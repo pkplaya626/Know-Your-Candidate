@@ -400,7 +400,9 @@
 
   var PAST = "This site does not read the state’s results and names no winner";
   var RECORD = { holder: "The sitting governor: see their record ›",
-                 member: "A member of Congress: see their profile ›" };
+                 member: "A member of Congress: see their profile ›",
+                 // stategov's memberFormer: the membership snapshot no longer seats them.
+                 former: "A former member of Congress: see their profile ›" };
 
   /** Every word the overlay's head and footer give *found* ({kind, code,
    *  person}), each "" where it says none: one table (rule 12) that the
@@ -449,7 +451,7 @@
     out.surnameOnly = p.surnameOnly ? "The list gives a surname only." : "";
     out.runningMate = p.runningMate ? p.runningMate + " for lieutenant governor" : "";
     out.term = term ? "Term " + term + (past ? "" : " (if elected)") : "";
-    out.record = p.holder ? RECORD.holder : p.member ? RECORD.member : "";
+    out.record = p.holder ? RECORD.holder : p.member ? (p.memberFormer ? RECORD.former : RECORD.member) : "";
     var named = listFor(list, p);
     out.source = "Source: " + named.source + " (read " + KYC.dateWords(named.read) + ").";
     return out;

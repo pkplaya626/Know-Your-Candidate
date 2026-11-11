@@ -302,7 +302,7 @@ def governor_candidate_articles(root="."):
     return out
 
 
-def attach_history(code, entry, raw, cache, photo_cache, problems):
+def attach_history(code, entry, raw, cache, photo_cache, problems, as_of=None, sitting=()):
     """Give the governor's card and the candidates' their offices held and
     articles from the history cache (kyc/history.py, rule 69), by the
     overlay's ids: the governor's only while the cache's item is the one
@@ -311,7 +311,11 @@ def attach_history(code, entry, raw, cache, photo_cache, problems):
     race's article links for them now (``asked``, rule 69's
     ``history-stale``). The governor's date of birth where the NGA and
     Wikidata agree (``agreed_birth``); a disagreement is reported, never
-    shown."""
+    shown. A seat in Congress is current only while the membership snapshot
+    (read *as_of*) seats the person (*sitting*, bioguide ids), as on a
+    member's profile: in January the six members of Congress who ran for
+    governor read "U.S. Representative since 2017" here and "2017-2027" on
+    their own profile."""
     from . import history, statewide, statewide_photos
 
     people = (cache or {}).get("people") or {}
@@ -326,7 +330,7 @@ def attach_history(code, entry, raw, cache, photo_cache, problems):
     elif not (rec and rec.get("wikidata") == raw["wikidata"]):
         gov["bornWhy"] = "not-read"
     if rec and raw.get("wikidata") and rec.get("wikidata") == raw["wikidata"]:
-        gov["politicalHistory"] = history.for_page(rec)
+        gov["politicalHistory"] = history.for_page(rec, as_of, rec.get("bioguide") in sitting)
         gov["wikidata"] = rec["wikidata"]
         if rec.get("wikipedia"):
             gov["wikipedia"] = rec["wikipedia"]
@@ -358,6 +362,10 @@ def attach_history(code, entry, raw, cache, photo_cache, problems):
         member = candidate_member(photo_cache, code, printed)
         if member:
             row["member"] = member
+            # A member of Congress no longer seated is a former one, wherever
+            # the overlay or its share page says whose profile it links.
+            if as_of and member not in sitting:
+                row["memberFormer"] = True
         found = statewide_photos.article_of(photo_cache, code, "governor", printed)
         if found and found.get("read"):
             row["articleRead"] = found["read"]
@@ -372,7 +380,7 @@ def attach_history(code, entry, raw, cache, photo_cache, problems):
         row["wikipedia"] = article
         rec = people.get(row["id"])
         if rec and rec.get("asked") == article:
-            row["politicalHistory"] = history.for_page(rec)
+            row["politicalHistory"] = history.for_page(rec, as_of, rec.get("bioguide") in sitting)
         elif rec:
             problems.append(f"{code}: {row['name']}'s offices were read from {rec.get('asked')}; the "
                             f"race's article now links {article}; not shown; run 'history'")
@@ -609,6 +617,10 @@ def build(root="."):
     # The offices held (kyc/history.py): optional; a state whose governor
     # or candidates it does not hold shows "No linked record" (rule 19).
     history_cache = history.load_cache(root)
+    # Whether a seat in Congress is current is the membership snapshot's to
+    # say, as on a member's profile (history.attach).
+    from . import legislators
+    as_of, sitting = history.membership(legislators.load_snapshot(root))
     candidates_heavy = 0
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
@@ -694,7 +706,8 @@ def build(root="."):
                         photo_cache, guide_cache, copies_manifest)
         # The offices held, articles and the agreed date of birth for the
         # governor's overlay and the candidates' (rule 91, rule 69).
-        attach_history(code, entry, governors[code], history_cache, photo_cache, problems)
+        attach_history(code, entry, governors[code], history_cache, photo_cache, problems,
+                       as_of, sitting)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))

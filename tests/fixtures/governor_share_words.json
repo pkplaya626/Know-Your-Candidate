@@ -54,6 +54,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -166,6 +173,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -269,6 +283,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -378,6 +399,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -489,6 +517,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -601,6 +636,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -711,6 +753,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -821,6 +870,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -869,6 +925,124 @@
     "past": "",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4 years (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Running for",
@@ -933,6 +1107,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1045,6 +1226,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1148,6 +1336,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1257,6 +1452,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1368,6 +1570,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1480,6 +1689,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1590,6 +1806,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1700,6 +1923,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1748,6 +1978,124 @@
     "past": "",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": ""
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is among the candidates for this office",
+        "why": "listed"
+       },
+       "note": "open seat (term-limited)",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Running for",
@@ -1812,6 +2160,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -1924,6 +2279,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2027,6 +2389,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2136,6 +2505,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2247,6 +2623,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2359,6 +2742,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2469,6 +2859,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2579,6 +2976,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2627,6 +3031,124 @@
     "past": "",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4 years (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "Whether A B is running was not checked",
+        "why": "unchecked"
+       },
+       "note": "4-year term",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Running for",
@@ -2691,6 +3213,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2808,6 +3337,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -2916,6 +3452,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -3030,6 +3573,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -3146,6 +3696,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -3263,6 +3820,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -3378,6 +3942,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -3493,6 +4064,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -3546,6 +4124,129 @@
     "past": "",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 2 years (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "then": {
+         "cite": "Art. V",
+         "source": "https://law.example.gov/",
+         "text": "the constitution limits the governor to two terms"
+        },
+        "why": "not-listed"
+       },
+       "note": "2-year term.",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Running for",
@@ -4055,6 +4756,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -4170,6 +4878,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -4338,6 +5053,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -4450,6 +5172,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -4553,6 +5282,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -4662,6 +5398,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -4773,6 +5516,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -4885,6 +5635,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -4995,6 +5752,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5105,6 +5869,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5153,6 +5924,124 @@
     "past": "",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4 years (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Running for",
@@ -5217,6 +6106,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5329,6 +6225,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5432,6 +6335,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5541,6 +6451,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5652,6 +6569,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5764,6 +6688,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5874,6 +6805,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -5984,6 +6922,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6032,6 +6977,124 @@
     "past": "",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": ""
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is among the candidates for this office",
+        "why": "listed"
+       },
+       "note": "open seat (term-limited)",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Running for",
@@ -6096,6 +7159,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6208,6 +7278,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6311,6 +7388,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6420,6 +7504,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6531,6 +7622,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6643,6 +7741,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6753,6 +7858,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6863,6 +7975,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -6911,6 +8030,124 @@
     "past": "",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4 years (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "Whether A B is running was not checked",
+        "why": "unchecked"
+       },
+       "note": "4-year term",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Running for",
@@ -6975,6 +8212,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -7092,6 +8336,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -7200,6 +8451,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -7314,6 +8572,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -7430,6 +8695,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -7547,6 +8819,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -7662,6 +8941,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -7777,6 +9063,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -7830,6 +9123,129 @@
     "past": "",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 2 years (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "then": {
+         "cite": "Art. V",
+         "source": "https://law.example.gov/",
+         "text": "the constitution limits the governor to two terms"
+        },
+        "why": "not-listed"
+       },
+       "note": "2-year term.",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Running for",
@@ -8339,6 +9755,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -8454,6 +9877,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -8622,6 +10052,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -8734,6 +10171,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -8837,6 +10281,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -8946,6 +10397,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9057,6 +10515,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9169,6 +10634,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9279,6 +10751,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9389,6 +10868,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9437,6 +10923,124 @@
     "past": "This site does not read the state’s results and names no winner",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "https://results.example.gov/",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4 years"
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "https://results.example.gov/",
     "runningMate": "",
     "seeking": "Ran for",
@@ -9501,6 +11105,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9613,6 +11224,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9716,6 +11334,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9825,6 +11450,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -9936,6 +11568,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10048,6 +11687,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10158,6 +11804,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10268,6 +11921,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10316,6 +11976,124 @@
     "past": "This site does not read the state’s results and names no winner",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "https://results.example.gov/",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": ""
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is among the candidates for this office",
+        "why": "listed"
+       },
+       "note": "open seat (term-limited)",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "https://results.example.gov/",
     "runningMate": "",
     "seeking": "Ran for",
@@ -10380,6 +12158,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10492,6 +12277,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10595,6 +12387,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10704,6 +12503,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10815,6 +12621,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -10927,6 +12740,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11037,6 +12857,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11147,6 +12974,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11195,6 +13029,124 @@
     "past": "This site does not read the state’s results and names no winner",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "https://results.example.gov/",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4 years"
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "Whether A B is running was not checked",
+        "why": "unchecked"
+       },
+       "note": "4-year term",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "https://results.example.gov/",
     "runningMate": "",
     "seeking": "Ran for",
@@ -11259,6 +13211,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11376,6 +13335,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11484,6 +13450,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11598,6 +13571,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11714,6 +13694,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11831,6 +13818,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -11946,6 +13940,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -12061,6 +14062,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -12114,6 +14122,129 @@
     "past": "This site does not read the state’s results and names no winner",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "https://results.example.gov/",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 2 years"
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "then": {
+         "cite": "Art. V",
+         "source": "https://law.example.gov/",
+         "text": "the constitution limits the governor to two terms"
+        },
+        "why": "not-listed"
+       },
+       "note": "2-year term.",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "https://results.example.gov/",
     "runningMate": "",
     "seeking": "Ran for",
@@ -12623,6 +14754,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -12738,6 +14876,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -12906,6 +15051,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13018,6 +15170,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13121,6 +15280,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13230,6 +15396,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13341,6 +15514,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13453,6 +15633,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13563,6 +15750,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13673,6 +15867,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13721,6 +15922,124 @@
     "past": "This site does not read the state’s results and names no winner",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4 years"
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Ran for",
@@ -13785,6 +16104,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -13897,6 +16223,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14000,6 +16333,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14109,6 +16449,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14220,6 +16567,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14332,6 +16686,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14442,6 +16803,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14552,6 +16920,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14600,6 +16975,124 @@
     "past": "This site does not read the state’s results and names no winner",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": ""
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is among the candidates for this office",
+        "why": "listed"
+       },
+       "note": "open seat (term-limited)",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Ran for",
@@ -14664,6 +17157,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14776,6 +17276,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14879,6 +17386,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -14988,6 +17502,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15099,6 +17620,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15211,6 +17739,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15321,6 +17856,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15431,6 +17973,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15479,6 +18028,124 @@
     "past": "This site does not read the state’s results and names no winner",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4 years"
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "Whether A B is running was not checked",
+        "why": "unchecked"
+       },
+       "note": "4-year term",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Ran for",
@@ -15543,6 +18210,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15660,6 +18334,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15768,6 +18449,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15882,6 +18570,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -15998,6 +18693,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -16115,6 +18817,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -16230,6 +18939,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -16345,6 +19061,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -16398,6 +19121,129 @@
     "past": "This site does not read the state’s results and names no winner",
     "printed": "",
     "record": "A member of Congress: see their profile ›",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 2 years"
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-n-o",
+    "member": "O000001",
+    "memberFormer": true,
+    "name": "N O",
+    "party": "Republican"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf"
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "then": {
+         "cite": "Art. V",
+         "source": "https://law.example.gov/",
+         "text": "the constitution limits the governor to two terms"
+        },
+        "why": "not-listed"
+       },
+       "note": "2-year term.",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Republican",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "A former member of Congress: see their profile ›",
     "results": "",
     "runningMate": "",
     "seeking": "Ran for",
@@ -16907,6 +19753,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,
@@ -17022,6 +19875,13 @@
           "member": "M000001",
           "name": "L M",
           "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-n-o",
+          "member": "O000001",
+          "memberFormer": true,
+          "name": "N O",
+          "party": "Republican"
          }
         ],
         "certified": false,

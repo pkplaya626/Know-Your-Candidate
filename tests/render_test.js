@@ -22294,6 +22294,29 @@ async function testTheJanuaryPage() {
       ledes.every((t) => /took their seats on January 3, 2027/.test(t) && !/ (is|are) running in a district/.test(t)),
       ledes.map((t) => t.slice(-180)).join(" | "));
   });
+  // A governor candidate who was a member of Congress and has left is a
+  // former one on the overlay (stategov's memberFormer), and no seat in
+  // Congress there is current: six read "U.S. Representative since 2017"
+  // beside "A member of Congress: see their profile" in January.
+  const sgJan = {};
+  new Function("window", fs.readFileSync(path.join(SITE, "data/stategov.js"), "utf8"))(sgJan);
+  const govBad = [];
+  let govMembers = 0;
+  Object.entries((sgJan.kycStateGov || {}).states || {}).forEach(([code, st]) => {
+    const item = (((st.ballot2026 || {}).offices || {}).governor || {});
+    ((item.candidates || {}).candidates || []).filter((c) => c.member).forEach((c) => {
+      govMembers += 1;
+      const p = GK.byId(c.member);
+      const sits = !!p && GK.seated(p);
+      if (!sits && !c.memberFormer) govBad.push(`${code} ${c.name}: not "former"`);
+      const current = ((c.politicalHistory || {}).rows || []).filter((r) => r.congress && r.current);
+      if (!sits && current.length) govBad.push(`${code} ${c.name}: ${current[0].office} since ${current[0].from}`);
+    });
+  });
+  suite("the January page: a governor candidate who has left Congress is a former member there", () => {
+    check("no seat in Congress is current on the overlay of one the record no longer seats, and the record line says former",
+      govMembers > 0 && govBad.length === 0, govBad.slice(0, 4).join(" | ") || `${govMembers} members`);
+  });
   suite("the January page: a nominee Congress has seated for the new term is never awaiting a result", () => {
     check("each reads \"Seated for the new term\" on a card, the term's years in the dialog, the record credited, and the same on its share page",
       seatedBad.length === 0, seatedBad.slice(0, 4).join(" | ") || `${seatedNominees.length} seated nominees` +
