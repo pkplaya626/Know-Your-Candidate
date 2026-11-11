@@ -997,8 +997,10 @@
     var hold = past ? "may also have held" : "may also hold";
     if (code === "DC") return KYC.ballot.dcContests(past);
     if (territory) {
-      // A territory's own record covers its governor only (ballot2026.TERRITORIES):
-      // its legislature and local offices are not in it, and are said so.
+      // A territory's own record covers its governor and lieutenant governor,
+      // and an office its own law elects (the Northern Mariana Islands'
+      // attorney general; ballot2026.TERRITORIES): its legislature and local
+      // offices are not in it, and are said so.
       var named = KYC.stategov && KYC.stategov.listsCandidates(code, { governor: false });
       return (list
         ? "Of the territorial offices this site covers, the same ballot also " + elects + " the " +

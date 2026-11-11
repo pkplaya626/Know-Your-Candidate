@@ -456,7 +456,23 @@ TERMS = {
                        "Commonwealth for a term of office of four years.")),),
                    note="The Commonwealth Election Commission set a governor's runoff for November "
                         "20, 2026 (art. III, s.4: the fourteenth day after certification); art. "
-                        "VIII, s.4 and 1 CMC 6509 set no other day for a runoff's ticket."),),
+                        "VIII, s.4 and 1 CMC 6509 set no other day for a runoff's ticket."),
+           # The attorney general, elected since the 2012 amendment of art.
+           # III, s.11 (read again 2026-11-11, as this project): its own
+           # record, led by the section that makes the office elected.
+           _record(("ag",), ("nth", 2, "Monday", 1),
+                   "the second Monday of January of the year following the year in which the election "
+                   "was held",
+                   "2027-01-11", "N.M.I. Const. art. VIII, s.4, with art. III, s.11",
+                   ((MP_CONST, (
+                       "Officers elected at the regular general election shall take office on the "
+                       "second Monday of January of the year following the year in which the election "
+                       "was held.",
+                       "The attorney general shall be elected at large within the Commonwealth for a "
+                       "term of office of four years.")),),
+                   note="Art. III, s.11(e) and 1 CMC 6509(b) hold a runoff fourteen days after the "
+                        "Commission certifies the results where no candidate has more than half the "
+                        "votes cast; neither sets another day for its winner to take office.")),
     "NM": (_record(("governor", "lt", "ag", "sos"), ("day", 1, 1),
                    "the first day of January next after their election",
                    "2027-01-01", "N.M. Const. art. V, s.1",

@@ -2474,7 +2474,15 @@ state's record. The counts on the page are derived, never typed.
 `ballot2026.TERRITORIES` covers the territories' governors and lieutenant
 governors: Guam's and the Virgin Islands' from the Organic Acts (48 U.S.C.
 1422, 1591), the Northern Mariana Islands' from its Commission's certified
-list; American Samoa and Puerto Rico elected theirs in 2024. D.C. elects a
+list; American Samoa and Puerto Rico elected theirs in 2024. A territory's
+record holds another of the four offices only where its own law elects it:
+the Northern Mariana Islands' attorney general, elected at large in a
+nonpartisan race since the 2012 amendment of N.M.I. Const. art. III, s.11,
+whose three candidates are the Commission's specimen ballots' and whose new
+term begins on art. VIII, s.4's second Monday of January. This site reads
+attorneys general for the fifty states only (`kyc/officers.py`), so that
+row lists the candidates and names no holder, and the territory's note says
+so. D.C. elects a
 mayor, and the map says so. Arizona's lieutenant governor, a new office
 first filled on November 3, reads "No one holds this office yet", not "no
 such office".

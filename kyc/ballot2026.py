@@ -1056,10 +1056,17 @@ STATES = {
 # The territories' governors, each from the territory's own record or the
 # federal law that sets its elections (audit 2026-10-17, RACES-07): the
 # governor2026 map called Guam, the Virgin Islands and the Northern Mariana
-# Islands "not covered" while each elects its governor on November 3. Only
-# the governor and lieutenant governor: the national associations list no
-# territory's attorney general or secretary of state as an elected office
-# this site covers. Checked 2026-10-17.
+# Islands "not covered" while each elects its governor on November 3. Each
+# holds its governor and lieutenant governor (checked 2026-10-17), and
+# another of the four offices only where the territory's own law elects it
+# and that law and the election office's list were read here: the Northern
+# Mariana Islands have elected their attorney general since the 2012
+# amendment of N.M.I. Const. art. III, s.11, and its three candidates were on
+# the November 3 specimen ballots, while the page said nothing of the office
+# (rule 19; read 2026-11-11). This site reads attorneys general for the
+# fifty states only (kyc/officers.py), so its holder is not on the page; the
+# election office's list is. No other territory's attorney general or secretary of state has
+# been read here: a record without one is not a finding that it elects none.
 TERRITORIES = {
     "GU": {
         "governor": ("elected", True,
@@ -1087,6 +1094,17 @@ TERRITORIES = {
             "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing"),
         "lt": ("elected-jointly-with-governor", True,
             "Elected on one ticket with the governor, as the Commission's certified list says",
+            "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing"),
+        # N.M.I. Const. art. III, s.11 (https://cnmilaw.gov/constitution, read
+        # 2026-11-11): "The attorney general shall be elected at large within
+        # the Commonwealth for a term of office of four years"; s.11(d):
+        # "Elections for attorney general shall be nonpartisan, and candidates
+        # shall not declare any party affiliation." The Commission's listing
+        # names three candidates under "Attorney General", each marked "N/P"
+        # ("Non-Partisan"), and its specimen ballots print the same three.
+        "ag": ("elected", True,
+            "4-year term; elected at large, its candidates declaring no party (N.M.I. Const. "
+            "art. III, s.11); three candidates on the Commission's 2026 list",
             "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing"),
     },
     "AS": {
@@ -1237,9 +1255,18 @@ def check(states=None, territories=None, next_=None, open_seats=None):
         problems.append(f"territories: {', '.join(sorted(territories))}, not "
                         f"{', '.join(TERRITORY_CODES)}")
     for code, entry in sorted(territories.items()):
-        if sorted(entry) != ["governor", "lt"]:
-            problems.append(f"{code}: a territory holds the governor and lieutenant governor only")
+        # The governor and lieutenant governor, and any other of the four
+        # offices only where the territory's own law elects it (the Northern
+        # Mariana Islands' attorney general): never a chamber, which the
+        # territories' records here do not cover.
+        if not {"governor", "lt"} <= set(entry) or set(entry) - set(OFFICES):
+            problems.append(f"{code}: a territory holds the governor and lieutenant governor, "
+                            f"and no more than the other offices its own law elects")
             continue
+        for office in sorted(set(entry) - {"governor", "lt"}):
+            if not entry[office][0].startswith("elected"):
+                problems.append(f"{code} {office}: a territory's record holds an office beyond "
+                                f"its governor's only where it is elected")
         problems.extend(_office_problems(code, entry))
     every = dict(states, **territories)
     for (code, key), value in sorted(next_.items()):
@@ -1385,7 +1412,9 @@ def _source_problems(code, field, source):
 
 def for_state(code):
     """The page's record for *code*: a state's or a territory's, or ``{}``
-    for D.C. A territory's holds its governor and lieutenant governor only.
+    for D.C. A territory's holds its governor and lieutenant governor, and
+    another office only where its own law elects it (the Northern Mariana
+    Islands' attorney general).
     An office or chamber not up carries ``next`` where NEXT gives its year.
     Open seats are not here: they depend on who holds the office, which
     ``open_seat`` checks against the rosters."""

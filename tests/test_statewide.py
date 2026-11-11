@@ -491,6 +491,125 @@ class TestArizonasOwnList(unittest.TestCase):
                           if "AZ" in e[0]])
 
 
+class TestTheNorthernMarianaIslandsAttorneyGeneral(unittest.TestCase):
+    """The Northern Mariana Islands elect their attorney general (N.M.I.
+    Const. art. III, s.11, as amended in 2012), and three candidates for it
+    were on the November 3 specimen ballots, but the ballot table held the
+    territory's governor and lieutenant governor only: its page said nothing
+    of an office its voters elected that day (rule 19), while the cache's
+    own notes said the office was "outside this batch". Read 2026-11-11 from
+    the Commonwealth Election Commission's specimen ballots and candidates
+    listing and the Commonwealth's constitution on cnmilaw.gov."""
+
+    SPECIMEN = "https://www.votecnmi.gov.mp/downloads/2026/2026_GE_BALLOT_SPECIMEN.pdf"
+    LISTING = "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing"
+    # The specimen ballots' column, in the ballot's own order: no party is
+    # printed beside any, as art. III, s.11(d) has it.
+    ROWS = ["EVANGELISTA, Michael Norita", "TORRES, Joaquin Deleon Guerrero",
+            "GLASS, Jonathan Robert"]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cache = statewide.load(".")
+        cls.payload, cls.problems = stategov.build(".")
+
+    def test_the_ballot_table_puts_the_office_on_the_ballot(self):
+        selection, up, note, source = ballot2026.TERRITORIES["MP"]["ag"]
+        self.assertEqual(selection, "elected")
+        self.assertTrue(up)
+        self.assertTrue(note.startswith("4-year term;"), note)
+        self.assertIn("art. III, s.11", note)
+        self.assertEqual(source, self.LISTING)
+        record = ballot2026.for_state("MP")
+        self.assertTrue(record["territory"])
+        self.assertEqual(sorted(record["offices"]), ["ag", "governor", "lt"])
+        # No other territory's attorney general has been read here; a record
+        # without one is not a finding that it elects none.
+        for code in ("AS", "GU", "PR", "VI"):
+            self.assertNotIn("ag", ballot2026.TERRITORIES[code], code)
+
+    def test_a_territorys_office_beyond_the_governors_must_be_elected(self):
+        territories = copy.deepcopy(ballot2026.TERRITORIES)
+        territories["MP"]["ag"] = ("appointed", False, "Appointed", self.LISTING)
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(territories=territories)
+        self.assertIn("MP ag", str(caught.exception))
+        territories = copy.deepcopy(ballot2026.TERRITORIES)
+        territories["MP"]["upper"] = ("Senate", 9, 3, "all", self.LISTING)
+        with self.assertRaises(ballot2026.Ballot2026Error):
+            ballot2026.check(territories=territories)
+
+    def test_the_list_is_the_commissions_specimen_ballot(self):
+        from kyc import voting_dates
+        o = statewide.office(self.cache, "MP", "ag")
+        self.assertEqual(o["title"], "Attorney General")
+        self.assertEqual(o["list"]["url"], self.SPECIMEN)
+        self.assertEqual(o["list"]["by"], "Commonwealth Election Commission")
+        self.assertEqual(o["list"]["kind"], "specimen ballot")
+        self.assertEqual(o["list"]["read"], "2026-11-11")
+        self.assertTrue(voting_dates.official_source(o["list"]["url"], "MP")[0])
+        self.assertFalse(statewide.not_the_states(o["list"]))
+        # The specimen ballots never call themselves certified.
+        self.assertFalse(o["certified"])
+        self.assertNotIn("certifiedQuote", o)
+        self.assertIn(self.LISTING, o["list"]["title"])
+        self.assertNotIn("outside this batch", self.cache["states"]["MP"]["notes"])
+
+    def test_the_names_as_the_ballot_prints_them_and_no_party(self):
+        o = statewide.office(self.cache, "MP", "ag")
+        self.assertEqual([p["name"] for p in o["candidates"]], self.ROWS)
+        quote = o["list"]["quote"]
+        for i, name in enumerate(self.ROWS, 1):
+            self.assertIn(f"{i} {name}", quote)
+        for person in o["candidates"]:
+            self.assertIsNone(person["party"], person)
+            self.assertFalse(person["writeIn"], person)
+            self.assertIsNone(person["runningMate"], person)
+        self.assertIn("nonpartisan", o["notes"])
+        shown = self.payload["states"]["MP"]["ballot2026"]["offices"]["ag"]["candidates"]
+        # First name first, in ordinary capitals, as the listing page writes
+        # them (rule 77), in the page's order of surname.
+        self.assertEqual([c["name"] for c in shown["candidates"]],
+                         ["Michael Norita Evangelista", "Jonathan Robert Glass",
+                          "Joaquin Deleon Guerrero Torres"])
+        self.assertFalse([c for c in shown["candidates"] if "party" in c])
+        self.assertEqual(shown["source"], "the Commonwealth Election Commission’s specimen ballot")
+
+    def test_the_holder_is_recorded_but_no_roster_names_one_for_the_page(self):
+        o = statewide.office(self.cache, "MP", "ag")
+        self.assertEqual(o["holderResearched"], "Edward E. Manibusan")
+        self.assertFalse(o["holderOnList"])
+        self.assertTrue(o["holderSource"]["url"].startswith("https://www.cnmioag.org/"))
+        self.assertIn("Manibusan", o["holderSource"]["quote"])
+        # No association's roster lists the Commonwealth's attorney general,
+        # so the page names no holder, and no holder line is read for one
+        # (rule 91: the line is read for the roster's holder, never copied
+        # from the research).
+        state = self.payload["states"]["MP"]
+        self.assertNotIn("ag", state)
+        item = state["ballot2026"]["offices"]["ag"]
+        self.assertNotIn("holderStatus", item)
+        self.assertNotIn("outgoing", item)
+        self.assertFalse([p for p in self.problems if p.startswith("MP ag")], self.problems)
+
+    def test_the_new_term_begins_on_the_constitutions_day(self):
+        from kyc import terms_begin
+        term = self.payload["states"]["MP"]["ballot2026"]["offices"]["ag"]["termBegins"]
+        self.assertEqual(term["day"], "2027-01-11")
+        self.assertEqual(term["kind"], "on")
+        self.assertTrue(term["counted"])
+        self.assertEqual(term["source"], "https://cnmilaw.gov/constitution")
+        self.assertIn("art. VIII, s.4", term["cite"])
+        self.assertIn("art. III, s.11", term["cite"])
+        self.assertNotIn(("MP", "ag"), terms_begin.GAPS)
+        record = terms_begin.record_for("MP", "ag")
+        quotes = [q for _source, qs in record["sources"] for q in qs]
+        self.assertIn("The attorney general shall be elected at large within the Commonwealth for "
+                      "a term of office of four years.", quotes)
+        # One day for the governor's term and the attorney general's.
+        self.assertEqual(terms_begin.for_page("MP", "governor")["day"], term["day"])
+
+
 class TestTheListsPartyKeys(unittest.TestCase):
     """Rule 91: a code a list prints is spelled out from the list's own key
     or statute. Arizona's listing prints REP, DEM, GRN, NOL and PND with no
