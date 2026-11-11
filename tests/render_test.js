@@ -5905,8 +5905,13 @@ async function testRenumbered() {
       // raceStatusRace is that race.
       const mover = r.candidateIds.map(KYC.byId).some((p) => p && p.renumbered &&
         (p.contestRaceId || p.raceStatusRace) === r.id);
+      // A holder the record seats for the seat they won is "re-elected" there
+      // whatever the clock (KYC.movedLine): on the January rehearsal this
+      // suite reads the record's seats on a campaign clock.
+      const seatedThere = r.incumbentIds.map(KYC.byId).some((p) => p && p.name === r.holderMoved.name &&
+        p.raceRole === "winner" && p.raceId !== r.id);
       return r.openSeat === mover || (r.openSeat ? !/new district map/.test(badge)
-        : !/Holder running in/.test(badge) || />Open seat</.test(badge));
+        : !(seatedThere ? /Holder re-elected in/ : /Holder running in/).test(badge) || />Open seat</.test(badge));
     });
     check("a renumbered seat is open only when no member runs there, and says where its holder went",
       moved.length > 0 && wrong.length === 0, wrong.map((r) => r.id).join(", "));
