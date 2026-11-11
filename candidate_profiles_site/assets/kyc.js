@@ -1095,7 +1095,7 @@
     var line = contestLine(item, opts);
     if (line) return line;
     opts = opts || {};
-    var won = item.raceRole === "winner" && !!item.raceId && item.raceId !== race.id;
+    var won = item.raceRole === "winner" && !!item.raceId && item.raceId !== (race || {}).id;
     var seat = seatWords(won ? item.raceId : (item.contestRaceId || item.raceStatusRace));
     var map = " under the state’s new district map";
     var moved = !!item.renumbered;

@@ -666,7 +666,7 @@
   function heldByLine(p, race) {
     var name = '<button type="button" class="link-button" data-id="' +
       KYC.escapeAttr(p.id) + '">' + KYC.escapeHtml(p.name) + "</button>";
-    if (!KYC.sitsIn(race, p)) {
+    if (!(race ? KYC.sitsIn(race, p) : KYC.seated(p))) {
       return '<p class="race-held">' + name + ", who held this seat, " +
         KYC.escapeHtml(heldByWhat(p, race)) + ".</p>";
     }

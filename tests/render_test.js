@@ -5152,7 +5152,7 @@ async function testOtherRunWalk() {
           // its head's badge (Your ballot draws the same "Held by" line).
           const card = stripped(KYC.cards.statusBadge(m));
           if (card.indexOf(line.label) === -1) wrong.push(`${tag}: card "${card}"`);
-          const heldBy = stripped(KYC.cards.heldByLine(m));
+          const heldBy = stripped(KYC.cards.heldByLine(m, held));
           if (heldBy.indexOf("who " + want.clause + ".") === -1) wrong.push(`${tag}: held by "${heldBy}"`);
           const row = KYC.cards.holderWords(held, KYC.cards.racePeople(held, held.incumbentIds.concat(held.candidateIds).map(KYC.byId).filter(Boolean)));
           if (row.indexOf(want.clause) === -1) wrong.push(`${tag}: row "${row}"`);
@@ -12209,6 +12209,9 @@ async function testRecordPhase() {
         raceStatus: "elected", raceRole: "winner", officeLabel: p.contestLabel });
       delete p.contestRaceId;
       delete p.contestLabel;
+      // Seated for the seat they won, they no longer sit in this one, as
+      // the record says (kyc/races.py _sits_in).
+      if (r.incumbent && r.incumbent.profileId === p.id) r.incumbent.seated = false;
     });
   } });
   await settle(50);
