@@ -420,7 +420,10 @@
   // route): share.NATIONAL_SOURCE writes the same words.
   var NATIONAL_NAME = "Wikipedia's national summary of the House elections";
   var NATIONAL_NOTE = "which gives no vote count; the state's page had none when read";
-  var NATIONAL_WORDS = NATIONAL_NAME + ", " + NATIONAL_NOTE;
+  // Where the state's page, read with it, counted the same candidate ahead and
+  // named no winner (raceStatusSource "national-counts"; share.NATIONAL_COUNTS_SOURCE).
+  var NATIONAL_COUNTS_NOTE = "which gives no vote count; the state's page, read the same " +
+    "day, counts the same candidate ahead and names no winner";
   /* A sitting member leaving the seat they hold, in the same words whether
    * the results list them as withdrawn or do not list them: only the title,
    * which cites its source, differs. */
@@ -743,8 +746,10 @@
     var title = own.title || spec.title;
     var source = spec.source || (listed ? LISTED_SOURCE : certified
       ? " Source: " + (opts.sourceName || "the certified list of candidates") + "."
-      : opts.source === "national" && (status === "elected" || status === "defeated")
-        ? " Source: " + NATIONAL_WORDS + "."
+      : (opts.source === "national" || opts.source === "national-counts") &&
+          (status === "elected" || status === "defeated")
+        ? " Source: " + NATIONAL_NAME + ", " +
+          (opts.source === "national-counts" ? NATIONAL_COUNTS_NOTE : NATIONAL_NOTE) + "."
         : SOURCE);
     // An independent or a minor party's nominee reaches the ballot by
     // petition or by their party's nomination, mostly without a primary:
@@ -1136,14 +1141,17 @@
         "won, lost or withdrew.";
     // The caveat is page text: a title is a hover a phone never shows.
     var note = listed ? "" : '<span class="race-source-note"> (not the state\u2019s certified count)</span>';
-    // A winner called from the national summary, where the state's page held
-    // no result (rule 63's national route): its own source, said beside the
-    // page's (rule 19).
+    // A winner called from the national summary, where the state's page
+    // named no winner (rule 63's national route): its own source, said beside
+    // the page's (rule 19), in the words true of that read - the page gave no
+    // count, or counts that put the same candidate ahead.
+    var natNote = r.nationalCounts ? NATIONAL_COUNTS_NOTE : NATIONAL_NOTE;
     var national = r.calledBy === "national" && /^https:\/\//.test(r.nationalUrl || "")
       ? '<span class="race-source"><a href="' + escapeAttr(r.nationalUrl) +
-        '" target="_blank" rel="noopener noreferrer" title="' + escapeAttr(NATIONAL_WORDS) +
+        '" target="_blank" rel="noopener noreferrer" title="' +
+        escapeAttr(NATIONAL_NAME + ", " + natNote) +
         '">Winner: ' + escapeHtml(NATIONAL_NAME) + "</a>" +
-        '<span class="race-source-note"> (' + escapeHtml(NATIONAL_NOTE) + ")</span></span>"
+        '<span class="race-source-note"> (' + escapeHtml(natNote) + ")</span></span>"
       : "";
     return '<span class="race-source"><a href="' + escapeAttr(r.sourceUrl) +
       '" target="_blank" rel="noopener noreferrer" title="' + escapeAttr(title) + '">' +
