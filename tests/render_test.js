@@ -2913,6 +2913,12 @@ async function testStates() {
       !gov.querySelector(".gov-name ~ p .gov-ballot-mark, .gov-officer-name ~ p .gov-ballot-mark"));
     check("nothing on the page says a person is on the ballot",
       !/\bOn the Nov 3, 2026 ballot/.test(gov.textContent), gov.textContent.slice(0, 200));
+    // Its hover is the term, never the researchers' note ("last elected
+    // 2022", "on 2026 sample ballot"), which from November 4 contradicted it.
+    const titles = marks.map((a) => a.getAttribute("title") || "");
+    check("each mark's hover is the term's length alone",
+      titles.length >= 4 && titles.every((t) => /^(?:Last elected Nov 3, 2026; )?(?:\d+-year term)?$/.test(t)) &&
+        !titles.some((t) => /last elected 20\d\d|sample ballot/.test(t)), titles.join(" | "));
     // Kemp, Jones, Carr and Raffensperger are on none of the November 3
     // ballot's lists (PERSONA-02): each office says so, citing the list.
     const sg = ga.window.kycStateGov.states.GA;

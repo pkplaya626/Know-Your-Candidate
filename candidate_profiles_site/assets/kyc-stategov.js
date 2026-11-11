@@ -169,8 +169,22 @@
     if (!item) return "";
     return '<a class="gov-ballot-mark' + (item.up ? " up" : "") + '" href="' +
       KYC.escapeAttr(item.source) + '" target="_blank" rel="noopener noreferrer" title="' +
-      KYC.escapeAttr((item.note || item.basis || "") + (more || "")) + '">' +
-      KYC.escapeHtml(text) + "</a>";
+      KYC.escapeAttr((item.up && item.note ? upWords(item) : item.note || item.basis || "") +
+        (more || "")) + '">' + KYC.escapeHtml(text) + "</a>";
+  }
+
+  /* An office on the ballot's hover: the term's length its note opens
+   * with, and from the day after the election that it was elected then.
+   * The rest of a note is the researchers' shorthand ("last elected 2022",
+   * "on 2026 sample ballot", "'Governor/Lt. Governor' one row"), which
+   * stood under the mark on some 66 offices and from November 4 said
+   * "last elected 2022" beside "This office was on the Nov 3, 2026 ballot". */
+  function upWords(item) {
+    var m = /^(\d+)-year term(?=[;,.]|$)/.exec(String(item.note || ""));
+    var parts = [];
+    if (after()) parts.push("Last elected Nov 3, 2026");
+    if (m) parts.push(m[1] + "-year term");
+    return parts.join("; ");
   }
 
   function ballotItem(code, key) {
