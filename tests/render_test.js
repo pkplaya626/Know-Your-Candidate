@@ -3800,6 +3800,24 @@ async function testStates() {
       info.openCandidates > 0 && new RegExp(info.openCandidates + " candidates? for open seats").test(strip.textContent) &&
         !/\d+ challengers? on the ballot/.test(strip.textContent), strip.textContent.slice(0, 400));
   });
+  // The strip's split is its race heads' sum, both words (rule 73): FL-20,
+  // vacant at the election with a member running there under a new number,
+  // read "3 candidates" in its head and counted as challengers in the strip.
+  const flSplit = await buildPage("states/fl.html");
+  await settle(60);
+  suite("states/fl.html — the strip's challengers and open-seat candidates are its race heads' sums", () => {
+    const info = flSplit.window.kycBuildMeta.states.FL;
+    const sums = { challenger: 0, candidate: 0 };
+    flSplit.window.kycRaces.filter((r) => r.state === "FL").forEach((r) => {
+      [...flSplit.D.querySelectorAll("#race-" + r.id + " .race-head .badge")].forEach((b) => {
+        const m = /^(\d+) (challenger|candidate)s? (?:were )?on the ballot$/.exec(b.textContent.trim());
+        if (m) sums[m[2]] += Number(m[1]);
+      });
+    });
+    check("as the sidebar and the strip count them", flSplit.errors.length === 0 && sums.candidate > 0 &&
+      sums.candidate === info.openCandidates && sums.challenger === info.challengersOnBallot - info.openCandidates,
+      `heads ${sums.challenger}/${sums.candidate}, strip ${info.challengersOnBallot - info.openCandidates}/${info.openCandidates}`);
+  });
   const guam = await buildPage("states/gu.html");
   suite("states/gu.html — a territory's own election office (RACES-07)", () => {
     const box = guam.D.getElementById("voting");

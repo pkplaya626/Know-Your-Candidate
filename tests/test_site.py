@@ -1248,6 +1248,12 @@ class TestStatePages(unittest.TestCase):
         # Of them, the open seat's are candidates, not challengers (audit
         # 2026-10-17, RACES-14): the page splits the same total.
         self.assertEqual(summary.by_state(people, races)["MI"]["openCandidates"], 3)
+        # A seat no record incumbent held is counted as the race head counts
+        # it (races.py noHolder), open or not: FL-20, vacant at the election
+        # with a member running there under a new number, split Florida's
+        # strip 40/18 over heads summing 37/21 (rule 73).
+        races[1]["noHolder"] = True
+        self.assertEqual(summary.by_state(people, races)["MI"]["openCandidates"], 4)
 
     def test_a_race_says_how_its_ballot_is_decided(self):
         # A top-two ballot of two Democrats read like a misprint with the rule

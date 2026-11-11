@@ -355,7 +355,7 @@ def by_state(profiles, races=None):
             listed = race.get("candidateCount", 0) + len(
                 (race.get("results") or {}).get("otherNominees") or [])
             entry["challengersOnBallot"] += listed
-            if race.get("openSeat"):
+            if race.get("noHolder", race.get("openSeat")):
                 # Of them, the people running for a seat nobody holds on its
                 # ballot: candidates, not challengers (RACES-14). The total
                 # stays the race headers' sum (rule 73); the page splits it.

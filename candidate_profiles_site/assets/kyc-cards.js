@@ -625,7 +625,9 @@
       var running = race.candidateCount + unprofiled;
       // With nobody holding the seat on the ballot, nobody is challenging:
       // an open seat, or one nobody held when the race was set (FL-20).
-      var word = race.openSeat || !(race.incumbentIds || []).length ? "candidate" : "challenger";
+      // The pipeline's one test (races.py noHolder), which the strip and
+      // the sidebar count by (rule 73).
+      var word = race.noHolder ? "candidate" : "challenger";
       // From the day after Election Day, who was on it (rule 63).
       badges.push(headBadge("count", "badge-money", running + " " + word + (running === 1 ? "" : "s") +
         (race.settled ? (voted ? (running === 1 ? " was" : " were") : "") + " on the ballot" : "")));

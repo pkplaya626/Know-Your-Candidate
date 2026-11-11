@@ -391,6 +391,14 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         # member is running for, did not count as open.
         if race["id"] in moved_into:
             race["openSeat"] = False
+        # Whether its people are candidates rather than challengers: an open
+        # seat, or one no record incumbent held (FL-20, vacant at the
+        # election, with a member running there under a new number). The
+        # race head counted FL-20's three as candidates and the summary as
+        # challengers, so Florida's strip split 40/18 over heads summing
+        # 37/21 (rule 73). One test, here, for the head, the strip, the
+        # sidebar and the share pages.
+        race["noHolder"] = bool(race["openSeat"] or not race["incumbentIds"])
         if record:
             # Who held the seat on the ballot, from the record: named even
             # when they have no profile here, and said to be seated only

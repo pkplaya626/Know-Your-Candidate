@@ -1267,7 +1267,7 @@ def head_count(race, post=False):
         return f"{race['ballotUnknown']} filed, ballot status not known"
     if race.get("contested"):
         running = count + unprofiled_names
-        word = "candidate" if race.get("openSeat") or not (race.get("incumbentIds") or []) else "challenger"
+        word = "candidate" if race.get("noHolder") else "challenger"
         verb = ("" if not post else " was" if running == 1 else " were")
         return (f"{running} {word}{'' if running == 1 else 's'}"
                 + (f"{verb} on the ballot" if race.get("settled") else ""))
