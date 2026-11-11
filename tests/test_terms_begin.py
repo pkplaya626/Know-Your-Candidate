@@ -224,8 +224,22 @@ class TheTable(unittest.TestCase):
         for (code, key), day in expected.items():
             self.assertEqual(terms_begin.for_page(code, key)["day"], day, (code, key))
         # A named day is not said to be counted.
-        for code, key in (("NM", "governor"), ("NY", "ag"), ("TX", "ag"), ("IN", "sos")):
+        for code, key in (("NM", "governor"), ("NY", "ag"), ("TX", "ag")):
             self.assertFalse(terms_begin.for_page(code, key)["counted"], (code, key))
+
+    def test_an_office_that_cites_the_law_without_quoting_it_is_no_source(self):
+        # The second reader of PR #233: Indiana's Election Division's calendar
+        # cites IC 4-5-1-1 and does not quote it, and this table quotes the
+        # law's own words. Its January 1 is a lead, and the gap names the
+        # statute's address for a person to read.
+        self.assertIsNone(terms_begin.record_for("IN", "sos"))
+        why, address = terms_begin.GAPS[("IN", "sos")]
+        self.assertIn("https://iga.in.gov/laws/2025/ic/titles/4", why)
+        self.assertEqual(address, terms_begin.IN_CALENDAR)
+        # Tennessee's leads give two days a reader must tell apart.
+        tn = terms_begin.GAPS[("TN", "governor")][0]
+        self.assertIn("January 15", tn)
+        self.assertIn("General Assembly designates", tn)
 
     def test_one_jurisdictions_offices_can_split_between_a_day_and_a_gap(self):
         # Texas's attorney general starts on Gov't Code 601.003's January 1,

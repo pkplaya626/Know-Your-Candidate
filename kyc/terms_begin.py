@@ -429,20 +429,6 @@ TERMS = {
                        "The terms of office of all State and County officers made elective by this "
                        "Constitution begin on the first Tuesday in January next after their election, "
                        "unless otherwise provided in this Constitution.")),)),),
-    # A named day, as the state's election office gives it with the statute
-    # it cites; the statute's own text (iga.in.gov) is drawn by script.
-    "IN": (_record(("sos",), ("day", 1, 1), "JANUARY 1, 2027",
-                   "2027-01-01",
-                   "Ind. Code 4-5-1-1, as the Indiana Election Division's 2026 Election Calendar "
-                   "gives it",
-                   ((IN_CALENDAR, (
-                       "FRIDAY, JANUARY 1, 2027",
-                       "First day of term for an individual elected to the following offices in the "
-                       "2026 general election: secretary of state, state comptroller, and treasurer of "
-                       "state. (IC 3-10-2-7; IC 4-5-1-1; IC 4-7-1-1; IC 4-8.1-2-4).")),),
-                   note="Read from the Election Division's calendar, which cites IC 4-5-1-1 and "
-                        "does not quote it: iga.in.gov answers every address with its script "
-                        "app's empty shell."),),
     # Art. II, s.3 has them qualify on that day "or as soon thereafter as may
     # be practicable", but s.1 fixes when the term commences. The attorney
     # general's term (art. V, s.1) names no day: a gap.
@@ -593,6 +579,15 @@ GAPS = {
     ("MD", "ag"): ("Md. Const. art. V, s.1 runs the attorney general's term \"for four years from "
                    "the time of his election and qualification\", which names no calendar day, and "
                    "this read found no statute that fixes one", MD_CONST),
+    # The second reader of PR #233: the Election Division's calendar cites
+    # IC 4-5-1-1 and does not quote it, and this table quotes the law's own
+    # words; the calendar's January 1 is a lead until a person reads the
+    # statute.
+    ("IN", "sos"): (
+        "iga.in.gov, where the Indiana Code is published, answered every address this site asked "
+        "for with its script app's empty page, so IC 4-5-1-1 was not read. A person should read "
+        "it at https://iga.in.gov/laws/2025/ic/titles/4 (the Indiana Election Division's 2026 "
+        "calendar, which cites it without quoting it, gives January 1, 2027)", IN_CALENDAR),
     ("ME", "governor"): (
         "maine.gov answered this site's request with CloudFront's \"Request blocked\" page (HTTP "
         "403), and lldc.mainelegislature.org reset the connection. A person should read Me. Const. "
@@ -617,7 +612,9 @@ GAPS = {
         "commercial host, and the Secretary of State's printing of the constitution answered this "
         "site's request with CloudFront's \"Request blocked\" page (HTTP 403): "
         "https://publications.tnsosfiles.com/pub/2023%20TN%20Constitution.pdf. A person should "
-        "read Tenn. Code Ann. 2-18-115 on the official text (the leads give January 15)", None),
+        "read Tenn. Code Ann. 2-18-115 on the official text (the leads give two days a reader must "
+        "tell apart: the term dating from January 15 under subsection (c), and an inauguration "
+        "on a day the General Assembly designates under subsection (b))", None),
     ("TX", "governor"): (_TX_INSTALLED, TX_CN_4),
     ("TX", "lt"): ("Tex. Const. art. IV, s.16(a) has the lieutenant governor \"continue in office "
                    "for the same time\" as the governor, whom art. IV, s.4 installs \"on the first "
