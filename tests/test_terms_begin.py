@@ -160,6 +160,19 @@ class TheTable(unittest.TestCase):
         self.assertIn("whose term of office shall be four years",
                       " ".join(q for _s, qs in ag["sources"] for q in qs))
 
+    def test_arizonas_first_lieutenant_governor_takes_office_on_one_day(self):
+        # The guide's maps move Arizona out of the states with no lieutenant
+        # governor on government_maps.AZ_LTGOV_FROM; this table dates the
+        # term from the same provision. Two counts of one day (rule 12) are
+        # held to each other, since neither module can import the other
+        # (government_maps -> ... -> ballot2026 -> government_maps).
+        from kyc import government_maps
+        record = terms_begin.record_for("AZ", "lt")
+        self.assertEqual(record["day"], government_maps.AZ_LTGOV_FROM)
+        # The span quoted to readers names no 1971 (the second reader).
+        self.assertNotIn("1971", record["words"])
+        self.assertIn(record["words"], " ".join(q for _s, qs in record["sources"] for q in qs))
+
     def test_each_office_links_its_own_provision_first(self):
         # Nevada's secretary of state is NRS 225, never the Attorney
         # General's chapter, though NRS 282.010 sets both their days.
