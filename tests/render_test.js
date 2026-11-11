@@ -22353,8 +22353,11 @@ async function testTheJanuaryPage() {
     // seat they held, so the words say that, and no card says otherwise.
     const nsWords = [nsChip ? nsChip.textContent : "", nsTitle, nsLabel].join(" | ");
     const nsLost = nsCards.filter((p) => /lost/i.test((NK.standing(p, "card") || {}).label || ""));
-    const nsOnBallot = nsCards.filter((p) => /on the November ballot|^Elected|^Lost the November/i.test(
-      ((NK.standing(p, "long") || {}).label || "")));
+    // On the November ballot for the seat they held, that is: Mike Collins
+    // and Ashley Hinson were on it for the Senate, which the words allow.
+    const ranElsewhere = (p) => !!p.contestRaceId || (!!p.raceStatusRace && p.raceStatusRace !== p.raceId);
+    const nsOnBallot = nsCards.filter((p) => !ranElsewhere(p) &&
+      /on the November ballot|^Elected|^Lost the November/i.test(((NK.standing(p, "long") || {}).label || "")));
     check("and its words are true of every card it lists: none \"did not run\" over a lost primary, nobody on the November ballot",
       !(nsLost.length && /did not run/i.test(nsWords)) && !nsOnBallot.length &&
         /not on the November \d{4} ballot for the seat they held/.test(nsTitle) &&
