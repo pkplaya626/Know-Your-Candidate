@@ -22251,7 +22251,8 @@ async function testTheJanuaryPage() {
       !/holds each|running for it/.test(senTitle), senTitle);
     check("\"Not seeking re-election\" is \"Did not run for re-election\" over members who have left, and nobody seated",
       !!nsChip && nsChip.textContent.trim() === "Did not run for re-election" && nsCards.length > 0 &&
-        nsCards.every((p) => p.formerMember && !NK.seated(p)),
+        nsCards.every((p) => p.formerMember && !NK.seated(p)) &&
+        /: members who did not run for re-election in 2026, all of whom have since left Congress\./.test(nsLabel),
       `${nsCards.length} cards; seated: ` + nsCards.filter((p) => NK.seated(p)).map((p) => p.name).join(", ") + " | " + nsLabel.slice(0, 160));
     check("its hover speaks of the members who left, never of sitting members or the seat they hold",
       /all of whom have since left Congress/.test(nsTitle) && !/Sitting members|seat they hold/.test(nsTitle), nsTitle);

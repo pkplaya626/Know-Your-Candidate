@@ -681,7 +681,12 @@
       // From the day after Election Day nobody is "still running": the
       // list holds who won and who lost (rule 63).
       var voted = KYC.electionStatus().phase === "post-election";
-      html += KYC.escapeHtml(": " + (state.role === "candidate"
+      // "Did not run for re-election" once the new Congress sits lists
+      // people neither in office nor on the ballot (initElectionWords).
+      var leftWords = state.election === "notSeeking" && KYC.recordPhase();
+      html += KYC.escapeHtml(": " + (leftWords
+        ? "members who did not run for re-election in 2026, all of whom have since left Congress"
+        : state.role === "candidate"
         ? (voted ? "candidates who were on the November ballot" : "candidates still running")
         : voted ? "people in office or who were on the November ballot"
         : "people in office or still running") + ".");
