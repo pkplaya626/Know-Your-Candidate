@@ -15064,7 +15064,9 @@ async function testSharePages() {
       if ((other ? other.text : null) !== (otherShown ? unescapeHtml(otherShown[1]) : null)) {
         wrong.push(`${p.id}: other office "${otherShown && otherShown[1]}"`);
       }
-      const next = KYC.seated(p) && !p.seatUp2026 && p.electionYear ? "Seat up in " + p.electionYear : null;
+      // The dialog's reading (KYC.seatUpYear): a member seated for the new
+      // term says when the seat is next up, whatever seatUp2026 says.
+      const next = KYC.seatUpYear(p) ? "Seat up in " + KYC.seatUpYear(p) : null;
       const nextShown = /<p class="share-next">(.*?)<\/p>/.exec(html);
       if (next !== (nextShown ? nextShown[1] : null)) wrong.push(`${p.id}: "${nextShown && nextShown[1]}" for "${next}"`);
       // A portrait only by a sourced route (rule 24): never a fallback's.
@@ -15677,7 +15679,8 @@ async function testFrame() {
       rows.every((r) => { const last = r.lastElementChild.textContent.trim();
         return last === "–" || WORD_DATE.test(last) || /^(Each|In the repository)/.test(last); }),
       rows.map((r) => r.lastElementChild.textContent.trim()).join(" | "));
-    const fecRow = rows.find((r) => /Who is running/.test(r.textContent));
+    // "Who ran" once the results read are November's (pages._AFTER_ELECTION_NAMES).
+    const fecRow = rows.find((r) => /Who is running|Who ran/.test(r.textContent));
     check("the FEC's figures say where their date is, not a dash",
       !!fecRow && /run through/.test(fecRow.lastElementChild.textContent), fecRow && fecRow.textContent);
     check("the hand-kept rosters are a source of their own, and the page does not say every fact is a script's",
@@ -22730,11 +22733,14 @@ async function testWordsSinceElectionDay() {
       // Two counts of one set of seats each say their basis once they can
       // differ (rule 73), from one place (KYC.senateBases).
       const bases = w.KYC.senateBases ? w.KYC.senateBases() : { defending: "" };
+      // Nothing is dotted once the new Congress sits (summary.py sends no "up").
+      const dotted = !!(w.KYC.meta().senate || {}).up;
       check("the seats each party defends and the bar's dotted seats each say whose party they count",
         after
           ? label("senateDefending") === bases.defending &&
             /^Seats each party defended \(by the party that held each at the election\)$/.test(bases.defending) &&
-            /seats that were on the Nov 3, 2026 ballot, by the party of who holds each now\./.test(note)
+            (dotted ? /seats that were on the Nov 3, 2026 ballot, by the party of who holds each now\./.test(note)
+              : !/Dotted/.test(note))
           : label("senateDefending") === "Seats each party defends" && !/who holds each now/.test(note),
         `${label("senateDefending")} | ${note}`);
       check("the Challengers chip's hover", chip("role", "candidate") === (after
