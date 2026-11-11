@@ -1200,6 +1200,8 @@ class TestStatePages(unittest.TestCase):
                       "sit for a district with a different number from the one they held before.",
                       january)
         self.assertNotIn(" hold.", january)
+        self.assertIn("; 1 of them sits for a district", pages.district_page_text(
+            "TX", 38, ResultsDay("2027-01-05", record=True), 1)[1])
         self.assertEqual(pages.district_page_text("MP", 1)[0],
                          "Northern Mariana Islands' seat in the House")
 

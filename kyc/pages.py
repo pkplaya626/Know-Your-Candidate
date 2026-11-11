@@ -1630,7 +1630,8 @@ def district_moves(kind, post=False, seated=0):
                 f"{start.strftime('%B')} {start.day}, {start.year}")
         if not seated:
             return took + "."
-        return (took + f"; {seated} of them sit for a district with a different number "
+        verb = "sits" if seated == 1 else "sit"
+        return (took + f"; {seated} of them {verb} for a district with a different number "
                 f"from the one they held before.")
     if post:
         return (f"{'Every member' if every else 'Some members'} ran in 2026 in a district with "
