@@ -1098,9 +1098,15 @@
   /* The words every view says outside spending in: one implementation
    * (rule 12) for the race's money row, its comparison and the dialog. */
   function outsideTotals(o) {
+    // A side whose total is below zero is shown as filed and said to be
+    // one: "spent -$28K supporting" read as nothing a reader could parse
+    // (Jimmy Gomez, the January sweep of 2026-11-11).
     var side = function (total, n, word) {
+      var notes = [];
+      if (n) notes.push(n + (n === 1 ? " group" : " groups"));
+      if (total < 0) notes.push("as filed: a refund or correction the FEC counts against earlier spending");
       return total ? KYC.moneyShort(total) + " " + word +
-        (n ? " (" + n + (n === 1 ? " group" : " groups") + ")" : "") : "";
+        (notes.length ? " (" + notes.join("; ") + ")" : "") : "";
     };
     return [side(o.support, o.supportCommittees, "supporting"),
             side(o.oppose, o.opposeCommittees, "opposing")].filter(Boolean).join(" and ");

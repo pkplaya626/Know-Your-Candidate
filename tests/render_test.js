@@ -16144,6 +16144,14 @@ async function testRaceMoney() {
       [...outside].every((o) => /^(?:Filed (?:under their|separately under their) (?:House|Senate) candidacy[^:]*: o|O)utside groups spent \$[\d.]+[KMB]? (supporting|opposing)/.test(o.textContent) &&
         /processed when read on/.test(o.textContent) && /fec\.gov/.test(o.querySelector("a").href) &&
         !/\bnet\b/i.test(o.textContent)), outside.length + " lines");
+    // A side below zero is said to be as filed (Jimmy Gomez's "-$28K
+    // supporting" read as money spent): built from a record of that shape.
+    const negative = window.KYC.cards.outsideLine({ id: "FAKE", outsideSpending: { support: -28159.84,
+      supportCommittees: 3, oppose: 0, cycle: 2026, asOf: "2026-11-10", url: "https://www.fec.gov/" } })
+      .replace(/<[^>]+>/g, "");
+    check("a side whose total is below zero says it is as filed, a refund or correction",
+      /supporting \(3 groups; as filed: a refund or correction the FEC counts against earlier spending\)/.test(negative),
+      negative.slice(0, 200));
   });
 
   suite("states/nc.html — the seat's last election", () => {
