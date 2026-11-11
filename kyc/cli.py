@@ -1666,6 +1666,8 @@ def _verify(args):
                             snapshot=legislators.load_snapshot(args.root))
     from . import members as members_mod
     members_mod.apply_cache(profiles, members_mod.load_cache(args.root))
+    # As the build does: a seated winner's reads made while they ran.
+    enrich.apply_to_winners(profiles, enrichment, as_of=_age_date(stats))
     race_list = races_mod.build(
         profiles, candidates.filing_counts(field),
         results=outcomes, dates=results_mod.load_dates(args.root),
