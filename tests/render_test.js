@@ -14190,7 +14190,7 @@ async function testFrame() {
       nationalCounts: true }) });
     const both = window.document.createElement("div");
     both.innerHTML = KYC.resultsSourceHtml(counted);
-    const counts = /which gives no vote count; the state's page, read the same day, counts the same candidate ahead and names no winner/;
+    const counts = /which marks the winner and gives no vote count; the state's page, read the same day, counts that winner ahead and names no winner/;
     check("a national call over agreeing counts says the state's page counted them ahead",
       both.querySelectorAll(".race-source a").length === 2 && counts.test(both.textContent) &&
         counts.test(both.querySelectorAll(".race-source a")[1].getAttribute("title")) &&

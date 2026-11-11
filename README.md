@@ -835,9 +835,9 @@ page and writes `data/primary_results.json`. Three things keep it honest:
     The page credits such a call to "Wikipedia's national summary of the
     House elections, which gives no vote count; the state's page had none
     when read" wherever a status's source is shown, or, where the state's
-    page gave counts at that read, "... which gives no vote count; the
-    state's page, read the same day, counts the same candidate ahead and
-    names no winner" (`raceStatusSource: "national-counts"`, the race
+    page gave counts at that read, "... which marks the winner and gives no
+    vote count; the state's page, read the same day, counts that winner
+    ahead and names no winner" (`raceStatusSource: "national-counts"`, the race
     summary's `nationalCounts: true`).
 
   Each race records how its winner was called (`calledBy`: `table`,

@@ -236,9 +236,9 @@ NATIONAL_SOURCE = ("Wikipedia's national summary of the House elections, which g
                    "vote count; the state's page had none when read")
 # The same, where the state's page, read with the summary, gave counts that put
 # the same person first and named no winner (raceStatusSource "national-counts").
-NATIONAL_COUNTS_SOURCE = ("Wikipedia's national summary of the House elections, which gives "
-                          "no vote count; the state's page, read the same day, counts the same "
-                          "candidate ahead and names no winner")
+NATIONAL_COUNTS_SOURCE = ("Wikipedia's national summary of the House elections, which marks "
+                          "the winner and gives no vote count; the state's page, read the same "
+                          "day, counts that winner ahead and names no winner")
 
 
 def _race_source(status, source=None, source_name=None):

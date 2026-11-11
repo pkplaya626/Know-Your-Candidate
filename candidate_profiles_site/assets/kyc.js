@@ -422,8 +422,10 @@
   var NATIONAL_NOTE = "which gives no vote count; the state's page had none when read";
   // Where the state's page, read with it, counted the same candidate ahead and
   // named no winner (raceStatusSource "national-counts"; share.NATIONAL_COUNTS_SOURCE).
-  var NATIONAL_COUNTS_NOTE = "which gives no vote count; the state's page, read the same " +
-    "day, counts the same candidate ahead and names no winner";
+  // It says whom it counted ahead, the summary's winner, since it stands alone
+  // as a loser's source too (PR #224 review).
+  var NATIONAL_COUNTS_NOTE = "which marks the winner and gives no vote count; the state's " +
+    "page, read the same day, counts that winner ahead and names no winner";
   /* A sitting member leaving the seat they hold, in the same words whether
    * the results list them as withdrawn or do not list them: only the title,
    * which cites its source, differs. */

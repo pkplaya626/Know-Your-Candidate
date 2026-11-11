@@ -1561,8 +1561,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     call is never kept over a refusal. The article's "Crossover seats"
     tables list eight districts again beside their PVI (NE-2, NY-17, PA-1,
     CA-1, CA-3, CA-41, CA-48 and UT-1 in revision 1384925256), which made
-    each two rows and so none: a row counts only in its state's section.
-    A call the last read made that this one does not make, with no
+    each two rows and so none: a row counts only in its state's section. An
+    article that keys fewer districts in their states' own sections than
+    its rows name, or none, is taken as unread and the last read's calls
+    stand (`national_unkeyed`, rule 36): restructured, it would have dropped
+    every call on a refresh that merges itself. The second reader of the
+    one test found the withdrawal asking the page about the row's spelling
+    while the call found its person by filing: a row marking "James Stone"
+    over the filing "STONE, PAT JAMES" withdrew the call ("the counts put
+    Pat Stone first") and made it again in the same read. Both now find the
+    person one way (`national_person`), and a page whose own route elects
+    that person withdraws nothing (MN-1's shape, a declared mark at 0.10
+    points). A table's lines that name nobody ("Write-ins") are no leader,
+    so where together they could out-count the marked person the counts do
+    not agree. A call the last read made that this one does not make, with no
     result from the state's page and no withdrawal (the row lost its mark,
     holds two, or went), is `result-national-dropped`, and a call kept past
     `officers.KEPT_STALE_DAYS` while the article cannot be read is
@@ -1580,9 +1592,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `raceStatusSource` "national"), or where the page gave counts at that
     read (the call's `pageCounts`, with `pageLeader`, `pageLead`,
     `pageMargin` and `pageReporting` as the gate measured them; a call kept
-    unread keeps the case it was made in) "... which gives no vote count; the
-    state's page, read the same day, counts the same candidate ahead and
-    names no winner" (`share.NATIONAL_COUNTS_SOURCE`, "national-counts",
+    unread keeps the case it was made in) "... which marks the winner and
+    gives no vote count; the state's page, read the same day, counts that
+    winner ahead and names no winner" (`share.NATIONAL_COUNTS_SOURCE`,
+    "national-counts", a loser's source too, so it says whom it counted;
     the race summary's `nationalCounts`); an infobox call is the state's
     page's.
     Replayed over every state's page as it stood at 19:50 UTC on 2026-11-10,
