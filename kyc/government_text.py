@@ -455,11 +455,18 @@ SOURCES = {
                      "&secStart=15.20.081&secEnd=15.20.081"),
     "ak-ballot-measures": ("Alaska Division of Elections, Petitions and ballot measures",
                            "https://www.elections.alaska.gov/petitions-and-ballot-measures/"),
+    # Read 2026-11-11 (through kyc.tls, rule 8): "2026 General Election -
+    # November 3, 2026 Results Status: Unofficial Page last updated
+    # November 10, 2026 at 7:16 pm"; certified results are under its
+    # "Search Official Election Results".
+    "ak-results-2026": ("Alaska Division of Elections, Election results",
+                        "https://www.elections.alaska.gov/election-results/"),
     # Missouri's referendum on its 2025 map (read 2026-11-11): the measure
     # "Proposition A ... Proposed by Referendum Petition", among those
     # "certified for the November 3, 2026 general election"; its results
     # page lists "General Election - November 3, 2026 View Unofficial
-    # Results" where earlier elections give their certified "Grand Totals";
+    # Results" where earlier elections, "Primary Election - August 4, 2026"
+    # among them, give their certified "Grand Totals";
     # and Mo. Const. art. III, sec. 52(b): "Any measure referred to the
     # people shall take effect when approved by a majority of the votes
     # cast thereon, and not otherwise."
@@ -593,9 +600,13 @@ INDEX = {
                     Tense(("campaign", "Congress: every member, and everyone who has filed to "
                                        "run for their seats, on the [profile grid](site:index.html) "
                                        "and the [partisan map](site:map.html)."),
-                          ("voted", "Congress: every member, and everyone who filed to run for "
-                                    "their seats in 2026, on the [profile grid](site:index.html) "
-                                    "and the [partisan map](site:map.html).")),
+                          # Not "everyone who filed": a profile is a filing
+                          # past the statute's $5,000 (rules 22, 23), which the
+                          # elections page's funding section says in full.
+                          ("voted", "Congress: every member, and the 2026 candidates for their "
+                                    "seats as [this site counts them](guide:elections#funding), "
+                                    "on the [profile grid](site:index.html) and the [partisan "
+                                    "map](site:map.html).")),
                     "[The federal government](site:federal/index.html): the President, the Vice "
                     "President, the Cabinet and every sitting federal judge, court by court.",
                     "[Each state's page](site:states/index.html): its members of Congress, its "
@@ -747,10 +758,16 @@ CONGRESS = {
     # Not "Congress": the site's navigation has that entry, for its members.
     "people": True,
     "revisit": [
-        ("2026-12-09", "Missouri's board of state canvassers announces November's results by "
-                       "the second Tuesday in December (RSMo 115.511): quote Proposition A's "
-                       "certified result from the Secretary of State, or say it is still not "
-                       "certified"),
+        # RSMo 115.511.2 (read 2026-11-11) sets the second Tuesday in
+        # December for the board's statement on the general election's
+        # offices; it names no day for a question on that ballot, and
+        # subsection 3's "two weeks after receiving all required abstracts"
+        # is for special elections. The result may be certified sooner: the
+        # paragraph's "on November 11 ... still listed" stays true as dated.
+        ("2026-12-09", "Missouri's board of state canvassers announces the general election's "
+                       "results for its offices by the second Tuesday in December (RSMo "
+                       "115.511.2): quote Proposition A's certified result from the Secretary "
+                       "of State, or say it is still not certified"),
     ],
     "title": "How Congress works",
     "card": ("The Senate and the House: what each does, who runs them, how a bill becomes "
@@ -1042,19 +1059,31 @@ CONGRESS = {
                     # The referendum was on the ballot, and this site reads no
                     # ballot question's result (rule 95): the state's word on
                     # it, as of the day read, until the canvass is certified
-                    # (the page's revisit).
+                    # (the page's revisit). Which map held which election is
+                    # the Onder order's word (read 2026-11-11): the primary
+                    # was not the general election - "The Secretary
+                    # nonetheless chose to proceed with the 2025 map for the
+                    # primary", while the Missouri Supreme Court's decision
+                    # "had prohibited use of the 2025 map in the general
+                    # election", "leaving the 2022 map in effect for the 2026
+                    # general election", and "Ballots using the 2022 map have
+                    # been printed and mailed." The primary's day is the
+                    # Secretary of State's results page's ("Primary Election -
+                    # August 4, 2026").
                     ("voted",
                      "Missouri's 2025 map is not among them. Enough voters signed a "
                      "referendum petition against it that, as Missouri's Supreme Court held on "
-                     "September 3, 2026, it could take effect only if voters approved it, so "
-                     "Missouri's 2026 congressional election was held on its 2022 map "
-                     "([Missouri's districts](site:districts/mo.html)). On September 25 the "
-                     "U.S. Supreme Court had told the federal courts not to bar the 2022 map "
-                     "from that election, or to require the 2025 one (People Not Politicians v. "
-                     "Onder). The referendum, Proposition A, was on the November 3, 2026 "
-                     "ballot; on November 11, 2026 the Secretary of State still listed that "
-                     "election's results as unofficial, and this site does not read a ballot "
-                     "question's result."))),
+                     "September 3, 2026, it could take effect only if voters approved it. "
+                     "Missouri's August 4, 2026 congressional primary was held on the 2025 "
+                     "map, as its Secretary of State chose, but its November 3 general "
+                     "election was held on the 2022 map ([Missouri's "
+                     "districts](site:districts/mo.html)): on September 25 the U.S. Supreme "
+                     "Court had told the federal courts not to bar the 2022 map from that "
+                     "election, or to require the 2025 one (People Not Politicians v. Onder). "
+                     "The referendum, Proposition A, was on the November 3, 2026 ballot; on "
+                     "November 11, 2026 the Secretary of State still listed that election's "
+                     "results as unofficial, and this site does not read a ballot question's "
+                     "result."))),
             ],
             "sources": ["usc-2-2a", "usc-2-2c", "wesberry", "reynolds", "usc-52-10301",
                         "callais", "rucho", "onder", "mo-const-3-52b", "mo-sos-measures-2026",
@@ -2303,8 +2332,8 @@ ELECTIONS = {
                      "Federal law sets the day of the general election for Congress: the "
                      "Tuesday after the first Monday in November of every even-numbered year "
                      "(2 U.S.C. 7). In 2026 that was November 3, and every House seat was on "
-                     "that ballot, because House terms are two years. The next is on "
-                     "{{next-election-day}}."))),
+                     "that ballot, because House terms are two years. The next such day, "
+                     "under that statute, is {{next-election-day}}."))),
                 ("p", "A state holds a regular Senate election when one of its senators' six-year "
                       "terms is ending, on the same November ballot, and the winner's term "
                       "begins on January 3 of the next year (2 U.S.C. 1). When a Senate seat "
@@ -2364,15 +2393,20 @@ ELECTIONS = {
                     # by voters"); this site reads no ballot question's
                     # result (rule 95). Alaska's 2026 elections were held
                     # under the law the measure would repeal, whatever its
-                    # outcome.
+                    # outcome. What the Division's record shows of the
+                    # count is its results page's word ("Results Status:
+                    # Unofficial"), never "not recorded", and the general
+                    # election "used" ranked-choice voting, not "was
+                    # decided" by it, while the count is unofficial.
                     ("voted",
                      _TOP_TWO + "In 2026 Alaska's "
                      "primary chose no party's nominee: the four candidates with the most votes "
-                     "went on to the general election, which was decided by [ranked-choice "
+                     "went on to the general election, which used [ranked-choice "
                      "voting](#ranked-choice). On November 3, 2026, Alaska's voters also voted "
                      "on a ballot measure to repeal its open primary and ranked-choice general "
-                     "elections; on November 11 the Division of Elections had not yet recorded "
-                     "its outcome, and this site does not read a ballot question's result."))),
+                     "elections; on November 11 the Division of Elections still listed that "
+                     "election's results as unofficial, and this site does not read a ballot "
+                     "question's result."))),
                 ("p", Tense(
                     ("campaign",
                      "Louisiana's U.S. House seats follow a different calendar in 2026. Under Act 7 "
@@ -2393,7 +2427,9 @@ ELECTIONS = {
             ],
             "sources": ["eac-primaries", "va-24-2-530", "la-sos-elected", "ca-sos-primaries",
                         "wa-29a-52-112", "ak-15-25-010", "ak-15-15-350", "ak-ballot-measures",
-                        "la-sos-house-2026", "va-24-2-509", "va-24-2-510", "ct-chap-153"],
+                        "ak-results-2026", "la-sos-house-2026", "va-24-2-509", "va-24-2-510",
+                        "ct-chap-153"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "funding",
@@ -2449,6 +2485,7 @@ ELECTIONS = {
                     ("voted", _FEC_SCOPE.format(elects="elected in 2026")))),
             ],
             "sources": ["fec-register", "usc-52-30101", "eac-in-charge", "const-art1"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "runoffs",
@@ -2491,18 +2528,26 @@ ELECTIONS = {
                      "with a majority was decided at the general election on December 12."))),
             ],
             "sources": ["tx-el-172", "ga-sb202", "ga-runoff-2026", "usc-48-1712", "la-sos-elected"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "ranked-choice",
             "heading": "Ranked-choice voting",
             "blocks": [
                 # Alaska's 2026 count was ranked-choice whatever its repeal
-                # measure's outcome (the page's revisit).
+                # measure's outcome (the page's revisit). "Used", not
+                # "decided": the count is unofficial for weeks after the
+                # day, and a word for a finished count would run ahead of
+                # it. Read 2026-11-11: 2026 ME 32 ("Ranked-choice voting is
+                # thus now in effect ... for elections for the federal
+                # offices of United States Senator and Representative to
+                # Congress") and AS 15.15.350(c) ("All general elections
+                # shall be conducted by ranked-choice voting").
                 ("p", Tense(
                     ("campaign", "Maine and Alaska decide their federal general elections by "
                                  "ranked-choice voting." + _MAINE_RCV),
-                    ("voted", "Maine and Alaska decided their 2026 federal general elections by "
-                              "ranked-choice voting." + _MAINE_RCV))),
+                    ("voted", "Maine and Alaska used ranked-choice voting in their 2026 federal "
+                              "general elections." + _MAINE_RCV))),
                 ("p", "The count goes in rounds. If a candidate has more than half of the first "
                       "choices, that candidate wins. If not, under Alaska's law the last-place "
                       "candidate is eliminated and each of that candidate's ballots moves to the "
@@ -2517,6 +2562,7 @@ ELECTIONS = {
             ],
             "sources": ["me-rcv-faq", "me-21a-723a", "me-sjc-2026", "ak-15-15-350",
                         "ak-15-20-081"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "counting",
@@ -2562,6 +2608,7 @@ ELECTIONS = {
                            "at the earliest, and the state canvass had to be done by December 7")))),
             ],
             "sources": ["ca-sos-2026-dates", "watson-rnc", "usc-52-21082", "tx-sos-2026-calendar"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "recounts",
@@ -2653,6 +2700,7 @@ ELECTIONS = {
                       "practicable."),
             ],
             "sources": ["const-amdt20", "const-art1", "tx-const-art4"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "vacancies",

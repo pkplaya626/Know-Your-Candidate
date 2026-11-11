@@ -409,8 +409,25 @@ class TestTheGuideOnTheBuildsDay(unittest.TestCase):
             self.assertIn("states held an election for governor", self.text[name])
             self.assertIn("Who was on the November ballot", self.text[name])
             self.assertIn("In 2026 that was November 3", self.text[name])
-            # The next election's day is the statute's, counted.
-            self.assertIn("The next is on November 7, 2028.", self.text[name])
+            # The next election's day is the statute's, counted, and said to
+            # be the statute's: Georgia's runoff and Louisiana's December
+            # round fall between, and "The next is on November 7, 2028" read
+            # as the next election of any kind.
+            self.assertIn("The next such day, under that statute, is November 7, 2028.",
+                          self.text[name])
+            self.assertNotIn("The next is on", self.text[name])
+            # A count that is unofficial for weeks is not "decided" by the
+            # day after it (PR #228 review): the states used ranked-choice
+            # voting, whatever the certified count turns out to be.
+            for words in ("decided their 2026", "which was decided by"):
+                self.assertNotIn(words, self.text[name], name)
+            self.assertIn("Maine and Alaska used ranked-choice voting in their 2026 federal "
+                          "general elections", self.text[name])
+            # The grid holds the candidates past the statute's $5,000, not
+            # everyone who filed (rules 22, 23).
+            self.assertNotIn("everyone who filed", self.text[name])
+            self.assertIn("the 2026 candidates for their seats as this site counts them",
+                          self.text[name])
 
     def test_missouri_says_the_referendum_was_held_and_no_result(self):
         # This site reads no ballot question's result (rule 95).
@@ -422,6 +439,44 @@ class TestTheGuideOnTheBuildsDay(unittest.TestCase):
             for verdict in ("approved Proposition", "rejected", "passed", "failed",
                             "takes effect", "took effect"):
                 self.assertNotIn(verdict, paragraph)
+
+    def test_missouri_names_the_map_each_election_was_held_on(self):
+        # The Onder order: "The Secretary nonetheless chose to proceed with
+        # the 2025 map for the primary", and the state court "had
+        # prohibited use of the 2025 map in the general election". The
+        # first past-tense paragraph said "Missouri's 2026 congressional
+        # election was held on its 2022 map", false of the August primary
+        # (PR #228 review). A sentence naming the map an election was held
+        # on names which election.
+        for name in ("nov12", "dec15", "jan10"):
+            paragraph = re.search(r"Missouri's 2025 map is not among them\.[^<]*?result\.",
+                                  self.text[name]).group(0)
+            self.assertRegex(paragraph, r"August 4, 2026 congressional primary was held on "
+                                        r"the 2025 map")
+            self.assertIn("November 3 general election was held on the 2022 map", paragraph)
+            held = re.findall(r"([\w ,]*?) (?:was|were) held on (?:its|the) (\d{4}) map",
+                              paragraph)
+            self.assertTrue(held)
+            for election, _year in held:
+                self.assertRegex(election, r"primary|general election", paragraph)
+
+    def test_alaska_says_what_the_division_of_elections_lists(self):
+        # The Division's results page read "Results Status: Unofficial" on
+        # 2026-11-11; "had not yet recorded its outcome" said of its record
+        # what that page contradicts (rule 19, PR #228 review). The source
+        # the words rest on is cited.
+        from kyc.government_text import ELECTIONS
+
+        for name in ("nov12", "jan10"):
+            paragraph = re.search(r"In 2026 Alaska's primary[^<]*?result\.",
+                                  self.text[name]).group(0)
+            self.assertIn("the Division of Elections still listed that election's results as "
+                          "unofficial", paragraph)
+            self.assertNotIn("not yet recorded", paragraph)
+        primaries = next(s for s in ELECTIONS["sections"] if s["id"] == "primaries")
+        self.assertIn("ak-results-2026", primaries["sources"])
+        self.assertEqual(government.SOURCES["ak-results-2026"][1],
+                         "https://www.elections.alaska.gov/election-results/")
 
     def test_each_december_day_moves_its_own_words(self):
         nov, dec = self.text["nov12"], self.text["dec15"]
