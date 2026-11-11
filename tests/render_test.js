@@ -23248,7 +23248,11 @@ async function testWordsSinceElectionDay() {
           Object.values(leads).every((t) => /^Each seat, who held it and who was on the November ballot/.test(t)) &&
             !/with the sitting member|no longer running|also elects |may also hold /.test(all) &&
             /the same ballot also elected /.test(leads.il) && /may also have held/.test(leads.gu) &&
-            /may also have held the District's own contests/.test(leads.dc),
+            // The District's attorney general is listed (ballot2026.DISTRICT),
+            // so its lead says the ballot elected it and names the rest as
+            // its "other" contests.
+            /the same ballot also elected the attorney general/.test(leads.dc) &&
+            /may also have held the District's other contests/.test(leads.dc),
           JSON.stringify(leads).slice(0, 900));
       } else {
         check("the campaign's lead", Object.values(leads).every((t) => /^Each seat with the sitting member/.test(t)) &&
