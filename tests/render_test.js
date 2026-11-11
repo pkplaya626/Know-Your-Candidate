@@ -22317,6 +22317,40 @@ async function testTheJanuaryPage() {
     check("no seat in Congress is current on the overlay of one the record no longer seats, and the record line says former",
       govMembers > 0 && govBad.length === 0, govBad.slice(0, 4).join(" | ") || `${govMembers} members`);
   });
+  // A former member keeps the Directory's education and careers, and a
+  // member seated in the other chamber shows none of the old seat's district
+  // offices (kyc/members.py): Andy Biggs read "Education No data" in
+  // January, and Andy Barr's Lexington office stood under "State offices".
+  const memberCache = JSON.parse(fs.readFileSync(path.join(SITE, "data", "members.json"), "utf8"));
+  const hostOf = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } };
+  const full = {};
+  fs.readdirSync(path.join(SITE, "data", "people")).filter((f) => /^[a-z]{2}\.js$/.test(f)).forEach((f) => {
+    (readPeopleFile(path.join(SITE, "data", "people", f)).people || []).forEach((p) => { full[p.id] = p; });
+  });
+  const bioBad = [];
+  let bioFormer = 0;
+  let bioMoved = 0;
+  GK.people().filter((p) => !p.isCandidate).forEach((p) => {
+    const rec = Object.assign({}, p, full[p.id] || {});
+    const listed = ((memberCache.directory || {}).byId || {})[p.id];
+    const site = ((memberCache.sites || {})[p.id] || {}).url;
+    if (rec.formerMember && listed && listed.education && site &&
+        [hostOf(listed.site), hostOf(listed.leadsTo)].indexOf(hostOf(site)) !== -1) {
+      bioFormer += 1;
+      if (rec.education === "No data" || rec.previous_professions === "No data" && listed.careers) {
+        bioBad.push(`${p.name}: education "${rec.education}", careers "${rec.previous_professions}"`);
+      }
+      if (rec.platforms === "No data" && (rec.quality || {}).platforms === "unknown") bioBad.push(`${p.name}: platform "No data"`);
+    }
+    if (GK.seated(p) && /\.house\.gov$/.test(hostOf(site)) && p.chamber === "Senate") {
+      bioMoved += 1;
+      if ((rec.districtOffices || []).length) bioBad.push(`${p.name}: the House offices as a senator's`);
+    }
+  });
+  suite("the January page: a former member keeps the Directory's words; a member who changed chambers shows no old offices", () => {
+    check("education and careers as the Directory printed them, the platform's absence said, no House office under a senator",
+      bioFormer > 0 && bioBad.length === 0, bioBad.slice(0, 4).join(" | ") || `${bioFormer} former members, ${bioMoved} senators from the House`);
+  });
   suite("the January page: a nominee Congress has seated for the new term is never awaiting a result", () => {
     check("each reads \"Seated for the new term\" on a card, the term's years in the dialog, the record credited, and the same on its share page",
       seatedBad.length === 0, seatedBad.slice(0, 4).join(" | ") || `${seatedNominees.length} seated nominees` +

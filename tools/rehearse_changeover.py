@@ -280,6 +280,12 @@ def january(root=REPO):
         if rid:
             race = record["races"][rid]
             senate = race["chamber"] == "Senate"
+            if p["chamber"] != race["chamber"]:
+                # A member seated in the other chamber has that chamber's
+                # site, office and phone, which a fiction cannot know:
+                # copying the House term's made Andy Barr's Senate profile
+                # link barr.house.gov and hid what a new site does.
+                p.update(url=None, address=None, office=None, phone=None, contactForm=None)
             p.update(chamber=race["chamber"], state=race["state"],
                      district=None if senate else race["district"],
                      senateClass=race.get("senateClass") if senate else None,

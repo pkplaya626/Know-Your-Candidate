@@ -1072,6 +1072,12 @@
           return officeCard("home-office", o.city || (senate ? "State office" : "District office"),
             [street, place], o.phone, o.hours);
         }).join("") + "</ul>";
+    } else if (item.districtOfficesPending) {
+      // Read for the seat they held before (kyc/members.py): a House member
+      // now a senator showed their old district offices as "State offices".
+      out += '<span class="field-label">' + (senate ? "State offices" : "District offices") +
+        "</span>" + '<p class="casework-note">Their ' + kind + "s have not been read for their " +
+        "new term yet.</p>";
     }
     if (!out) return "";
     // Said once, after every office: the Washington office is the term's

@@ -1850,6 +1850,7 @@
     not_listed: "Not listed on their official site",
     see_site: "On their official site's issues page",
     see_home: "On their official website",
+    not_kept: "Not shown after they left office",
   };
   var ABSENT_TITLE = {
     not_disclosed: "No public disclosure exists for this field.",
@@ -1861,6 +1862,10 @@
       "list of issues it could take in the page's own words. The page is linked.",
     see_home: "This site read the member's official website and found issue pages it links, " +
       "but no issues page and too few issues to list. The site is linked.",
+    // A former member's: kyc/members.py, which read them from a site they
+    // no longer hold.
+    not_kept: "This site read their issues from their official website, which they no longer " +
+      "hold, and does not show them after they left office.",
     // The only absence that reports work we actually did.
     no_filing: "Checked with the FEC: this candidate has no filing for the "
       + "current cycle. Members running for a different seat file under a "

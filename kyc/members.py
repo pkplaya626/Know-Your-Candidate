@@ -1198,6 +1198,22 @@ def match_directory(profiles, entries, resolve=None):
     return out, problems_found, report
 
 
+def moved_since_read(url, profile):
+    """True when the official site this cache read for a member (*url*) is
+    not the seat they hold now: another chamber's host (a House member now
+    a senator, whose new site congress-legislators may not list yet), or
+    another address than the one they hold."""
+    host = enrich.host_of(url)
+    if not host:
+        return False
+    chamber = str(profile.get("chamber") or "")
+    for suffix, name in (("house.gov", "House"), ("senate.gov", "Senate")):
+        if (host == suffix or host.endswith("." + suffix)) and name not in chamber:
+            return True
+    now = enrich.host_of(profile.get("website"))
+    return bool(now) and now != host
+
+
 def directory_site_is(listed, website):
     """True when a Directory entry is about the member at *website*: printed
     at that address, or at one that led to it when it was read."""
@@ -1392,12 +1408,28 @@ def apply_cache(profiles, cache):
         if not is_member(profile):
             continue
         bioguide = profile["id"]
-        if bioguide in offices and not profile.get("formerMember"):
+        site = sites.get(bioguide) or {}
+        # The offices were read from the official site the cache read
+        # (site["url"]): a member now at another address - a House member
+        # seated in the Senate - has not had their new offices read, and the
+        # old House district offices read as a senator's "State offices"
+        # (the January sweep of 2026-11-11: Andy Barr's Lexington office).
+        moved = moved_since_read(site.get("url"), profile)
+        if bioguide in offices and not profile.get("formerMember") and not moved:
             profile["districtOffices"] = offices[bioguide]
             profile["districtOfficesRead"] = offices_read
             counts["offices"] += 1
+        elif bioguide in offices and moved:
+            profile["districtOfficesPending"] = True
+            counts["offices_pending"] += 1
         listed = directory.get(bioguide) or {}
-        if listed and directory_site_is(listed, profile.get("website")):
+        # The Directory's entry is theirs where it prints the address of an
+        # official site of theirs: the one they hold, or the one this cache
+        # read for them, which a former member (no site now) and a member who
+        # moved (a new one) keep. Andy Biggs's education and careers read "No
+        # data" in January, a week after the Directory's words were shown.
+        if listed and any(directory_site_is(listed, url)
+                          for url in (profile.get("website"), site.get("url")) if url):
             # The Congressional Directory first: Congress's own printed
             # record, compiled from each member's office.
             if listed.get("education") and fill_field(profile, "education", listed["education"],
@@ -1417,7 +1449,12 @@ def apply_cache(profiles, cache):
             if article.get("occupation") and fill_field(profile, "previous_professions",
                                                          article["occupation"], ARTICLE_SOURCE):
                 counts["occupation"] += 1
-        site = sites.get(bioguide) or {}
+        if site and profile.get("formerMember") and (profile.get("quality") or {}).get("platforms"):
+            # Read from an official website they no longer hold, and not shown
+            # after they left: said as that, never "No data" (rule 19).
+            profile["quality"]["platforms"] = "not_kept"
+            counts["platform_not_kept"] += 1
+            continue
         if not site or site.get("url") != profile.get("website") or profile.get("formerMember"):
             continue
         # What the furniture filter now refuses is dropped from a cached read

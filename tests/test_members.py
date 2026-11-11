@@ -62,6 +62,42 @@ def member(**extra):
     return profile
 
 
+class TestAMemberWhoLeftOrMoved(unittest.TestCase):
+    """The January sweep of 2026-11-11: a former member's education and
+    careers read "No data" a week after the Directory's words were shown,
+    because the Directory's entry was joined only on the site they hold, and
+    none is held after leaving; a House member now a senator showed their
+    old district offices as "State offices"."""
+
+    LISTED = {"directory": {"byId": {"L000560": {
+        "education": "B.A., Pacific Lutheran University", "careers": "member, county council",
+        "site": "https://larsen.house.gov"}}},
+        "sites": {"L000560": {"url": "https://larsen.house.gov", "issues": ["A", "B", "C"],
+                              "issuesUrl": "https://larsen.house.gov/issues", "verdict": "listed"}},
+        "offices": {"byId": {"L000560": [{"city": "Everett", "state": "WA"}]}, "read": "2026-11-10"}}
+
+    def test_a_former_member_keeps_the_directorys_words_and_says_why_no_platform(self):
+        gone = member(website=None, formerMember={"left": "2027-01-03"})
+        members.apply_cache([gone], self.LISTED)
+        self.assertEqual(gone["education"], "B.A., Pacific Lutheran University")
+        self.assertEqual(gone["fieldSources"]["previous_professions"], "congressional-directory")
+        self.assertEqual(gone["quality"]["platforms"], "not_kept")
+        self.assertNotIn("districtOffices", gone)
+
+    def test_a_member_in_the_other_chamber_shows_no_old_district_offices(self):
+        senator = member(chamber="Senate", officeLabel="Senate • WA", website=None)
+        members.apply_cache([senator], self.LISTED)
+        self.assertNotIn("districtOffices", senator)
+        self.assertTrue(senator["districtOfficesPending"])
+        # Still the Directory's words: the entry prints a site of theirs.
+        self.assertEqual(senator["education"], "B.A., Pacific Lutheran University")
+        # A member at the address read keeps their offices.
+        sitting = member()
+        members.apply_cache([sitting], self.LISTED)
+        self.assertEqual(sitting["districtOffices"], [{"city": "Everett", "state": "WA"}])
+        self.assertNotIn("districtOfficesPending", sitting)
+
+
 class TestTheDirectory(unittest.TestCase):
     """The Official Congressional Directory prints each member's education
     and professional history under labels, and the office web address under
