@@ -38,6 +38,7 @@ from . import vacancies as vacancies_mod
 from . import ballot_measures as measures_mod
 from . import local_measures as local_measures_mod
 from . import search_index as search_index_mod
+from . import official_share
 
 
 def _load(args):
@@ -299,6 +300,7 @@ def _build(args):
                           voting=voting_mod.load_cache(args.root) or {},
                           federal=federal_mod.load_cache(args.root),
                           judiciary=judiciary_mod.load_cache(args.root),
+                          judge_disclosures=_load_judge_disclosures(args.root),
                           vacancies=vacancies_mod.load_cache(args.root),
                           history=lineage,
                           voting_dates=voting_dates_mod.load(args.root),
@@ -507,6 +509,10 @@ def _build(args):
     if emit.read_signature(path=gov_file) != emit.stategov_signature(state_gov):
         gov_path, gov_size = emit.write_stategov(state_gov, args.root)
         print(f"[ok] wrote {gov_path} ({gov_size / 1024:.0f} KB)")
+    # Each state's part, for its own page.
+    gov_states = emit.write_stategov_states(state_gov, args.root)
+    if gov_states:
+        print(f"[ok] wrote {len(gov_states)} file(s) under {emit.STATEGOV_DIR}")
     gov_stats = stategov.stats(state_gov)
     print(f"[ok] state government: {gov_stats['governors']} governors; " + ", ".join(
         f"{n} {k}" for k, n in sorted(gov_stats["trifectas"].items())))
@@ -615,9 +621,16 @@ def _build(args):
     states = [w for w in written if os.path.normpath(emit.STATES_DIR) in os.path.normpath(w)]
     share_dirs = {os.path.normpath(os.path.join(args.root, d)) for d in emit.SHARE_DIRS}
     shared = [w for w in written if os.path.normpath(os.path.dirname(w)) in share_dirs]
+    officials_dir = os.path.join(args.root, emit.SITE_DIR, official_share.OFFICIAL_DIR)
+    in_o = (sorted(f for f in os.listdir(officials_dir) if f.endswith(".html"))
+            if os.path.isdir(officials_dir) else [])
+    governors = sum(1 for f in in_o if f.startswith("gov-"))
+    officials = len(in_o) - governors
     print(f"[ok] wrote {len(states)} state pages under {emit.STATES_DIR}, "
           f"{len(maps)} district pages under {emit.DISTRICT_PAGES_DIR} and "
-          f"{len(shared)} changed share page(s) of {len(profiles) + len(race_list)}")
+          f"{len(shared)} changed share page(s) of {len(profiles) + len(race_list)} profiles "
+          f"and races, {officials} federal officials and judges and {governors} governors "
+          "and candidates for governor")
     from . import assets
     restamped = assets.stamp_templates(args.root)
     if restamped:
@@ -911,8 +924,13 @@ def _seats(args):
         except (seat_history.ClerkFormatError, OSError, portraits.PortraitError) as exc:
             print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
             return 2
+    earlier = cache.get("houseEarlier") or {}
     print(f"  {len(cache['house'])} House results and {len(cache['senate'])} Senate results "
           f"shown, {len(cache['withheld'])} withheld (read {cache['read']})")
+    for year in sorted(earlier):
+        print(f"  {year}: {len(earlier[year])} House results shown, "
+              f"{sum(1 for w in cache['withheld'] if w['year'] == int(year) and '-' in w['seat'] and w['seat'].count('-') == 1)} "
+              f"withheld, {len((cache.get('noResult') or {}).get(year) or [])} with no result listed")
     for item in cache["withheld"]:
         print(f"    withheld {item['seat']} {item['year']}: {item['why']}"
               + (f" ({item['page']})" if item.get("page") else ""))
@@ -1786,6 +1804,11 @@ def _verify(args):
     else:
         print(f"  ok  {emit.STATEGOV_FILE} matches the governor, legislator and NCSL caches "
               f"({gov_expected[:16]}...)")
+    if gov_built is not None:
+        gov_parts = emit.check_stategov_states(gov_built, args.root)
+        problems += [f"{path} is {why}" for path, why in gov_parts]
+        if not gov_parts:
+            print(f"  ok  {emit.STATEGOV_DIR} holds each state's part of it")
 
     # The statewide questions (rule 95): the page's file is the cache's.
     measures_cache = measures_mod.load(args.root)
@@ -2142,6 +2165,10 @@ def _photo_routes(root):
             out.update(guide_photos.own_addresses(rec.get("state"), rec.get("page"),
                                                   rec.get("photo")))
     out.update(refused_urls(guides.get("notPortraits")))
+    # The President's, the Vice President's and the Cabinet's (the White
+    # House's and the offices' pages: federal_build.withhold_refused).
+    from . import federal, federal_build
+    out.update(federal_build.photo_addresses(federal.load_cache(root)))
     out.discard(None)
     return out
 
@@ -2427,6 +2454,19 @@ def _judiciary(args):
 
     previous = judiciary.load_cache(args.root)
     links_only = getattr(args, "links_only", False)
+    chiefs_only = getattr(args, "chiefs_only", False)
+    disclosures_only = getattr(args, "disclosures_only", False)
+    if chiefs_only or disclosures_only:
+        if not previous:
+            print(f"[error] no {judiciary.CACHE_PATH}; run 'judiciary'", file=sys.stderr)
+            return 2
+        if chiefs_only:
+            _court_chiefs(previous, previous, args)
+            if not args.check:
+                print(f"[ok] wrote {judiciary.save_cache(previous, args.root)}")
+        if disclosures_only:
+            _judge_disclosures(previous, args)
+        return 0
     if args.check or links_only:
         cache = previous
         if not cache:
@@ -2444,6 +2484,9 @@ def _judiciary(args):
         cache["territorial"], trouble = territorial_courts.fetch((previous or {}).get("territorial"))
         for line in trouble:
             print(f"  [warn] territorial court: {line}; its last roster stands")
+        # A chief the directory's record cannot settle, from the court's own
+        # site (kyc/court_chiefs.py); a page not read keeps the last read.
+        _court_chiefs(cache, previous, args)
     # A retired justice is listed apart and never counted as sitting.
     judges = {k: j for k, j in cache["judges"].items() if not j.get("retiredJustice")}
     active = sum(1 for j in judges.values() if j["status"] == "active")
@@ -2487,7 +2530,58 @@ def _judiciary(args):
             for line in links["problems"][:10]:
                 print(f"           - {line}")
             print(f"[ok] wrote {judge_links.CACHE_PATH}")
+        if not links_only:
+            _judge_disclosures(cache, args)
     return 1 if failed else 0
+
+
+def _load_judge_disclosures(root):
+    from . import judge_disclosures
+    return judge_disclosures.load_cache(root)
+
+
+def _court_chiefs(cache, previous, args):
+    """Each court's own word on its chief, where a recipe reads it
+    (kyc/court_chiefs.py), into *cache*'s ``courtChiefs``. With ``--check``
+    the committed reads are only reported."""
+    from . import court_chiefs
+
+    if not args.check:
+        reads, trouble = court_chiefs.fetch(cache["judges"], (previous or {}).get("courtChiefs"))
+        cache["courtChiefs"] = reads
+        for line in trouble:
+            print(f"  [warn] court chief: {line}")
+    for cid, entry in sorted((cache.get("courtChiefs") or {}).items()):
+        said = entry.get("words") or entry.get("refused") or "not read"
+        print(f"  {cid}: the court's site: {said} ({entry.get('read') or 'never read'})")
+    for level, code, message, detail in court_chiefs.problems(cache):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+
+
+def _judge_disclosures(cache, args):
+    """The judges' financial disclosure reports as CourtListener holds them,
+    joined by FJC id (kyc/judge_disclosures.py). A failed read keeps the
+    committed cache and fails nothing (rule 8)."""
+    from . import judge_disclosures
+
+    previous = judge_disclosures.load_cache(args.root)
+    judges = {k: j for k, j in cache["judges"].items()}
+    if args.check:
+        found = previous
+    else:
+        try:
+            found = judge_disclosures.fetch(judges, previous)
+        except judge_disclosures.JudgeDisclosuresError as exc:
+            print(f"  [warn] judges' disclosures: {exc}; the committed cache is unchanged")
+            found = previous
+        else:
+            print(f"[ok] wrote {judge_disclosures.save_cache(found, args.root)}")
+    for level, code, message, detail in judge_disclosures.problems(found, judges):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
 
 
 def _federal(args):
@@ -2957,6 +3051,12 @@ def build_parser():
     jud.add_argument("--links-only", action="store_true",
                      help="read only the judges' Wikipedia articles and portraits "
                           "(kyc/judge_links.py), for the committed directory")
+    jud.add_argument("--chiefs-only", action="store_true",
+                     help="read only each court's own word on its chief where the directory's "
+                          "record cannot settle it (kyc/court_chiefs.py)")
+    jud.add_argument("--disclosures-only", action="store_true",
+                     help="read only the judges' financial disclosures as CourtListener holds "
+                          "them (kyc/judge_disclosures.py), for the committed directory")
 
     og = add("oge", help="financial disclosures of the President, the Vice President and the "
                          "Cabinet, from the Office of Government Ethics")

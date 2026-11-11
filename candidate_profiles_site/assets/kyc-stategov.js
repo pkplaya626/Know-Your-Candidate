@@ -289,7 +289,7 @@
       mate +
       (person.ballotName ? '<span class="faint">; printed on the ballot as “' +
         KYC.escapeHtml(person.ballotName) + "”</span>" : "") +
-      (photo && credit ? '<span class="gov-photo-credit">' + credit + "</span>" : "") +
+      (photo && credit ? '<span class="gov-photo-credit"' + creditsAttr(person.photo) + ">" + credit + "</span>" : "") +
       "</span></li>";
   }
 
@@ -396,6 +396,14 @@
     return "Governor of " + (place || KYC.stateName(code));
   }
 
+  /** The attribute naming the photograph a credit is for: the address its
+   *  <img> loads the original from (KYC.photoHref), which is where a copy
+   *  falls back to (KYC.retryOriginal), so a photograph that fails for good
+   *  takes every credit naming it with it (dropPhotoCredit, rule 87). */
+  function creditsAttr(url) {
+    return ' data-credits="' + KYC.escapeAttr(KYC.photoHref(url)) + '"';
+  }
+
   /* The empty circle a card keeps where it has no photograph, or where its
    * photograph failed to load: never a broken image. */
   var NO_PORTRAIT = '<span class="gov-portrait-none" aria-hidden="true"></span>';
@@ -409,7 +417,7 @@
     return {
       img: '<img class="gov-portrait" ' + KYC.photoAttrs(url, copy) +
         ' alt="" width="72" height="72" loading="lazy" decoding="async">',
-      credit: '<p class="gov-photo-credit gcard-credit">' + line + "</p>",
+      credit: '<p class="gov-photo-credit gcard-credit"' + creditsAttr(url) + ">" + line + "</p>",
     };
   }
 
@@ -450,19 +458,22 @@
    *  rule 40: each price quoted, dated, linked, labelled not a poll and not
    *  this site's forecast), or the line that says this site's cache holds
    *  none (rule 19: about the cache, never the race). "" where the page
-   *  does not load data/odds.js. */
+   *  does not load data/odds.js. A page that loads it once drawn (a
+   *  state's, named on demand) gets kyc-odds.js's slot, filled with the
+   *  same block, or the same "holds none" line (*none*), when it is in. */
+  var ODDS_NONE = '<p class="faint gov-odds-none">This site’s cache of prediction markets and polling ' +
+    "averages holds none for this race.</p>";
+
   function raceOdds(code, opts) {
-    if (!KYC.odds || !global.kycOdds) return "";
+    if (!KYC.odds || !(global.kycOdds || (KYC.odds.later && KYC.odds.later()))) return "";
     // The parties the list prints beside its candidates, write-ins apart:
     // what kyc-odds.js reads to say a party-only market over a ballot of
     // one party cannot tell its candidates apart (rule 79).
     var parts = listParts(code, "governor");
     var parties = parts && parts.printed ? parts.printed.map(function (p) { return p.party || ""; }) : null;
-    var html = KYC.odds.render({ id: raceId(code), label: raceHeading(code), listParties: parties },
-      opts || { compact: true });
-    if (html) return html;
-    return '<p class="faint gov-odds-none">This site’s cache of prediction markets and polling ' +
-      "averages holds none for this race.</p>";
+    var html = KYC.odds.render({ id: raceId(code), label: raceHeading(code), listParties: parties,
+      none: ODDS_NONE }, opts || { compact: true });
+    return html || ODDS_NONE;
   }
 
   function governorCard(code, opts) {
@@ -1041,7 +1052,7 @@
               : NO_SMALL_PHOTO) +
             '<span class="gov-court-text"><span class="gov-court-name">' + KYC.escapeHtml(name) +
             (name === court.chief ? ' <span class="faint">' + chiefTitle + "</span>" : "") + "</span>" +
-            (shot ? '<span class="gov-photo-credit">' +
+            (shot ? '<span class="gov-photo-credit"' + creditsAttr(shot.photo) + ">" +
               KYC.photoCreditHtml(KYC.copyCredit({ by: whose, page: shot.page }, shot.photo,
                 shot.photoCopy)) + "</span>" : "") +
             "</span></li>";
@@ -1162,23 +1173,84 @@
         var drawn = off.photo && !(off.disputed || off.unlisted || off.unconfirmed ||
           off.vacant || off.none || off.notMember);
         rows.push([pair[0], drawn && off.photoBy, off.photoPage,
-          drawn && KYC.copyOf(off.photo, off.photoCopy)]);
+          drawn && KYC.copyOf(off.photo, off.photoCopy), off.photo]);
       });
     // A smaller copy this site made of a heavy one says so, and links the
     // original (rule 101), as the credit line under a portrait does; the
     // note goes if the copy fails and the original is drawn
     // (KYC.retryOriginal removes every note naming that original).
+    // Each clause names the photograph it credits, by the address its <img>
+    // falls back to (KYC.photoHref of the original), so a photograph that
+    // fails for good takes its credit with it (dropPhotoCredit, rule 87).
     var said = rows.filter(function (row) { return row[1]; }).map(function (row) {
       var copy = row[3];
-      return KYC.escapeHtml(row[0].toLowerCase()) + ", " +
+      return '<span class="gov-photo-source"' + creditsAttr(row[4]) + ">" + KYC.escapeHtml(row[0].toLowerCase()) + ", " +
         (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1])) +
         (copy ? '<span class="photo-copy-note" data-copy-of="' + KYC.escapeAttr(copy.of) +
           '"> (a smaller copy made by this site of ' +
           link(copy.of, "the original file" +
             (copy.ofBytes ? " (" + KYC.weightWords(copy.ofBytes) + ")" : "")) + ")</span>"
-          : "");
+          : "") + "</span>";
     });
-    return said.length ? " Photographs: " + said.join("; ") + "." : "";
+    return said.length ? '<span class="gov-photo-sources">' + PHOTOGRAPHS + said.join("; ") + ".</span>" : "";
+  }
+
+  /* The words that open the list of photographs' credits. */
+  var PHOTOGRAPHS = " Photographs: ";
+
+  /** Does an <img> on the page still show the photograph at *address*,
+   *  loaded or yet to load (as its original, or as a copy that falls back
+   *  to it)? One that fails takes its own credit when it does. */
+  function stillShown(address) {
+    return Array.prototype.some.call(global.document.querySelectorAll("img"), function (img) {
+      return img.getAttribute("src") === address || img.getAttribute("data-photo-original") === address;
+    });
+  }
+
+  /** A photograph at *address* (as its <img> loads it, its original's
+   *  address once a copy has given way, KYC.retryOriginal) that failed for
+   *  good takes its credit with it (rule 87): *own*, the credit under the
+   *  <img> that failed (a card's line, a candidate's or a justice's row,
+   *  the overlay's header), always; and, once no other <img> on the page
+   *  shows that photograph, every credit naming it wherever the page
+   *  prints it (data-credits): any other credit line, and its clause in
+   *  every list of sources, the clauses left keeping their "; " and the
+   *  final ".", and a list with none left going, "Photographs:" with it.
+   *  One helper for the governor's card, each candidate's card, the map
+   *  panel's cards, the governor overlay's header (kyc-governor.js), every
+   *  officer's photograph and every candidate's and justice's row (rule
+   *  12); the caller has replaced or emptied the failed <img> first. */
+  function dropPhotoCredit(address, own) {
+    // A credit line goes; a slot that stays in the page to be filled again
+    // (the overlay's, data-credit-slot) is hidden once it is empty.
+    var drop = function (said) {
+      var slot = said.parentNode;
+      said.remove();
+      if (slot && slot.hasAttribute && slot.hasAttribute("data-credit-slot") && !slot.textContent.trim()) {
+        slot.hidden = true;
+      }
+    };
+    if (own && own.parentNode) drop(own);
+    if (!address || stillShown(address)) return;
+    Array.prototype.forEach.call(global.document.querySelectorAll("[data-credits]"), function (said) {
+      if (said.getAttribute("data-credits") === address && !said.classList.contains("gov-photo-source")) drop(said);
+    });
+    Array.prototype.forEach.call(global.document.querySelectorAll(".gov-photo-sources"), function (list) {
+      var clauses = Array.prototype.slice.call(list.querySelectorAll(".gov-photo-source"));
+      var left = clauses.filter(function (c) { return c.getAttribute("data-credits") !== address; });
+      if (left.length === clauses.length) return;
+      if (!left.length) {
+        list.remove();
+        return;
+      }
+      while (list.firstChild) list.removeChild(list.firstChild);
+      list.appendChild(global.document.createTextNode(PHOTOGRAPHS));
+      left.forEach(function (clause, i) {
+        if (i) list.appendChild(global.document.createTextNode("; "));
+        list.appendChild(clause);
+      });
+      list.appendChild(global.document.createTextNode("."));
+    });
   }
 
   /** A court's line in the list of sources: whose roster, and the day it
@@ -1195,18 +1267,25 @@
   /* The same, for a candidate or a justice in a list where others have one. */
   var NO_SMALL_PHOTO = '<span class="gov-photo gov-photo-none" aria-hidden="true"></span>';
 
-  /* An NGA headshot that fails to load leaves the card without one, not a
-   * broken image. Error events do not bubble, so this listens on capture. */
+  /* A photograph that fails to load (an NGA headshot, a candidate's, an
+   * officer's, a justice's) leaves its card or row without one, not a
+   * broken image, and its credit goes with it (dropPhotoCredit). Error
+   * events do not bubble, so this listens on capture. */
   global.document.addEventListener("error", function (event) {
     var img = event.target;
     // A copy that fails falls back to its original first (rule 101).
     if (img && img.tagName === "IMG" && KYC.retryOriginal(img, event)) return;
+    // Only the original has failed now: the address every credit of it
+    // names (data-credits), whichever <img> on the page failed.
+    var address = img && img.getAttribute && img.getAttribute("src");
     if (img && img.classList && img.classList.contains("gov-officer-photo")) {
-      // The row keeps its column, as a holder never pictured does.
+      // The row keeps its column, as a holder never pictured does, and the
+      // list of sources stops crediting a photograph not shown (rule 87).
       var holder = global.document.createElement("span");
       holder.className = "gov-officer-photo gov-officer-nophoto";
       holder.setAttribute("aria-hidden", "true");
       img.replaceWith(holder);
+      dropPhotoCredit(address);
     } else if (img && img.classList && img.classList.contains("gov-photo")) {
       // A candidate's or a justice's: the circle stays, and so does no credit
       // for a photograph not shown.
@@ -1214,22 +1293,29 @@
       none.className = "gov-photo gov-photo-none";
       none.setAttribute("aria-hidden", "true");
       var credit = img.parentNode && img.parentNode.querySelector(".gov-photo-credit");
-      if (credit) credit.remove();
       img.replaceWith(none);
+      dropPhotoCredit(address, credit);
     } else if (img && img.classList && img.classList.contains("gov-portrait")) {
-      // A governor's or a candidate's card keeps its empty circle, and no
-      // credit for a photograph it does not show.
+      // A governor's or a candidate's card (on a state page, the grid's
+      // Governors view or the map's panel) keeps its empty circle, and no
+      // credit for a photograph it does not show; an overlay's race-mate
+      // thumbnail credits none of its own.
       var card = img.closest && img.closest(".gcard");
       var said = card && card.querySelector(".gcard-credit");
-      if (said) said.remove();
+      var circle = global.document.createElement("span");
+      circle.setAttribute("aria-hidden", "true");
       if (card) {
-        var circle = global.document.createElement("span");
         circle.className = "gov-portrait-none";
-        circle.setAttribute("aria-hidden", "true");
+        img.replaceWith(circle);
+      } else if (img.classList.contains("race-mate-thumb")) {
+        // The overlay's race-mate row keeps its column, as a candidate
+        // never pictured does (kyc-governor.js mateRow).
+        circle.className = "thumb-monogram";
         img.replaceWith(circle);
       } else {
         img.remove();
       }
+      dropPhotoCredit(address, said);
     }
   }, true);
 
@@ -1387,6 +1473,9 @@
     racePanel: racePanel,
     candidateBadge: candidateBadge,
     cardPhoto: cardPhoto,
+    // One way a photograph that failed takes its credit with it (rule 87),
+    // for the overlay's header as for the cards (kyc-governor.js).
+    dropPhotoCredit: dropPhotoCredit,
     governorUp: governorUp,
     governorListed: governorListed,
     governorOf: governorOf,

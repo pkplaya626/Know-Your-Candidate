@@ -302,7 +302,11 @@ jobs:
       # keeps the committed cache and stops nothing else in this run. The
       # judges' articles and portraits follow (kyc/judge_links.py): Wikidata,
       # Wikipedia and Commons a request a second, and each new photograph's
-      # largest size weighed once, a request a second.
+      # largest size weighed once, a request a second. Then a court's own
+      # word on its chief where the directory cannot say (kyc/court_chiefs.py)
+      # and the judges' financial disclosures as CourtListener's public bulk
+      # files hold them (kyc/judge_disclosures.py); either that cannot be
+      # read keeps its last read.
       - name: Refresh the federal judiciary
         if: ${{ !inputs.results_only }}
         continue-on-error: true

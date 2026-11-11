@@ -52,6 +52,7 @@ data/federal_executive.json ──┤   (President, VP, Cabinet: White House, of
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
 data/judge_links.json       ──┤   (judges' articles and portraits: FJC slug -> Wikidata P2736)
+data/judge_disclosures.json ──┤   (judges' financial disclosures: CourtListener's bulk files, by FJC judge id)
 data/court_districts.json   ──┤   (which district court covers each county: 28 U.S.C. 81-131)
 data/political_history.json ──┤   (public offices held: congress-legislators; Wikidata the article confirms)
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
@@ -60,18 +61,20 @@ data/local_sites.json       ──┤   (each local government's listed website,
 data/members.json           ──┤   (members' platforms, education, careers, offices: members)
 data/roll_calls.json        ──┤   (every roll call of the Congress: House Clerk, Senate LIS; votes)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
-data/seat_history.json      ──┤   (each seat's last election: the Clerk's statistics, checked; seats)
+data/seat_history.json      ──┤   (each seat's elections, 2018-2024: the Clerk's statistics, checked; seats)
 data/outside_spending.json  ──┤   (independent expenditures by candidate: FEC Schedule E; outside)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/photo_copies.json      ──┤   (each heavy portrait's original and its copy, and each photograph hosted here: rule 101)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/people/meta.js (the build's figures and signature)
                                              data/people/index.js (everyone's cards and search fields, every race)
+                                             data/people/words.js (the profiles' own words the grid's search reads, on a query; rule 94)
                                              data/people/*.js   (one state's whole records and races; rule 94)
                                              data/geo.js        (SVG path data for the map)
                                              data/odds.js       (market prices, polling averages)
                                              data/government.js (the guide's maps: kyc/government_maps.py)
                                              data/stategov.js   (governors, chamber control, trifectas)
+                                             data/stategov/*.js (one state's part of it, for its own state page; rule 94)
                                              data/measures.js   (the statewide questions: kyc/ballot_measures.py)
                                              data/localmeasures/*.js (the counties covered, and one state's local questions: kyc/local_measures.py)
                                              data/search.js     (the search's places and bodies: kyc/search_index.py)
@@ -95,6 +98,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
                                              p/*.html, r/*.html (generated share pages: one per profile and race, kyc/share.py)
+                                             o/*.html           (generated share pages: one per federal official and judge, kyc/official_share.py,
+                                                                 and per governor and candidate for governor, kyc/governor_share.py)
                                              photos/*.jpg       (smaller copies of heavy portraits, by hash: photocopies)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
@@ -138,7 +143,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `statewide_candidates.json`, `statewide_photos.json`, `guide_photos.json`, `ballot_measures.json`,
   `local_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
-  `judge_links.json`, `court_districts.json`,
+  `judge_links.json`, `judge_disclosures.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
   `seat_history.json`, `outside_spending.json`
   and `departed_members.json` are caches, but
@@ -199,6 +204,8 @@ python build_profile_site.py federal          # the President, VP and Cabinet (W
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it;
                                               # the territorial courts' judges from their own sites; judges' Wikidata links
 python build_profile_site.py judiciary --links-only  # only the judges' articles and portraits (rule 82), for the committed directory
+python build_profile_site.py judiciary --chiefs-only  # only a court's own word on its chief, where the directory's record cannot say (rule 82)
+python build_profile_site.py judiciary --disclosures-only  # only the judges' financial disclosures as CourtListener holds them (rule 82)
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
@@ -213,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2924 tests, no dependencies
-npm install && npm test                       # 3772 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3040 tests, no dependencies
+npm install && npm test                       # 4502 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1286,7 +1293,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     that ballot `defeated`, and no mark or two marks change nothing.
     Georgia's general runoff (`overrides.GENERAL_RUNOFFS`) is a runoff table
     naming no party whose people were all on the November ballot - a June
-    party runoff titled "Runoff results" holds a loser who never was.
+    party runoff titled "Runoff results" holds a loser who never was. From
+    the day after December 1 a runoff with no result read is in the past
+    tense, as Louisiana's December round and a November nominee are
+    (the owner's decision of 2026-11-01): "Awaiting the Dec 1 runoff
+    result" on a card, "Ran in the December 1 general election runoff:
+    awaiting result" in the dialog and on the share pages (`heldRunoff` in
+    `KYC.raceStatus`'s words, `share._held_runoff`). The words take the
+    race's own date, so the Delegates' runoff in Guam and the Virgin Islands
+    (November 17, 48 U.S.C. 1712) reads the same a fortnight sooner, while
+    Georgia's is still "In the runoff" and Louisiana's "In the Dec 12 general
+    election"; the grid's key lists each day its races hold, and a member's
+    run in a runoff that has been held is "ran for" (`contestLine`'s
+    "awaiting" stage), on the card and the dialog's cross-link alike.
     Rehearsed on 2024's pages as they stood the morning after Election Day
     and once certified (2026-11-01), the reading called no race wrongly, but
     a table titled by its seat alone ("Florida's 1st congressional district,
@@ -1486,131 +1505,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     reader changed seven races and nothing else: Swanson and Nagel lost,
     Kirchner and Wirth are nominees again under one name each, none of the
     four other names is shown, MN-1 awaits its result, and two write-ins
-    (rule 77) are no longer read as on the ballot. A week after the count
-    the owner wrote "it seems we are missing some confirmed election
-    results across the site": 91 of 475 races were called, because a
-    winner came only from the "winning candidate" template. 241 pages
-    declared the winner in the infobox with counts leading them and marked
-    no row (Alabama's editors bold the winner's row; Texas's tables stand
-    blank), and 117 sections held no result at all while the national
-    article's row of every district marked the winner with `{{aye}}`. Two
-    routes now name a winner, by the lead's decision and the owner's ("Yes,
-    with checks", 2026-11-10), and neither relaxes a refusal. The infobox's
-    declaration, where no November table marks anyone, is read as the
-    table's mark on that person, or with no table on the infobox's own row
-    (`results.infobox_call`, `called`), so `refuse_marks` and `resolve_race`
-    decide it as they decide a mark (rule 12) and hold it to its own gates
-    besides (`_call_stands`): declared and not ongoing; the person on the
-    page's November ballot and named by a filing, a state's list or an
-    evidenced `RESULT_NAMES` entry (a name only the infobox gives is refused,
-    and said); the table's counts, where it gives any, and the infobox's two
-    or more counts leading with them; the infobox's share reporting at least
-    `REPORTING_FLOOR` and readable; and a lead of at least `CLOSE_MARGIN`,
-    which a declaration does not excuse here as it does a mark (Tennessee's
-    4th, 280 votes, is refused). A declaration with no counts anywhere stands
-    only where nobody else is on the ballot, as an unopposed mark does. The
-    majority gates stand: with no counted table there is no majority, so
-    Georgia's twelve blank-table seats, Louisiana's open rounds, Maine's 1st
-    and the Virgin Islands wait for their counts. The national route
-    (`national_call`) reads "2026 United States House of Representatives
-    elections" once a run (`fetch_national`, under the reader's agent), only
-    for a House race whose section marks and declares nobody (no November
-    table's mark, no infobox declaration, nothing refused or decided: those
-    are the page's own routes, whatever they conclude) and gives either no
-    count at all or counts that are a second source agreeing
-    (`national_counts`): every November table that counts two people, and
-    the infobox where it counts two, put the marked person first and nobody
-    beside them, the infobox's share reporting, where it gives one, is
-    readable and at least `REPORTING_FLOOR`, and the lead is at least
-    `CLOSE_MARGIN` of the count; a count for one person alone is no lead. It
-    is one test for the first read and every later one. Until 2026-11-11 a
-    page with counts let a call stand only where the last read had called
-    the race nationally over a page with none, so the result hung on when a
-    page was first read: New Jersey's 2nd was called for Zack Mullock from
-    the pages saved at 19:50 UTC on 2026-11-10, and the refresh two hours
-    later, whose page counted him 137,999 to Jeff Van Drew's 130,631 with no
-    mark and the count marked ongoing, left it "Awaiting result". Never in a
-    ranked-choice or majority state or on an open primary's or a qualified
-    list's seat, nor for D.C. or a territory, since the call's credit speaks
-    of "the state's page" (rule 75; `national_barred`). The
-    district's row - the one the table of every district keys by
-    `{{ushr|ST|N}}` beside its PVI, in the article's own section for the
-    district's state (`national_rows`), a key two such rows share giving
-    none - must mark one person, who is one November nominee of the race by filing
-    or a state's list, with no look-alike beside them (rule 25) and the row's
-    party their filing's major party; and the row's own words must agree with
-    the frozen record's incumbent and none disagree: "Incumbent re-elected"
-    only for them; "lost re-election", "lost renomination" or "New member
-    elected" only for someone else; a party's "hold" only where the marked
-    person's party, the one named, is the holder's, "gain" only where it is
-    not; a row with none of those words gives nothing. Texas's 30th and 35th
-    ("Democratic gain" over a Democratic holder, on the national article's
-    new lines) give nothing so. A district two members held spans two rows
-    of the table, and both rows' words are the row's: the 18th ("Incumbent
-    re-elected" for its holder, "lost renomination" for Al Green) and the
-    37th ("re-elected" for a member who held the 35th) give nothing. A read
-    that fails keeps the last read's national calls (`kept`, rule 8); a state
-    page that later gives a result takes over, and one that puts someone
-    else first withdraws the call, which `validate` warns of
-    (`nationalWithdrawn`, `result-national-withdrawn`). Its review found a
-    page that gains counts leading with the called person was let call
-    again past the gates a call from the page meets: a lead of 0.07 points,
-    or 3 reporting, read "Elected" on every read, and a declaration refused
-    as too close brought the national call back through `carry_refused`. Such
-    counts now withdraw it too (`national_counts`), and a withdrawn national
-    call is never kept over a refusal. The article's "Crossover seats"
-    tables list eight districts again beside their PVI (NE-2, NY-17, PA-1,
-    CA-1, CA-3, CA-41, CA-48 and UT-1 in revision 1384925256), which made
-    each two rows and so none: a row counts only in its state's section. An
-    article that keys fewer districts in their states' own sections than
-    its rows name, or none, is taken as unread and the last read's calls
-    stand (`national_unkeyed`, rule 36): restructured, it would have dropped
-    every call on a refresh that merges itself. The second reader of the
-    one test found the withdrawal asking the page about the row's spelling
-    while the call found its person by filing: a row marking "James Stone"
-    over the filing "STONE, PAT JAMES" withdrew the call ("the counts put
-    Pat Stone first") and made it again in the same read. Both now find the
-    person one way (`national_person`), and a page whose own route elects
-    that person withdraws nothing (MN-1's shape, a declared mark at 0.10
-    points). A table's lines that name nobody ("Write-ins") are no leader,
-    so where together they could out-count the marked person the counts do
-    not agree. A call the last read made that this one does not make, with no
-    result from the state's page and no withdrawal (the row lost its mark,
-    holds two, or went), is `result-national-dropped`, and a call kept past
-    `officers.KEPT_STALE_DAYS` while the article cannot be read is
-    `result-national-kept-stale`. A minor-party nominee a certified list
-    prints, whom a national call settles as defeated, credits the national
-    summary, never "Wikipedia's election results page" (`_source_of`: six
-    Texans did). Each race records how
-    it was called (`calledBy`: table, infobox or national; a national call
-    its row, address and revision), the read's log and `validate`'s summary
-    count each route (`result-calls`, an "info" line), and a national call is
-    credited wherever a status's source is shown - the dialog's long title,
-    the race head's source line, share pages and the status table's fixture
-    - to "Wikipedia's national summary of the House elections, which gives no
-    vote count; the state's page had none when read" (`share.NATIONAL_SOURCE`,
-    `raceStatusSource` "national"), or where the page gave counts at that
-    read (the call's `pageCounts`, with `pageLeader`, `pageLead`,
-    `pageMargin` and `pageReporting` as the gate measured them; a call kept
-    unread keeps the case it was made in) "... which marks the winner and
-    gives no vote count; the state's page, read the same day, counts that
-    winner ahead and names no winner" (`share.NATIONAL_COUNTS_SOURCE`,
-    "national-counts", a loser's source too, so it says whom it counted;
-    the race summary's `nationalCounts`); an infobox call is the state's
-    page's.
-    Replayed over every state's page as it stood at 19:50 UTC on 2026-11-10,
-    the reader called 228 races from the infobox and 110 from the national
-    summary beside the 92 tables' marks, and changed nothing else once one
-    thing the calls exposed was fixed: a filer in a November table whom a
-    state's whole list does not print read "Lost the November election"
-    (FL-6's Michael Gist), and a loss is now no more than a place on the
-    ballot (`certify_race`), so they read "not on the ballot". Replayed
-    over every page as it stood at about 00:20 UTC on 2026-11-11 (national
-    revision 1384945080), the one test called six more races from the
-    national summary over counts that agree - AR-1, AR-2, FL-7, FL-9, NJ-2
-    and VA-3, FL-7's lead 0.51 points and FL-9's 0.53 at 99 reporting -
-    and moved nothing else, and read again over its own result it moved
-    nothing at all. Who
+    (rule 77) are no longer read as on the ballot. Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though
@@ -1925,60 +1820,6 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "On the ballot" in CA-3, which he holds and is not running for. A filer
     the results do not name after the primary is `ballotUnknown`, never
     "the primary has not been held yet", and is not counted as on it.
-    The move is the record's once the new Congress sits: a member seated
-    for the seat they won under the new number has no other run on their
-    profile (no `contestRaceId`), so it is the race the results credit them
-    with (`raceStatusRace`), and a seat a member ran in under the new
-    number is not open by that move, not by a field the new term clears.
-    The January rehearsal over the refresh of 2026-11-10, the first with
-    Utah's races called, read "4 open seats in 2026" over three members
-    re-elected under the new map; the head badge now says it in the past
-    tense ("Holder re-elected in UT-2", "who held this seat"). Its second
-    reader built the January pages on a January clock, in the phase the
-    data says - every other suite rewinds the phase to the campaign's, so
-    none of this failed anywhere - and found the move kept by the race but
-    lost by every view that lists its people, each asking `contestRaceId`
-    alone: CA-41's row read "Held by Ken Calvert. Elected: Ken Calvert (R),
-    Linda Sánchez (D)" (he sits for CA-40), and FL-23, FL-25, CA-6 and KY-6
-    (Andy Barr, a senator) the same; CA-3 "Kevin Kiley, who holds this
-    seat" of a member who had left; the share pages and the state pages'
-    plain lists marked Barr, Calvert, Blake Moore, Wasserman Schultz and
-    Bera "holds the seat", by `seated` anywhere; and the strips, the
-    sidebar and the directory "members running under a new district
-    number". So one reading answers "who held this seat and where did they
-    go" for every view (rule 12): `KYC.movedFrom` / `share.moved_from` (a
-    record holder who won another race, or whose run - `contestRaceId`,
-    else `raceStatusRace` - was another), `KYC.sitsIn` / `share.sits_in`
-    (in that very seat, by `race.incumbent.seated`, never `seated` alone)
-    and `KYC.movedLine` / `share.moved_clause` (the run in `contestLine`'s
-    words, else the record's: "was re-elected in CA-40 under the state's
-    new district map", "won the race for Senate KY"). The race sections and
-    rows, Your ballot, the dialog's race panel and the share pages ask
-    them; "Held by" is said only of whoever sits in the seat, and anyone
-    else "X, who held this seat, ...", in the campaign too (a member who
-    left mid-term); the status fixture holds both sides to the sentence
-    ("moved"). The strips, sidebar and directory say "who ran under a new
-    district number in 2026" once the new Congress sits (`renumberedTail`),
-    and a seat vacant at the election "No member held this seat in the
-    2026 race: it was vacant", not "the seat is vacant" over its winner
-    (FL-20). Its review found the words beside them still present: in Ami
-    Bera's CA-3 panel Kevin Kiley's hover read "Held this seat. ...; holds
-    House • CA-3 until 2027-01-03", eleven members who had left were "not
-    seeking re-election to" seats whose terms had ended, every such seat's
-    panel opened "The seat's holder first" over its former holder, the
-    directory counted Kiley among "11 ... who are under Sitting members
-    here", and the sidebar said 868 people "are on the ballot". So a member
-    who has left "held" the seat until the day they left (`contestLine`),
-    "the seat's holder" is one who sits in it (`raceOrderNote`, else "The
-    seat's former holder first"), the directory counts under Sitting
-    members only those seated, and the sidebar is in the past tense from
-    the day after Election Day. Rehearsed over main's data with 429
-    November calls, 30 holders in 17 states read so, and
-    `testTheJanuaryPage` builds the page of every state that holds one
-    (found from the data), a dialog on each such seat, the map's House
-    panels, the grid and the share pages at 2027-01-10 with no rewind, and
-    fails on any of the above (4 of its 12 checks failed on the first
-    fix's code); on campaign data it says it skipped.
 
 75. **Write a place's own words.** A territory or D.C. is never "the
     state"; a legislature carries the name its constitution gives it
@@ -2233,7 +2074,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     only over that is left out and counted (`judge-portraits-oversized`),
     never resized or copied here. Each portrait records its route, the
     evidence naming the judge, the day read and its weight, and the
-    build fails one without them. A justice's portrait is the Court's
+    build fails one without them. A judge's financial disclosures are
+    linked the same way (`kyc/judge_disclosures.py`, FEDERAL-05): the
+    CourtListener record carrying the FJC's judge id (`jid`), from its
+    public bulk files (its API needs an account), refused where its surname
+    or year of birth disagrees with the directory's (Chatigny's 1952, Owen
+    for Richman), or, with no year to compare, its first given name. A
+    judge's link says the years it holds, since most end in 2020. Where the
+    joined record holds none, the dialog says exactly that of the record
+    carrying the FJC id and links it, never "CourtListener lists no reports
+    for this judge": its review found Judge Graber's fifteen reports, and
+    Judge Willett's three, filed under duplicate records carrying no FJC id,
+    which are never joined by name. And where the directory lists a court's
+    chief on senior status too, the court's own site's word is read by a
+    recipe (`kyc/court_chiefs.py`, FEDERAL-17: one chief at most, one named
+    in two headings being one, a judge the directory lists there by surname
+    and given name, dated, warned stale; a page in a shape the recipe does
+    not know keeps the last read, as does a bot wall's page, rule 103's
+    `agent.walled`; both readers send `agent.USER_AGENT`) and shown beside
+    the directory's record,
+    attributed, never in its place - on the hub, the court's page and the
+    judge's own dialog. A justice's portrait is the Court's
     official one as Commons holds it, credited to its photographer
     (`overrides.JUSTICE_PORTRAITS`, the owner's decision of 2026-10-20):
     the Court's photographs page asks for approval before publication, and
@@ -2685,6 +2546,74 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     appointment, on what day. From the day after Election Day the fold is
     "Before 2026", not "Last time" (rule 63), and a ranked-choice count's
     first choices are a lead, never a win.
+    The same fold draws the seat's strip, every election from 2018 to 2024
+    (`seat_history.seat_strip`, VISUALS-33), each year's count read and
+    checked as the last one is, and who served the term it chose from
+    congress-legislators' terms by bioguide id. A House district's years
+    are grouped by the lines they were fought on and break at each change:
+    the census maps from 2022 (not in a state elected at large throughout),
+    each mid-decade map (`districts.REDRAWN_BEFORE`, from the state's own
+    enacting record, checked against the Census Bureau's list for each
+    Congress: North Carolina's for 2020; Alabama's, Georgia's,
+    Louisiana's, New York's and North Carolina's for 2024) and 2026's
+    (`REDRAWN`). Years on other lines than the race's sit under a line
+    saying they are the district that had its number on that map, which is
+    not the map the race is fought on, in dashed cells; a redrawn
+    district's own "last election" shows no 2024 figure as its own, in
+    words true beside the strip that gives it as the old map's district of
+    the number ("does not carry over" was false there). The reader
+    found more in the earlier files, each now read, never guessed: a
+    footnote marker before a count inside a district's run (Louisiana's
+    5th, 2020, whose runoff counts sit among the open primary's), a later
+    ranked-choice round's counts footnoted beside first choices (Maine's
+    2nd, 2022: the final round between the two), one runoff footnote per
+    candidate (Mississippi's 2018 special, refused unless they name one
+    day), and a district listed with no count (North Carolina's 9th,
+    2018, `no-result`, never "withheld"). The first full read put counts
+    beside the wrong names, each now refused: a party printed alone is a
+    fusion line only in New York and Connecticut (`FUSION_STATES`) -
+    anywhere else it is a candidate the Clerk did not name, nobody's
+    (Virginia's 2nd in 2020 gave Scott Taylor David Foster's 9,170 votes) -
+    and New Hampshire's "Scatter", Nevada's "None of These Candidates",
+    Maine's "Exhausted Ballot" and Puerto Rico's "Unadjudicated" had been
+    added to the candidate above them; a line naming no one and no party
+    the file prints after a name is an error. The check read less than it
+    could: a House runoff is checked against the runoff's table, never the
+    open primary's; "Election box  winning" with two spaces, a footnote in
+    a name's field and a box ending "{{end}}" are read; a title leading to
+    the national article is not a state's page. Two names with no footnote
+    in a ranked-choice state (Maine's 2nd, 2018) are the final round only
+    where the second compilation's final round has those counts and its
+    first round does not, and the cell says whose reading that is. What
+    the sources disagree on stays withheld: Wikipedia's 99,655 for Ohio's
+    4th runner-up in 2018 (the Clerk's 89,412 adds up), the Clerk's 63,606
+    for Texas's 14th in 2022 (the percentages say 68,606). The strip is the
+    state's file's, not the index's (`emit.RACE_INDEX_LEAVES_OUT`, rule
+    94), and its classes are its own: drawn as `seat-strip`, the
+    legislature's seat squares, it set each word on a line of its own. The
+    fold draws the last election, an index field, at once, and loads the
+    strip into a slot of its own whose words are about the seat's
+    elections (`stripSlot`): waiting whole, the 2024 result waited on the
+    state's file, vanished if it failed, and said "Loading California's
+    campaigns". The review of PR #187 found more in who served, each now
+    refused: congress-legislators ends an appointee's term on the special
+    election's day (Ashley Moody's and Jon Husted's, November 3, 2026),
+    which is no day they left - they serve until its winner is seated
+    (`untilSeated`, `_scheduled_end`) - and the page says an "until" only
+    once the reader's day has reached it; a special's term is served from
+    the day its winner took the seat (`_special_start`), so James Inhofe
+    was not among those who served the term Oklahoma's 2022 special chose;
+    one person's terms one after the other are one line (Pete Ricketts,
+    "appointed, then elected"); a majority of every first choice counted
+    is a first-round win (Chellie Pingree), less a lead; an unopposed name
+    with no count is not "the Clerk's count" unconfirmed; the Clerk's grave
+    accent inside a word is the ʻokina (`okina`: "Kaialiʻi", never a
+    grave accent in his name); and Alabama's court-drawn 2024 lines cite the Census
+    Bureau's list named as that list (`lead`), never as the map, until a
+    person reads the court's order. The strip stops at 2024, and from the
+    day after Election Day its heading says it is "Before 2026", as the
+    fold's line does: "Elections to this seat since 2018" under "Won by
+    Kevin Hern" read as though it reached him (rule 63).
     `kyc/outside.py` reads independent expenditures from the FEC's
     by-candidate totals for the 2025-26 cycle (an election-period read gave
     Jon Ossoff the January 2021 runoff's spending), by the profile's own
@@ -2708,7 +2637,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     closeness (rule 79).
     A race's money is its campaigns' own totals as bars in neutral ink on
     one scale, the party only in the name chip, each row with its own
-    through-date. Closest races are ordered by one market's prices, the
+    through-date, on every race block, in the profile dialog and in the
+    map's panel: the panel drew none (VISUALS-20's remainder) and now draws
+    the race block's own fold for each of the picked state's 2026 races,
+    closed, from the state's file when opened (rule 94), kept out of the
+    panel's live region so a screen reader does not read a race's figures
+    aloud as it fills. A decided race's fold says after the count what it
+    said before it, word for word, its loser's campaign and a runoff's two
+    with the rest: they are receipts, not a result (rule 63). Your ballot
+    draws none. Closest races are ordered by one market's prices, the
     gap between its two highest, never a blend (rule 40). In the grid's
     races view every new fold is drawn when opened (GRID-14's budget).
 
@@ -2841,7 +2778,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     race's (rule 73). A candidate's card holds the list's words alone, in
     the order and with the notes the list block gives (`listParts`, one
     source of them), and its photograph's copy is made for the card's 72px
-    circle (`photocopies.BOXES` "governor-candidate", rule 101). Its
+    circle (`photocopies.BOXES` "governor-candidate", rule 101). A card's
+    photograph, the map panel's and the overlay's header's included, that
+    fails takes its credit with it through the one helper the officers'
+    list of sources uses (`KYC.stategov.dropPhotoCredit`, rule 87): a copy
+    first gives way to its original, which keeps the credit (rule 101),
+    and only the original failing takes it, and every other credit naming
+    that file once nothing on the page still shows it. Its
     review found a count no second source checks: the NGA lists one
     unbroken span for a re-elected governor, so Bill Lee and Tate Reeves,
     in their second terms, read "First term" - the card counts no terms.
@@ -2981,6 +2924,39 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     as though it were the Senate. The guide's Congress page names its
     members from the build (`pages.committees_html`, `leaders_html`) and
     loads no profile data.
+    The index still held 45% of its gzipped weight in words no card draws -
+    careers, schools, platforms, committees, funding, the voting record,
+    the campaign's quote - which only the grid's free-text search reads, so
+    every reader of the grid and the map waited for them before the first
+    card or shape. They are `emit.INDEX_WORDS`, left out of the index and
+    written to `data/people/words.js`, which the grid loads the first time a
+    query is typed (`KYC.loadWords`; a link arriving with `?q=` asks for it
+    as `meta.js` arrives) and takes into the index's records as a state's
+    file does, filling and never replacing them. While it loads the results
+    line says the search is still reading the profiles' own words and anyone
+    they match is added in a moment; where it fails, that the search looked
+    at names, places and offices only - never "no profiles" (rule 19). The
+    Governors view searches its own cards and never asks for it. A field a
+    card, a filter, a sort or a race list reads stays in the index;
+    `TestTheIndexDrawsNothingItLeavesOut` holds the words to the same test as
+    `INDEX_LEAVES_OUT`, and `testPeopleSplit` asks real queries for the same
+    people, scores and snippets from the index and its words as from the
+    whole records. A state page holds only its own state's government
+    (`data/stategov/<st>.js`, that state's entry, the sources and `governed`,
+    the places whose entry holds a governor), so a link there to another
+    state's governor says so and links that state's page, its Copy link
+    shares the record's address there, and a place with no governor is not
+    sent to one; the map, the directory, the
+    legislatures' directory, the search and Your ballot keep the whole
+    `stategov.js`. A state page loads `data/odds.js` and `data/measures.js`
+    once it has drawn, and a district page `data/odds.js` when a profile
+    shows prices (`emit.PAGE_ON_DEMAND`, `STATE_PAGE_ON_DEMAND`,
+    `DISTRICT_PAGE_ON_DEMAND`, held by `check_pages`): each race draws a slot
+    `KYC.odds.render` fills when the file is in, or says did not load, and
+    the questions stand as the plain list rule 96 writes until they are
+    drawn over it. Anything new that draws prices or questions on those
+    pages goes through `KYC.odds.render` and `KYC.ballot`; a block that
+    tests `window.kycOdds` itself shows nothing there.
 
 95. **A ballot question is the election office's words, and "none" is a
     document's.** Every state page said the ballot also held "ballot
@@ -3095,6 +3071,49 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     copy it. A shared race opens its state page at the race and holds it
     there while the page above it draws (`kyc-state.js` `holdPlace`, until
     the reader moves): it once landed 3,000px short on a phone.
+    Officials and judges open in `KYC.official` behind `#/official/<id>`
+    and unfurled as the home page too, so each has `o/<id>.html`
+    (`kyc/official_share.py`): everyone the dialog answers to, a judge on
+    the page of the court whose file holds them, the justices, the
+    Cabinet and who left it this term on the federal page's. Its words are
+    the dialog's head, from one table (`shareWords`, `SOURCES`), compared
+    for every official on both clocks and over every case of
+    `tests/fixtures/official_share_words.json`: a judge's service with
+    both sources where they differ (rule 82), the appointing President,
+    never a party but the President's and Vice President's, a nomination
+    in the future tense without the list's as-of day, and a departure the
+    courts' announced list has for the judge ("Will take senior status",
+    `vacancies.announced_departures`, on the dialog too): Leslie
+    Southwick's first page unfurled as "Active service" alone. Its
+    description is the name and those words and nothing of its own - a
+    former officer's leads with "Former, this term", since "Pam Bondi:
+    Attorney General", cut short, read as still in office - and the
+    render suite takes each word out of it and finds only the joins.
+    Where it sends a reader without scripts, it says what that page's
+    plain text holds: the federal page's lists no one who left the
+    Cabinet and no retired justice. Its image is the
+    dialog's by the dialog's route, credited as the dialog credits it: the
+    White House's sizes of its one file or the copy made here on the
+    site's host (rules 42, 101), a judge's Commons portrait with its
+    licence recorded (rules 82, 87); the Court's own, without one, is the
+    card. A folder whose pages were not rendered (no federal build) is
+    never swept as orphans. The dialog's "Copy link" shares the page, and
+    an id nobody answers to shares the view. The governor overlays (rule
+    91) have theirs beside them, `o/gov-<ST>.html` and
+    `o/gov-<ST>-<name>.html` (`kyc/governor_share.py`): the overlay's head
+    from one table (`KYC.governor.shareWords`, compared for every governor
+    and candidate and over `tests/fixtures/governor_share_words.json` on
+    both clocks), the photograph only as the card shows it, the list cited
+    and dated, after Election Day the past tense and the state's results
+    naming no winner, the view the state page's overlay; each family in
+    `o/` is swept only when its own source was read. Its review found
+    every write-in's page cited to the printed list, which does not hold
+    their name: a write-in is cited to the office's list of write-ins
+    where it keeps one apart (`listFor`, `governor_share.list_for`).
+    Built first on results-day data, a sitting governor's unfurl read
+    "This office was on the Nov 3, 2026 ballot." and stopped, while the
+    page and every candidate's unfurl said this site names no winner: the
+    governor's description carries those words too.
 
 97. **The search answers what a reader types about government, from the
     data the page about it shows, and never guesses.** "governor", "Texas
@@ -3193,6 +3212,56 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     other office they are running for. And a smooth scroll past the
     delegation's cards (content-visibility) stopped every jump 500-950px
     short of its race, so every jump on the page now scrolls at once.
+    The second phase (after Election Day) adds three things, each tested on
+    the campaign clock and after Election Day. Once "Find your race" has
+    scrolled away a bar under the header holds the same select (a copy of
+    the block's, one list) and a way back; it is fixed, so showing it moves
+    nothing, it grows the page's scroll-padding by its height so a jump
+    lands below it, and it is not shown on a screen under 500px tall. The
+    padding is set before a jump scrolls, by where the jump will leave the
+    block (`barForJump`), never only once the observer sees the block go:
+    its review found every jump made from the block or by a link (the
+    select, a square, the lookup's answer, a `#race-` address) landing at
+    the header's padding, and the bar shown a moment later over the top of
+    the race; a jump back to the block takes the padding off first.
+    Chips over the rows pick out open seats and races with no challenger
+    on the ballot, in the race heads' own words on both clocks
+    (`KYC.cards.raceFilterWords`: "Uncontested" over heads saying "No
+    challenger on the ballot" was two names for one thing), and in their
+    tense: from the day after Election Day the heads read "No challenger was
+    on the ballot" (rule 63), and so does the chip - merged with the
+    results-day heads, a chip in the present tense named a filter no head
+    used over decided races. They are counted by the
+    heads' own tests (`KYC.cards.raceFilters`, which the grid's chip uses
+    too), with a live "Showing N of M races for Congress" line, and the button below it
+    opens and counts the races shown ("Open these 4 races", never "Open all
+    52" under "Showing 4 of 52"); the
+    filter is in the address (`#/?races=open`), a jump to a race it leaves
+    out shows every race again, and a search never brings one back. The
+    race for governor (rule 91) is no race for Congress: the bar's select
+    offers it where the block's does, its row opens it as a race's row
+    does, and no chip counts or hides it (rules 27, 73; `filterPasses`
+    leaves it alone). Merged with the governor cards, a chip hid it, and a
+    jump to it under a chip put every race back. And a
+    redrawn state's district page shows one plan at a time below 1000px,
+    the 2026 plan first, drawing the other only when it is first switched
+    to and keeping its markup while nothing it shows has changed (still
+    one remeasure at most): Texas's 2026 map began 5,459px down and now
+    begins about 550px down, with Find my district and the picker above
+    it, the key and the zoom chips under it, and the moves folded below
+    under a summary that is their heading's words in its tense ("Ran in a
+    different district" from the day after Election Day).
+    `testDistrictsPhonePlans` numbers every district of each plan, shown in
+    turn, at 280px, on every redrawn state the district files hold (rule
+    43). On a folded page the House delegation's cards
+    fold behind its heading's balance and a "Show all" button, hidden until
+    found, the senators open and every race row leading with its holder; a
+    search naming a member, find-in-page and printing open them; the
+    governor's card stays open under State government, never folded in
+    with Congress's delegation. Whether
+    rule 27 allows this was put to the owner, who approved it; it was the
+    branch's last code commit, so a revert of it alone, and a rebuild,
+    removes it.
 100. **A legislator's portrait is the legislature's, named beside them,
     and a seat's file is dated before it is believed.** 1,022 of 7,323
     state legislators had no portrait (audit 2026-10-17, STATEGOV-13;

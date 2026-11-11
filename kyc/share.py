@@ -25,7 +25,10 @@ import html
 import itertools
 import json
 import os
+from datetime import date, timedelta
 from urllib.parse import urlparse
+
+from . import overrides
 
 PROFILE_DIR = "p"
 RACE_DIR = "r"
@@ -118,6 +121,20 @@ def _open_round(date, held=False):
     return {"long": f"In the {words} general election"}
 
 
+def _held_runoff(date):
+    """KYC.raceStatus's heldRunoff: the long words of a general election
+    runoff (``overrides.GENERAL_RUNOFFS``: Georgia's, Guam's and the Virgin
+    Islands') once results read
+    after its day still mark no winner - in the past tense and awaiting
+    one, as an open primary's December round is (rule 63)."""
+    try:
+        _year, month, day = (int(part) for part in str(date).split("-"))
+        words = f"{_MONTHS[month - 1]} {day}"
+    except (ValueError, IndexError):
+        return None
+    return {"long": f"Ran in the {words} general election runoff: awaiting result"}
+
+
 def _decided_round(status, decided):
     """KYC.decidedRound's long words: a result the December round decided
     (``raceStatusDecided``, ``{date, open}``) in that round's words, never
@@ -143,9 +160,18 @@ def _decided_round(status, decided):
 def december_round(race):
     """The date of *race*'s December round when it is an open primary's
     general election (``primaryKind`` "open"), else None: Georgia's runoff
-    keeps the runoff's words."""
+    keeps the runoff's words (:func:`general_runoff`)."""
     race = race or {}
     return race.get("generalRunoff") if race.get("primaryKind") == "open" else None
+
+
+def general_runoff(race):
+    """The date of *race*'s general election runoff (Georgia's December 1,
+    the territories' November 17: ``generalRunoff`` from
+    ``overrides.GENERAL_RUNOFFS``) when it is not an
+    open primary's December round, else None."""
+    race = race or {}
+    return race.get("generalRunoff") if race.get("primaryKind") != "open" else None
 
 
 def party_key(person):
@@ -193,13 +219,14 @@ def ballot_line(item, by_id):
 
 def _race_status(status, own=False, unconfirmed=False, appointed=False, source=None,
                  all_party=None, minor=False, post_election=False, open_round=None,
-                 round_held=False, decided=None, record=False):
+                 round_held=False, decided=None, runoff_day=None, record=False):
     """KYC.raceStatus(status, "long", opts): ``(words, off)`` or None.
     *open_round* is the date of an open primary's December round
-    (``opts.round``), *round_held* whether it has passed; *decided* the
-    December round that decided a result (``opts.decided``); *record* the
-    record phase (``opts.record``), whose words for a member who did not
-    run are in the past tense (``_LEFT``)."""
+    (``opts.round``), *runoff_day* a general election runoff's
+    (``opts.runoffDay``), *round_held* whether that round has passed;
+    *decided* the December round that decided a result (``opts.decided``);
+    *record* the record phase (``opts.record``), whose words for a member
+    who did not run are in the past tense (``_LEFT``)."""
     spec = _RACE_STATUS.get(status)
     if not spec:
         return None
@@ -207,6 +234,8 @@ def _race_status(status, own=False, unconfirmed=False, appointed=False, source=N
         spec = _ALL_PARTY
     if status == "runoff" and open_round:
         spec = _open_round(open_round, round_held) or spec
+    elif status == "runoff" and runoff_day and round_held:
+        spec = _held_runoff(runoff_day) or spec
     if decided:
         spec = _decided_round(status, decided) or spec
     if source == "qualified" and status in _LISTED:
@@ -302,9 +331,14 @@ _FILERS = (
 # The December round the table's open-primary rows are asked about: any date
 # in December does, the cycle's own (overrides.OPEN_PRIMARY_SEATS) reads best.
 _TABLE_ROUND = "2026-12-12"
+# The general election runoff the table's other rows are asked about:
+# Georgia's, from the one table the results reader and the calendar read.
+_TABLE_RUNOFF = overrides.GENERAL_RUNOFFS["GA"][0]
+# Every day the table holds one: the words name the day, so each is asked.
+_TABLE_RUNOFF_DAYS = sorted({day for day, _why in overrides.GENERAL_RUNOFFS.values()})
 # A result each kind of December round decided (_decided_round): an open
 # primary's general election, and a general election runoff (Georgia's).
-_TABLE_DECIDED = ({"date": _TABLE_ROUND, "open": True}, {"date": "2026-12-01", "open": False})
+_TABLE_DECIDED = ({"date": _TABLE_ROUND, "open": True}, {"date": _TABLE_RUNOFF, "open": False})
 
 
 # The day the table's post-election rows are asked about.
@@ -327,6 +361,34 @@ def _member_elsewhere(status, renumbered, decided, unconfirmed):
     if unconfirmed:
         item["raceStatusUnconfirmed"] = True
     return item
+
+
+def _contest_rounds():
+    """What :func:`contest_clause` says of a member's other run in a December
+    round or a general election runoff, read the day before it, on the day
+    and the day after (``[kind, day, read, renumbered, clause]``): the
+    "contest" rows ask it with no race, so they never meet a round's date,
+    and a run in a runoff that has been held is "ran for", not "is running
+    for" (KYC.contestLine's "awaiting" stage)."""
+    rows = []
+    for kind, day in ((None, day) for day in _TABLE_RUNOFF_DAYS):
+        rows.extend(_contest_round(kind, day))
+    rows.extend(_contest_round("open", _TABLE_ROUND))
+    return rows
+
+
+def _contest_round(kind, day):
+    rows = []
+    race = {"generalRunoff": day}
+    if kind:
+        race["primaryKind"] = kind
+    for offset in (-1, 0, 1):
+        read = (date.fromisoformat(day) + timedelta(days=offset)).isoformat()
+        for renumbered in (0, 1):
+            item = _member_elsewhere("runoff", renumbered, None, 0)
+            clause = contest_clause(item, {}, {item["raceStatusRace"]: race}, read)
+            rows.append([kind, day, read, renumbered, clause])
+    return rows
 
 
 def _moved_holder(won, renumbered, labelled, sits):
@@ -357,31 +419,40 @@ def _moved_holder(won, renumbered, labelled, sits):
 
 
 def status_table():
-    """``{"statuses": [...], "contest": [...], "moved": [...], "filers":
-    [...]}``: what
-    :func:`_race_status` and :func:`_race_source` say for every combination
-    of status and option, what :func:`contest_clause` says of a member's other
-    run in every status, what :func:`moved_sentence` says of a seat's holder
-    whose run went elsewhere (seated in it or not, a member seated since for
-    the seat they won or not), what :func:`standing` says for each kind
-    of filer the results do not settle, and (``record``) what
-    :func:`_race_status` says in the record phase."""
+    """``{"statuses": [...], "contest": [...], "contestRounds": [...],
+    "moved": [...], "filers": [...], "record": [...], "former": [...]}``:
+    what :func:`_race_status` and :func:`_race_source` say for every
+    combination of status and option, what :func:`contest_clause` says of a
+    member's other run in every status and every kind of round, what
+    :func:`moved_sentence` says of a seat's holder whose run went elsewhere
+    (seated in it or not, a member seated since for the seat they won or
+    not), what :func:`standing` says for each kind of filer the results do
+    not settle, (``record``) what :func:`_race_status` says in the record
+    phase, and (``former``) what :func:`standing` says of a former member."""
     words = []
     # A race whose December round is an open primary's general election
     # (_open_round), before that day and after it; the render suite reads
     # "held" as the day after it, so only after Election Day.
+    # A general election runoff ("runoff", Georgia's) the same way, before
+    # its day and after it (_held_runoff), and the runoff's own words on
+    # every other day one is held (the territories' November 17).
     # And a result each kind of December round decided ("decided"), asked
     # after the open primary's day.
-    rounds = ((None, 0, None), (_TABLE_ROUND, 0, None), (_TABLE_ROUND, 1, None),
-              (_TABLE_ROUND, 1, _TABLE_DECIDED[0]), (None, 0, _TABLE_DECIDED[1]))
+    rounds = ((None, None, 0, None), (_TABLE_ROUND, None, 0, None), (_TABLE_ROUND, None, 1, None),
+              (None, _TABLE_RUNOFF, 0, None), (None, _TABLE_RUNOFF, 1, None),
+              (_TABLE_ROUND, None, 1, _TABLE_DECIDED[0]), (None, None, 0, _TABLE_DECIDED[1]),
+              *((None, day, held, None) for day in _TABLE_RUNOFF_DAYS if day != _TABLE_RUNOFF
+                for held in (0, 1)))
     for status in sorted(_RACE_STATUS):
         # A top-four primary's words are a top-two's in the long form.
         for all_party in (None, "top-two"):
             for source in (None, "certified", "qualified"):
-                for round_date, held, decided in rounds:
-                    if (round_date or decided) and all_party:
+                for round_date, runoff_day, held, decided in rounds:
+                    if (round_date or runoff_day or decided) and all_party:
                         continue
                     if decided and status not in ("elected", "defeated"):
+                        continue
+                    if runoff_day not in (None, _TABLE_RUNOFF) and status != "runoff":
                         continue
                     for flags in itertools.product((0, 1), repeat=5):
                         own, appointed, unconfirmed, minor, post = flags
@@ -391,8 +462,9 @@ def status_table():
                             status, own=bool(own), unconfirmed=bool(unconfirmed),
                             appointed=bool(appointed), source=source, all_party=all_party,
                             minor=bool(minor), post_election=bool(post), open_round=round_date,
-                            round_held=bool(held), decided=decided)
-                        words.append([status, all_party, source, round_date, held, decided]
+                            round_held=bool(held), decided=decided, runoff_day=runoff_day)
+                        words.append([status, all_party, source, round_date, runoff_day, held,
+                                      decided]
                                      + list(flags) + [label, int(off)])
     # The record phase, after Election Day: only a member who did not run
     # reads differently (_LEFT), and every other word is asked too, to show
@@ -458,10 +530,11 @@ def status_table():
             spec = standing(item, {}, {}, day)
             former.append([status, appointed, post, in_record, spec[0] if spec else None,
                            int(spec[1]) if spec else 0])
-    return {"words": ["status", "allParty", "source", "round", "held", "decided", "own",
+    return {"words": ["status", "allParty", "source", "round", "runoff", "held", "decided", "own",
                       "appointed", "unconfirmed", "minor", "post", "label", "off"],
             "statuses": words, "credits": credits, "contest": contest, "moved": moved,
-            "filers": filers, "record": record, "former": former}
+            "contestRounds": _contest_rounds(), "filers": filers, "record": record,
+            "former": former}
 
 
 def _former_member(status, appointed):
@@ -480,7 +553,8 @@ def status_table_text():
     """The fixture's text: one row a line, so a change reads as a diff."""
     table = status_table()
     lines = ["{", f'"words": {json.dumps(table["words"])},']
-    keys = ("statuses", "credits", "contest", "moved", "filers", "record", "former")
+    keys = ("statuses", "credits", "contest", "contestRounds", "moved", "filers", "record",
+            "former")
     for key in keys:
         rows = table[key]
         lines.append(f'"{key}": [')
@@ -532,11 +606,14 @@ def standing(item, by_id, races_by_id, post_election=False):
     status = contest_status(item, by_id)
     # The race that status is about, for its December round's words (as
     # KYC.raceStatusOf finds it); held once the results were read after it.
-    open_round = None
+    open_round = runoff_day = None
     if status == "runoff":
         race_id = record.get("raceStatusRace") or (
             item.get("contestRaceId") if _runs_elsewhere(item) else item.get("raceId"))
-        open_round = december_round(races_by_id.get(race_id or ""))
+        race = races_by_id.get(race_id or "")
+        open_round = december_round(race)
+        runoff_day = general_runoff(race)
+    round_day = open_round or runoff_day
     spec = _race_status(
         status,
         own=(not item.get("isCandidate") and not item.get("contestLabel")
@@ -549,9 +626,10 @@ def standing(item, by_id, races_by_id, post_election=False):
         post_election=post_election,
         open_round=open_round,
         # *post_election* is the day the results were read (post_election()).
-        round_held=bool(open_round and isinstance(post_election, str)
-                        and open_round < post_election),
+        round_held=bool(round_day and isinstance(post_election, str)
+                        and round_day < post_election),
         decided=record.get("raceStatusDecided"),
+        runoff_day=runoff_day,
         # The past tense (_LEFT): in the record phase, which post_election()
         # carries (ResultsDay), and for a former member once the election
         # has passed, as KYC.pastTense says: one who left in December read
@@ -1190,6 +1268,11 @@ def describe_race(race, by_id, races_by_id, post=False):
     # pages it cut the later candidates mid-sentence and the source credit
     # always (PR #123 review). The first person is always named.
     head = lead + (f" Where each stands, per {_and(sources)}: " if sources else " ")
+    # A decided race's winner comes first in the description, whatever the
+    # order the page lists them in: KY-6's named two who lost and cut to "and
+    # 1 more", so a shared link never said Zach Dembo won (PR #218 review).
+    won = [i for i, p in enumerate(running) if p.get("raceStatus") == "elected"]
+    people = [people[i] for i in won] + [w for i, w in enumerate(people) if i not in won]
     shown = people[:1]
     for i, words in enumerate(people[1:], start=1):
         rest = len(people) - i - 1

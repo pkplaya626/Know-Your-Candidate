@@ -632,7 +632,7 @@ def read_people(root="."):
     if not os.path.isdir(directory):
         return []
     for name in sorted(os.listdir(directory)):
-        if not name.endswith(".js") or name in ("index.js", "meta.js"):
+        if not name.endswith(".js") or name in ("index.js", "meta.js", "words.js"):
             continue
         with open(os.path.join(directory, name), encoding="utf-8") as handle:
             for line in handle:

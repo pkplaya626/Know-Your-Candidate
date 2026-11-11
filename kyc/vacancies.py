@@ -340,6 +340,36 @@ def pending_elevations(cache, judges):
     return out
 
 
+# The announced list's reasons a judge leaves their seat for, which the
+# judge's own record says in the future tense (kyc-official.js LEAVING). An
+# "Elevated" row is a nomination, said as one (pending_elevations).
+LEAVING_REASONS = ("Senior", "Retired", "Resigned")
+
+
+def announced_departures(cache, judges):
+    """``{judge id: {"court", "reason"}}``: sitting judges the announced
+    list has leaving their seat on that court - senior status, retirement,
+    resignation - for the judge's own record, where the dialog and the
+    share page say it in the future tense (rule 82): Judge Southwick's
+    unfurled as "Active service" while his court's table said "Will take
+    senior status". Found by :func:`judge_of`, never by a surname alone."""
+    out = {}
+    for row in (cache or {}).get("future") or []:
+        if row.get("reason") not in LEAVING_REASONS:
+            continue
+        jid = judge_of(row, judges)
+        if not jid:
+            continue
+        # Senior already by the directory: "will take senior status" beside
+        # "Senior status" would contradict it, and the directory has it
+        # happened.
+        seat = next(s for s in judges[jid]["seats"] if s.get("court") == row["court"])
+        if row["reason"] == "Senior" and seat.get("seniorSince"):
+            continue
+        out[jid] = {"court": row["court"], "reason": row["reason"]}
+    return out
+
+
 def nominated_to(row, cache):
     """The court of :func:`nomination_of`, or None."""
     other = nomination_of(row, cache)

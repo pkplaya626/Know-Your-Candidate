@@ -66,6 +66,51 @@ def _holder(office):
     }
 
 
+def photo_urls(person):
+    """Every address of *person*'s photograph: the file and each size of it
+    in its ``photoSet`` (``[url, width]``)."""
+    person = person or {}
+    urls = [person.get("photo")]
+    for size in person.get("photoSet") or ():
+        urls += [part for part in (size if isinstance(size, (list, tuple)) else (size,))
+                 if isinstance(part, str)]
+    return [u for u in urls if u]
+
+
+def photo_addresses(executive):
+    """Every address of a photograph the federal cache holds - the
+    President's, the Vice President's and each Cabinet holder's - for
+    validate's ``NOT_A_PORTRAIT`` staleness check: an entry refusing one of
+    them guards a file this route offers."""
+    executive = executive or {}
+    people = [executive.get("president"), executive.get("vicePresident")] + [
+        o.get("holder") for o in executive.get("offices") or () if isinstance(o, dict)]
+    return {u for person in people if isinstance(person, dict) for u in photo_urls(person)}
+
+
+def withhold_refused(payload):
+    """Asks the President's, the Vice President's and each Cabinet holder's
+    photograph of the lists a person keeps (``photos.refused``:
+    ``overrides.NOT_A_PORTRAIT`` and ``PORTRAIT_LICENCE_DOUBTS``), as every
+    other route is asked at build time (rules 24 and 87). A refused file is
+    withheld - no photo, no sizes - and said: returns the build's warnings,
+    one per person, naming them and why."""
+    from .photos import refused
+
+    people = [payload.get("president"), payload.get("vicePresident")] + [
+        o.get("holder") for o in payload.get("offices") or ()]
+    said = []
+    for person in people:
+        if not person or not person.get("photo") and not person.get("photoSet"):
+            continue
+        why = refused(*photo_urls(person))
+        if why:
+            person["photo"], person["photoSet"] = None, []
+            title = person.get("office") or person.get("title") or ""
+            said.append(f"{person['name']} ({title}): photograph withheld, {why}")
+    return said
+
+
 def _when(value):
     """A date as the pages show it: the agreed ``{date, precision}``, and
     whether the sources gave one and disagreed."""
@@ -94,10 +139,12 @@ def _change(row):
     return {k: v for k, v in out.items() if v not in (None, False, "")}
 
 
-def _judge(record, links=None):
+def _judge(record, links=None, disclosures=None):
     """A judge as the pages show them: nothing a source did not state.
     *links* is the judge-links cache (kyc/judge_links.py): a Wikipedia
-    article and a portrait joined through the FJC id, never a name."""
+    article and a portrait joined through the FJC id, never a name.
+    *disclosures* is CourtListener's holdings of their financial disclosure
+    reports (kyc/judge_disclosures.py), joined through the FJC's judge id."""
     keep = ("id", "name", "sortName", "status", "seats", "prior", "born", "education",
             "career", "otherNominations", "fjc", "justice", "retiredJustice", "courtService",
             "portrait")
@@ -113,6 +160,14 @@ def _judge(record, links=None):
     # Wikidata item carries their FJC id.
     if joined.get("linkVia") and (out.get("wikipedia") or out.get("wikidata")):
         out["linkVia"] = joined["linkVia"]
+    # Their financial disclosure reports, as CourtListener holds them: a
+    # link where it holds any, the record itself where the one carrying
+    # their FJC id holds none (its words about that record alone), and
+    # nothing where no CourtListener record carries their FJC id.
+    from . import judge_disclosures
+    held = judge_disclosures.for_judge(disclosures, record["id"].replace("fjc-", ""))
+    if held is not None:
+        out["disclosures"] = held
     # A sitting justice's official portrait as Wikimedia Commons holds it,
     # credited to its photographer (overrides.JUSTICE_PORTRAITS, the owner's
     # decision of 2026-10-20). The Court's own stands for a justice the
@@ -161,6 +216,8 @@ def build(root="."):
         raise FederalBuildError(f"no {judiciary.CACHE_PATH}; run 'judiciary'")
     from . import judge_links
     links = judge_links.load_cache(root)
+    from . import court_chiefs, judge_disclosures
+    disclosures = judge_disclosures.load_cache(root)
     problems = [message for level, _code, message, _d in federal.problems(executive)
                 if level == "error"]
     problems += [message for level, _code, message, _d in judiciary.problems(courts)
@@ -193,6 +250,15 @@ def build(root="."):
     # says which source says what (vacancies.listed_senior).
     disagree = vacancies.listed_senior(openings, judges)
     elevations = vacancies.pending_elevations(openings, judges)
+    # Leaving the seat, as the announced list has it (senior status,
+    # retirement): said on the judge's own record, in the future tense.
+    departures = vacancies.announced_departures(openings, judges)
+
+    def leaving(row, jid, cid):
+        going = departures.get(jid)
+        if going and going["court"] == cid:
+            row["leaving"] = {"reason": going["reason"]}
+        return row
     # Confirmed and not yet commissioned: listed apart on their court's
     # page, never among its judges or in its counts.
     pending = {}
@@ -257,6 +323,9 @@ def build(root="."):
             "chief": {"id": chief, "name": judiciary.display_name(judges[chief]["name"])}
             if chief else None,
             "chiefUnsettled": bool(held.get("chiefUnsettled")),
+            # Where the directory's record cannot say who is chief, what the
+            # court's own site says, beside it (kyc/court_chiefs.py).
+            **({"chiefByCourt": by_court} if (by_court := court_chiefs.shown(courts, cid)) else {}),
             **({"token": colours[court["circuit"]]}
                if court["kind"] == "appeals" and court.get("states") else {}),
             "vacancies": len(vacant.get(cid, [])),
@@ -270,7 +339,9 @@ def build(root="."):
     scotus = courts["courts"]["scotus"]
     payload = {
         "asOf": {"executive": executive["asOf"], "judiciary": courts["asOf"]},
-        "sources": {"executive": executive["sources"], "judiciary": courts["sources"]},
+        "sources": {"executive": executive["sources"], "judiciary": courts["sources"],
+                    **({"disclosures": judge_disclosures.source(disclosures)}
+                       if disclosures else {})},
         "president": _leader(executive["president"], "President of the United States"),
         "vicePresident": _leader(executive["vicePresident"], "Vice President of the United States"),
         "offices": offices,
@@ -280,8 +351,9 @@ def build(root="."):
         "otherCourts": [dict(c) for c in court_info.OTHER_COURTS],
         "courtSites": {"source": court_info.SOURCE, "reviewed": court_info.REVIEWED},
         "statute": (court_districts.load_cache(root) or {}).get("source"),
-        "supremeCourt": {"members": [_judge(judges[i], links) for i in scotus["judges"]],
-                         "retired": [_judge(judges[i], links) for i in scotus.get("retired") or []]},
+        "supremeCourt": {"members": [leaving(_judge(judges[i], links, disclosures), i, "scotus")
+                                     for i in scotus["judges"]],
+                         "retired": [_judge(judges[i], links, disclosures) for i in scotus.get("retired") or []]},
         # Sitting judges: a retired justice is listed apart, never counted.
         "judges": sum(1 for j in judges.values() if not j.get("retiredJustice")),
         "changes": {k: changes[k] for k in ("since", "read", "sources") if changes.get(k)} or None,
@@ -302,7 +374,7 @@ def build(root="."):
         # the directory, so every court page loads the same scripts.
         rows = []
         for i in held["judges"]:
-            row = _judge(judges[i], links)
+            row = _judge(judges[i], links, disclosures)
             listed = disagree.get((cid, i))
             if listed:
                 row["listedSenior"] = {"since": listed["since"]}
@@ -312,7 +384,7 @@ def build(root="."):
                 to = elevations[i]
                 row["nominatedTo"] = {"id": to["court"], "name": federal_courts.COURTS[to["court"]]["name"],
                                       "nominated": to.get("nominated"), "asOf": openings["asOf"]}
-            rows.append(row)
+            rows.append(leaving(row, i, cid))
         per_court[cid] = {"id": cid, "listed": held["listed"], "judges": rows,
                           "vacancies": vacant.get(cid, []), "future": coming.get(cid, [])}
         if divisions.get(cid):
@@ -326,7 +398,7 @@ def build(root="."):
         if not held["listed"] and listed_by_court:
             per_court[cid]["courtList"] = listed_by_court
         if held.get("retired"):
-            per_court[cid]["retired"] = [_judge(judges[i], links) for i in held["retired"]]
+            per_court[cid]["retired"] = [_judge(judges[i], links, disclosures) for i in held["retired"]]
     # One row per judge, with every court they sit on: a judge on several
     # courts (a roving judgeship) is one person.
     sitting_on = {}
@@ -370,6 +442,9 @@ def build(root="."):
     payload["succession"], trouble = succession(payload, executive,
                                                 legislators.load_snapshot(root))
     problems += trouble
+    # A photograph a person refused never reaches a page (rules 24, 87),
+    # asked before a copy of it is attached.
+    problems += withhold_refused(payload)
     # The White House's photographs, as the smaller copies this site made
     # of the heavy ones (rule 101).
     from . import photocopies

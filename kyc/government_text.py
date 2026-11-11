@@ -373,6 +373,8 @@ SOURCES = {
                 "https://www.law.cornell.edu/uscode/text/2/1"),
     "usc-2-7": ("2 U.S.C. 7 (the day of the House election)",
                 "https://www.law.cornell.edu/uscode/text/2/7"),
+    "usc-48-1712": ("48 U.S.C. 1712 (the Delegates from Guam and the Virgin Islands)",
+                    "https://www.law.cornell.edu/uscode/text/48/1712"),
     "usc-52-21082": ("52 U.S.C. 21082 (provisional ballots)",
                      "https://www.law.cornell.edu/uscode/text/52/21082"),
     "watson-rnc": ("Watson v. Republican National Committee, No. 24-1260 (June 29, 2026)",
@@ -2121,7 +2123,8 @@ ELECTIONS = {
         ("2026-11-04", "Alaska decided its ballot measure on its open primary and ranked-choice "
                        "elections on November 3: say how, and whether the description of its "
                        "elections still stands"),
-        ("2026-12-13", "Georgia's December 1 runoff, Louisiana's December 12 House elections and "
+        ("2026-12-13", "Guam's and the Virgin Islands' November 17 runoff, Georgia's December 1 "
+                       "runoff, Louisiana's December 12 House elections and "
                        "the certification deadlines have passed: put them in the past tense"),
         ("2027-01-04", "the members elected on November 3, 2026 took office on January 3: put "
                        "it in the past tense, and name the next election's dates"),
@@ -2300,12 +2303,15 @@ ELECTIONS = {
                       "no candidate has one, the top two meet in a runoff (O.C.G.A. 21-2-501). "
                       "Georgia's general-election runoff, if one is needed in 2026, is on December "
                       "1, four weeks after Election Day."),
+                ("p", "The Delegates from Guam and the Virgin Islands are elected by a majority "
+                      "too; when no candidate has one, the top two meet in a runoff on the "
+                      "fourteenth day after the election (48 U.S.C. 1712), November 17 in 2026."),
                 ("p", "Louisiana's December round is not a primary runoff: for its House seats in "
                       "2026 the November 3 vote is itself the open primary, and a seat no one wins "
                       "with a majority is decided at the general election on December 12. So some "
                       "House seats may not be decided until December."),
             ],
-            "sources": ["tx-el-172", "ga-sb202", "ga-runoff-2026", "la-sos-elected"],
+            "sources": ["tx-el-172", "ga-sb202", "ga-runoff-2026", "usc-48-1712", "la-sos-elected"],
         },
         {
             "id": "ranked-choice",
@@ -2399,10 +2405,18 @@ ELECTIONS = {
                         ("2026-11-10", "Nov 10", "California's late mail", [
                             "The last day for ballots postmarked by Election Day to reach a "
                             "California county."]),
+                        ("2026-11-17", "Nov 17", "Guam's and the Virgin Islands' runoff", [
+                            "Where no one won a majority for Delegate on November 3, the top two "
+                            "meet again. They read", ("runoff", "In the runoff"),
+                            "until it is held; from the day after, until a winner is marked "
+                            "in the results, they read",
+                            ("runoff-held", "Awaiting the Nov 17 runoff result"), "."]),
                         ("2026-12-01", "Dec 1", "Georgia's runoff", [
                             "Where no one won a majority in a Georgia general election, the top "
                             "two meet again. They read", ("runoff", "In the runoff"),
-                            "until it is decided."]),
+                            "until it is held; from the day after, until a winner is marked "
+                            "in the results, they read",
+                            ("runoff-held", "Awaiting the Dec 1 runoff result"), "."]),
                         ("2026-12-03", "Dec 3", "California's counties certify", [
                             "The deadline for California's counties to certify their results."]),
                         ("2026-12-07", "Dec 7", "Texas's state canvass", [
@@ -2419,7 +2433,7 @@ ELECTIONS = {
                                 "the next one to come is marked Next."),
                 }),
             ],
-            "sources": ["usc-2-7", "ca-sos-2026-dates", "ga-runoff-2026", "tx-sos-2026-calendar",
+            "sources": ["usc-2-7", "usc-48-1712", "ca-sos-2026-dates", "ga-runoff-2026", "tx-sos-2026-calendar",
                         "la-sos-house-2026", "const-amdt20"],
         },
         {

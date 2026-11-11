@@ -22,14 +22,16 @@ const SITE = path.resolve(__dirname, "..", "candidate_profiles_site");
  * and nothing reaches the network: the pages load nothing from another host
  * (CLAUDE.md), and a stylesheet is nothing a test reads. *served* lists the
  * site's files a page asked for. */
-function siteResources(served, refuse) {
+function siteResources(served, refuse, held) {
   return {
-    interceptors: [requestInterceptor((request) => {
+    interceptors: [requestInterceptor(async (request) => {
       const u = new URL(request.url);
       if (u.hostname !== "kyc.local") return new Response("", { status: 403 });
       if (/\.css$/.test(u.pathname)) return new Response("", { headers: { "Content-Type": "text/css" } });
       const file = path.join(SITE, ...decodeURIComponent(u.pathname).split("/").filter(Boolean));
       served.push(u.pathname + u.search);
+      // opts.hold: a file that arrives only when the suite releases it.
+      if (held && held.match.test(u.pathname)) await held.until;
       if (refuse && refuse.test(u.pathname)) return new Response("", { status: 503 });
       if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return new Response("", { status: 404 });
       return new Response(fs.readFileSync(file), {
@@ -44,6 +46,14 @@ function readPeopleFile(file) {
   const sandbox = { window: {} };
   require("vm").runInNewContext(fs.readFileSync(file, "utf8"), sandbox);
   return sandbox.window.kycPeopleFile || sandbox.window.kycBuildMeta;
+}
+
+/* The market prices as data/odds.js assigns them, read from the file: what a
+ * check chooses a priced race by before the page has asked for them. */
+function oddsOnDisk() {
+  const sandbox = { window: {} };
+  require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "odds.js"), "utf8"), sandbox);
+  return sandbox.window.kycOdds || {};
 }
 
 /* Everyone's whole record, from every state's file, keyed by id: what a
@@ -69,6 +79,19 @@ function profileHref(a) {
 /* Every race, from the index of everyone (rule 94). */
 function allRaces() {
   return readPeopleFile(path.join(SITE, "data", "people", "index.js")).races;
+}
+
+/* Every race whole, from every state's file: with the fields the index
+ * leaves out (emit.RACE_INDEX_LEAVES_OUT, the seat fold's strip). */
+let wholeRacesCache = null;
+function wholeRaces() {
+  if (!wholeRacesCache) {
+    wholeRacesCache = [];
+    peopleStates().forEach((code) => {
+      wholeRacesCache.push(...readPeopleFile(path.join(SITE, "data", "people", code + ".js")).races);
+    });
+  }
+  return wholeRacesCache;
 }
 
 /* Every state's people file (rule 94), by its lower-case code. */
@@ -521,7 +544,10 @@ function buildPage(page, opts) {
   opts = opts || {};
   const errors = [];
   const vc = new VirtualConsole();
-  vc.on("jsdomError", (e) => errors.push("jsdomError: " + e.message));
+  // A file a suite blocks failing to load is what it set up, not an error.
+  const blockedLoad = (message) => /Could not load script/.test(message) &&
+    (opts.block || []).some((b) => message.indexOf(b) !== -1);
+  vc.on("jsdomError", (e) => { if (!blockedLoad(e.message)) errors.push("jsdomError: " + e.message); });
   vc.on("error", (...a) => errors.push("console.error: " + a.join(" ")));
 
   // jsdom does not fetch <script src>, so inline every local script in
@@ -572,9 +598,17 @@ function buildPage(page, opts) {
   html = html.replace(/<!--inert-(\d+)-->/g, (m, i) => inert[Number(i)]);
 
   const served = [];
+  // A blocked file that the page names on demand (a state page's prices and
+  // questions) fails when it is asked for, as a blocked tag fails to load.
+  const blocked = (opts.block || []).map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const refuse = blocked.length
+    ? new RegExp((opts.refuse ? "(?:" + opts.refuse.source + ")|" : "") + "(?:" + blocked.join("|") + ")$")
+    : opts.refuse;
+  let release = () => {};
+  const held = opts.hold ? { match: opts.hold, until: new Promise((r) => { release = r; }) } : null;
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
-    resources: siteResources(served, opts.refuse),
+    resources: siteResources(served, refuse, held),
     url: "https://kyc.local/" + page + (opts.search || "") + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
@@ -594,6 +628,11 @@ function buildPage(page, opts) {
         addListener() {},
         removeListener() {},
       });
+      // opts.loaded: change the data after every script has assigned it and
+      // before any page module draws from it (the modules start on
+      // DOMContentLoaded, and this listener is the first), for pages that
+      // load no people (the federal pages): a check makes the state it tests.
+      if (opts.loaded) window.document.addEventListener("DOMContentLoaded", () => opts.loaded(window));
       if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
       // opts.federal: the federal data as a refresh might write it, changed
       // as data/federal.js assigns it, before any page module reads it.
@@ -615,16 +654,32 @@ function buildPage(page, opts) {
   });
 
   const { window } = dom;
-  const packed = { window, D: window.document, errors, served,
+  const packed = { window, D: window.document, errors, served, release: () => release(),
     sources: sources.map((m) => m[1].split("?v=")[0]) };
 
   // Wait for jsdom's own DOMContentLoaded rather than dispatching one. An
   // earlier version fired the event by hand, jsdom then fired its own, and
   // every page module booted twice - two listeners per control, so a single
   // click toggled the race view on and straight back off.
+  // A state's and a district's pages load the market prices and the
+  // statewide questions once drawn (named on demand): the page is handed
+  // over once each it asked for is in, or refused (opts.block, opts.refuse),
+  // as most suites read the page whole. One that asks how the page reads
+  // before they arrive says so (opts.early).
+  const LAZY = [["data/odds.js", "kycOdds"], ["data/measures.js", "kycMeasures"]];
+  const settled = async () => {
+    if (opts.early) return packed;
+    const asked = () => LAZY.filter(([file]) => [...window.document.head.querySelectorAll("script[src]")]
+      .some((s) => s.getAttribute("src").split("?")[0].endsWith(file)));
+    const refused = (file) => (opts.block || []).some((b) => file.endsWith(b)) ||
+      (opts.refuse && opts.refuse.test("/" + file));
+    await until(() => asked().every(([file, name]) => window[name] !== undefined || refused(file)), 8000);
+    if (asked().length) await new Promise((r) => setTimeout(r, 20));
+    return packed;
+  };
   return new Promise((resolve) => {
-    if (window.document.readyState !== "loading") return resolve(packed);
-    window.document.addEventListener("DOMContentLoaded", () => resolve(packed));
+    if (window.document.readyState !== "loading") return resolve(settled());
+    window.document.addEventListener("DOMContentLoaded", () => resolve(settled()));
   });
 }
 
@@ -5684,6 +5739,13 @@ function testColourVision(css) {
     if (!m) throw new Error("no fill rule for " + sel);
     return m[1].trim();
   };
+  // A rule's background over several lines.
+  const blockFill = (sel) => {
+    const m = css.match(new RegExp("^" + sel.replace(/\./g, "\\.") + " \\{([^}]*)\\}", "m"));
+    const fill = m && m[1].match(/background(?:-color)?:\s*([^;]+);/);
+    if (!fill) throw new Error("no fill rule for " + sel);
+    return fill[1].trim();
+  };
   LEGENDS["the balance bar"] = ["r", "d", "i"].map((p) => ruleFill(".bb-" + p));
   LEGENDS["the House squares"] = ["r", "d", "i"].map((p) => ruleFill(".ht-" + p));
   suite("kyc.css — no fill is a text colour (rule 88)", () => {
@@ -5746,6 +5808,17 @@ function testColourVision(css) {
       const shared = ["warn", "danger", "warn-text", "danger-text", "money-out", "money-in"]
         .filter((s) => parties.some((p) => plain(resolve(t, `var(--${s})`), p) < 10));
       check(`${name}: no status or money colour is a party's`, shared.length === 0, shared.join(", "));
+      // A race's money bars (rule 90), on race blocks, profiles and the
+      // map's panel: a length read against its track, in neutral ink (no
+      // hue a reader could take for a party), the two apart as every
+      // colour-vision type sees them.
+      const fill = resolve(t, blockFill(".money-fill"));
+      const track = resolve(t, blockFill(".money-track"));
+      const [, fa, fb] = oklab(rgb(fill).map(lin));
+      const barApart = Math.min(...Object.keys(MATRIX).map((k) => apart(fill, track, k)));
+      check(`${name}: a money bar is neutral ink, apart from its track`,
+        Math.hypot(fa, fb) < 0.05 && barApart >= 10,
+        `fill ${fill}, track ${track}, chroma ${Math.hypot(fa, fb).toFixed(3)}, apart ${barApart.toFixed(1)}`);
     }
     const js = fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8");
     check("the fills the tests call hatched are the ones kyc.js hatches",
@@ -5759,6 +5832,29 @@ function testColourVision(css) {
 
 /* The Senate by the year each seat is next decided. Every expected number
  * here is computed from the data the page loaded, never typed in. */
+/* The state strip's ballot figures in the race heads' tense: after Election
+ * Day Kentucky's read "7 challengers on the ballot" beside heads saying "1
+ * challenger was on the ballot" (PR #218 review), and still add up to them. */
+async function testStripTense() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const { D, errors } = await buildPage("states/ky.html", { now });
+    await settle(50);
+    suite(`states/ky.html ${when} — the strip's ballot figures in the heads' tense`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const verb = now ? / (was|were) on the ballot$/ : /[a-z] on the ballot$/;
+      const strip = [...D.querySelectorAll(".state-hero .badge")].map((b) => b.textContent)
+        .filter((t) => /^\d+ (challengers?|candidates? for open seats) /.test(t));
+      check("each says it in the clock's tense", strip.length > 0 && strip.every((t) => verb.test(t) &&
+        (!now || /^1 /.test(t) === / was /.test(t))), strip.join(" | "));
+      const heads = [...D.querySelectorAll(".race-head .badge-money")]
+        .map((b) => (/^(\d+) (?:challenger|candidate)s?(?: was| were)? on the ballot$/.exec(b.textContent) || [])[1])
+        .filter(Boolean).reduce((n, x) => n + Number(x), 0);
+      const sum = strip.reduce((n, t) => n + Number(t.split(" ")[0]), 0);
+      check("and still add up to the race heads", sum === heads, `${strip.join(" + ")} vs ${heads}`);
+    });
+  }
+}
+
 /* Everyone on the ballot, counted one way: the sidebar, a state's strip and
  * its race headers read 587, 16 and 58 for the same people. The people the
  * results name with no profile here are named in every view of a race, and
@@ -8637,13 +8733,30 @@ async function testGuideMaps() {
         chip("awaiting") === K.raceStatus("nominee", "card",
           { now: new window.Date(Date.UTC(2026, 10, 5, 12)) }).label &&
         chip("awaiting") !== chip("nominee"), chip("awaiting"));
+      // Georgia's runoff in both tenses: its step's own day, passed with no
+      // result read, in the one table's words (heldRunoff).
+      const heldChips = [...D.querySelectorAll('.guide-status[data-status="runoff-held"]')].map((n) => {
+        const day = n.closest("li").getAttribute("data-date");
+        const [y, m, d] = day.split("-").map(Number);
+        return { day, words: n.textContent,
+          table: K.raceStatus("runoff", "card", { runoffDay: day,
+            now: new window.Date(Date.UTC(y, m - 1, d + 4, 12)) }).label };
+      });
+      check("each runoff's step gives its past tense from the table, dated by the step",
+        heldChips.map((c) => c.day + " " + c.words).join(" | ") ===
+          "2026-11-17 Awaiting the Nov 17 runoff result | 2026-12-01 Awaiting the Dec 1 runoff result" &&
+        heldChips.every((c) => c.words === c.table) &&
+        [...D.querySelectorAll('.guide-status[data-status="runoff"]')].every((n) => n.textContent === "In the runoff"),
+        heldChips.map((c) => c.day + " " + c.words).join(" | "));
       check("on the campaign clock Election Day is next and nothing is past",
         D.querySelector(".guide-timeline-steps li.is-next").getAttribute("data-date") === "2026-11-03" &&
         !D.querySelector(".guide-timeline-steps li.is-past"));
       K.guide.initTimeline(new window.Date(Date.UTC(2026, 11, 5, 12)));
       check("in December the steps passed are marked done and the next is Texas's canvass",
         D.querySelector(".guide-timeline-steps li.is-next").getAttribute("data-date") === "2026-12-07" &&
-        D.querySelectorAll(".guide-timeline-steps li.is-past").length === 5);
+        [...D.querySelectorAll(".guide-timeline-steps li")].every((li) =>
+          li.classList.contains("is-past") === (li.getAttribute("data-date") < "2026-12-05")) &&
+        D.querySelectorAll(".guide-timeline-steps li.is-past").length >= 5);
       // The highlighted step read as "today": each mark is a word, and the
       // caption says what the words mean.
       const tags = [...D.querySelectorAll(".guide-timeline-steps .guide-timeline-tag")];
@@ -9842,6 +9955,208 @@ async function testStateGov() {
     }
   });
 
+  suite("state government — a photograph that fails takes its credit with it (rule 87)", () => {
+    // Which photographs a card draws is the week's read, so each case is
+    // made from whichever state carries what it needs, never by its code.
+    const drawn = (o) => !!(o && o.photo && o.photoBy && !(o.disputed || o.unlisted ||
+      o.unconfirmed || o.vacant || o.none || o.notMember));
+    const govShot = (s) => !!(s.governor && s.governor.headshot && s.governor.headshotBy);
+    const shots = (s) => (govShot(s) ? [s.governor.headshot] : [])
+      .concat(["lt", "ag", "sos"].filter((k) => drawn(s[k])).map((k) => s[k].photo));
+    // Every photograph on the card its own file: one failing names no other.
+    const distinct = (s) => new Set(shots(s)).size === shots(s).length;
+    // The copies a week's weighing made are set aside, so the first error
+    // is the photograph's own (the last case makes one).
+    const bare = (s) => [s.governor].concat(["lt", "ag", "sos"].map((k) => s[k])).filter(Boolean)
+      .filter((o) => "photoCopy" in o).map((o) => { const v = o.photoCopy; delete o.photoCopy; return [o, v]; });
+    const draw = (code) => {
+      const host = D.createElement("div");
+      host.innerHTML = KYC.stategov.render(code);
+      D.body.appendChild(host);
+      return host;
+    };
+    const list = (host) => host.querySelector(".gov-sources .gov-photo-sources");
+    const labels = (host) => [...host.querySelectorAll(".gov-sources .gov-photo-source")]
+      .map((c) => c.textContent.split(",")[0].trim());
+    // "; " between the clauses left, a final ".", and nothing else.
+    const wellFormed = (host) => {
+      const l = list(host);
+      if (!l) return true;
+      const parts = [...l.querySelectorAll(".gov-photo-source")].map((c) => c.textContent);
+      return parts.length > 0 && l.textContent === " Photographs: " + parts.join("; ") + ".";
+    };
+    const fail = (img) => img.dispatchEvent(new window.Event("error"));
+    // A credit stays while any <img> on the page still shows its file
+    // (KYC.stategov.dropPhotoCredit): an officer on their office's list of
+    // candidates shows the office's photograph there too (rule 91), and a
+    // file that fails fails in both places. *keeps*: the check that a
+    // clause stays while its file is still shown in the other place.
+    const failFile = (host, img, keeps) => {
+      const address = img.getAttribute("src");
+      fail(img);
+      const twins = [...host.querySelectorAll("img")].filter((i) => i.getAttribute("src") === address);
+      if (twins.length && keeps) keeps(address);
+      twins.forEach(fail);
+    };
+    const officerImg = (host, o) => [...host.querySelectorAll("img.gov-officer-photo")]
+      .find((i) => i.getAttribute("src") === KYC.photoHref(o.photo));
+    // The map's panel may show one of these states' cards: set aside while
+    // the suite draws its own, so no file is shown twice on the page.
+    const panel = D.getElementById("delegation");
+    const heldPanel = panel ? panel.innerHTML : "";
+    if (panel) panel.innerHTML = "";
+
+    const withAg = stateCodes.find((c) => drawn(data.states[c].ag) && distinct(data.states[c]) &&
+      shots(data.states[c]).length > 1);
+    check("a state whose attorney general and another office are pictured", !!withAg);
+    if (withAg) {
+      const s = data.states[withAg];
+      const kept = bare(s);
+      try {
+        const host = draw(withAg);
+        const before = labels(host);
+        check("the list of sources credits the attorney general's photograph",
+          before.indexOf("attorney general") !== -1 && wellFormed(host), before.join(" | "));
+        const img = officerImg(host, s.ag);
+        check("the attorney general's row draws the photograph its clause names", !!img &&
+          [...host.querySelectorAll(".gov-photo-source")].some((c) =>
+            c.getAttribute("data-credits") === img.getAttribute("src")));
+        if (img) {
+          failFile(host, img, (address) => check("its clause stays while the same file is still shown elsewhere",
+            [...host.querySelectorAll(".gov-photo-source")].some((c) => c.getAttribute("data-credits") === address)));
+        }
+        const after = labels(host);
+        check("a failed attorney general's photograph takes its clause, and only its clause",
+          !!img && !img.isConnected && after.indexOf("attorney general") === -1 &&
+          JSON.stringify(after) === JSON.stringify(before.filter((l) => l !== "attorney general")),
+          before.join(" | ") + " -> " + after.join(" | "));
+        check("and the list stays one sentence", wellFormed(host),
+          (list(host) || {}).textContent);
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    const withGov = stateCodes.find((c) => govShot(data.states[c]) && distinct(data.states[c]));
+    check("a state whose governor is pictured", !!withGov);
+    if (withGov) {
+      const s = data.states[withGov];
+      const kept = bare(s);
+      try {
+        // The governor's card says whose its photograph is under it
+        // (governorCard, PR #191), so the list of sources credits the
+        // officers alone.
+        const host = draw(withGov);
+        const before = labels(host);
+        const card = host.querySelector(".gcard:not(.gcard-candidate)");
+        const img = card && card.querySelector("img.gov-portrait");
+        const address = KYC.photoHref(s.governor.headshot);
+        check("the governor's card credits the headshot under it, and the list of sources does not",
+          before.indexOf("governor") === -1 && !!img && img.getAttribute("src") === address &&
+          !!card.querySelector('.gcard-credit[data-credits="' + address + '"]'));
+        // A candidate's card may show the same file (the holder on the list:
+        // the office photograph the card already shows, rule 91); it keeps
+        // its credit while it still shows it.
+        const twins = [...host.querySelectorAll(".gcard-candidate img.gov-portrait")]
+          .filter((i) => i.getAttribute("src") === address);
+        if (img) fail(img);
+        const after = labels(host);
+        check("a failed governor's headshot takes the card's credit and leaves the empty circle",
+          !card.querySelector("img.gov-portrait") && !!card.querySelector(".gov-portrait-none") &&
+          !card.querySelector(".gcard-credit"));
+        check("and touches no officer's clause", JSON.stringify(after) === JSON.stringify(before),
+          before.join(" | ") + " -> " + after.join(" | "));
+        check("a candidate's card still showing that file keeps its credit", twins.every((i) =>
+          i.isConnected && !!i.closest(".gcard").querySelector('.gcard-credit[data-credits="' + address + '"]')));
+        check("and what is left is one sentence", wellFormed(host), (list(host) || {}).textContent);
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    const every = stateCodes.find((c) => govShot(data.states[c]) && shots(data.states[c]).length > 1);
+    check("a state with the governor and an officer pictured", !!every);
+    if (every) {
+      const s = data.states[every];
+      const kept = bare(s);
+      try {
+        const host = draw(every);
+        check("its list of sources credits photographs", !!list(host));
+        // Every photograph on the card: the officers' and governor's, the
+        // race's cards and the officers' lists of candidates.
+        [...host.querySelectorAll("img.gov-portrait, img.gov-officer-photo, img.gov-photo")].forEach(fail);
+        const text = host.querySelector(".gov-sources").textContent;
+        check("when every photograph fails, the sources say no 'Photographs:'",
+          !list(host) && !/Photographs:/.test(text) && !host.querySelector(".gov-photo-source"), text);
+        check("and still end in a full stop", /\.$/.test(text.trim()), text.slice(-120));
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    if (withAg) {
+      // No state today pictures one office alone, so the case is made: the
+      // attorney general's photograph the only one the card credits, its
+      // clause the whole list, and its failure the list's end.
+      const s = data.states[withAg];
+      const kept = bare(s);
+      const others = [[s.governor, "headshot"], [s.lt, "photo"], [s.sos, "photo"]]
+        .filter(([o, k]) => o && k in o).map(([o, k]) => [o, k, o[k]]);
+      others.forEach(([o, k]) => { o[k] = null; });
+      try {
+        const host = draw(withAg);
+        check("a card picturing one office credits it in one clause",
+          JSON.stringify(labels(host)) === JSON.stringify(["attorney general"]) && wellFormed(host),
+          (list(host) || {}).textContent);
+        const img = officerImg(host, s.ag);
+        if (img) failFile(host, img);
+        const text = host.querySelector(".gov-sources").textContent;
+        check("and its one photograph failing leaves no 'Photographs:' and a full stop",
+          !!img && !list(host) && !/Photographs:/.test(text) && /\.$/.test(text.trim()), text.slice(-120));
+        host.remove();
+      } finally {
+        others.forEach(([o, k, v]) => { o[k] = v; });
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    if (withAg) {
+      // A copy that fails gives way to its original (rule 101), which is
+      // shown, so its credit stays; only when the original fails too does
+      // the credit go.
+      const s = data.states[withAg];
+      const kept = bare(s);
+      const COPY = "photos/0a1b2c3d4e5f60718293.jpg?v=0a1b2c3d4e";
+      s.ag.photoCopy = { src: COPY, of: s.ag.photo };
+      try {
+        const host = draw(withAg);
+        const img = [...host.querySelectorAll("img.gov-officer-photo")]
+          .find((i) => i.getAttribute("data-photo-original") === KYC.photoHref(s.ag.photo));
+        check("the attorney general's row loads the copy", !!img && img.getAttribute("src") === KYC.siteRoot() + COPY);
+        if (img) {
+          fail(img);
+          check("a copy that fails falls back to its original", img.isConnected &&
+            img.getAttribute("src") === KYC.photoHref(s.ag.photo));
+          check("and the original keeps its credit, no longer called a copy",
+            labels(host).indexOf("attorney general") !== -1 && wellFormed(host) &&
+            ![...host.querySelectorAll(".photo-copy-note")].some((n) =>
+              n.getAttribute("data-copy-of") === s.ag.photo), (list(host) || {}).textContent);
+          failFile(host, img);
+          check("then the original failing takes the credit", !img.isConnected &&
+            labels(host).indexOf("attorney general") === -1 && wellFormed(host));
+        }
+        host.remove();
+      } finally {
+        delete s.ag.photoCopy;
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+    if (panel) panel.innerHTML = heldPanel;
+  });
+
   suite("state government — the data", () => {
     check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
     const uncredited = stateCodes.filter((c) => {
@@ -10238,6 +10553,9 @@ async function testStateGov() {
   suite("state pages — where the office's site cannot confirm a listing, whole sentences", () => {
     const W = nhGov.window;
     const states = W.kycStateGov.states;
+    // A state's page holds its own government (data/stategov/<st>.js), and
+    // this draws Nevada's office on New Hampshire's: it is given Nevada's.
+    if (!states.NV) states.NV = JSON.parse(JSON.stringify(nvGov.window.kycStateGov.states.NV));
     const ag = Object.assign({}, states.NH.ag, { name: "Jane Q. Roe", party: "R", partyKey: "R",
       listedBy: "Republican Attorneys General Association", office: "https://ag.example.gov/" });
     const sos = Object.assign({}, states.NV.sos, { name: "John Q. Doe", party: "D", partyKey: "D",
@@ -10720,6 +11038,325 @@ async function testElectionNight() {
     const { runoff } = map.window.__senators || {};
     check("Georgia's senator in its December runoff reads the status table's words",
       !runoff || / in the general election runoff\)/.test(label(runoff)), runoff && label(runoff));
+  });
+}
+
+/* Georgia's Senate race sent to its December 1 general election runoff
+ * (overrides.GENERAL_RUNOFFS), read on *asOf*: the two in it "runoff", or,
+ * with *decided*, its result read and dated by the runoff (as
+ * results.py writes `raceStatusDecided`). Anyone else on its November
+ * ballot lost then. The race is the one every Georgia ZIP code's ballot
+ * and the Senate map hold. */
+function georgiaRunoff(asOf, decided) {
+  return generalRunoffIn("GA", "Senate", asOf, decided);
+}
+
+function generalRunoffIn(state, chamber, asOf, decided) {
+  return (window, meta) => {
+    rewindToCampaign(window);
+    meta.election = Object.assign({}, meta.election, { resultsAsOf: asOf });
+    const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
+    const race = window.kycRaces.find((r) => r.state === state && r.chamber === chamber &&
+      r.generalRunoff && r.primaryKind !== "open");
+    const own = (p) => p && !p.contestLabel &&
+      (p.isCandidate ? p.raceId : (p.contestRaceId || p.raceId)) === race.id;
+    const nominees = race ? [...new Set(race.incumbentIds.concat(race.candidateIds))]
+      .map((id) => byId[id]).filter((p) => own(p) && p.raceStatus === "nominee") : [];
+    if (nominees.length < 2) {
+      window.__gaRunoff = {};
+      return;
+    }
+    const two = nominees.slice(0, 2);
+    nominees.forEach((p) => {
+      const i = two.indexOf(p);
+      p.raceStatusRace = race.id;
+      if (i === -1) p.raceStatus = "defeated";
+      else if (decided) {
+        p.raceStatus = i === 0 ? "elected" : "defeated";
+        p.raceStatusDecided = { date: race.generalRunoff, open: false };
+      } else p.raceStatus = "runoff";
+    });
+    race.settled = true;
+    window.__gaRunoff = { race, two };
+  };
+}
+
+/* Georgia's December 1 runoff once its day has passed (the owner's answer
+ * of 2026-11-01): with no result read it is in the past tense and awaiting
+ * one, as Louisiana's December round is (rule 63); on the day itself and
+ * before it, "In the runoff"; with a result read, the runoff's result. One
+ * table (KYC.raceStatus, rule 12) on every view: the cards, the race's
+ * head, the dialog, a phone's race row, the Senate map, Your ballot. */
+async function testGeorgiaRunoffPast() {
+  const section = (D, r) => r && D.getElementById("race-" + r.id);
+  const cardOf = (D, r, p) => section(D, r) && section(D, r).querySelector('.card[data-id="' + p.id + '"]');
+  const head = (D, r) => section(D, r) && section(D, r).querySelector(".race-head");
+  const PAST = "Awaiting the Dec 1 runoff result";
+  const LONG = "Ran in the December 1 general election runoff: awaiting result";
+
+  const onDay = await buildPage("states/ga.html", { now: "2026-12-01T20:00:00",
+    data: georgiaRunoff("2026-11-20") });
+  suite("states/ga.html on December 1 — the runoff is still today's", () => {
+    const { race, two } = onDay.window.__gaRunoff || {};
+    check("no page errors", onDay.errors.length === 0, onDay.errors.join(" | "));
+    check("Georgia's Senate race to read", !!race);
+    if (!race) return;
+    check("both read In the runoff on their cards", two.every((p) =>
+      /In the runoff/.test((cardOf(onDay.D, race, p) || {}).textContent || "") &&
+        !/Awaiting/.test((cardOf(onDay.D, race, p) || {}).textContent || "")),
+    two.map((p) => (cardOf(onDay.D, race, p) || {}).textContent).join(" | "));
+    check("and the race's head is going to a runoff",
+      /Going to a runoff/.test((head(onDay.D, race) || {}).textContent || ""));
+    check("the profile says the general election runoff",
+      onDay.window.KYC.standing(two[0], "long").label === "In the general election runoff");
+  });
+
+  const after = await buildPage("states/ga.html", { now: "2026-12-05T09:00:00",
+    data: georgiaRunoff("2026-12-04") });
+  suite("states/ga.html after December 1, no result read — the runoff in the past tense", () => {
+    const { race, two } = after.window.__gaRunoff || {};
+    const KYC = after.window.KYC;
+    check("no page errors", after.errors.length === 0, after.errors.join(" | "));
+    if (!race) { check("Georgia's Senate race to read", false); return; }
+    const texts = two.map((p) => (cardOf(after.D, race, p) || {}).textContent || "");
+    check("both cards are awaiting the December 1 result, not still 'in' the runoff",
+      texts.every((t) => t.indexOf(PAST) !== -1 && !/In the runoff/.test(t)), texts.join(" | "));
+    const h = head(after.D, race);
+    const badge = h && [...h.querySelectorAll(".badge")].find((b) => b.textContent === PAST);
+    check("the race's head says so, and its hover names the two and the last read",
+      !!badge && !/Going to a runoff/.test(h.textContent) &&
+        /December 1 general election runoff/.test(badge.getAttribute("title")) &&
+        /2026-12-04/.test(badge.getAttribute("title")) &&
+        two.every((p) => badge.getAttribute("title").indexOf(p.name) !== -1),
+      h && h.textContent);
+    const long = KYC.standing(two[0], "long");
+    check("the short form (the map's panel, the lookup's answer) names the runoff, " +
+      "not a November result", KYC.standing(two[0], "short").label === "Awaiting runoff result",
+      KYC.standing(two[0], "short").label);
+    check("the profile's words: ran in it, awaiting result, as of the last read, credited",
+      long.label === LONG && /had not marked a winner/.test(long.title) && /2026-12-04/.test(long.title) &&
+        /Wikipedia/.test(long.title), long.label + " / " + long.title);
+    const card = cardOf(after.D, race, two[0]);
+    if (card) card.click();
+    const status = after.D.getElementById("profileModalStatus");
+    check("and the dialog shows them", !!status && status.textContent.indexOf(LONG) !== -1,
+      status && status.textContent);
+    const close = after.D.querySelector("#profileModal .modal-footer [data-close]");
+    if (close) close.click();
+    const key = KYC.raceStatusLegend().map((row) => row.label);
+    check("the grid's key holds the past tense beside the runoff's own words",
+      key.indexOf(PAST) !== -1 && key.indexOf("In the runoff") !== -1, key.join(", "));
+    // No other status reads the runoff's date (rule 63's other words).
+    check("no other status changes",
+      KYC.raceStatus("nominee", "long", { runoffDay: "2026-12-01" }).label ===
+        KYC.raceStatus("nominee", "long").label &&
+      KYC.raceStatus("defeated", "card", { runoffDay: "2026-12-01" }).label === "Lost in November" &&
+      KYC.raceStatus("advanced", "card", { runoffDay: "2026-12-01" }).label === "In runoff");
+  });
+
+  const decided = await buildPage("states/ga.html", { now: "2026-12-05T09:00:00",
+    data: georgiaRunoff("2026-12-04", true) });
+  suite("states/ga.html after December 1, its result read — the runoff's result", () => {
+    const { race, two } = decided.window.__gaRunoff || {};
+    if (!race) { check("Georgia's Senate race to read", false); return; }
+    check("no page errors", decided.errors.length === 0, decided.errors.join(" | "));
+    const texts = two.map((p) => (cardOf(decided.D, race, p) || {}).textContent || "");
+    check("its winner won the Dec 1 runoff, its loser lost it, and nobody is awaiting it",
+      /(Won Dec 1 runoff|Re-elected Dec 1)/.test(texts[0]) &&
+        /(Lost Dec 1 runoff|Lost re-election Dec 1)/.test(texts[1]) &&
+        !texts.some((t) => /Awaiting/.test(t)), texts.join(" | "));
+    check("the race's head names its winner",
+      /Won by /.test((head(decided.D, race) || {}).textContent || ""));
+  });
+
+  const phone = await buildPage("states/ga.html", { now: "2026-12-05T09:00:00",
+    data: georgiaRunoff("2026-12-04"), setup: (w) => phoneWidth(w, true) });
+  suite("states/ga.html on a phone after December 1 — the race's row in the same words", () => {
+    const { race } = phone.window.__gaRunoff || {};
+    check("no page errors", phone.errors.length === 0, phone.errors.join(" | "));
+    const sec = race && section(phone.D, race);
+    const row = sec && sec.querySelector(".race-row") ? readRow(sec) : null;
+    check("its row is awaiting the December 1 result, not 'in the runoff'",
+      !!row && row.text.indexOf(PAST) !== -1 && !/In the runoff|Going to a runoff/.test(row.text),
+      row ? row.text : "no row");
+  });
+
+  const map = await buildPage("map.html", { now: "2026-12-05T09:00:00", data: georgiaRunoff("2026-12-04") });
+  suite("map.html after December 1 — Georgia's Senate race in the past tense", () => {
+    const { race, two } = map.window.__gaRunoff || {};
+    if (!race) { check("Georgia's Senate race to read", false); return; }
+    map.D.querySelector('[data-mode="senate2026"]').click();
+    const label = (map.D.querySelector('#usMap [data-state="GA"]') ||
+      { getAttribute: () => "" }).getAttribute("aria-label") || "";
+    const holder = two.find((p) => !p.isCandidate);
+    check("the state's label reads the status table's past tense",
+      !holder || label.indexOf(" " + LONG.charAt(0).toLowerCase() + LONG.slice(1) + ")") !== -1, label);
+  });
+
+  const ballot = await ballotFor("#/?zip=30009", { now: "2026-12-05T09:00:00",
+    data: georgiaRunoff("2026-12-04") });
+  suite("Your ballot after December 1 — the runoff in the past tense", () => {
+    const { race } = ballot.window.__gaRunoff || {};
+    check("no page errors", ballot.errors.length === 0, ballot.errors.join(" | "));
+    if (!race) { check("Georgia's Senate race to read", false); return; }
+    const li = ballot.D.getElementById("contest-" + race.id);
+    const words = li ? [...li.querySelectorAll(".ballot-person")].map((n) => badgeWords(n).join("+")) : [];
+    check("its two read the past tense, as their cards do",
+      words.filter((w) => w.indexOf(PAST) !== -1).length === 2 && !words.some((w) => /In the runoff/.test(w)),
+      words.join(" | "));
+  });
+
+  // A member in the runoff for another seat (Mike Collins, in Georgia's
+  // Senate race): "running" until it is held, then "ran" with the result
+  // awaited, on the card's line and the dialog's cross-link alike.
+  const memberIn = (page) => {
+    const { two } = page.window.__gaRunoff || {};
+    return two && page.window.legislatorsData.find((p) => !p.isCandidate && p.alsoRunningId &&
+      two.some((t) => t.id === p.alsoRunningId));
+  };
+  const crossLink = (page, member) => {
+    page.window.KYC.profile.open(member.id);
+    const link = page.D.getElementById("profileModalCrossLink");
+    const words = link ? link.textContent : "";
+    page.window.KYC.profile.close();
+    return words;
+  };
+  const dayOf = await buildPage("states/ga.html", { now: "2026-12-01T20:00:00",
+    data: georgiaRunoff("2026-11-20") });
+  const dayAfter = await buildPage("states/ga.html", { now: "2026-12-05T09:00:00",
+    data: georgiaRunoff("2026-12-04") });
+  suite("states/ga.html — a member's other run through the runoff (rule 63, KYC.contestLine)", () => {
+    const before = memberIn(dayOf);
+    const past = memberIn(dayAfter);
+    check("a member to read", !!before && !!past);
+    if (!before || !past) return;
+    const running = dayOf.window.KYC.contestLine(before);
+    const ran = dayAfter.window.KYC.contestLine(past);
+    check("on the day itself the run is still on", running.stage === "running" && !running.past &&
+      /^is running for /.test(running.clause), running.clause);
+    check("after it, the run is awaiting the result, in the past tense",
+      ran.stage === "awaiting" && ran.past && /^ran for .*; the result is awaited$/.test(ran.clause), ran.clause);
+    const onDay = crossLink(dayOf, before);
+    const afterDay = crossLink(dayAfter, past);
+    check("the dialog's cross-link says 'Also running for' on the day",
+      /Also running for/.test(onDay) && !/Also ran for/.test(onDay), onDay);
+    check("and 'Also ran for', awaiting the runoff's result, after it, as the card does",
+      /Also ran for/.test(afterDay) && !/Also running for/.test(afterDay) &&
+        /awaiting the Dec 1 runoff result/.test(afterDay), afterDay);
+  });
+
+  // Guam's Delegate (and the Virgin Islands', by the same table) has a
+  // runoff a fortnight after the election (48 U.S.C. 1712), so its past
+  // tense names its own day, and comes while Georgia's is still ahead.
+  const GU_PAST = "Awaiting the Nov 17 runoff result";
+  const guOnDay = await buildPage("states/gu.html", { now: "2026-11-17T20:00:00",
+    data: generalRunoffIn("GU", "House", "2026-11-16") });
+  suite("states/gu.html on November 17 — the runoff is still today's", () => {
+    const { race, two } = guOnDay.window.__gaRunoff || {};
+    check("no page errors", guOnDay.errors.length === 0, guOnDay.errors.join(" | "));
+    if (!race) { check("Guam's race to read", false); return; }
+    const texts = two.map((p) => (cardOf(guOnDay.D, race, p) || {}).textContent || "");
+    check("both read In the runoff, and nothing is awaited",
+      texts.every((t) => /In the runoff/.test(t) && !/Awaiting/.test(t)), texts.join(" | "));
+    check("and the race's head is going to a runoff",
+      /Going to a runoff/.test((head(guOnDay.D, race) || {}).textContent || ""));
+  });
+  const guAfter = await buildPage("states/gu.html", { now: "2026-11-18T09:00:00",
+    data: generalRunoffIn("GU", "House", "2026-11-18") });
+  suite("states/gu.html after November 17, no result read — its own day's words", () => {
+    const { race, two } = guAfter.window.__gaRunoff || {};
+    const KYC = guAfter.window.KYC;
+    check("no page errors", guAfter.errors.length === 0, guAfter.errors.join(" | "));
+    if (!race) { check("Guam's race to read", false); return; }
+    const texts = two.map((p) => (cardOf(guAfter.D, race, p) || {}).textContent || "");
+    check("both cards await the November 17 result",
+      texts.every((t) => t.indexOf(GU_PAST) !== -1 && !/In the runoff/.test(t)), texts.join(" | "));
+    const h = head(guAfter.D, race);
+    check("the race's head says so, and that the runoff was held on its day",
+      !!h && h.textContent.indexOf(GU_PAST) !== -1 && /Runoff held Nov 17/.test(h.textContent), h && h.textContent);
+    check("the dialog's words name its day",
+      KYC.standing(two[0], "long").label === "Ran in the November 17 general election runoff: awaiting result",
+      KYC.standing(two[0], "long").label);
+    check("and say which vote had no majority, never 'in November' of a runoff held in November",
+      /won a majority in the general election\./.test(KYC.standing(two[0], "long").title),
+      KYC.standing(two[0], "long").title);
+    const key = KYC.raceStatusLegend().map((row) => row.label);
+    check("its key names its own day, and no other's",
+      key.indexOf(GU_PAST) !== -1 && !key.some((label) => /Dec 1 runoff/.test(label)), key.join(", "));
+  });
+  const guDecided = await buildPage("states/gu.html", { now: "2026-11-20T09:00:00",
+    data: generalRunoffIn("GU", "House", "2026-11-20", true) });
+  suite("states/gu.html with its result read — the runoff's result, on its day", () => {
+    const { race, two } = guDecided.window.__gaRunoff || {};
+    if (!race) { check("Guam's race to read", false); return; }
+    const texts = two.map((p) => (cardOf(guDecided.D, race, p) || {}).textContent || "");
+    check("its winner and its loser read that day, and nobody is awaiting it",
+      /(Won Nov 17 runoff|Re-elected Nov 17)/.test(texts[0]) &&
+        /(Lost Nov 17 runoff|Lost re-election Nov 17)/.test(texts[1]) &&
+        !texts.some((t) => /Awaiting/.test(t)), texts.join(" | "));
+    const unseated = guDecided.window.KYC.raceStatus("elected", "long",
+      { decided: { date: race.generalRunoff, open: false } }).title;
+    check("no 'in November' for the vote that had no majority",
+      /won a majority in the general election/.test(unseated), unseated);
+  });
+  const allRaces = await buildPage("index.html", { now: "2026-11-18T09:00:00", data: phaseAt("2026-11-18T09:00:00") });
+  suite("every December or November round, each by its own race's day (rules 63, 75)", () => {
+    const KYC = allRaces.window.KYC;
+    const withRound = (allRaces.window.kycRaces || []).filter((r) => r.generalRunoff);
+    const noon = (y, m, d) => new allRaces.window.Date(y, m - 1, d, 12);
+    const wrong = [];
+    [noon(2026, 11, 18), noon(2026, 12, 5), noon(2026, 12, 13)].forEach((now) => {
+      const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0")].join("-");
+      withRound.forEach((race) => {
+        const held = race.generalRunoff < today;
+        const words = KYC.runoffWords(race, now);
+        const open = race.primaryKind === "open";
+        const [, m, d] = race.generalRunoff.split("-").map(Number);
+        const day = ["Nov", "Dec"][m - 11] + " " + d;
+        const want = open ? (held ? "Awaiting the " + day + " result" : "In the " + day + " general election")
+          : held ? "Awaiting the " + day + " runoff result" : "In the runoff";
+        if (words.card !== want) wrong.push(`${race.id} on ${today}: ${words.card}, not ${want}`);
+      });
+    });
+    const states = new Set(withRound.map((r) => r.state));
+    check("the races with a round include Georgia's, Guam's, the Virgin Islands' and Louisiana's",
+      ["GA", "GU", "VI", "LA"].every((st) => states.has(st)), [...states].join(" "));
+    check("each reads its own tense on November 18, December 5 and December 13",
+      wrong.length === 0, wrong.slice(0, 4).join(" | "));
+    const key = KYC.raceStatusLegend().map((row) => row.label);
+    check("the grid's key lists the past tense of each day its races hold",
+      ["Awaiting the Nov 17 runoff result", "Awaiting the Dec 1 runoff result",
+        "In the Dec 12 general election", "Awaiting the Dec 12 result", "In the runoff"]
+        .every((label) => key.indexOf(label) !== -1), key.join(", "));
+  });
+
+  // The governor's card, the race for governor and their overlays (#191,
+  // #195) name no state winner and read no status of Congress's: none of
+  // the runoff's words, in either tense, reach them.
+  const RUNOFF_WORDS = /Awaiting the Dec 1 runoff result|Awaiting runoff result|general election runoff|In the runoff|Going to a runoff/;
+  const gov = await buildPage("states/ga.html", { now: "2026-12-05T09:00:00",
+    data: georgiaRunoff("2026-12-04"), hash: "#/official/gov-GA" });
+  await settle(50);
+  suite("states/ga.html after December 1 — the governor's cards and overlays hold no runoff words", () => {
+    const { race } = gov.window.__gaRunoff || {};
+    check("no page errors", gov.errors.length === 0, gov.errors.join(" | "));
+    if (!race) { check("Georgia's Senate race to read", false); return; }
+    const card = gov.D.querySelector("#state-government #governor");
+    const block = gov.D.getElementById("governor-race");
+    check("the governor's card is drawn, without them", !!card && !RUNOFF_WORDS.test(card.textContent),
+      card && card.textContent);
+    check("the race for governor is drawn, without them", !!block && !RUNOFF_WORDS.test(block.textContent),
+      block && block.textContent.slice(0, 300));
+    const modal = gov.D.getElementById("governorModal");
+    check("the governor's overlay opens on its link, without them",
+      !!modal && !modal.hidden && !RUNOFF_WORDS.test(modal.textContent), modal && modal.textContent.slice(0, 300));
+    const close = modal && modal.querySelector("[data-close]");
+    if (close) close.click();
+    const cand = block && block.querySelector(".gcard-candidate[data-governor]");
+    if (cand) cand.click();
+    check("a candidate's overlay opens, without them", !!cand && !modal.hidden &&
+      !RUNOFF_WORDS.test(modal.textContent), modal && modal.textContent.slice(0, 300));
   });
 }
 
@@ -13005,11 +13642,183 @@ async function testFederal() {
   });
 
   await testFederalAudit();
+  await testCourtChiefsAndDisclosures();
 }
 
 /* The reader-side audit of 2026-10-17 (FEDERAL-*): who sits, announced
  * vacancies, the hub's vacancies and nominees, the executive's departed
  * officers, the line of succession, the agencies' own websites. */
+/** FEDERAL-17 and FEDERAL-05, on states the test makes (the Conventions):
+ *  a court whose directory record cannot say who is chief, with and
+ *  without the court's own site's word beside it; and a judge whose
+ *  disclosures CourtListener holds, one whose joined record lists none, and one it has
+ *  no record of - on the campaign clock and after Election Day. */
+async function testCourtChiefsAndDisclosures() {
+  const probe = await buildPage("federal/index.html");
+  await settle(50);
+  const court = probe.window.kycFederal.courts.find((c) => c.kind === "district" && c.listed &&
+    c.active > 2 && !c.chiefUnsettled);
+  if (!court) {
+    suite("court chiefs and judges' disclosures", () => check("a district court to test on", false));
+    return;
+  }
+  const id = court.id;
+  const ON_THE_SITE = { name: "Pat Q. Example", title: "Chief District Judge",
+    words: "Pat Q. Example, Chief District Judge", source: "https://www.example.uscourts.gov/judges",
+    read: "2026-10-30" };
+  // The court's index row and its first active judge, made unsettled; the
+  // court's own word added where `named`.
+  const unsettle = (named) => (w) => {
+    const row = w.kycFederal.courts.find((c) => c.id === id);
+    const mine = w.kycCourt[id];
+    const judge = mine.judges.find((j) => j.status !== "senior");
+    row.chief = null;
+    row.chiefUnsettled = true;
+    delete row.chiefByCourt;
+    if (named) row.chiefByCourt = Object.assign({ judge: judge.id }, ON_THE_SITE);
+    judge.seats.forEach((s) => { if (s.court === id) s.chiefUnsettled = true; });
+    w.__unsettled = judge;
+  };
+  const DISCLOSED = { url: "https://www.courtlistener.com/person/1/pat-example/#disclosures",
+    reports: 3, first: "2018", last: "2020" };
+  const NONE_LISTED = { record: "https://www.courtlistener.com/person/2/pat-example/", reports: 0 };
+  for (const now of [CAMPAIGN_NOW, "2026-11-05T09:00:00"]) {
+    const when = now === CAMPAIGN_NOW ? "campaign" : "after Election Day";
+    for (const named of [true, false]) {
+      const hub = await buildPage("federal/index.html", { now, loaded: (w) => {
+        const row = w.kycFederal.courts.find((c) => c.id === id);
+        row.chief = null;
+        row.chiefUnsettled = true;
+        delete row.chiefByCourt;
+        if (named) row.chiefByCourt = Object.assign({ judge: "fjc-1" }, ON_THE_SITE);
+      } });
+      await settle(50);
+      suite(`federal/index.html — an unsettled chief, ${named ? "with" : "without"} the court's ` +
+        `own word (${when})`, () => {
+        const { D, errors } = hub;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const cell = D.querySelector('#courts a[href="../courts/' + id + '.html"]').closest("tr")
+          .querySelector('[data-label="Chief judge"]');
+        const text = cell.textContent;
+        if (named) {
+          check("the court's own word is named, attributed to the court, never the directory's",
+            text === "Pat Q. Example (as the court’s own site names its chief; the directory’s " +
+              "record is not settled: see the court’s page)", text);
+          check("the name opens the judge's record on the court's page",
+            !!cell.querySelector('a[href="../courts/' + id + '.html#/official/fjc-1"]'));
+        } else {
+          check("with nothing read, it reads 'Not settled'", text === "Not settled (see the court’s page)",
+            text);
+        }
+        check("it links to why", !!cell.querySelector('a[href="../courts/' + id + '.html#chiefUnsettled"]'));
+      });
+
+      const page = await buildPage("courts/" + id + ".html", { now, loaded: unsettle(named) });
+      await settle(50);
+      suite(`courts/${id}.html — an unsettled chief, ${named ? "with" : "without"} the court's own ` +
+        `word (${when})`, () => {
+        const { window: w, D, errors } = page;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const note = D.getElementById("chiefUnsettled");
+        const text = note ? note.textContent : "";
+        check("the directory's record is said, and why it cannot say who is chief",
+          text.indexOf("The directory lists " + w.__unsettled.name + " as this court’s chief judge " +
+            "and also on senior status") === 0 && /28 U\.S\.C\. 136\(a\)/.test(text), text);
+        if (named) {
+          check("the court's own words stand beside it, quoted, linked and dated",
+            text.indexOf("The court’s own website lists “Pat Q. Example, Chief District Judge” (its " +
+              "page of judges, read by this site on " + w.KYC.dateWords("2026-10-30") + ")") !== -1 &&
+            !!note.querySelector('a[href="https://www.example.uscourts.gov/judges"]'), text);
+          check("neither is taken over the other", /neither is taken over the other/.test(text) &&
+            !/nobody is shown as chief/.test(text), text);
+        } else {
+          check("with nothing read, nobody is shown as chief", /nobody is shown as chief/.test(text) &&
+            !/court’s own website/.test(text), text);
+        }
+      });
+
+      // The judge's own dialog says the same beside the seat (rule 82: the
+      // row, the dialog and the hub; the PR #181 review found it silent).
+      page.window.KYC.official.open(page.window.__unsettled.id);
+      await settle(20);
+      suite(`courts/${id}.html — the unsettled chief's dialog, ${named ? "with" : "without"} the ` +
+        `court's own word (${when})`, () => {
+        const { window: w, D, errors } = page;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const line = D.querySelector("#officialModalBody .chief-by-court");
+        const text = line ? line.textContent : "";
+        check("the directory's two words are said", text.indexOf("The directory also lists this " +
+          "judge as the court’s chief judge, which a judge on senior status cannot be (28 U.S.C. " +
+          "136(a))") === 0, text);
+        if (named) {
+          check("the court's own word beside them, quoted, linked and dated", text.indexOf(
+            "the court’s own website lists “Pat Q. Example, Chief District Judge” (its page of " +
+            "judges, read by this site on " + w.KYC.dateWords("2026-10-30") + "). Neither is taken " +
+            "over the other.") !== -1 && !!line.querySelector('a[href="https://www.example.uscourts.gov/judges"]'),
+          text);
+        } else {
+          check("with nothing read, nobody is shown as chief", /Nobody is shown as the court’s chief/.test(
+            text) && !/own website/.test(text), text);
+        }
+      });
+      page.window.KYC.official.close && page.window.KYC.official.close();
+    }
+
+    // The dialog's disclosures: held, none listed, no record.
+    const cases = [["held", DISCLOSED], ["none listed", NONE_LISTED], ["no record", null]];
+    for (const [what, held] of cases) {
+      let judgeId = null;
+      const page = await buildPage("courts/" + id + ".html", { now, loaded: (w) => {
+        const judge = w.kycCourt[id].judges[0];
+        judgeId = judge.id;
+        if (held) judge.disclosures = held; else delete judge.disclosures;
+        w.kycFederal.sources.disclosures = { export: "2026-09-30", read: "2026-11-01",
+          url: "https://www.courtlistener.com/" };
+      } });
+      await settle(50);
+      page.window.KYC.official.open(judgeId);
+      await settle(20);
+      suite(`courts/${id}.html — a judge's financial disclosures: ${what} (${when})`, () => {
+        const { window: w, D, errors } = page;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const body = D.getElementById("officialModalBody");
+        const chip = [...body.querySelectorAll("a.link-chip")].find((a) =>
+          a.textContent === "Financial disclosures");
+        const note = D.getElementById("officialDisclosures");
+        const text = note ? note.textContent : "";
+        check("never says a report was not filed", !/not filed|none filed|no reports filed/i.test(
+          body.textContent));
+        if (what === "held") {
+          check("a 'Financial disclosures' link to CourtListener's page for them",
+            !!chip && chip.getAttribute("href") === DISCLOSED.url);
+          check("says what the link is, which years and as of when", text.indexOf(
+            "Financial disclosure reports, as CourtListener holds them: 3 reports, for 2018 to 2020 " +
+            "(its data of " + w.KYC.dateWords("2026-09-30") + ").") === 0, text);
+          check("says how it was found: by the FJC id, never a name", /Federal Judicial Center’s id/.test(text) &&
+            /never a search by name/.test(text), text);
+        } else if (what === "none listed") {
+          // The PR #181 review: Judge Graber's reports are under a duplicate
+          // record carrying no FJC id, so the words speak of the joined
+          // record alone, which is linked for a reader to look.
+          const record = [...body.querySelectorAll("a.link-chip")].find((a) =>
+            a.textContent === "CourtListener record");
+          check("no 'Financial disclosures' link; the record itself is linked", !chip && !!record &&
+            record.getAttribute("href") === NONE_LISTED.record, record && record.getAttribute("href"));
+          check("the words are about the record carrying the FJC id, its data dated", text.indexOf(
+            "Financial disclosure reports: the CourtListener record that carries this judge’s Federal " +
+            "Judicial Center id lists no reports (its data of " + w.KYC.dateWords("2026-09-30") +
+            ").") === 0 && /cannot say whether CourtListener holds reports for them under another/.test(
+            text), text);
+          check("never that CourtListener holds none for the judge",
+            !/lists no reports for this judge/.test(body.textContent), text);
+        } else {
+          check("no link and no word", !chip && !note);
+        }
+      });
+    }
+  }
+}
+
 async function testFederalAudit() {
   const hub = await buildPage("federal/index.html");
   await settle(50);
@@ -13066,8 +13875,14 @@ async function testFederalAudit() {
     const unsettled = d.courts.find((c) => c.chiefUnsettled);
     const cell = unsettled && D.querySelector('#courts a[href="../courts/' + unsettled.id + '.html"]')
       .closest("tr").querySelector('[data-label="Chief judge"]');
-    check("a chief the directory contradicts reads 'Not settled', linked to why", !unsettled ||
-      (/^Not settled \(see the court’s page\)$/.test(cell.textContent) &&
+    // Where the court's own site was read, its word stands beside the note
+    // (kyc/court_chiefs.py); testCourtChiefsAndDisclosures makes both states.
+    check("a chief the directory contradicts reads 'Not settled' or the court's own word, linked " +
+      "to why", !unsettled ||
+      ((unsettled.chiefByCourt
+        ? cell.textContent.indexOf(unsettled.chiefByCourt.name + " (as the court’s own site names " +
+          "its chief; the directory’s record is not settled: see the court’s page)") === 0
+        : /^Not settled \(see the court’s page\)$/.test(cell.textContent)) &&
        !!cell.querySelector('a[href$="#chiefUnsettled"]')), cell && cell.textContent);
     // FEDERAL-24: the Article I courts are named and linked.
     const lede = D.getElementById("courtsLede");
@@ -13526,6 +14341,525 @@ function plainList(html, attr, id) {
   return m ? plainItems(m[1]) : [];
 }
 
+/* An official's share page (o/<id>.html, kyc/official_share.py; rule 96,
+ * TECH-09): the President, the Vice President, the Cabinet and every
+ * federal judge, each in the words the officials' dialog gives them
+ * (KYC.official.shareWords, one table), with the picture and credit the
+ * dialog shows, by its route only (rules 24, 82, 87, 101). Compared for
+ * every official on both clocks - the campaign's and after Election Day,
+ * since the pages land after it - and every case of the fixture asked of
+ * the page code. */
+async function testOfficialSharePages() {
+  // The federal officials' and judges' own: the governors' pages share the
+  // folder, and testGovernorSharePages reads them.
+  const files = fs.readdirSync(path.join(SITE, "o")).filter((f) => /\.html$/.test(f) && !/^gov-/.test(f));
+  const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
+  // Each court's file, as its page loads it: the record a court's page opens.
+  const courts = {};
+  fs.readdirSync(path.join(SITE, "data", "judiciary")).forEach((f) => {
+    if (!/\.js$/.test(f) || f === "index.js") return;
+    const sandbox = { window: {} };
+    require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "judiciary", f), "utf8"), sandbox);
+    Object.assign(courts, sandbox.window.kycCourt || {});
+  });
+  const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "official_share_words.json"), "utf8"));
+  for (const [clock, now] of [["the campaign's clock", CAMPAIGN_NOW], ["after Election Day", "2026-11-05T12:00:00"]]) {
+    const hub = await buildPage("federal/index.html", { now });
+    await settle(50);
+    const W = hub.window;
+    const K = W.KYC;
+    const onHub = K.official.officials();
+    const parse = (html) => new W.DOMParser().parseFromString(html, "text/html");
+    const text = (doc, sel) => {
+      const el = doc.querySelector(sel);
+      return el ? el.textContent : "";
+    };
+    const creditText = (credit) => {
+      const div = W.document.createElement("div");
+      div.innerHTML = K.photoCreditHtml(credit);
+      return div.textContent;
+    };
+    suite(`officials' share pages — one each, in the dialog's words (rule 96), ${clock}`, () => {
+      check("the federal page loads", hub.errors.length === 0, hub.errors.join(" | "));
+      // Everyone the dialog answers to: the hub's, and each court's judges.
+      const want = new Set(Object.keys(onHub));
+      Object.keys(courts).forEach((cid) => (courts[cid].judges || []).concat(courts[cid].retired || [])
+        .forEach((j) => want.add(j.id)));
+      const have = new Set(files.map((f) => f.replace(/\.html$/, "")));
+      const missing = [...want].filter((id) => !have.has(id));
+      const extra = [...have].filter((id) => !want.has(id));
+      check("a share page for everyone the dialog answers to, and none for anyone else",
+        missing.length === 0 && extra.length === 0 && have.size > 1000,
+        `${have.size} pages; missing ${missing.slice(0, 4)}; extra ${extra.slice(0, 4)}`);
+      check("no official is a profile (rule 27): none shares an id with one",
+        [...have].every((id) => /^(x-|fjc-)/.test(id)));
+      const wrong = [];
+      const images = [];
+      let photos = 0;
+      files.forEach((f) => {
+        const id = f.replace(/\.html$/, "");
+        const html = fs.readFileSync(path.join(SITE, "o", f), "utf8");
+        const doc = parse(html);
+        const view = (doc.getElementById("shareView") || { getAttribute: () => "" }).getAttribute("href");
+        const m = /^\.\.\/(federal\/index|courts\/([a-z0-9-]+))\.html#\/official\/(.+)$/.exec(view || "");
+        if (!m || m[3] !== id) { wrong.push(`${id}: view ${view}`); return; }
+        let found = null;
+        if (m[2]) {
+          const court = courts[m[2]] || {};
+          const rec = (court.judges || []).concat(court.retired || []).filter((j) => j.id === id)[0];
+          if (rec) found = { kind: "judge", person: rec };
+        } else {
+          found = onHub[id] || null;
+        }
+        if (!found) { wrong.push(`${id}: nobody at ${view}`); return; }
+        const words = K.official.shareWords(found);
+        const shown = {
+          kind: text(doc, ".share-kind"),
+          office: text(doc, ".share-office"),
+          inLaw: text(doc, ".share-in-law"),
+          party: text(doc, ".share-party"),
+          status: text(doc, ".share-status"),
+          appointedBy: text(doc, ".share-appointed").replace(/^Appointed by /, ""),
+          nominated: text(doc, ".share-nominated").replace(/\.$/, ""),
+          leaving: text(doc, ".share-leaving").replace(/\.$/, ""),
+          source: text(doc, ".share-source").replace(/^Source: /, ""),
+        };
+        Object.keys(words).forEach((k) => {
+          const expect = k === "source" ? words.source.replace(/\.?$/, ".") : words[k];
+          if (shown[k] !== expect) wrong.push(`${id} ${k}: "${shown[k]}" for "${expect}"`);
+        });
+        if (doc.querySelector("h1").textContent !== found.person.name) wrong.push(`${id}: name`);
+        // The description is the name and the head's words, every one of
+        // them, and nothing of its own: take each out, and only the joins
+        // are left. A former officer's leads with "Former, this term".
+        const desc = (doc.querySelector('meta[name="description"]') || { content: "" }).content;
+        const said = { leader: ["kind", "party", "status"], officer: ["office", "kind", "status"],
+                       former: ["kind", "office", "status"],
+                       judge: ["kind", "office", "status", "appointedBy", "leaving", "nominated"] }[found.kind];
+        let rest = desc;
+        said.concat().sort((a, b) => words[b].length - words[a].length).forEach((k) => {
+          if (!words[k]) return;
+          const at = rest.indexOf(words[k]);
+          if (at === -1) wrong.push(`${id}: the description lacks ${k} "${words[k]}"`);
+          else rest = rest.slice(0, at) + "|" + rest.slice(at + words[k].length);
+        });
+        rest = rest.replace(found.person.name, "|").replace("; appointed by |", "|");
+        if (!/^[|\s.,:;()—]*$/.test(rest)) wrong.push(`${id}: the description's own words "${rest}"`);
+        if (found.kind === "former" && desc.indexOf(words.kind) > desc.indexOf(words.office)) {
+          wrong.push(`${id}: a former officer's description must lead with "${words.kind}"`);
+        }
+        // A party only where the dialog gives one: never a judge's or a
+        // Cabinet officer's.
+        if (found.kind !== "leader" && (shown.party || (found.person.party && desc.indexOf(found.person.party) !== -1))) {
+          wrong.push(`${id}: a party`);
+        }
+        // The picture: the dialog's, by its route, or the site's card.
+        const img = (doc.querySelector('meta[property="og:image"]') || { content: "" }).content;
+        if (/\/assets\/social-card\.png$/.test(img)) {
+          if (doc.querySelector(".share-photo-credit")) wrong.push(`${id}: a credit with no photograph`);
+          return;
+        }
+        photos += 1;
+        const pic = K.official.picture(found.person, 116);
+        const p = found.person;
+        const copy = p.photo ? K.copyOf(p.photo, p.photoCopy) : null;
+        const ok = !!pic && !/Special:/.test(img) && (p.photo
+          ? (copy ? img === host + copy.src
+            : (p.photoSet || []).some((s) => s[0] === img) || img === p.photo)
+          : !!(p.portrait && p.portrait.licence) && /^https:\/\/upload\.wikimedia\.org\//.test(img) &&
+            ((p.portrait.set || []).some((s) => s[1] === img) || img === p.portrait.url));
+        if (!ok) images.push(`${id}: ${img}`);
+        else if (text(doc, ".share-photo-credit") !== creditText(pic.credit)) {
+          wrong.push(`${id}: credit "${text(doc, ".share-photo-credit")}" for "${creditText(pic.credit)}"`);
+        }
+      });
+      check("every official's share page says what the dialog says, from one table",
+        wrong.length === 0, wrong.slice(0, 6).join(" | ") || `${files.length} pages`);
+      check("a share image is the dialog's photograph by its route, credited as the dialog credits it, " +
+        "or the site's card", images.length === 0 && photos > 500,
+        images.slice(0, 4).join(" | ") || `${photos} photographs`);
+      const off = fixture.cases.filter(([kind, person, office, words]) => {
+        const got = K.official.shareWords({ kind, person, office: office || undefined });
+        return JSON.stringify(Object.keys(words).sort().map((k) => [k, words[k]])) !==
+          JSON.stringify(Object.keys(got).sort().map((k) => [k, got[k]]));
+      });
+      check("every case of the words table, asked of the page code (tests/fixtures/official_share_words.json)",
+        fixture.cases.length >= 30 && off.length === 0,
+        off.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${fixture.cases.length} cases`);
+      check("each case leaving the seat is in the future tense, and only the list's reasons are said",
+        fixture.cases.filter(([kind, person]) => kind === "judge" && person.leaving).length >= 3 &&
+        fixture.cases.every(([kind, person, office, words]) => !words.leaving || /^Will /.test(words.leaving)));
+      // A copy's credit gives its original's weight: rounded alike on both
+      // sides, ties too (Python rounds a tie to even, toFixed up).
+      const weighed = (fixture.weights || []).filter(([n, words]) => K.weightWords(n) !== words);
+      check("an original's weight in a copy's credit, as the page writes it",
+        (fixture.weights || []).length >= 10 && weighed.length === 0,
+        weighed.slice(0, 4).map(([n, w]) => `${n}: ${w} for ${K.weightWords(n)}`).join(" | "));
+    });
+  }
+
+  // The dialog draws those words, and its Copy link shares the page.
+  const hub = await buildPage("federal/index.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  const tne = await buildPage("courts/tn-e.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  // A court with a judge leaving their seat, as the announced list has it,
+  // whichever court that is on the day (Southwick's Fifth Circuit once).
+  const goingCourt = Object.keys(courts).sort().find((cid) => (courts[cid].judges || []).some((j) => j.leaving));
+  const going = goingCourt ? await buildPage(`courts/${goingCourt}.html`, { now: CAMPAIGN_NOW }) : null;
+  if (going) await settle(50);
+  suite("the officials' dialog — the share page's words, and its address to share", () => {
+    const drawn = [];
+    const check1 = (page, id) => {
+      const { window: w, D } = page;
+      const K = w.KYC;
+      K.official.open(id);
+      const found = K.official.officials()[id];
+      const words = K.official.shareWords(found);
+      const kind = D.getElementById("officialModalKind").textContent;
+      const meta = D.getElementById("officialModalMeta");
+      const status = meta.querySelector(".official-status");
+      if (kind !== words.kind) drawn.push(`${id}: kind ${kind}`);
+      if ((status ? status.textContent.trim() : "") !== words.status) drawn.push(`${id}: status`);
+      const leaving = meta.querySelector(".official-leaving");
+      if ((leaving ? leaving.textContent.trim() : "") !== words.leaving) drawn.push(`${id}: leaving`);
+      if (words.office && meta.textContent.indexOf(words.office) === -1) drawn.push(`${id}: office`);
+      if (words.appointedBy && meta.textContent.indexOf("Appointed by " + words.appointedBy) === -1) {
+        drawn.push(`${id}: appointed`);
+      }
+      if (D.getElementById("officialModalBody").textContent.indexOf(words.source.replace(/\.$/, "")) === -1 &&
+          D.getElementById("officialModalSource").textContent.indexOf(words.source) === -1) {
+        drawn.push(`${id}: source`);
+      }
+      K.official.close();
+    };
+    const d = hub.window.kycFederal;
+    const ids = [d.president.id, d.vicePresident.id]
+      .concat(d.offices.filter((o) => o.holder).slice(0, 4).map((o) => o.holder.id))
+      .concat((d.former || []).slice(0, 2).map((p) => p.id))
+      .concat(d.supremeCourt.members.map((j) => j.id))
+      .concat((d.supremeCourt.retired || []).map((j) => j.id));
+    ids.forEach((id) => check1(hub, id));
+    (tne.window.kycCourt["tn-e"].judges || []).forEach((j) => check1(tne, j.id));
+    if (going) (going.window.kycCourt[goingCourt].judges || []).forEach((j) => check1(going, j.id));
+    check("the dialog draws its head from the same words, on the hub and a court's page",
+      drawn.length === 0 && ids.length > 12, drawn.slice(0, 5).join(" | "));
+  });
+
+  const W = hub.window;
+  const K = W.KYC;
+  const someone = W.kycFederal.supremeCourt.members[0];
+  K.official.open(someone.id);
+  const copy = hub.D.getElementById("officialModalCopy");
+  let copied = null;
+  Object.defineProperty(W.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  copy.click();
+  await settle(0);
+  const viaShare = copied;
+  K.official.close();
+  K.official.open("x-nobody-of-that-name");
+  copied = null;
+  hub.D.getElementById("officialModalCopy").click();
+  await settle(0);
+  const nobody = copied;
+  K.official.close();
+  suite("Copy link in the officials' dialog — the share page's address (TECH-09)", () => {
+    // From the site's root: the federal page sits a folder down.
+    const want = new W.URL("../o/" + someone.id + ".html", W.location.href).href;
+    check("an official's link is their share page", viaShare === want && /\/o\/fjc-\d+\.html$/.test(want),
+      `${viaShare} for ${want}`);
+    check("a link nobody here answers to stays the view's, with no share page to unfurl",
+      typeof nobody === "string" && /#\/official\/x-nobody-of-that-name$/.test(nobody), String(nobody));
+  });
+}
+
+/* Rule 96 for the governor overlays (rule 91): o/gov-<ST>.html and
+ * o/gov-<ST>-<name>.html, written by kyc/governor_share.py in the overlay's
+ * own words (KYC.governor.shareWords). Every page is compared with the
+ * overlay's words on the day the build's results were read, as the
+ * profiles' are; every case of tests/fixtures/governor_share_words.json is
+ * asked of the page code on both clocks; and the overlay draws its head from
+ * the same words, its Copy link sharing the page. */
+async function testGovernorSharePages() {
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  const asOf = String((meta.election || {}).resultsAsOf || CAMPAIGN_NOW).slice(0, 10);
+  const files = fs.readdirSync(path.join(SITE, "o")).filter((f) => /^gov-.*\.html$/.test(f));
+  const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
+  const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "governor_share_words.json"), "utf8"));
+  const norm = (s) => String(s || "").replace(/\s+/g, " ").trim();
+  // The classes kyc.css makes a block inside .modal-meta (a sentence there).
+  const sentenceBlocks = new Set([...fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8")
+    .matchAll(/\.modal-meta \.([\w-]+)\s*\{[^}]*display:\s*block/g)].map((m) => m[1]));
+
+  {
+    const page = await buildPage("states/ga.html", { now: asOf + "T12:00:00" });
+    await settle(50);
+    const W = page.window;
+    const K = W.KYC;
+    // A state's page holds its own state's part of the governments
+    // (data/stategov/<st>.js, PR #172), and the share pages are every
+    // state's: the checks of every governor and candidate read the whole
+    // file, as the grid's Governors view and the map load it.
+    const part = Object.keys(W.kycStateGov.states);
+    W.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
+    const parse = (html) => new W.DOMParser().parseFromString(html, "text/html");
+    const text = (doc, sel) => {
+      const el = doc.querySelector(sel);
+      return el ? norm(el.textContent) : "";
+    };
+    const creditText = (credit) => {
+      const div = W.document.createElement("div");
+      div.innerHTML = K.photoCreditHtml(credit);
+      return norm(div.textContent);
+    };
+    suite(`governors' share pages — one each, in the overlay's words (rules 91, 96), as of ${asOf}`, () => {
+      check("the state page loads", page.errors.length === 0, page.errors.join(" | "));
+      check("the state's page loaded its own state's part alone, before the whole file was read",
+        part.join(" ") === "GA", part.join(" "));
+      // Everyone the overlay answers to: each governor, and each candidate
+      // on a list for an office on this ballot.
+      const want = new Set();
+      Object.keys(W.kycStateGov.states).forEach((code) => {
+        const s = W.kycStateGov.states[code];
+        if (!s.governor || !K.governor.find(s.governor.id)) return;
+        want.add(s.governor.id);
+        const parts = K.stategov.listParts(code, "governor");
+        if (parts && !parts.none) parts.list.candidates.forEach((p) => { if (K.governor.find(p.id)) want.add(p.id); });
+      });
+      const have = new Set(files.map((f) => f.replace(/\.html$/, "")));
+      const missing = [...want].filter((id) => !have.has(id));
+      const extra = [...have].filter((id) => !want.has(id));
+      check("a share page for every governor and candidate the overlay answers to, and none else",
+        missing.length === 0 && extra.length === 0 && have.size > 150,
+        `${have.size} pages; missing ${missing.slice(0, 4)}; extra ${extra.slice(0, 4)}`);
+      check("no governor is a profile (rule 27): every id is the overlay's own",
+        [...have].every((id) => /^gov-[A-Z]{2}(?:-[a-z0-9-]+)?$/.test(id)));
+      const wrong = [];
+      const images = [];
+      let photos = 0;
+      let candidates = 0;
+      let writeInsApart = 0;
+      files.forEach((f) => {
+        const id = f.replace(/\.html$/, "");
+        const html = fs.readFileSync(path.join(SITE, "o", f), "utf8");
+        const doc = parse(html);
+        const found = K.governor.find(id);
+        if (!found) { wrong.push(`${id}: nobody`); return; }
+        if (found.kind === "candidate") candidates += 1;
+        const view = (doc.getElementById("shareView") || { getAttribute: () => "" }).getAttribute("href");
+        if (view !== "../states/" + found.code.toLowerCase() + ".html#/official/" + id) {
+          wrong.push(`${id}: view ${view}`);
+        }
+        const words = K.governor.shareWords(found);
+        const shown = {
+          kind: text(doc, ".share-kind"),
+          office: text(doc, ".share-office strong"),
+          seeking: found.kind === "candidate" ? text(doc, ".share-office").replace(/ Governor • [A-Z]{2}$/, "") : "",
+          party: text(doc, ".share-party"),
+          since: text(doc, ".share-since"),
+          mark: text(doc, ".share-mark"),
+          holder: text(doc, ".share-holder"),
+          status: text(doc, ".share-status"),
+          printed: text(doc, ".share-printed"),
+          ballotName: text(doc, ".share-ballot-name"),
+          surnameOnly: text(doc, ".share-surname-only"),
+          runningMate: text(doc, ".share-mate").replace(/^Running mate: /, ""),
+          term: text(doc, ".share-term"),
+          record: text(doc, ".share-record"),
+          past: text(doc, ".share-past").replace(/(?:: the official results)?\.$/, ""),
+          results: ((doc.querySelector(".share-past a") || { getAttribute: () => "" }).getAttribute("href")) || "",
+          source: text(doc, ".share-source"),
+        };
+        Object.keys(words).forEach((k) => {
+          if (shown[k] !== norm(words[k])) wrong.push(`${id} ${k}: "${shown[k]}" for "${words[k]}"`);
+        });
+        Object.keys(shown).forEach((k) => { if (!(k in words)) wrong.push(`${id}: ${k} is not the overlay's`); });
+        if (doc.querySelector("h1").textContent !== found.person.name) wrong.push(`${id}: name`);
+        const desc = (doc.querySelector('meta[name="description"]') || { content: "" }).content;
+        ["party", "since", "mark", "status", "past"].forEach((k) => {
+          // The mark's two parts are two sentences there (PR #180 review:
+          // "Not elected in 2026 Next elected: November 2029" read as a glitch).
+          const want = k === "mark" ? words.mark.replace(/ Next /, ". Next ") : words[k];
+          if (want && desc.indexOf(want) === -1) wrong.push(`${id}: the description lacks ${k}`);
+        });
+        if (/\d{4} Next /.test(desc)) wrong.push(`${id}: the mark's two parts run together in the description`);
+        // A write-in is cited to the document that names them: the office's
+        // list of write-ins where it keeps one apart (rules 19, 91; PR #180
+        // review), never the printed list without their name.
+        const listed = found.kind === "candidate"
+          ? K.stategov.ballotOf(found.code).offices.governor.candidates : null;
+        if (listed) {
+          const named = found.person.writeIn && listed.writeIns ? listed.writeIns : listed;
+          const cited = (doc.querySelector(".share-source a") || { getAttribute: () => "" }).getAttribute("href");
+          if (cited !== named.url || text(doc, ".share-source").indexOf(named.source) === -1) {
+            wrong.push(`${id}: cites ${cited} for ${named.url}`);
+          }
+          if (found.person.writeIn && listed.writeIns) writeInsApart += 1;
+        }
+        if (desc.indexOf(found.person.name) !== 0) wrong.push(`${id}: the description must lead with the name`);
+        if (/ • /.test(desc)) wrong.push(`${id}: a card's bullet in the description`);
+        // Never a winner, and in the past tense after the election.
+        if (/\b(won|elected governor|winner:)/i.test(desc + doc.body.textContent.replace(/names no winner/g, ""))) {
+          wrong.push(`${id}: a winner named`);
+        }
+        // The picture: the overlay's, by its route, credited as it credits it, or the site's card.
+        const img = (doc.querySelector('meta[property="og:image"]') || { content: "" }).content;
+        const p = found.person;
+        const url = found.kind === "governor" ? p.headshot : (p.writeIn ? "" : p.photo);
+        const credit = found.kind === "governor"
+          ? (p.headshotBy ? { by: p.headshotBy, page: p.headshotPage } : null) : p.photoCredit;
+        const drawn = K.stategov.cardPhoto(url, p.photoCopy, credit);
+        if (/\/assets\/social-card\.png$/.test(img)) {
+          if (drawn.credit) images.push(`${id}: the overlay shows a photograph, the page the card`);
+          if (doc.querySelector(".share-photo-credit")) wrong.push(`${id}: a credit with no photograph`);
+          return;
+        }
+        photos += 1;
+        const copy = K.copyOf(url, p.photoCopy);
+        const expect = copy ? host + copy.src : /^photos\//.test(url) ? host + url : url;
+        if (!drawn.credit || img !== expect || /Special:/.test(img)) {
+          images.push(`${id}: ${img} for ${expect}`);
+        } else if (text(doc, ".share-photo-credit") !== creditText(K.copyCredit(credit, url, p.photoCopy))) {
+          wrong.push(`${id}: credit "${text(doc, ".share-photo-credit")}"`);
+        }
+      });
+      check("every governor's and candidate's share page says what the overlay says, from one table",
+        wrong.length === 0 && candidates > 100, wrong.slice(0, 6).join(" | ") || `${files.length} pages`);
+      check("the write-ins whose office lists them apart are among them, each cited to that list",
+        writeInsApart > 0, `${writeInsApart} write-ins`);
+      check("a share image is the overlay's photograph by its route, credited as the overlay credits it, " +
+        "or the site's card", images.length === 0 && photos > 50,
+        images.slice(0, 4).join(" | ") || `${photos} photographs`);
+    });
+  }
+
+  for (const [clock, now, post] of [["the campaign's clock", CAMPAIGN_NOW, false],
+                                    ["after Election Day", "2026-11-05T12:00:00", true]]) {
+    const page = await buildPage("states/ga.html", { now });
+    await settle(50);
+    const W = page.window;
+    const K = W.KYC;
+    // The overlay's head is checked for a governor whose office is not on
+    // this ballot too, and Georgia's is: the whole file is read, since a
+    // state's page holds its own part alone (PR #172). Read from Georgia's
+    // part only, that governor was never found and the check went quiet.
+    W.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
+    suite(`the governors' words table asked of the page code, ${clock}`, () => {
+      const data = W.kycStateGov;
+      const savedState = data.states.GA;
+      const savedSources = data.sources;
+      const voting = (W.kycBuildMeta.voting = W.kycBuildMeta.voting || {});
+      const savedVoting = voting.GA;
+      const rows = fixture.cases.filter((row) => row[0] === post);
+      const off = rows.filter(([_post, code, kind, person, state, sources, results, words]) => {
+        data.states[code] = state;
+        data.sources = sources;
+        voting[code] = results ? { results } : {};
+        let got;
+        try {
+          got = K.governor.shareWords({ kind, code, person });
+        } finally {
+          data.states.GA = savedState;
+          data.sources = savedSources;
+          voting.GA = savedVoting;
+        }
+        return JSON.stringify(Object.keys(words).sort().map((k) => [k, words[k]])) !==
+          JSON.stringify(Object.keys(got).sort().map((k) => [k, got[k]]));
+      });
+      check("every case of the words table (tests/fixtures/governor_share_words.json)",
+        rows.length >= 60 && off.length === 0,
+        off.slice(0, 2).map((r) => JSON.stringify([r[2], r[3].id, r[7]])).join(" | ") || `${rows.length} cases`);
+      check(post ? "after Election Day every case is in the past tense and names no winner"
+        : "before it, none is in the past tense",
+        rows.every((r) => r[7].kind !== "Governor (Candidate)" || (r[7].seeking === "Ran for") === post) &&
+        rows.every((r) => (post ? !r[7].holder : !r[7].past && !r[7].results)) &&
+        rows.some((r) => post === !!r[7].past) &&
+        rows.every((r) => !/\b(won|winner|elected governor)\b/i.test(JSON.stringify(r[7]).replace(/names no winner/g, ""))));
+
+      // The overlay draws its head from the same words.
+      const drawn = [];
+      const modal = () => page.D.getElementById("governorModal");
+      const t = (sel) => norm((modal().querySelector(sel) || {}).textContent || "");
+      const ids = [data.states.GA.governor.id].concat(
+        data.states.GA.ballot2026.offices.governor.candidates.candidates.map((p) => p.id));
+      const notUp = Object.keys(data.states).find((c) => !K.stategov.governorUp(c) && data.states[c].governor);
+      if (notUp) ids.push(data.states[notUp].governor.id);
+      ids.forEach((id) => {
+        K.governor.open(id);
+        const found = K.governor.find(id);
+        const words = K.governor.shareWords(found);
+        if (t("#governorModalKind") !== words.kind) drawn.push(`${id}: kind`);
+        const metaText = t("#governorModalMeta");
+        if (metaText.indexOf(norm(words.seeking ? words.seeking + " " + words.office : words.office)) === -1) drawn.push(`${id}: office`);
+        if (words.since && metaText.indexOf(words.since) === -1) drawn.push(`${id}: since`);
+        const status = t("#governorModalStatus");
+        ["mark", "holder", "status", "ballotName", "surnameOnly", "past"].forEach((k) => {
+          if (words[k] && status.indexOf(norm(words[k])) === -1) drawn.push(`${id}: ${k}`);
+        });
+        if (words.results && !modal().querySelector('#governorModalStatus a[href="' + words.results + '"]')) {
+          drawn.push(`${id}: the results link`);
+        }
+        // A sentence with a link in it is one block: as .modal-meta's
+        // inline-flex item, the results line's sentence, link and full stop
+        // stood in three narrow columns on a phone (PR #180 review).
+        [...modal().querySelector("#governorModalStatus").children].forEach((child) => {
+          const mixed = [...child.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) &&
+            child.children.length > 0;
+          if (mixed && ![...child.classList].some((c) => sentenceBlocks.has(c))) {
+            drawn.push(`${id}: "${norm(child.textContent).slice(0, 40)}" is not one block`);
+          }
+        });
+        if (words.printed && t("#governorModalPrinted") !== words.printed) drawn.push(`${id}: printed`);
+        if (words.term && metaText.indexOf(words.term) === -1) drawn.push(`${id}: term`);
+        if (words.runningMate && t("#governorModalBody").indexOf(words.runningMate) === -1) drawn.push(`${id}: mate`);
+        if (words.record && t("#governorModalBody").indexOf(words.record) === -1) drawn.push(`${id}: record`);
+        if (t("#governorModalSource") !== norm(words.source)) drawn.push(`${id}: source "${t("#governorModalSource")}"`);
+        K.governor.close();
+      });
+      check("the overlay draws its head and footer from the same words", drawn.length === 0 && ids.length > 3,
+        drawn.slice(0, 5).join(" | "));
+      check("a governor whose office is not on the ballot is among them", !!notUp, notUp || "none found");
+    });
+  }
+
+  // Copy link shares the page, and a link nobody answers to stays the view's.
+  const page = await buildPage("states/ga.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  const W = page.window;
+  const K = W.KYC;
+  let copied = null;
+  Object.defineProperty(W.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  const gid = W.kycStateGov.states.GA.governor.id;
+  K.governor.open(gid);
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const governorLink = copied;
+  K.governor.close();
+  const cid = W.kycStateGov.states.GA.ballot2026.offices.governor.candidates.candidates[0].id;
+  K.governor.open(cid);
+  copied = null;
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const candidateLink = copied;
+  K.governor.close();
+  K.governor.open("gov-GA-nobody-of-that-name");
+  copied = null;
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const nobody = copied;
+  K.governor.close();
+  suite("Copy link in the governor overlay — the share page's address (rule 96)", () => {
+    const want = (id) => new W.URL("../o/" + encodeURIComponent(id) + ".html", W.location.href).href;
+    check("a governor's link is their share page", governorLink === want(gid) && /\/o\/gov-GA\.html$/.test(governorLink),
+      `${governorLink} for ${want(gid)}`);
+    check("a candidate's link is theirs", candidateLink === want(cid), `${candidateLink} for ${want(cid)}`);
+    check("a link nobody here answers to stays the overlay's address, with no share page to unfurl",
+      typeof nobody === "string" && /#\/official\/gov-GA-nobody-of-that-name$/.test(nobody), String(nobody));
+  });
+}
+
 /* Rule 96: a profile's and a race's share page, and a state page's plain
  * lists, are written by the pipeline (kyc/share.py) in the words the page
  * code gives the same people. Every one is compared with KYC.standing as
@@ -13749,20 +15083,22 @@ async function testSharePages() {
   const AFTER_DAY = new window.Date(2026, 10, 5, 12);
   suite("share pages' status words — every case, asked of the page code (rule 96)", () => {
     const off = [];
-    // "held": the day after an open primary's December round (KYC.runoffWords).
+    // "held": the day after a December round - an open primary's general
+    // election or a general election runoff (KYC.runoffWords).
     const dayAfter = (iso) => {
       const [y, m, d] = iso.split("-").map(Number);
       return new window.Date(y, m - 1, d + 1, 12);
     };
     table.statuses.forEach((row) => {
-      const [status, allParty, source, round, held, decided, own, appointed, unconfirmed, minor,
-        post, label, gone] = row;
+      const [status, allParty, source, round, runoff, held, decided, own, appointed, unconfirmed,
+        minor, post, label, gone] = row;
       const spec = KYC.raceStatus(status, "long", { own: !!own, appointed: !!appointed,
         unconfirmed: !!unconfirmed, minor: !!minor, allParty: allParty || undefined,
-        source: source || undefined, round: round || undefined, decided: decided || undefined,
-        now: held ? dayAfter(round) : post ? AFTER_DAY : CAMPAIGN_DAY, record: false });
+        source: source || undefined, round: round || undefined, runoffDay: runoff || undefined,
+        decided: decided || undefined,
+        now: held ? dayAfter(round || runoff) : post ? AFTER_DAY : CAMPAIGN_DAY, record: false });
       if (!spec || spec.label !== label || !!spec.off !== !!gone) {
-        off.push(`${JSON.stringify(row.slice(0, 11))}: "${spec && spec.label}" for "${label}"`);
+        off.push(`${JSON.stringify(row.slice(0, 12))}: "${spec && spec.label}" for "${label}"`);
       }
     });
     // The record phase: a member who did not run is in the past tense once
@@ -13782,10 +15118,13 @@ async function testSharePages() {
         `${(table.record || []).length} cases`);
     check("every status, member or not, appointed, unconfirmed, minor-party, all-party, " +
       "certified or qualified, before and after Election Day, an open primary's December " +
-      "round before and after its day, and a result each kind of December round decided",
-      table.statuses.length > 1000 && table.statuses.some((row) => row[5] && row[5].open) &&
-      table.statuses.some((row) => row[5] && !row[5].open) &&
-      table.statuses.some((row) => row[3] && row[4]) && off.length === 0,
+      "round and a general election runoff before and after its day, and a result each kind " +
+      "of December round decided",
+      table.statuses.length > 1000 && table.statuses.some((row) => row[6] && row[6].open) &&
+      table.statuses.some((row) => row[6] && !row[6].open) &&
+      table.statuses.some((row) => row[3] && row[5]) &&
+      table.statuses.some((row) => row[4] && row[5] && row[0] === "runoff" &&
+        /^Ran in the December 1 general election runoff/.test(row[12])) && off.length === 0,
       off.slice(0, 4).join(" | ") || `${table.statuses.length} cases`);
     const credited = table.credits.filter(([status, source, name, credit]) =>
       creditOf(KYC.raceStatus(status, "long", { source: source || undefined,
@@ -13850,6 +15189,32 @@ async function testSharePages() {
       ["elected", "defeated", "nominee", "runoff", "eliminated", "withdrawn", "unlisted", ""].every(
         (status) => table.contest.some((row) => row[0] === status)) && contest.length === 0,
       contest.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") || `${table.contest.length} cases`);
+    // The same, in a round of its own: the rows above ask with no race, so
+    // they never meet a round's day. The pipeline's race and date are laid
+    // over the page's for each row, and put back.
+    const roundsOff = table.contestRounds.filter(([kind, day, read, renumbered, clause]) => {
+      const race = window.kycRaces.find((r) => r.id === (renumbered ? "H-AL-01-2026" : "S-AL-2026"));
+      if (!race) return true;
+      const saved = { generalRunoff: race.generalRunoff, primaryKind: race.primaryKind };
+      race.generalRunoff = day;
+      race.primaryKind = kind || undefined;
+      const [y, m, d] = read.split("-").map(Number);
+      const line = KYC.contestLine({ id: "FAKE", isCandidate: false, name: "A Member",
+        party: "Republican", officeLabel: "House \u2022 AL-2", raceId: "H-AL-02-2026",
+        contestLabel: renumbered ? "House \u2022 AL-1" : "Senate \u2022 AL",
+        contestRaceId: race.id, raceStatusRace: race.id, raceStatus: "runoff",
+        renumbered: !!renumbered }, { now: new window.Date(y, m - 1, d, 12) });
+      Object.assign(race, saved);
+      return !line || line.clause !== clause;
+    });
+    check("and a member's other run in a round, the day before it, on the day and after it",
+      table.contestRounds.length >= 18 && roundsOff.length === 0 &&
+        table.contestRounds.some((row) => /; the result is awaited$/.test(row[4])) &&
+        table.contestRounds.some((row) => /^is running/.test(row[4])),
+      roundsOff.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") || `${table.contestRounds.length} cases`);
+    check("and each day a general election runoff is held is asked of its words",
+      ["November 17", "December 1"].every((day) => table.statuses.some((row) => row[4] && row[5] &&
+        row[12] === "Ran in the " + day + " general election runoff: awaiting result")));
     // The same run of a member who has left (rule 67): the clause is the
     // same, and the hover says they held the seat, until the day they left -
     // never "holds" it or "not seeking re-election" to it. Kevin Kiley's, in
@@ -14738,8 +16103,9 @@ async function testRaceMoney() {
    * NJ-11, GA-13, GA-14), and every "Last time" becomes 2026's own from the
    * day after Election Day (PR #110 review; rule 63). */
   suite("the seat's last election: specials since, and the day after", () => {
-    // Every state's races: the North Carolina page holds its own (rule 94).
-    const all = allRaces();
+    // Every state's races, whole: the North Carolina page holds its own
+    // (rule 94), and a race the index holds waits for its state's file.
+    const all = wholeRaces();
     const specials = all.filter((r) => r.lastElection && r.lastElection.seatedSince &&
       r.lastElection.seatedSince.how === "special-election");
     const campaign = new window.Date(2026, 9, 20);
@@ -14780,10 +16146,213 @@ async function testRaceMoney() {
     check("a ranked-choice count's first choices are a lead, not a win, in the summary",
       rcv.every((r) => / led first choices by \d+\.\d points$/.test(holder(KYC.cards.lastTimeBlock(r,
         { lazy: false, now: campaign })).querySelector("summary").textContent)), rcv.length);
+    // ... and in the table: "Won" beside a first-choice row only with more
+    // than half of every vote counted (Begich's 48.4% in Alaska, 2024, was
+    // badged "Won"). Made so from a copy of any two-candidate result.
+    const two = shown.find((r) => r.lastElection.candidates[1] && !r.lastElection.redrawn &&
+      !r.lastElection.withheld && r.lastElection.kind !== "unopposed" &&
+      r.lastElection.rankedChoice !== "first-choices");
+    const badges = (r) => [...holder(KYC.cards.lastTimeBlock(r, { lazy: false, now: campaign }))
+      .querySelectorAll(".last-table .badge")].map((b) => b.textContent);
+    const ranked = (share) => {
+      const r = JSON.parse(JSON.stringify(two));
+      r.lastElection.rankedChoice = "first-choices";
+      r.lastElection.candidates[0].votes = Math.round(r.lastElection.total * share);
+      return r;
+    };
+    check("a first-choice leader short of a majority is badged a lead, never 'Won'",
+      !!two && JSON.stringify(badges(ranked(0.484))) === '["Led first choices"]', two && two.id);
+    check("and one with more than half of every vote counted won outright",
+      !!two && JSON.stringify(badges(ranked(0.53))) === '["Won"]' &&
+        JSON.stringify(badges(two)) === '["Won"]', two && two.id);
     const unchecked = all.filter((r) => r.lastElection && r.lastElection.withheld === "unchecked");
     check("a result the second compilation does not confirm says so, not that it was unread",
       unchecked.every((r) => /does not confirm it/.test(holder(KYC.cards.lastTimeBlock(r,
         { lazy: false })).textContent)), unchecked.length);
+  });
+
+  /* The seat's strip, 2018 to 2024 (VISUALS-33): grouped by the lines each
+   * year was fought on, a result on other lines labelled as the district
+   * that had the number on that map, never this district's (rule 90); the
+   * party a chip and the bars neutral ink (rule 88); page text and boxes
+   * (rule 46); in the state's file, not the index's (rule 94). */
+  suite("the seat's strip of elections since 2018", () => {
+    const whole = wholeRaces().filter((r) => r.seatHistory && r.lastElection);
+    const campaign = new window.Date(2026, 9, 20);
+    const after = new window.Date(2026, 10, 4);
+    const draw = (r, now) => {
+      const box = D.createElement("div");
+      box.innerHTML = KYC.cards.lastTimeBlock(r, { lazy: false, now: now });
+      return box;
+    };
+    check("every race's state file carries its strip", whole.length > 400 &&
+      wholeRaces().every((r) => !r.lastElection || r.seatHistory), whole.length);
+    // The fold waiting for the state's file on a page that holds only the
+    // index is testPeopleSplit's (the grid); a state page holds its own
+    // state's file, whose races carry the strip and draw it at once.
+    check("the index leaves the strip out, and the state page's own races draw it at once",
+      allRaces().every((r) => !("seatHistory" in r)) && (() => {
+        const r = window.kycRaces.filter((x) => x.lastElection && x.state === "NC")[0];
+        return !!r && !!r.seatHistory &&
+          /class="seat-history"/.test(KYC.cards.lastTimeBlock(r, { lazy: false }));
+      })());
+    const sample = whole.filter((r, i) => i % 3 === 0 || r.state === "NC" || r.state === "MT" ||
+      r.chamber === "Senate");
+    const bad = [];
+    sample.forEach((r) => {
+      [campaign, after].forEach((now) => {
+        const box = draw(r, now);
+        const strip = box.querySelector(".seat-history");
+        const s = r.seatHistory;
+        const past = now === after;
+        if (!strip) { bad.push(r.id + ": no strip"); return; }
+        if (strip.querySelector("svg, canvas, text")) bad.push(r.id + ": drawn as a picture");
+        if (strip.querySelectorAll(".strip-cell").length !== s.cells.length) {
+          bad.push(r.id + ": cells");
+        }
+        // History beside "Won by": the strip stops before the race its block
+        // decides, and from the day after Election Day its heading says so,
+        // as the fold's line does (rule 63).
+        const title = strip.querySelector(".strip-title").textContent;
+        if (/^Before 2026: elections /.test(title) !== past || (!past && !/^Elections /.test(title))) {
+          bad.push(r.id + ": the strip's heading on the wrong day: " + title);
+        }
+        if (s.cells.some((c) => c.year >= 2026)) bad.push(r.id + ": a strip reaching the race itself");
+        const heads = [...strip.querySelectorAll(".strip-era")].map((p) => p.textContent);
+        const others = s.eras.filter((e, i) => !e.same && s.cells.some((c) => c.era === i));
+        if (r.chamber === "House") {
+          if (heads.filter((h) => /^On other lines than this race’s/.test(h)).length !== others.length) {
+            bad.push(r.id + ": an era on other lines is not labelled so");
+          }
+          if (!heads.every((h) => /^On other lines/.test(h) ||
+              new RegExp("the lines this district " + (past ? "was" : "is") + " elected on in 2026").test(h))) {
+            bad.push(r.id + ": an era head in the wrong tense or words");
+          }
+          if (s.eras.some((e) => e.same) && s.breaks.some((b) => b.year === 2026)) {
+            bad.push(r.id + ": a redrawn district has an era on its 2026 lines");
+          }
+        } else if (heads.length) {
+          bad.push(r.id + ": a Senate seat's lines are labelled");
+        }
+        const breaks = [...strip.querySelectorAll(".strip-break")].map((p) => p.textContent);
+        if (breaks.length !== s.breaks.length ||
+            !s.breaks.every((b) => breaks.some((t) => t.indexOf(String(b.year)) !== -1 &&
+              /^New lines (from|for) /.test(t)))) {
+          bad.push(r.id + ": breaks " + breaks.join(" / "));
+        }
+        // The party is a chip; a bar is neutral ink.
+        const coloured = [...strip.querySelectorAll('[class*="party-"]')];
+        if (!coloured.every((el) => el.classList.contains("party-chip"))) bad.push(r.id + ": party ink");
+        if ([...strip.querySelectorAll(".strip-fill")].some((el) => /color|background/.test(
+          el.getAttribute("style") || ""))) bad.push(r.id + ": a coloured bar");
+        // A first-choice lead is never a win; a withheld year says why.
+        s.cells.forEach((c, i) => {
+          const text = strip.querySelectorAll(".strip-cell")[i].textContent;
+          // A majority of every vote counted is a first-round win.
+          if (c.result && c.result.rankedChoice === "first-choices" && c.result.candidates[1] &&
+              (c.result.firstChoiceMajority
+                ? !/won a majority of first choices/.test(text)
+                : !/led first choices by/.test(text) || / won /.test(text))) {
+            bad.push(r.id + " " + c.year + ": first choices read as a win, or a majority as a lead");
+          }
+          // An "until" is a day that has come (PR #187 review).
+          (c.holders || []).forEach((h) => {
+            if (h.until && h.until > KYC.localDay(now) && text.indexOf("until " + KYC.dateWords(h.until)) !== -1) {
+              bad.push(r.id + " " + c.year + ": an until still ahead");
+            }
+          });
+          if (c.withheld && !/^\d{4}(?: special)?Not shown/.test(text)) bad.push(r.id + " " + c.year);
+          if (c.result && !/won|led|unopposed|only candidate/.test(text)) bad.push(r.id + " " + c.year);
+        });
+      });
+    });
+    check("each year is in its era, labelled by its lines, in the tense of the reader's day",
+      bad.length === 0, bad.slice(0, 6).join(" | ") + " (" + sample.length + " races)");
+    const nc = races.filter((r) => /^race-H-NC/.test(r.id))[0];
+    const fold = nc && nc.querySelector(".race-last");
+    if (fold) openFold(window, fold);
+    const strip = fold && fold.querySelector(".seat-history");
+    check("North Carolina's districts break at all four of its maps since 2018, none of them its 2026 lines",
+      !!strip && strip.querySelectorAll(".strip-break").length === 4 &&
+        /Session Law 2019-249/.test(strip.textContent) && /2020 census/.test(strip.textContent) &&
+        /Session Law 2023-145/.test(strip.textContent) && !/elected on in 2026/.test(strip.textContent) &&
+        // What "other lines" means is said once, not before each of its four maps.
+        (strip.textContent.match(/which is not the map this race/g) || []).length === 1 &&
+        (strip.textContent.match(/, the district numbered 1 on that map\./g) || []).length === 3,
+      strip ? strip.textContent.slice(0, 300) : "no strip");
+    // A final round the Clerk prints without naming it is said to be the
+    // second compilation's reading (Maine's 2nd in 2018), made here from a
+    // copy of a real race so the check does not wait on the day's data.
+    const me = JSON.parse(JSON.stringify(whole.filter((r) => r.chamber === "House" &&
+      r.seatHistory.cells.some((c) => c.result && c.result.candidates[1]))[0]));
+    const cell = me.seatHistory.cells.find((c) => c.result && c.result.candidates[1]);
+    cell.result.kind = "rcv-final";
+    delete cell.result.rankedChoice;
+    cell.result.roundFrom = "second-compilation";
+    const meText = draw(me, campaign).querySelectorAll(".strip-cell")[
+      me.seatHistory.cells.indexOf(cell)].textContent;
+    check("a final round the Clerk does not name says whose reading it is",
+      /won the final round by/.test(meText) && /Wikipedia’s page gives them as the final round’s/.test(meText),
+      meText);
+    const mt = whole.filter((r) => r.state === "MT" && r.district === 1)[0];
+    check("Montana's 1st says its 2018 and 2020 results are the whole state's, elected at large",
+      !!mt && /elected one member at large then: the results are the whole state’s/.test(
+        draw(mt, campaign).textContent));
+
+    /* The review of PR #187, each case made here from a copy of a real
+     * Senate race so the check does not wait on the day's data. */
+    const senate = whole.filter((r) => r.chamber === "Senate" &&
+      r.seatHistory.cells.some((c) => c.result))[0];
+    const made = (holders, extra) => {
+      const r = JSON.parse(JSON.stringify(senate));
+      const c = r.seatHistory.cells.find((x) => x.result);
+      c.holders = holders;
+      Object.assign(c, extra || {});
+      r.seatHistory.cells = [c];
+      return r;
+    };
+    const held = (r, now) => (draw(r, now).querySelector(".strip-cell .strip-held") || {}).textContent || "";
+    // A term ending after the reader's day: no "until" before it comes.
+    const later = made([{ id: "A", name: "Ann Example", party: "Republican" },
+      { id: "B", name: "Bea Example", party: "Democrat", from: "2025-01-21", until: "2026-12-01" }]);
+    check("an until still ahead of the reader's day is not said, and is once it has come",
+      !/until/.test(held(later, campaign)) &&
+        /until Dec\. 1, 2026|until December 1, 2026/.test(held(later, new window.Date(2026, 11, 2))),
+      held(later, campaign) + " / " + held(later, new window.Date(2026, 11, 2)));
+    // An appointee whose term ends on the special's day serves until its
+    // winner is seated, before that day and after it.
+    const moody = made([{ id: "R", name: "Marco Rubio", party: "Republican", until: "2025-01-20" },
+      { id: "M", name: "Ashley Moody", party: "Republican", from: "2025-01-21", how: "appointment",
+        untilSeated: true }]);
+    check("an appointee is serving until the special election's winner takes the seat, never until its day",
+      [campaign, after].every((now) => /Ashley Moody R? ?\(from Jan(?:\.|uary) 21, 2025, appointed until the special election’s winner takes the seat\)/.test(
+        held(moody, now).replace(/\s+/g, " ")) && !/Nov(?:\.|ember) 3/.test(held(moody, now))),
+      held(moody, campaign));
+    // One person appointed, then elected, is one line.
+    const ricketts = made([{ id: "R", name: "Pete Ricketts", party: "Republican", from: "2023-01-23",
+      how: "appointment", elected: "2024-11-05" }]);
+    check("one person appointed and then elected is one line that says both",
+      /Pete Ricketts.*appointed, then elected Nov(?:\.|ember) 5, 2024/.test(held(ricketts, after)) &&
+        (held(ricketts, after).match(/Ricketts/g) || []).length === 1, held(ricketts, after));
+    // An unopposed name with no count is not "the Clerk's count".
+    const lucas = made([], { result: undefined, withheld: "unchecked", withheldUnopposed: true });
+    delete lucas.seatHistory.cells[0].result;
+    const lucasText = draw(lucas, campaign).querySelector(".strip-cell").textContent;
+    check("an unopposed name with no count says so, not that a count is unconfirmed",
+      /unopposed and with no count/.test(lucasText) && !/Clerk’s count/.test(lucasText), lucasText);
+    // A redrawn district's fold stays true beside the strip below it.
+    const redrawn = whole.filter((r) => r.lastElection.redrawn)[0];
+    const redrawnText = redrawn ? draw(redrawn, campaign).textContent : "";
+    check("a redrawn district's fold does not say the result is left out, with the strip giving it",
+      !!redrawn && /so this site does not give it as this district’s own/.test(redrawnText) &&
+        !/does not carry over/.test(redrawnText), redrawnText.slice(0, 300));
+    // Alabama's 2024 lines cite the Census Bureau's list as a list.
+    const al = whole.filter((r) => r.chamber === "House" && r.state === "AL" && r.seatHistory)[0];
+    const alBreak = al ? [...draw(al, campaign).querySelectorAll(".strip-break")]
+      .map((p) => p.textContent).filter((t) => /2024/.test(t))[0] || "" : "";
+    check("Alabama's 2024 lines name the Census Bureau's list as what it is, never as the map",
+      /New lines from 2024, drawn by a federal court\. Source: the Census Bureau’s list of 2024 changes; this site has not read the map’s own record\./.test(alBreak) &&
+        !/Court-drawn map/.test(alBreak), alBreak);
   });
 
   suite("compare the ballot: offices with their place, one renderer", () => {
@@ -15057,6 +16626,284 @@ async function testRaceMoney() {
       close.window.KYC.profile.close();
     }
   });
+}
+
+/* What every money fold says, wherever it is drawn (rule 90): bars in
+ * neutral ink on one scale per race, the party only in the name chip, each
+ * row its own through-date and FEC link, receipts said to include loans. */
+function moneyFoldProblems(blocks) {
+  const rows = blocks.flatMap((b) => [...b.querySelectorAll(".money-row")]);
+  const barred = rows.filter((r) => r.querySelector(".money-bar"));
+  const bad = [];
+  if (!barred.length) bad.push("no row with figures");
+  barred.forEach((r) => {
+    if (r.querySelectorAll(".money-bar").length < 2) bad.push("fewer than two bars");
+    if (![...r.querySelectorAll(".money-value")].every((v) => /^-?\$[\d.]+[KMB]?$/.test(v.textContent))) {
+      bad.push("an unrounded figure");
+    }
+    if (!/^FEC, through [A-Z][a-z]+\.? \d{1,2}, 20\d\d$/.test(r.querySelector(".money-asof").textContent)) {
+      bad.push("no through-date: " + r.querySelector(".money-asof").textContent);
+    }
+    const a = r.querySelector(".money-asof a");
+    if (!a || !/^https:\/\/www\.fec\.gov\/data\/candidate\/[HSP]\w+\/$/.test(a.href)) bad.push("no FEC link");
+  });
+  if (rows.some((r) => r.querySelector(".money-bars [class*='party']"))) bad.push("a party colour on a bar");
+  if (!rows.every((r) => !!r.querySelector(".money-who .party-chip"))) bad.push("a row without its party chip");
+  blocks.forEach((b) => {
+    const widths = [...b.querySelectorAll(".money-fill")].map((f) => parseFloat(f.style.width));
+    if (widths.length && (Math.max(...widths) !== 100 || widths.some((w) => w < 0 || w > 100))) {
+      bad.push("not one scale: " + widths.join(","));
+    }
+    if (!/Raised includes loans and transfers/.test(b.textContent)) bad.push("receipts not said to include loans");
+  });
+  return bad;
+}
+
+/* The map's delegation panel draws each 2026 race's money through the race
+ * block's own fold (rule 12, VISUALS-20): closed, and drawn when opened from
+ * the state's own file, which it says while it loads and if it fails (rule
+ * 94); on the campaign clock and after Election Day, when the money is
+ * still the campaigns' filed totals and who lost stays in view (rule 63). */
+async function testMapMoney() {
+  const slim = await buildPage("map.html", { people: "index", hash: "#/?state=TX&mode=house" });
+  const full = await buildPage("map.html", { hash: "#/?state=TX&mode=house" });
+  await settle(150);
+  const K = slim.window.KYC;
+  const ballotRaces = (KYC, code, chamber) => KYC.races().filter((r) => r.state === code && r.chamber === chamber &&
+    KYC.cards.racePeople(r, r.incumbentIds.concat(r.candidateIds).map(KYC.byId).filter(Boolean)).running.length);
+  const txRaces = ballotRaces(K, "TX", "House");
+  const folds = (b) => [...b.D.querySelectorAll("#delegation .race-money")];
+  const toggle = slim.D.getElementById("showMoney");
+  const box = slim.D.getElementById("moneyRows");
+  const closedAtFirst = folds(slim).every((f) => !f.open && f.hasAttribute("data-fold") &&
+    !f.querySelector(".money-row"));
+  // Read before the click: a regression that drew the folds open would pass
+  // a check made after it.
+  const hiddenAtFirst = !!box && box.hidden === true && !!toggle &&
+    toggle.getAttribute("aria-expanded") === "false";
+  const before = servedPeople(slim).length;
+  if (toggle) toggle.click();
+  const first = folds(slim)[0];
+  openFold(slim.window, first);
+  const loading = first.querySelector(".fold-body").textContent;
+  const loadingHtml = first.querySelector(".fold-body").innerHTML;
+  await until(() => !!first.querySelector(".money-row"), 6000);
+  const fullFirst = folds(full)[0];
+  openFold(full.window, fullFirst);
+  suite("map.html — the House view's money, race by race (VISUALS-20)", () => {
+    check("no page errors", slim.errors.length === 0 && full.errors.length === 0,
+      slim.errors.concat(full.errors).join(" | "));
+    check("a fold for each Texas House race with someone on its ballot, under one count",
+      folds(slim).length === txRaces.length && txRaces.length > 1 && !!toggle &&
+        toggle.getAttribute("aria-controls") === "moneyRows" &&
+        new RegExp("^\\s*Money in each race " + txRaces.length + "$").test(toggle.textContent) &&
+        folds(slim).every((f) => box.contains(f)), folds(slim).length + "/" + txRaces.length);
+    check("folded until the reader asks: the delegation comes first",
+      hiddenAtFirst && closedAtFirst && box.hidden === false && toggle.getAttribute("aria-expanded") === "true",
+      "hidden at first " + hiddenAtFirst + ", folds closed " + closedAtFirst);
+    // The panel is a polite live region (map.html #delegation): a fold that
+    // fills when opened is kept out of it, or a screen reader reads a race's
+    // figures aloud; its loading line, a status of its own, still speaks.
+    check("the folds are kept out of the panel's live region",
+      slim.D.getElementById("delegation").getAttribute("aria-live") === "polite" &&
+        box.getAttribute("aria-live") === "off" && /role="status"/.test(loadingHtml), loadingHtml);
+    check("each fold names its district, in the district's order",
+      folds(slim).map((f) => f.querySelector("summary").textContent).join("|") ===
+        txRaces.slice().sort((a, b) => Number(a.district) - Number(b.district))
+          .map((r) => "Money in TX-" + r.district).join("|"));
+    check("below the statuses' source, not among the people",
+      !slim.D.querySelector("#challengerRows .race-money") && !!slim.D.querySelector("#delegation .race-results") &&
+        !!(slim.D.querySelector("#delegation .race-results").compareDocumentPosition(toggle) & 4));
+    check("it says it is loading, and draws nothing from the cards meanwhile",
+      /Loading Texas/.test(loading) && !/No data/.test(loading), loading);
+    check("it loads Texas's file, and only it",
+      servedPeople(slim).slice(before).join() === "/data/people/tx.js", servedPeople(slim).join(" "));
+    check("then the money is what the whole records show",
+      first.innerHTML === fullFirst.innerHTML, firstDifference(fullFirst.innerHTML, first.innerHTML));
+    const problems = moneyFoldProblems([first]);
+    check("the race block's bars: neutral ink, one scale, dated and linked rows", problems.length === 0,
+      problems.slice(0, 4).join(" | "));
+    const name = first.querySelector(".money-who [data-id]");
+    // The panel's one delegated listener opens whatever carries a data-id.
+    check("a name in it carries that person's id, for the panel's listener to open",
+      !!name && name.tagName === "BUTTON" && !!K.byId(name.getAttribute("data-id")));
+  });
+
+  // The 2026 Senate race: one fold, beside the race's people, before the
+  // markets (a race block's order); the delegation view has no race.
+  slim.window.location.hash = "#/?state=NC&mode=senate2026";
+  await settle(150);
+  const nc = folds(slim);
+  const odds = slim.D.querySelector("#delegation .odds");
+  if (nc[0]) openFold(slim.window, nc[0]);
+  await until(() => nc[0] && !!nc[0].querySelector(".money-row"), 6000);
+  slim.window.location.hash = "#/?state=NC&mode=senate";
+  await settle(150);
+  const delegationFolds = folds(slim).length;
+  // A governor's race has no money fold: this site reads federal filings
+  // only (rule 19), so the governor races' view draws none - no empty or
+  // zero fold, no "Money in each race" count - and its panel keeps its own
+  // order: the candidates' cards, the list's source, then the markets.
+  const governorRaces = [];
+  for (const code of ["GA", "AK"]) {
+    slim.window.location.hash = "#/?state=" + code + "&mode=governor2026";
+    await settle(150);
+    const panel = slim.D.getElementById("delegation");
+    const at = (sel) => panel.querySelector(sel);
+    const before = (a, b) => !!a && !!b && !!(a.compareDocumentPosition(b) & 4);
+    governorRaces.push({ code, folds: folds(slim).length, count: !!slim.D.getElementById("showMoney"),
+      money: /Money in /.test(panel.textContent), drawn: !!at(".gov-race-panel"),
+      order: before(at(".gcard-candidate"), at(".gov-candidates-source")) &&
+        (!at(".odds") || before(at(".gov-candidates-source"), at(".odds"))) });
+  }
+  suite("map.html — the 2026 Senate race's money", () => {
+    check("one fold, named as on the state page, outside any count",
+      nc.length === 1 && nc[0].querySelector("summary").textContent === "Money in the race" &&
+        !slim.D.getElementById("showMoney"), nc.map((f) => f.querySelector("summary").textContent).join("|"));
+    check("kept out of the panel's live region, as the House view's are",
+      !!nc[0] && !!nc[0].closest('[aria-live="off"]') &&
+        nc[0].closest("[aria-live]") !== slim.D.getElementById("delegation"));
+    check("before the markets, as a race block has it",
+      !odds || !!(nc[0].compareDocumentPosition(odds) & 4));
+    const problems = moneyFoldProblems(nc);
+    check("drawn as the race block draws it", problems.length === 0, problems.slice(0, 4).join(" | "));
+    check("the Senate delegation view, which holds no race, has none", delegationFolds === 0);
+    check("the governor races' view draws no money fold and counts none (rule 19: federal filings only)",
+      governorRaces.length === 2 && governorRaces.every((g) => g.drawn && !g.folds && !g.count && !g.money),
+      JSON.stringify(governorRaces));
+    check("and keeps its panel's order: the cards, the list's source, the markets",
+      governorRaces.every((g) => g.order), JSON.stringify(governorRaces));
+  });
+  slim.window.close();
+  full.window.close();
+
+  // A state's file that fails: said, with how to retry, and nothing drawn.
+  {
+    const built = await buildPage("map.html", { people: "index", refuse: /\/data\/people\/tx\.js$/,
+      hash: "#/?state=TX&mode=house" });
+    await settle(150);
+    const fold = built.D.querySelector("#delegation .race-money");
+    openFold(built.window, fold);
+    await until(() => /did not load/.test(fold.textContent), 6000);
+    suite("map.html — a race's money when its state's file fails", () => {
+      check("says the figures did not load, and how to retry",
+        /did not load\. Close this and open it again to retry/.test(fold.textContent), fold.textContent);
+      check("no money rows drawn from the cards", !fold.querySelector(".money-row"));
+    });
+    built.window.close();
+  }
+
+  // After Election Day: who lost stays in the money, which is still each
+  // campaign's filed totals, the same figures as on the campaign clock.
+  {
+    const pick = (w) => {
+      const race = w.kycRaces.find((r) => r.state === "NC" && r.chamber === "Senate");
+      const byId = Object.fromEntries(w.legislatorsData.map((p) => [p.id, p]));
+      return race.incumbentIds.concat(race.candidateIds).map((id) => byId[id])
+        .filter((p) => p && p.raceStatus === "nominee" && p.receipts && /\$/.test(p.receipts));
+    };
+    const campaign = await buildPage("map.html", { hash: "#/?state=NC&mode=senate2026" });
+    const after = await buildPage("map.html", { now: "2026-11-05T09:00:00", hash: "#/?state=NC&mode=senate2026",
+      data: (w) => {
+        rewindToCampaign(w);
+        const [won, lost] = pick(w);
+        if (won && lost) { won.raceStatus = "elected"; lost.raceStatus = "defeated"; }
+        w.__money = { won: won && won.id, lost: lost && lost.id };
+      } });
+    await settle(150);
+    const open = (b) => {
+      const f = b.D.querySelector("#delegation .race-money");
+      if (f) openFold(b.window, f);
+      return f;
+    };
+    const a = open(campaign);
+    const b = open(after);
+    await until(() => a && b && !!a.querySelector(".money-row") && !!b.querySelector(".money-row"), 6000);
+    const { won, lost } = after.window.__money || {};
+    const ids = (f) => [...f.querySelectorAll(".money-who [data-id]")].map((x) => x.getAttribute("data-id"));
+    suite("map.html — the Senate race's money after Election Day", () => {
+      check("no page errors", after.errors.length === 0, after.errors.join(" | "));
+      check("a winner and a loser to read", !!(won && lost));
+      check("the loser's campaign stays in the money, beside the winner's",
+        !!b && ids(b).indexOf(lost) !== -1 && ids(b).indexOf(won) !== -1, b && ids(b).join(","));
+      check("the same filed totals as on the campaign clock, nothing re-read as a result",
+        !!a && !!b && a.querySelector(".money-rows").innerHTML === b.querySelector(".money-rows").innerHTML,
+        a && b && firstDifference(a.innerHTML, b.innerHTML));
+      const problems = b ? moneyFoldProblems([b]) : ["no fold"];
+      check("drawn as on the campaign clock", problems.length === 0, problems.slice(0, 4).join(" | "));
+      // A decided race's fold keeps the receipts' own words: nothing in it
+      // reads as a result, and it is the campaign clock's to the letter.
+      check("a decided race's fold says what it said before the count, word for word",
+        !!a && !!b && a.querySelector("summary").textContent === b.querySelector("summary").textContent &&
+          a.querySelector(".fold-body").innerHTML === b.querySelector(".fold-body").innerHTML,
+        a && b && firstDifference(a.querySelector(".fold-body").innerHTML, b.querySelector(".fold-body").innerHTML));
+      // The list above it reads as the day it is (rule 63), and the panel
+      // keeps a race block's order on either clock.
+      const inOrder = (b0) => {
+        const panel = b0.D.getElementById("delegation");
+        const seq = [".race-people", ".race-results", ".race-money", ".odds"]
+          .map((sel) => panel.querySelector(sel));
+        return seq.every(Boolean) && seq.slice(1).every((el, i) => !!(seq[i].compareDocumentPosition(el) & 4));
+      };
+      const head = (b0) => b0.D.querySelector("#delegation .race-people").textContent;
+      check("the list above it is 'On the November ballot', and 'Still in the race' only before the count",
+        /^\s*On the November ballot \d+/.test(head(after)) && /^\s*Still in the race \d+/.test(head(campaign)),
+        head(campaign) + " / " + head(after));
+      check("the list, its source, the money, then the markets, on either clock",
+        inOrder(campaign) && inOrder(after));
+    });
+    campaign.window.close();
+    after.window.close();
+  }
+
+  // A decided House race and one gone to a runoff keep their folds, and
+  // their folds their words; the count is the campaign clock's: who was on
+  // the ballot does not change with who won.
+  {
+    const decide = (w) => {
+      rewindToCampaign(w);
+      const byId = Object.fromEntries(w.legislatorsData.map((p) => [p.id, p]));
+      const contested = w.kycRaces.filter((r) => r.state === "NC" && r.chamber === "House").map((race) => ({
+        race,
+        people: race.incumbentIds.concat(race.candidateIds).map((id) => byId[id]).filter((p) =>
+          p && p.raceStatus === "nominee" && (!p.contestRaceId || p.contestRaceId === race.id) &&
+            p.receipts && /\$/.test(p.receipts)),
+      })).filter((x) => x.people.length >= 2);
+      const [one, two] = contested;
+      if (!one || !two) return;
+      one.people[0].raceStatus = "elected";
+      one.people[1].raceStatus = "defeated";
+      two.people[0].raceStatus = two.people[1].raceStatus = "runoff";
+      w.__decided = [one, two].map((x) => ({ district: x.race.district, ids: x.people.slice(0, 2).map((p) => p.id) }));
+    };
+    const campaign = await buildPage("map.html", { hash: "#/?state=NC&mode=house" });
+    const after = await buildPage("map.html", { now: "2026-11-05T09:00:00", hash: "#/?state=NC&mode=house", data: decide });
+    await settle(150);
+    const foldsOf = (b) => [...b.D.querySelectorAll("#delegation .race-money")];
+    const decided = after.window.__decided || [];
+    const named = (b, district) => foldsOf(b).find((f) =>
+      f.querySelector("summary").textContent === "Money in NC-" + district);
+    const pairs = decided.map((d) => ({ d, was: named(campaign, d.district), now: named(after, d.district) }));
+    pairs.forEach((x) => {
+      if (x.was) openFold(campaign.window, x.was);
+      if (x.now) openFold(after.window, x.now);
+    });
+    suite("map.html — a decided House race's money", () => {
+      check("no page errors", after.errors.length === 0, after.errors.join(" | "));
+      check("a decided race and a runoff to read", decided.length === 2, JSON.stringify(decided));
+      check("the same count of folds as before the count",
+        foldsOf(after).length === foldsOf(campaign).length && foldsOf(after).length > 1,
+        foldsOf(campaign).length + " / " + foldsOf(after).length);
+      check("each keeps its fold and both its campaigns",
+        pairs.every((x) => !!x.now && x.d.ids.every((id) =>
+          !!x.now.querySelector('.money-who [data-id="' + id + '"]'))), JSON.stringify(decided));
+      check("word for word what it said before the count",
+        pairs.every((x) => !!x.was && !!x.now &&
+          x.was.querySelector(".fold-body").innerHTML === x.now.querySelector(".fold-body").innerHTML));
+    });
+    campaign.window.close();
+    after.window.close();
+  }
 }
 
 function K_open(window, id) {
@@ -15348,6 +17195,11 @@ async function testCharts() {
 
     suite("charts — polling averages as dots (VISUALS-34)", () => {
       const odds = window.kycOdds || { races: {} };
+      // A race for Congress is the build's; a race for governor (G-<ST>-2026,
+      // PR #195) is drawn from the object kyc-stategov.js raceOdds builds, by
+      // the same KYC.odds.render, so its averages are held to the same rule.
+      const raceOf = (id) => (window.kycRaces || []).find((r) => r.id === id) ||
+        (/^G-[A-Z]{2}-\d{4}$/.test(id) ? { id: id, label: "Governor" } : null);
       const raceIds = Object.keys(odds.races).filter((id) => (odds.races[id].polls || {}).rows &&
         odds.races[id].polls.rows.length && (odds.races[id].markets || []).length);
       let checked = 0;
@@ -16144,6 +17996,12 @@ async function sameOnBoth(full, slim, routes, ids, wait) {
       const done = (b) => !/Looking up/.test((b.D.getElementById("findrep") || {}).textContent || "");
       await until(() => done(full) && done(slim), 8000);
     }
+    // A query loads the profiles' words (data/people/words.js) on the
+    // grid as it ships, and draws again when they are in.
+    if (/[?&]q=/.test(route) && slim.window.KYC.wordsHeld) {
+      await until(() => slim.window.KYC.wordsHeld(), 8000);
+      await settle(30);
+    }
     const a = shown(full.D, ids);
     const b = shown(slim.D, ids);
     out.push({ route, same: a === b, why: a === b ? "" : firstDifference(a, b), size: a.length });
@@ -16151,8 +18009,15 @@ async function sameOnBoth(full, slim, routes, ids, wait) {
   return out;
 }
 
+/* The people files a page fetched once built: the index and the states'
+ * files, not the words the grid's search reads (servedWords). */
 function servedPeople(built) {
-  return built.served.filter((s) => /\/data\/people\//.test(s)).map((s) => s.split("?")[0]);
+  return built.served.filter((s) => /\/data\/people\//.test(s) && !/\/words\.js/.test(s))
+    .map((s) => s.split("?")[0]);
+}
+
+function servedWords(built) {
+  return built.served.filter((s) => /\/data\/people\/words\.js/.test(s));
 }
 
 async function testPeopleSplit() {
@@ -16196,6 +18061,10 @@ async function testPeopleSplit() {
       check("the globals keep their shape: legislatorsData, kycRaces, kycBuildMeta",
         Array.isArray(slim.window.legislatorsData) && Array.isArray(slim.window.kycRaces) &&
           slim.window.kycRaces.length === index.races.length && !!slim.window.kycBuildMeta.signature);
+      check("nor the profiles' words the search reads, before a query is typed",
+        servedWords(slim).length === 0 && !slim.window.KYC.wordsHeld() &&
+          slim.window.legislatorsData.every((p) => !("platforms" in p) && !("education" in p)),
+        servedWords(slim).join(" "));
     });
     const routes = ["#/", "#/?sort=name", "#/?sort=age-desc", "#/?sort=age-asc", "#/?sort=senate26",
       "#/?sort=close-kalshi", "#/?sort=close-polymarket", "#/?view=race", "#/?view=senate",
@@ -16203,12 +18072,47 @@ async function testPeopleSplit() {
       "#/?role=candidate", "#/?role=member&state=TX", "#/?election=senateUp26", "#/?election=notSeeking",
       "#/?election=unchallenged", "#/?state=CA&view=race", "#/?q=nurse", "#/?q=veteran",
       "#/?q=speaker", "#/?q=pelo", "#/?q=texas", "#/?q=j.d.", "#/?q=warren", "#/?q=vance",
-      "#/?q=80202", "#/?q=02139", "#/?q=nurse&sort=name&eliminated=show"];
+      "#/?q=80202", "#/?q=02139", "#/?q=nurse&sort=name&eliminated=show", "#/?q=harvard",
+      "#/?q=abortion&view=race", "#/?q=appropriations&view=senate", "#/?q=TX-3", "#/?q=farmer&role=candidate"];
     const ids = ["results", "resultsLabel", "officialResults", "activeFilters", "findrep", "noResults"];
     const compared = await sameOnBoth(full, slim, routes, ids, 200);
     suite("index.html — every view the same from the index as from everyone's whole records", () => {
       compared.forEach((c) => check(`${c.route} draws the same`, c.same && c.size > 200, c.why || c.size));
       check("still no state's file loaded", servedPeople(slim).length === 0, servedPeople(slim).join(" "));
+      check("the profiles' words loaded once, for the first query",
+        servedWords(slim).length === 1 && slim.window.KYC.wordsHeld(), servedWords(slim).join(" "));
+    });
+
+    // Every query finds exactly whom it finds from everyone's whole
+    // records, in the same order, once the words are in: names, careers,
+    // schools, issues, offices held, committees, states and districts
+    // however written (rule 5).
+    const QUERIES = ["pelosi", "pelo", "Mike Rogers", "j.d. vance", "jd vance", "diaz-balart",
+      "Díaz-Balart", "nurse", "farmer", "attorney", "veteran", "teacher", "small business owner",
+      "harvard", "west point", "university of texas", "stanford law", "abortion", "immigration",
+      "border security", "medicare", "climate", "second amendment", "governor", "state senator",
+      "mayor", "city council", "appropriations", "armed services", "pac", "individual",
+      "dw-nominate", "speaker", "Senator Warren", "Rep. Crockett", "kansas", "Kansas", "texas",
+      "IN", "in", "me", "new york", "TX-3", "tx 3", "TX-03", "TX3", "texas 3rd", "ca-12",
+      "AK-AL", "Ohio delegation", "democratic", "republican nurse", "zzqx nobody"];
+    const finds = (w, q) => w.KYC.people().map((p) => [p.id, w.KYC.queryScore(p, q)])
+      .filter((r) => r[1] >= 0).map((r) => r.join(":")).sort().join(",");
+    const snippets = (w, q) => w.KYC.people().map((p) => {
+      const s = w.KYC.queryScore(p, q) === 3 ? w.KYC.searchSnippet(p, q) : null;
+      return s ? p.id + "=" + s.label + ":" + s.text : "";
+    }).filter(Boolean).sort().join("|");
+    suite("index.html — a query finds the same people from the index and its words (rule 94)", () => {
+      QUERIES.forEach((q) => {
+        const a = finds(full.window, q);
+        const b = finds(slim.window, q);
+        check(`"${q}" finds the same people, scored the same`, a === b,
+          a === b ? (a ? a.split(",").length : 0) + " found" : firstDifference(a, b));
+      });
+      const s = QUERIES.filter((q) => snippets(full.window, q) !== snippets(slim.window, q));
+      check("and says where in their words it found each, the same", s.length === 0, s.join(", "));
+      const careers = finds(full.window, "nurse").split(",").filter((r) => /:3$/.test(r)).length;
+      check("a career word finds people by their words alone (the file is read, not skipped)",
+        careers > 0, String(careers));
     });
 
     // A race's money and its ballot side by side are the state's file's:
@@ -16226,6 +18130,11 @@ async function testPeopleSplit() {
     openFold(slim.window, compare(slim));
     openFold(full.window, compare(full));
     await until(() => !!compare(slim).querySelector(".compare-table"), 5000);
+    // The seat's strip is a race's field the index leaves out.
+    const lastFold = (b) => b.D.querySelector('#results .race-last[data-fold]');
+    openFold(slim.window, lastFold(slim));
+    openFold(full.window, lastFold(full));
+    await until(() => !!lastFold(slim).querySelector(".seat-history"), 5000);
     suite("index.html — a race's money and comparison load the state's records when opened", () => {
       check("it says it is loading, and draws nothing from the cards meanwhile",
         /Loading Georgia/.test(loading) && !/No data/.test(loading), loading);
@@ -16236,8 +18145,49 @@ async function testPeopleSplit() {
       check("and the ballot side by side too",
         compare(slim).innerHTML === compare(full).innerHTML,
         firstDifference(compare(full).innerHTML, compare(slim).innerHTML));
+      check("and the seat's last election with its strip since 2018, filled into the index's race",
+        !!lastFold(slim).querySelector(".seat-history") &&
+          lastFold(slim).innerHTML === lastFold(full).innerHTML &&
+          slim.window.kycRaces.filter((r) => r.state === "GA").every((r) => !!r.seatHistory) &&
+          slim.window.kycRaces.filter((r) => r.state !== "GA").every((r) => !r.seatHistory),
+        firstDifference(lastFold(full).innerHTML, lastFold(slim).innerHTML));
       check("Georgia's people are whole now, no one else's",
         slim.window.legislatorsData.every((p) => slim.window.KYC.isFull(p) === (p.state === "GA")));
+    });
+
+    // The seat's last election is the index's and is drawn at once; only
+    // the strip waits for the state's file, in a slot of its own whose words
+    // are about the seat's elections, and a file that fails takes nothing
+    // away (PR #187 review). Made to fail here, then asked again.
+    slim.window.location.hash = "#/?state=VT&view=race";
+    full.window.location.hash = "#/?state=VT&view=race";
+    await settle(200);
+    const vtFold = (b) => b.D.querySelector('#results .race-last[data-fold]');
+    const realLoad = slim.window.KYC.loadPeople;
+    slim.window.KYC.loadPeople = () => Promise.resolve(false);
+    openFold(slim.window, vtFold(slim));
+    const vtAtOnce = vtFold(slim).querySelector(".fold-body").textContent;
+    await settle(50);
+    const vtFailed = vtFold(slim).querySelector(".fold-body").textContent;
+    slim.window.KYC.loadPeople = realLoad;
+    vtFold(slim).open = false;
+    vtFold(slim).dispatchEvent(new slim.window.Event("toggle"));
+    openFold(slim.window, vtFold(slim));
+    openFold(full.window, vtFold(full));
+    await until(() => !!vtFold(slim).querySelector(".seat-history"), 5000);
+    suite("index.html — a seat's last election at once, its strip when the state's file is in", () => {
+      check("the last election is drawn at once, and the strip's slot speaks of the seat's elections",
+        /Counts:|not shown|redrew/.test(vtAtOnce) &&
+          /Loading this seat’s elections since 2018/.test(vtAtOnce) && !/campaigns/.test(vtAtOnce),
+        vtAtOnce.slice(0, 300));
+      check("a file that fails keeps the last election and says the strip did not load",
+        /Counts:|not shown|redrew/.test(vtFailed) &&
+          /This seat’s elections since 2018 did not load/.test(vtFailed) && !/campaigns/.test(vtFailed),
+        vtFailed.slice(0, 300));
+      check("opened again, the strip is drawn, as the whole records draw it",
+        vtFold(slim).innerHTML === vtFold(full).innerHTML &&
+          !vtFold(slim).querySelector("[data-strip-race]"),
+        firstDifference(vtFold(full).innerHTML, vtFold(slim).innerHTML));
     });
 
     // A card opens the dialog over a loading line, never over the card's
@@ -16267,6 +18217,134 @@ async function testPeopleSplit() {
     slim.window.KYC.profile.close();
     full.window.close();
     slim.window.close();
+  }
+
+  // While the words load the grid says so, and where they fail it says the
+  // search looked at names, places and offices only: never "No profiles"
+  // for someone their words would have found (rule 19).
+  {
+    const type = (b, q) => {
+      const input = b.D.getElementById("searchInput");
+      input.value = q;
+      input.dispatchEvent(new b.window.Event("search"));
+    };
+    const label = (b) => b.D.getElementById("resultsLabel").textContent;
+    const slim = await buildPage("index.html", { people: "index" });
+    await settle(100);
+    type(slim, "harvard");
+    const reading = label(slim);
+    const readingEmpty = slim.D.getElementById("noResults").hidden;
+    await until(() => slim.window.KYC.wordsHeld() && !/Still reading/.test(label(slim)), 8000);
+    const read = label(slim);
+    const failed = await buildPage("index.html", { people: "index", refuse: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(failed, "harvard");
+    await until(() => /did not load/.test(label(failed)), 8000);
+    const failedLine = label(failed);
+    const failedEmpty = failed.D.getElementById("noResults").hidden;
+    type(failed, "nurse");
+    await until(() => servedWords(failed).length === 2, 8000);
+    // A shared link with a query asks for the words as the index arrives.
+    const linked = await buildPage("index.html", { people: "index", hash: "#/?q=nurse" });
+    await until(() => linked.window.KYC.wordsHeld() && !/Still reading/.test(label(linked)), 8000);
+    await settle(30);
+    suite("index.html — a query while the profiles' words load, and if they fail", () => {
+      check("while they load it says so, never that no profile matches",
+        /Still reading the profiles’ own words/.test(reading) && !/^\s*No profiles/.test(reading) && readingEmpty,
+        reading);
+      check("then it draws whom they match, and the line says nothing more of it",
+        /^Showing/.test(read.trim()) && !/own words/.test(read) &&
+          slim.D.querySelectorAll("#results .card").length > 0, read);
+      check("where they failed, it says the search looked at names, places and offices only",
+        /did not load, so this search looked at names, places and offices only/.test(failedLine) &&
+          !/^\s*No profiles/.test(failedLine) && failedEmpty, failedLine);
+      check("and a new query asks for them again", servedWords(failed).length === 2,
+        servedWords(failed).join(" "));
+      check("a link that arrives with a query asks for them once, and finds by them",
+        servedWords(linked).length === 1 && linked.D.querySelectorAll("#results .card").length > 0 &&
+          /^Showing/.test(label(linked).trim()) && linked.errors.length === 0,
+        servedWords(linked).length + " / " + label(linked).slice(0, 80));
+      // But the refusal itself, which is the failure this checks.
+      const errors = slim.errors.concat(failed.errors.filter((e) =>
+        !/Could not load script: "https:\/\/kyc\.local\/data\/people\/words\.js/.test(e)));
+      check("no page errors but the refused file", errors.length === 0, errors.join(" | "));
+      check("where they failed, the line reads as a sentence",
+        /^No profile found by name, place or office matching “harvard”\./.test(failedLine.trim()), failedLine);
+    });
+    slim.window.close();
+    failed.window.close();
+  }
+
+  // The words can arrive seconds after the first matches are drawn: a
+  // reader who has since appended cards, opened a race's fold or is on a
+  // card keeps their place when the list is drawn again (PR #172 review;
+  // rule 45's "redrew the grid from its first card").
+  {
+    const type = (b, q) => {
+      const input = b.D.getElementById("searchInput");
+      input.value = q;
+      input.dispatchEvent(new b.window.Event("search"));
+    };
+    const label = (b) => b.D.getElementById("resultsLabel").textContent;
+    const cards = (b) => b.D.querySelectorAll("#results .card[data-id]");
+    // Everyone in Texas, out of the race too: more than one window of cards.
+    const grid = await buildPage("index.html", { people: "index", hash: "#/?eliminated=show",
+      hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(grid, "texas");
+    await until(() => /Still reading/.test(label(grid)), 5000);
+    const first = cards(grid).length;
+    const more = grid.D.getElementById("gridMore");
+    if (more) more.click();
+    const appended = cards(grid).length;
+    const on = cards(grid)[Math.min(appended - 1, first + 5)];
+    const onId = on && on.getAttribute("data-id");
+    if (on) on.focus();
+    grid.release();
+    await until(() => grid.window.KYC.wordsHeld() && !/Still reading/.test(label(grid)), 8000);
+    await settle(30);
+    const after = cards(grid).length;
+    const focused = grid.D.activeElement;
+
+    const races = await buildPage("index.html", { people: "index", hash: "#/?view=race",
+      hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(races, "texas");
+    await until(() => /Still reading/.test(label(races)), 5000);
+    const outs = [...races.D.querySelectorAll("#results details.race-out[data-out-race]")];
+    const out = outs[Math.min(2, outs.length - 1)];
+    const outKey = out && out.getAttribute("data-out-race");
+    if (out) openFold(races.window, out);
+    races.release();
+    await until(() => races.window.KYC.wordsHeld() && !/Still reading/.test(label(races)), 8000);
+    await settle(30);
+    const reopened = outKey && races.D.querySelector('#results details[data-out-race="' + outKey + '"]');
+    const openNow = [...races.D.querySelectorAll("#results details[open]")];
+
+    const still = await buildPage("index.html", { people: "index", hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(still, "texas");
+    await until(() => /Still reading/.test(label(still)), 5000);
+    still.release();
+    await until(() => still.window.KYC.wordsHeld() && !/Still reading/.test(label(still)), 8000);
+    await settle(30);
+    suite("index.html — the words arriving keep the reader's place", () => {
+      check("no page errors", [grid, races, still].every((b) => b.errors.length === 0),
+        [grid, races, still].flatMap((b) => b.errors).join(" | "));
+      check("the reader had appended cards past the first window", first > 0 && appended > first,
+        first + " then " + appended);
+      check("the list drawn again holds at least as many cards", after >= appended, after + " / " + appended);
+      check("and the card the reader was on keeps the focus",
+        !!onId && !!focused && focused.getAttribute("data-id") === onId &&
+          grid.D.getElementById("results").contains(focused),
+        onId + " / " + (focused && focused.getAttribute && focused.getAttribute("data-id")));
+      check("a race's fold the reader opened stays open, its people drawn",
+        !!reopened && reopened.open && reopened.querySelectorAll(".card").length > 0 &&
+          openNow.length === 1, (outKey || "no fold") + " / " + openNow.length + " open");
+      check("a reader who has not moved sees the list drawn as it is now, from its first window",
+        cards(still).length > 0 && cards(still).length <= 120, String(cards(still).length));
+    });
+    [grid, races, still].forEach((b) => b.window.close());
   }
 
   // The directory of states counts every state's races from the index.
@@ -16779,6 +18857,628 @@ function rowProblems(window, D) {
     }
   });
   return out;
+}
+
+/* ===================================== a redrawn state's districts, phone */
+
+/* Below 1000px a redrawn state's district page shows one plan at a time
+ * behind a switch, the 2026 plan first, and draws only that one: Texas's
+ * 2026 map began 5,459px down on a phone (VISUALS-02). */
+async function testDistrictsPhonePlans() {
+  // A browser that can share a location, so Find my district is drawn.
+  const both = (width) => (w) => {
+    phoneWidth(w, true);
+    drawnAt(width)(w);
+    Object.defineProperty(w.navigator, "geolocation", { value: { getCurrentPosition() {} }, configurable: true });
+  };
+  // The third clock is January's: once the new Congress sits nobody is
+  // running anywhere, so the page draws no moves (kyc-districts.js moves()),
+  // and its checks ask the page's data which it is (the January rehearsal
+  // failed on checks that asked for the moves whatever the data held).
+  for (const [now, when, data] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"],
+    ["2026-11-05T09:00:00", "once the new Congress sits", recordPhase]]) {
+    const page = await buildPage("districts/tx.html", { now, setup: both(302), data });
+    await settle(30);
+    const { window, D, errors } = page;
+    const state = window.kycDistricts.TX;
+    // The moves are the data's: none in the record phase, by design.
+    const moves = !window.KYC.recordPhase() && !!D.querySelector(".districts-movers");
+    const grid = D.getElementById("planGrid");
+    const cards = () => [...grid.children];
+    const shownCard = () => cards().filter((c) => !c.hidden);
+    const numbered = (card, plan) => {
+      const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+      return Object.keys(plan.districts).filter((n) => !written.has(n));
+    };
+    const before = (a, b) => !!a && !!b && !!(a.compareDocumentPosition(b) & window.Node.DOCUMENT_POSITION_FOLLOWING);
+    // What of the key a reader sees: its parts not hidden.
+    const keyWords = (legend) => legend ? [...legend.children].filter((c) => !c.hidden)
+      .map((c) => c.textContent).join(" | ") : "";
+    suite(`districts/tx.html on a phone ${when} — one plan at a time, the 2026 plan first`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const buttons = [...D.querySelectorAll(".plan-switch [data-plan-show]")];
+      check("a switch of two buttons is shown, the 2026 plan's first and pressed",
+        !D.querySelector(".plan-switch").hidden && buttons.length === 2 &&
+          buttons[0].getAttribute("data-plan-show") === "1" && buttons[0].getAttribute("aria-pressed") === "true" &&
+          buttons[1].getAttribute("aria-pressed") === "false",
+        buttons.map((b) => b.textContent + "=" + b.getAttribute("aria-pressed")).join(" | "));
+      check("each button names its plan by the plan's own label and title (rule 75)",
+        buttons.every((b) => {
+          const plan = state.plans[Number(b.getAttribute("data-plan-show"))];
+          return b.textContent === plan.label + " " + plan.title;
+        }), buttons.map((b) => b.textContent).join(" | "));
+      check("only the 2026 plan is drawn: the other card is an empty placeholder, hidden",
+        cards().length === 2 && shownCard().length === 1 && shownCard()[0] === cards()[1] &&
+          cards()[0].hidden && !cards()[0].querySelector("svg"),
+        cards().map((c) => (c.hidden ? "hidden " : "shown ") + c.querySelectorAll("svg").length).join(" | "));
+      check("every district on the 2026 plan is numbered somewhere, at 302px (rule 43)",
+        numbered(cards()[1], state.plans[1]).length === 0, numbered(cards()[1], state.plans[1]).join(","));
+      check("Find my district and the picker sit on one row above the map",
+        before(D.getElementById("districtPick"), grid) && !!D.getElementById("locateMe") &&
+          D.querySelector(".districts-locate.has-pick").contains(D.getElementById("districtPick")) &&
+          D.querySelector(".districts-tools").hidden);
+      const fold = D.querySelector(".districts-after .movers-fold");
+      // The summary is the heading's words in the clock's tense (rule 63):
+      // "Ran in a different district" from the day after Election Day.
+      const moved = now ? /^Ran in a different district \d+ members?$/ : /^Running in a different district \d+ members?$/;
+      if (moves) {
+        check("the moves are folded, closed, below the map, the summary counting the members in the heading's tense",
+          !!fold && !fold.open && before(grid, fold) && !!fold.querySelector(".mover-group") &&
+            moved.test(fold.querySelector("summary").textContent) &&
+            fold.querySelector(".state-heading").textContent === fold.querySelector("summary").firstChild.textContent.trim(),
+          fold && fold.querySelector("summary").textContent);
+      } else {
+        check("with no moves in the data, no moves fold and no moves block are drawn",
+          !fold && !D.querySelector(".districts-movers") && !D.querySelector(".mover-group") &&
+            (!data || window.KYC.recordPhase()), fold ? fold.textContent : "");
+      }
+      if (data) check("January's page is the record phase's", window.KYC.recordPhase() && !moves);
+      check("the hero's lede and links follow the map",
+        !!D.querySelector(".districts-after .districts-lede") && !!D.querySelector(".districts-after .state-links") &&
+          !D.querySelector(".state-hero .districts-lede"));
+      const legend = D.querySelector(".party-legend");
+      check("the key, the toggles and the how-to sit under the shown map, inside its card",
+        !!legend && shownCard()[0].contains(legend) && before(shownCard()[0].querySelector(".district-statewide"), legend) &&
+          shownCard()[0].contains(D.getElementById("compareToggle")) && shownCard()[0].contains(D.querySelector(".districts-howto")));
+      // The key says what the map on screen shows: before the record phase
+      // the 2026 map is uncoloured, so under it the party key and "The 2024
+      // map is colored..." described a map the reader could not see (PR #218
+      // review); in the record phase both maps are coloured and it is whole.
+      const keyShown = keyWords(legend);
+      check("the key under the 2026 plan speaks of the map shown",
+        window.KYC.recordPhase()
+          ? /by who last held it/.test(keyShown) && /Republican/.test(keyShown)
+          : /seats filled in November/.test(keyShown) && !/is colored/.test(keyShown) &&
+            !/Democratic|Republican|Vacant/.test(keyShown), keyShown);
+      const chips = [...shownCard()[0].querySelectorAll(".inset-zoom [data-zoom]")];
+      check("a Zoom chip for each inset, by its title, under the statewide map",
+        chips.map((c) => c.textContent).join("|") === state.insets.map((i) => i.title).join("|") &&
+          before(shownCard()[0].querySelector(".district-statewide"), chips[0]),
+        chips.map((c) => c.textContent).join("|"));
+      const jumps = [];
+      const real = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () { jumps.push(this); };
+      chips[chips.length - 1].click();
+      window.Element.prototype.scrollIntoView = real;
+      check("a chip jumps to its inset, on the shown plan",
+        jumps.length === 1 && jumps[0].getAttribute("data-inset") === chips[chips.length - 1].textContent &&
+          shownCard()[0].contains(jumps[0]), jumps.map((j) => j.getAttribute("data-inset")).join(","));
+    });
+    suite(`districts/tx.html on a phone ${when} — the other plan, drawn on its first switch and kept`, () => {
+      const kept = cards()[1];
+      D.querySelector('[data-plan-show="0"]').click();
+      check("the 2024 plan is drawn and shown, the 2026 one hidden",
+        shownCard().length === 1 && shownCard()[0] === cards()[0] && !!cards()[0].querySelector(".district-statewide") &&
+          cards()[1] === kept && kept.hidden);
+      check("every district on the 2024 plan is numbered somewhere, at 302px (rule 43)",
+        numbered(cards()[0], state.plans[0]).length === 0, numbered(cards()[0], state.plans[0]).join(","));
+      check("the switch says which is shown, and so does its live region",
+        D.querySelector('[data-plan-show="0"]').getAttribute("aria-pressed") === "true" &&
+          D.getElementById("planShown").textContent === "Showing the " + state.plans[0].title + ", used for " +
+          state.plans[0].used + ".", D.getElementById("planShown").textContent);
+      const old = cards()[0];
+      D.querySelector('[data-plan-show="1"]').click();
+      check("switching back shows the 2026 card as drawn, not drawn again",
+        cards()[1] === kept && !kept.hidden && cards()[0] === old && old.hidden);
+      check("and the key goes with the shown card", kept.contains(D.querySelector(".party-legend")));
+      D.querySelector('[data-plan-show="0"]').click();
+      const oldKey = keyWords(D.querySelector(".party-legend"));
+      check("under the 2024 plan the key is its party colours, not the 2026 plan's",
+        /Republican/.test(oldKey) && !/seats filled in November/.test(oldKey) &&
+          (window.KYC.recordPhase() || /is colored/.test(oldKey)), oldKey);
+      D.querySelector('[data-plan-show="1"]').click();
+      // A pick changes both plans: the hidden one is drawn again only when shown.
+      D.getElementById("districtPick").value = "9";
+      D.getElementById("districtPick").dispatchEvent(new window.Event("change", { bubbles: true }));
+      check("a pick redraws the shown plan with it", cards()[1] !== kept &&
+        [...cards()[1].querySelectorAll(".district-num.is-focus")].some((n) => n.textContent === "9"));
+      check("and leaves the hidden plan as it was until it is shown", cards()[0] === old);
+      D.querySelector('[data-plan-show="0"]').click();
+      check("shown, the 2024 plan is drawn again with the pick",
+        cards()[0] !== old && [...cards()[0].querySelectorAll(".district-num.is-focus")].some((n) => n.textContent === "9"));
+    });
+    suite(`districts/tx.html ${when} — a tablet turned past 1000px is the desktop page, and back`, () => {
+      turn(window, false);
+      check("both plans drawn side by side, no switch",
+        cards().length === 2 && cards().every((c) => !c.hidden && c.querySelector(".district-statewide")) &&
+          D.querySelector(".plan-switch").hidden && !grid.classList.contains("single"));
+      check("the moves (where the data holds any), lede and links are back where the desktop page has them",
+        (moves ? before(D.querySelector(".districts-movers"), D.getElementById("districtPick"))
+          : !D.querySelector(".districts-movers") && !D.querySelector(".movers-fold")) &&
+          !!D.querySelector(".state-hero .districts-lede") && !!D.querySelector(".state-hero .state-links") &&
+          D.querySelector(".districts-after").hidden);
+      check("no Zoom chips on a desktop", !D.querySelector(".inset-zoom"));
+      check("the key and toggles are back above the maps, in the desktop order",
+        before(D.querySelector(".party-legend"), grid) && D.querySelector(".districts-controls").contains(D.querySelector(".party-legend")) &&
+          D.querySelector(".districts-tools").contains(D.getElementById("compareToggle")) &&
+          D.querySelector(".districts-tools").contains(D.getElementById("districtPick")) &&
+          !D.querySelector(".districts-tools").hidden && !D.querySelector(".districts-locate.has-pick") &&
+          before(D.getElementById("districtPick"), D.getElementById("compareToggle")) &&
+          before(D.querySelector(".districts-howto"), D.querySelector(".party-legend")));
+      turn(window, true);
+      check("turned back, one plan again, the one the reader had picked",
+        shownCard().length === 1 && shownCard()[0] === cards()[0] &&
+          D.querySelector('[data-plan-show="0"]').getAttribute("aria-pressed") === "true");
+      check("still no page errors", errors.length === 0, errors.join(" | "));
+    });
+  }
+  // A state that was not redrawn has one plan: no switch on a phone, its
+  // lede after the map all the same.
+  const ny = await buildPage("districts/ny.html", { setup: both(286) });
+  suite("districts/ny.html on a phone — one plan, no switch", () => {
+    check("no page errors", ny.errors.length === 0, ny.errors.join(" | "));
+    check("no switch", !ny.D.querySelector(".plan-switch"));
+    const card = ny.D.querySelector(".plan-card");
+    const plan = ny.window.kycDistricts.NY.plans[0];
+    const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+    check("every district numbered at 286px", Object.keys(plan.districts).every((n) => written.has(n)));
+    check("zoom chips for its insets", card.querySelectorAll(".inset-zoom [data-zoom]").length ===
+      ny.window.kycDistricts.NY.insets.length);
+  });
+  // The rule 43 check at the phone's own narrowest width: each plan in turn,
+  // on every redrawn state - every district file holding two plans - not a
+  // sample of them (PR #176 review: AL, LA, OH, TN and UT were left out).
+  const redrawn = fs.readdirSync(path.join(SITE, "data", "districts")).filter((f) => /^[a-z]{2}\.js$/.test(f)).map((f) => {
+    const sandbox = { window: {} };
+    require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "districts", f), "utf8"), sandbox);
+    return sandbox.window.kycDistricts || {};
+  }).flatMap((maps) => Object.keys(maps).filter((code) => (maps[code].plans || []).length === 2));
+  suite("the redrawn states, read from the district files", () => {
+    check("several, Texas and California among them", redrawn.length >= 4 && redrawn.includes("TX") && redrawn.includes("CA"),
+      redrawn.join(","));
+  });
+  for (const code of redrawn) {
+    const page = await buildPage("districts/" + code.toLowerCase() + ".html", { setup: both(280) });
+    const state = page.window.kycDistricts[code];
+    suite(`districts/${code.toLowerCase()}.html on a phone at 280px — every district numbered on each plan`, () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      [1, 0].forEach((i) => {
+        page.D.querySelector(`[data-plan-show="${i}"]`).click();
+        const card = page.D.getElementById("planGrid").children[i];
+        const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+        const missing = Object.keys(state.plans[i].districts).filter((n) => !written.has(n));
+        check(`the ${state.plans[i].title}, shown`, !card.hidden && missing.length === 0, missing.join(","));
+      });
+    });
+  }
+}
+
+/* ============================== a folded state page's jump bar and filters */
+
+/* A phone of *height* px: the fold's width query, the bar's height query,
+ * and an IntersectionObserver whose callback the suite calls itself. */
+function phoneOfHeight(height) {
+  return (w) => {
+    phoneWidth(w, true);
+    const width = w.matchMedia;
+    w.matchMedia = (query) => /max-height: 499/.test(query)
+      ? { media: query, matches: height < 500, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} }
+      : width(query);
+    w.__observed = [];
+    w.IntersectionObserver = class {
+      constructor(fn, opts) { this.fn = fn; this.opts = opts; }
+      observe(node) { w.__observed.push({ node, fire: (entry) => this.fn([Object.assign({ target: node }, entry)]) }); }
+      disconnect() {}
+    };
+  };
+}
+
+async function testJumpBar() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const page = await buildPage("states/ca.html", { now, setup: phoneOfHeight(844) });
+    const { window, D, errors } = page;
+    const bar = D.querySelector(".jumpbar");
+    const root = D.documentElement;
+    const watch = window.__observed.filter((o) => o.node.id === "find-race")[0];
+    suite(`states/ca.html on a phone ${when} — the jump bar (rule 44)`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("a bar named Jump to, hidden while Find your race is on screen",
+        !!bar && bar.tagName === "NAV" && bar.getAttribute("aria-label") === "Jump to" && bar.hidden &&
+          !root.classList.contains("has-jumpbar"));
+      check("it watches the Find your race block, below the header", !!watch);
+      const block = [...D.querySelectorAll("#raceJumpSelect option")].map((o) => o.value);
+      const copy = [...D.querySelectorAll("#raceJumpBar option")].map((o) => o.value);
+      check("its select offers exactly the block's places, in the same order",
+        copy.length > 50 && copy.join("|") === block.join("|"), copy.length + " against " + block.length);
+      check("and is named for what it does", D.getElementById("raceJumpBar").getAttribute("aria-label") === "Jump to a race or section");
+      // A jump from the block itself, the bar still hidden: the padding the
+      // bar needs is on before the scroll, or the bar the observer shows a
+      // moment later covers the race the jump landed on (PR #176 review).
+      const landed = [];
+      const own = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () {
+        landed.push({ id: this.id, padded: root.classList.contains("has-jumpbar"), bar: !bar.hidden });
+      };
+      const blockSelect = D.getElementById("raceJumpSelect");
+      const pick = [...blockSelect.options].filter((o) => /^race-H-CA-32/.test(o.value))[0].value;
+      blockSelect.value = pick;
+      blockSelect.dispatchEvent(new window.Event("change", { bubbles: true }));
+      window.Element.prototype.scrollIntoView = own;
+      const first = landed.filter((j) => j.id === pick)[0];
+      check("a pick from the block, the bar hidden, turns the bar and its padding on before it scrolls",
+        !!first && first.padded && first.bar, JSON.stringify(landed));
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+      check("once the block has scrolled away under the header, the bar shows and the page's scroll padding grows",
+        !bar.hidden && root.classList.contains("has-jumpbar"));
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: 2000, bottom: 2600 } });
+      check("never for a block below the screen", bar.hidden);
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+      // A pick from the bar opens its race and goes there, as the block's does.
+      const select = D.getElementById("raceJumpBar");
+      const value = [...select.options].filter((o) => /^race-H-CA-40/.test(o.value))[0].value;
+      const jumps = [];
+      const real = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () { jumps.push(this.id || this.className); };
+      select.value = value;
+      select.dispatchEvent(new window.Event("change", { bubbles: true }));
+      const section = D.getElementById(value).closest("section.race-foldable");
+      check("a pick from the bar opens its race and jumps to it",
+        jumps.indexOf(value) !== -1 && section.querySelector(".race-row").getAttribute("aria-expanded") === "true",
+        jumps.join(","));
+      check("and the bar's select goes back to its first option", select.value === "");
+      jumps.length = 0;
+      let backPadded = null;
+      window.Element.prototype.scrollIntoView = function () {
+        jumps.push(this.id || this.className);
+        if (this.id === "find-race") backPadded = root.classList.contains("has-jumpbar") || !bar.hidden;
+      };
+      D.querySelector("[data-jump-find]").click();
+      window.Element.prototype.scrollIntoView = real;
+      check("its button goes back to Find your race and puts the reader on its select",
+        jumps.indexOf("find-race") !== -1 && D.activeElement === D.getElementById("raceJumpSelect"), jumps.join(","));
+      check("with the bar and its padding gone before it scrolls, so the block lands under the header alone",
+        backPadded === false);
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+      turn(window, false);
+      check("a desktop never shows it, past the block or not", bar.hidden && !root.classList.contains("has-jumpbar"));
+      turn(window, true);
+      check("turned back to a phone past the block, it shows again", !bar.hidden);
+      watch.fire({ isIntersecting: true, boundingClientRect: { top: 200, bottom: 800 } });
+      check("and hides, its padding with it, when the block comes back", bar.hidden && !root.classList.contains("has-jumpbar"));
+    });
+  }
+  // A race reached by its address (a shared race's page, Your ballot, a
+  // district page) lands below the bar the observer will show.
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const landed = [];
+    const phone = phoneOfHeight(844);
+    const linked = await buildPage("states/ca.html", { now, hash: "#race-H-CA-32-2026", setup: (w) => {
+      phone(w);
+      w.Element.prototype.scrollIntoView = function () {
+        landed.push({ id: this.id, padded: w.document.documentElement.classList.contains("has-jumpbar") });
+      };
+    } });
+    suite(`states/ca.html#race-H-CA-32-2026 on a phone ${when} — a linked race lands below the bar`, () => {
+      check("no page errors", linked.errors.length === 0, linked.errors.join(" | "));
+      const jumps = landed.filter((j) => j.id === "race-H-CA-32-2026");
+      check("every jump to it is made with the bar's padding on", jumps.length > 0 && jumps.every((j) => j.padded),
+        JSON.stringify(landed.slice(0, 6)));
+      check("and the bar shows", !linked.D.querySelector(".jumpbar").hidden);
+    });
+  }
+  const short = await buildPage("states/ca.html", { setup: phoneOfHeight(420) });
+  suite("states/ca.html on a phone on its side (420px tall) — no jump bar", () => {
+    const watch = short.window.__observed.filter((o) => o.node.id === "find-race")[0];
+    watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+    check("past the block, still hidden: the header and the bar would take a third of the screen",
+      short.D.querySelector(".jumpbar").hidden && !short.D.documentElement.classList.contains("has-jumpbar"));
+  });
+  // A state that does not fold has no bar at all.
+  const wy = await buildPage("states/wy.html", { setup: phoneOfHeight(844) });
+  suite("states/wy.html on a phone — no fold, no bar", () => {
+    check("no bar", !wy.D.querySelector(".jumpbar"));
+  });
+}
+
+/* The chips over a folded page's race rows: counted by the race heads' own
+ * tests, so a chip, its count and the badges never disagree (rule 73). */
+async function testRaceFilters() {
+  const PAGES = ["ca", "tx", "fl", "ny", "ga", "il"];
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const built = {};
+    for (const st of PAGES) built[st] = await buildPage("states/" + st + ".html", { now, setup: (w) => phoneWidth(w, true) });
+    // The heads' words for a race nobody challenges, in the clock's tense
+    // (rule 63): the chip names what it filters in the same words.
+    const noneWords = now ? "No challenger was on the ballot" : "No challenger on the ballot";
+    suite(`state pages on a phone ${when} — the race filters' counts are the race heads' (rules 12, 73)`, () => {
+      const problems = [];
+      PAGES.forEach((st) => {
+        const { window, D, errors } = built[st];
+        if (errors.length) problems.push(st + ": " + errors.join(" | "));
+        const sections = [...D.querySelectorAll("section.race-foldable")];
+        // What each race's own head says, read from the page.
+        const heads = (word) => sections.filter((s) => [...s.querySelectorAll(".race-body .race-head .badge, .race-body .badge")]
+          .some((b) => b.textContent.trim().indexOf(word) === 0)).length;
+        const said = { open: heads("Open seat"), unchallenged: heads(noneWords) };
+        const chips = {};
+        [...D.querySelectorAll(".race-filters [data-race-filter]")].forEach((c) => {
+          chips[c.getAttribute("data-race-filter")] = Number(c.querySelector(".race-filter-count").textContent);
+        });
+        if (chips.all !== sections.length) problems.push(st + ": All says " + chips.all + " over " + sections.length);
+        ["open", "unchallenged"].forEach((k) => {
+          const got = chips[k] || 0;
+          if (got !== said[k]) problems.push(`${st}: ${k} chip ${got}, heads ${said[k]}`);
+        });
+        const info = window.KYC.meta().states[st.toUpperCase()];
+        if ((chips.open || 0) !== (info.open || 0)) problems.push(`${st}: open chip ${chips.open} against the summary's ${info.open}`);
+      });
+      check("each chip counts the races whose head says so, and Open seats is the summary's count", problems.length === 0,
+        problems.slice(0, 6).join(" || "));
+      const past = when === "after Election Day";
+      const words = [].concat(...PAGES.map((st) => [...built[st].D.querySelectorAll(".race-filters [data-race-filter]")]
+        .map((c) => c.firstChild.textContent.trim())));
+      // One name for one thing, on both clocks: the chip is the heads' words
+      // (KYC.cards.raceFilterWords), never "Uncontested" over heads saying
+      // "No challenger on the ballot" (rule 12; PR #176 review), and after
+      // the count the heads' past tense, never the present over a decided
+      // race (rule 63).
+      const other = past ? "No challenger on the ballot" : "No challenger was on the ballot";
+      check(`the no-challenger chip is the head badge's words${past ? ", in the past tense after Election Day" : ""}`,
+        words.indexOf(noneWords) !== -1 && words.indexOf(other) === -1 && words.indexOf("Uncontested") === -1,
+        [...new Set(words)].join(" | "));
+    });
+
+    const { window, D } = built.ca;
+    const KYC = window.KYC;
+    const sections = [...D.querySelectorAll("section.race-foldable")];
+    const shown = () => sections.filter((s) => !s.hidden);
+    const status = D.getElementById("raceFilterStatus");
+    suite(`states/ca.html on a phone ${when} — picking out the open seats`, () => {
+      check("a group of chips over the rows, All pressed", D.querySelector(".race-filters").getAttribute("role") === "group" &&
+        D.querySelector('[data-race-filter="all"]').getAttribute("aria-pressed") === "true" && status.textContent === "");
+      D.querySelector('.race-filters [data-race-filter="open"]').click();
+      const want = sections.filter((s) => KYC.cards.raceFilters.open(KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0]));
+      check("only the open seats' rows are shown", shown().length === want.length && shown().every((s) => want.indexOf(s) !== -1),
+        shown().map((s) => s.getAttribute("data-race")).join(","));
+      check("the live line says how many, of how many", status.textContent === `Showing ${want.length} of ${sections.length} races for Congress` &&
+        status.getAttribute("aria-live") === "polite", status.textContent);
+      check("with Show all beside it", !D.querySelector(".race-filter-all").hidden);
+      check("the filter is in the address", /#\/\?races=open$/.test(window.location.href), window.location.href);
+      // The button below the line counts what the line counts, and opens
+      // only those (rule 73; PR #176 review: "Open all 52 races").
+      const openAll = D.querySelector("[data-race-open-all]");
+      const these = want.length === 1 ? "Open this race" : `Open these ${want.length} races`;
+      check("Open all counts the races shown", openAll.textContent === these, openAll.textContent);
+      openAll.click();
+      check("and opens those alone", want.every((s) => s.classList.contains("is-open")) &&
+        sections.filter((s) => want.indexOf(s) === -1).every((s) => !s.classList.contains("is-open")));
+      check("then offers to fold them", openAll.textContent === these.replace(/^Open/, "Fold"), openAll.textContent);
+      openAll.click();
+      // A search inside the filter keeps the filter.
+      const outsider = sections.filter((s) => want.indexOf(s) === -1)[0];
+      const name = KYC.byId(outsider.querySelector(".race-body .card").getAttribute("data-id")).name;
+      const input = D.getElementById("stateSearch");
+      if (input) {
+        input.value = name;
+        input.dispatchEvent(new window.Event("input"));
+      }
+    });
+  }
+  // The search runs after its debounce: read it, then the jumps.
+  await settle(200);
+  for (const [now, when] of [[undefined, "on the campaign clock"]]) {
+    const page = await buildPage("states/ca.html", { now, hash: "#/?races=open", setup: (w) => phoneWidth(w, true) });
+    const { window, D } = page;
+    const KYC = window.KYC;
+    const sections = [...D.querySelectorAll("section.race-foldable")];
+    const shown = () => sections.filter((s) => !s.hidden);
+    const isOpen = (s) => KYC.cards.raceFilters.open(KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0]);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a shared filter, and jumps out of it`, () => {
+      check("the address's filter is applied as the page loads",
+        D.querySelector('[data-race-filter="open"]').getAttribute("aria-pressed") === "true" && shown().every(isOpen) &&
+          shown().length === sections.filter(isOpen).length);
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      const input = D.getElementById("stateSearch");
+      const name = KYC.byId(outsider.querySelector(".race-body .card").getAttribute("data-id")).name;
+      check("a race the filter leaves out is not brought back by a search alone", (() => {
+        input.value = name;
+        input.dispatchEvent(new window.Event("input"));
+        return true;
+      })());
+    });
+    await settle(200);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a search inside the filter`, () => {
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      check("the matching race outside the filter stays hidden", outsider.hidden && shown().every(isOpen));
+      const input = D.getElementById("stateSearch");
+      input.value = "";
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a jump to a race the filter leaves out`, () => {
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      const select = D.getElementById("raceJumpSelect");
+      select.value = "race-" + outsider.getAttribute("data-race");
+      select.dispatchEvent(new window.Event("change", { bubbles: true }));
+      check("shows every race again and opens the one asked for",
+        !outsider.hidden && outsider.classList.contains("is-open") && shown().length === sections.length &&
+          D.querySelector('[data-race-filter="all"]').getAttribute("aria-pressed") === "true");
+      check("and the address no longer names a filter", !/races=/.test(window.location.href), window.location.href);
+      D.querySelector('.race-filters [data-race-filter="open"]').click();
+      D.querySelector(".race-filter-all").click();
+      check("Show all shows every row and returns to the All chip",
+        shown().length === sections.length && D.activeElement === D.querySelector('.race-filters [data-race-filter="all"]'));
+    });
+  }
+  const desk = await buildPage("states/ca.html", { hash: "#/?races=open" });
+  suite("states/ca.html#/?races=open at 1000px and wider — no filter, every race shown", () => {
+    const sections = [...desk.D.querySelectorAll("section.race-foldable")];
+    check("every race shown, the fold bar with its chips hidden",
+      sections.every((s) => !s.hidden) && desk.D.querySelector(".race-fold-bar").hidden);
+    check("no page errors", desk.errors.length === 0, desk.errors.join(" | "));
+  });
+}
+
+/* On a phone a folded state's House delegation folds behind its heading's
+ * balance and a button; the senators stay open, and every race row leads
+ * with who holds its seat (rule 27; the owner's question, PR body). */
+async function testDelegationFold() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const page = await buildPage("states/ca.html", { now, setup: (w) => phoneWidth(w, true) });
+    const { window, D, errors } = page;
+    const KYC = window.KYC;
+    const grid = D.getElementById("delegationCards");
+    const button = D.querySelector("[data-delegation-toggle]");
+    const house = KYC.people().filter((p) => KYC.seated(p) && p.state === "CA" && /House/.test(p.chamber));
+    suite(`states/ca.html on a phone ${when} — the House delegation folded to its balance`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the heading keeps its balance by party", !!D.querySelector("#delegation h2 .balance") &&
+        /\d+ D/.test(D.querySelector("#delegation h2 .balance").textContent));
+      check("its cards are in the page, hidden until found, behind one button that names how many",
+        grid.getAttribute("hidden") === "until-found" && grid.querySelectorAll(".card").length === house.length &&
+          !button.parentNode.hidden && button.getAttribute("aria-expanded") === "false" &&
+          button.textContent === "Show all " + house.length + " representatives" &&
+          button.getAttribute("aria-controls") === "delegationCards", button.textContent);
+      check("the senators stay open", !D.querySelector("#senators .card-grid").hidden &&
+        D.querySelectorAll("#senators .card").length === 2);
+      check("the delegation still comes before the races (rule 27)",
+        !!(D.getElementById("delegation").compareDocumentPosition(D.getElementById("races")) & window.Node.DOCUMENT_POSITION_FOLLOWING));
+      const held = [...D.querySelectorAll("section.race-foldable")].filter((s) => /^H-/.test(s.getAttribute("data-race")));
+      check("every House race's row leads with whether and by whom its seat is held",
+        held.every((s) => s.querySelector(".race-row-held") && s.querySelector(".race-row-held").textContent.trim()),
+        held.filter((s) => !s.querySelector(".race-row-held")).map((s) => s.getAttribute("data-race")).join(","));
+      button.click();
+      check("the button shows every card, and says it folds them", !grid.hasAttribute("hidden") &&
+        button.getAttribute("aria-expanded") === "true" && button.textContent === "Fold the " + house.length + " representatives");
+      button.click();
+      check("and folds them again", grid.getAttribute("hidden") === "until-found");
+      // The browser's find in a folded card opens the delegation.
+      grid.dispatchEvent(new window.Event("beforematch", { bubbles: true }));
+      check("find-in-page opens it", !grid.hasAttribute("hidden") && button.getAttribute("aria-expanded") === "true");
+      button.click();
+      window.dispatchEvent(new window.Event("beforeprint"));
+      check("printing opens it", !grid.hasAttribute("hidden"));
+      window.dispatchEvent(new window.Event("afterprint"));
+      check("and folds back what printing opened", grid.getAttribute("hidden") === "until-found");
+      turn(window, false);
+      check("1000px and wider: every card shown, no button", !grid.hasAttribute("hidden") && button.parentNode.hidden);
+      turn(window, true);
+      check("turned back, folded again", grid.getAttribute("hidden") === "until-found");
+      const input = D.getElementById("stateSearch");
+      input.value = house[0].name;
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html on a phone ${when} — the page's search reaches a folded member`, () => {
+      check("a search naming a member opens the delegation", !grid.hasAttribute("hidden"));
+      const input = D.getElementById("stateSearch");
+      input.value = "";
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html on a phone ${when} — and cleared, folds back what it opened`, () => {
+      check("folded again", grid.getAttribute("hidden") === "until-found");
+    });
+  }
+  const wy = await buildPage("states/wy.html", { setup: (w) => phoneWidth(w, true) });
+  suite("states/wy.html on a phone — a state that does not fold keeps its delegation open", () => {
+    check("no button, cards shown", !wy.D.querySelector("[data-delegation-toggle]") &&
+      !wy.D.querySelector("#delegation .card-grid").hidden);
+  });
+}
+
+/* The phone layout's second phase meets the race for governor (PRs #176,
+ * #191): the jump bar reaches it as "Find your race" does, a race filter
+ * never counts or hides it as a race for Congress (rules 27, 73), its row
+ * opens its section as a race's does, and the folded delegation never
+ * takes the governor's card in with Congress's. */
+async function testPhoneGovernorRace() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    for (const st of ["ga", "ca"]) {
+      const page = await buildPage("states/" + st + ".html", { now, setup: phoneOfHeight(844) });
+      const { window, D, errors } = page;
+      const root = D.documentElement;
+      const gov = D.getElementById("race-governor");
+      const congress = [...D.querySelectorAll("section.race-foldable")];
+      suite(`states/${st}.html on a phone ${when} — the race for governor beside the jump bar, the filters and the folded delegation`, () => {
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        check("the race for governor folds to a row of its own, apart from the races for Congress",
+          !!gov && gov.classList.contains("gov-race-foldable") && !gov.classList.contains("race-foldable") &&
+            congress.indexOf(gov) === -1);
+        const block = [...D.querySelectorAll("#raceJumpSelect option")].map((o) => o.value);
+        const copy = [...D.querySelectorAll("#raceJumpBar option")].map((o) => o.value);
+        check("the bar's select offers the race for governor where the block's does, in the same order",
+          copy.indexOf("race-governor") !== -1 && copy.indexOf("race-governor") === block.indexOf("race-governor") &&
+            copy.join("|") === block.join("|"), copy.indexOf("race-governor") + " / " + block.indexOf("race-governor"));
+        // In page order: after State government, before the statewide
+        // questions, which the page draws after the race for governor.
+        const at = (v) => copy.indexOf(v);
+        check("in page order: after State government, before the statewide questions",
+          (at("state-government") === -1 || at("state-government") < at("race-governor")) &&
+            (at("measures") === -1 || at("race-governor") < at("measures")) &&
+            (!D.getElementById("measures") ||
+              !!(D.getElementById("governor-race").compareDocumentPosition(D.getElementById("measures")) & 4)),
+          copy.slice(0, 6).join(","));
+        const chips = [...D.querySelectorAll(".race-filters [data-race-filter]")];
+        const all = chips.filter((c) => c.getAttribute("data-race-filter") === "all")[0];
+        check("the chips say what they filter", !!D.querySelector('.race-filters[aria-label="Show races for Congress"]'));
+        check("All counts the races for Congress alone (rule 73)",
+          !!all && Number(all.querySelector(".race-filter-count").textContent) === congress.length,
+          all && all.textContent);
+        const pick = chips.filter((c) => c.getAttribute("data-race-filter") !== "all")[0];
+        if (!pick) return;
+        pick.click();
+        const status = D.getElementById("raceFilterStatus").textContent;
+        const shown = congress.filter((s) => !s.hidden).length;
+        check("a filter leaves the race for governor shown, and out of its count",
+          !gov.hidden && status === `Showing ${shown} of ${congress.length} races for Congress`, status);
+        // A jump to the race for governor from the bar, under a filter: it
+        // opens, the filter stays, and the bar's padding is on before it
+        // scrolls (barForJump).
+        const watch = window.__observed.filter((o) => o.node.id === "find-race")[0];
+        watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+        const landed = [];
+        const own = window.Element.prototype.scrollIntoView;
+        window.Element.prototype.scrollIntoView = function () {
+          landed.push({ id: this.id, padded: root.classList.contains("has-jumpbar") });
+        };
+        const select = D.getElementById("raceJumpBar");
+        select.value = "race-governor";
+        select.dispatchEvent(new window.Event("change", { bubbles: true }));
+        window.Element.prototype.scrollIntoView = own;
+        const jump = landed.filter((j) => j.id === "race-governor")[0];
+        check("a pick from the bar opens the race for governor and lands below the bar",
+          !!jump && jump.padded && gov.querySelector(".race-row").getAttribute("aria-expanded") === "true" &&
+            gov.querySelector(".race-body").getAttribute("hidden") === null, JSON.stringify(landed));
+        check("and leaves the races for Congress picked out as they were",
+          pick.getAttribute("aria-pressed") === "true" && congress.filter((s) => !s.hidden).length === shown);
+        // Its row folds and opens it, as a race's row does.
+        const row = gov.querySelector(".race-row");
+        row.click();
+        check("its row folds it", row.getAttribute("aria-expanded") === "false" &&
+          gov.querySelector(".race-body").getAttribute("hidden") === "until-found");
+        row.click();
+        check("and opens it again", row.getAttribute("aria-expanded") === "true");
+        all.click();
+        // The folded delegation is Congress's: the governor's card is not in it.
+        const grid = D.getElementById("delegationCards");
+        const card = D.querySelector("#governor.gcard");
+        check("the delegation folds, the governor's card stays shown under State government",
+          !!grid && grid.getAttribute("hidden") === "until-found" && !!card && !grid.contains(card) &&
+            !card.closest("[hidden]") && !!card.closest("#state-government"));
+      });
+    }
+  }
 }
 
 async function testStatePhone() {
@@ -17680,6 +20380,185 @@ async function testGuidePhotos() {
   }
 }
 
+/* A state's page draws its races and its plain questions first, and loads
+ * the market prices and the questions in full once drawn (phone plan 3b);
+ * a district page loads the prices when a profile shows them. Each, once
+ * in, draws exactly what the page drew when it loaded them first, and a
+ * file that does not load is said where it would have been drawn. */
+async function testLazyStateData() {
+  const preload = (files) => (window) => {
+    files.forEach((file) => window.eval(fs.readFileSync(path.join(SITE, "data", file), "utf8")));
+  };
+  const allSlotsFilled = (b) => !b.D.querySelector(".odds-slot");
+  // On the campaign clock, and the day after Election Day, when the prices
+  // are final and the questions in the past tense (rule 63).
+  for (const [code, now] of [["ca"], ["tx"], ["wy"], ["nh"], ["ca", "2026-11-05T09:00:00"],
+    ["wy", "2026-11-05T09:00:00"]]) {
+    const page = `states/${code}.html`;
+    const early = await buildPage(page, { early: true, now });
+    const slots = early.D.querySelectorAll("#stateContent .odds-slot").length;
+    // Congress's races, and the race for governor (#governor-race, PR #191),
+    // whose markets are drawn in its block through kyc-odds.js too (PR #195).
+    const govRaces = early.D.querySelectorAll("#stateContent #governor-race .gov-race").length;
+    const races = early.D.querySelectorAll("#stateContent section.race").length + govRaces;
+    const govSlots = early.D.querySelectorAll("#stateContent #governor-race .odds-slot").length;
+    const plain = early.D.getElementById("measures");
+    const plainWords = plain ? plain.textContent : "";
+    const loadedFirst = early.window.kycOdds !== undefined || early.window.kycMeasures !== undefined;
+    await until(() => early.window.kycOdds !== undefined && early.window.kycMeasures !== undefined &&
+      allSlotsFilled(early), 8000);
+    await settle(30);
+    const first = await buildPage(page, { setup: preload(["odds.js", "measures.js"]), now });
+    await settle(30);
+    const a = first.D.getElementById("stateContent").innerHTML;
+    const b = early.D.getElementById("stateContent").innerHTML;
+    suite(`${page}${now ? " after Election Day" : ""} — the prices and the questions load once the races are drawn`, () => {
+      check("no page errors", early.errors.length === 0 && first.errors.length === 0,
+        early.errors.concat(first.errors).join(" | "));
+      check("neither was loaded before the first draw", !loadedFirst);
+      check("each race drawn holds a slot for its prices", races > 0 && slots === races, `${slots} / ${races}`);
+      check("the race for governor among them", govRaces === 1 && govSlots === 1, `${govSlots} / ${govRaces}`);
+      const govBlock = early.D.querySelector("#stateContent #governor-race .gov-race");
+      check("once in, the race for governor's block is what KYC.stategov draws: its markets, or the line that " +
+        "the cache holds none",
+        !!govBlock && !govBlock.querySelector(".odds-slot") &&
+        (!!govBlock.querySelector(".odds") || !!govBlock.querySelector(".gov-odds-none")) &&
+        govBlock.outerHTML === first.D.querySelector("#stateContent #governor-race .gov-race").outerHTML);
+      check("the questions stand as the page was written, with no word of a failure",
+        !plain || (!plain.querySelector(".measures-failed") && !!plain.querySelector("[data-measure]") ===
+          /<li data-measure="/.test(fs.readFileSync(path.join(SITE, page), "utf8"))), plainWords.replace(/\s+/g, " ").trim().slice(0, 80));
+      check("once in, the page is what it is when they load first", a === b && a.length > 1000,
+        firstDifference(a, b));
+      check("every slot filled", allSlotsFilled(early));
+    });
+    early.window.close();
+    first.window.close();
+  }
+  {
+    // A link to one question (the search's answers link
+    // states/<st>.html#measure-<ST>-<n>, rule 97) lands on it in the plain
+    // list, and again on it drawn in full once data/measures.js is in, held
+    // there while the page grows; a reader who moved first is left where
+    // they are. Before, it landed nowhere and left the reader at the top
+    // (PR #172 review). jsdom lays nothing out, so the jumps are counted.
+    const file = fs.readFileSync(path.join(SITE, "states", "ca.html"), "utf8");
+    const want = /<li data-measure="1" id="measure-CA-1">/.test(file) ? "measure-CA-1" : null;
+    const open = async (hash) => {
+      const sizes = [];
+      const jumps = [];
+      const page = await buildPage("states/ca.html", { early: true, hash, hold: /\/data\/measures\.js$/,
+        setup: (w) => {
+          w.ResizeObserver = function (cb) {
+            const me = { cb, on: false };
+            sizes.push(me);
+            this.observe = () => { me.on = true; };
+            this.disconnect = () => { me.on = false; };
+          };
+          w.HTMLElement.prototype.scrollIntoView = function () {
+            jumps.push({ id: this.id, inPage: this.isConnected, full: this.classList.contains("measure") ||
+              !!this.querySelector(".measure") });
+          };
+        } });
+      await settle(30);
+      const grow = () => sizes.forEach((o) => { if (o.on) o.cb([]); });
+      return { page, jumps, grow };
+    };
+    const arrived = (page) => until(() => page.window.kycMeasures !== undefined &&
+      !!page.D.querySelector("#measures .measure"), 8000);
+    const one = await open("#" + want);
+    const before = one.jumps.slice();
+    one.page.release();
+    await arrived(one.page);
+    await settle(30);
+    const after = one.jumps.slice(before.length);
+    one.grow();
+    const regrown = one.jumps.slice(before.length + after.length);
+    const section = await open("#measures");
+    section.page.release();
+    await arrived(section.page);
+    await settle(30);
+    section.grow();
+    const moved = await open("#" + want);
+    const movedBefore = moved.jumps.length;
+    moved.page.window.dispatchEvent(new moved.page.window.WheelEvent("wheel", { deltaY: 100 }));
+    moved.page.release();
+    await arrived(moved.page);
+    await settle(30);
+    moved.grow();
+    suite("states/ca.html#measure-CA-1 — a link to a question lands on it while the questions load", () => {
+      check("no page errors", [one, section, moved].every((o) => o.page.errors.length === 0),
+        [one, section, moved].flatMap((o) => o.page.errors).join(" | "));
+      check("the plain list carries the question's id", !!want);
+      check("it jumps to the question in the plain list, before the file is in",
+        before.length === 1 && before[0].id === want && before[0].inPage && !before[0].full,
+        JSON.stringify(before));
+      check("and to the question drawn in full once it is in, never to the plain one gone",
+        after.length >= 1 && after.every((j) => j.id === want && j.inPage && j.full), JSON.stringify(after));
+      check("held there as the page goes on growing", regrown.length === 1 && regrown[0].id === want &&
+        regrown[0].inPage && regrown[0].full, JSON.stringify(regrown));
+      check("the fragment is dropped from the address", one.page.window.location.hash === "",
+        one.page.window.location.hash);
+      const last = section.jumps[section.jumps.length - 1] || {};
+      check("a link to the section is held on the section drawn in full",
+        section.jumps.length >= 3 && last.id === "measures" && last.inPage && last.full,
+        JSON.stringify(section.jumps));
+      check("a reader who moved before the file arrived is left where they are",
+        movedBefore === 1 && moved.jumps.length === 1, JSON.stringify(moved.jumps));
+    });
+    [one, section, moved].forEach((o) => o.page.window.close());
+  }
+  {
+    const failed = await buildPage("states/ca.html", { block: ["data/odds.js"] });
+    await until(() => !!failed.D.querySelector(".odds-failed"), 8000);
+    const races = failed.D.querySelectorAll("#stateContent section.race").length +
+      failed.D.querySelectorAll("#stateContent #governor-race .gov-race").length;
+    suite("states/ca.html — market prices that did not load are said where each race shows them", () => {
+      check("no page errors", failed.errors.length === 0, failed.errors.join(" | "));
+      check("every race's place for its prices says they did not load",
+        races > 0 && failed.D.querySelectorAll("#stateContent .odds-failed").length === races,
+        failed.D.querySelectorAll("#stateContent .odds-failed").length + " / " + races);
+      check("in words, never a blank", /did not load/.test(
+        (failed.D.querySelector("#stateContent .odds-failed") || {}).textContent || ""));
+    });
+    failed.window.close();
+  }
+  {
+    // A district page draws no race's prices until a profile shows them.
+    // The profile is opened by its address, chosen from the data as a
+    // Texan whose race has prices: the page draws no card by default on
+    // every day (the January rehearsal's districts/tx.html draws none), so
+    // clicking the first card tested the day's data, not the rule.
+    const page = await buildPage("districts/tx.html", { early: true });
+    await settle(50);
+    const before = page.served.filter((s) => /\/data\/odds\.js/.test(s)).length;
+    const priced = oddsOnDisk().races || {};
+    const raceIds = new Set(page.window.KYC.races().map((r) => r.id));
+    const person = (page.window.legislatorsData || []).filter((p) => {
+      const id = p.contestRaceId || p.raceId;
+      return p.state === "TX" && raceIds.has(id) && ((priced[id] || {}).markets || []).length > 0;
+    })[0];
+    if (person) page.window.location.hash = "#/profile/" + encodeURIComponent(person.id);
+    await until(() => page.window.kycOdds !== undefined && !page.D.querySelector(".odds-slot"), 8000);
+    const box = page.D.getElementById("profileModalRaceOdds");
+    const title = (page.D.getElementById("profileModalRaceTitle") || {}).textContent;
+    const want = person && page.window.KYC.races().filter((r) => r.id === (person.contestRaceId || person.raceId))[0];
+    suite("districts/tx.html — the prices load when a profile shows them", () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      check("a Texan whose race has prices, in the page's data", !!person && !!want,
+        person ? person.id : "none of " + (page.window.legislatorsData || []).length + " profiles");
+      check("not before", before === 0, String(before));
+      check("then the dialog shows them as the prices are drawn everywhere",
+        !!box && !!want && title === want.label &&
+          box.innerHTML === page.window.KYC.odds.render(want, { compact: true, collapsed: true }),
+        box ? title + ": " + box.innerHTML.slice(0, 80) : "no box");
+      check("and they are prices, not a line saying there are none",
+        !!box && box.querySelector(".odds-market") !== null && !/holds none/.test(box.textContent),
+        box ? box.innerHTML.slice(0, 120) : "no box");
+    });
+    page.window.close();
+  }
+}
+
 /* ===================================================== governors' cards */
 
 /* The owner's request of 2026-11-02, "lets add cards for governors": every
@@ -17702,6 +20581,11 @@ async function testGovernorCards() {
 
   const ga = await buildPage("states/ga.html");
   const sg = ga.window.KYC.stategov;
+  // A state's page holds its own state's part of the governments
+  // (data/stategov/<st>.js, PR #172); the checks of every state's card read
+  // the whole file, as the grid's Governors view and the map load it.
+  const part = Object.keys(ga.window.kycStateGov.states);
+  ga.window.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
   const data = ga.window.kycStateGov.states;
   const codes = Object.keys(data);
   const listOf = (code) => {
@@ -17712,6 +20596,7 @@ async function testGovernorCards() {
 
   suite("governor cards — one implementation, for every governor and every listed candidate (rules 12, 91)", () => {
     check("no page errors", !ga.errors.length, ga.errors.join(" | "));
+    check("the state's page loaded its own state's part alone", part.join(" ") === "GA", part.join(" "));
     const missing = codes.filter((c) => {
       const card = html(sg.governorCard(c)).querySelector(".gcard");
       return !card || card.querySelector(".gov-name").textContent.trim() !== data[c].governor.name ||
@@ -17781,6 +20666,12 @@ async function testGovernorCards() {
       !!D.querySelector('#state-government a.state-jump[href="#governor-race"]'));
     check("a chip jumps to it", !!D.querySelector('.state-parts a[href="#governor-race"]'));
     check("nothing about the governor links a profile", noProfile(race) && noProfile(card));
+    // The seat's results strip (PR #187) is a race for Congress's: this
+    // site reads no state results, so the race for governor has no
+    // "Last time" fold, no strip and no slot waiting for one.
+    check("the race for governor carries no seat history (the site reads no state results)",
+      !!race && !race.querySelector("details.race-last, .seat-history, .seat-history-wait, [data-strip-race]") &&
+      !/since 2018/.test(race.textContent));
     const status = data.GA.ballot2026.offices.governor.holderStatus;
     check("the race says whether the holder is on the ballot, in the State government card's words",
       !status || race.querySelector(".gov-holder-status").textContent === card.querySelector(".gov-holder-status").textContent);
@@ -17816,6 +20707,12 @@ async function testGovernorCards() {
       (!results || !!race.querySelector('a[href="' + results + '"]')));
     check("no winner, no holder line", !/\b(Elected|Won|Winner)\b/.test(race.textContent) &&
       !race.querySelector(".gov-holder-status"));
+    // The seat's results strip (PR #187) is a race for Congress's: this
+    // site reads no state results, so the race for governor has no
+    // "Last time" fold, no strip and no slot waiting for one.
+    check("the race for governor carries no seat history (the site reads no state results)",
+      !!race && !race.querySelector("details.race-last, .seat-history, .seat-history-wait, [data-strip-race]") &&
+      !/since 2018/.test(race.textContent));
     check("the office's mark says it was on the ballot",
       /This office was on the Nov 3, 2026 ballot/.test(after.D.querySelector("#governor.gcard").textContent));
   });
@@ -17842,6 +20739,8 @@ async function testGovernorCards() {
     row.click();
     check("tapped, it opens", fold.querySelector(".race-body").getAttribute("hidden") === null &&
       row.getAttribute("aria-expanded") === "true");
+    check("opened, it holds no seat history: the strip is a race for Congress's (PR #187)",
+      !fold.querySelector("details.race-last, .seat-history, .seat-history-wait, [data-strip-race]"));
     const open = D.querySelector("[data-race-open-all]");
     const congress = phone.window.KYC.races().filter((r) => r.state === "CA").length;
     check("it is no race for Congress: \"Open all\" counts only theirs (rule 73)",
@@ -18214,19 +21113,83 @@ async function testGovernorOverlays() {
     await until(() => !open() && window.location.hash === startHash, 3000);
     check("the Close button closes it to the same address", !open() && window.location.hash === startHash);
 
+    // A state's page holds its own state's part of the governments
+    // (data/stategov/<st>.js, PR #172): a link there to another state's
+    // governor is on that state's page, never "not in this build's data"
+    // (rule 19).
+    {
+      check("the page holds Georgia's part alone", Object.keys(window.kycStateGov.states).join(" ") === "GA");
+      window.KYC.governor.open("gov-TX");
+      const body = modal().querySelector("#governorModalBody").textContent;
+      const link = modal().querySelector('#governorModalBody a[href$="states/tx.html#/official/gov-TX"]');
+      check("another state's governor links to that state's page, never \"Nobody here by this link\"",
+        open() && !!link && /holds the records of Georgia alone/.test(body) &&
+        /a record of Texas: open it on Texas’s page/.test(body) &&
+        !/Nobody here by this link|No longer listed/.test(modal().textContent), body.slice(0, 200));
+      // Copy link (PR #180's share pages) shares the record where it is
+      // drawn, that state's page, never this page's note that it is elsewhere.
+      {
+        let copied = null;
+        const savedClipboard = Object.getOwnPropertyDescriptor(window.navigator, "clipboard");
+        Object.defineProperty(window.navigator, "clipboard", { configurable: true,
+          value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+        modal().querySelector("#governorModalCopy").click();
+        await settle(0);
+        if (savedClipboard) Object.defineProperty(window.navigator, "clipboard", savedClipboard);
+        else delete window.navigator.clipboard;
+        check("its Copy link is the record's address on that state's page",
+          /\/states\/tx\.html#\/official\/gov-TX$/.test(copied || "") && !/states\/ga\.html/.test(copied || ""),
+          String(copied));
+      }
+      window.KYC.governor.close();
+      await until(() => !open(), 2000);
+      // A territory and the District in their own words (rule 75), and
+      // never "state" of either; a place with no governor (the District)
+      // is never sent to its page, which would say nobody is there (rules
+      // 19 and the PR #172 review). Asked of the data: whichever places
+      // the file names as having a governor, and whichever not.
+      const governed = window.kycStateGov.governed || [];
+      check("the page's file names the places with a governor",
+        governed.indexOf("GA") !== -1 && governed.indexOf("TX") !== -1, governed.join(" "));
+      const islands = governed.filter((c) => c === "VI" || c === "MP")[0];
+      if (islands) {
+        window.KYC.governor.open("gov-" + islands);
+        const words = modal().textContent;
+        check("an island territory is \"the … Islands’ page\", never another state",
+          open() && /On the .*Islands’ page/.test(words) && !/[Aa]nother state|state government/.test(words),
+          words.slice(0, 200));
+        window.KYC.governor.close();
+        await until(() => !open(), 2000);
+      }
+      if (governed.indexOf("DC") === -1) {
+        window.KYC.governor.open("gov-DC");
+        const words = modal().textContent;
+        check("a place with no governor is not sent to its page, which holds nobody by that link",
+          open() && /No longer listed/.test(words) && !modal().querySelector('#governorModalBody a[href*="states/"]') &&
+          !/District of Columbia’s page/.test(words), words.slice(0, 200));
+        window.KYC.governor.close();
+        await until(() => !open(), 2000);
+      }
+    }
     // Every governor's "In office since" and "Born" in rule 19's words: a
     // disagreement only where the pipeline compared two dates, and "no
-    // Wikidata item" where the roster holds none (PR #195 review).
+    // Wikidata item" where the roster holds none (PR #195 review). Read on
+    // the map, which holds every state's government (a state's page holds
+    // its own, PR #172), through the same overlay.
     {
+      const whole = await buildPage("map.html");
+      await settle(50);
+      const wmodal = () => whole.D.getElementById("governorModal");
       const bad = [];
       const fieldOf = (label) => {
-        const f = [...modal().querySelectorAll("#governorModalBody .field")]
+        const f = [...wmodal().querySelectorAll("#governorModalBody .field")]
           .find((x) => x.querySelector(".field-label").textContent === label);
         return f ? f.querySelector(".field-value").textContent : "";
       };
-      for (const [code, st] of Object.entries(window.kycStateGov.states)) {
+      check("the map holds every state's government", Object.keys(whole.window.kycStateGov.states).length > 50);
+      for (const [code, st] of Object.entries(whole.window.kycStateGov.states)) {
         const g = st.governor;
-        window.KYC.governor.open(g.id);
+        whole.window.KYC.governor.open(g.id);
         const since = fieldOf("In office since");
         const bornWords = fieldOf("Born");
         const want = {
@@ -18242,11 +21205,12 @@ async function testGovernorOverlays() {
         if (/do not agree/.test(since) && g.sinceWhy !== "disagree") bad.push(code + ": a disagreement claimed");
         if (/do not agree/.test(bornWords) && g.bornWhy !== "disagree") bad.push(code + ": a disagreement claimed");
       }
-      window.KYC.governor.close();
-      await until(() => !open(), 2000);
+      whole.window.KYC.governor.close();
+      await until(() => wmodal().hidden, 2000);
       check("every governor's dates: shown where the NGA and Wikidata agree, else why, in rule 19's words",
         !bad.length, bad.slice(0, 5).join(" | "));
-      const states = window.kycStateGov.states;
+      const states = whole.window.kycStateGov.states;
+      whole.window.close();
       check("the roster's governors with no Wikidata item read \"no Wikidata item\", never a disagreement",
         Object.values(states).filter((s) => s.governor.sinceWhy === "no-item").length > 0 &&
         Object.values(states).every((s) => s.governor.sinceWhy !== "disagree" || !!s.governor.wikidata ||
@@ -18391,7 +21355,10 @@ async function testGovernorOverlays() {
       await until(() => !open(), 2000);
       // In the data: the candidates the pipeline ties to a member, and the
       // sitting governors on their lists, carry their link's field.
-      const all = Object.values(window.kycStateGov.states).flatMap((s) =>
+      // Every state's, from the whole file (a state's page holds its own).
+      const whole = {};
+      new Function("window", fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"))(whole);
+      const all = Object.values(whole.kycStateGov.states).flatMap((s) =>
         ((s.ballot2026 && s.ballot2026.offices.governor && s.ballot2026.offices.governor.candidates) || { candidates: [] })
           .candidates);
       check("the data ties members by bioguide id and marks the sitting governors on their lists",
@@ -18545,6 +21512,357 @@ async function testGovernorOverlays() {
     check("a state with no governor's race says so, and shows the governor's card",
       /does not elect its governor in 2026/.test(panel.textContent) && !!panel.querySelector('.gcard[data-governor="gov-VA"]') &&
       !panel.querySelector(".gcard-candidate"));
+  }
+
+  // What each page loads when (PR #172 merged with #191 and #195): a shared
+  // link to an overlay opens with the race's odds on every page, saying so
+  // while a file it needs loads and where one did not load (rule 94).
+  const racePanelOdds = (page) => {
+    const p = page.D.getElementById("governorModalRacePanel");
+    return p ? p.innerHTML : "";
+  };
+  {
+    const held = await buildPage("states/ga.html", { early: true, hash: "#/official/gov-GA",
+      hold: /\/data\/odds\.js$/, setup: withOdds });
+    await settle(50);
+    const modal = held.D.getElementById("governorModal");
+    const slotBefore = !!held.D.querySelector("#governorModalRacePanel .odds-slot");
+    const servedBefore = held.served.filter((s) => /\/data\/odds\.js/.test(s)).length;
+    held.release();
+    await until(() => held.window.kycOdds !== undefined && !held.D.querySelector(".odds-slot"), 8000);
+    await settle(30);
+    const block = held.D.querySelector("#governorModalRacePanel .odds");
+    const want = held.window.KYC.stategov.raceOdds("GA", { compact: true, collapsed: true });
+    const raceBlock = held.D.querySelector("#governor-race .gov-race .odds");
+    suite("states/ga.html#/official/gov-GA — the overlay opened before the prices are in", () => {
+      check("no page errors", held.errors.length === 0, held.errors.join(" | "));
+      check("open on landing, the prices asked for once", !!modal && !modal.hidden && servedBefore === 1,
+        String(servedBefore));
+      check("the race panel holds the prices' place while they load", slotBefore);
+      check("once in, the overlay's markets are what KYC.stategov draws, every slot filled",
+        !!block && racePanelOdds(held).indexOf(want) !== -1 && /Kalshi/.test(block.textContent) &&
+        !held.D.querySelector(".odds-slot"), block ? block.textContent.slice(0, 80) : "no block");
+      check("and the race block under the cards too", !!raceBlock && /Kalshi/.test(raceBlock.textContent));
+    });
+    held.window.close();
+  }
+  {
+    const refused = await buildPage("states/ga.html", { hash: "#/official/gov-GA", block: ["data/odds.js"] });
+    await until(() => !!refused.D.querySelector("#governorModalRacePanel .odds-failed"), 8000);
+    suite("states/ga.html#/official/gov-GA — prices that did not load are said in the overlay", () => {
+      check("no page errors", refused.errors.length === 0, refused.errors.join(" | "));
+      check("the overlay's race panel says the prices did not load",
+        /did not load/.test(refused.D.querySelector("#governorModalRacePanel .odds-failed").textContent));
+      check("never the line that the cache holds none", !refused.D.querySelector("#governorModalRacePanel .gov-odds-none"));
+    });
+    refused.window.close();
+  }
+  {
+    // The grid names data/stategov.js on demand (PR #191): a shared link
+    // asks for it, says it is loading, and opens with the odds the grid
+    // loaded first.
+    const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+      hold: /\/data\/stategov\.js$/, setup: withOdds });
+    await settle(50);
+    const modal = grid.D.getElementById("governorModal");
+    const loading = !!modal && !modal.hidden && /Loading the governors/.test(modal.textContent) &&
+      !/Nobody here by this link|No longer listed/.test(modal.textContent);
+    grid.release();
+    await until(() => grid.window.kycStateGov !== undefined &&
+      grid.D.getElementById("governorModalName").textContent === grid.window.kycStateGov.states.GA.governor.name, 8000);
+    await settle(30);
+    const block = grid.D.querySelector("#governorModalRacePanel .odds");
+    const words = grid.served.filter((s) => /\/data\/people\/words\.js/.test(s)).length;
+    suite("index.html#/official/gov-GA — the governors' data loads on demand, and the overlay opens with its odds", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("says it is loading, never \"not listed\", while the file is out", loading);
+      check("then names the governor, with the race's markets", !modal.hidden && !!block && /Kalshi/.test(block.textContent) &&
+        racePanelOdds(grid).indexOf(grid.window.KYC.stategov.raceOdds("GA", { compact: true, collapsed: true })) !== -1);
+      check("and asks for no profile words", words === 0, String(words));
+    });
+    grid.window.close();
+  }
+  {
+    // The address changes while the file is out (Back, an edited hash, a
+    // candidate's link): the overlay draws what is open when the file
+    // comes, never "Loading…" for ever (PR #172 review).
+    for (const next of ["#/official/gov-TX", "#/official/gov-GA-x"]) {
+      const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+        hold: /\/data\/stategov\.js$/, setup: withOdds });
+      await settle(50);
+      grid.window.location.hash = next;
+      await settle(30);
+      const asked = grid.served.filter((s) => /\/data\/stategov\.js/.test(s)).length;
+      grid.release();
+      await until(() => grid.window.kycStateGov !== undefined &&
+        !/Loading/.test(grid.D.getElementById("governorModalName").textContent), 3000);
+      await settle(30);
+      const modal = grid.D.getElementById("governorModal");
+      const name = grid.D.getElementById("governorModalName").textContent;
+      const want = next === "#/official/gov-TX" ? grid.window.kycStateGov.states.TX.governor.name : "No longer listed";
+      suite("index.html" + next + " — asked for while the governors' data is still loading", () => {
+        check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+        check("the file asked for once", asked === 1, String(asked));
+        check("the record the address names is drawn once the file is in, never \"Loading…\"",
+          !!modal && !modal.hidden && name === want && !/Loading the governors/.test(modal.textContent), name);
+      });
+      grid.window.close();
+    }
+  }
+  {
+    // A page of a place that is not a state says so in its own words
+    // (rule 75): "the records of the District of Columbia", never "state".
+    const dc = await buildPage("states/dc.html", { hash: "#/official/gov-GA" });
+    await settle(50);
+    const body = (dc.D.getElementById("governorModalBody") || {}).textContent || "";
+    const kind = (dc.D.getElementById("governorModalKind") || {}).textContent || "";
+    suite("states/dc.html#/official/gov-GA — another place's governor, in the District's words", () => {
+      check("no page errors", dc.errors.length === 0, dc.errors.join(" | "));
+      check("the District's own words, a link to Georgia's page, and no \"state\"",
+        /holds the records of the District of Columbia alone/.test(body) &&
+        !!dc.D.querySelector('#governorModalBody a[href$="states/ga.html#/official/gov-GA"]') &&
+        !/state/i.test(body + " " + kind), kind + " | " + body.slice(0, 200));
+    });
+    dc.window.close();
+  }
+  {
+    const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+      block: ["data/stategov.js"] });
+    await until(() => /did not load/.test((grid.D.getElementById("governorModal") || {}).textContent || ""), 8000);
+    const modal = grid.D.getElementById("governorModal");
+    suite("index.html#/official/gov-GA — the governors' data refused", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("the overlay says the data did not load, never that nobody is here",
+        !!modal && !modal.hidden && /governors’ data did not load/.test(modal.textContent) &&
+        !/Nobody here by this link|No longer listed/.test(modal.textContent), modal ? modal.textContent.slice(0, 120) : "");
+    });
+    grid.window.close();
+  }
+  {
+    const shared = await buildPage("map.html", { hash: "#/official/gov-GA", setup: withOdds });
+    await settle(50);
+    const modal = shared.D.getElementById("governorModal");
+    const block = shared.D.querySelector("#governorModalRacePanel .odds");
+    suite("map.html#/official/gov-GA — a shared link opens the overlay with its odds", () => {
+      check("no page errors", shared.errors.length === 0, shared.errors.join(" | "));
+      check("open on landing, naming the governor", !!modal && !modal.hidden &&
+        shared.D.getElementById("governorModalName").textContent === shared.window.kycStateGov.states.GA.governor.name);
+      check("with the race's markets", !!block && /Kalshi/.test(block.textContent));
+    });
+    shared.window.close();
+  }
+  {
+    // The Governors view searches its own cards: a query there asks for
+    // none of the profiles' words (data/people/words.js, PR #172).
+    const grid = await buildPage("index.html", { hash: "#/?chamber=governors&q=texas", people: "index" });
+    await until(() => grid.D.querySelectorAll("#results .gcard").length > 0, 8000);
+    await settle(50);
+    const words = grid.served.filter((s) => /\/data\/people\/words\.js/.test(s)).length;
+    suite("index.html#/?chamber=governors&q=texas — the governors' search loads no profile words", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("Texas's governor found", grid.D.querySelector('#results .gcard[data-governor="gov-TX"]') !== null);
+      check("the words file not asked for", words === 0, String(words));
+      check("no line about reading the profiles' words", !/profiles’ own words/.test(grid.D.getElementById("resultsLabel").textContent));
+    });
+    grid.window.close();
+  }
+}
+
+/* A governor's or a candidate's photograph that fails takes its credit with
+ * it, through one helper (KYC.stategov.dropPhotoCredit, rule 87): on the
+ * state page's governor card and race cards, the grid's Governors view, the
+ * map's race panel and the overlay's header. A copy that fails falls back
+ * to its original and keeps the credit, no longer calling it a copy (rule
+ * 101); only the original failing removes the image and every credit
+ * naming it, wherever the page prints it, once no <img> there still shows
+ * it. The state is chosen from the data (the governor pictured and on the
+ * list, so a candidate's card shows the same file, and another candidate
+ * pictured), and copies are planted on the governor's headshot and the
+ * other candidate's photograph, the week's own set aside. */
+async function testGovernorPhotoCredits() {
+  const sg = {};
+  new Function("window", fs.readFileSync(path.join(SITE, "data/stategov.js"), "utf8"))(sg);
+  const states = sg.kycStateGov.states;
+  const listOf = (s) => ((((s.ballot2026 || {}).offices || {}).governor || {}).candidates || {}).candidates || [];
+  const pictured = (p) => !p.writeIn && !!p.photo && !!p.photoCredit;
+  const pick = (s) => {
+    const g = s.governor || {};
+    if (!(g.headshot && g.headshotBy && g.id)) return null;
+    const twin = listOf(s).find((p) => pictured(p) && p.photo === g.headshot && p.id);
+    const other = listOf(s).find((p) => pictured(p) && p.photo !== g.headshot && p.id &&
+      !listOf(s).some((q) => q !== p && q.photo === p.photo));
+    return twin && other ? { twin: twin.id, other: other.id } : null;
+  };
+  const code = Object.keys(states).sort().find((c) => pick(states[c]));
+  suite("governors — a photograph that fails takes its credit with it (rule 87)", () => {
+    check("a state whose governor is pictured on the card and on the list, beside another pictured candidate",
+      !!code);
+  });
+  if (!code) return;
+  const ids = pick(states[code]);
+  const COPY = "photos/0a1b2c3d4e5f60718293.jpg?v=0a1b2c3d4e";
+  const COPY2 = "photos/1b2c3d4e5f6071829304.jpg?v=1b2c3d4e5f";
+  const plant = (window) => {
+    let value;
+    Object.defineProperty(window, "kycStateGov", { configurable: true, enumerable: true, get() { return value; },
+      set(v) {
+        const s = v.states[code];
+        delete s.governor.photoCopy;
+        listOf(s).forEach((p) => { delete p.photoCopy; });
+        s.governor.photoCopy = { src: COPY, of: s.governor.headshot, ofBytes: 4200000 };
+        const other = listOf(s).find((p) => p.id === ids.other);
+        other.photoCopy = { src: COPY2, of: other.photo, ofBytes: 3100000 };
+        value = v;
+      } });
+  };
+  const fail = (window, img) => img.dispatchEvent(new window.Event("error"));
+  // Every credit on the page names a photograph an <img> there still shows
+  // (as itself, or as the original a copy falls back to), and every
+  // governor's or candidate's photograph shown is credited.
+  const creditProblems = (D) => {
+    const shown = (a) => [...D.querySelectorAll("img")].some((i) =>
+      i.getAttribute("src") === a || i.getAttribute("data-photo-original") === a);
+    const orphans = [...D.querySelectorAll("[data-credits]")]
+      .filter((c) => !shown(c.getAttribute("data-credits")));
+    const bare = [...D.querySelectorAll(".gcard img.gov-portrait")]
+      .filter((i) => !i.closest(".gcard").querySelector(".gcard-credit"));
+    return orphans.map((c) => "credit for a photograph not shown: " + c.textContent.slice(0, 60))
+      .concat(bare.map((i) => "photograph without its credit: " + i.getAttribute("src")));
+  };
+  // The governor card's and the race cards' photographs, failing in turn.
+  const cardsCase = (label, window, root) => {
+    const D = window.document;
+    const KYC = window.KYC;
+    const s = window.kycStateGov.states[code];
+    const original = KYC.photoHref(s.governor.headshot);
+    const other = listOf(s).find((p) => p.id === ids.other);
+    const otherOriginal = KYC.photoHref(other.photo);
+    const govCard = root.querySelector('.gcard[data-governor="gov-' + code + '"]:not(.gcard-candidate)');
+    const twinCard = root.querySelector('.gcard-candidate[data-governor="' + ids.twin + '"]');
+    const otherCard = root.querySelector('.gcard-candidate[data-governor="' + ids.other + '"]');
+    suite(label, () => {
+      check("the governor's card, the holder's card on the list and another candidate's card are drawn",
+        !!govCard && !!twinCard && !!otherCard);
+      if (!govCard || !twinCard || !otherCard) return;
+      check("nothing on the page credits a photograph it does not show, before any fails",
+        !creditProblems(D).length, creditProblems(D).join(" | "));
+      const img = govCard.querySelector("img.gov-portrait");
+      const credit = () => govCard.querySelector(".gcard-credit");
+      check("the governor's card loads the copy, and its credit says so and names the original",
+        !!img && img.getAttribute("src") === KYC.siteRoot() + COPY && !!credit() &&
+        credit().getAttribute("data-credits") === original && !!credit().querySelector(".photo-copy-note"));
+      fail(window, img);
+      check("a copy that fails falls back to its original", img.isConnected && img.getAttribute("src") === original);
+      check("and keeps its credit, no longer calling it a copy", !!credit() && /^Photo/.test(credit().textContent) &&
+        !credit().querySelector(".photo-copy-note"), credit() && credit().textContent);
+      fail(window, img);
+      check("the original failing leaves the empty circle and takes the card's credit",
+        !img.isConnected && !!govCard.querySelector(".gov-portrait-none") && !credit());
+      const twinImg = twinCard.querySelector("img.gov-portrait");
+      check("the holder's card on the list, still showing that file, keeps its credit",
+        !!twinImg && twinImg.getAttribute("src") === original &&
+        !!twinCard.querySelector('.gcard-credit[data-credits="' + original + '"]'));
+      fail(window, twinImg);
+      check("its failing too takes its credit, and nothing on the page credits that file any more",
+        !twinCard.querySelector(".gcard-credit") && !!twinCard.querySelector(".gov-portrait-none") &&
+        ![...D.querySelectorAll("img")].some((i) => i.getAttribute("src") === original) &&
+        ![...D.querySelectorAll("[data-credits]")].some((c) => c.getAttribute("data-credits") === original));
+      const otherImg = otherCard.querySelector("img.gov-portrait");
+      const otherCredit = () => otherCard.querySelector(".gcard-credit");
+      check("another candidate's card loads its copy, credited as one",
+        !!otherImg && otherImg.getAttribute("src") === KYC.siteRoot() + COPY2 &&
+        !!otherCredit() && !!otherCredit().querySelector(".photo-copy-note"));
+      fail(window, otherImg);
+      check("its copy failing falls back to the original and keeps the credit",
+        otherImg.isConnected && otherImg.getAttribute("src") === otherOriginal && !!otherCredit() &&
+        !otherCredit().querySelector(".photo-copy-note"));
+      fail(window, otherImg);
+      check("the original failing takes it", !otherImg.isConnected && !otherCredit() &&
+        !!otherCard.querySelector(".gov-portrait-none"));
+      check("every other candidate's card keeps its photograph and its credit",
+        [...root.querySelectorAll(".gcard-candidate")].filter((c) => c !== twinCard && c !== otherCard)
+          .every((c) => !!c.querySelector("img.gov-portrait") === !!c.querySelector(".gcard-credit")));
+      check("nothing left on the page credits a photograph it does not show",
+        !creditProblems(D).length, creditProblems(D).join(" | "));
+    });
+  };
+
+  for (const [when, now] of [["on the campaign clock", undefined], ["after Election Day", "2026-11-05T09:00:00"]]) {
+    const page = await buildPage("states/" + code.toLowerCase() + ".html", { setup: plant, now });
+    await settle(50);
+    const root = page.D.getElementById("state-government").parentNode;
+    cardsCase("states/" + code.toLowerCase() + ".html, " + when + " — the governor's card and the race's cards",
+      page.window, page.D.body);
+    suite("states/" + code.toLowerCase() + ".html, " + when + " — no page errors", () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      check("the state government section is on the page", !!root);
+    });
+  }
+
+  const map = await buildPage("map.html", { hash: "#/?state=" + code + "&mode=governor2026", setup: plant });
+  await settle(50);
+  cardsCase("map.html#/?state=" + code + "&mode=governor2026 — the race panel's cards", map.window,
+    map.D.getElementById("delegation"));
+
+  const grid = await buildPage("index.html", { setup: plant });
+  {
+    const D = grid.D;
+    D.querySelector('[data-group="chamber"][data-value="governors"]').click();
+    await until(() => D.querySelectorAll("#results .gcard").length > 0, 8000);
+    const s = grid.window.kycStateGov.states[code];
+    const original = grid.window.KYC.photoHref(s.governor.headshot);
+    const card = D.querySelector('#results .gcard[data-governor="gov-' + code + '"]');
+    suite("index.html#/?chamber=governors — the governor's card on the grid", () => {
+      const img = card && card.querySelector("img.gov-portrait");
+      check("the card loads the copy, credited as one", !!img &&
+        img.getAttribute("src") === grid.window.KYC.siteRoot() + COPY &&
+        !!card.querySelector(".gcard-credit .photo-copy-note"));
+      if (!img) return;
+      fail(grid.window, img);
+      check("a copy that fails falls back to its original and keeps the credit",
+        img.isConnected && img.getAttribute("src") === original && !!card.querySelector(".gcard-credit") &&
+        !card.querySelector(".photo-copy-note"));
+      fail(grid.window, img);
+      check("the original failing takes the credit and leaves the circle",
+        !img.isConnected && !card.querySelector(".gcard-credit") && !!card.querySelector(".gov-portrait-none"));
+      check("nothing on the grid credits a photograph it does not show",
+        !creditProblems(D).length, creditProblems(D).join(" | "));
+    });
+  }
+
+  // The overlay's header: the governor's, then a candidate's, each opened
+  // by its own address over the state page.
+  for (const [who, id, copy] of [["the governor", "gov-" + code, COPY], ["a candidate", ids.other, COPY2]]) {
+    const page = await buildPage("states/" + code.toLowerCase() + ".html", { setup: plant, hash: "#/official/" + id });
+    await settle(50);
+    const { window, D } = page;
+    const s = window.kycStateGov.states[code];
+    const record = id === "gov-" + code ? { photo: s.governor.headshot }
+      : listOf(s).find((p) => p.id === id);
+    const original = window.KYC.photoHref(record.photo);
+    const modal = D.getElementById("governorModal");
+    const img = D.getElementById("governorModalPhoto");
+    const line = D.getElementById("governorModalPhotoCredit");
+    suite("states/" + code.toLowerCase() + ".html#/official/" + id + " — " + who + "'s overlay header", () => {
+      check("the overlay is open, its header loading the copy, credited as one", !!modal && !modal.hidden &&
+        img.getAttribute("src") === window.KYC.siteRoot() + copy && !line.hidden &&
+        !!line.querySelector('[data-credits="' + original + '"] .photo-copy-note'));
+      fail(window, img);
+      check("a copy that fails falls back to its original and keeps the credit, no longer a copy's",
+        img.getAttribute("src") === original && !line.hidden && /^Photo/.test(line.textContent) &&
+        !line.querySelector(".photo-copy-note"), line.textContent);
+      // The card on the page under the overlay still shows the file.
+      const card = D.querySelector('.gcard[data-governor="' + id + '"]');
+      fail(window, img);
+      check("the original failing empties the portrait and takes the header's credit",
+        !img.getAttribute("src") && D.getElementById("governorModalPortrait").classList.contains("gov-portrait-empty") &&
+        line.hidden && !line.textContent.trim());
+      check("while the card under it, still showing that file, keeps its own credit", !card ||
+        (!!card.querySelector("img.gov-portrait") && !!card.querySelector(".gcard-credit")));
+      check("nothing on the page credits a photograph it does not show",
+        !creditProblems(D).length, creditProblems(D).join(" | "));
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+    });
   }
 }
 
@@ -18948,8 +22266,10 @@ function KYC_ESC(text) {
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
+  if (!only || only === "split") await testLazyStateData();
   if (!only || only === "index.html" || only === "votes") await testVotes();
   if (!only || only === "money") await testRaceMoney();
+  if (!only || only === "money" || only === "map") await testMapMoney();
   if (!only || only === "charts") await testCharts();
   if (!only || only === "guide") await testGuide();
   if (!only || only === "guide") await testBillFlow();
@@ -18963,6 +22283,7 @@ function KYC_ESC(text) {
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testBallotCounts();
+  if (!only || only === "index.html" || only === "striptense") await testStripTense();
   if (!only || only === "index.html") await testRenumbered();
   if (!only || only === "index.html") await testPhoneMenus();
   if (!only || only === "index.html") await testBootSurvivesAFailure();
@@ -18982,11 +22303,17 @@ function KYC_ESC(text) {
   if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
   if (!only || only === "states" || only === "statephone") await testStatePhone();
+  if (!only || only === "states" || only === "statephone" || only === "jumpbar") await testJumpBar();
+  if (!only || only === "states" || only === "statephone" || only === "racefilters") await testRaceFilters();
+  if (!only || only === "states" || only === "statephone" || only === "delegation") await testDelegationFold();
+  if (!only || only === "states" || only === "statephone" || only === "governors") await testPhoneGovernorRace();
   if (!only || only === "states" || only === "governors") await testGovernorCards();
   if (!only || only === "states" || only === "governors") await testGovernorOverlays();
+  if (!only || only === "states" || only === "governors" || only === "photos") await testGovernorPhotoCredits();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
   if (!only || only === "states") await testLouisianaDecember();
+  if (!only || only === "states") await testGeorgiaRunoffPast();
 if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
@@ -18999,6 +22326,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testContactActions();
   if (!only || only === "index.html") await testPayLine();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
+  if (!only || only === "redistricting" || only === "districtphone") await testDistrictsPhonePlans();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();
   if (!only || only === "links") await testDeepLinks();
@@ -19011,6 +22339,8 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();
   if (!only || only === "share") await testSharePages();
+  if (!only || only === "share") await testOfficialSharePages();
+  if (!only || only === "share" || only === "governors") await testGovernorSharePages();
   if (!only || only === "share" || only === "january") await testTheJanuaryPage();
   if (!only || only === "contrast") testContrast();
 

@@ -1259,9 +1259,11 @@
     // it on the card.
     var other = item.alsoRunningId ? KYC.byId(item.alsoRunningId) : null;
     var counted = !!other && KYC.electionStatus().phase === "post-election";
+    // A runoff is still ahead until its day has passed; then it too is
+    // awaited, in the words contestLine's "awaiting" stage reads.
     var ended = !!other && (KYC.offBallot(other.raceStatus) || other.raceStatus === "defeated" ||
       other.raceStatus === "elected" || (counted && KYC.onNovemberBallot(other.raceStatus) &&
-        other.raceStatus !== "runoff"));
+        (other.raceStatus !== "runoff" || /awaiting result/.test(KYC.raceStatusOf(other, "long").label))));
     // Elected is said once, by the verb; a result keeps the status table's
     // capitals ("lost in November", never "lost in november").
     var elected = !!other && other.raceStatus === "elected";

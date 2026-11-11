@@ -409,7 +409,7 @@ _DATE = re.compile(r"\d{4}-\d{2}-\d{2}$")
 
 # The statuses a timeline step may name: keys of KYC.raceStatus's table
 # (assets/kyc.js RACE_STATUS), and "awaiting", a nominee after Election Day.
-TIMELINE_STATUSES = ("nominee", "awaiting", "elected", "defeated", "runoff")
+TIMELINE_STATUSES = ("nominee", "awaiting", "elected", "defeated", "runoff", "runoff-held")
 
 
 def _timeline(spec, here, pad):

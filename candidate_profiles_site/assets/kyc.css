@@ -3556,6 +3556,93 @@ html.has-zip .ballot-result { min-height: 100vh; }
   border-radius: var(--radius-sm);
   background: var(--surface-2);
 }
+/* A phone's switch between a redrawn state's two plans (kyc-districts.js
+ * layout()): one plan at a time, the 2026 plan first. */
+.plan-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-3);
+}
+.plan-switch[hidden] { display: none; }
+.plan-switch-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 48px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--t-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.plan-switch-label {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.plan-switch-title { font-weight: 700; }
+.plan-switch-btn[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--surface-1);
+}
+.plan-switch-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.inset-zoom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin: var(--s-2) 0 var(--s-3);
+}
+.inset-zoom-label { font-size: var(--t-sm); font-weight: 600; color: var(--text-muted); }
+.inset-zoom .chip { min-height: 40px; font: inherit; font-size: var(--t-sm); cursor: pointer; }
+.inset { scroll-margin-top: calc(var(--header-h) + var(--s-2)); }
+.plan-grid.one-plan .plan-head > .state-kicker,
+.plan-grid.one-plan .plan-head > .plan-title { display: none; }
+/* Find my district beside the picker, the note under both. */
+.districts-locate.has-pick {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--s-1) var(--s-3);
+}
+.districts-locate.has-pick > .field-note,
+.districts-locate.has-pick > .state-note { grid-column: 1 / -1; }
+.districts-locate.has-pick .districts-pick {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  font-size: var(--t-xs);
+}
+.districts-locate.has-pick .districts-pick .select { width: 100%; }
+.districts-keys .districts-toggle { display: flex; }
+.districts-after { margin-top: var(--s-4); }
+.districts-keys { margin: var(--s-3) 0; }
+.districts-after .districts-lede { margin-top: 0; }
+.movers-fold {
+  margin: var(--s-4) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.movers-fold > summary {
+  min-height: 48px;
+  padding: var(--s-3);
+  font-weight: 700;
+  cursor: pointer;
+}
+.movers-count { font-weight: 400; color: var(--text-muted); }
+.movers-fold .districts-movers { padding: 0 var(--s-3) var(--s-3); }
+/* Its summary is the heading there. */
+.movers-fold .districts-movers > .state-heading { display: none; }
+
 .inset-row {
   display: flex;
   flex-wrap: wrap;
@@ -4986,6 +5073,10 @@ button.local-county-link {
 /* The holder line is a sentence: as a flex item it split its link from its
  * brackets ("( the list )"). */
 #governorModal .modal-meta .gov-holder-status { display: block; margin: 0; font-size: var(--t-sm); }
+/* So is the line after Election Day that links the state's results: as a
+ * flex item its sentence, link and full stop stood in three narrow columns
+ * on a phone (PR #180 review). */
+#governorModal .modal-meta .gov-past { display: block; min-width: 0; margin: 0; font-size: var(--t-sm); }
 .race-mate .gov-portrait.race-mate-thumb { width: 36px; height: 36px; }
 .race-mate .gcard-party-words { color: var(--text); }
 .races-folded .gov-race-foldable.is-open .race-body { padding: var(--s-3) var(--s-1) 0; }
@@ -5478,6 +5569,9 @@ button.local-county-link {
 .race-mates > .race-money,
 .race-mates > .race-last,
 .race-mates > .race-compare { display: block; margin-top: var(--s-2); }
+/* The map's panel: each race's money fold under one count (kyc-map.js). */
+.panel-money { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
+.panel-money > .race-money { min-width: 0; }
 
 .money-rows { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-3); }
 .money-row { display: grid; gap: var(--s-1); min-width: 0; }
@@ -5560,6 +5654,47 @@ button.local-county-link {
 .last-table th,
 .last-table td { padding: var(--s-1) var(--s-3) var(--s-1) 0; text-align: left; font-weight: 400; }
 .last-table td { font-variant-numeric: tabular-nums; }
+
+/* The seat's elections since 2018 (VISUALS-33): a cell a year, the margin
+ * a bar in neutral ink (the party only in its chip, rule 88), the years on
+ * other lines than this race's in dashed cells under their own line, and
+ * each change of lines between them on a line of its own. Two across on a
+ * phone's width, four where there is room. */
+.seat-history { margin-top: var(--s-3); padding-top: var(--s-2); border-top: 1px solid var(--border); }
+.strip-title { margin: 0 0 var(--s-1); font-size: var(--t-sm); font-weight: 600; }
+.strip-era { margin: var(--s-2) 0 var(--s-1); font-size: var(--t-xs); color: var(--text-muted); }
+.strip-break {
+  margin: var(--s-2) 0;
+  padding-left: var(--s-2);
+  border-left: 3px solid var(--border-strong);
+  font-size: var(--t-xs);
+}
+.strip-cells {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--s-2);
+}
+.strip-cell {
+  display: grid;
+  gap: 3px;
+  align-content: start;
+  min-width: 0;
+  padding: var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: var(--t-xs);
+  overflow-wrap: anywhere;
+}
+.strip-other + .strip-cells .strip-cell { border-style: dashed; }
+.strip-year { font-weight: 600; font-variant-numeric: tabular-nums; }
+.strip-track { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
+.strip-fill { display: block; height: 100%; border-radius: 3px; background: var(--text-muted); }
+.strip-none,
+.strip-held { color: var(--text-muted); }
+.strip-who .strip-held { display: block; }
 
 /* Outside spending in the dialog: spaced like the funding box above it, a
  * short line of totals, each side's committees with their amounts in a
@@ -5770,6 +5905,27 @@ button.local-county-link {
 .find-race-statewide { margin: 0; font-size: var(--t-sm); line-height: 1.6; }
 .find-race-kicker { font-weight: 700; }
 .find-race-more { color: var(--text-muted); }
+/* The jump bar (kyc-state.js initJumpBar): fixed under the sticky header
+ * once "Find your race" has scrolled away, so showing it moves nothing;
+ * under the drawer's scrim. While it shows, a jump lands below it too. */
+.jumpbar {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  z-index: 43;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+}
+.jumpbar[hidden] { display: none; }
+.jumpbar .select { flex: 1 1 auto; min-width: 0; min-height: 40px; font-size: 16px; }
+.jumpbar-back { flex: 0 0 auto; min-height: 40px; white-space: nowrap; }
+html.has-jumpbar { scroll-padding-top: calc(var(--header-h) + var(--jump-h, 49px) + var(--s-2)); }
 .race-fold-bar {
   display: flex;
   flex-wrap: wrap;
@@ -5779,6 +5935,25 @@ button.local-county-link {
   margin: 0 0 var(--s-3);
 }
 .race-shared { margin: 0; font-size: var(--t-sm); color: var(--text-muted); }
+/* The House delegation folded on a phone (kyc-state.js showDelegation). */
+.delegation-fold { margin: 0 0 var(--s-3); }
+.delegation-toggle { min-height: 44px; }
+/* Chips over the rows (kyc-state.js raceFilterBar): the site's chips,
+ * neutral, never a party's or a status's colour. */
+.race-filters { display: flex; flex-wrap: wrap; gap: var(--s-2); width: 100%; }
+.race-filter {
+  min-height: 44px;
+  font: inherit;
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+.race-filter[aria-pressed="true"] { font-weight: 700; }
+/* On the pressed chip's own fill, the count in the chip's ink. */
+.race-filter[aria-pressed="true"] .race-filter-count { color: inherit; }
+.race-filter:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.race-filter-count { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.race-filter-status { width: 100%; margin: 0; font-size: var(--t-sm); }
+.race-filter-all { min-height: 44px; }
 .race-shared .badge { margin: 0 var(--s-1) var(--s-1) 0; }
 .race-open-all { min-height: 44px; }
 .race-row-title { margin: 0; font-size: inherit; font-weight: inherit; }
