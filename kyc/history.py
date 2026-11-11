@@ -637,6 +637,24 @@ def stale(profiles, cache):
     return out
 
 
+def folded(profile, people):
+    """A seated winner's record read while they ran, under the filing folded
+    into their profile (``record.filing_ids``), where their own is not read
+    yet: only while the profile links the article it was read from (rule
+    69), as a challenger's is. A newcomer's January dialog read "No linked
+    record of public offices" over the state senate and assembly terms
+    shown a week before (the January sweep of 2026-11-11)."""
+    from .record import filing_ids, seated_winner
+
+    if not seated_winner(profile):
+        return None
+    for pid in filing_ids(profile):
+        found = people.get(pid)
+        if found and found.get("asked") and found["asked"] == profile.get("wikipedia"):
+            return found
+    return None
+
+
 def membership(snapshot):
     """``(as of, {bioguide})`` from the membership snapshot: the day it was
     read and who sits."""
@@ -658,6 +676,8 @@ def apply_cache(profiles, cache, snapshot=None):
     attached = 0
     for profile in profiles:
         found = people.get(profile["id"])
+        if not found:
+            found = folded(profile, people)
         if found and id(profile) not in refused:
             profile["politicalHistory"] = for_page(
                 found, as_of, not profile.get("formerMember") and found.get("bioguide") in sitting)

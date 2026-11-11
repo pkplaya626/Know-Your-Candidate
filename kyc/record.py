@@ -275,3 +275,19 @@ def drift(record, live, snapshot):
                                  if rid in race_ids(record) else
                                  "a seat today that the record does not have"))
     return out
+
+
+def seated_winner(profile):
+    """A member seated since Election Day for a race of the cycle they won
+    in a seat they did not hold (``raceRole`` "winner"): a newcomer, or a
+    House member now a senator."""
+    return seated(profile) and profile.get("raceRole") == "winner"
+
+
+def filing_ids(profile):
+    """The profile ids of the filings folded into *profile* (``FEC_`` and
+    each FEC id it holds: its own and the merged, ``otherFecIds``), which
+    caches keyed while they ran still hold their reads under, as
+    ``share.aliases`` resolves them; never its own id."""
+    ids = [profile.get("fecCandidateId"), *(profile.get("otherFecIds") or [])]
+    return [f"FEC_{fid}" for fid in ids if fid and f"FEC_{fid}" != profile.get("id")]

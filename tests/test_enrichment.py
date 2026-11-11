@@ -76,6 +76,56 @@ class TestProvenance(unittest.TestCase):
         self.assertFalse(profile["hasRealFinance"])
 
 
+class TestSeatedWinnersKeepTheirReads(unittest.TestCase):
+    """A winner Congress seats is a member, and the filing they ran under is
+    folded into their profile: what was read under ``FEC_<id>`` while they
+    ran is theirs still (the January sweep of 2026-11-11: Richard Pan's
+    January dialog read "Education No data" and "No linked record of public
+    offices" over the infobox and the offices shown a week before)."""
+
+    def newcomer(self, **extra):
+        return dict({"id": "Z900006", "name": "Pat Newcomer", "isCandidate": False,
+                     "raceRole": "winner", "raceId": "H-CA-06-2026", "fecCandidateId": "H6CA03158",
+                     "wikipedia": "Pat Newcomer", "education": "No data", "birthdate": "No data",
+                     "quality": {"education": "unknown", "birthdate": "unknown"}}, **extra)
+
+    def test_the_articles_facts_are_kept(self):
+        from kyc import enrich
+        cache = {"people": {"FEC_H6CA03158": {"wiki": {
+            "title": "Pat Newcomer", "born": "1965-10-28", "education": "Johns Hopkins University (BS)"}}}}
+        person = self.newcomer()
+        import datetime
+        counts = enrich.apply_to_winners([person], cache, as_of=datetime.date(2027, 1, 10))
+        self.assertEqual(person["education"], "Johns Hopkins University (BS)")
+        self.assertEqual(person["fieldSources"]["education"], "wikipedia")
+        self.assertEqual(person["birthdate"], "1965-10-28")
+        self.assertEqual(counts["education"], 1)
+        # The Directory's record, already filled, wins.
+        member = self.newcomer(education="B.S., the Directory's words", quality={})
+        enrich.apply_to_winners([member], cache)
+        self.assertEqual(member["education"], "B.S., the Directory's words")
+        # Only while the profile links the article read, and never for a
+        # member who left or anyone who is not a seated winner.
+        for other in (self.newcomer(wikipedia="Someone Else"),
+                      self.newcomer(formerMember={"left": "2027-01-03"}),
+                      self.newcomer(raceRole=None)):
+            enrich.apply_to_winners([other], cache)
+            self.assertEqual(other["education"], "No data")
+
+    def test_the_offices_held_are_kept_while_the_article_is_theirs(self):
+        from kyc import history
+        record = {"asked": "Pat Newcomer", "wikidata": "Q1", "congress": [],
+                  "offices": [{"office": "California State Senate", "where": "California",
+                               "district": "6", "from": "2014", "to": "2022", "open": False,
+                               "agree": "exact"}], "withheld": []}
+        person = self.newcomer()
+        history.apply_cache([person], {"people": {"FEC_H6CA03158": record}})
+        self.assertEqual(person["politicalHistory"]["rows"][0]["office"], "California State Senate")
+        moved = self.newcomer(wikipedia="Someone Else")
+        history.apply_cache([moved], {"people": {"FEC_H6CA03158": record}})
+        self.assertNotIn("politicalHistory", moved)
+
+
 class TestPortraits(unittest.TestCase):
     """Offline tests; the network paths run under the portraits command."""
 

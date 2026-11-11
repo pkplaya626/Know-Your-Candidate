@@ -224,6 +224,13 @@ def _build(args):
     from . import members as members_mod
     member_sources = members_mod.load_cache(args.root)
     filled = members_mod.apply_cache(profiles, member_sources)
+    if enrichment:
+        # A seated winner's article facts read while they ran, after the
+        # members' own sources so the Directory's record wins.
+        kept = enrich.apply_to_winners(profiles, enrichment, as_of=_age_date(stats))
+        if kept:
+            print("  seated winners, from the reads made while they ran: " +
+                  ", ".join(f"{n} {k}" for k, n in sorted(kept.items())))
     stats["member_sources"] = dict(sorted(filled.items()))
     if member_sources:
         print("  members: " + ", ".join(f"{n} {k}" for k, n in sorted(filled.items()))
