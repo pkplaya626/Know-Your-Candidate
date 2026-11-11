@@ -447,6 +447,9 @@ SOURCES = {
     "ak-15-25-010": ("Alaska Statutes 15.25.010 (the primary)",
                      "https://www.akleg.gov/basis/statutes.asp?media=print"
                      "&secStart=15.25.010&secEnd=15.25.010"),
+    "ak-15-25-100": ("Alaska Statutes 15.25.100 (a vacancy among the primary's four)",
+                     "https://www.akleg.gov/basis/statutes.asp?media=print"
+                     "&secStart=15.25.100&secEnd=15.25.100"),
     "ak-15-15-350": ("Alaska Statutes 15.15.350 (ranked-choice general elections)",
                      "https://www.akleg.gov/basis/statutes.asp?media=print"
                      "&secStart=15.15.350&secEnd=15.15.350"),
@@ -2397,12 +2400,19 @@ ELECTIONS = {
                     # count is its results page's word ("Results Status:
                     # Unofficial"), never "not recorded", and the general
                     # election "used" ranked-choice voting, not "was
-                    # decided" by it, while the count is unofficial.
+                    # decided" by it, while the count is unofficial. The
+                    # second reader of 2026-11-11 found "the four with the
+                    # most votes went on" false of 2026 as a fact: four
+                    # top-four finishers in the race for the U.S. House
+                    # withdrew and the next finishers took their places
+                    # (AS 15.25.100(c): "the candidate who received the
+                    # fifth most votes"; rule 77).
                     ("voted",
                      _TOP_TWO + "In 2026 Alaska's "
                      "primary chose no party's nominee: the four candidates with the most votes "
-                     "went on to the general election, which used [ranked-choice "
-                     "voting](#ranked-choice). On November 3, 2026, Alaska's voters also voted "
+                     "advanced to the general election, and a candidate who withdrew in time was "
+                     "replaced by the one with the next most votes. The general election used "
+                     "[ranked-choice voting](#ranked-choice). On November 3, 2026, Alaska's voters also voted "
                      "on a ballot measure to repeal its open primary and ranked-choice general "
                      "elections; on November 11 the Division of Elections still listed that "
                      "election's results as unofficial, and this site does not read a ballot "
@@ -2426,7 +2436,8 @@ ELECTIONS = {
                       "nominee."),
             ],
             "sources": ["eac-primaries", "va-24-2-530", "la-sos-elected", "ca-sos-primaries",
-                        "wa-29a-52-112", "ak-15-25-010", "ak-15-15-350", "ak-ballot-measures",
+                        "wa-29a-52-112", "ak-15-25-010", "ak-15-25-100", "ak-15-15-350",
+                        "ak-ballot-measures",
                         "ak-results-2026", "la-sos-house-2026", "va-24-2-509", "va-24-2-510",
                         "ct-chap-153"],
             "reviewed": "2026-11-11",

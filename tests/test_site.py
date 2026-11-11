@@ -1181,6 +1181,14 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(va.count("used again in 2026"), 1)
         self.assertIn("not on the ballot in 2026", pages.district_page_text("PR", 1)[1])
         self.assertIn("referendum", pages.district_page_text("MO", 8)[1])
+        # Missouri's August primaries were fought on the 2025 lines and its
+        # November general on these (People Not Politicians v. Onder); the
+        # page said only that the courts "kept these districts in place for
+        # 2026", silent on the primaries (the guide's second reader).
+        mo = pages.district_page_text("MO", 8)[1]
+        self.assertIn("August 4, 2026 congressional primaries were held on that map", mo)
+        self.assertIn("in place for the November 3, 2026 general election", mo)
+        self.assertNotIn("in place for 2026.", mo)
         # A redrawn state's members who moved, in the build's tense: running
         # before Election Day, ran after it, and in January who took their
         # seats (the sweep of 2026-11-11: "some members are running ... from
