@@ -1638,8 +1638,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `KYC.seatedTerm`, `share.seated_term`), never "Awaiting result": the
     January rehearsal of 2026-11-11 printed "Awaiting result" under "Term
     Jan. 3, 2027 - Jan. 3, 2029" for 46 members, and Greg Casar's TX-37 card
-    said it beside TX-35's "was re-elected in TX-37". It says nothing of
-    the others on that ballot, whom no result has marked.
+    said it beside TX-35's "was re-elected in TX-37". The others on that
+    ballot "Was on the November ballot", the title naming whom the record
+    seats and crediting it, never "Awaiting result" and never a loss no
+    result marked (LA-4 read "Awaiting result" four times under "Seated:
+    Mike Johnson"). One reading names who sits (`KYC.seatedIn`,
+    `share.seated_in`: in that very seat, on a term begun after Election
+    Day) for the race head's "Seated:" badge and the others' words; the
+    first head counted anyone whose status read "Seated for", so TX-35's
+    fell back to "Awaiting result" over Greg Casar, who sits for TX-37.
 
 68. **A new Congress is the data's word, about everything that changes
     with it.** Rehearsed on a fictional January 4 membership, the site
@@ -1709,7 +1716,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "since 2013" was frozen at the read, so a senator who left on January
     3 would have stayed current. Whether a seat in Congress is current is
     the membership snapshot's to say, by the person's bioguide id, at
-    build time (`history-behind`). The sitting governors are read by the
+    build time (`history-behind`). An office whose first year is after the
+    read's is not shown: Wikidata and the article agreeing on "Governor of
+    Iowa, 2027-" made Rob Sand's and Phil Weiser's November overlays name
+    them governors, a state winner this site does not name (rule 91;
+    `history.for_page`'s *read*). The sitting governors are read by the
     Wikidata item the NGA roster's cross-check holds for them
     (`executives.wikidata`, under `gov-<ST>`), with the item's date of
     birth kept for the build to compare with the NGA's; the candidates for
@@ -1824,7 +1835,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     counted them as challengers. Once the new Congress sits, the winners it
     seated are members, not filings, and the Challengers chip's note counts
     them apart (`election.winnersSeated`), or its terms summed to 476 under
-    the sidebar's 602.
+    the sidebar's 602; so is a special election's winner seated in December
+    ("now sit in Congress", 602 under 603 before). How many members of a
+    redrawn state ran under a new number is the data's
+    (`pages.district_moves`): Utah's hand-typed "Every member ran" stood
+    over Burgess Owens, who withdrew.
 
 74. **A status word must describe the race it badges, and what that race
     decided.** California's and Washington's top two and Alaska's top
@@ -2003,7 +2018,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     style the race badges use for people; it read as a fact about each, and
     none of them is on that ballot. The mark says "This office is on the
     Nov 3, 2026 ballot" and sits on the office's label line, never in the
-    holder's block. Who is not running is said only where a cited source
+    holder's block; its hover gives the term, and after the election "On the
+    Nov 3, 2026 ballot", never "Last elected" (this site reads no state's
+    result, and Guam's, the Virgin Islands' and Georgia's runoffs decide
+    some). Who is not running is said only where a cited source
     says so: the election office's list of candidates for that office
     (rule 91), with the constitution's term limit (`ballot2026.OPEN_SEATS`,
     read with the NGA's count of the governor's terms) as the reason beside
@@ -2294,7 +2312,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     A winner seated since Election Day keeps the article's facts and the
     offices held read under the filing folded into their profile, while
     the profile links that article (`enrich.apply_to_winners`,
-    `history.folded`), after the Directory, which wins.
+    `history.folded`), after the Directory, which wins - but an office open
+    at that read is not current (`openWhenRead`: the dialog says it was held
+    when read as a candidate, the card says nothing of it), or Mike
+    McGuire's January card read "Member of the State Senate of California"
+    beside no seat in Congress - and the 2026 campaign's money read under
+    that filing's FEC id until the finance step reads them as a member
+    ("Raised No data" stood over millions).
 
 87. **A photograph says whose it is, read from its source, and weighs
     what a card needs.** 153 of 394 Wikimedia portraits were CC BY or
