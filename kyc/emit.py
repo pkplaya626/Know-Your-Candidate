@@ -1146,10 +1146,14 @@ def stategov_state_payload(payload, code):
     ``governed`` names every place whose entry holds a governor, so a link
     on one state's page to another's governor can say it is on that page,
     and a place with none (the District of Columbia) is never offered as
-    holding one (rules 19, 75)."""
+    holding one (rules 19, 75). The District's own record, which holds no
+    governor (``stategov.build``'s ``district``: its attorney general on the
+    2026 ballot), is in its own page's file alone."""
     states = payload.get("states") or {}
+    district = payload.get("district") or {}
     governed = sorted(c for c, entry in states.items() if (entry or {}).get("governor"))
     return {"states": {code: states[code]} if code in states else {},
+            **({"district": {code: district[code]}} if code in district else {}),
             "governed": governed,
             "sources": payload.get("sources") or {}}
 

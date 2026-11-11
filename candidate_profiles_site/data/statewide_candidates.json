@@ -1331,6 +1331,51 @@
    },
    "verified": "CT verified 2026-10-18: New Britain (LM 2026-10-02) and Fairfield (LM 2026-10-07) sample ballots carry identical statewide rows 1A-1D, 5A-5D, 8A-8C; the Voter Guide's Appendix II (LM 2026-10-02) lists the same people and party lines (Matthew Corey on the guide, Matt Corey on the ballot). No corrections."
   },
+  "DC": {
+   "notes": "Source: the District of Columbia Board of Elections' 2026 general election sample ballots ('Official Ballot ... GENERAL ELECTION: TUESDAY, NOVEMBER 3, 2026'), linked as 'SAMPLE BALLOTS' by ward from https://www.dcboe.org/elections/2026-elections, with its 'General Election Candidates in Ballot Order' and its 'List of General Election Write-in Candidates'. The District elects a mayor and a council, not a governor and a legislature; of the four offices this cache follows it elects only its attorney general. Holder from the Office of the Attorney General (oag.dc.gov). Read 2026-11-11.",
+   "offices": {
+    "ag": {
+     "candidates": [
+      {
+       "holder": false,
+       "name": "Manuel Rivera",
+       "party": "Republican",
+       "runningMate": null,
+       "surname": "Rivera",
+       "writeIn": false
+      },
+      {
+       "holder": true,
+       "name": "Brian L. Schwalb",
+       "party": "Democratic",
+       "runningMate": null,
+       "surname": "Schwalb",
+       "writeIn": false
+      }
+     ],
+     "certified": false,
+     "holderNote": "On the sample ballots, which mark no one as the holder; the Office of the Attorney General's own page names him as the office's holder. This site reads attorneys general for the fifty states only (kyc/officers.py), so the page names no holder for the office.",
+     "holderOnList": true,
+     "holderResearched": "Brian L. Schwalb",
+     "holderSource": {
+      "quote": "Attorney General Brian L. Schwalb ... As the District of Columbia's second independent elected attorney general, Brian is committed to fighting for D.C., District residents and District autonomy",
+      "url": "https://oag.dc.gov/about-oag/our-structure-divisions/about-attorney-general"
+     },
+     "list": {
+      "by": "District of Columbia Board of Elections",
+      "dated": "HTTP Last-Modified: Mon, 14 Sep 2026 19:07:44 GMT (the ballot shows no date of its own)",
+      "kind": "sample ballot",
+      "quote": "ATTORNEY GENERAL FOR THE DISTRICT OF COLUMBIA PROCURADOR GENERAL POR EL DISTRITO DE COLUMBIA Vote for no more than one (1) No vote por más de uno (1) Manuel Rivera Republican Republicano Brian L. Schwalb Democratic Demócrata Write-in candidato por escrito",
+      "read": "2026-11-11",
+      "title": "District of Columbia Board of Elections, 'Official Ballot - General Election: Tuesday, November 3, 2026', the Wards 2, 4, 7, 8 sample ballot (Ward2478C.pdf), linked as 'Wards 2, 4, 7, 8' under 'SAMPLE BALLOTS' from https://www.dcboe.org/elections/2026-elections",
+      "url": "https://www.dcboe.org/getContentAsset/6190836f-7916-4ce3-a985-5c675ccc941e/5ebbd046-860b-4ee1-81c8-43d0e3bc446e/Ward2478C.pdf?language=en"
+     },
+     "notes": "Names and parties as the sample ballot prints them, in its order, under 'ATTORNEY GENERAL FOR THE DISTRICT OF COLUMBIA - Vote for no more than one (1)', with a write-in line. The same contest, the same two names in the same order, is on the Board's Ward 1, Ward 3, Ward 5 and Ward 6 sample ballots and on its non-citizen residents' Wards 2, 4, 7, 8 ballot; its federal-only ballot holds no District contest. The Board's 'General Election Candidates in Ballot Order' (https://www.dcboe.org/getContentAsset/1029b813-fb27-4055-9218-fbe40360aacb/5ebbd046-860b-4ee1-81c8-43d0e3bc446e/2026-General-CANDIDATES-07152026.pdf?language=en, Last-Modified 14 Sep 2026) lists the same two under 'Attorney General', Rivera as 'Republican' and Schwalb as 'Democrat' (this reader does not decode every letter of that file's font, so the spelling is the sample ballots'; its contact columns are not recorded), and its 'List of General Election Write-in Candidates' (https://www.dcboe.org/getContentAsset/baa7b20c-9cbd-45fe-9842-986da48d2123/5ebbd046-860b-4ee1-81c8-43d0e3bc446e/2026-General-Election-WRITE-IN-CANDIDATES-07222026.pdf?language=en, printed 11/9/2026 4:06 PM) names no one for Attorney General. The Board's ballot access page: 'The Attorney General is elected to a four-year term every non-presidential election year' (https://www.dcboe.org/candidates/candidate-ballot-access-information). Ranked-choice voting applies to the office only 'when three or more candidates appear on the ballot' (the Board's 2026 general election voter guide); two did. Read 2026-11-11, every document asked as this project (kyc/agent.py).",
+     "title": "Attorney General for the District of Columbia"
+    }
+   },
+   "verified": "DC added 2026-11-11: the attorney general's list was read from the Wards 2, 4, 7, 8 sample ballot and checked against the four other ward ballots, the candidates in ballot order and the write-in list by the reader who added it; a second reader has not yet re-opened it."
+  },
   "DE": {
    "notes": "Only the Attorney General is on Delaware's 2026 statewide ballot among the four offices (governor and lieutenant governor were elected in 2024; the secretary of state is appointed).",
    "offices": {
@@ -1854,8 +1899,71 @@
    "verified": "GA verified 2026-10-18: SoS 'November 2026 Federal and State Candidates.xlsx' (zip LM 2026-09-01, still the file the election page links) re-read: Governor Rick Jackson (R, listed twice)/Keisha Lance Bottoms (D); Lt Gov Dolezal/McLaurin; AG Strickland/Miller; SoS Fleming/Penny Brown Reynolds; no other party; Kemp, Jones, Carr, Raffensperger on no row. Write-in list (Updated 9/24/26) has the 7 governor write-ins and none for the other three. Constitution quotes found. One correction: Raffensperger's incumbent source moved from mvp.sos.ga.gov (refuses scripts) to the SoS election page."
   },
   "GU": {
-   "notes": "Source: the Guam Election Commission's 2026 General Election Sample Ballot, with its 2026 Candidate Information spreadsheet for which office each ticket member seeks. Incumbents from the Office of the Governor (governor.guam.gov). Read 2026-10-18.",
+   "notes": "Source: the Guam Election Commission's 2026 General Election Sample Ballot, with its 2026 Candidate Information spreadsheet for which office each ticket member seeks. Incumbents from the Office of the Governor (governor.guam.gov). Read 2026-10-18. The attorney general, elected under 5 GCA s.30101, was added on 2026-11-11 from the same sample ballot.",
    "offices": {
+    "ag": {
+     "candidates": [
+      {
+       "holder": false,
+       "name": "TYDINGCO, Phillip James",
+       "party": null,
+       "runningMate": null,
+       "surname": "TYDINGCO",
+       "writeIn": false
+      },
+      {
+       "holder": false,
+       "name": "PAULUHN, Jordan Lawrence Evangelista",
+       "party": null,
+       "runningMate": null,
+       "surname": "PAULUHN",
+       "writeIn": false
+      },
+      {
+       "holder": false,
+       "name": "FISHER, Thomas Joseph",
+       "party": null,
+       "runningMate": null,
+       "surname": "FISHER",
+       "writeIn": false
+      },
+      {
+       "holder": false,
+       "name": "SANTOS, Peter John",
+       "party": null,
+       "runningMate": null,
+       "surname": "SANTOS",
+       "writeIn": false
+      },
+      {
+       "holder": true,
+       "name": "MOYLAN, Douglas B.",
+       "party": null,
+       "runningMate": null,
+       "surname": "MOYLAN",
+       "writeIn": false
+      }
+     ],
+     "certified": false,
+     "holderNote": "Marked '(Incumbent)' on the sample ballot. The Office of the Attorney General's own site (https://www.guamag.org/) answered this project's request with Cloudflare's 'Attention Required!' challenge (HTTP 403) on 2026-11-11, so the holder was not read there; a person should. This site reads attorneys general for the fifty states only (kyc/officers.py), so the page names no holder for the office.",
+     "holderOnList": true,
+     "holderResearched": "Douglas B. Moylan",
+     "holderSource": {
+      "quote": "Attorney General of Guam ... 5. MOYLAN, Douglas B. (Incumbent)",
+      "url": "https://drive.google.com/file/d/1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN/view?usp=sharing"
+     },
+     "list": {
+      "by": "Guam Election Commission",
+      "dated": "Google Drive Last-Modified: Tue, 15 Sep 2026 04:59:06 GMT (the ballot shows no date of its own)",
+      "kind": "sample ballot",
+      "quote": "Attorney General of Guam Abugao Hineråt Guåhan Mark one (1) oval only. 1. TYDINGCO, Phillip James Phil Chief Prosecutor 2. PAULUHN, Jordan Lawrence Evangelista NO MORE DRAMA 3. FISHER, Thomas Joseph Attorney Fisher 4. SANTOS, Peter John GRASSROOTS 5. MOYLAN, Douglas B. (Incumbent) TOUGHEST AG ONCRIME Write-in",
+      "read": "2026-11-11",
+      "title": "Guam Election Commission, '2026 General Election Sample Ballot' (2026 General Election Sample Ballot.pdf), linked as '(LINK)' under '2026 General Election Sample Ballots' from https://gec.guam.gov/2026-general-election-info/ and by its name from the Commission's home page https://gec.guam.gov/",
+      "url": "https://drive.google.com/file/d/1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN/view?usp=sharing"
+     },
+     "notes": "Names as the sample ballot prints them (surname first), in its order (1-5), in the left-hand column of its second page under 'Attorney General of Guam' ('Mark one (1) oval only'); the right-hand column is the Consolidated Commission on Utilities. No party is printed beside any of them, as 5 GCA s.30101(b) has it: 'A candidate for the position of Attorney General of Guam shall declare no political party affiliation' (https://col.guamcourts.gov/sites/default/files/05gc030_2026-10-26.pdf, COL 2026-10-26). Under each name the ballot prints a campaign's words ('Phil Chief Prosecutor', 'NO MORE DRAMA', 'Attorney Fisher', 'GRASSROOTS', '(Incumbent) TOUGHEST AG ONCRIME'), not recorded as names. The ballot has a 'Write-in' line and names no write-in candidate. The Commission's '2026 Candidate Information' spreadsheet (https://docs.google.com/spreadsheets/d/1Fp2bbL-2IwWF5J6e6xJpu_3LNTjFHQx7/edit?usp=sharing, Last-Modified 17 Aug 2026) lists the same five for 'Attorney General', its 'Political Party' column blank for each ('MOYLAN, Douglas'); its contact columns are not recorded (the July 14 sheet the Commission's 2026 general election page links as its list of candidates holds only the primary's partisan offices). s.30101(b): the candidate receiving the most votes is certified as elected, so no runoff. gec.guam.gov answered on 2026-11-11. Read 2026-11-11, every document asked as this project (kyc/agent.py).",
+     "title": "Attorney General of Guam"
+    },
     "governor": {
      "candidates": [
       {
@@ -1945,7 +2053,7 @@
      "title": "Lieutenant Governor of Guam"
     }
    },
-   "verified": "GU verified 2026-10-18 unchanged: the GEC's 2026 General Election Sample Ballot (Drive file linked from gec.guam.gov in the 2026-10-12 capture; gec.guam.gov itself still times out) lists only Ada/Calvo (R) and Terlaje/Perez (D); offices per ticket confirmed in the Candidate Information sheet; incumbents' quotes on governor.guam.gov; the statute's term-limit text added as a source."
+   "verified": "GU verified 2026-10-18 unchanged: the GEC's 2026 General Election Sample Ballot (Drive file linked from gec.guam.gov in the 2026-10-12 capture; gec.guam.gov itself still times out) lists only Ada/Calvo (R) and Terlaje/Perez (D); offices per ticket confirmed in the Candidate Information sheet; incumbents' quotes on governor.guam.gov; the statute's term-limit text added as a source. The attorney general's list, added 2026-11-11, was read from the same sample ballot (page 2, left-hand column) and checked against the Commission's Candidate Information spreadsheet by the reader who added it; a second reader has not yet re-opened it."
   },
   "HI": {
    "notes": "Hawaii's attorney general is appointed and it has no secretary of state. The Candidate Report table is drawn by script; it was read in headless Chrome, all 28 pages.",

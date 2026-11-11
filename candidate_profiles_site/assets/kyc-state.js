@@ -995,7 +995,17 @@
     var past = KYC.electionStatus().phase === "post-election";
     var elects = past ? "elected" : "elects";
     var hold = past ? "may also have held" : "may also hold";
-    if (code === "DC") return KYC.ballot.dcContests(past);
+    if (code === "DC") {
+      // The District's attorney general, the one office of the four its own
+      // law elects (ballot2026.DISTRICT), is listed under Local government
+      // with the Board of Elections' candidates; its other contests are not.
+      var named = KYC.stategov && KYC.stategov.listsCandidates(code);
+      return (list ? "Of the District's offices this site covers, the same ballot also " + elects + " the " +
+        KYC.escapeHtml(list.replace(/^the /, "")) + " (see " +
+        '<a class="state-jump" href="#state-government">Local government</a>' +
+        (named ? ", which lists the candidates for " + KYC.escapeHtml(named) : "") + "). " : "") +
+        KYC.ballot.dcContests(past);
+    }
     if (territory) {
       // A territory's own record covers its governor and lieutenant governor,
       // and an office its own law elects (the Northern Mariana Islands'

@@ -119,8 +119,17 @@
   var BALLOT_WORD = { governor: "governor", lt: "lieutenant governor",
     ag: "attorney general", sos: "secretary of state" };
 
+  /* The District of Columbia's own record (stategov.build's `district`): it
+   * elects a mayor, not a governor, so it has no entry among the states,
+   * every one of which holds a governor; but its own law elects one of the
+   * four offices, its attorney general, whose candidates the Board of
+   * Elections lists (ballot2026.DISTRICT). */
+  function district(code) {
+    return (gd().district || {})[code] || null;
+  }
+
   function ballot(code) {
-    var s = state(code);
+    var s = state(code) || district(code);
     return s && s.ballot2026 && s.ballot2026.offices ? s.ballot2026 : null;
   }
 
@@ -893,7 +902,8 @@
   function look(code, mode) {
     var s = state(code);
     var name = KYC.stateName(code);
-    if (mode === "governor2026" && !ballot(code)) {
+    // The District's record holds no governor (its attorney general alone).
+    if (mode === "governor2026" && (!s || !ballot(code))) {
       return { fill: FILL.nonpartisan, text: code === "DC"
         ? "D.C. elects a mayor, not a governor" : name + ": not covered here" };
     }
@@ -1237,10 +1247,40 @@
       '">' + KYC.escapeHtml(raceHeading(code)) + (here ? "" : " ›") + "</a>.</p>";
   }
 
+  /** The District of Columbia: a mayor and a council, not a governor and a
+   *  legislature, and of the four offices this site follows the one its own
+   *  law elects, its attorney general, with the candidates the Board of
+   *  Elections lists (ballot2026.DISTRICT), drawn by the rows a state's
+   *  officers are (officerRow, rule 12). No roster read here names its
+   *  holder, and the note says what is not covered, in the District's own
+   *  words (rule 75): every page named the office among "the District's own
+   *  contests ... which this site does not list". */
+  function districtRender(code) {
+    var html = '<p class="faint">The District of Columbia has an elected mayor and a council of 13, ' +
+      "not a governor and legislature.</p>";
+    var listed = ["lt", "ag", "sos"].filter(function (k) {
+      var item = ballotItem(code, k);
+      return !!(item && item.up && item.candidates);
+    });
+    if (!listed.length) return html;
+    return html + '<p class="panel-subhead">District officers</p><ul class="gov-officers">' +
+      listed.map(function (k) {
+        return officerRow(k, null, officeMark(code, k), ballotItem(code, k), "The District",
+          openSeat(code, k), candidatesBlock(code, k), code);
+      }).join("") + "</ul>" +
+      '<p class="gov-note">The District of Columbia’s mayor, council and courts, and the holder of ' +
+      "its office of attorney general, are not covered here: this site lists, for the attorney " +
+      "general, the candidates on the Board of Elections’ list.</p>" +
+      '<p class="gov-sources faint">What is on the Nov 3 ballot: the Board of Elections, linked ' +
+      "from the mark. The candidates for the office on it: the Board’s list, named under the " +
+      "office as the document it is.</p>";
+  }
+
   /** Everything known about who runs one state, as HTML. *opts.links* adds
    * the links to its legislature and county pages. */
   function render(code, opts) {
     var s = state(code);
+    if (!s && district(code)) return districtRender(code);
     if (!s) {
       return '<p class="faint">' + (code === "DC"
         ? "The District of Columbia has an elected mayor and a council of 13, not a governor and legislature."
@@ -1664,6 +1704,10 @@
     codes: function () { return Object.keys(gd().states); },
     titles: TITLES,
     state: state,
+    // The District's own record, its attorney general on the 2026 ballot
+    // (the search's answers and the grid's index, kyc-search.js,
+    // kyc-directory.js): never a state's, which holds a governor.
+    district: district,
     look: look,
     legend: legend,
     badge: badge,

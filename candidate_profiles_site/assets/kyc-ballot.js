@@ -613,9 +613,14 @@
     "contests, and local ballot questions, which this site does not list";
 
   function dcContests(past) {
+    // The District's attorney general, the one office of the four its own
+    // law elects, is listed with the Board's candidates (ballot2026.DISTRICT):
+    // it was named here among the contests "which this site does not list".
+    var listed = !!(KYC.stategov && KYC.stategov.listsCandidates("DC"));
     return "Your ballot may also " + (past ? "have held" : "hold") +
-      " the District's own contests, such as for mayor, attorney " +
-      "general, the D.C. Council, the State Board of Education and Advisory Neighborhood " +
+      " the District's " + (listed ? "other" : "own") + " contests, such as for mayor, " +
+      (listed ? "" : "attorney general, ") +
+      "the D.C. Council, the State Board of Education and Advisory Neighborhood " +
       "Commissions, which this site does not list (" +
       '<a href="https://www.dcboe.org/elections/2026-elections" target="_blank" ' +
       'rel="noopener noreferrer">D.C. Board of Elections</a>).';
@@ -1101,7 +1106,9 @@
   /** "Statewide" is a state's word; a territory's offices are its own
    *  (rule 75). */
   function wide(code) {
-    return stateInfo(code).territory ? "Territorial" : "Statewide";
+    // The District is no territory, whatever the build's figures group it
+    // with (rule 75): its offices are the District's.
+    return code === "DC" ? "District" : stateInfo(code).territory ? "Territorial" : "Statewide";
   }
 
   /** The statewide offices on the ballot, each with its mark (linked to
@@ -1392,7 +1399,7 @@
         return KYC.findRep.houseRace(code, Array.isArray(part) ? part[0] : part);
       }) || statewideUp || asked || !!(local && local.any);
     var order = ["Congress"];
-    if (statewideUp) order.push(wide(code).toLowerCase() + " offices");
+    if (statewideUp) order.push(code === "DC" ? "the District’s offices" : wide(code).toLowerCase() + " offices");
     if (legislature.anyUp) order.push("the state legislature");
     // The note names every card the list shows: where there are no
     // questions, or no list was found, the last card still says so (PR #120
