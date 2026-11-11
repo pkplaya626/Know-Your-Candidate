@@ -11066,7 +11066,9 @@ async function testElectionNight() {
     // on that ballot, never that it was "elected" then: Georgia's own
     // governor runoff is December 1, and this site reads no state's result
     // (rule 91; "Last elected Nov 3, 2026", the review of PR #227).
-    const govMarks = [...december.D.querySelectorAll(".gov-ballot-mark.up")].map((a) => a.getAttribute("title") || "");
+    // An office's mark (on its label line), not a chamber's seats line.
+    const govMarks = [...december.D.querySelectorAll(".gov-ballot-mark.up")]
+      .filter((a) => a.parentElement.classList.contains("gov-office")).map((a) => a.getAttribute("title") || "");
     check("an office's ballot mark is never 'elected' after the election",
       govMarks.length >= 4 && govMarks.every((t) => /^On the Nov 3, 2026 ballot(?:; \d+-year term)?$/.test(t)),
       govMarks.join(" | "));
