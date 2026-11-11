@@ -483,31 +483,33 @@ class TestTheGuideOnTheBuildsDay(unittest.TestCase):
                          government.Clock(True, True, "2027-01-04"))
 
     def test_every_tense_names_a_time_the_clock_knows(self):
-        from kyc import government_maps
-        from kyc.government_text import SEE, Tense
+        from kyc.government_text import Tense
 
-        found = []
-
-        def walk(value):
-            if isinstance(value, Tense):
-                found.append(value)
-            elif isinstance(value, (list, tuple)):
-                for item in value:
-                    walk(item)
-            elif isinstance(value, dict):
-                for item in value.values():
-                    walk(item)
-        walk(list(PAGES))
-        walk(list(SEE.values()))
-        walk(list(government_maps.PRESIDES_NOTES.values()))
+        found = government.tenses()
         self.assertTrue(found)
         for tense in found:
             days = [when for when, _ in tense if when[:1].isdigit()]
             self.assertEqual(days, sorted(days), tense)
-            for at in self.CLOCKS.values():
+            for at in government.every_clock():
                 government.words(tense, at)
         with self.assertRaises(ValueError):
             Tense(("voted", "words with no campaign form"))
+
+    def test_a_link_in_later_words_is_checked_before_its_day(self):
+        # check() reads every tense, so a broken link written only in the
+        # words for after the election fails the build now, not on the day
+        # the words turn on.
+        from kyc.government_text import ELECTIONS, Tense
+
+        section = ELECTIONS["sections"][0]
+        bad = ("p", Tense(("campaign", "Fine."), ("2026-12-02", "[Gone](#no-such-section).")))
+        section["blocks"].append(bad)
+        try:
+            problems = government.check()
+        finally:
+            section["blocks"].remove(bad)
+        self.assertTrue(any("no-such-section" in p for p in problems), problems)
+        self.assertEqual(government.check(), [])
 
 
 class TestNoCongressIsTyped(unittest.TestCase):

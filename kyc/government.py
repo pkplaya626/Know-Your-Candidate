@@ -113,6 +113,39 @@ def words(value, at=None):
     return chosen
 
 
+def tenses():
+    """Every :class:`Tense` in the guide's words: its pages, its "see it"
+    links and the maps' notes."""
+    from . import government_maps
+
+    found = []
+
+    def walk(value):
+        if isinstance(value, Tense):
+            found.append(value)
+        elif isinstance(value, (list, tuple)):
+            for item in value:
+                walk(item)
+        elif isinstance(value, dict):
+            for item in value.values():
+                walk(item)
+    walk(list(PAGES))
+    walk(list(SEE.values()))
+    walk(list(government_maps.PRESIDES_NOTES.values()))
+    return found
+
+
+def every_clock():
+    """One clock for each set of words the guide can say: the campaign's,
+    the day after the election, each dated form's day, and the record
+    phase after the last of them."""
+    days = sorted({when for tense in tenses() for when, _words in tense
+                   if re.fullmatch(r"\d{4}-\d{2}-\d{2}", when)})
+    return ([CAMPAIGN, Clock(True, False, "")]
+            + [Clock(True, False, day) for day in days]
+            + [Clock(True, True, days[-1] if days else "")])
+
+
 def _map_modes(slug):
     from . import government_maps
     return government_maps.modes(at=now()).get(slug) or []
@@ -969,10 +1002,18 @@ def check():
             if section["id"] in ids:
                 problems.append(f"{page['slug']}: section id {section['id']!r} used twice")
             ids.add(section["id"])
-        try:
-            _main(page)
-        except (ValueError, KeyError) as error:
-            problems.append(str(error))
+        # Every tense's words, each link in them checked: a link written
+        # only in the words after the election would first be followed on
+        # the build that turned them on.
+        for at in every_clock():
+            token = _NOW.set(at)
+            try:
+                _main(page)
+            except (ValueError, KeyError) as error:
+                if str(error) not in problems:
+                    problems.append(str(error))
+            finally:
+                _NOW.reset(token)
     for key, (title, url) in SOURCES.items():
         if key not in cited:
             problems.append(f"source {key!r} is listed but no section cites it")
