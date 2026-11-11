@@ -432,7 +432,7 @@
   function MEMBER_LEAVING(spec) {
     return { cls: "badge-danger", card: "Not running for re-election",
       long: "Not running for re-election in 2026", mate: "Not running for re-election",
-      short: "Leaving seat", title: spec.title };
+      short: "Leaving seat", title: spec.title, leaving: "member" };
   }
   /* An appointee was never elected to the seat, so is not "re-elected" or
    * "not running for re-election": Alan Armstrong took Oklahoma's on an
@@ -440,7 +440,26 @@
   var APPOINTEE_LEAVING = { cls: "badge-danger", card: "Not running in 2026",
     long: "Not running in 2026", mate: "Not running in 2026", short: "Leaving seat",
     title: "Appointed to the seat; not named in the primary results or on the November " +
-      "ballot for it, so not seeking election to it." };
+      "ballot for it, so not seeking election to it.", leaving: "appointee" };
+  /* The same once the Congress the cycle elects sits (recordPhase, opts.record):
+   * the 2026 race is a record, and whoever it badges has left the seat. On the
+   * January rehearsal a member who left on January 3 read "Leaving seat" and
+   * "Not running for re-election in 2026" in their own dialog (PR #225 review).
+   * The title keeps its source, in the past tense. kyc/share.py's _LEFT says
+   * the same words, and tests/fixtures/share_status_words.json holds both. */
+  var LEFT = {
+    member: { card: "Did not run for re-election", long: "Did not run for re-election in 2026",
+      mate: "Did not run for re-election", short: "Left the seat" },
+    appointee: { card: "Did not run in 2026", long: "Did not run in 2026",
+      mate: "Did not run in 2026", short: "Left the seat" },
+  };
+  function leftWords(spec) {
+    var words = LEFT[spec.leaving];
+    return { cls: spec.cls, card: words.card, long: words.long, mate: words.mate,
+      short: words.short, leaving: spec.leaving,
+      title: String(spec.title || "").replace(/\bNot seeking\b/g, "Did not seek")
+        .replace(/\bnot seeking\b/g, "did not seek") };
+  }
   var RACE_STATUS = {
     nominee: { cls: "badge-money", rank: 0,
       card: "On the November ballot", long: "On the November ballot", mate: "On the ballot",
@@ -696,7 +715,9 @@
    *  record's raceStatusUnconfirmed; `appointed` - an appointee, who is
    *  never "not running for re-election"; `round` - an open primary's
    *  December round's date; `decided` - the December round that decided a
-   *  result (`raceStatusDecided`); `now` - the clock, for tests. */
+   *  result (`raceStatusDecided`); `now` - the clock, for tests; `record` -
+   *  the record phase's past tense for a member who did not run (LEFT),
+   *  else the data's own phase (recordPhase). */
   /* Through to November from an all-party primary - California's and
    * Washington's top two, Alaska's top four: nobody won a party's
    * nomination, and two of one party can both go through. The pipeline
@@ -745,6 +766,9 @@
     if (status === "unlisted" && opts.unconfirmed && !certified) spec = UNCONFIRMED;
     var own = (opts.own && spec.member) || {};
     if (opts.own && opts.appointed && spec.member && spec.off) own = APPOINTEE_LEAVING;
+    // In the past tense once the Congress the cycle elects sits (LEFT).
+    var record = opts.record === undefined ? recordPhase() : !!opts.record;
+    if (record && own.leaving) own = leftWords(own);
     var title = own.title || spec.title;
     var source = spec.source || (listed ? LISTED_SOURCE : certified
       ? " Source: " + (opts.sourceName || "the certified list of candidates") + "."
@@ -806,6 +830,7 @@
       allParty: record.allPartyPrimary,
       minor: partyKey(item) === "i",
       now: opts.now,
+      record: opts.record,
     });
   }
 
@@ -906,8 +931,12 @@
       out.push({ cls: spec.cls, label: spec.card, title: title || spec.title || "",
                  rank: spec.rank === undefined ? 9 : spec.rank });
     };
+    // The badges' own tense (LEFT): the record phase's key says what its
+    // badges say.
+    var record = recordPhase();
     var member = function (spec) {
       var m = spec.member;
+      if (m && record && m.leaving) m = leftWords(m);
       if (m) add({ cls: m.cls || spec.cls, card: m.card, rank: spec.rank }, m.title);
     };
     Object.keys(RACE_STATUS).forEach(function (status) {
@@ -923,7 +952,7 @@
       "party; on the November ballot.");
     add(LISTED.unlisted);
     add(UNCONFIRMED);
-    add(APPOINTEE_LEAVING);
+    add(record ? leftWords(APPOINTEE_LEAVING) : APPOINTEE_LEAVING);
     add(AWAITING, "After Election Day: on the November ballot, and the results this site last " +
       "read had not marked a winner.");
     // An open primary's December round, in its race's words (openRound),

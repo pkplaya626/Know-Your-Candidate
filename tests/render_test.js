@@ -13755,11 +13755,26 @@ async function testSharePages() {
       const spec = KYC.raceStatus(status, "long", { own: !!own, appointed: !!appointed,
         unconfirmed: !!unconfirmed, minor: !!minor, allParty: allParty || undefined,
         source: source || undefined, round: round || undefined, decided: decided || undefined,
-        now: held ? dayAfter(round) : post ? AFTER_DAY : CAMPAIGN_DAY });
+        now: held ? dayAfter(round) : post ? AFTER_DAY : CAMPAIGN_DAY, record: false });
       if (!spec || spec.label !== label || !!spec.off !== !!gone) {
         off.push(`${JSON.stringify(row.slice(0, 11))}: "${spec && spec.label}" for "${label}"`);
       }
     });
+    // The record phase: a member who did not run is in the past tense once
+    // the Congress the cycle elects sits (KYC's LEFT, share._LEFT).
+    const recordOff = (table.record || []).filter((row) => {
+      const [status, allParty, source, own, appointed, unconfirmed, label, gone] = row;
+      const spec = KYC.raceStatus(status, "long", { own: !!own, appointed: !!appointed,
+        unconfirmed: !!unconfirmed, allParty: allParty || undefined, source: source || undefined,
+        now: AFTER_DAY, record: true });
+      return !spec || spec.label !== label || !!spec.off !== !!gone;
+    });
+    check("and every status in the record phase, a member who did not run in the past tense",
+      (table.record || []).length > 100 && recordOff.length === 0 &&
+        table.record.some((row) => row[6] === "Did not run for re-election in 2026") &&
+        table.record.some((row) => row[6] === "Did not run in 2026"),
+      recordOff.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") ||
+        `${(table.record || []).length} cases`);
     check("every status, member or not, appointed, unconfirmed, minor-party, all-party, " +
       "certified or qualified, before and after Election Day, an open primary's December " +
       "round before and after its day, and a result each kind of December round decided",
@@ -18744,6 +18759,142 @@ async function testTheJanuaryPage() {
       off.map((rid) => `${rid}: ${named[rid]}`).join(" | ") ||
         Object.keys(want).filter((rid) => named[rid]).map((rid) => named[rid]).join(" | "));
   });
+
+  // A former member is named as their own record says they go by (rule 66):
+  // on the first January rehearsal five read their roster's legal name -
+  // "Earl Carter" for Buddy Carter, "James (Jim) Moylan" - and a reader
+  // typing "Buddy Carter" found nothing. The name expected is built here
+  // from the name block their archived row keeps (Former_Members.csv's
+  // "Record Name"), by the rule legislators.display_name states.
+  const rows = readCsv(path.join(SITE, "..", "Former_Members.csv"));
+  const rowOf = {};
+  rows.forEach((r) => { if (r["Left Office"]) rowOf[(r["Bioguide ID"] || "").toUpperCase()] = r; });
+  const initial = (w) => /^[A-Z]\.$/.test(w || "");
+  const fold = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const recordName = (roster, parts) => {
+    roster = String(roster || "").split(/\s+/).filter(Boolean).join(" ");
+    const words = roster.split(" ");
+    if (parts.nickname || initial(words[0])) {
+      const first = parts.nickname ||
+        (parts.middle && !initial(parts.middle.split(" ")[0]) ? parts.middle : "");
+      return first && parts.last ? first + " " + parts.last : roster;
+    }
+    const nick = /^(\S+)\s+\(([^)]+)\)\s+(.+)$/.exec(roster);
+    if (nick) return nick[2].trim() + " " + nick[3];
+    const official = String(parts.official_full || "").replace(/\s*"[^"]+"/g, "").split(/\s+/)
+      .filter(Boolean);
+    if (official.length >= 2 && words.length >= 2 && !initial(official[0]) &&
+        fold(official[official.length - 1]) === fold(words[words.length - 1]) &&
+        official[0].length < words[0].length && fold(official[0]) !== fold(words[0])) {
+      return [official[0]].concat(words.slice(1)).join(" ");
+    }
+    return roster;
+  };
+  const formers = GK.people().filter((p) => p.formerMember && !p.isCandidate);
+  const names = { unrecorded: [], wrong: [], unfound: [], renamed: 0 };
+  formers.forEach((p) => {
+    const row = rowOf[p.id];
+    let parts = {};
+    try { parts = JSON.parse((row || {})["Record Name"] || "{}"); } catch (e) { parts = {}; }
+    if (!row || !parts.last) { names.unrecorded.push(p.name + " (" + p.id + ")"); return; }
+    const want = recordName(row.Name, parts);
+    if (p.name !== want) names.wrong.push(`${p.id}: "${p.name}", the record's "${want}"`);
+    if (fold(row.Name) !== fold(p.name)) names.renamed += 1;
+    const lost = [row.Name, p.name].filter((q) => !GK.matchesQuery(p, q.toLowerCase()));
+    if (lost.length) names.unfound.push(`${p.name}: not found by "${lost.join('", "')}"`);
+  });
+  // No former member's own words are in the present tense (rule 67): a
+  // member who left on January 3 read "Leaving seat" and "Not running for
+  // re-election in 2026" on January 10 (PR #225 review). Every form, the
+  // dialog for those who did not run, and their share pages.
+  const PRESENT = /\bNot running\b|\bLeaving seat\b|^Running |\bis running\b|\bnot seeking\b/;
+  const present = [];
+  formers.forEach((p) => {
+    ["card", "long", "mate", "short"].forEach((form) => {
+      const spec = GK.standing(p, form);
+      if (spec && (PRESENT.test(spec.label) || PRESENT.test(spec.title || ""))) {
+        present.push(`${p.name} ${form}: "${spec.label}" / "${String(spec.title).slice(0, 80)}"`);
+      }
+    });
+    const line = GK.contestLine(p);
+    if (line && (PRESENT.test(line.label) || PRESENT.test(line.title))) {
+      present.push(`${p.name} contest: "${line.label}"`);
+    }
+  });
+  const leftSeat = formers.filter((p) => GK.offBallot(GK.contestStatus(p)) && !p.contestLabel);
+  let opened = 0;
+  for (const p of leftSeat.slice(0, 6)) {
+    grid.window.location.hash = "#/profile/" + encodeURIComponent(p.id);
+    grid.window.dispatchEvent(new grid.window.Event("hashchange"));
+    await settle(60);
+    if ((grid.D.getElementById("profileModalName") || {}).textContent !== p.name) continue;
+    opened += 1;
+    const said = ((grid.D.getElementById("profileModalStatus") || {}).textContent || "").replace(/\s+/g, " ");
+    const hovers = titlesOf(grid.D.getElementById("profileModalStatus")).join(" ");
+    if (PRESENT.test(said) || PRESENT.test(hovers)) present.push(`${p.name} dialog: "${said.slice(0, 120)}"`);
+  }
+  const shared = [];
+  formers.forEach((p) => {
+    const file = path.join(SITE, "p", p.id + ".html");
+    const html = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+    if (!html) shared.push(`${p.id}: no share page`);
+    else if (/Not running for re-election|Not running in 2026|Leaving seat/.test(html)) {
+      shared.push(`${p.name}: ${(/(Not running[^<."]*|Leaving seat)/.exec(html) || [""])[0]}`);
+    }
+    if (html && html.indexOf(KYC_ESC(p.name)) === -1) shared.push(`${p.id}: share page does not name "${p.name}"`);
+  });
+
+  suite("the January page: a former member's name and words (rules 66, 67)", () => {
+    check("the data has former members, each archived with their record's name block",
+      formers.length > 0 && names.unrecorded.length === 0,
+      names.unrecorded.slice(0, 5).join(", ") || `${formers.length} former members`);
+    check("each is named as their record says they go by", names.wrong.length === 0 && names.renamed > 0,
+      names.wrong.slice(0, 5).join(" | ") || `${names.renamed} named otherwise than the roster`);
+    check("the search finds each by the roster's spelling and by the name shown",
+      names.unfound.length === 0, names.unfound.slice(0, 5).join(" | "));
+    check("no former member's status reads in the present tense, in any form or their dialog",
+      leftSeat.length > 0 && opened > 0 && present.length === 0,
+      present.slice(0, 5).join(" | ") || `${leftSeat.length} who did not run, ${opened} dialogs`);
+    check("nor on their share pages, which name them as the page does", shared.length === 0,
+      shared.slice(0, 5).join(" | "));
+  });
+}
+
+/* The rows of a CSV file as objects keyed by its header (RFC 4180: quoted
+ * fields, doubled quotes, commas and newlines inside quotes). */
+function readCsv(file) {
+  if (!fs.existsSync(file)) return [];
+  const text = fs.readFileSync(file, "utf8");
+  const records = [];
+  let row = [], field = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (c === '"') quoted = false;
+      else field += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(field); field = "";
+      if (row.length > 1 || row[0]) records.push(row);
+      row = [];
+    } else field += c;
+  }
+  if (field || row.length) { row.push(field); records.push(row); }
+  const head = records.shift() || [];
+  return records.map((r) => {
+    const out = {};
+    head.forEach((h, i) => { out[h] = r[i] === undefined ? "" : r[i]; });
+    return out;
+  });
+}
+
+/* The HTML-escaped form of a name, as kyc/share.py writes it. */
+function KYC_ESC(text) {
+  return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
 }
 
 (async function main() {

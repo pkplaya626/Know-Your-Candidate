@@ -96,8 +96,11 @@ def december(label, root=REPO):
     after["legislators"] = sorted(people, key=lambda p: p["bioguide"])
     after["count"] = len(people)
     after["fetched"] = "2026-12-09T07:20:00+00:00"
+    # The name block legislators-historical holds for them: the snapshot's
+    # nameParts are that block's own keys (legislators.name_parts), so the
+    # archive keeps the name they go by, as the real file's entry would.
     historical = [{"id": {"bioguide": loser},
-                   "name": {"first": gone["nameParts"].get("first"), "last": gone["last"]},
+                   "name": dict(gone.get("nameParts") or {"last": gone["last"]}),
                    "terms": [{"type": "sen", "start": gone["termStart"], "end": "2026-12-08",
                               "state": gone["state"]}]}]
     return after, historical
@@ -258,7 +261,10 @@ def january(root=REPO):
             log.append([holder[rid][0], rid, bid])
         elif bid in held.values() or (p["chamber"] == "House" and p["state"] != "PR"):
             left = "2026-12-08" if bid == oh else NEW_TERM
-            gone.append({"id": {"bioguide": bid}, "name": {"last": p.get("last")},
+            # Their name block as legislators-historical holds it (the
+            # snapshot's nameParts), as for December's loser.
+            gone.append({"id": {"bioguide": bid},
+                         "name": dict(p.get("nameParts") or {"last": p.get("last")}),
                          "terms": [{"type": "sen" if p["chamber"] == "Senate" else "rep",
                                     "start": p.get("termStart"), "end": left,
                                     "state": p["state"]}]})

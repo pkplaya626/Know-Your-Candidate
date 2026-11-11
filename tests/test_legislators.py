@@ -514,6 +514,30 @@ class TestApply(unittest.TestCase):
         self.assertEqual((row["Left Office"], row["Left Via"], row["Last Congress"]),
                          ("2027-01-03", "legislators-historical", "119"))
         self.assertEqual(row["Education"], "BA, Rice University")
+        # The record held no name block: nothing is written in its place.
+        self.assertEqual(row["Record Name"], "")
+        self.assertEqual(legislators.former_name_record(row), {})
+
+    def test_the_archive_keeps_the_records_name_block(self):
+        # The new snapshot no longer holds them, and the roster's "Earl
+        # Carter" is not the name Buddy Carter goes by (rule 66).
+        snap = snapshot_of(entry(bioguide="STAYS", chamber="rep", district=6))
+        block = {"first": "Earl", "middle": "L.", "last": "Carter", "nickname": "Buddy",
+                 "official_full": 'Earl L. "Buddy" Carter'}
+        ended = {"X000001": {"left": "2027-01-03", "via": "legislators-historical",
+                             "nameParts": block}}
+        with tempfile.TemporaryDirectory() as tmp:
+            self.rosters(tmp, house=[self.member(Name="Earl Carter"),
+                                     self.member("STAYS", District="District 6")])
+            legislators.apply(self.drift_of(tmp, snap, ended), tmp)
+            row, = self.read(tmp, legislators.FORMER_ROSTER)
+        self.assertEqual(row["Name"], "Earl Carter")
+        self.assertEqual(json.loads(row["Record Name"]), block)
+        self.assertEqual(legislators.former_name_record(row), block)
+
+    def test_a_record_name_that_is_not_a_name_block_is_none(self):
+        for text in ("", "Buddy Carter", "[1, 2]", "{not json"):
+            self.assertEqual(legislators.former_name_record({"Record Name": text}), {}, text)
 
     def test_a_departure_with_no_record_is_left_for_somebody_to_see(self):
         snap = snapshot_of(entry(bioguide="STAYS", chamber="rep", district=6))
@@ -594,6 +618,15 @@ class TestDepartures(unittest.TestCase):
                                      historical=self.historical("GONE", "2026-11-14"))
         self.assertEqual(out, {"GONE": {"left": "2026-11-14", "via": "legislators-historical"}})
 
+    def test_the_records_name_block_comes_with_a_departure(self):
+        historical = self.historical("GONE", "2027-01-03")
+        historical[0]["name"] = {"first": "James", "middle": "Richard", "last": "Moylan",
+                                 "official_full": "James C. Moylan", "unused": "x"}
+        out = legislators.departures({"GONE"}, self.now, historical=historical)
+        self.assertEqual(out["GONE"]["nameParts"],
+                         {"first": "James", "middle": "Richard", "last": "Moylan",
+                          "official_full": "James C. Moylan"})
+
     def test_the_day_a_term_ends_counts(self):
         self.now["fetched"] = "2027-01-03T23:00:00+00:00"
         self.assertIn("GONE", legislators.departures(
@@ -638,6 +671,82 @@ class TestDepartures(unittest.TestCase):
         codes = [i.code for i in validate.check_snapshot(
             [], {"members": rows}, self.now, now=datetime.datetime(2027, 1, 4))]
         self.assertIn("departed-member", codes)
+
+
+class TestFormerNames(unittest.TestCase):
+    """A former member is shown by the name their own record says they go
+    by, from the name block their archived row keeps, as a sitting member is
+    (rule 66): the first January rehearsal named Buddy Carter "Earl Carter"
+    and Jim Moylan "James (Jim) Moylan"."""
+
+    BLOCKS = {
+        "Z800001": ("Earl Carter", "GA", 1,
+                    {"first": "Earl", "middle": "L.", "last": "Carter", "nickname": "Buddy",
+                     "official_full": 'Earl L. "Buddy" Carter'}),
+        "Z800002": ("James (Jim) Moylan", "GU", 0,
+                    {"first": "James", "middle": "Richard", "last": "Moylan",
+                     "official_full": "James C. Moylan"}),
+        "Z800003": ("C. Franklin", "FL", 18,
+                    {"first": "C.", "middle": "Scott", "last": "Franklin",
+                     "official_full": "Scott Franklin"}),
+    }
+
+    def build(self, recorded=True):
+        from kyc import profiles as profiles_mod
+
+        races, incumbents, rows = {}, {}, []
+        for bioguide, (roster, state, district, block) in self.BLOCKS.items():
+            rid = f"H-{state}-{district:02d}-2026"
+            races[rid] = {"chamber": "House", "state": state, "district": district}
+            incumbents[rid] = {"bioguide": bioguide, "termStart": "2025-01-03", "name": roster}
+            rows.append({"Bioguide ID": bioguide, "Name": roster, "Chamber": "House",
+                         "Party": "Republican", "State": state,
+                         "District": "At-Large" if not district else f"District {district}",
+                         "Term Start": "2025-01-03", "Status": "Retiring in 2026",
+                         "Left Office": "2027-01-03", "Left Via": "legislators-historical",
+                         "Last Congress": "119",
+                         "Record Name": json.dumps(block) if recorded else ""})
+        record = {"races": races, "incumbents": incumbents}
+        built = profiles_mod._former_members(rows, record, [], set())
+        return rows, record, {p["id"]: p for p in built}
+
+    def test_each_is_named_as_their_record_says(self):
+        _rows, _record, built = self.build()
+        for bioguide, (roster, _state, _district, block) in self.BLOCKS.items():
+            self.assertEqual(built[bioguide]["name"],
+                             legislators.display_name(roster, {"nameParts": block}))
+        self.assertEqual([built[b]["name"] for b in sorted(built)],
+                         ["Buddy Carter", "Jim Moylan", "Scott Franklin"])
+
+    def test_the_roster_spelling_and_the_records_forms_stay_searchable(self):
+        _rows, _record, built = self.build()
+        carter = built["Z800001"]
+        self.assertEqual(carter["rosterName"], "Earl Carter")
+        self.assertIn("Earl Carter", carter["aliases"])
+        self.assertIn("Earl L. Carter", carter["aliases"])
+        self.assertIn("James (Jim) Moylan", built["Z800002"]["aliases"])
+        self.assertIn("C. Franklin", built["Z800003"]["aliases"])
+
+    def test_the_name_brings_nothing_else(self):
+        # "no office or phone is attached": a name block is not a person record.
+        _rows, _record, built = self.build()
+        for profile in built.values():
+            for key in ("phone", "contactForm", "website", "senateClass", "offices"):
+                self.assertNotIn(key, profile)
+            self.assertEqual(profile["term_start"], "2025-01-03 - 2027-01-03")
+            self.assertEqual(profile["status"], "Former member: left office 2027-01-03")
+
+    def test_a_row_without_one_keeps_the_roster_spelling_and_is_named(self):
+        rows, record, built = self.build(recorded=False)
+        self.assertEqual(sorted(p["name"] for p in built.values()),
+                         ["C. Franklin", "Earl Carter", "James (Jim) Moylan"])
+        issues = validate.check_former_names(list(built.values()), {"former": rows})
+        issue, = issues
+        self.assertEqual((issue.level, issue.code), ("warn", "former-name-unrecorded"))
+        self.assertEqual(len(issue.detail), 3)
+        _rows, _record, recorded = self.build()
+        self.assertEqual(validate.check_former_names(list(recorded.values()),
+                                                     {"former": _rows}), [])
 
 
 class TestNewTerms(unittest.TestCase):

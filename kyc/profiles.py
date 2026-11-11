@@ -306,7 +306,7 @@ def _committee_text(assignments):
 
 
 def _build_member(row, index, seats_up=None, term_ends=None, person=None, assignments=None,
-                  as_of=None):
+                  as_of=None, name_record=None):
     from . import legislators
 
     name = clean_str(row.get("Name"), "")
@@ -321,7 +321,12 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     # spelling stays searchable and keeps keying the name-keyed caches
     # (``rosterName``). The same person's curated Senate-run row already
     # read "Andy Barr" beside "Garland Barr".
-    display = legislators.display_name(name, person) or name
+    # A former member's record is gone from the snapshot; their archived row
+    # keeps its name block (*name_record*, legislators.former_name_record),
+    # which names them and nothing else: no contact, term or Senate cycle
+    # comes with it.
+    named = person or {"nameParts": dict(name_record or {})}
+    display = legislators.display_name(name, person or (named if name_record else None)) or name
 
     chamber = clean_str(row.get("Chamber"), "")
     kind = _chamber_kind(chamber)
@@ -459,11 +464,13 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
                                   "checked": other_office[2]}
     if person:
         profile.update(_contact(person))
+    if person or name_record is not None:
         # Names a voter may type instead: "Jim Clyburn" for James Clyburn.
-        # Taken from the record matched on bioguide id, never from a name.
+        # Taken from the record matched on bioguide id, never from a name;
+        # for a former member, from the name block their row keeps.
         extra = ((name,) if display != name else ()) + tuple(
             alias for alias, _evidence in overrides.SEARCH_ALIASES.get(bioguide, ()))
-        found = legislators.aliases(person, display, extra=extra)
+        found = legislators.aliases(named, display, extra=extra)
         if found:
             profile["aliases"] = found
     if kind == "Senate":
@@ -500,12 +507,18 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
     view counts with ``record.seated`` (rule 27). Nothing is said that the
     archive does not know: the term ends on the day they left, the roster's
     status line and committee seats - about the term that ended - are not
-    shown, and no office or phone is attached.
+    shown, and no office or phone is attached. They are shown by the name
+    their record says they go by, from the name block the row keeps
+    (``Record Name``, legislators.former_name_record), as a sitting member
+    is: without it, "Earl Carter" for Buddy Carter and "James (Jim) Moylan"
+    on January 3. A row without one keeps the roster's spelling, and
+    validate says so (former-name-unrecorded).
 
     A record incumbent still on the roster is built from the roster (an
     interrupted archive leaves a row in both files). One with no archived
     row has no profile; the race still names them (``race.incumbent``).
     """
+    from . import legislators
     from .record import held_races
 
     on_roster = {p["id"] for p in profiles}
@@ -535,7 +548,8 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
                     "At-Large" if district == 0 else f"District {district}")}
         row = dict(row, **seat)
         left = clean_str(row.get("Left Office"), "")
-        profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of)
+        profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of,
+                                name_record=legislators.former_name_record(row))
         profile.update(
             formerMember={"left": left, "via": clean_str(row.get("Left Via"), ""),
                           "congress": int(clean_str(row.get("Last Congress"), "0") or 0) or None},
@@ -565,7 +579,8 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
         row = dict(same[-1] if same else rows_of[-1], **seat)
         held = incumbents[rid]
         left = clean_str(row.get("Left Office"), "")
-        profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of)
+        profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of,
+                                name_record=legislators.former_name_record(row))
         profile["formerMember"] = {
             "left": left,
             "via": clean_str(row.get("Left Via"), ""),

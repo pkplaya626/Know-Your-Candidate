@@ -183,6 +183,38 @@ class TestStatusTable(unittest.TestCase):
             self.assertIn(words, labels)
         self.assertEqual({row[0] for row in table["statuses"]}, set(share._RACE_STATUS))
 
+    def test_the_record_phase_says_a_member_who_did_not_run_left(self):
+        # On January 10 a member who left on January 3 read "Leaving seat"
+        # and "Not running for re-election in 2026" (PR #225 review).
+        table = share.status_table()
+        after = {tuple(row[:3] + row[6:9]): row[11] for row in table["statuses"]
+                 if row[10] and not row[3] and not row[4] and not row[5] and not row[9]}
+        record = {tuple(row[:6]): row[6] for row in table["record"]}
+        labels = set(record.values())
+        self.assertIn("Did not run for re-election in 2026", labels)
+        self.assertIn("Did not run in 2026", labels)
+        self.assertFalse({w for w in labels if w.startswith("Not running")})
+        for key, words in record.items():
+            leaving = after[key].startswith("Not running")
+            self.assertEqual(words.startswith("Did not run"), leaving, key)
+            if not leaving:
+                self.assertEqual(words, after[key], key)
+
+    def test_post_election_carries_the_record_phase(self):
+        campaign = share.post_election({"election": {"resultsAsOf": "2026-11-10",
+                                                     "phase": "campaign"}})
+        record = share.post_election({"election": {"resultsAsOf": "2027-01-04",
+                                                   "phase": "record"}})
+        self.assertEqual((campaign, campaign.record), ("2026-11-10", False))
+        self.assertEqual((record, record.record), ("2027-01-04", True))
+        member = {"id": "X", "isCandidate": False, "raceStatus": "unlisted", "raceId": "H-AL-02-2026"}
+        self.assertEqual(share.standing(member, {}, {}, campaign)[0],
+                         "Not running for re-election in 2026")
+        self.assertEqual(share.standing(member, {}, {}, record)[0],
+                         "Did not run for re-election in 2026")
+        self.assertEqual(share.standing(dict(member, appointed=True), {}, {}, record)[0],
+                         "Did not run in 2026")
+
 
 class TestSharePhoto(unittest.TestCase):
     """A share image is a photograph that came by a sourced route (rule 24),

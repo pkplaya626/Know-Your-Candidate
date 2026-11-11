@@ -54,7 +54,7 @@ def race_path(rid):
 # wording (`member`) and whether the status takes someone out of the race
 # (`off`). Only the "long" form: it is the one the profile dialog shows.
 def _leaving():
-    return {"long": "Not running for re-election in 2026"}
+    return {"long": "Not running for re-election in 2026", "leaving": "member"}
 
 
 _RACE_STATUS = {
@@ -69,7 +69,11 @@ _RACE_STATUS = {
     "withdrawn": {"long": "Withdrew from the 2026 race", "off": True, "member": _leaving()},
     "unlisted": {"long": "Not on the 2026 primary ballot", "off": True, "member": _leaving()},
 }
-_APPOINTEE_LEAVING = {"long": "Not running in 2026"}
+_APPOINTEE_LEAVING = {"long": "Not running in 2026", "leaving": "appointee"}
+# KYC's LEFT: the same once the Congress the cycle elects sits (the record
+# phase), when whoever they badge has left the seat.
+_LEFT = {"member": {"long": "Did not run for re-election in 2026"},
+         "appointee": {"long": "Did not run in 2026"}}
 _UNCONFIRMED = {"long": "Not on the November ballot", "off": True}
 _AWAITING = {"long": "On the November ballot: awaiting result"}
 _MINOR_NOMINEE = {"long": "On the November ballot"}
@@ -189,11 +193,13 @@ def ballot_line(item, by_id):
 
 def _race_status(status, own=False, unconfirmed=False, appointed=False, source=None,
                  all_party=None, minor=False, post_election=False, open_round=None,
-                 round_held=False, decided=None):
+                 round_held=False, decided=None, record=False):
     """KYC.raceStatus(status, "long", opts): ``(words, off)`` or None.
     *open_round* is the date of an open primary's December round
     (``opts.round``), *round_held* whether it has passed; *decided* the
-    December round that decided a result (``opts.decided``)."""
+    December round that decided a result (``opts.decided``); *record* the
+    record phase (``opts.record``), whose words for a member who did not
+    run are in the past tense (``_LEFT``)."""
     spec = _RACE_STATUS.get(status)
     if not spec:
         return None
@@ -217,6 +223,8 @@ def _race_status(status, own=False, unconfirmed=False, appointed=False, source=N
     mine = (own and spec.get("member")) or {}
     if own and appointed and spec.get("member") and spec.get("off"):
         mine = _APPOINTEE_LEAVING
+    if record and mine.get("leaving"):
+        mine = _LEFT[mine["leaving"]]
     if status == "nominee" and spec is _RACE_STATUS["nominee"] and minor and not own:
         spec = _MINOR_NOMINEE
     if status in ("nominee", "qualified") and post_election:
@@ -355,8 +363,9 @@ def status_table():
     of status and option, what :func:`contest_clause` says of a member's other
     run in every status, what :func:`moved_sentence` says of a seat's holder
     whose run went elsewhere (seated in it or not, a member seated since for
-    the seat they won or not), and what :func:`standing` says for each kind
-    of filer the results do not settle."""
+    the seat they won or not), what :func:`standing` says for each kind
+    of filer the results do not settle, and (``record``) what
+    :func:`_race_status` says in the record phase."""
     words = []
     # A race whose December round is an open primary's general election
     # (_open_round), before that day and after it; the render suite reads
@@ -385,6 +394,20 @@ def status_table():
                             round_held=bool(held), decided=decided)
                         words.append([status, all_party, source, round_date, held, decided]
                                      + list(flags) + [label, int(off)])
+    # The record phase, after Election Day: only a member who did not run
+    # reads differently (_LEFT), and every other word is asked too, to show
+    # it does not.
+    record = []
+    for status in sorted(_RACE_STATUS):
+        for all_party in (None, "top-two"):
+            for source in (None, "certified", "qualified"):
+                for own, appointed, unconfirmed in itertools.product((0, 1), repeat=3):
+                    label, off = _race_status(
+                        status, own=bool(own), unconfirmed=bool(unconfirmed),
+                        appointed=bool(appointed), source=source, all_party=all_party,
+                        post_election=True, record=True)
+                    record.append([status, all_party, source, own, appointed, unconfirmed,
+                                   label, int(off)])
     credits = [[status, source, name, _race_source(status, source, name)]
                for status in sorted(_RACE_STATUS)
                for source, name in ((None, None), ("certified", None),
@@ -425,19 +448,20 @@ def status_table():
     return {"words": ["status", "allParty", "source", "round", "held", "decided", "own",
                       "appointed", "unconfirmed", "minor", "post", "label", "off"],
             "statuses": words, "credits": credits, "contest": contest, "moved": moved,
-            "filers": filers}
+            "filers": filers, "record": record}
 
 
 def status_table_text():
     """The fixture's text: one row a line, so a change reads as a diff."""
     table = status_table()
     lines = ["{", f'"words": {json.dumps(table["words"])},']
-    for key in ("statuses", "credits", "contest", "moved", "filers"):
+    keys = ("statuses", "credits", "contest", "moved", "filers", "record")
+    for key in keys:
         rows = table[key]
         lines.append(f'"{key}": [')
         lines += [json.dumps(row, ensure_ascii=False, separators=(",", ":"))
                   + ("," if i < len(rows) - 1 else "") for i, row in enumerate(rows)]
-        lines.append("]," if key != "filers" else "]")
+        lines.append("]," if key != keys[-1] else "]")
     lines += ["}", ""]
     return "\n".join(lines)
 
@@ -502,7 +526,9 @@ def standing(item, by_id, races_by_id, post_election=False):
         # *post_election* is the day the results were read (post_election()).
         round_held=bool(open_round and isinstance(post_election, str)
                         and open_round < post_election),
-        decided=record.get("raceStatusDecided"))
+        decided=record.get("raceStatusDecided"),
+        # The record phase, which post_election() carries (ResultsDay).
+        record=bool(getattr(post_election, "record", False)))
     if spec:
         return spec
     words = _unsettled(item, races_by_id)
@@ -535,13 +561,31 @@ def post_election(summary):
     After Election Day it is that day itself ("2026-11-05", true as a
     test), so that :func:`standing` can say whether a December round had
     passed when the results were read, as the page says on the reader's
-    day; before it, False."""
+    day; before it, False. Once the Congress the cycle elects sits (the
+    summary's phase "record", KYC.recordPhase), the day carries that too
+    (:class:`ResultsDay`), so every page written from it says what the
+    dialog does in that phase."""
     from . import cycle
 
-    as_of = (((summary or {}).get("election") or {}).get("resultsAsOf") or "")[:10]
+    election = (summary or {}).get("election") or {}
+    as_of = (election.get("resultsAsOf") or "")[:10]
     if not as_of:
         return False
-    return as_of if as_of > cycle.general_election_day(cycle.CYCLE).isoformat() else False
+    if as_of <= cycle.general_election_day(cycle.CYCLE).isoformat():
+        return False
+    return ResultsDay(as_of, record=election.get("phase") == "record")
+
+
+class ResultsDay(str):
+    """:func:`post_election`'s day, which is the day the results were read
+    as a string, and says whether the build is in the record phase
+    (``record``): one value for every share and state page to pass on, as
+    the page reads one clock."""
+
+    def __new__(cls, day, record=False):
+        value = super().__new__(cls, day)
+        value.record = bool(record)
+        return value
 
 
 def ballot_source(race):

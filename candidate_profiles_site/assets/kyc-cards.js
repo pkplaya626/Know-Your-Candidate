@@ -448,7 +448,8 @@
   function holderOut(holder) {
     var spec = KYC.standing(holder, "card");
     var other = KYC.otherOffice(holder);
-    return holder.name + ": " + (spec ? spec.label : "Not running for re-election") +
+    return holder.name + ": " + (spec ? spec.label : KYC.recordPhase()
+      ? "Did not run for re-election" : "Not running for re-election") +
       (other ? " · " + other.text : "") + ".";
   }
 
