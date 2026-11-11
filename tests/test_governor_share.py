@@ -101,7 +101,7 @@ class TestWords(unittest.TestCase):
         self.assertEqual((words["kind"], words["seeking"], words["office"]),
                          ("Governor (Candidate)", "Running for", "Governor • GA"))
         self.assertEqual(words["status"], "On the Nov 3, 2026 ballot")
-        self.assertEqual(words["term"], "Term 4-year term (if elected)")
+        self.assertEqual(words["term"], "Term 4 years (if elected)")
         self.assertEqual(words["source"], "Source: the Secretary of State’s list (read Oct. 18, 2026).")
         # Never a party's money, a platform or a profile (rules 25, 27).
         self.assertEqual(words["record"], "")
@@ -111,7 +111,7 @@ class TestWords(unittest.TestCase):
                                            "https://results.example.gov/")
         self.assertEqual(words["seeking"], "Ran for")
         self.assertEqual(words["status"], "Was on the Nov 3, 2026 ballot")
-        self.assertEqual(words["term"], "Term 4-year term")
+        self.assertEqual(words["term"], "Term 4 years")
         self.assertEqual(words["past"], governor_share.PAST)
         self.assertEqual(words["results"], "https://results.example.gov/")
         gov = governor_share.share_words(found("gov-GA"), True, SOURCES, "https://results.example.gov/")

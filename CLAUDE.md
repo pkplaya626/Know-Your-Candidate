@@ -2820,8 +2820,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     photographs' member route) links that member's profile, the only
     profile link an overlay holds, and the sitting governor on the list
     links their governor's record. The header's "Term" is the ballot
-    note's leading term length alone ("4-year term", "if elected" beside
-    it): the rest of a note is why the office is on the ballot, and printed
+    note's leading term length alone, as a length ("Term 4 years", "if
+    elected" beside it; "Term 4-year term" repeated the label): the rest of a note is why the office is on the ballot, and printed
     whole it read "Term Elected with the lieutenant governor ... (if
     elected)" under Guam's candidates. No rule number is printed to a
     reader. The race panel lists the list's other candidates with the

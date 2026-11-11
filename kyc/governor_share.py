@@ -143,14 +143,16 @@ def holder_html(item, post):
 
 
 def term_words(item, post):
-    """``termLength``: "Term 4-year term (if elected)" where the ballot
-    table's note opens with one, else ""."""
+    """``termLength``: "Term 4 years (if elected)" where the ballot
+    table's note opens with a term's length ("4-year term"), else "": the
+    label and a value repeating it read "Term 4-year term"."""
     if not item or not item.get("up"):
         return ""
-    match = re.match(r"^(\d+-year term)(?=[;,.]|$)", str(item.get("note") or ""))
+    match = re.match(r"^(\d+)-year term(?=[;,.]|$)", str(item.get("note") or ""))
     if not match:
         return ""
-    return f"Term {match.group(1)}" + ("" if post else " (if elected)")
+    years = match.group(1) + (" year" if match.group(1) == "1" else " years")
+    return f"Term {years}" + ("" if post else " (if elected)")
 
 
 def badge_words(person, post):

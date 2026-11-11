@@ -2086,8 +2086,8 @@ portrait with its credit (a failed one leaves the circle and takes its
 credit with it), the party under it (a candidate's fusion line in ink, rule
 88), an office tag ("Governor", "Governor (Candidate)"), the name with the
 list's own form under it, "Governor of Georgia" or "Running for Governor •
-GA" with the term's length from the ballot table's note ("Term 4-year term
-(if elected)"; nothing where the note opens with no length - the rest of a
+GA" with the term's length from the ballot table's note ("Term 4 years
+(if elected)", from "4-year term"; nothing where the note opens with no length - the rest of a
 note is why the office is on the ballot), the office's ballot mark and holder line (rule 79)
 or the candidate's badge ("On the Nov 3, 2026 ballot"; a write-in said; from
 the day after Election Day "Was on the Nov 3, 2026 ballot", naming no

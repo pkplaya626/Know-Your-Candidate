@@ -169,14 +169,16 @@
 
   /** The term's length, from the ballot table's note where the office is on
    *  the ballot and the note opens with one ("4-year term; term begins
-   *  01/2027" -> "4-year term"), else "". The rest of a note is why the
+   *  01/2027" -> "4 years"), else "". The rest of a note is why the
    *  office is on the ballot - "last elected 2022", Guam's statute, "open
-   *  seat (Mills term-limited)" - and is no term (PR #195 review). */
+   *  seat (Mills term-limited)" - and is no term (PR #195 review). Written
+   *  as a length: under the label "Term", "4-year term" read "Term 4-year
+   *  term (if elected)". */
   function termLength(code) {
     var b = sg().ballotOf(code);
     var item = b && b.offices.governor;
-    var m = item && item.up && /^(\d+-year term)(?=[;,.]|$)/.exec(String(item.note || ""));
-    return m ? m[1] : "";
+    var m = item && item.up && /^(\d+)-year term(?=[;,.]|$)/.exec(String(item.note || ""));
+    return m ? m[1] + (m[1] === "1" ? " year" : " years") : "";
   }
 
   /** One candidate as a row in the race panel, in the profile dialog's
