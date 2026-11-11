@@ -3657,8 +3657,8 @@
     }
    },
    "runoff": {
-    "date": null,
-    "note": "If no candidate for governor and lieutenant governor (or for attorney general) receives more than half the votes, a runoff is held fourteen days after the Commission certifies the general election results (1 CMC § 6509). The date depends on certification and is not yet set."
+    "date": "2026-11-20",
+    "note": "The Commonwealth Election Commission certified the general election results on November 6, 2026 (its home page: 'The General Election results were certified on November 6, 2026.'), and its 2026 Run-Off Election Important Dates (a PDF its 'Run-Off Election Important Dates' page embeds, server last-modified 2026-11-08) and its home page give the 2026 Run-Off Election as Friday, November 20, 2026: the fourteenth day after certification, as 1 CMC § 6509(a) and (b) count it. Under that section a runoff between the two highest is held where no candidate for governor and lieutenant governor, or for attorney general, receives more than one-half of the votes. No Commission page read on 2026-11-11 says in words which office or offices this runoff decides, or who is in it: not the runoff calendar, its page, the home page, or the agenda of the November 6 meeting, which listed 'Approval of Ballot Layout for the 2026 Run-Off Election'; so the record does not say, and this site reads no territorial result (rule 91). The same calendar gives: November 10, last day to mail out the runoff absentee ballots; November 12, last day to receive absentee ballot applications over the counter; November 13 to November 19, early voting for the runoff (specimen ballots posted in each polling place from November 13); December 4, last day to receive runoff absentee ballots (1 CMC § 6213(a): postmarked by the day of the runoff). The cache has no fields for a runoff's own early voting or absentee deadlines, so only the runoff's date is shown. Read 2026-11-11, every request sending the project's User-Agent; not yet re-opened by a second reader. 1 CMC § 6524(b) also holds a runoff where two or more persons tie for any office; the page's words name the offices § 6509 holds a majority runoff for."
    },
    "sources": [
     {
@@ -3804,6 +3804,62 @@
      "quote": "§ 6213. Absentee Voting: Counting Ballots. (a) To be eligible to be counted, an absentee ballot shall be received by the Commission not later than the date of election",
      "pageUpdated": null,
      "reread": "2026-10-18"
+    },
+    {
+     "field": "runoff.date",
+     "url": "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf",
+     "quote": "2026 Run-Off Election - Important Dates ... NOVEMBER 06 Certification of the 2026 General Election results ... NOVEMBER 20 2026 Run-Off Election",
+     "pageUpdated": "2026-11-08 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.date",
+     "url": "https://www.votecnmi.gov.mp/",
+     "quote": "Nov 20 Friday 2026 Run-Off Election ... Important Dates for Election 2026 ... November 20, 2026 0 days ‣ 2026 Run-Off Election Day.",
+     "pageUpdated": null,
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.note",
+     "url": "https://www.votecnmi.gov.mp/",
+     "quote": "The General Election results were certified on November 6, 2026.",
+     "pageUpdated": null,
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/public_notice/2026/Public_Notice-November_06_2026.pdf",
+     "quote": "V. New Business A. Certification of the 2026 General Election Results B. Approval of Ballot Layout for the 2026 Run-Off Election",
+     "pageUpdated": "2026-11-05 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf",
+     "quote": "NOVEMBER 10 Last day to mail out the 2026 run-off absentee ballots NOVEMBER 12 Last day to receive absentee ballot applications over the counter NOVEMBER 13 First day of early voting Specimen ballots to be posted in each polling place. NOVEMBER 19 Last day of (Run-Off) Early Voting NOVEMBER 20 2026 Run-Off Election DECEMBER 04 Last day to receive run-off election absentee ballots",
+     "pageUpdated": "2026-11-08 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
+     "quote": "§ 6509. Runoff Elections for Governor and Lieutenant Governor and Attorney General. ... (b) If, in an election for Attorney General, no candidate receives more than one-half of the total votes cast, there shall be a runoff election fourteen days after the Commonwealth Election Commission has certified the results of the general election consistent with Article III, Section 11(e) of the Constitution of the Commonwealth of the Northern Mariana Islands. ... (c) The candidates who received the highest and second highest number of votes cast and counted in the general election shall compete in the runoff election.",
+     "pageUpdated": "2020-07-30 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
+     "quote": "§ 6213. Absentee Voting: Counting Ballots. (a) ... provided that in the case of a runoff election an absentee ballot shall be postmarked not later than the day of the runoff election and shall be received by the Commission no later than fourteen days after the date of the runoff election.",
+     "pageUpdated": "2020-07-30 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
+     "quote": "§ 6524. Tabulation of Votes. ... (b) In any election where it is impossible to declare a winner because two or more persons receive an equal number of votes for any office, there shall be a run-off to determine the winning candidate or candidates.",
+     "pageUpdated": "2020-07-30 (server last-modified)",
+     "read": "2026-11-11"
     }
    ],
    "notes": "Registration for the November 3 election closed September 4 (60 days before); the Commission's site now reads 'Voter Registration is Closed', and there is no Election Day registration. Registration by mail is only for a qualified voter outside the Commonwealth (notarized affidavit, postmarked by the deadline). No official page found says whether online registration exists, so that field is left blank. Absentee voting requires a reason: the election law lets a voter vote absentee when likely to be kept from the polls in their senatorial district on Election Day by business, travel, school, U.S. Armed Forces or Merchant Marine service, employment, training, medical treatment, government representation, or accompanying a household member doing one of these (1 CMC 6211), or by illness or disability (1 CMC 6210), and the application must state the reason. Applications by mail, fax or electronic means were due October 9 (25 days before); the election law also allows an application in person until the end of regular office hours on the day before the election, and a voter confined to home or hospital by illness or disability may request one until noon on Election Day. An absentee ballot must be RECEIVED by the Commission by Election Day to count (mailed by U.S. First Class Mail or courier, or dropped in the Commission's mailbox in each senatorial district, open at least a week before the election). Early voting on Saipan, Tinian and Rota runs October 27 to November 2 (the Commission's Important Dates and its home page, which on October 18 read 'General early voting opens in 9 days'); Northern Islands early voting opened September 18 and closes at 4:00 p.m. November 2. Early voting sites are open 8:30 a.m. to 4:00 p.m. daily, weekends and holidays included. The Commission's polling-places page reads 'Vote early Sep 18 - Nov 2' without saying that the September 18 start is for the Northern Islands only; the Important Dates and 1 CMC 6222 put the Saipan, Tinian and Rota start at October 27. Polls open 7:00 a.m. to 7:00 p.m. Chamorro Standard Time on November 3; bring a photo ID. The CNMI Election Law compilation and the CEC regulations the Commission posts were last modified in 2020; the 2026 dates come from the Commission's 2026 Important Dates (September 2026). The receipt deadline is Election Day itself, so Watson v. RNC does not change it.",

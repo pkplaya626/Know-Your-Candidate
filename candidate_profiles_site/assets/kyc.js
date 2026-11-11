@@ -3067,7 +3067,15 @@
         stateByName["us virgin islands"] = stateByName["u s virgin islands"] = "VI";
         stateByName["virgin islands"] = "VI";
       }
-      if (states.MP) stateByName["northern marianas"] = stateByName["mariana islands"] = "MP";
+      // "CNMI", the Commonwealth's own short form (its election commission is
+      // votecnmi.gov.mp): "CNMI attorney general" answered nothing. A whole
+      // word, never a prefix (rule 5).
+      if (states.MP) {
+        stateByName["northern marianas"] = stateByName["mariana islands"] = "MP";
+        stateByName.cnmi = "MP";
+        // "C.N.M.I." folds to single letters, as "D.C." does.
+        stateByName["c n m i"] = "MP";
+      }
       Object.keys(STATE_ABBREVIATIONS).forEach(function (word) {
         var code = stateAbbreviation(word, true);
         if (code && states[code]) stateByName[word] = code;

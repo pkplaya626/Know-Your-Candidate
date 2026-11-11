@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3117 tests, no dependencies
-npm install && npm test                       # 4611 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3122 tests, no dependencies
+npm install && npm test                       # 4630 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2203,7 +2203,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     runoff stay, the runoff in the past tense once gone (rule 63). A null
     is a gap and says nothing; a researcher's note is never shown. A
     runoff says what it decides (`RUNOFF_WORDS`): Arkansas's December 1 is
-    not a runoff for Congress. The cycle's dates are reread each cycle, and
+    not a runoff for Congress. A runoff counted from a certification no one
+    can date ahead (the Northern Mariana Islands', fourteen days after its
+    Commission certifies, 1 CMC 6509) stays null until the office
+    publishes its date: the Commission's runoff calendar gave November 20
+    (read 2026-11-11). Its words name the offices 1 CMC 6509 holds a
+    majority runoff for (6524(b) adds a tie in any office), never which
+    race went to one or who is in it, which no Commission
+    page says (rule 91). The cycle's dates are reread each cycle, and
     `check` refuses a date outside it.
 
 85. **A ZIP code is not a place, and a location is placed on lines fine
@@ -3206,7 +3213,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (rule 27).
     A word is matched whole: "Proposition 50" is not Proposition 5, and
     "3.5%" in North Carolina's question title is not "Amendment 3". A short
-    form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov."), but in
+    form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov.", "CNMI"), but in
     the answers a two-letter code that is a word ("oh", "in", "va") beside
     another word is a state only typed in capitals (rule 5), and changing
     only the capitals redraws them; the grid still reads a code typed alone
