@@ -18814,6 +18814,9 @@ async function testDistrictsPhonePlans() {
       return Object.keys(plan.districts).filter((n) => !written.has(n));
     };
     const before = (a, b) => !!a && !!b && !!(a.compareDocumentPosition(b) & window.Node.DOCUMENT_POSITION_FOLLOWING);
+    // What of the key a reader sees: its parts not hidden.
+    const keyWords = (legend) => legend ? [...legend.children].filter((c) => !c.hidden)
+      .map((c) => c.textContent).join(" | ") : "";
     suite(`districts/tx.html on a phone ${when} — one plan at a time, the 2026 plan first`, () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
       const buttons = [...D.querySelectorAll(".plan-switch [data-plan-show]")];
@@ -18860,6 +18863,16 @@ async function testDistrictsPhonePlans() {
       check("the key, the toggles and the how-to sit under the shown map, inside its card",
         !!legend && shownCard()[0].contains(legend) && before(shownCard()[0].querySelector(".district-statewide"), legend) &&
           shownCard()[0].contains(D.getElementById("compareToggle")) && shownCard()[0].contains(D.querySelector(".districts-howto")));
+      // The key says what the map on screen shows: before the record phase
+      // the 2026 map is uncoloured, so under it the party key and "The 2024
+      // map is colored..." described a map the reader could not see (PR #218
+      // review); in the record phase both maps are coloured and it is whole.
+      const keyShown = keyWords(legend);
+      check("the key under the 2026 plan speaks of the map shown",
+        window.KYC.recordPhase()
+          ? /by who last held it/.test(keyShown) && /Republican/.test(keyShown)
+          : /seats filled in November/.test(keyShown) && !/is colored/.test(keyShown) &&
+            !/Democratic|Republican|Vacant/.test(keyShown), keyShown);
       const chips = [...shownCard()[0].querySelectorAll(".inset-zoom [data-zoom]")];
       check("a Zoom chip for each inset, by its title, under the statewide map",
         chips.map((c) => c.textContent).join("|") === state.insets.map((i) => i.title).join("|") &&
@@ -18891,6 +18904,12 @@ async function testDistrictsPhonePlans() {
       check("switching back shows the 2026 card as drawn, not drawn again",
         cards()[1] === kept && !kept.hidden && cards()[0] === old && old.hidden);
       check("and the key goes with the shown card", kept.contains(D.querySelector(".party-legend")));
+      D.querySelector('[data-plan-show="0"]').click();
+      const oldKey = keyWords(D.querySelector(".party-legend"));
+      check("under the 2024 plan the key is its party colours, not the 2026 plan's",
+        /Republican/.test(oldKey) && !/seats filled in November/.test(oldKey) &&
+          (window.KYC.recordPhase() || /is colored/.test(oldKey)), oldKey);
+      D.querySelector('[data-plan-show="1"]').click();
       // A pick changes both plans: the hidden one is drawn again only when shown.
       D.getElementById("districtPick").value = "9";
       D.getElementById("districtPick").dispatchEvent(new window.Event("change", { bubbles: true }));

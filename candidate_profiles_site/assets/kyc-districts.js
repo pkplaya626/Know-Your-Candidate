@@ -1372,6 +1372,10 @@
     Array.prototype.forEach.call(doc.querySelectorAll("[data-plan-show]"), function (button) {
       button.setAttribute("aria-pressed", String(onePlan() && Number(button.getAttribute("data-plan-show")) === shown));
     });
+    // The key says only what the map on screen shows (legend()).
+    Array.prototype.forEach.call(doc.querySelectorAll(".party-legend [data-legend-plan]"), function (part) {
+      part.hidden = onePlan() && Number(part.getAttribute("data-legend-plan")) !== shown;
+    });
     var live = el("planShown");
     if (live && announce) {
       var plan = state.plans[shown];
@@ -1581,12 +1585,19 @@
     });
     var keys = [["d", "Democratic"], ["r", "Republican"], ["i", "Independent"],
       ["vacant", "Vacant seat"]].filter(function (p) { return shown[p[0]]; });
+    // Before the record phase only the old map is coloured, so on a phone,
+    // one plan at a time, each part of the key is shown under its own map
+    // (updateSwitch): under the new map the party key and "The 2024 map is
+    // colored..." described a map the reader could not see (PR #218 review).
+    var split = redrawn() && !archive();
+    var oldPart = split ? ' data-legend-plan="0"' : "";
     var items = keys.map(function (p) {
-      return '<span class="key"><span class="swatch party-fill-' + p[0] + '"></span>' +
+      return '<span class="key"' + oldPart + '><span class="swatch party-fill-' + p[0] + '"></span>' +
         KYC.escapeHtml(p[1]) + "</span>";
     });
-    if (redrawn() && !archive()) {
-      items.push('<span class="key"><span class="swatch party-fill-none"></span>' +
+    if (split) {
+      items.push('<span class="key" data-legend-plan="' + (state.plans.length - 1) +
+        '"><span class="swatch party-fill-none"></span>' +
         "The " + KYC.escapeHtml(newPlan().title) + ": seats filled in November</span>");
     }
     var title = archive()
@@ -1594,7 +1605,7 @@
         KYC.escapeHtml(state.plans[0].title) + " by who last held it"
       : (redrawn() ? "The " + KYC.escapeHtml(state.plans[0].title) + " is colored"
         : "Colored") + " by the party of the member who holds each seat";
-    return '<p class="party-legend"><span class="party-legend-title">' + title + "</span>" +
+    return '<p class="party-legend"><span class="party-legend-title"' + oldPart + ">" + title + "</span>" +
       items.join("") + "</p>";
   }
 
