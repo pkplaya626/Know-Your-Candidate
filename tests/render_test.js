@@ -13543,8 +13543,13 @@ async function testSharePages() {
     const file = path.join(SITE, ...rel.split("/"));
     return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null;
   };
+  // The share pages are written in the phase the data says (the record
+  // phase's past tense, share.post_election), and this page is built on the
+  // results' day, before the new Congress sits, whose phase the suite rewinds
+  // to the campaign's: the words are asked in the data's own phase.
+  const asWritten = { record: (meta.election || {}).phase === "record" };
   const words = (p) => {
-    const spec = KYC.standing(p, "long");
+    const spec = KYC.standing(p, "long", asWritten);
     if (!spec) return null;
     const line = KYC.ballotLine(p);
     return spec.label + (!p.isCandidate && p.contestLabel ? " for " + p.contestLabel : "") +
@@ -13602,7 +13607,7 @@ async function testSharePages() {
       const want = words(p);
       if (shown !== want) wrong.push(`${p.id}: "${shown}" for "${want}"`);
       const desc = /<meta name="description" content="([^"]*)">/.exec(html);
-      const spec = KYC.standing(p, "long");
+      const spec = KYC.standing(p, "long", asWritten);
       if (spec && !(desc && unescapeHtml(desc[1]).indexOf(spec.label) !== -1)) wrong.push(`${p.id}: description`);
       // Who says so: the source the dialog's badge credits (rule 19).
       const credit = /<p class="share-source faint">Source: (.*?)\.<\/p>/.exec(html);
@@ -13671,7 +13676,7 @@ async function testSharePages() {
       if (marked.join() !== holders.join()) raceWrong.push(`${race.id}: holder ${marked} for ${holders}`);
       const credits = [];
       s.moved.concat(s.holders, s.running, s.out).forEach((p) => {
-        const c = creditOf(KYC.standing(p, "long"));
+        const c = creditOf(KYC.standing(p, "long", asWritten));
         if (c && credits.indexOf(c) === -1) credits.push(c);
       });
       const sources = /<p class="share-source faint">Where each stands: per (.*?)\.<\/p>/.exec(html);
