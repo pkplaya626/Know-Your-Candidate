@@ -1597,6 +1597,11 @@ def _possessive(name):
 
 # States whose map is unchanged but nearly was, where a reader may have read
 # otherwise. Each clause is on the record of the court that decided it.
+# When an unchanged state's districts are used again, where that is not the
+# whole of 2026: Missouri's primaries were fought on the 2025 map, and "used
+# again in 2026" read beside its note as true of them (the train's reader).
+UNCHANGED_AGAIN = {"MO": "for the November 3, 2026 general election"}
+
 UNCHANGED_NOTES = {
     # People Not Politicians v. Onder (U.S. Supreme Court, 26A388): "The
     # Secretary nonetheless chose to proceed with the 2025 map for the
@@ -1605,10 +1610,10 @@ UNCHANGED_NOTES = {
     # names each primary's winner by district number (RSMo 115.401). The
     # page said only that the courts "kept these districts in place for
     # 2026" (the guide's second reader, 2026-11-11).
-    "MO": ("A map passed in 2025 was suspended by a referendum petition. The August 4, 2026 "
-           "congressional primaries were held on that map all the same, and the courts kept "
-           "these districts in place for the November 3, 2026 general election, where each "
-           "primary's winner stood for the district of the same number."),
+    "MO": ("A map passed in 2025 was suspended by a referendum petition, and the courts kept "
+           "these districts in place. The August 4, 2026 congressional primaries were held on "
+           "the 2025 map all the same, and each primary's winner stood for the district of the "
+           "same number here."),
     # Voters approved the amendment on April 21, 2026 (51.7% to 48.3%); the
     # Supreme Court of Virginia struck it down 4-3 on May 8, 2026, for want
     # of an intervening general election between the legislature's two
@@ -1678,10 +1683,13 @@ def district_page_text(code, seats=None, post=False, seated=0, moved=None):
                 intro += " " + moves
         return entry["headline"], intro
     name = state_name(code)
+    # In the build's tense (*post*): "are used again in 2026" and "is not on
+    # the ballot in 2026" stood over an election that had been held.
+    verb, was = ("were", "was") if post else ("are", "is")
     if code == "PR":
         return (f"{_possessive(name)} seat in the House",
                 "Puerto Rico elects a non-voting resident commissioner to the House, at "
-                "large, for a four-year term. The seat is not on the ballot in 2026.")
+                f"large, for a four-year term. The seat {was} not on the ballot in 2026.")
     if code in TERRITORIES:
         return (f"{_possessive(name)} seat in the House",
                 f"{name} elects a non-voting delegate to the House, at large.")
@@ -1690,8 +1698,8 @@ def district_page_text(code, seats=None, post=False, seated=0, moved=None):
                 f"{name} elects one member of the House, at large: the whole state is "
                 f"one district.")
     intro = (f"{name} elects {seats} members of the House, one from each district below. "
-             f"These are the districts of the 2024 election, and they are used again in "
-             f"2026." if seats else
+             f"These are the districts of the 2024 election, and they {verb} used again "
+             f"{UNCHANGED_AGAIN.get(code, 'in 2026')}." if seats else
              f"{name}'s House districts, as used in 2024 and again in 2026.")
     if code in UNCHANGED_NOTES:
         intro += " " + UNCHANGED_NOTES[code]

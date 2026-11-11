@@ -53,7 +53,7 @@ KEYS = ("kind", "office", "seeking", "party", "since", "pastTerm", "mark", "hold
 
 # The overlay's words for what this site does not read after the election
 # (rule 91: names no winner).
-# "These", never "the state’s": a territory is never a state (rule 75), and
+# "The election’s", never "the state’s": a territory is never a state (rule 75), and
 # Guam's, the Virgin Islands' and the Northern Marianas' overlays said it.
 PAST = "This site does not read the election’s results and names no winner"
 RECORD = {"holder": "The sitting governor: see their record ›",

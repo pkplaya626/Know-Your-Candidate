@@ -116,7 +116,7 @@ TERMS = {
                    # The span ends before "1971": the page shows it in quotation
                    # marks after "counted from", where a 1971 read as this term's
                    # (the second reader, 2026-11-11).
-                   "four years beginning on the first Monday of January",
+                   "beginning on the first Monday of January",
                    "2027-01-04", "Ariz. Const. art. 5, s.1(A)",
                    ((AZ_5_1, (
                        "The executive department shall consist of the governor, lieutenant governor, "

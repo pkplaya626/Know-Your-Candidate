@@ -477,8 +477,8 @@ class TestTheGuideOnTheBuildsDay(unittest.TestCase):
             # finishers took their places (AS 15.25.100(c), rule 77): "the
             # four candidates with the most votes went on" was false of 2026
             # (the guide's second reader, 2026-11-11).
-            self.assertIn("a candidate who withdrew in time was replaced by the one with the "
-                          "next most votes", paragraph)
+            self.assertIn("a candidate for Congress who withdrew in time was replaced by the one "
+                          "with the next most votes", paragraph)
             self.assertNotIn("most votes went on", paragraph)
         primaries = next(s for s in ELECTIONS["sections"] if s["id"] == "primaries")
         self.assertIn("ak-15-25-100", primaries["sources"])

@@ -2410,8 +2410,8 @@ ELECTIONS = {
                     ("voted",
                      _TOP_TWO + "In 2026 Alaska's "
                      "primary chose no party's nominee: the four candidates with the most votes "
-                     "advanced to the general election, and a candidate who withdrew in time was "
-                     "replaced by the one with the next most votes. The general election used "
+                     "advanced to the general election, and a candidate for Congress who withdrew in "
+                     "time was replaced by the one with the next most votes. The general election used "
                      "[ranked-choice voting](#ranked-choice). On November 3, 2026, Alaska's voters also voted "
                      "on a ballot measure to repeal its open primary and ranked-choice general "
                      "elections; on November 11 the Division of Elections still listed that "
