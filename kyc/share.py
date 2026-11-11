@@ -649,7 +649,7 @@ def _former_member(status, appointed):
     """A record incumbent archived as a former member, for :func:`status_table`
     (the render suite builds the same)."""
     item = {"id": "FAKE", "isCandidate": False, "name": "A Member", "party": "Republican",
-            "raceId": "H-AL-02-2026", "raceStatus": status,
+            "raceId": "H-ZZ-01-2026", "raceStatus": status,
             "formerMember": {"left": "2026-12-15", "via": "legislators-historical",
                              "congress": 119}}
     if appointed:

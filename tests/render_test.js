@@ -15274,10 +15274,12 @@ async function testSharePages() {
     // A former member is in the past tense from the day after Election Day,
     // whatever the phase (KYC.pastTense, share.past_tense): one who left in
     // December read "Leaving seat" until January 3 (PR #226 review). The
-    // same person as share._former_member builds.
+    // same person as share._former_member builds, in a race no data holds:
+    // the table is written with no races, and in the January data AL-2's
+    // seat is filled, so its others "Was on the November ballot".
     const former = (table.former || []).filter(([status, appointed, post, inRecord, label, gone]) => {
       const item = { id: "FAKE", isCandidate: false, name: "A Member", party: "Republican",
-        raceId: "H-AL-02-2026", raceStatus: status,
+        raceId: "H-ZZ-01-2026", raceStatus: status,
         formerMember: { left: "2026-12-15", via: "legislators-historical", congress: 119 } };
       if (appointed) item.appointed = true;
       const spec = KYC.standing(item, "long", { now: post ? AFTER_DAY : CAMPAIGN_DAY,
