@@ -71,6 +71,31 @@ OK_6 = "https://oksenate.gov/sites/default/files/2022-05/oc6.pdf"
 PA_4_3 = "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/00/00.004.003.000..HTM"
 PA_4_4 = "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/00/00.004.004.000..HTM"
 RI_4 = "https://www.rilegislature.gov/riconstitution/Constitution/C04.aspx"
+# The Alabama Legislature's own printing of the Constitution of 2022, the
+# recompiled text ratified on November 8, 2022 (headed "Proposed").
+AL_CONST = ("https://alison.legislature.state.al.us/files/pdf/lsa/proposed-constitution/"
+            "2022-constitution-statewide.pdf")
+CT_CONST = "https://www.cga.ct.gov/asp/Content/constitutions/Constitution_State_CT.pdf"
+DE_3 = "https://delcode.delaware.gov/constitution/constitution-04.html"
+# The Indiana Election Division's 2026 Election Calendar (Rev. 1, March 16,
+# 2026), on the Secretary of State's site.
+IN_CALENDAR = ("https://www.in.gov/sos/elections/files/"
+               "2026-Election-Calendar-Election-Administrators-Edition-Revised-March-2026.pdf")
+# The Department of Legislative Services' "Maryland Constitution with
+# Amendments to January 1, 2025".
+MD_CONST = "https://mgaleg.maryland.gov/Pubs/LegisLegal/2025-constitution-maryland-us.pdf"
+MP_CONST = "https://cnmilaw.gov/constitution"
+NM_CONST = "https://www.sos.nm.gov/wp-content/uploads/2025/01/NM_Constitution_-2025-for-SOS.pdf"
+NY_PBO_4 = "https://legislation.nysenate.gov/pdf/laws/PBO4/"
+NY_CONST = "https://dos.ny.gov/system/files/documents/2025/12/constitution-january-1-2026.pdf"
+OR_176 = "https://www.oregonlegislature.gov/bills_laws/ors/ors176.html"
+SD_3_1_2 = "https://sdlegislature.gov/api/Statutes/3-1-2.html"
+TX_CN_4 = "https://tcss.legis.texas.gov/resources/CN/pdf/CN.4.pdf"
+TX_GV_601 = "https://tcss.legis.texas.gov/resources/GV/pdf/GV.601.pdf"
+VT_3_151 = "https://legislature.vermont.gov/statutes/section/03/007/00151"
+WI_8_25 = "https://docs.legis.wisconsin.gov/statutes/statutes/8/25"
+WY_22 = "https://wyoleg.gov/statutes/compress/title22.pdf"
+WY_97 = "https://wyoleg.gov/statutes/compress/title97.pdf"
 # The United States Code as the Government Publishing Office serves it
 # (the organic acts of Guam and the Virgin Islands).
 USC_48_1422 = "https://www.govinfo.gov/link/uscode/48/1422?type=usc&year=mostrecent&link-type=html"
@@ -367,53 +392,246 @@ TERMS = {
                    ((USC_48_1591, (
                        "The term of the elected Governor and Lieutenant Governor shall commence on the "
                        "first Monday of January following the date of election.",)),)),),
+    # The second read of 2026-11-11 (the gaps): every quote below was found
+    # again on its page, asked as this project (kyc/agent.py), that day.
+    "AL": (_record(("governor", "lt", "ag", "sos"), ("after", "Monday", ("nth", 2, "Tuesday", 1)),
+                   "the first Monday after the second Tuesday in January next succeeding their "
+                   "election",
+                   "2027-01-18", "Ala. Const. (2022) art. V, s.116",
+                   ((AL_CONST, (
+                       "The governor, lieutenant governor, attorney general, state auditor, secretary "
+                       "of state, state treasurer, and commissioner of agriculture and industries, "
+                       "shall hold their respective offices for the term of four years from the first "
+                       "Monday after the second Tuesday in January next succeeding their election and "
+                       "until their successors shall be elected and qualified.",)),),
+                   note="The Legislature's printing of the recompiled Constitution of 2022 as "
+                        "proposed (ratified November 8, 2022); no later amendment of s.116 was "
+                        "looked for."),),
+    "CT": (_record(("governor", "lt", "ag", "sos"), ("after", "Wednesday", FIRST_MONDAY_JANUARY),
+                   "the Wednesday following the first Monday of the January next succeeding their "
+                   "election",
+                   "2027-01-06", "Conn. Const. art. IV, ss.1 and 2 (s.1 as amended by amend. art. I)",
+                   ((CT_CONST, (
+                       "A general election for governor, lieutenant-governor, secretary of the state, "
+                       "treasurer, comptroller and attorney general shall be held on the Tuesday after "
+                       "the first Monday of November, 1974, and quadrennially thereafter.",
+                       "Such officers shall hold their respective offices from the Wednesday following "
+                       "the first Monday of the January next succeeding their election until the "
+                       "Wednesday following the first Monday of the fifth January succeeding their "
+                       "election and until their successors are duly qualified.")),)),),
+    # Art. III, s.21 provides nothing "otherwise" for the attorney general.
+    "DE": (_record(("ag",), ("nth", 1, "Tuesday", 1),
+                   "the first Tuesday in January next after their election",
+                   "2027-01-05", "Del. Const. art. III, ss.21 and 24",
+                   ((DE_3, (
+                       "The terms of office of the Attorney General, the Insurance Commissioner, the "
+                       "Auditor of Accounts, and the State Treasurer shall be 4 years.",
+                       "The terms of office of all State and County officers made elective by this "
+                       "Constitution begin on the first Tuesday in January next after their election, "
+                       "unless otherwise provided in this Constitution.")),)),),
+    # A named day, as the state's election office gives it with the statute
+    # it cites; the statute's own text (iga.in.gov) is drawn by script.
+    "IN": (_record(("sos",), ("day", 1, 1), "JANUARY 1, 2027",
+                   "2027-01-01",
+                   "Ind. Code 4-5-1-1, as the Indiana Election Division's 2026 Election Calendar "
+                   "gives it",
+                   ((IN_CALENDAR, (
+                       "FRIDAY, JANUARY 1, 2027",
+                       "First day of term for an individual elected to the following offices in the "
+                       "2026 general election: secretary of state, state comptroller, and treasurer of "
+                       "state. (IC 3-10-2-7; IC 4-5-1-1; IC 4-7-1-1; IC 4-8.1-2-4).")),),
+                   note="Read from the Election Division's calendar, which cites IC 4-5-1-1 and "
+                        "does not quote it: iga.in.gov answers every address with its script "
+                        "app's empty shell."),),
+    # Art. II, s.3 has them qualify on that day "or as soon thereafter as may
+    # be practicable", but s.1 fixes when the term commences. The attorney
+    # general's term (art. V, s.1) names no day: a gap.
+    "MD": (_record(("governor", "lt"), ("nth", 3, "Wednesday", 1),
+                   "the third Wednesday of January next ensuing his election",
+                   "2027-01-20", "Md. Const. art. II, ss.1 and 1B",
+                   ((MD_CONST, (
+                       "The executive power of the State shall be vested in a Governor, whose term of "
+                       "office shall commence on the third Wednesday of January next ensuing his "
+                       "election, and continue for four years, and until his successor shall have "
+                       "qualified",
+                       "the election of Governor, or the nomination of a candidate for Governor, also "
+                       "shall constitute the election for the same term, or the nomination, of the "
+                       "Lieutenant Governor who was listed on the ballot or was being considered "
+                       "jointly with him.")),)),),
+    "MP": (_record(("governor", "lt"), ("nth", 2, "Monday", 1),
+                   "the second Monday of January of the year following the year in which the election "
+                   "was held",
+                   "2027-01-11", "N.M.I. Const. art. VIII, s.4, with art. III, s.4",
+                   ((MP_CONST, (
+                       "Officers elected at the regular general election shall take office on the "
+                       "second Monday of January of the year following the year in which the election "
+                       "was held.",
+                       "The governor and lieutenant governor shall be elected at large within the "
+                       "Commonwealth for a term of office of four years.")),),
+                   note="The Commonwealth Election Commission set a governor's runoff for November "
+                        "20, 2026 (art. III, s.4: the fourteenth day after certification); art. "
+                        "VIII, s.4 and 1 CMC 6509 set no other day for a runoff's ticket."),),
+    "NM": (_record(("governor", "lt", "ag", "sos"), ("day", 1, 1),
+                   "the first day of January next after their election",
+                   "2027-01-01", "N.M. Const. art. V, s.1",
+                   ((NM_CONST, (
+                       "The executive department shall consist of a governor, lieutenant governor, "
+                       "secretary of state, state auditor, state treasurer, attorney general and "
+                       "commissioner of public lands, who shall, unless otherwise provided in the "
+                       "constitution of New Mexico, be elected for terms of four years beginning on "
+                       "the first day of January next after their election.",)),)),),
+    # The constitution gives these terms four years and no day (art. IV,
+    # s.1; art. V, s.1), so no other law fixes their commencement and Public
+    # Officers Law s.4(1) applies. www.nysenate.gov's law pages answered 403.
+    "NY": (_record(("governor", "lt", "ag"), ("day", 1, 1),
+                   "the first day of January next after his election",
+                   "2027-01-01", "N.Y. Pub. Off. Law s.4(1); N.Y. Const. art. IV, s.1 and art. V, s.1",
+                   ((NY_PBO_4, (
+                       "The term of office of an elective officer, unless elected to fill a vacancy "
+                       "then existing, shall commence on the first day of January next after his "
+                       "election, if the commencement thereof be not otherwise fixed by law.",)),
+                    (NY_CONST, (
+                       "The executive power shall be vested in the governor, who shall hold office for "
+                       "four years; the lieutenant-governor shall be chosen at the same time, and for "
+                       "the same term.",
+                       "The comptroller and attorney-general shall be chosen at the same general "
+                       "election as the governor and hold office for the same term")))),),
+    # Gov't Code 601.003(c) leaves the governor and lieutenant governor out,
+    # whose installation the constitution sets on no fixed day: gaps. Gov't
+    # Code 301.001 (the session's "12 noon") is no source of this record.
+    "TX": (_record(("ag",), ("day", 1, 1),
+                   "January 1 of the year following the general election for state and county "
+                   "officers",
+                   "2027-01-01", "Tex. Gov't Code 601.003(a); Tex. Const. art. IV, s.23",
+                   ((TX_GV_601, (
+                       "The regular term of an elective state, district, county, or precinct office "
+                       "begins on January 1 of the year following the general election for state and "
+                       "county officers.",
+                       "This section does not apply to the office of governor, lieutenant governor, "
+                       "state senator, or state representative.")),
+                    (TX_CN_4, (
+                       "The Comptroller of Public Accounts, the Commissioner of the General Land "
+                       "Office, the Attorney General, and any statutory State officer who is elected "
+                       "by the electorate of Texas at large, unless a term of office is otherwise "
+                       "specifically provided in this Constitution, shall each hold office for the "
+                       "term of four years.",)))),),
+    "WI": (_record(("governor", "lt", "ag", "sos"), FIRST_MONDAY_JANUARY,
+                   "the first Monday of January, next succeeding the officer’s election",
+                   "2027-01-04", "Wis. Stat. s.8.25(4)(a) and (b)2.",
+                   ((WI_8_25, (
+                       "A governor, lieutenant governor, secretary of state, treasurer and an attorney "
+                       "general shall be elected at the general election in 1970 and quadrennially "
+                       "thereafter.",
+                       "The regular full term of each other officer enumerated in par. (a) commences "
+                       "on the first Monday of January, next succeeding the officer’s election.")),)),),
+    # The statute names the day outright; the constitution's art. 6, s.17
+    # names the same day "or as soon thereafter as may be possible".
+    "WY": (_record(("governor", "sos"), FIRST_MONDAY_JANUARY,
+                   "the first Monday in January next following their election",
+                   "2027-01-04", "Wyo. Stat. 22-2-107; Wyo. Const. art. 6, s.17, art. 4, ss.1 and 11",
+                   ((WY_22, (
+                       "All state and county officers elected at a general election shall assume their "
+                       "offices on the first Monday in January next following their election.",)),
+                    (WY_97, (
+                       "All state and county officers elected at a general election shall enter upon "
+                       "their respective duties on the first Monday in January next following the date "
+                       "of their election, or as soon thereafter as may be possible.",
+                       "The executive power shall be vested in a governor, who shall hold his office "
+                       "for the term of four (4) years and until his successor is elected and duly "
+                       "qualified.",
+                       "They shall severally hold their offices at the seat of government, for the "
+                       "term of four (4) years and until their successors are elected and duly "
+                       "qualified.")))),),
 }
 
 # Offices on the 2026 ballot with no day here, and why: a gap, never a guess.
 # Each is (why, the page that says so, or None where nothing was read). Read
 # on 2026-11-11; a refusal or a page drawn by script concludes nothing (rule
-# 8), so those offices wait for a person to read the provision by hand.
-_NOT_READ = "this read found no official copy of the provision it could read"
+# 8), so those offices wait for a person to read the provision by hand at
+# the address the why names, and the why says what the server answered,
+# never that the law has no day.
 _VT_49 = ("Vt. Const. ch. II, s.49 fixes no day: the term \"shall commence when they shall be "
           "chosen and qualified\"")
+_SD_WINDOW = ("SDCL 3-1-2 gives a window, not a day: a state officer qualifies and enters on the "
+              "duties \"on the first Monday of January succeeding their election or within twenty "
+              "days thereafter\", or on \"the Saturday immediately preceding the second Tuesday of "
+              "January\"; the constitution gives the term four years and no day (art. IV, ss.2 "
+              "and 7)")
+_TX_INSTALLED = ("Tex. Const. art. IV, s.4 installs the governor \"on the first Tuesday after the "
+                 "organization of the Legislature, or as soon thereafter as practicable\", and the "
+                 "houses organize on no fixed day (Gov't Code 301.001 fixes only the session's "
+                 "convening); Gov't Code 601.003(c) leaves the office out of its January 1")
 _GAPS_BY_STATE = {
-    "AL": (_NOT_READ + " (the Alabama Legislature's constitution pages are drawn by script)", None),
-    "AR": (_NOT_READ, None),
-    "CA": (_NOT_READ + " (leginfo.legislature.ca.gov refused this site's request, HTTP 403)", None),
-    "CT": (_NOT_READ, None),
-    "DE": (_NOT_READ, None),
-    "GA": (_NOT_READ + " (sos.ga.gov refused this site's request, HTTP 403); the leads say the "
-           "governor is installed by the General Assembly, on no fixed day", None),
-    "IN": (_NOT_READ, None),
-    "MD": (_NOT_READ + " (msa.maryland.gov closed the connection)", None),
-    "ME": (_NOT_READ + " (legislature.maine.gov closed the connection)", None),
-    "MP": (_NOT_READ + " (the Law Revision Commission's constitution page is drawn by script)", None),
-    "NH": (_NOT_READ, None),
-    "NM": (_NOT_READ, None),
-    "NY": (_NOT_READ + " (nysenate.gov refused this site's request, HTTP 403)", None),
-    # The review of PR #230 read the page this read had not: the
-    # constitution starts "all officers, except the Governor" on the first
-    # Monday in January, and art. V, s.1 gives the governor's term no day.
-    "OR": ("Or. Const. art. II, s.14 starts the duties of \"all officers, except the Governor\" on "
-           "the first Monday in January following the election, and art. V, s.1 gives the "
-           "governor's term of four years no day; this read found no provision for the governor's",
-           "https://www.oregonlegislature.gov/bills_laws/Pages/OrConst.aspx"),
-    "SD": (_NOT_READ + " (sdlegislature.gov's constitution pages are drawn by script)", None),
-    "TN": (_NOT_READ + " (the Tennessee Code's official text is published on a commercial host; "
-           "the leads cite two sections giving different days)", None),
-    "TX": (_NOT_READ + " (statutes.capitol.texas.gov closed the connection)", None),
-    "WI": ("Wis. Const. art. XIII, s.1 starts the political year on the first Monday of January; "
-           "this read found no provision saying these terms begin with it",
-           "https://docs.legis.wisconsin.gov/constitution/wi/000242/000013"),
-    "WY": (_NOT_READ, None),
+    "AR": ("this read found no official copy of the Arkansas Constitution it could read: the "
+           "Arkansas Legislature's Arkansas Law page links the Code and the Constitution of 1874 "
+           "only to LexisNexis, a commercial host; its own constitution PDF answered HTTP 500 "
+           "(https://www.arkleg.state.ar.us/assembly/Summary/ArkansasConstitution1874.pdf) and the "
+           "Secretary of State's copy HTTP 404 "
+           "(https://www.sos.arkansas.gov/uploads/education/ArkansasConstitution1874.pdf). A person "
+           "should read Ark. Const. art. 6, s.3 on an official copy; the leads say it names no day "
+           "(the Speaker declares the officers elected in the session's first week)",
+           "https://arkleg.state.ar.us/ArkansasLaw"),
+    # The researcher's read of the same morning had the article's page answer
+    # and quoted art. V, s.2 ("from the Monday after January 1 following the
+    # election") and s.11 ("for the same term as the Governor"); a quote this
+    # read could not find on the page is not recorded (rule 8).
+    "CA": ("leginfo.legislature.ca.gov answered this site's request for Article V three times with "
+           "a Cloudflare challenge page (\"Just a moment...\", HTTP 403). A person should read Cal. "
+           "Const. art. V, ss.2 and 11 at https://leginfo.legislature.ca.gov/faces/"
+           "codes_displayText.xhtml?lawCode=CONS&division=&title=&part=&chapter=&article=V", None),
+    "GA": ("sos.ga.gov answered this site's request for the Secretary of State's PDF of the "
+           "constitution with a Cloudflare challenge page (\"Just a moment...\", HTTP 403), the "
+           "General Assembly's legis.ga.gov is drawn by script, and the Official Code of Georgia "
+           "is published on a commercial host (LexisNexis). A person should read Ga. Const. art. "
+           "V, s.I, paras. I-III and s.III, para. I at https://sos.ga.gov/sites/default/files/"
+           "2023-08/Georgia%20Constitution%20-%20Electronic%20Version%20-%20January%252C%202023.pdf"
+           "; the leads say the governor is installed by the General Assembly, on no fixed day",
+           None),
+    "SD": (_SD_WINDOW, SD_3_1_2),
 }
 GAPS = {
+    ("MD", "ag"): ("Md. Const. art. V, s.1 runs the attorney general's term \"for four years from "
+                   "the time of his election and qualification\", which names no calendar day, and "
+                   "this read found no statute that fixes one", MD_CONST),
+    ("ME", "governor"): (
+        "maine.gov answered this site's request with CloudFront's \"Request blocked\" page (HTTP "
+        "403), and lldc.mainelegislature.org reset the connection. A person should read Me. Const. "
+        "art. V, pt. 1, s.2 at https://www.maine.gov/legis/const/ or https://"
+        "lldc.mainelegislature.org/Open/Const/Versions/MeConst_2024_Amd.pdf (the leads give the "
+        "first Wednesday after the first Tuesday of January)", None),
+    ("NH", "governor"): (
+        "nh.gov answered this site's request for the constitution's page 403 (\"Access Denied\"). "
+        "A person should read N.H. Const. pt. II, arts. 41-42 at https://www.nh.gov/glance/"
+        "state-constitution/executive-power-governor; RSA 4-A:2, which the General Court's site "
+        "served, names no day (a governor-elect is one \"until the day of his inauguration\")",
+        "https://gc.nh.gov/rsa/html/I/4-A/4-A-2.htm"),
+    # The review of PR #230 read Or. Const. art. II, s.14: "all officers,
+    # except the Governor" enter on the first Monday in January.
+    ("OR", "governor"): (
+        "ORS 176.010 starts the governor's term \"upon the publication of the returns by the "
+        "Speaker of the House of Representatives\", which Or. Const. art. V, s.4 has the Speaker do "
+        "in the presence of both houses on no fixed day (art. II, s.14's first Monday in January "
+        "is for \"all officers, except the Governor\")", OR_176),
+    ("TN", "governor"): (
+        "the Tennessee Code's only free official text is LexisNexis's public-access site, a "
+        "commercial host, and the Secretary of State's printing of the constitution answered this "
+        "site's request with CloudFront's \"Request blocked\" page (HTTP 403): "
+        "https://publications.tnsosfiles.com/pub/2023%20TN%20Constitution.pdf. A person should "
+        "read Tenn. Code Ann. 2-18-115 on the official text (the leads give January 15)", None),
+    ("TX", "governor"): (_TX_INSTALLED, TX_CN_4),
+    ("TX", "lt"): ("Tex. Const. art. IV, s.16(a) has the lieutenant governor \"continue in office "
+                   "for the same time\" as the governor, whom art. IV, s.4 installs \"on the first "
+                   "Tuesday after the organization of the Legislature, or as soon thereafter as "
+                   "practicable\": no fixed day", TX_CN_4),
     ("VT", "governor"): (_VT_49, VT_CONST),
     ("VT", "lt"): (_VT_49, VT_CONST),
-    ("VT", "ag"): (_NOT_READ + " (Vt. Const. ch. II, s.49 covers the governor, lieutenant "
-                   "governor and treasurer only)", VT_CONST),
-    ("VT", "sos"): (_NOT_READ + " (Vt. Const. ch. II, s.49 covers the governor, lieutenant "
-                    "governor and treasurer only)", VT_CONST),
+    ("VT", "ag"): ("3 V.S.A. s.151 starts the attorney general's term \"when his or her election is "
+                   "declared by the committee appointed by the Senate and House of Representatives "
+                   "to canvass the votes\", on no fixed day", VT_3_151),
+    ("VT", "sos"): ("this read found no provision that starts the secretary of state's term: Vt. "
+                    "Const. ch. II, s.49 covers the governor, lieutenant governor and treasurer "
+                    "only, s.48 leaves the secretary's election to legislation, and 3 V.S.A. ch. 5 "
+                    "names no day; a person should search the Vermont Statutes for it", VT_CONST),
 }
 for _code, _gap in _GAPS_BY_STATE.items():
     for _key in ballot2026.OFFICES:
