@@ -1951,7 +1951,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `testTheJanuaryPage` builds the page of every state that holds one
     (found from the data), a dialog on each such seat, the map's House
     panels, the grid and the share pages at 2027-01-10 with no rewind, and
-    fails on any of the above (8 of its 12 checks failed on the first
+    fails on any of the above (4 of its 12 checks failed on the first
     fix's code); on campaign data it says it skipped.
 
 75. **Write a place's own words.** A territory or D.C. is never "the
