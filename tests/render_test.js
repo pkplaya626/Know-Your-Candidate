@@ -10778,7 +10778,8 @@ async function testStateGov() {
     // this site does not list" (ballot2026.DISTRICT).
     check("its ballot is never said to hold a governor or legislature",
       !!note && !/governor|legislature/.test(note.textContent) &&
-      /the same ballot also elect(?:s|ed) the attorney general \(see Local government, which lists the candidates for the attorney general\)/.test(note.textContent) &&
+      /the same ballot also elect(?:s|ed) the attorney general \(see Local government, which lists the candidates\)/.test(note.textContent) &&
+      !/attorney general[^.]*the candidates for the attorney general/.test(note.textContent) &&
       /the District's other contests, such as for mayor, the D\.C\. Council/.test(note.textContent) &&
       !/mayor, attorney general/.test(note.textContent) &&
       !!note.querySelector('a[href="https://www.dcboe.org/elections/2026-elections"][rel~="noopener"]') &&
