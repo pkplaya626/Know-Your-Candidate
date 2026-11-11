@@ -2207,8 +2207,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     can date ahead (the Northern Mariana Islands', fourteen days after its
     Commission certifies, 1 CMC 6509) stays null until the office
     publishes its date: the Commission's runoff calendar gave November 20
-    (read 2026-11-11). Its words name the offices the law holds a runoff
-    for, never which race went to one or who is in it, which no Commission
+    (read 2026-11-11). Its words name the offices 1 CMC 6509 holds a
+    majority runoff for (6524(b) adds a tie in any office), never which
+    race went to one or who is in it, which no Commission
     page says (rule 91). The cycle's dates are reread each cycle, and
     `check` refuses a date outside it.
 

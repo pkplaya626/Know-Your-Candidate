@@ -12767,7 +12767,8 @@ async function testSearchAnswers() {
         people.length > 0 && people.every((p) => p && p.state === "MP") &&
           people.map((p) => p.id).join(",") === placeCards, label());
       check("a whole word only: never a word it begins, never a near spelling",
-        KYC.stateNamed("CNMI") === "MP" && KYC.stateNamed("cnmis") === null &&
+        KYC.stateNamed("CNMI") === "MP" && KYC.stateNamed("C.N.M.I.") === "MP" &&
+          KYC.stateNamed("cnmis") === null &&
           KYC.stateNamed("cnm") === null && KYC.stateNamed("nmi") === null);
     });
   }

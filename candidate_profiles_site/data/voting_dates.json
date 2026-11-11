@@ -3658,7 +3658,7 @@
    },
    "runoff": {
     "date": "2026-11-20",
-    "note": "The Commonwealth Election Commission certified the general election results on November 6, 2026 (its home page: 'The General Election results were certified on November 6, 2026.'), and its 2026 Run-Off Election Important Dates (a PDF its 'Run-Off Election Important Dates' page embeds, server last-modified 2026-11-08) and its home page give the 2026 Run-Off Election as Friday, November 20, 2026: the fourteenth day after certification, as 1 CMC § 6509(a) and (b) count it. Under that section a runoff between the two highest is held where no candidate for governor and lieutenant governor, or for attorney general, receives more than one-half of the votes. No Commission page read on 2026-11-11 says in words which office or offices this runoff decides, or who is in it: not the runoff calendar, its page, the home page, or the agenda of the November 6 meeting, which listed 'Approval of Ballot Layout for the 2026 Run-Off Election'; so the record does not say, and this site reads no territorial result (rule 91). The same calendar gives: November 10, last day to mail out the runoff absentee ballots; November 12, last day to receive absentee ballot applications over the counter; November 13 to November 19, early voting for the runoff (specimen ballots posted in each polling place from November 13); December 4, last day to receive runoff absentee ballots (1 CMC § 6213(a): postmarked by the day of the runoff). The cache has no fields for a runoff's own early voting or absentee deadlines, so only the runoff's date is shown. Read 2026-11-11, every request sending the project's User-Agent; not yet re-opened by a second reader."
+    "note": "The Commonwealth Election Commission certified the general election results on November 6, 2026 (its home page: 'The General Election results were certified on November 6, 2026.'), and its 2026 Run-Off Election Important Dates (a PDF its 'Run-Off Election Important Dates' page embeds, server last-modified 2026-11-08) and its home page give the 2026 Run-Off Election as Friday, November 20, 2026: the fourteenth day after certification, as 1 CMC § 6509(a) and (b) count it. Under that section a runoff between the two highest is held where no candidate for governor and lieutenant governor, or for attorney general, receives more than one-half of the votes. No Commission page read on 2026-11-11 says in words which office or offices this runoff decides, or who is in it: not the runoff calendar, its page, the home page, or the agenda of the November 6 meeting, which listed 'Approval of Ballot Layout for the 2026 Run-Off Election'; so the record does not say, and this site reads no territorial result (rule 91). The same calendar gives: November 10, last day to mail out the runoff absentee ballots; November 12, last day to receive absentee ballot applications over the counter; November 13 to November 19, early voting for the runoff (specimen ballots posted in each polling place from November 13); December 4, last day to receive runoff absentee ballots (1 CMC § 6213(a): postmarked by the day of the runoff). The cache has no fields for a runoff's own early voting or absentee deadlines, so only the runoff's date is shown. Read 2026-11-11, every request sending the project's User-Agent; not yet re-opened by a second reader. 1 CMC § 6524(b) also holds a runoff where two or more persons tie for any office; the page's words name the offices § 6509 holds a majority runoff for."
    },
    "sources": [
     {
@@ -3851,6 +3851,13 @@
      "field": "runoff.note",
      "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
      "quote": "§ 6213. Absentee Voting: Counting Ballots. (a) ... provided that in the case of a runoff election an absentee ballot shall be postmarked not later than the day of the runoff election and shall be received by the Commission no later than fourteen days after the date of the runoff election.",
+     "pageUpdated": "2020-07-30 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
+     "quote": "§ 6524. Tabulation of Votes. ... (b) In any election where it is impossible to declare a winner because two or more persons receive an equal number of votes for any office, there shall be a run-off to determine the winning candidate or candidates.",
      "pageUpdated": "2020-07-30 (server last-modified)",
      "read": "2026-11-11"
     }

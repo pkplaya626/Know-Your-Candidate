@@ -221,8 +221,10 @@ RUNOFF_WORDS = {
            "The date set for runoffs for judges and school board members"),
     # The Commission's own calendar sets it (read 2026-11-11), fourteen
     # days after it certified the results on November 6, as 1 CMC 6509(a)
-    # and (b) count it. The law holds a runoff only for these offices; no
-    # Commission page says in words which of them this one decides, so the
+    # and (b) count it. 1 CMC 6509 holds a majority runoff for these
+    # offices; 6524(b) also holds one where two or more tie for any office
+    # (the second reader of PR #235). No Commission page says in words
+    # which this one decides, so the
     # words do not say either (rule 91: this site reads no territory's
     # result). Not "if one is needed": the Commission has set it.
     "MP": ("Runoff election set by the Commonwealth Election Commission: the law holds one "

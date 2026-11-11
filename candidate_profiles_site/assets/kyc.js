@@ -3073,6 +3073,8 @@
       if (states.MP) {
         stateByName["northern marianas"] = stateByName["mariana islands"] = "MP";
         stateByName.cnmi = "MP";
+        // "C.N.M.I." folds to single letters, as "D.C." does.
+        stateByName["c n m i"] = "MP";
       }
       Object.keys(STATE_ABBREVIATIONS).forEach(function (word) {
         var code = stateAbbreviation(word, true);
