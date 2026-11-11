@@ -22893,11 +22893,35 @@ async function testTheJanuaryWords() {
       !!reelected && !!newcomer && [reelected, newcomer].every((p) =>
         !!K.seatUpYear && K.seatUpYear(p) === String(p.electionYear) && shareLine(p) === `Seat up in ${p.electionYear}`),
       [reelected, newcomer].filter(Boolean).map((p) => `${p.name}: ${K.seatUpYear ? K.seatUpYear(p) : "(no seatUpYear)"} / ${shareLine(p)}`).join(" | "));
-    check("a seated winner with no money read says it was not read for the new term, never 'No data'",
+    check("a seated winner with no money read says so in its own words, never 'No data'",
       unread.every((p) => ["not_read_new_term", "no_filing"].indexOf((p.quality || {}).receipts) !== -1 &&
         !/No data/.test(K.renderField(p, "receipts"))),
       unread.map((p) => `${p.name}: ${(p.quality || {}).receipts} ${K.renderField(p, "receipts")}`).slice(0, 4).join(" | ") ||
         "every seated winner's money is read");
+    // The review of PR #229: three seated winners read "holds no totals for
+    // their 2026 campaign" while the finance cache held them under a curated
+    // row's name. Whatever key holds figures under one of their FEC ids, the
+    // profile shows them, and the absence is said only where none does.
+    const cached = new Set();
+    try {
+      Object.values(JSON.parse(fs.readFileSync(path.join(SITE, "data", "finance.json"), "utf8")))
+        .forEach((r) => { if (r && r.candidate_id && r.receipts != null) cached.add(r.candidate_id); });
+    } catch (e) { /* no cache: nothing is held, so nothing is missed */ }
+    const idsOf = (p) => [p.fecCandidateId].concat(p.otherFecIds || []).filter(Boolean);
+    const winners = [...everyone().values()].filter((p) => K.seated(p) && p.raceRole === "winner");
+    const missed = winners.filter((p) => idsOf(p).some((id) => cached.has(id)) &&
+      (typeof p.receipts !== "number" && !/^\$/.test(String(p.receipts || ""))));
+    check("a seated winner whose FEC id has cached figures shows them, under whatever key they are cached",
+      missed.length === 0,
+      missed.map((p) => `${p.name} (${idsOf(p).join(", ")}): ${K.renderField(p, "receipts")}`).slice(0, 4).join(" | "));
+    const said = winners.filter((p) => ["receipts", "disbursements", "funding_sources"]
+      .some((f) => (p.quality || {})[f] === "not_read_new_term"));
+    check("the new term's absence is said only of a winner none of whose FEC ids has cached figures, " +
+      "in their funding box too",
+      said.every((p) => !idsOf(p).some((id) => cached.has(id)) &&
+        ["receipts", "disbursements", "funding_sources"].every((f) =>
+          (p.quality || {})[f] === "not_read_new_term" || ((p.quality || {})[f] === undefined && f === "funding_sources"))),
+      said.map((p) => `${p.name}: ${JSON.stringify(p.quality)}`).slice(0, 4).join(" | ") || "nobody");
   });
 }
 

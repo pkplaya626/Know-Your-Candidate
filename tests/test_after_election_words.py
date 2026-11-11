@@ -220,7 +220,43 @@ class TestASeatedWinnersMoneyNotReadYet(unittest.TestCase):
         fec.apply_cache([person], {})
         self.assertEqual(person["quality"]["receipts"], NOT_READ_NEW_TERM)
         self.assertEqual(person["receipts"], STATUS_LABELS[NOT_READ_NEW_TERM])
-        self.assertEqual(person["receipts"], "Not read for their new term yet")
+        self.assertEqual(person["receipts"], "No FEC figures held yet")
+        # One absence in the dialog, not two (rule 19).
+        self.assertEqual(person["quality"]["funding_sources"], NOT_READ_NEW_TERM)
+
+    def test_a_real_funding_line_is_never_replaced_by_the_absence(self):
+        person = self.winner(funding_sources="Individual 80%")
+        fec.apply_cache([person], {})
+        self.assertEqual(person["funding_sources"], "Individual 80%")
+
+    def test_totals_cached_under_a_curated_rows_name_are_found_by_the_id(self):
+        # The review of PR #229: Andy Barr's Senate campaign is cached as
+        # "andy barr|KY|S"; seated, his profile is keyed by the roster's
+        # "Garland Barr", and a fold that asked only "fec:<id>" keys told the
+        # page this site held no totals for a campaign it held at $12.5m.
+        person = self.winner(name="Andy Barr", rosterName="Garland Barr", chamber="Senate",
+                             state="KY", district=None, fecCandidateId="S6KY00286",
+                             rosterFecId="H0KY06104")
+        cache = {
+            "andy barr|KY|S": {"found": True, "name": "Andy Barr", "candidate_id": "S6KY00286",
+                               "receipts": 12541350.16, "disbursements": 9000000.0,
+                               "cash_on_hand": 3000000.0, "election_year": 2026,
+                               "coverage_start": "2025-01-01", "coverage_end": "2026-09-30"},
+            "garland barr|KY|H": {"found": True, "name": "Garland Barr",
+                                  "candidate_id": "H0KY06104", "receipts": 10.0},
+        }
+        fec.apply_cache([person], cache)
+        self.assertNotIn("receipts", person.get("quality") or {})
+        self.assertEqual(person["receipts"], "$12,541,350.16")
+        self.assertEqual(person["fecCandidateId"], "S6KY00286")
+
+    def test_one_id_under_two_keys_is_read_through_the_later_date(self):
+        cache = {"a|KY|S": {"candidate_id": "S1", "receipts": 1.0, "coverage_end": "2026-06-30"},
+                 "fec:S1": {"candidate_id": "S1", "receipts": 2.0, "coverage_end": "2026-09-30"},
+                 "b|KY|S": {"candidate_id": "S2", "receipts": None}}
+        index = fec.totals_by_candidate_id(cache)
+        self.assertEqual(index["S1"]["receipts"], 2.0)
+        self.assertNotIn("S2", index)
 
     def test_a_folded_filing_still_gives_its_totals(self):
         person = self.winner(fecCandidateId="H6OH01001")

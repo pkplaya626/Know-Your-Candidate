@@ -1931,7 +1931,7 @@
     not_disclosed: "Not disclosed",
     unknown: "No data",
     no_filing: "No filing this cycle",
-    not_read_new_term: "Not read for their new term yet",
+    not_read_new_term: "No FEC figures held yet",
     not_listed: "Not listed on their official site",
     see_site: "On their official site's issues page",
     see_home: "On their official website",
@@ -1957,11 +1957,10 @@
     no_filing: "Checked with the FEC: this candidate has no filing for the "
       + "{cycle} cycle. Members running for a different seat file under a "
       + "separate committee.",
-    // kyc/normalize.py's NOT_READ_NEW_TERM: a seated winner whose money the
-    // finance step has not read under the seat they now hold.
-    not_read_new_term: "Seated for a new term since this site last read the FEC's figures: it " +
-      "has not yet read their filing for the seat they now hold, and holds no totals for their " +
-      "2026 campaign either.",
+    // kyc/normalize.py's NOT_READ_NEW_TERM: a seated winner for whom no
+    // record this site holds carries figures under any of their FEC ids.
+    not_read_new_term: "Seated for a new term: this site holds no FEC figures yet under any " +
+      "FEC id it has for them, for the seat they now hold or the 2026 campaign that won it.",
   };
 
   function absentTitle(status) {

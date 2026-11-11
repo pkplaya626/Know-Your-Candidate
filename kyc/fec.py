@@ -691,37 +691,73 @@ def funding_base(record, parts):
     return gross if gross - receipts >= 0.01 else None
 
 
+def totals_by_candidate_id(cache):
+    """``{candidate id: record}`` over every record in the finance cache that
+    holds figures, whatever key it is cached under: a filer's (``fec:<id>``)
+    and a member's or curated row's (name, state and chamber) alike. Where
+    two records carry one id, the one read through the later date stands,
+    then the first key in order, so a build is the same every time."""
+    out = {}
+    for key in sorted(cache):
+        record = cache[key]
+        if not isinstance(record, dict):
+            continue
+        fid = record.get("candidate_id")
+        if not fid or record.get("receipts") is None:
+            continue
+        held = out.get(fid)
+        if held is None or (record.get("coverage_end") or "") > (held.get("coverage_end") or ""):
+            out[fid] = record
+    return out
+
+
 def apply_cache(profiles, cache):
     """Overlay FEC figures onto profiles, replacing roster estimates."""
-    from .normalize import NO_FILING, NOT_READ_NEW_TERM, STATUS_LABELS
+    from .normalize import NO_FILING, NOT_READ_NEW_TERM, STATUS_LABELS, UNKNOWN
 
     from .record import seated_winner
 
     applied = checked = 0
+    by_id = totals_by_candidate_id(cache)
     for profile in profiles:
         record = cache.get(profile_key(profile)) or {}
+        own_id = False
         if record.get("receipts") is None and seated_winner(profile):
             # A winner Congress seats is a member, keyed by name, state and
             # chamber, which the finance step has not read yet: the 2026
-            # campaign's own totals, read under the filing folded into them
-            # (by its FEC id, rule 17), are theirs still. "Raised No data"
-            # stood in January over filings that raised millions a week
-            # before (the review of PR #227).
+            # campaign's own totals, read under any of their FEC ids (rule
+            # 17), are theirs still. "Raised No data" stood in January over
+            # filings that raised millions a week before (the review of PR
+            # #227). The totals are found by the id whatever key holds them:
+            # a curated Senate row's are keyed by the name it ran under
+            # ("andy barr|KY|S"), which the seated member's roster spelling
+            # ("Garland Barr") never meets, and looked up under "fec:" alone
+            # the page said this site held no totals for three campaigns
+            # whose totals it held (the review of PR #229).
             for fid in [profile.get("fecCandidateId"), *(profile.get("otherFecIds") or [])]:
-                folded = cache.get(f"fec:{fid}") if fid else None
-                if folded and folded.get("receipts") is not None:
-                    record = folded
+                if fid and fid in by_id:
+                    record = by_id[fid]
+                    own_id = True
                     break
             if record.get("receipts") is None and not record.get("candidate_id"):
-                # Neither their member record nor a folded filing's totals
-                # are read: said as that, never "No data" (rule 19).
+                # No record this site holds carries any of their FEC ids
+                # with figures: said as that, never "No data" (rule 19).
+                # Their funding box says the same, not a second absence
+                # beside it ("No data"), unless it holds something real.
                 quality = profile.setdefault("quality", {})
-                for field in ("receipts", "disbursements"):
+                for field in ("receipts", "disbursements", "funding_sources"):
+                    if field == "funding_sources" and quality.get(field) not in (UNKNOWN, None):
+                        continue
+                    if field == "funding_sources" and quality.get(field) is None \
+                            and profile.get(field) not in (None, "", STATUS_LABELS[UNKNOWN]):
+                        continue
                     quality[field] = NOT_READ_NEW_TERM
                     profile[field] = STATUS_LABELS[NOT_READ_NEW_TERM]
                 continue
         roster_id = profile.get("rosterFecId")
-        if roster_id and record.get("candidate_id") not in (None, roster_id):
+        # Totals found by the profile's own FEC id are its own: the roster's
+        # id is the seat they held before, never a reason to refuse them.
+        if roster_id and not own_id and record.get("candidate_id") not in (None, roster_id):
             # Found by an older name search, for a filing the roster says is
             # not this person's. Show nothing until resolve_all looks again.
             continue
