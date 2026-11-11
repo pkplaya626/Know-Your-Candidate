@@ -23,6 +23,7 @@ and purple already mean a party on this site, and grey means "none".
 
 from . import geo
 from .government_text import SOURCES as TEXT_SOURCES
+from .government_text import Tense
 from .normalize import TERRITORIES, US_STATES
 
 STATES = sorted(code for code in set(US_STATES.values()) if code not in TERRITORIES)
@@ -89,13 +90,55 @@ SENATE_PRESIDES = {
                 "NJ", "OH", "RI", "SC", "UT", "WI"),
     "none": ("AZ", "ME", "NH", "OR", "WY"),
 }
+def _first_monday_of_january(year):
+    import datetime
+    day = datetime.date(year, 1, 1)
+    return day + datetime.timedelta(days=(7 - day.weekday()) % 7)
+
+
+# Arizona's executive officers "hold office for four years beginning on the
+# first Monday of January ... next after the regular general election" (Ariz.
+# Const. art. 5, sec. 1, read 2026-11-11), and its first lieutenant governor
+# is elected in 2026 for "the term of office that starts in 2027" (S.C.R.
+# 1024): from that day the state is no longer among those with none.
+AZ_LTGOV_FROM = _first_monday_of_january(2027).isoformat()
+
+
+def _day_words(iso):
+    import datetime
+    day = datetime.date.fromisoformat(iso)
+    return f"{day:%B} {day.day}, {day.year}"
+
+
 PRESIDES_NOTES = {
     "CA": "By the Senate's practice, the lieutenant governor presides only when invited.",
     "OK": "The lieutenant governor may preside when they choose to.",
     "NE": "Nebraska's Legislature has one chamber, and the lieutenant governor presides over it.",
-    "AZ": ("Under a 2022 amendment, Arizona's first lieutenant governor, elected on a ticket with "
-           "the governor, takes office in January 2027, with no role in the Senate."),
+    "AZ": Tense(
+        ("campaign", "Under a 2022 amendment, Arizona's first lieutenant governor, elected on a "
+                     "ticket with the governor, takes office in January 2027, with no role in "
+                     "the Senate."),
+        ("voted", "Under a 2022 amendment, Arizona voted for its first lieutenant governor on "
+                  "November 3, 2026, on the governor's ticket; the office's first term begins "
+                  f"on {_day_words(AZ_LTGOV_FROM)}, with no role in the Senate."),
+        (AZ_LTGOV_FROM, "Under a 2022 amendment, Arizona's first lieutenant governor, elected "
+                        "on the governor's ticket on November 3, 2026, took office on "
+                        f"{_day_words(AZ_LTGOV_FROM)}, with no role in the Senate.")),
 }
+
+
+def presides_table(at=None):
+    """:data:`SENATE_PRESIDES` on the build's day *at*: Arizona, which has
+    had no lieutenant governor, is among the states whose senate elects its
+    own president from the day its first takes office (:data:`AZ_LTGOV_FROM`).
+    Typed in, the count read "five states have no lieutenant governor" for
+    ever."""
+    from .government import come
+    table = {key: tuple(codes) for key, codes in SENATE_PRESIDES.items()}
+    if at is not None and come(AZ_LTGOV_FROM, at):
+        table["none"] = tuple(c for c in table["none"] if c != "AZ")
+        table["elected"] = tuple(sorted(table["elected"] + ("AZ",)))
+    return table
 
 # Each state's court of last resort: its name, justices and term (table 5.1),
 # and how a justice is first chosen for a full term (table 5.6). The method
@@ -316,14 +359,16 @@ def _legislature():
     }
 
 
-def figures():
+def figures(at=None):
     """Counts the guide's text states, from the tables its maps draw (rule
-    73): ``{{ltgov-presides}}`` in a sentence is this table's count."""
+    73): ``{{ltgov-presides}}`` in a sentence is this table's count, on the
+    build's day *at* (:func:`presides_table`)."""
     from . import ballot2026
     ballot = ballot2026.stats()
+    presides = presides_table(at)
     return {
-        "ltgov-presides": len(SENATE_PRESIDES["ltgov"]),
-        "no-ltgov": _word(len(SENATE_PRESIDES["none"])),
+        "ltgov-presides": len(presides["ltgov"]),
+        "no-ltgov": _word(len(presides["none"])),
         "governors-2026": ballot["governor"],
         "chambers": ballot["chambers"],
         "chambers-2026": ballot["chambersUp"],
@@ -336,8 +381,11 @@ def _word(n):
     return words[n] if n < len(words) else str(n)
 
 
-def _presides():
-    of = {code: key for key, codes in SENATE_PRESIDES.items() for code in codes}
+def _presides(at=None):
+    from .government import CAMPAIGN, words
+    table = presides_table(at)
+    of = {code: key for key, codes in table.items() for code in codes}
+    notes = {code: words(note, at or CAMPAIGN) for code, note in PRESIDES_NOTES.items()}
     phrase = {
         "ltgov": "The lieutenant governor is the president of the Senate.",
         "speaker-ltgov": ("The Senate elects its own leader, who by law also holds the title of "
@@ -346,9 +394,14 @@ def _presides():
                     "who does not preside."),
         "none": "The state has no lieutenant governor; the Senate elects its own president.",
     }
-    facts = {code: (PRESIDES_NOTES[code] if code == "NE" else
-                    phrase[of[code]] + (" " + PRESIDES_NOTES[code] if code in PRESIDES_NOTES else ""))
+    facts = {code: (notes[code] if code == "NE" else
+                    phrase[of[code]] + (" " + notes[code] if code in notes else ""))
              for code in STATES}
+    # The 2022 table, and Arizona from the day its first lieutenant governor
+    # takes office (presides_table).
+    compiled = ("As compiled by the Council of State Governments in 2022." if table == SENATE_PRESIDES
+                else "As compiled by the Council of State Governments in 2022, with Arizona's "
+                     f"first lieutenant governor, who took office on {_day_words(AZ_LTGOV_FROM)}.")
     return {
         "id": "presides",
         "label": "Senate president",
@@ -363,14 +416,14 @@ def _presides():
         "values": {code: of[code] for code in STATES},
         "facts": facts,
         "outside": "Not a state: this map covers the 50 state senates.",
-        "about": (f"In {len(SENATE_PRESIDES['ltgov'])} states the lieutenant governor is the "
+        "about": (f"In {len(table['ltgov'])} states the lieutenant governor is the "
                   "president of the senate, presiding and breaking ties; elsewhere the senate "
                   "elects its own president. Tennessee's and West Virginia's senates elect a "
                   "leader whom the law also calls lieutenant governor, and "
-                  f"{_word(len(SENATE_PRESIDES['none'])).lower()} states have no lieutenant "
-                  "governor at all. As compiled by the Council of State Governments in 2022."),
-        "sources": ["bots-4-14", "ncsl-leaders", "az-prop131"],
-        "scoped": {"az-prop131": ["AZ"]},
+                  f"{_word(len(table['none'])).lower()} states have no lieutenant "
+                  f"governor at all. {compiled}"),
+        "sources": ["bots-4-14", "ncsl-leaders", "az-prop131", "az-const-5-1"],
+        "scoped": {"az-prop131": ["AZ"], "az-const-5-1": ["AZ"]},
     }
 
 
@@ -743,12 +796,15 @@ def _date_words(iso):
     return f"{day:%B} {day.day}, {day.year}"
 
 
-def _ballot():
+def _ballot(at=None):
     """What each state elects on November 3, 2026 (kyc/ballot2026.py, each
     value from the state's own record), coloured by whether the governor
     and the legislature are on the ballot. The state's own sources are cited
-    on its fact alone."""
+    on its fact alone. From the day after the election, in the past tense
+    (*at*, the build's day)."""
     from . import ballot2026
+    from .government import CAMPAIGN, come
+    voted = come("voted", at or CAMPAIGN)
     titles = {"governor": "governor", "lt": "lieutenant governor", "ag": "attorney general",
               "sos": "secretary of state"}
     values, facts, scoped, sources = {}, {}, {}, []
@@ -802,12 +858,19 @@ def _ballot():
         "values": values,
         "facts": facts,
         "outside": "Not a state: this map covers the 50 states' own offices.",
-        "about": (f"{ballot2026.stats()['governor']} states elect a governor on November 3, "
-                  f"2026, and {ballot2026.stats()['chambersUp']} of the "
-                  f"{ballot2026.stats()['chambers']} state legislative chambers hold regular "
-                  "elections. Pick a state for which of four statewide offices (governor, "
-                  "lieutenant governor, attorney general and secretary of state) and which "
-                  "legislative seats it elects, each from the state's own constitution, "
+        "about": ((f"{ballot2026.stats()['governor']} states held an election for governor on "
+                   f"November 3, 2026, and {ballot2026.stats()['chambersUp']} of the "
+                   f"{ballot2026.stats()['chambers']} state legislative chambers held regular "
+                   "elections. Pick a state for which of four statewide offices (governor, "
+                   "lieutenant governor, attorney general and secretary of state) and which "
+                   "legislative seats it elected, " if voted else
+                   f"{ballot2026.stats()['governor']} states elect a governor on November 3, "
+                   f"2026, and {ballot2026.stats()['chambersUp']} of the "
+                   f"{ballot2026.stats()['chambers']} state legislative chambers hold regular "
+                   "elections. Pick a state for which of four statewide offices (governor, "
+                   "lieutenant governor, attorney general and secretary of state) and which "
+                   "legislative seats it elects, ")
+                  + "each from the state's own constitution, "
                   "statutes or election pages. Other statewide offices some states elect, such "
                   "as a comptroller, a treasurer or judges, are not covered, and special "
                   "elections to fill a vacancy are not counted."),
@@ -832,11 +895,12 @@ def _host_title(code, url, items=()):
     return f"{state_name(code)}'s own record{what} ({host})"
 
 
-def modes(root="."):
-    """``{page slug: [mode, ...]}`` for every guide page that has a map."""
+def modes(root=".", at=None):
+    """``{page slug: [mode, ...]}`` for every guide page that has a map, on
+    the build's day *at* (``government.clock``; the campaign's when None)."""
     from . import census
     found = {
-        "states": [_legislature(), _presides(), _veto(), _judges(), _ballot()],
+        "states": [_legislature(), _presides(at), _veto(), _judges(), _ballot(at)],
         "courts": [_circuits()],
         "tribal": [_pl280()],
     }
@@ -852,11 +916,12 @@ def modes(root="."):
 
 # ------------------------------------------------------------------ payload
 
-def payload():
+def payload(at=None):
     """What ``data/government.js`` holds: each mode as the page draws it, and
-    the sources they cite."""
+    the sources they cite, on the build's day *at* (the campaign's when
+    None): its words change on the days the guide's do, and on no other."""
     out = {"modes": {}, "pages": {}, "sources": {}}
-    for page, items in modes().items():
+    for page, items in modes(at=at).items():
         out["pages"][page] = [m["id"] for m in items]
         for m in items:
             entry = {

@@ -600,9 +600,10 @@ def _build(args):
     if any(level == "error" for level, _, _ in copy_issues):
         return 2
 
-    # The guide's maps: rewritten only when what they say changed.
-    from . import government_maps
-    guide_maps = government_maps.payload()
+    # The guide's maps: rewritten only when what they say changed, in the
+    # tense of the build's day, as the guide's pages are.
+    from . import government, government_maps
+    guide_maps = government_maps.payload(government.clock(summary, args.root))
     guide_file = os.path.join(args.root, emit.GOVERNMENT_FILE)
     if emit.read_signature(path=guide_file) != emit.government_signature(guide_maps):
         guide_path, guide_size = emit.write_government(guide_maps, args.root)
@@ -1869,8 +1870,9 @@ def _verify(args):
     else:
         print(f"  ok  {emit.COURT_COUNTIES_FILE} matches 28 U.S.C. 81-131 as read")
 
-    from . import government_maps
-    guide_expected = emit.government_signature(government_maps.payload())
+    from . import government, government_maps
+    guide_expected = emit.government_signature(
+        government_maps.payload(government.clock(summary, args.root)))
     guide_committed = emit.read_signature(path=os.path.join(args.root, emit.GOVERNMENT_FILE))
     if guide_committed is None:
         problems.append(f"{emit.GOVERNMENT_FILE} is missing or carries no signature")

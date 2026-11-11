@@ -34,6 +34,28 @@ data, on the page (``assets/kyc-guide.js``), so it cannot go stale.
 
 REVIEWED = "2026-10-18"
 
+
+class Tense(tuple):
+    """Words that change with the build's day, never typed for one day
+    only: ``Tense(("campaign", words), (when, words), ...)``, and the page
+    says the last whose *when* has come (``government.words``). A *when* is
+
+    - ``"campaign"``: always (the first form, said before Election Day);
+    - ``"voted"``: the results were read after Election Day, the pages'
+      own test (``share.post_election``);
+    - ``"seated"``: the Congress the cycle elects sits (``cycle.phase``
+      "record");
+    - an ISO day: the build's day (``government.clock``) is on or after it.
+
+    The guide said "36 states elect a governor" a week after they had, and
+    would have said Arizona's first lieutenant governor "takes office in
+    January 2027" for ever."""
+
+    def __new__(cls, *forms):
+        if not forms or forms[0][0] != "campaign":
+            raise ValueError("a Tense opens with its campaign words")
+        return super().__new__(cls, forms)
+
 # key -> (title, URL). Primary sources wherever one exists.
 SOURCES = {
     # The Constitution
@@ -433,6 +455,21 @@ SOURCES = {
                      "&secStart=15.20.081&secEnd=15.20.081"),
     "ak-ballot-measures": ("Alaska Division of Elections, Petitions and ballot measures",
                            "https://www.elections.alaska.gov/petitions-and-ballot-measures/"),
+    # Missouri's referendum on its 2025 map (read 2026-11-11): the measure
+    # "Proposition A ... Proposed by Referendum Petition", among those
+    # "certified for the November 3, 2026 general election"; its results
+    # page lists "General Election - November 3, 2026 View Unofficial
+    # Results" where earlier elections give their certified "Grand Totals";
+    # and Mo. Const. art. III, sec. 52(b): "Any measure referred to the
+    # people shall take effect when approved by a majority of the votes
+    # cast thereon, and not otherwise."
+    "mo-const-3-52b": ("Missouri Constitution, Article III, Section 52(b) (measures referred "
+                       "to the people)",
+                       "https://revisor.mo.gov/main/OneSection.aspx?section=III%20%20%2052%28b%29"),
+    "mo-sos-measures-2026": ("Missouri Secretary of State, 2026 Ballot Measures",
+                             "https://www.sos.mo.gov/elections/petitions/2026BallotMeasures"),
+    "mo-sos-results": ("Missouri Secretary of State, Missouri Election Results",
+                       "https://www.sos.mo.gov/elections/results"),
     "me-rcv-faq": ("Maine Secretary of State, Ranked-choice voting: frequently asked questions",
                    "https://www.maine.gov/sos/elections-voting/"
                    "ranked-choice-voting-frequently-asked-questions"),
@@ -442,6 +479,14 @@ SOURCES = {
                     "https://www.courts.maine.gov/courts/sjc/lawcourt/2026/26me032.pdf"),
     "az-16-661": ("Arizona Revised Statutes 16-661 (automatic recounts)",
                   "https://www.azleg.gov/ars/16/00661.htm"),
+    # Read 2026-11-11: "The executive department shall consist of the
+    # governor, lieutenant governor, ... each of whom shall hold office for
+    # four years beginning on the first Monday of January ... next after the
+    # regular general election", the lieutenant governor elected on the
+    # governor's ticket (subsection C, from S.C.R. 1024, which "applies
+    # beginning with elections for the term of office that starts in 2027").
+    "az-const-5-1": ("Arizona Constitution, Article 5, Section 1 (the executive department; "
+                     "terms)", "https://www.azleg.gov/const/5/1.htm"),
     "fec-register": ("Federal Election Commission: Registering as a candidate",
                      "https://www.fec.gov/help-candidates-and-committees/filing-reports/"
                      "registering-candidate/"),
@@ -545,9 +590,12 @@ INDEX = {
                 ("p", "Know Your Candidate shows who holds these offices now, each from the "
                       "record that keeps it:"),
                 ("ul", [
-                    "Congress: every member, and everyone who has filed to run for their "
-                    "seats, on the [profile grid](site:index.html) and the [partisan "
-                    "map](site:map.html).",
+                    Tense(("campaign", "Congress: every member, and everyone who has filed to "
+                                       "run for their seats, on the [profile grid](site:index.html) "
+                                       "and the [partisan map](site:map.html)."),
+                          ("voted", "Congress: every member, and everyone who filed to run for "
+                                    "their seats in 2026, on the [profile grid](site:index.html) "
+                                    "and the [partisan map](site:map.html).")),
                     "[The federal government](site:federal/index.html): the President, the Vice "
                     "President, the Cabinet and every sitting federal judge, court by court.",
                     "[Each state's page](site:states/index.html): its members of Congress, its "
@@ -694,8 +742,16 @@ CONGRESS = {
     # drawn as two chambers' tracks (VISUALS-31; Article I, Section 7, the
     # House's legislative process page, the Senate's glossary and cloture
     # page), and the contact paragraph, revised for the cards' contact links.
+    # The districts section was read again on 2026-11-11 for Missouri's
+    # referendum, which was on the November 3 ballot.
     # Not "Congress": the site's navigation has that entry, for its members.
     "people": True,
+    "revisit": [
+        ("2026-12-09", "Missouri's board of state canvassers announces November's results by "
+                       "the second Tuesday in December (RSMo 115.511): quote Proposition A's "
+                       "certified result from the Secretary of State, or say it is still not "
+                       "certified"),
+    ],
     "title": "How Congress works",
     "card": ("The Senate and the House: what each does, who runs them, how a bill becomes "
              "law, how districts are drawn, and who chairs each committee now."),
@@ -974,16 +1030,36 @@ CONGRESS = {
                       "sooner, and these did for the 2026 election. Each links its districts "
                       "before and after:"),
                 ("redrawn",),
-                ("p", "Missouri's 2025 map is not among them. Enough voters signed a "
-                      "referendum petition against it that, as Missouri's Supreme Court held on "
-                      "September 3, 2026, it does not take effect unless voters approve it in "
-                      "the 2026 election. On September 25 the U.S. Supreme Court told the "
-                      "federal courts not to bar the 2022 map from Missouri's 2026 "
-                      "congressional election, or to require the 2025 one (People Not "
-                      "Politicians v. Onder)."),
+                ("p", Tense(
+                    ("campaign",
+                     "Missouri's 2025 map is not among them. Enough voters signed a "
+                     "referendum petition against it that, as Missouri's Supreme Court held on "
+                     "September 3, 2026, it does not take effect unless voters approve it in "
+                     "the 2026 election. On September 25 the U.S. Supreme Court told the "
+                     "federal courts not to bar the 2022 map from Missouri's 2026 "
+                     "congressional election, or to require the 2025 one (People Not "
+                     "Politicians v. Onder)."),
+                    # The referendum was on the ballot, and this site reads no
+                    # ballot question's result (rule 95): the state's word on
+                    # it, as of the day read, until the canvass is certified
+                    # (the page's revisit).
+                    ("voted",
+                     "Missouri's 2025 map is not among them. Enough voters signed a "
+                     "referendum petition against it that, as Missouri's Supreme Court held on "
+                     "September 3, 2026, it could take effect only if voters approved it, so "
+                     "Missouri's 2026 congressional election was held on its 2022 map "
+                     "([Missouri's districts](site:districts/mo.html)). On September 25 the "
+                     "U.S. Supreme Court had told the federal courts not to bar the 2022 map "
+                     "from that election, or to require the 2025 one (People Not Politicians v. "
+                     "Onder). The referendum, Proposition A, was on the November 3, 2026 "
+                     "ballot; on November 11, 2026 the Secretary of State still listed that "
+                     "election's results as unofficial, and this site does not read a ballot "
+                     "question's result."))),
             ],
             "sources": ["usc-2-2a", "usc-2-2c", "wesberry", "reynolds", "usc-52-10301",
-                        "callais", "rucho", "onder"],
+                        "callais", "rucho", "onder", "mo-const-3-52b", "mo-sos-measures-2026",
+                        "mo-sos-results"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "committees",
@@ -1433,16 +1509,18 @@ COURTS = {
 STATES = {
     "slug": "states",
     "title": "How state governments work",
-    "card": ("Legislatures, governors and the other officials states elect, executive "
-             "councils, state courts, and what is on the 2026 ballot."),
+    "card": Tense(("campaign", "Legislatures, governors and the other officials states elect, "
+                               "executive councils, state courts, and what is on the 2026 "
+                               "ballot."),
+                  ("voted", "Legislatures, governors and the other officials states elect, "
+                            "executive councils, state courts, and what was on the 2026 "
+                            "ballot.")),
     # The count of states with no lieutenant governor is a figure from the
-    # map's table, true until Arizona's first takes office.
-    "revisit": [
-        ("2027-01-05", "Arizona's first lieutenant governor took office in January 2027: move "
-                       "Arizona out of SENATE_PRESIDES['none'] and say how its Senate is led"),
-        ("2026-11-04", "the 2026 ballot map describes an election that has happened: put it "
-                       "in the past tense, or replace it with the next cycle's"),
-    ],
+    # map's table, which moves Arizona on the day its first lieutenant
+    # governor takes office (government_maps.presides_table), and the 2026
+    # ballot is in the past tense from the day after the election: both by
+    # the build's day, so neither waits for a revisit. The ballot section
+    # was read again on 2026-11-11.
     "description": ("How state governments are organized: legislatures and who presides over "
                     "them, governors and the other officials states elect, executive councils, "
                     "and state courts."),
@@ -1565,13 +1643,24 @@ STATES = {
                       "the three members of the Railroad Commission, which, despite its name, "
                       "regulates the state's oil and gas industry and pipelines."),
                 ("h3", "On the 2026 ballot", "ballot-2026"),
-                ("p", "On November 3, 2026, {{governors-2026}} states elect a governor, and "
-                      "{{chambers-2026}} of the {{chambers}} state legislative chambers hold "
-                      "regular elections for some or all of their seats. [The 2026 ballot "
-                      "map](site:government/states.html#/?mode=ballot) shows which offices and "
-                      "how many seats each state elects, with the state's own record for each."),
+                ("p", Tense(
+                    ("campaign",
+                     "On November 3, 2026, {{governors-2026}} states elect a governor, and "
+                     "{{chambers-2026}} of the {{chambers}} state legislative chambers hold "
+                     "regular elections for some or all of their seats. [The 2026 ballot "
+                     "map](site:government/states.html#/?mode=ballot) shows which offices and "
+                     "how many seats each state elects, with the state's own record for each."),
+                    ("voted",
+                     "On November 3, 2026, {{governors-2026}} states held an election for "
+                     "governor, and {{chambers-2026}} of the {{chambers}} state legislative "
+                     "chambers held regular elections for some or all of their seats. [The "
+                     "2026 ballot map](site:government/states.html#/?mode=ballot) shows which "
+                     "offices and how many seats each state elected, with the state's own "
+                     "record for each."))),
             ],
-            "sources": ["ncsl-veto", "ncsl-leaders", "ncsl-elections", "tx-glo", "tx-rrc"],
+            "sources": ["ncsl-veto", "ncsl-leaders", "ncsl-elections", "tx-glo", "tx-rrc",
+                        "az-const-5-1"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "councils",
@@ -2105,6 +2194,47 @@ TRIBAL = {
 }
 
 
+# The parts of the elections page's paragraphs that every tense shares,
+# so a fact is written once for all of them (rule 12).
+_TOP_TWO = ("Some states hold no party primary for Congress. California and Washington "
+            "list every candidate on one primary ballot, and the two with the most votes "
+            "go on to November whatever party they prefer; a party preference on "
+            "Washington's ballot is shown for voters' information only. ")
+_LA_CALENDAR = ("Louisiana's U.S. House seats followed a different calendar in 2026. Under Act 7 "
+                "of the 2026 Regular Session they were moved to the November 3 ballot as an "
+                "open primary: every candidate ran on one ballot, a candidate with a "
+                "majority of the votes was elected, and otherwise the top two, of any party, "
+                "{meet} in a general election on December 12. [Louisiana's page](state:LA) "
+                "lists the candidates the Secretary of State qualified.")
+_FEC_SCOPE = ("The FEC regulates campaigns only for federal office: president, vice "
+              "president, senator and representative, and Congress's delegates and "
+              "resident commissioner (52 U.S.C. 30101(3)). Candidates for state and "
+              "local offices file, and report their money, under state law. [The 2026 "
+              "ballot map](site:government/states.html#/?mode=ballot) shows which state "
+              "offices each state {elects}, with the state's own record for each.")
+_MAINE_RCV = (" Maine also uses it in its primaries for Congress, governor and "
+              "the legislature, but not in its general elections for governor or the "
+              "legislature: "
+              "its Supreme Judicial Court has advised, in 2017 and again in April 2026, "
+              "that the state constitution requires those to be decided by plurality. "
+              "Voters rank the candidates in "
+              "order of preference instead of choosing one.")
+_COUNT_GOES_ON = ("Voting ends on Election Day; counting does not, and results reported on "
+                  "election night are unofficial. Some states count mailed ballots sent by "
+                  "Election Day that arrive afterward: {california}. On June 29, 2026 "
+                  "the Supreme Court held, in Watson v. Republican National Committee, that the "
+                  "federal Election Day statutes do not stop a state from counting ballots "
+                  "postmarked by Election Day and received afterward.")
+_CANVASS = ("After the count, local officials review and confirm the results - the "
+            "canvass - and then the state certifies them, on deadlines each state sets. "
+            "Two examples for 2026: {ca_counties}, and {ca_state}. In Texas, {tx}.")
+_NEW_TERMS = ("Under the Twentieth Amendment, the terms of senators and representatives end, "
+              "and the new terms begin, at noon on January 3. The regular terms of the "
+              "members elected on November 3, 2026 {begin} at noon on January 3, 2027. A "
+              "member elected to the rest of a vacant term, as in the special Senate "
+              "elections on the same ballot, joins a term already running rather than one "
+              "that begins on January 3.")
+
 ELECTIONS = {
     "slug": "elections",
     "title": "How elections work",
@@ -2119,15 +2249,18 @@ ELECTIONS = {
     "reviewed": "2026-10-18",
     # Text about dated events goes stale on those dates: validate warns from
     # each one until the page is checked again and "reviewed" moved past it.
+    # The words about the November 3 election, Georgia's December 1 runoff,
+    # Louisiana's December 12 House elections, the certification deadlines
+    # and January 3 change tense by the build's day (government_text.Tense),
+    # read again on 2026-11-11; what a reader can only learn from a state's
+    # certified count waits here for a person.
     "revisit": [
-        ("2026-11-04", "Alaska decided its ballot measure on its open primary and ranked-choice "
-                       "elections on November 3: say how, and whether the description of its "
-                       "elections still stands"),
-        ("2026-12-13", "Guam's and the Virgin Islands' November 17 runoff, Georgia's December 1 "
-                       "runoff, Louisiana's December 12 House elections and "
-                       "the certification deadlines have passed: put them in the past tense"),
-        ("2027-01-04", "the members elected on November 3, 2026 took office on January 3: put "
-                       "it in the past tense, and name the next election's dates"),
+        ("2026-12-01", "Alaska's measure to repeal its open primary and ranked-choice general "
+                       "elections: quote the Division of Elections' recorded outcome, and if it "
+                       "passed, say from when the description of Alaska's elections no longer "
+                       "stands (primaries and ranked-choice sections)"),
+        ("2026-12-13", "Guam's and the Virgin Islands' November 17 runoff has passed: its "
+                       "paragraph's second read is the owner's"),
     ],
     "description": ("When federal elections are held and who runs them; primaries, runoffs and "
                     "ranked-choice counts; how votes are counted, certified and recounted; and "
@@ -2159,10 +2292,19 @@ ELECTIONS = {
             "id": "when",
             "heading": "When federal elections are held",
             "blocks": [
-                ("p", "Federal law sets the day of the general election for Congress: the "
-                      "Tuesday after the first Monday in November of every even-numbered year "
-                      "(2 U.S.C. 7). In 2026 that is November 3. Every House seat is on that "
-                      "ballot, because House terms are two years."),
+                ("p", Tense(
+                    ("campaign",
+                     "Federal law sets the day of the general election for Congress: the "
+                     "Tuesday after the first Monday in November of every even-numbered year "
+                     "(2 U.S.C. 7). In 2026 that is November 3. Every House seat is on that "
+                     "ballot, because House terms are two years."),
+                    # The next day is the statute's, counted by cycle.py.
+                    ("voted",
+                     "Federal law sets the day of the general election for Congress: the "
+                     "Tuesday after the first Monday in November of every even-numbered year "
+                     "(2 U.S.C. 7). In 2026 that was November 3, and every House seat was on "
+                     "that ballot, because House terms are two years. The next is on "
+                     "{{next-election-day}}."))),
                 ("p", "A state holds a regular Senate election when one of its senators' six-year "
                       "terms is ending, on the same November ballot, and the winner's term "
                       "begins on January 3 of the next year (2 U.S.C. 1). When a Senate seat "
@@ -2173,6 +2315,7 @@ ELECTIONS = {
                       "years. Georgia held its 2026 primary on May 19, with a runoff on June 16."),
             ],
             "sources": ["usc-2-7", "usc-2-1", "const-amdt17", "tx-el-41", "ga-election-guide"],
+            "reviewed": "2026-11-11",
         },
         {
             "id": "who-runs",
@@ -2205,21 +2348,41 @@ ELECTIONS = {
                       "among other offices. A voter registered as a Democrat or a Republican votes "
                       "only in that party's primary, and a voter registered with no party may "
                       "choose either party's primary, but not both."),
-                ("p", "Some states hold no party primary for Congress. California and Washington "
-                      "list every candidate on one primary ballot, and the two with the most votes "
-                      "go on to November whatever party they prefer; a party preference on "
-                      "Washington's ballot is shown for voters' information only. Alaska's primary "
-                      "chooses no party's nominee: the four candidates with the most votes go on to "
-                      "the general election, which is decided by [ranked-choice voting]"
-                      "(#ranked-choice). On November 3, 2026, Alaska's voters also decide a ballot "
-                      "measure that would repeal its open primary and ranked-choice general "
-                      "elections."),
-                ("p", "Louisiana's U.S. House seats follow a different calendar in 2026. Under Act 7 "
-                      "of the 2026 Regular Session they were moved to the November 3 ballot as an "
-                      "open primary: every candidate runs on one ballot, a candidate with a "
-                      "majority of the votes is elected, and otherwise the top two, of any party, "
-                      "meet in a general election on December 12. [Louisiana's page](state:LA) "
-                      "lists the candidates the Secretary of State has qualified."),
+                ("p", Tense(
+                    ("campaign",
+                     _TOP_TWO + "Alaska's primary "
+                     "chooses no party's nominee: the four candidates with the most votes go on to "
+                     "the general election, which is decided by [ranked-choice voting]"
+                     "(#ranked-choice). On November 3, 2026, Alaska's voters also decide a ballot "
+                     "measure that would repeal its open primary and ranked-choice general "
+                     "elections."),
+                    # The measure's outcome is the state's to record (read
+                    # 2026-11-11: the Division of Elections listed "24ESEG
+                    # Repeal the open primary and ranked choice general
+                    # elections Petition Status: Will appear on General
+                    # Election ballot", where an earlier one reads "Approved
+                    # by voters"); this site reads no ballot question's
+                    # result (rule 95). Alaska's 2026 elections were held
+                    # under the law the measure would repeal, whatever its
+                    # outcome.
+                    ("voted",
+                     _TOP_TWO + "In 2026 Alaska's "
+                     "primary chose no party's nominee: the four candidates with the most votes "
+                     "went on to the general election, which was decided by [ranked-choice "
+                     "voting](#ranked-choice). On November 3, 2026, Alaska's voters also voted "
+                     "on a ballot measure to repeal its open primary and ranked-choice general "
+                     "elections; on November 11 the Division of Elections had not yet recorded "
+                     "its outcome, and this site does not read a ballot question's result."))),
+                ("p", Tense(
+                    ("campaign",
+                     "Louisiana's U.S. House seats follow a different calendar in 2026. Under Act 7 "
+                     "of the 2026 Regular Session they were moved to the November 3 ballot as an "
+                     "open primary: every candidate runs on one ballot, a candidate with a "
+                     "majority of the votes is elected, and otherwise the top two, of any party, "
+                     "meet in a general election on December 12. [Louisiana's page](state:LA) "
+                     "lists the candidates the Secretary of State has qualified."),
+                    ("voted", _LA_CALENDAR.format(meet="meet")),
+                    ("2026-12-13", _LA_CALENDAR.format(meet="met")))),
                 ("p", "Some parties nominate without a primary. In Virginia, a state party may "
                       "decide how it nominates candidates for the U.S. Senate and statewide office, "
                       "and state law sets deadlines for nominations made other than by primary. In "
@@ -2281,13 +2444,9 @@ ELECTIONS = {
                       "needed, and how a party nominates. Each state's chief election official "
                       "publishes those rules; the U.S. Election Assistance Commission lists who "
                       "runs elections in each state."),
-                ("p", "The FEC regulates campaigns only for federal office: president, vice "
-                      "president, senator and representative, and Congress's delegates and "
-                      "resident commissioner (52 U.S.C. 30101(3)). Candidates for state and "
-                      "local offices file, and report their money, under state law. [The 2026 "
-                      "ballot map](site:government/states.html#/?mode=ballot) shows which state "
-                      "offices each state elects this year, with the state's own record for "
-                      "each."),
+                ("p", Tense(
+                    ("campaign", _FEC_SCOPE.format(elects="elects this year")),
+                    ("voted", _FEC_SCOPE.format(elects="elected in 2026")))),
             ],
             "sources": ["fec-register", "usc-52-30101", "eac-in-charge", "const-art1"],
         },
@@ -2299,17 +2458,37 @@ ELECTIONS = {
                       "most. When no one has a majority, the leaders meet again in a runoff. In "
                       "Texas, a primary candidate needs a majority of the votes to win a party's "
                       "nomination, and a runoff primary is held when no one has one."),
-                ("p", "Georgia requires a majority in its primaries and its general elections; when "
-                      "no candidate has one, the top two meet in a runoff (O.C.G.A. 21-2-501). "
-                      "Georgia's general-election runoff, if one is needed in 2026, is on December "
-                      "1, four weeks after Election Day."),
+                ("p", Tense(
+                    ("campaign",
+                     "Georgia requires a majority in its primaries and its general elections; when "
+                     "no candidate has one, the top two meet in a runoff (O.C.G.A. 21-2-501). "
+                     "Georgia's general-election runoff, if one is needed in 2026, is on December "
+                     "1, four weeks after Election Day."),
+                    # Whether one was held, and its result, are the races'
+                    # to say (rule 63); the date was the state's either way.
+                    ("2026-12-02",
+                     "Georgia requires a majority in its primaries and its general elections; when "
+                     "no candidate has one, the top two meet in a runoff (O.C.G.A. 21-2-501). In "
+                     "2026 the date for a general-election runoff was December 1, four weeks "
+                     "after Election Day."))),
                 ("p", "The Delegates from Guam and the Virgin Islands are elected by a majority "
                       "too; when no candidate has one, the top two meet in a runoff on the "
                       "fourteenth day after the election (48 U.S.C. 1712), November 17 in 2026."),
-                ("p", "Louisiana's December round is not a primary runoff: for its House seats in "
-                      "2026 the November 3 vote is itself the open primary, and a seat no one wins "
-                      "with a majority is decided at the general election on December 12. So some "
-                      "House seats may not be decided until December."),
+                ("p", Tense(
+                    ("campaign",
+                     "Louisiana's December round is not a primary runoff: for its House seats in "
+                     "2026 the November 3 vote is itself the open primary, and a seat no one wins "
+                     "with a majority is decided at the general election on December 12. So some "
+                     "House seats may not be decided until December."),
+                    ("voted",
+                     "Louisiana's December round is not a primary runoff: for its House seats in "
+                     "2026 the November 3 vote was itself the open primary, and a seat no one won "
+                     "with a majority is decided at the general election on December 12, so not "
+                     "until December."),
+                    ("2026-12-13",
+                     "Louisiana's December round was not a primary runoff: for its House seats in "
+                     "2026 the November 3 vote was itself the open primary, and a seat no one won "
+                     "with a majority was decided at the general election on December 12."))),
             ],
             "sources": ["tx-el-172", "ga-sb202", "ga-runoff-2026", "usc-48-1712", "la-sos-elected"],
         },
@@ -2317,14 +2496,13 @@ ELECTIONS = {
             "id": "ranked-choice",
             "heading": "Ranked-choice voting",
             "blocks": [
-                ("p", "Maine and Alaska decide their federal general elections by ranked-choice "
-                      "voting. Maine also uses it in its primaries for Congress, governor and "
-                      "the legislature, but not in its general elections for governor or the "
-                      "legislature: "
-                      "its Supreme Judicial Court has advised, in 2017 and again in April 2026, "
-                      "that the state constitution requires those to be decided by plurality. "
-                      "Voters rank the candidates in "
-                      "order of preference instead of choosing one."),
+                # Alaska's 2026 count was ranked-choice whatever its repeal
+                # measure's outcome (the page's revisit).
+                ("p", Tense(
+                    ("campaign", "Maine and Alaska decide their federal general elections by "
+                                 "ranked-choice voting." + _MAINE_RCV),
+                    ("voted", "Maine and Alaska decided their 2026 federal general elections by "
+                              "ranked-choice voting." + _MAINE_RCV))),
                 ("p", "The count goes in rounds. If a candidate has more than half of the first "
                       "choices, that candidate wins. If not, under Alaska's law the last-place "
                       "candidate is eliminated and each of that candidate's ballots moves to the "
@@ -2344,23 +2522,44 @@ ELECTIONS = {
             "id": "counting",
             "heading": "Counting, canvassing and certification",
             "blocks": [
-                ("p", "Voting ends on Election Day; counting does not, and results reported on "
-                      "election night are unofficial. Some states count mailed ballots sent by "
-                      "Election Day that arrive afterward: California counts ballots postmarked by "
-                      "Election Day that reach the county by November 10, 2026. On June 29, 2026 "
-                      "the Supreme Court held, in Watson v. Republican National Committee, that the "
-                      "federal Election Day statutes do not stop a state from counting ballots "
-                      "postmarked by Election Day and received afterward."),
+                ("p", Tense(
+                    ("campaign", _COUNT_GOES_ON.format(
+                        california="California counts ballots postmarked by Election Day that "
+                                   "reach the county by November 10, 2026")),
+                    ("2026-11-11", _COUNT_GOES_ON.format(
+                        california="in 2026 California counted ballots postmarked by Election Day "
+                                   "that reached the county by November 10")))),
                 ("p", "Provisional ballots take time too. In a federal election, a voter whose name "
                       "is not on the list, or whose eligibility an official questions, may cast a "
                       "provisional ballot, and it is counted if election officials later confirm "
                       "under state law that the voter was eligible (52 U.S.C. 21082)."),
-                ("p", "After the count, local officials review and confirm the results - the "
-                      "canvass - and then the state certifies them, on deadlines each state sets. "
-                      "Two examples for 2026: California's counties have until December 3 to "
-                      "certify, and its Secretary of State certifies the statewide results by "
-                      "December 11. In Texas, local canvasses are held from the third day after the "
-                      "election at the earliest, and the state canvass must be done by December 7."),
+                # Each deadline in its tense on the build's day: the three
+                # pass on December 3, 7 and 11.
+                ("p", Tense(
+                    ("campaign", _CANVASS.format(
+                        ca_counties="California's counties have until December 3 to certify",
+                        ca_state="its Secretary of State certifies the statewide results by "
+                                 "December 11",
+                        tx="local canvasses are held from the third day after the election at "
+                           "the earliest, and the state canvass must be done by December 7")),
+                    ("2026-12-04", _CANVASS.format(
+                        ca_counties="California's counties had until December 3 to certify",
+                        ca_state="its Secretary of State certifies the statewide results by "
+                                 "December 11",
+                        tx="local canvasses could be held from the third day after the election "
+                           "at the earliest, and the state canvass must be done by December 7")),
+                    ("2026-12-08", _CANVASS.format(
+                        ca_counties="California's counties had until December 3 to certify",
+                        ca_state="its Secretary of State certifies the statewide results by "
+                                 "December 11",
+                        tx="local canvasses could be held from the third day after the election "
+                           "at the earliest, and the state canvass had to be done by December 7")),
+                    ("2026-12-12", _CANVASS.format(
+                        ca_counties="California's counties had until December 3 to certify",
+                        ca_state="its Secretary of State was to certify the statewide results by "
+                                 "December 11",
+                        tx="local canvasses could be held from the third day after the election "
+                           "at the earliest, and the state canvass had to be done by December 7")))),
             ],
             "sources": ["ca-sos-2026-dates", "watson-rnc", "usc-52-21082", "tx-sos-2026-calendar"],
         },
@@ -2440,12 +2639,11 @@ ELECTIONS = {
             "id": "taking-office",
             "heading": "Taking office",
             "blocks": [
-                ("p", "Under the Twentieth Amendment, the terms of senators and representatives end, "
-                      "and the new terms begin, at noon on January 3. The regular terms of the "
-                      "members elected on November 3, 2026 begin at noon on January 3, 2027. A "
-                      "member elected to the rest of a vacant term, as in the special Senate "
-                      "elections on the same ballot, joins a term already running rather than one "
-                      "that begins on January 3."),
+                # "seated": the Congress the cycle elects sits, by the
+                # snapshot read after noon on January 3 (cycle.phase).
+                ("p", Tense(
+                    ("campaign", _NEW_TERMS.format(begin="begin")),
+                    ("seated", _NEW_TERMS.format(begin="began")))),
                 ("p", "The Constitution makes each house of Congress the judge of the elections, "
                       "returns and qualifications of its own members (Article I, Section 5), so a "
                       "dispute over who won a House or Senate seat can end up before that house."),
@@ -2486,7 +2684,8 @@ PAGES = (INDEX, CONGRESS, EXECUTIVE, COURTS, STATES, LOCAL, TRIBAL, ELECTIONS)
 SEE = {
     ("congress", "senate"): [
         ("The senators sitting now", "site:index.html#/?role=member&chamber=Senate"),
-        ("The Senate races on the ballot", "site:index.html#/?view=senate")],
+        (Tense(("campaign", "The Senate races on the ballot"),
+               ("voted", "The 2026 Senate races")), "site:index.html#/?view=senate")],
     ("congress", "house"): [
         ("The representatives sitting now", "site:index.html#/?role=member&chamber=House"),
         ("Every state's districts, on a map", "site:states/index.html")],
@@ -2517,9 +2716,15 @@ SEE = {
         ("Every state's cities and towns, on a map", "site:counties/index.html")],
     ("local", "townships"): [("Every state's local governments, counted", "site:counties/index.html")],
     ("elections", "when"): [
-        ("The races on the ballot", "site:index.html#/?view=race"),
-        ("The races on the partisan map", "site:map.html")],
-    ("elections", "primaries"): [("Who is still on the ballot", "site:index.html")],
+        (Tense(("campaign", "The races on the ballot"),
+               ("voted", "The 2026 races")), "site:index.html#/?view=race"),
+        (Tense(("campaign", "The races on the partisan map"),
+               ("voted", "The 2026 races on the partisan map")), "site:map.html")],
+    # After the election the grid's default view keeps everyone who was on the
+    # November ballot, the defeated with them (rule 63).
+    ("elections", "primaries"): [(Tense(("campaign", "Who is still on the ballot"),
+                                        ("voted", "Who was on the November ballot")),
+                                  "site:index.html")],
     ("elections", "funding"): [("Each candidate's money, in their profile", "site:index.html")],
 }
 

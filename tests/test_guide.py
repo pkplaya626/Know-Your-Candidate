@@ -347,16 +347,167 @@ class TestDatedText(unittest.TestCase):
         self.assertEqual(government.revisits("2026-10-16"), [])
 
     def test_a_passed_date_is_due_until_the_page_is_checked_again(self):
+        # The rule, not the day's list: every revisit date after its page
+        # was checked is due from that day, and none before it.
         from kyc import validate
 
-        due = government.revisits("2026-11-04")
-        self.assertEqual([(slug, day) for slug, day, _what in due],
-                         [("states", "2026-11-04"), ("elections", "2026-11-04")])
-        self.assertEqual([i.code for i in validate.check_guide("2027-02-01")], ["guide-revisit"])
-        # Three on the elections page, two on the states page (its 2026
-        # ballot map, and Arizona's first lieutenant governor).
-        self.assertEqual(len(validate.check_guide("2027-02-01")[0].detail), 5)
+        dated = sorted((page["slug"], day) for page in PAGES
+                       for day, _what in page.get("revisit") or ()
+                       if day > page.get("reviewed", government.REVIEWED))
+        self.assertTrue(dated)
+        first = min(day for _slug, day in dated)
+        due = government.revisits(first)
+        self.assertEqual(sorted((slug, day) for slug, day, _what in due),
+                         [entry for entry in dated if entry[1] <= first])
+        last = max(day for _slug, day in dated)
+        self.assertEqual([i.code for i in validate.check_guide(last)], ["guide-revisit"])
+        self.assertEqual(len(validate.check_guide(last)[0].detail), len(dated))
         self.assertEqual(validate.check_guide("2026-10-16"), [])
+
+
+class TestTheGuideOnTheBuildsDay(unittest.TestCase):
+    """The guide said "36 states elect a governor", "Who is still on the
+    ballot" and that Missouri's map "does not take effect unless voters
+    approve it in the 2026 election" a week after the election, and would
+    have gone on saying "five states have no lieutenant governor" and that
+    Arizona's first "takes office in January 2027" after it had. Its words
+    are chosen by the build's day (government.clock), never typed for one
+    day: true on November 12, December 15 and January 10 alike."""
+
+    CLOCKS = {
+        "campaign": government.CAMPAIGN,
+        "nov12": government.Clock(True, False, "2026-11-12"),
+        "dec15": government.Clock(True, False, "2026-12-15"),
+        "jan3": government.Clock(True, True, "2027-01-03"),
+        "jan10": government.Clock(True, True, "2027-01-10"),
+    }
+    CAMPAIGN_WORDS = (
+        "states elect a governor", "everyone who has filed to run", "Who is still on the ballot",
+        "races on the ballot", "unless voters approve it", "In 2026 that is November 3",
+        "voters also decide a ballot measure", "each state elects this year",
+        "what is on the 2026 ballot", "Louisiana's U.S. House seats follow a",
+        "Maine and Alaska decide their", "a seat no one wins with a majority",
+    )
+
+    @classmethod
+    def setUpClass(cls):
+        cls.text = {}
+        for name, at in cls.CLOCKS.items():
+            pages = government.render_all("example.org", ["TX", "AZ", "MO"], at=at)
+            words = " ".join(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
+                             for html in pages.values())
+            cls.text[name] = re.sub(r"\s+", " ", words)
+
+    def test_the_campaign_reads_as_it_did(self):
+        for words in self.CAMPAIGN_WORDS:
+            self.assertIn(words, self.text["campaign"])
+
+    def test_after_the_election_nothing_is_in_the_campaigns_tense(self):
+        for name in ("nov12", "dec15", "jan3", "jan10"):
+            for words in self.CAMPAIGN_WORDS:
+                self.assertNotIn(words, self.text[name], name)
+            self.assertIn("states held an election for governor", self.text[name])
+            self.assertIn("Who was on the November ballot", self.text[name])
+            self.assertIn("In 2026 that was November 3", self.text[name])
+            # The next election's day is the statute's, counted.
+            self.assertIn("The next is on November 7, 2028.", self.text[name])
+
+    def test_missouri_says_the_referendum_was_held_and_no_result(self):
+        # This site reads no ballot question's result (rule 95).
+        for name in ("nov12", "jan10"):
+            paragraph = re.search(r"Missouri's 2025 map is not among them\.[^<]*?result\.",
+                                  self.text[name]).group(0)
+            self.assertIn("Proposition A, was on the November 3, 2026 ballot", paragraph)
+            self.assertIn("listed that election's results as unofficial", paragraph)
+            for verdict in ("approved Proposition", "rejected", "passed", "failed",
+                            "takes effect", "took effect"):
+                self.assertNotIn(verdict, paragraph)
+
+    def test_each_december_day_moves_its_own_words(self):
+        nov, dec = self.text["nov12"], self.text["dec15"]
+        self.assertIn("if one is needed in 2026, is on December 1", nov)
+        self.assertIn("the date for a general-election runoff was December 1", dec)
+        self.assertIn("meet in a general election on December 12", nov)
+        self.assertIn("met in a general election on December 12", dec)
+        self.assertIn("California's counties have until December 3", nov)
+        self.assertIn("California's counties had until December 3", dec)
+        self.assertNotIn("must be done by December 7", dec)
+
+    def test_january_third_and_fourth_are_two_days(self):
+        # The new Congress on January 3 (the record phase), Arizona's first
+        # lieutenant governor on the first Monday of January (Ariz. Const.
+        # art. 5, sec. 1): January 4, 2027.
+        from kyc import government_maps
+
+        self.assertEqual(government_maps.AZ_LTGOV_FROM, "2027-01-04")
+        for name in ("campaign", "nov12", "dec15"):
+            self.assertIn("begin at noon on January 3, 2027", self.text[name])
+        for name in ("jan3", "jan10"):
+            self.assertIn("began at noon on January 3, 2027", self.text[name])
+        for name in ("campaign", "nov12", "dec15", "jan3"):
+            self.assertIn("Five states have none", self.text[name])
+            presides = government_maps.presides_table(self.CLOCKS[name])
+            self.assertIn("AZ", presides["none"])
+        # The map's Arizona panel (data/government.js).
+        facts = {name: government_maps.payload(self.CLOCKS[name])["modes"]["presides"]["facts"]["AZ"]
+                 for name in ("campaign", "jan3", "jan10")}
+        self.assertIn("takes office in January 2027", facts["campaign"])
+        self.assertIn("first term begins on January 4, 2027", facts["jan3"])
+        self.assertNotIn("takes office", facts["jan10"])
+        self.assertIn("Four states have none", self.text["jan10"])
+        presides = government_maps.presides_table(self.CLOCKS["jan10"])
+        self.assertNotIn("AZ", presides["none"])
+        self.assertIn("AZ", presides["elected"])
+        payload = government_maps.payload(self.CLOCKS["jan10"])["modes"]["presides"]
+        self.assertEqual(payload["values"]["AZ"], "elected")
+        self.assertIn("took office on January 4, 2027", payload["facts"]["AZ"])
+        # The map's own words, which the page writes (its "about" block).
+        self.assertIn("four states have no lieutenant governor", self.text["jan10"])
+        self.assertIn("five states have no lieutenant governor", self.text["jan3"])
+        self.assertEqual(government_maps.figures(self.CLOCKS["jan10"])["no-ltgov"], "Four")
+        # The ballot map is in the past tense once the election is held.
+        governors = government_maps.figures()["governors-2026"]
+        self.assertIn(f"{governors} states held an election for governor on November 3, 2026",
+                      self.text["nov12"])
+
+    def test_the_clock_is_the_pages_own_test(self):
+        # The results read after Election Day, the record phase, and the
+        # latest day the data was read: never the machine's calendar.
+        def summary(as_of, phase="campaign"):
+            return {"election": {"resultsAsOf": as_of, "phase": phase}}
+        self.assertEqual(government.clock(None), government.CAMPAIGN)
+        self.assertEqual(government.clock(summary("2026-11-03")), government.CAMPAIGN)
+        self.assertEqual(government.clock(summary("2026-11-12")),
+                         government.Clock(True, False, "2026-11-12"))
+        self.assertEqual(government.clock(summary("2027-01-04", "record")),
+                         government.Clock(True, True, "2027-01-04"))
+
+    def test_every_tense_names_a_time_the_clock_knows(self):
+        from kyc import government_maps
+        from kyc.government_text import SEE, Tense
+
+        found = []
+
+        def walk(value):
+            if isinstance(value, Tense):
+                found.append(value)
+            elif isinstance(value, (list, tuple)):
+                for item in value:
+                    walk(item)
+            elif isinstance(value, dict):
+                for item in value.values():
+                    walk(item)
+        walk(list(PAGES))
+        walk(list(SEE.values()))
+        walk(list(government_maps.PRESIDES_NOTES.values()))
+        self.assertTrue(found)
+        for tense in found:
+            days = [when for when, _ in tense if when[:1].isdigit()]
+            self.assertEqual(days, sorted(days), tense)
+            for at in self.CLOCKS.values():
+                government.words(tense, at)
+        with self.assertRaises(ValueError):
+            Tense(("voted", "words with no campaign form"))
 
 
 class TestNoCongressIsTyped(unittest.TestCase):
