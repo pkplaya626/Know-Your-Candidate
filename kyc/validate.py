@@ -2191,6 +2191,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_second_registrations(races, profiles, field)
     issues += check_results(profiles, races)
     issues += check_winners(profiles, races)
+    issues += check_seating_results(profiles, races, snapshot)
     issues += check_member_filings(profiles, snapshot)
     issues += check_seat_vacancies(profiles, snapshot)
     issues += check_former_wins((raw or {}).get("former"), (raw or {}).get("record"))
@@ -2306,6 +2307,74 @@ def check_voting_dates(data):
         return [Issue("error", "voting-dates", f"{len(found)} problems in the voting dates "
                       f"(kyc/voting_dates.py)", found)]
     return []
+
+
+def check_seating_results(profiles, races, snapshot=None):
+    """Congress's record and the results must not disagree about a race's
+    term (the January sweep of 2026-11-11; CLAUDE.md's worst failure mode):
+    a person seated since Election Day for the term a race decided whom the
+    results read for that race call "defeated", and - once the Congress the
+    cycle elects sits - a person the results call "elected" whom the record
+    does not seat. Rehearsed on a reversed December, both printed side by
+    side on one page ("Lost the November election" under a term to 2029) and
+    passed every check. The first is an error in the record phase; the
+    second stays a warning, since a winner may die or be refused a seat."""
+    from . import cycle as cycle_mod
+    from .record import seated
+
+    if not snapshot:
+        return []
+    record_phase = cycle_mod.phase(snapshot) == "record"
+    election = cycle_mod.general_election_day(cycle_mod.CYCLE).isoformat()
+    by_id = {p["id"]: p for p in profiles}
+
+    def status_in(person, rid):
+        if person.get("raceStatusRace", person.get("raceId")) != rid:
+            return None
+        return person.get("raceStatus")
+
+    seated_lost, elected_unseated = [], []
+    for race in races or []:
+        rid = race["id"]
+        people = [by_id[pid] for pid in dict.fromkeys(
+            list(race.get("incumbentIds") or []) + list(race.get("candidateIds") or []))
+            if pid in by_id]
+        inc = race.get("incumbent") or {}
+        sitters = []
+        for person in people:
+            if person.get("isCandidate") or not seated(person):
+                continue
+            here = (inc.get("seated") if inc.get("profileId") == person["id"]
+                    else person.get("raceId") == rid)
+            start = str(person.get("term_start") or "")[:10]
+            if here and start > election:
+                sitters.append(person)
+                if status_in(person, rid) == "defeated":
+                    seated_lost.append(f"{rid}: {person['name']} ({person['id']}) is seated for "
+                                       f"the term from {start} by Congress's record; the results "
+                                       f"read for this race say defeated")
+        if not record_phase:
+            continue
+        for person in people:
+            if status_in(person, rid) != "elected" or person in sitters:
+                continue
+            if person.get("isCandidate") and race.get("winnerId"):
+                continue            # one person's filing: seated-unlinked says so
+            elected_unseated.append(f"{rid}: {person['name']} ({person['id']}) is elected by the "
+                                    f"results read for this race; Congress's record does not "
+                                    f"seat them for its term")
+    issues = []
+    if seated_lost:
+        issues.append(Issue(
+            "error" if record_phase else "warn", "result-contradicts-seating",
+            f"{len(seated_lost)} people Congress's record seats for a race's term are "
+            f"\"defeated\" in the results read for it: one of the two is wrong", sorted(seated_lost)))
+    if elected_unseated:
+        issues.append(Issue(
+            "warn", "result-contradicts-seating",
+            f"{len(elected_unseated)} people the results call elected are not seated by "
+            f"Congress's record for the term", sorted(elected_unseated)))
+    return issues
 
 
 def check_winners(profiles, races):
