@@ -33,7 +33,15 @@ null: the state's own links stay beside it.
   deadline falls after the election it is for: a runoff's own early voting
   and mail-ballot dates (``runoff.earlyVoting``, ``runoff.mail``) fall
   between November 3 and the runoff, but for a ballot still arriving after
+  it, its own registration deadlines (``runoff.registration``) on or before
   it, and none stands without the runoff's date;
+- a day the office says early voting is not held inside its window
+  (``earlyVoting.except``, ``runoff.earlyVoting.except``: Louisiana's
+  "excluding Sunday, November 29") is named, closed, in a quote it stands
+  on (``closes``), and every day of a weekday the office closes as a class
+  ("Excluding Sundays") is listed: on Sunday, October 25 the Louisiana,
+  Delaware, South Carolina and Hawaii pages called early voting "Under way"
+  on a day each office had excluded;
 - a qualifier that is a claim of its own is said in a quote it stands on
   (``SAID``): a runoff's early voting that may begin before its first date
   ("as soon as possible, but no later than"), an application taken in
@@ -177,6 +185,11 @@ SHOWN = {
     "registration.sameDay.through": (),
     "earlyVoting.start": (),
     "earlyVoting.end": (),
+    # Days inside the window the office says early voting is not held, each
+    # named in a quote the window stands on (``except_problems``): Louisiana's
+    # "October 20-27 (excluding Sunday, October 25)", South Carolina's
+    # "Closed Sunday, October 25".
+    "earlyVoting.except": ("earlyVoting.start", "earlyVoting.end"),
     # Each local office sets its own days within the window (Wisconsin's
     # "possibly through November 1").
     "earlyVoting.setLocally": (),
@@ -200,6 +213,19 @@ SHOWN = {
     # it is offered: Georgia's calendar gives its runoff's "As soon as
     # possible, but no later than 11/23/26" (``SAID``).
     "runoff.earlyVoting.startsBy": ("runoff.earlyVoting.start",),
+    # Louisiana's December 12: "November 28-December 5 (excluding Sunday,
+    # November 29)".
+    "runoff.earlyVoting.except": ("runoff.earlyVoting.start", "runoff.earlyVoting.end"),
+    # A runoff's own registration deadlines, kept as the general election's
+    # are: Louisiana's dates page gives December 12's ("in person, by mail,
+    # or at an OMV Office is November 12", online "November 21"), and with
+    # no field for them the page said nothing of them on the in-person
+    # deadline's own day (read 2026-11-12).
+    "runoff.registration.online.deadline": (),
+    "runoff.registration.online.time": ("runoff.registration.online.deadline",),
+    "runoff.registration.mail.deadline": (),
+    "runoff.registration.mail.rule": ("runoff.registration.mail.deadline",),
+    "runoff.registration.inPerson.deadline": (),
     "runoff.mail.requestDeadline.date": (),
     "runoff.mail.requestDeadline.rule": ("runoff.mail.requestDeadline.date",),
     # How an application must reach the office by that day, where the office
@@ -219,18 +245,51 @@ SHOWN_WHEN_TRUE = {"noElection", "registration.none", "registration.sameDay.avai
 RUNOFF_DATES = ("runoff.earlyVoting.start", "runoff.earlyVoting.end",
                 "runoff.mail.requestDeadline.date", "runoff.mail.returnDeadline.date",
                 "runoff.mail.returnDeadline.receivedBy")
+# A runoff's own registration deadlines: each on or before the runoff, but
+# not always after November 3 (Arkansas's and Mississippi's December 1 closed
+# registration on November 2), and none without the runoff's date.
+RUNOFF_REGISTRATION = ("runoff.registration.online.deadline", "runoff.registration.mail.deadline",
+                       "runoff.registration.inPerson.deadline")
 
 # "Postmarked by then" and "must arrive by then" are claims of their own:
 # each must be said in a quote the value stands on (its own source or a
 # stand-in's), not merely beside a date (PR #102 review: South Dakota's
 # "received" stood on a quote that said only the date).
 RULE_WORDS = {
-    "postmarked": re.compile(r"postmark", re.I),
+    # Mississippi's calendar writes "post-marked".
+    "postmarked": re.compile(r"post-?mark", re.I),
     "received": re.compile(r"receiv|receipt|arriv|\breach|in the hands of|in (?:the )?possession"
                            r"|deliver(?:y|ed) to", re.I),
 }
 RULES = ("registration.mail.rule", "mail.requestDeadline.rule", "mail.returnDeadline.rule",
-         "runoff.mail.requestDeadline.rule", "runoff.mail.returnDeadline.rule")
+         "runoff.registration.mail.rule", "runoff.mail.requestDeadline.rule",
+         "runoff.mail.returnDeadline.rule")
+
+# A day inside an early-voting window that the office says is not one of its
+# days, as its own words name it: {field: the window it is inside}. The
+# window's line said "Under way" on Sunday, October 25 in Louisiana, Delaware,
+# South Carolina and Hawaii, each of which had excluded it, and would have on
+# Louisiana's Sunday, November 29; a day is never inferred from a weekday or
+# a holiday the office does not name (Arkansas's "during regular office
+# hours" names none).
+EXCEPT = {"earlyVoting.except": "earlyVoting",
+          "runoff.earlyVoting.except": "runoff.earlyVoting"}
+_WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+# What says a day is not held: "excluding", "except", "closed", "no early
+# voting" (Delaware's "October 25, 2026 – NO EARLY VOTING").
+_CLOSED = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early voting(?: on)?)"
+# The words that close a day named AFTER them: never a bare "no early
+# voting", which ends Delaware's sentence for one day and runs on into the
+# next ("October 25, 2026 - NO EARLY VOTING October 26, 2026 - October 27"),
+# and never a day that opens a range (the second reader of PR #240).
+_BEFORE = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early voting on)"
+_NOT_A_RANGE = r"(?![,\s\d]*[–—-]|[,\s\d]*(?:through|to)\b)"
+# A weekday the office closes as a class, beside the words that close it:
+# Hawaii's "(Excluding Sundays)", or "Sundays ... excepted".
+CLOSED_CLASS = re.compile(
+    r"\b" + _CLOSED + r"\s+(?:all\s+)?(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b"
+    r"|\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b[^.;()]{0,40}?\b(?:excluded|excepted|closed)\b",
+    re.I)
 # A qualifier that is a claim of its own is said in a quote it stands on, as
 # "postmarked" and "received" are: a start that is only the latest day early
 # voting may begin, and an application taken in person alone.
@@ -397,7 +456,7 @@ def _sources(record, field):
 
 def _shown(record, path):
     value = get(record, path)
-    if value in (None, ""):
+    if value in (None, "") or value == []:
         return None
     if path in SHOWN_WHEN_TRUE and value is not True:
         return None
@@ -458,6 +517,7 @@ def state_problems(code, record, runoffs):
         if not any(words.search(q) for q in quotes):
             out.append(f"{code} {path}: shown, but no quote it stands on says so")
     out += where_problems(code, record)
+    out += except_problems(code, record)
     out += _date_problems(code, record)
     date = get(record, "runoff.date")
     if date and code not in RUNOFF_WORDS:
@@ -499,6 +559,120 @@ def where_problems(code, record):
     return [f"{code} registration.sameDay.where: {part!r} is not in the office's words quoted "
             f"for same-day registration" for part in where_excerpts(where)
             if not any(_plain(part) in q for q in quotes)]
+
+
+def _day_words(iso):
+    """A day as an office writes it, as a pattern: "Sunday, November 29",
+    "Nov. 29", "11/29/26", with or without its weekday and its year."""
+    date = datetime.date.fromisoformat(iso)
+    month = _MONTHS[date.month - 1]
+    return (rf"(?:{_WEEKDAYS[date.weekday()]},?\s+)?"
+            rf"(?:(?:{month}|{month[:3]}\.?)\s+0?{date.day}(?:st|nd|rd|th)?(?!\d)"
+            rf"|0?{date.month}/0?{date.day}(?:/(?:20)?{date.year % 100:02d})?(?!\d))"
+            rf"(?:,?\s*{date.year})?")
+
+
+def closed_weekdays(quote):
+    """The weekdays *quote* closes as a class ("Excluding Sundays"), by name."""
+    out = set()
+    for m in CLOSED_CLASS.finditer(str(quote or "")):
+        stem = (m.group(1) or m.group(2)).lower()
+        out |= {w for w in _WEEKDAYS if w[:-3].lower() == stem}
+    return out
+
+
+def closes(quote, iso):
+    """Does *quote* say early voting is not held on the day *iso*: the day
+    named beside the words that close it ("excluding Sunday, November 29",
+    "Closed Sunday, October 25", "October 25, 2026 – NO EARLY VOTING"), or
+    its weekday closed as a class ("Excluding Sundays")? A day the words do
+    not name is not closed, whatever the calendar makes of it (rule 84)."""
+    if closes_on_date(quote, iso):
+        return True
+    return _WEEKDAYS[datetime.date.fromisoformat(iso).weekday()] in closed_weekdays(str(quote or ""))
+
+
+def closes_on_date(quote, iso):
+    """Does *quote* name the day *iso* itself closed ("excluding Sunday,
+    November 29", "October 25, 2026 - NO EARLY VOTING"), its weekday as a
+    class aside?"""
+    quote = str(quote or "")
+    day = _day_words(iso)
+    if re.search(r"\b" + _BEFORE + r"\W{0,3}(?:on\s+)?" + day + _NOT_A_RANGE, quote, re.I):
+        return True
+    return bool(re.search(day + r"\s*\W{0,3}\s*(?:no early voting|closed)\b", quote, re.I))
+
+
+def _window_days(start, end):
+    day, last = datetime.date.fromisoformat(start), datetime.date.fromisoformat(end)
+    while day <= last:
+        yield day
+        day += datetime.timedelta(days=1)
+
+
+def except_problems(code, record):
+    """The days an early-voting window is not held (``EXCEPT``): a list of
+    dates, in order, each inside its window and named closed in a quote the
+    window stands on; and where a quote closes a weekday as a class, every
+    such day of the window is listed, or the page would call one "Under
+    way"."""
+    out = []
+    for path, window in EXCEPT.items():
+        days = get(record, path)
+        if days is None or days == []:
+            # An office's words that name a day closed hold the record to
+            # listing it, or the page calls that day "Under way": Louisiana's
+            # October 25 shipped so (the second reader of PR #240). A weekday
+            # closed as a class is not asked here: Colorado's and Nevada's
+            # words close a class for some sites only.
+            start, end = get(record, f"{window}.start"), get(record, f"{window}.end")
+            if (isinstance(start, str) and isinstance(end, str) and _DATE.match(start)
+                    and _DATE.match(end) and start <= end):
+                quotes = [s.get("quote") or "" for s in record.get("sources") or []
+                          if s.get("field") in (path,) + SHOWN[path]]
+                named = [day.isoformat() for day in _window_days(start, end)
+                         if start < day.isoformat() < end
+                         and any(closes_on_date(q, day.isoformat()) for q in quotes)]
+                if named:
+                    out.append(f"{code} {path}: a quote the window stands on names "
+                               f"{', '.join(named)} closed, but no day is listed")
+            continue
+        if not (isinstance(days, list) and all(isinstance(d, str) and _DATE.match(d) for d in days)):
+            out.append(f"{code} {path}: {days!r} is not a list of dates")
+            continue
+        try:
+            for value in days:
+                datetime.date.fromisoformat(value)
+        except ValueError:
+            out.append(f"{code} {path}: {days!r} holds a day that is not a date")
+            continue
+        if days != sorted(set(days)):
+            out.append(f"{code} {path}: {days!r} is not in order, each day once")
+        start, end = get(record, f"{window}.start"), get(record, f"{window}.end")
+        if not (isinstance(start, str) and isinstance(end, str) and _DATE.match(start)
+                and _DATE.match(end) and start <= end):
+            out.append(f"{code} {path}: days the window is not held, with no window")
+            continue
+        out += [f"{code} {path}: {value} is not inside the window, {start} to {end}"
+                for value in days if not start < value < end]
+        quotes = [s.get("quote") or "" for s in record.get("sources") or []
+                  if s.get("field") in (path,) + SHOWN[path]]
+        out += [f"{code} {path}: {value}, but no quote it stands on names that day closed"
+                for value in days if not any(closes(q, value) for q in quotes)]
+        named = [day.isoformat() for day in _window_days(start, end)
+                 if start < day.isoformat() < end and day.isoformat() not in days
+                 and any(closes_on_date(q, day.isoformat()) for q in quotes)]
+        if named:
+            out.append(f"{code} {path}: a quote the window stands on names "
+                       f"{', '.join(named)} closed, but it is not listed")
+        weekdays = set().union(*(closed_weekdays(q) for q in quotes))
+        missing = [day.isoformat() for day in _window_days(start, end)
+                   if _WEEKDAYS[day.weekday()] in weekdays and day.isoformat() not in days]
+        if missing:
+            out.append(f"{code} {path}: the office closes "
+                       f"{' and '.join(sorted(w + 's' for w in weekdays))}, but {', '.join(missing)} "
+                       f"{'is' if len(missing) == 1 else 'are'} not listed")
+    return out
 
 
 def _date_problems(code, record):
@@ -560,10 +734,17 @@ def _runoff_date_problems(code, record, runoff, day):
     does."""
     out = []
     dates = {path: day(path) for path in RUNOFF_DATES}
+    registered = {path: day(path) for path in RUNOFF_REGISTRATION}
     if not runoff:
         out += [f"{code} {path}: a runoff's own date, with no runoff date in the record"
-                for path, value in dates.items() if value]
+                for path, value in list(dates.items()) + list(registered.items()) if value]
         return out
+    out += [f"{code} {path}: {value} is after the runoff on {runoff}"
+            for path, value in registered.items() if value and value > runoff]
+    if registered["runoff.registration.online.deadline"] and get(
+            record, "registration.online.available") is not True:
+        out.append(f"{code} runoff.registration.online: a deadline for registration not offered "
+                   "online")
     start, end = dates["runoff.earlyVoting.start"], dates["runoff.earlyVoting.end"]
     if (start is None) != (end is None):
         out.append(f"{code} runoff.earlyVoting: a window with one end")
@@ -680,10 +861,40 @@ def arrive_sources(links, deadline):
     return word + [i for i in day if i not in word]
 
 
+def _excluding(days):
+    """", excluding Sunday, November 29": the days inside a window the office
+    says it is not held, each with its weekday, as its words name them."""
+    if not days:
+        return ""
+    named = [f"{_WEEKDAYS[datetime.date.fromisoformat(d).weekday()]}, {_long(d)}" for d in days]
+    return ", excluding " + (named[0] if len(named) == 1
+                             else ", ".join(named[:-1]) + " and " + named[-1])
+
+
+def _window_sources(links, window, days):
+    """The links of an early-voting line: the window's own (``window`` is
+    ``earlyVoting`` or ``runoff.earlyVoting``) and, for each day it says the
+    window is not held, a page whose words close that day, where none linked
+    already does (rule 84: the words "excluding Sunday, November 29" keep
+    their source as the dates do)."""
+    fields = (f"{window}.start", f"{window}.end")
+    linked = links.of(*fields)
+    for day in days:
+        urls = {links.urls[i] for i in linked}
+        if any(closes(s.get("quote"), day) for field in (f"{window}.except",) + fields
+               for s in _sources(links.record, field) if s["url"] in urls):
+            continue
+        more = links.of(f"{window}.except", *fields,
+                        want=lambda s, day=day: closes(s.get("quote"), day))
+        linked = linked + [i for i in more if i not in linked]
+    return linked
+
+
 def lines(code, record, place):
     """The page's lines for one record: ``(lines, register, links)``.
 
-    Each line is ``{"k": kind, "d": date, "e"?: end of a window, "t": words,
+    Each line is ``{"k": kind, "d": date, "e"?: end of a window, "x"?: days
+    inside the window it is not held, "t": words,
     "p"?: words once the date has passed, "s": a short label for the
     calendar, "src": [link numbers], "keep"?: still shown after Election
     Day}``; a line with no date is a standing fact. ``register`` is when
@@ -784,13 +995,18 @@ def lines(code, record, place):
         # Wisconsin's window is the earliest and latest a municipal clerk may
         # offer, not days every clerk is open (PR #102 review).
         local = _shown(record, "earlyVoting.setLocally")
-        out.append({"k": "early", "d": start, "e": end,
-                    "t": "In-person early voting" + (
-                        ", on the days and hours each local election office sets: it may start "
-                        "later or end sooner than these dates" if local else ""),
-                    "s": "Early voting" + (" (local days)" if local else ""),
-                    "src": links.of("earlyVoting.start", "earlyVoting.end")
-                    + (links.of("earlyVoting.setLocally") if local else [])})
+        closed = _shown(record, "earlyVoting.except") or []
+        line = {"k": "early", "d": start, "e": end,
+                "t": "In-person early voting" + _excluding(closed) + (
+                    ", on the days and hours each local election office sets: it may start "
+                    "later or end sooner than these dates" if local else ""),
+                "s": "Early voting" + (" (local days)" if local else ""),
+                "src": _window_sources(links, "earlyVoting", closed)
+                + (links.of("earlyVoting.setLocally") if local else [])}
+        if closed:
+            # The days the page never calls "Under way" (kyc-ballot.js when()).
+            line["x"] = list(closed)
+        out.append(line)
 
     if _shown(record, "mail.allMail"):
         out.append({"k": "allmail", "t": "Every registered voter is mailed a ballot without "
@@ -862,8 +1078,69 @@ def lines(code, record, place):
     return out, register, links
 
 
+def runoff_registration_lines(record, links, of, name, needed):
+    """The runoff's own registration deadlines (``runoff.registration``),
+    said as the general election's are, one line a day: "Last day to
+    register to vote by mail (postmarked by then) or in person for a U.S.
+    House general election, if one is held". "Last day" only where the
+    record says the state has no same-day registration, a word its source
+    gives of every election ("registered at least 20 days prior to an
+    election"); else "Deadline", claiming nothing more (rule 84). Each is
+    kept after Election Day until its day has passed. A line that says
+    "postmarked" links a quote that says so, beside the page that gives the
+    day (``arrive_sources``' rule): Louisiana's dates page gives November 12,
+    its registration questions page the postmark."""
+    by_date = {}
+    online = _shown(record, "runoff.registration.online.deadline")
+    if online:
+        time = _time(get(record, "runoff.registration.online.time"))
+        by_date.setdefault(online, []).append(
+            ("online", "online" + (f" (until {time})" if time else ""),
+             "runoff.registration.online.deadline"))
+    mailed = _shown(record, "runoff.registration.mail.deadline")
+    rule = get(record, "runoff.registration.mail.rule") if mailed else None
+    if mailed:
+        by_date.setdefault(mailed, []).append(
+            ("mail", "by mail" + {"postmarked": " (postmarked by then)",
+                                  "received": " (the form must arrive by then)"}.get(rule, ""),
+             "runoff.registration.mail.deadline"))
+    person = _shown(record, "runoff.registration.inPerson.deadline")
+    if person:
+        by_date.setdefault(person, []).append(("in person", "in person",
+                                               "runoff.registration.inPerson.deadline"))
+    last = get(record, "registration.sameDay.available") is False
+    out = []
+    for date, methods in sorted(by_date.items()):
+        how = _join([m[1] for m in methods])
+        short = " / ".join(m[0] if m[0] != "mail" else "by mail" for m in methods)
+        every = len(by_date) == 1 and len(methods) == 3
+        fields = [m[2] for m in methods]
+        # Each way's own source: the day of each is the page's word.
+        src = []
+        for field in fields:
+            src = src + [i for i in links.of(field) if i not in src]
+        if rule in RULE_WORDS and "runoff.registration.mail.deadline" in fields:
+            urls = {links.urls[i] for i in src}
+            says = lambda s: bool(RULE_WORDS[rule].search(s.get("quote") or ""))
+            if not any(says(s) for field in ("runoff.registration.mail.deadline",
+                                             "runoff.registration.mail.rule")
+                       for s in _sources(record, field) if s["url"] in urls):
+                src = src + [i for i in links.of("runoff.registration.mail.rule",
+                                                 "runoff.registration.mail.deadline", want=says)
+                             if i not in src]
+        out.append({"k": "runoff-register", "d": date, "keep": True,
+                    "t": ("Last day to register to vote " if last else "Deadline to register to vote ")
+                         + f"{how} {of}",
+                    "s": f"{name} registration " + ("closes" if last else "deadline") +
+                         ("" if every else f" ({short})") + needed,
+                    "src": src})
+    return out
+
+
 def runoff_lines(code, record, links):
-    """The runoff's own early voting and mail-ballot dates, as the general
+    """The runoff's own registration deadlines (``runoff_registration_lines``),
+    early voting (with the days the office excludes, ``_excluding``) and
+    mail-ballot dates, as the general
     election's are said: each kept after Election Day ("keep") until its day
     has passed, on the reader's calendar, so they go with the runoff but for a
     ballot still arriving after it (rule 84). "For the runoff" where the
@@ -878,16 +1155,20 @@ def runoff_lines(code, record, links):
     # Inside a sentence the condition is set off on both sides.
     of_mid = of if held else of + ","
     needed = "" if held else ", if needed"
-    out = []
+    out = runoff_registration_lines(record, links, of, name, needed)
     start, end = _shown(record, "runoff.earlyVoting.start"), _shown(record, "runoff.earlyVoting.end")
     if start and end:
         sooner = _shown(record, "runoff.earlyVoting.startsBy")
-        out.append({"k": "runoff-early", "d": start, "e": end, "keep": True,
-                    "t": f"In-person early voting {of}" + (
-                        f"; it begins as soon as possible, and no later than {_long(start)}"
-                        if sooner else ""),
-                    "s": f"{name} early voting" + needed,
-                    "src": links.of("runoff.earlyVoting.start", "runoff.earlyVoting.end")})
+        closed = _shown(record, "runoff.earlyVoting.except") or []
+        line = {"k": "runoff-early", "d": start, "e": end, "keep": True,
+                "t": f"In-person early voting {of}" + _excluding(closed) + (
+                    f"; it begins as soon as possible, and no later than {_long(start)}"
+                    if sooner else ""),
+                "s": f"{name} early voting" + needed,
+                "src": _window_sources(links, "runoff.earlyVoting", closed)}
+        if closed:
+            line["x"] = list(closed)
+        out.append(line)
     request = _shown(record, "runoff.mail.requestDeadline.date")
     if request:
         # An application made in person may be for a ballot picked up there,

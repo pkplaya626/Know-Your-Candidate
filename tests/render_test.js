@@ -11552,7 +11552,8 @@ async function testRunoffDatesElsewhere() {
       "2026-11-12": "return,runoff,runoff-early", "2026-11-14": "runoff,runoff-early",
       "2026-11-15": "runoff,runoff-early", "2026-11-16": "runoff", "2026-11-18": "runoff" } },
     LA: { zip: "70112", ballotDays: ["2026-11-12", "2026-12-08", "2026-12-13"], days: {
-      "2026-11-12": "runoff,runoff-early,runoff-request,runoff-return",
+      // November 12's and 21's registration deadlines (runoff.registration).
+      "2026-11-12": "runoff,runoff-register,runoff-register,runoff-early,runoff-request,runoff-return",
       "2026-11-28": "runoff,runoff-early,runoff-request,runoff-return",
       "2026-12-06": "runoff,runoff-request,runoff-return", "2026-12-08": "runoff,runoff-request,runoff-return",
       "2026-12-11": "runoff,runoff-return", "2026-12-13": "runoff" } },
@@ -11593,9 +11594,9 @@ async function testRunoffDatesElsewhere() {
     const runoffKinds = (p) => kinds(p.D.getElementById("voting")).split(",").filter((k) => /^runoff/.test(k)).join(",");
     check("before the election every runoff line is shown, after the runoff's own",
       runoffKinds(before.VI) === "runoff,runoff-request,runoff-early" &&
-        runoffKinds(before.LA) === "runoff,runoff-early,runoff-request,runoff-return" &&
-        runoffKinds(before.AR) === "runoff,runoff-early,runoff-return" &&
-        runoffKinds(before.MS) === "runoff,runoff-postmark,runoff-arrive",
+        runoffKinds(before.LA) === "runoff,runoff-register,runoff-register,runoff-early,runoff-request,runoff-return" &&
+        runoffKinds(before.AR) === "runoff,runoff-register,runoff-early,runoff-return" &&
+        runoffKinds(before.MS) === "runoff,runoff-register,runoff-postmark,runoff-arrive",
       ["VI", "LA", "AR", "MS"].map((c) => c + ": " + runoffKinds(before[c])).join(" || "));
 
     // The Virgin Islands: the Elections System's calendar.
@@ -11627,7 +11628,7 @@ async function testRunoffDatesElsewhere() {
 
     // Louisiana: a general election, never a runoff.
     const la12 = voting("LA", "2026-11-12");
-    const LA_EARLY = /^November 28 – December 5, 2026\. In-person early voting for a U\.S\. House general election, if one is held\./;
+    const LA_EARLY = /^November 28 – December 5, 2026\. In-person early voting for a U\.S\. House general election, if one is held, excluding Sunday, November 29\./;
     const LA_REQUEST = /^December 8, 2026\. Last day to apply for a mail ballot for a U\.S\. House general election, if one is held\./;
     const LA_RETURN = /^December 11, 2026\. Mail ballots for a U\.S\. House general election, if one is held, must arrive at the election office by 4:30 pm on this day\./;
     check("LA, Nov 12: early voting, the request and the return for a House general election, ahead, linked to the dates page",
@@ -11723,6 +11724,205 @@ async function testRunoffDatesElsewhere() {
     check("Mississippi's November 10 links its calendar, which says postmarked, not the page that gives the day alone",
       /^November 10, 2026\. Mail ballots postmarked by November 3 are counted if they arrive by this day\./.test(text(v, "arrive")) &&
         href(v, "arrive") === MS_CAL, text(v, "arrive") + " / " + href(v, "arrive"));
+  });
+}
+
+/* A runoff's own registration deadlines (runoff.registration), and the days
+ * an office says its early voting is not held (earlyVoting.except,
+ * runoff.earlyVoting.except), read 2026-11-12. Louisiana's dates page gives
+ * December 12's registration deadlines - in person, by mail or at OMV by
+ * November 12, online by November 21 - and its early voting as "November
+ * 28-December 5 (excluding Sunday, November 29)": the page said nothing of
+ * registering while the in-person deadline was that day, and would have
+ * called early voting "Under way" on the Sunday. November 3's early voting
+ * excluded a Sunday too, in Louisiana's, Delaware's, South Carolina's and
+ * Hawaii's own words. Arkansas's and Mississippi's December 1 closed
+ * registration on November 2. Each line is in the reader's day's tense
+ * (rule 84), names no race and nobody (rule 91), and Louisiana's never says
+ * "runoff"; one module draws the state page and Your ballot (rule 12). */
+async function testRunoffRegistration() {
+  const LA_DATES = "https://www.sos.la.gov/elections-voting/election-dates";
+  const LA_FAQ = "https://www.sos.la.gov/elections-voting/voter-registration-faqs";
+  const AR_CAL = "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf";
+  const AR_REG = "https://sos.arkansas.gov/elections/voter-information/voter-registration-information";
+  const MS_CAL = "https://www.sos.ms.gov/content/documents/elections/2026%20Elections%20Calendar.pdf";
+  const kinds = (root) => root ? [...root.querySelectorAll(".vote-dates li")].map((li) => li.getAttribute("data-kind")).join(",") : "no dates";
+  const items = (root, kind) => root ? [...root.querySelectorAll('.vote-dates li[data-kind="' + kind + '"]')] : [];
+  const text = (root, kind, n) => (items(root, kind)[n || 0] || {}).textContent || "";
+  const hrefs = (li) => li ? [...li.querySelectorAll(".vote-src a")].map((a) => a.getAttribute("href")) : [];
+  const cells = (root) => root ? [...root.querySelectorAll("ol.vote-cal li")] : [];
+  const cell = (root, words) => cells(root).find((li) => li.textContent === words);
+  const status = (li) => li ? (/is-now/.test(li.className) ? "now" : /is-past/.test(li.className) ? "past" : "ahead") : "missing";
+  const quiet = (words) => !/Under way|Ended|Passed|Today|No early voting today/.test(words);
+
+  const MAIL = /^November 12, 2026\. Last day to register to vote by mail \(postmarked by then\) or in person for a U\.S\. House general election, if one is held\./;
+  const ONLINE = /^November 21, 2026\. Last day to register to vote online for a U\.S\. House general election, if one is held\./;
+  const EARLY = /^November 28 – December 5, 2026\. In-person early voting for a U\.S\. House general election, if one is held, excluding Sunday, November 29\./;
+  const MAIL_CELL = "Nov 12House general registration closes (by mail / in person), if needed";
+  const ONLINE_CELL = "Nov 21House general registration closes (online), if needed";
+  const EARLY_CELL = "Nov 28–Dec 5House general early voting, if needed";
+
+  // Louisiana on the days the task names, and the day after the Sunday.
+  const DAYS = {
+    "2026-11-12": "runoff,runoff-register,runoff-register,runoff-early,runoff-request,runoff-return",
+    "2026-11-21": "runoff,runoff-register,runoff-early,runoff-request,runoff-return",
+    "2026-11-29": "runoff,runoff-early,runoff-request,runoff-return",
+    "2026-11-30": "runoff,runoff-early,runoff-request,runoff-return",
+    "2026-12-13": "runoff",
+  };
+  const la = {};
+  const ballots = {};
+  for (const day of Object.keys(DAYS)) {
+    la[day] = await buildPage("states/la.html", { now: day + "T09:00:00" });
+    if (day !== "2026-11-30") ballots[day] = await ballotFor("#/?zip=70112", { now: day + "T09:00:00" });
+  }
+  const v = (day) => la[day].D.getElementById("voting");
+
+  suite("states/la.html and Your ballot (70112) — December 12's registration deadlines and its excluded Sunday", () => {
+    const all = Object.values(la).concat(Object.values(ballots));
+    check("no page errors", all.every((p) => !p.errors.length), all.map((p) => p.errors.join(" | ")).filter(Boolean).join(" / "));
+    const wrong = Object.entries(DAYS).map(([day, want]) => [day, kinds(v(day)), want]).filter((w) => w[1] !== w[2]);
+    check("each day keeps the lines still to come", wrong.length === 0, wrong.map((w) => w.join(": ")).join(" || "));
+
+    // November 12: in person, by mail and at OMV, today.
+    const n12 = v("2026-11-12");
+    const mail = items(n12, "runoff-register")[0];
+    check("Nov 12: the last day to register in person or by mail, today, in the dates page's terms",
+      MAIL.test(text(n12, "runoff-register")) && /Today/.test(text(n12, "runoff-register")),
+      text(n12, "runoff-register"));
+    check("Nov 12: it links the dates page that gives the day, and the questions page that says postmarked",
+      JSON.stringify(hrefs(mail)) === JSON.stringify([LA_DATES, LA_FAQ]), hrefs(mail).join(" "));
+    check("Nov 12: online registration closes November 21, ahead, linked to the dates page",
+      ONLINE.test(text(n12, "runoff-register", 1)) && quiet(text(n12, "runoff-register", 1)) &&
+        JSON.stringify(hrefs(items(n12, "runoff-register")[1])) === JSON.stringify([LA_DATES]),
+      text(n12, "runoff-register", 1));
+    check("Nov 12: early voting, ahead, says the Sunday it excludes",
+      EARLY.test(text(n12, "runoff-early")) && quiet(text(n12, "runoff-early")), text(n12, "runoff-early"));
+    check("Nov 12: the strip marks the registration deadline as today's, November 21 ahead",
+      status(cell(n12, MAIL_CELL)) === "now" && status(cell(n12, ONLINE_CELL)) === "ahead",
+      cells(n12).map((c) => c.textContent).join(" | "));
+    check("Nov 12: the lines follow December 12's own, which calls it a general election",
+      kinds(n12).indexOf("runoff,runoff-register") === 0 &&
+        /^December 12, 2026\. The U\.S\. House vote on November 3 is an open primary/.test(text(n12, "runoff")),
+      text(n12, "runoff"));
+
+    // November 21: online, today; November 12's gone.
+    const n21 = v("2026-11-21");
+    check("Nov 21: the last day to register online is today, and November 12's line is gone",
+      items(n21, "runoff-register").length === 1 && ONLINE.test(text(n21, "runoff-register")) &&
+        /Today/.test(text(n21, "runoff-register")) && !cell(n21, MAIL_CELL) && status(cell(n21, ONLINE_CELL)) === "now",
+      text(n21, "runoff-register"));
+
+    // November 29: the Sunday the page excludes. Never "Under way".
+    const n29 = v("2026-11-29");
+    check("Nov 29: no early voting today, and it resumes November 30, never 'Under way'",
+      EARLY.test(text(n29, "runoff-early")) && /No early voting today; resumes November 30/.test(text(n29, "runoff-early")) &&
+        !/Under way/.test(text(n29, "runoff-early")), text(n29, "runoff-early"));
+    check("Nov 29: the strip does not mark the window under way, and marks today on its own",
+      status(cell(n29, EARLY_CELL)) === "ahead" && cells(n29).some((c) => /is-today/.test(c.className)),
+      cells(n29).map((c) => c.className + ":" + c.textContent).join(" | "));
+    check("Nov 29: no registration line is left, both deadlines having passed",
+      items(n29, "runoff-register").length === 0, kinds(n29));
+    const n30 = v("2026-11-30");
+    check("Nov 30: early voting under way again, and the strip says so",
+      /Under way/.test(text(n30, "runoff-early")) && !/No early voting today/.test(text(n30, "runoff-early")) &&
+        status(cell(n30, EARLY_CELL)) === "now", text(n30, "runoff-early"));
+
+    // December 13: December 12 alone, in the past tense.
+    check("Dec 13: December 12 alone, for what it was",
+      /^December 12, 2026\. The date set for a general election for any U\.S\. House seat/.test(text(v("2026-12-13"), "runoff")),
+      text(v("2026-12-13"), "runoff"));
+
+    // None of them says "runoff", names a district, a seat or a person.
+    const own = Object.values(la).flatMap((p) => [...p.D.querySelectorAll("#voting .vote-dates li")]
+      .filter((li) => /^runoff-/.test(li.getAttribute("data-kind"))).map((li) => li.textContent))
+      .concat(Object.values(la).flatMap((p) => cells(p.D.getElementById("voting")).map((c) => c.textContent)
+        .filter((t) => /House general/.test(t))));
+    check("no line or cell of December 12's own says 'runoff', a district or a seat",
+      own.length > 0 && own.every((t) => !/runoff|District|LA-\d|Senate/i.test(t)), own.join(" | "));
+
+    // Your ballot says each day what the state page says (one module).
+    const differ = Object.keys(ballots).map((day) => {
+      const dates = ballots[day].out.querySelector(".ballot-dates");
+      if (!dates) return day + ": no dates";
+      const a = [...v(day).querySelectorAll(".vote-dates li")].map((li) => li.textContent);
+      const b = [...dates.querySelectorAll(".vote-dates li")].map((li) => li.textContent);
+      return JSON.stringify(a) === JSON.stringify(b) ? "" : day + ": " + b.join(" | ") + " / " + a.join(" | ");
+    }).filter(Boolean);
+    check("Your ballot's key dates are the state page's, word for word, every day", differ.length === 0, differ.join(" || "));
+    const b12 = ballots["2026-11-12"].out.querySelector(".ballot-dates");
+    check("Your ballot on Nov 12: the in-person and mail deadline is today",
+      !!b12 && MAIL.test(text(b12, "runoff-register")) && /Today/.test(text(b12, "runoff-register")),
+      b12 && b12.textContent.slice(0, 500));
+    const b29 = ballots["2026-11-29"].out.querySelector(".ballot-dates");
+    check("Your ballot on Nov 29: no early voting today, never 'Under way'",
+      !!b29 && /No early voting today; resumes November 30/.test(text(b29, "runoff-early")) &&
+        !/Under way/.test(text(b29, "runoff-early")), b29 && text(b29, "runoff-early"));
+  });
+
+  // November 3's early voting: the Sundays the offices excluded.
+  const GENERAL = [
+    ["LA", "2026-10-25", /^October 20 – October 27, 2026\. In-person early voting, excluding Sunday, October 25\./, "October 26"],
+    ["DE", "2026-10-25", /^October 22 – November 1, 2026\. In-person early voting, excluding Sunday, October 25\./, "October 26"],
+    ["SC", "2026-10-25", /^October 19 – October 31, 2026\. In-person early voting, excluding Sunday, October 25\./, "October 26"],
+    ["HI", "2026-10-25", /^October 20 – November 2, 2026\. In-person early voting, excluding Sunday, October 25 and Sunday, November 1\./, "October 26"],
+    ["HI", "2026-11-01", /^October 20 – November 2, 2026\. In-person early voting, excluding Sunday, October 25 and Sunday, November 1\./, "November 2"],
+  ];
+  const general = [];
+  for (const [code, day, words, next] of GENERAL) {
+    general.push([code, day, words, next, await buildPage("states/" + code.toLowerCase() + ".html", { now: day + "T09:00:00" })]);
+  }
+  const laAfter = await buildPage("states/la.html", { now: "2026-10-26T09:00:00" });
+  const laBallot = await ballotFor("#/?zip=70112", { now: "2026-10-25T09:00:00" });
+  suite("November 3's early voting on a Sunday the office excluded (LA, DE, SC, HI)", () => {
+    check("no page errors", general.every((g) => !g[4].errors.length) && !laAfter.errors.length && !laBallot.errors.length,
+      general.map((g) => g[4].errors.join(" | ")).join(" / "));
+    for (const [code, day, words, next, p] of general) {
+      const root = p.D.getElementById("voting");
+      const line = text(root, "early");
+      check(code + ", " + day + ": the office's excluded day, no early voting today, resuming " + next,
+        words.test(line) && new RegExp("No early voting today; resumes " + next + "\\b").test(line) && !/Under way/.test(line),
+        line);
+      const early = cells(root).find((c) => /Early voting$/.test(c.textContent));
+      check(code + ", " + day + ": the strip does not mark the window under way", status(early) === "ahead",
+        early && early.className);
+    }
+    check("LA, Oct 26: under way again", /Under way/.test(text(laAfter.D.getElementById("voting"), "early")),
+      text(laAfter.D.getElementById("voting"), "early"));
+    const dates = laBallot.out.querySelector(".ballot-dates");
+    check("Your ballot (70112) on Oct 25 says the same", !!dates &&
+      /No early voting today; resumes October 26/.test(text(dates, "early")) && !/Under way/.test(text(dates, "early")),
+      dates && text(dates, "early"));
+  });
+
+  // Arkansas's and Mississippi's December 1: registration closed November 2.
+  const ar = await buildPage("states/ar.html", { now: "2026-11-02T09:00:00" });
+  const ms = await buildPage("states/ms.html", { now: "2026-11-02T09:00:00" });
+  const arLater = await buildPage("states/ar.html", { now: "2026-11-12T09:00:00" });
+  const arBallot = await ballotFor("#/?zip=72201", { now: "2026-11-02T09:00:00" });
+  suite("states/ar.html and ms.html — a December 1 runoff's registration closed November 2", () => {
+    check("no page errors", ![ar, ms, arLater, arBallot].some((p) => p.errors.length),
+      [ar, ms, arLater, arBallot].map((p) => p.errors.join(" | ")).join(" / "));
+    const a = ar.D.getElementById("voting");
+    const m = ms.D.getElementById("voting");
+    const WORDS = /^November 2, 2026\. Last day to register to vote by mail \(postmarked by then\) or in person for a runoff, if one is held\./;
+    check("AR, Nov 2: today, from the calendar, and the postmark from the registration page",
+      WORDS.test(text(a, "runoff-register")) && /Today/.test(text(a, "runoff-register")) &&
+        JSON.stringify(hrefs(items(a, "runoff-register")[0])) === JSON.stringify([AR_CAL, AR_REG]),
+      text(a, "runoff-register") + " / " + hrefs(items(a, "runoff-register")[0]).join(" "));
+    check("MS, Nov 2: today, from the calendar, which says post-marked",
+      WORDS.test(text(m, "runoff-register")) && /Today/.test(text(m, "runoff-register")) &&
+        JSON.stringify(hrefs(items(m, "runoff-register")[0])) === JSON.stringify([MS_CAL]),
+      text(m, "runoff-register"));
+    check("each strip cell names whose runoff it is, never a bare 'Runoff'",
+      status(cell(a, "Nov 2Local runoff registration closes (by mail / in person), if needed")) === "now" &&
+        status(cell(m, "Nov 2Judicial, school board runoff registration closes (by mail / in person), if needed")) === "now",
+      cells(a).concat(cells(m)).map((c) => c.textContent).join(" | "));
+    check("AR, Nov 12: gone, having passed", items(arLater.D.getElementById("voting"), "runoff-register").length === 0,
+      kinds(arLater.D.getElementById("voting")));
+    const dates = arBallot.out.querySelector(".ballot-dates");
+    check("Your ballot (72201) on Nov 2 says the same", !!dates &&
+      text(dates, "runoff-register") === text(a, "runoff-register"), dates && text(dates, "runoff-register"));
   });
 }
 
@@ -23918,6 +24118,7 @@ async function testTheJanuaryWords() {
   if (!only || only === "states") await testGeorgiaRunoffPast();
   if (!only || only === "states" || only === "ballot" || only === "mprunoff") await testMarianasRunoff();
   if (!only || only === "states" || only === "ballot" || only === "runoffdates") await testRunoffDatesElsewhere();
+  if (!only || only === "states" || only === "ballot" || only === "runoffreg") await testRunoffRegistration();
 if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
