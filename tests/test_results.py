@@ -3980,37 +3980,59 @@ class TestARenamedNovemberRow(NoGap):
                           self.november("Jo Swan"))
         self.assertEqual(self.race(cache)["status"], self.CALLED)
         self.assertEqual(self.codes(cache), ["result-row-renamed"])
-        # On a minor party's line the row reads as the page has it, and is
-        # looked at with the same sentence; never hers by the surname.
+        # On a minor party's line too the row is refused, never read as the
+        # page has it: so read, "Free withdrew from the October debate" made
+        # the party's filed nominee "withdrawn", where main folds the row to
+        # him (PR #241's second reader). He reads as before the count.
         self.field["candidates"].append(row("H6OH05011", "FREE, LEE", "OH", "H", 5, "LIB"))
         primaries = self.PRIMARIES + "\n" + party_box(
             "Libertarian convention results", ("Lee Free", self.LIB, 40, True))
         table = party_box(self.GENERAL, ("Pat Stone", REP, 190744, True),
                           ("Trina Swan", DEM, 168350, False), ("Leo Free", self.LIB, 4100, False))
-        cache = self.read("Free withdrew from the October debate.", table, primaries=primaries)
-        self.assertFalse(cache["renamedRows"])
-        self.assertEqual(self.race(cache)["unmatched"], {"Leo Free": "defeated"})
-        self.assertIn("may say they left", cache["unsettledRows"][self.RACE][0]["why"])
+        for sentence in ("Free withdrew from the October debate.",
+                         "Free left the stage early at the October debate."):
+            cache = self.read(sentence, table, primaries=primaries)
+            race = self.race(cache)
+            self.assertNotEqual(race["status"]["H6OH05011"], "withdrawn", sentence)
+            self.assertEqual(race["status"]["H6OH05011"], "nominee", sentence)
+            self.assertEqual(race["status"]["H6OH05003"], "defeated", sentence)
+            self.assertEqual(race["unmatched"], {}, sentence)
+            self.assertFalse(cache["renamedRows"], sentence)
+            self.assertFalse(cache["unsettledRows"], sentence)
+            refused = cache["refusedRows"][self.RACE]
+            self.assertEqual([(r["name"], r["for"]) for r in refused],
+                             [("Leo Free", ["Lee Free"])], sentence)
+            self.assertIn("a minor party's November row", refused[0]["why"])
+            self.assertIn("may say they left", refused[0]["why"])
+            self.assertIn("(H6OH05011)", refused[0]["why"])
+            self.assertEqual(self.codes(cache), ["result-row-refused"], sentence)
+        # With no such sentence the fold is as before.
+        cache = self.read("Free won the convention in May.", table, primaries=primaries)
+        self.assertEqual(self.race(cache)["status"]["H6OH05011"], "defeated")
+        self.assertEqual(cache["renamedRows"][self.RACE][0]["as"], "Lee Free")
 
     PLAIN_DEPARTURES = (
         "Swan withdrew from the race for health reasons.",
         "Swan withdrew from the race for personal and family reasons in August.",
         "Swan, 58, died on September 2.",
         "Swan, the Democratic nominee, withdrew from the race on August 20.",
+        "Swan, the incumbent, withdrew from the race on August 20.",
         "Swan (D) withdrew from the race in August.",
-        "Swan ended her re-election bid in August.",
+        "Swan ended her re-election bid on August 20.",
+        "Swan withdrew from her race for re-election.",
         "Swan suspended her reelection campaign on August 20.",
-        "In August Swan withdrew from the race.",
         "On August 20 Swan withdrew from the race.",
+        "In September Swan withdrew from the race.",
         "Later Swan dropped out of the race.",
         "Subsequently Swan withdrew from the race.",
     )
 
     def test_plain_departures_are_honoured(self):
-        # Follow-up 1's other half: an appositive, an age, a bracket, "her
-        # re-election bid", "for health reasons", a month dated by the word
-        # before it, a sentence opener before the surname. Each is honoured,
-        # over the surname and over the very count alike, and said.
+        # Follow-up 1's other half: an age, a party's bracket, the nominee's
+        # own title in this race, "her re-election bid", "for health
+        # reasons", a month that is no given name or before a day number, a
+        # sentence opener before the surname. Each is honoured, over the
+        # surname and over the very count alike, and said.
         for sentence in self.PLAIN_DEPARTURES:
             for infobox, row_name in ((self.infobox(swan=168349), "Jo Swan"),
                                       (self.infobox(), "Jeanne Hendry")):
@@ -4022,13 +4044,58 @@ class TestARenamedNovemberRow(NoGap):
                 self.assertEqual(cache["unsettledRows"][self.RACE][0]["sentence"],
                                  sentence.rstrip("."), sentence)
         # Still not: another office's race, another person's month, a race
-        # "for" anything but a reason.
+        # "for" anything but a reason, and every shape below. Over a
+        # stranger's row the row is refused, as before the sentence.
         for sentence in ("Swan withdrew from the race for governor in August.",
                          "June Swan withdrew from the race in August.",
-                         "Swan, who had beaten Gull, withdrew."):
+                         "Swan, who had beaten Gull, withdrew.") + self.ABOUT_SOMETHING_ELSE:
             cache = self.read(sentence, self.infobox(swan=168349), self.november())
             self.assertEqual(self.race(cache)["status"], self.HELD, sentence)
             self.assertFalse(cache["unsettledRows"], sentence)
+            self.assertEqual(self.codes(cache), ["result-row-refused"], sentence)
+
+    # Shapes the widened reading honoured though each is about another race,
+    # another person or another time (PR #241's second reader).
+    ABOUT_SOMETHING_ELSE = (
+        # An appositive that is not the nominee's title in this race.
+        "Swan, then a candidate for governor, withdrew from the race in 2022.",
+        "Swan, now a state senator, withdrew from the race in 2022.",
+        "Swan, a candidate in 2024, withdrew from the race and endorsed Gull.",
+        "Swan, the nominee's husband, died in September.",
+        "Swan, the 2022 nominee, withdrew from the race.",
+        "Swan (then a senator) withdrew from the race in August.",
+        # A re-election to another chamber or office.
+        "Swan withdrew from her race for re-election to the Ohio Senate to run for Congress.",
+        "Swan ended her re-election bid to the state senate in March to run for this seat.",
+        "Swan ended her re-election bid in the 4th district to run for this seat.",
+        "Swan ended her re-election bid as mayor in March.",
+        # April, May, June and August are given names.
+        "After June Swan withdrew from the race, Trina Swan won the primary.",
+        "Before May Swan withdrew from the race in March, the field had three candidates.",
+        "In August Swan withdrew from the race.",
+        "In April Swan withdrew from the race.",
+    )
+
+    def test_a_sentence_of_another_race_leaves_the_very_count_fold_as_main_has_it(self):
+        # On Minnesota's 8th's shape - a renamed row with her very count -
+        # main folds the row to her ("defeated"); the widened reading said
+        # the real nominee "withdrawn" for each of these (PR #241's second
+        # reader). None is honoured, and the fold is as main has it.
+        for sentence in self.ABOUT_SOMETHING_ELSE:
+            self.assertEqual(results._departure("Trina Swan", sentence), ("", "", ""), sentence)
+            cache = self.read(sentence, self.infobox(), self.november())
+            race = self.race(cache)
+            self.assertEqual(race["status"], self.CALLED, sentence)
+            self.assertEqual(race["unmatched"], {}, sentence)
+            self.assertFalse(cache["unsettledRows"], sentence)
+            self.assertIn("very count", cache["renamedRows"][self.RACE][0]["why"], sentence)
+        # Beside the surname alone each is still a doubt: the row is refused,
+        # never hers.
+        for sentence in self.ABOUT_SOMETHING_ELSE:
+            cache = self.read(sentence, self.infobox(swan=168349), self.november("Jo Swan"))
+            self.assertEqual(self.race(cache)["status"], self.HELD, sentence)
+            self.assertFalse(cache["renamedRows"], sentence)
+            self.assertIn("may say they left", cache["refusedRows"][self.RACE][0]["why"], sentence)
 
     UNDONE = (
         "A court reversed Swan's removal from the ballot.",
@@ -4056,18 +4123,80 @@ class TestARenamedNovemberRow(NoGap):
                           self.infobox(swan=168349), self.november())
         self.assertEqual(self.race(cache)["status"], self.HELD)
 
+    # A plain departure beside a word that may undo it, about her or not.
+    DOUBTED = (
+        ("Swan withdrew from the race on August 20. Swan had earlier denied rumors that she "
+         "was ill.",),
+        ("Swan reversed her position on tariffs in May.",
+         "Swan withdrew from the race on August 20."),
+        ("Swan withdrew from the race on August 20. Stone denied any part in it.",),
+    )
+
+    def test_an_undone_departure_takes_no_very_count_either(self):
+        # PR #241's second reader: read as no sentence at all, an undone
+        # departure left the row to the infobox's very count, and the nominee
+        # the page says withdrew took the row's loss ("defeated"), where main
+        # reads her "withdrawn". The departure is reported, and the row
+        # refused, loudly: she reads as before the count, never "defeated".
+        from kyc import validate
+        for parts in self.DOUBTED:
+            logged = []
+            cache = self.read(*parts, self.infobox(), self.november(), logged=logged)
+            race = self.race(cache)
+            self.assertEqual(race["status"], self.HELD, parts)
+            self.assertEqual(race["unmatched"], {}, parts)
+            self.assertFalse(cache["renamedRows"], parts)
+            self.assertFalse(cache["unsettledRows"], parts)
+            refused = cache["refusedRows"][self.RACE]
+            self.assertEqual([(r["name"], r["for"]) for r in refused],
+                             [("Jeanne Hendry", ["Trina Swan"])], parts)
+            self.assertIn("Swan withdrew from the race on August 20", refused[0]["why"])
+            self.assertIn("may say that was undone or untrue", refused[0]["why"])
+            self.assertIn("overrides.RESULT_NAMES entry on their FEC id (H6OH05003)",
+                          refused[0]["why"])
+            self.assertTrue(any("[REFUSED]" in line and "undone" in line for line in logged))
+            issue = [i for i in validate.check_results_pages(cache)
+                     if i.code == "result-row-refused"][0]
+            self.assertIn("may say that was undone", issue.detail[0])
+        # The reader says which sentence would have said it, and which undoes it.
+        self.assertEqual(
+            results._departure("Trina Swan", " ".join(self.DOUBTED[2])),
+            ("", "Swan withdrew from the race on August 20.", "Stone denied any part in it"))
+        self.assertEqual(results._left_in_prose("Trina Swan", " ".join(self.DOUBTED[2])), "")
+        # Every departure the earlier test undoes takes no very count either.
+        for sentence in self.UNDONE:
+            cache = self.read(sentence, self.infobox(), self.november())
+            self.assertNotEqual(self.race(cache)["status"]["H6OH05003"], "withdrawn", sentence)
+            self.assertFalse(cache["unsettledRows"], sentence)
+            if results._departure("Trina Swan", sentence)[1]:
+                self.assertEqual(self.race(cache)["status"], self.HELD, sentence)
+                self.assertFalse(cache["renamedRows"], sentence)
+        # With nothing to undo it, the departure is honoured as before.
+        cache = self.read("Swan withdrew from the race on August 20.", self.infobox(),
+                          self.november())
+        self.assertEqual(self.race(cache)["status"]["H6OH05003"], "withdrawn")
+
     def test_a_caption_or_a_lower_case_word_is_no_sentence_about_her(self):
         # Follow-up 2: an image's caption, a gallery's, and "swan" as a word.
         for text in ("[[File:Swan portrait.jpg|thumb|Swan withdrew from the race in 2024]]",
                      "[[Image:Swan.png|thumb|left|Swan withdrew from the race on "
                      "[[August 20]]]]",
                      "<gallery>\nFile:Swan.jpg|Swan withdrew from the race\n</gallery>",
+                     # An external link inside the caption (PR #241's second reader).
+                     "[[File:Swan.jpg|thumb|Swan withdrew from the race in 2024 "
+                     "[https://example.com/x source]]]",
+                     "[[File:Swan.jpg|thumb|Swan withdrew from the race in 2024 "
+                     "[https://example.com/x source] and [[Ohio]]]]",
                      "A swan died on the lake beside the polling station on August 20."):
             cache = self.read(text, self.infobox(swan=168349), self.november())
             race = self.race(cache)
             self.assertEqual(race["status"], self.HELD, text)
             self.assertFalse(cache["unsettledRows"], text)
             self.assertEqual(self.codes(cache), ["result-row-refused"], text)
+            # Over Minnesota's 8th's shape, the very count folds, as without it.
+            cache = self.read(text, self.infobox(), self.november())
+            self.assertEqual(self.race(cache)["status"], self.CALLED, text)
+            self.assertFalse(cache["unsettledRows"], text)
         # The same sentence as prose is honoured.
         cache = self.read("Swan withdrew from the race in 2024.", self.infobox(swan=168349),
                           self.november())
@@ -4184,6 +4313,70 @@ class TestARenamedNovemberRow(NoGap):
                           certified=lists("Jeanne Hendry"))
         self.assertEqual(self.race(cache)["status"]["H6OH05003"], "withdrawn")
         self.assertIn("whole list", cache["unsettledRows"][self.RACE][0]["why"])
+
+    def test_a_name_the_whole_list_prints_that_may_be_hers_takes_no_fold(self):
+        # PR #241's second reader: the whole list certifies "Hollis Swan", a
+        # relative named in her place, and the November row reads "Butch
+        # Swan". By the surname fold she took the row's loss against the list,
+        # and "Hollis Swan" lost too: two Democrats. Main reads her
+        # "withdrawn". Nothing here can tell whether the list's name is hers
+        # or a relative's, so neither fold is taken, on any line, and the row
+        # is refused with what a person may record: she reads as before the
+        # count, never "defeated".
+        def lists(*entries):
+            return {"OH": {"source": "Ohio Secretary of State (made up)", "url": "https://x",
+                           "fetched": "2026-10-17", "complete": True, "races": {self.RACE: [
+                               {"name": n, "party": p, "kind": "ballot"} for n, p in
+                               (("Pat Stone", "Republican"),) + entries]}}}
+
+        hollis = lists(("Hollis Swan", "Democratic"))
+        for parts, row_name in (((self.infobox(swan=168349),), "Butch Swan"),
+                                ((self.infobox(),), "Butch Swan"),
+                                (("Swan won the primary in May.", self.infobox(swan=168349)),
+                                 "Butch Swan")):
+            cache = self.read(*parts, self.november(row_name), certified=hollis)
+            race = self.race(cache)
+            self.assertNotEqual(race["status"]["H6OH05003"], "defeated", parts)
+            self.assertEqual(race["status"], self.HELD, parts)
+            self.assertFalse(cache["renamedRows"], parts)
+            self.assertFalse(cache["unsettledRows"], parts)
+            refused = cache["refusedRows"][self.RACE]
+            self.assertEqual([(r["name"], r["for"]) for r in refused],
+                             [(row_name, ["Trina Swan"])], parts)
+            self.assertIn('"Hollis Swan"', refused[0]["why"])
+            self.assertIn("under their party", refused[0]["why"])
+            self.assertIn("(H6OH05003)", refused[0]["why"])
+            # The list's own name reads as the list and the page have it, as main.
+            self.assertEqual(race["unmatched"], {"Hollis Swan": "defeated"}, parts)
+            self.assertEqual(self.codes(cache), ["result-row-refused"], parts)
+        # Her legal name, and the row her short form: the same, never a fold.
+        cache = self.read(self.infobox(swan=168349), self.november("Kit Swan"),
+                          certified=lists(("Katharine T. Swan", "Democratic")))
+        self.assertEqual(self.race(cache)["status"], self.HELD)
+        self.assertEqual(cache["refusedRows"][self.RACE][0]["name"], "Kit Swan")
+        # A name the list prints under another party is not hers: the whole
+        # list leaves her out, and she has left, as main reads it.
+        cache = self.read(self.infobox(swan=168349), self.november("Butch Swan"),
+                          certified=lists(("Hollis Swan", "Green")))
+        self.assertEqual(self.race(cache)["status"]["H6OH05003"], "withdrawn")
+        self.assertFalse(cache["refusedRows"])
+        self.assertIn("whole list", cache["unsettledRows"][self.RACE][0]["why"])
+        # On a minor party's line the row is refused too, never read as the
+        # page has it, nor his by the surname.
+        self.field["candidates"].append(row("H6OH05011", "FREE, LEE", "OH", "H", 5, "LIB"))
+        primaries = self.PRIMARIES + "\n" + party_box(
+            "Libertarian convention results", ("Lee Free", self.LIB, 40, True))
+        table = party_box(self.GENERAL, ("Pat Stone", REP, 190744, True),
+                          ("Trina Swan", DEM, 168350, False), ("Leo Free", self.LIB, 4100, False))
+        cache = self.read(table, primaries=primaries,
+                          certified=lists(("Trina Swan", "Democratic"), ("Lena Free", "Libertarian")))
+        race = self.race(cache)
+        self.assertEqual(race["status"]["H6OH05011"], "nominee")
+        self.assertFalse(cache["renamedRows"])
+        self.assertFalse(cache["unsettledRows"])
+        refused = cache["refusedRows"][self.RACE]
+        self.assertEqual([(r["name"], r["for"]) for r in refused], [("Leo Free", ["Lee Free"])])
+        self.assertIn('"Lena Free"', refused[0]["why"])
 
 
 class TestAWriteInRowIsNotABallotLine(NoGap):

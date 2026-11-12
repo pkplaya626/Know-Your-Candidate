@@ -220,7 +220,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3185 tests, no dependencies
+python -m unittest discover tests             # 3188 tests, no dependencies
 npm install && npm test                       # 4756 real-DOM checks (needs jsdom)
 ```
 
@@ -1463,18 +1463,32 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "the nomination", "the ballot", "the general election", "the ticket",
     "her campaign", "her re-election bid", "as the nominee"); or the
     November row's own name ("replaced by Jeanne Hendry", "in favour of
-    Hendry"). An appositive, an age or a bracket may stand between ("Swan,
-    the nominee, withdrew", "Swan, 58, died"), "the race for health
-    reasons" is the race, and neither a month the word before it dates by
-    ("In August Swan withdrew") nor a word that opens a sentence ("Later
-    Swan") is a namesake's given name. A forum, a debate, another office,
-    another party's nomination, a relative's death and another candidate's
-    bullet are not; "stepped aside in August" with no more said is not
-    either; nor is an image's caption, "a swan" in lower case, or anything
-    said of them where a sentence naming them speaks of a reinstatement, a
-    re-entry, a reversal, a denial or a false report ("a court reversed
-    Swan's removal from the ballot"), or the next sentence does. A sentence
-    not honoured changes nothing: the row goes on to the folds and the
+    Hendry"). An age, a party's bracket or the nominee's own title in this
+    race may stand between ("Swan, 58, died", "Swan (D) withdrew", "Swan,
+    the Democratic nominee, withdrew"), and no other appositive: PR #241's
+    second reader found "Swan, then a candidate for governor, withdrew from
+    the race in 2022", "Swan, a candidate in 2024, withdrew" and "Swan, the
+    nominee's husband, died" honoured over a renamed row with her very
+    count, and the real nominee "withdrawn". "The race for health reasons"
+    is the race; a re-election followed by "to", "in", "for" or "as" is
+    another chamber's or office's ("her race for re-election to the Ohio
+    Senate", "her re-election bid to the state senate"). A word that opens a
+    sentence ("Later Swan") or a month that is nobody's name ("In September
+    Swan") is no namesake's given name, but April, May, June and August are
+    ("After June Swan withdrew" may be a June Swan's, and "In August Swan
+    withdrew" is refused). A forum, a debate, another office, another
+    party's nomination, a relative's death and another candidate's bullet
+    are not; "stepped aside in August" with no more said is not either; nor
+    is an image's caption, whatever links it holds, or "a swan" in lower
+    case. A departure undone or doubted - where a sentence naming them
+    speaks of a reinstatement, a re-entry, a reversal, a denial or a false
+    report ("a court reversed Swan's removal from the ballot"), or the next
+    sentence does, even of someone else ("Stone denied any part in it") - is
+    not honoured and not dropped either (`_departure`): read as no sentence
+    at all, it left the row to the infobox's very count, and the nominee the
+    page says withdrew took the row's loss. The row is refused instead, on
+    any party's line, both sentences quoted. Any other sentence not honoured
+    changes nothing: the row goes on to the folds and the
     refusal, which a person sees. One honoured is never silent: the race
     records the row with the sentence quoted (`unsettledRows`, a `[note]` in
     the log, `result-row-unsettled`), and so it does for a nominee the
@@ -1491,13 +1505,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     ("Swan withdrew from the race for health reasons", "Swan, 58, died")
     unhonoured, and the departed nominee taking the row of the relative
     named in her place, and its loss, with only a renamed row's warning.
-    Such a row is refused instead, the sentence quoted beside the remedy
-    (on a minor party's line, read as the page has it and warned). The
-    state's whole list leaves a nominee out only where it prints no name
-    that no filing holds and that may be theirs (`certify_race`'s test):
-    printing them under a legal name the matcher cannot tie to them, it
-    read as their having left; the row is then refused, with the list's
-    name and the remedy. A rename that changes the row's party too is
+    Such a row is refused instead, the sentence quoted beside the remedy,
+    on a minor party's line too: read there as the page has it, "Free
+    withdrew from the October debate" made a minor party's filed nominee
+    "withdrawn" (PR #241's second reader). The state's whole list leaves a
+    nominee out only where it prints no name, under their party, that no
+    filing holds and that may be theirs (`certify_race`'s test): printing
+    them under a legal name the matcher cannot tie to them, it read as
+    their having left. Where it prints one, nothing can tell whether it is
+    them or someone named in their place - the list's "Hollis Swan" over a
+    row "Butch Swan", by the surname fold, made the nominee "defeated"
+    against the list beside Hollis Swan "defeated" too - so neither fold is
+    taken, and the row is refused, on any party's line, with the list's name
+    and the remedy. A rename that changes the row's party too is
     held: where one nominee alone is missing, the table holds no row of
     their party, and one row alone is under such a name on a line whose own
     nominee is already in the table - anyone on it the page names elsewhere
@@ -1521,7 +1541,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     second reader's six follow-ups, replayed over the two sets of pages
     saved on 2026-11-10 and 11, it changed nothing at all, and of the 1,146
     people on their November tables it still said none had left, and
-    doubted the surname of 51. And a mark inside
+    doubted the surname of 51; with the six of PR #241's second reader too,
+    it changes nothing on either set, says none of the 1,146 left, reports
+    no departure undone and doubts the same 51. And a mark inside
     recount range is an editor's call, not a count's: Minnesota's 1st was
     marked for Jake
     Johnson on 163,055 to 162,733 (322 votes, 0.10 points) with the infobox
