@@ -986,6 +986,12 @@ class TestNameFormsAndRounds(unittest.TestCase):
         joined = cell()
         sh._mark_winner(joined, sh.name_forms("PA-4", 2020))
         self.assertTrue(joined["holders"][0]["winner"])
+        # The form is matched whole, never by its surname: another Dean who
+        # served the term is not the winner (the second reader of PR #242).
+        other = cell()
+        other["holders"] = [{"id": "X000001", "name": "Howard Dean", "party": "Democrat"}]
+        sh._mark_winner(other, sh.name_forms("PA-4", 2020))
+        self.assertNotIn("winner", other["holders"][0])
 
     def test_counts_the_clerk_does_not_call_a_runoffs_are_on_the_official_word(self):
         # Guam's delegate, 2020: the Clerk prints the November 17 runoff's

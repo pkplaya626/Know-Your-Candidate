@@ -1639,10 +1639,15 @@ def _mark_winner(cell, forms=None):
     winner = result["candidates"][0]["name"]
     if result.get("rankedChoice") == "first-choices" and not result.get("firstChoiceMajority"):
         return                       # a lead in first choices is not a win
-    surnames = {surname(winner)} | {surname(f) for f in (forms or {}).get(winner, ())}
+    # A form is the whole name the evidence ties to the winner, so it is
+    # compared whole: by its surname, a full-term holder "Howard Dean"
+    # would have been marked the winner of PA-4 2020 (the second reader of
+    # PR #242).
+    whole = {" ".join(_fold(f).split()) for f in (forms or {}).get(winner, ())}
     for holder in cell.get("holders") or []:
-        if "from" not in holder and "until" not in holder and \
-                surname(holder["name"]) in surnames:
+        if "from" not in holder and "until" not in holder and (
+                surname(holder["name"]) == surname(winner)
+                or " ".join(_fold(holder["name"]).split()) in whole):
             holder["winner"] = True
 
 

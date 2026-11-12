@@ -2580,7 +2580,10 @@ SEAT_HISTORY_NAMES = {
         "2020 Texas page lists the Republican nominee as 'Monica de la Cruz-Hernandez, insurance "
         "agent' and gives '[[Monica De La Cruz]]' 109,017 in the district's infobox and "
         "general-election table (read 2026-11-12); the Clerk's 2022 and 2024 statistics name "
-        "the district's winner 'Monica De La Cruz'"),
+        "the district's winner 'Monica De La Cruz'; and the FEC files one candidate, "
+        "H0TX15124, as 'DE LA CRUZ HERNANDEZ, MONICA' for 2020 and 'DE LA CRUZ, MONICA' for "
+        "2022, 2024 and 2026, Texas's 15th district each time (its candidate history, read "
+        "2026-11-12)"),
     ("CA-30", 2022, "G. “Maebe A. Girl” Pudlo"): (
         "Maebe A. Girl",
         "the California Secretary of State's Statement of Vote of the November 8, 2022 general "
@@ -2645,7 +2648,7 @@ SEAT_HISTORY_ROUNDS = {
             "Poliquin, Bruce 138931', 'Continuing Ballots 281371'. maine.gov refuses this "
             "project's reader (403) and the address answered 404 from 2026, so the file was read "
             "2026-11-12 from the Internet Archive's capture of 2018-12-14, the one digest it "
-            "holds for the address from then to 2025-03-22"),
+            "holds for the address from then to 2025-04-04"),
     },
 }
 

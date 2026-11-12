@@ -2661,7 +2661,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     returns, and only a row that is that whole name, the counts still
     checked: Pennsylvania's returns and the Clerk print "Madeleine Dean
     Cunnane" (PA-4, 2020), Texas's canvass "Monica De La Cruz-Hernandez"
-    (TX-15, 2020) and California's Statement of Vote 'G. "Maebe A. Girl"
+    (TX-15, 2020) and California's Statement of Vote 'G "Maebe A. Girl"
     Pudlo' (CA-30, 2022), and the surname match withheld all three. Counts
     the Clerk prints without saying they are a later round's are that round
     only on the jurisdiction's own official results
