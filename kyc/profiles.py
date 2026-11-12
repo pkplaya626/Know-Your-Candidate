@@ -1152,7 +1152,10 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
         # it their place in the race.
         claimed |= _claimed_ids(profiles, people, record)
 
-        extra, _skipped = field_mod.to_profiles(field, profiles, claimed=claimed)
+        from . import departed as departed_mod
+        extra, _skipped = field_mod.to_profiles(
+            field, profiles, claimed=claimed,
+            departed=departed_mod.for_filings(data.get("departed")))
         profiles.extend(extra)
 
     for profile in profiles:

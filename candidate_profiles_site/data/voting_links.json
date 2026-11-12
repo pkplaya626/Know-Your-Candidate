@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-11T16:26:37+00:00",
+ "fetched": "2026-11-12T17:09:11+00:00",
  "links": {
   "http://pollfinder.sos.state.mn.us/": "live",
   "http://registration.elections.myflorida.com/": "live",
@@ -14,7 +14,7 @@
   "http://www.maine.gov/sos/cec/elec/voter-info/absent.html": "unknown",
   "http://www.mvp.sos.ga.gov/": "unknown",
   "http://www.sos.ca.gov/elections/polling-place/": "live",
-  "http://www.sos.mo.gov/elections/pollingplacelookup/": "live",
+  "http://www.sos.mo.gov/elections/pollingplacelookup/": "unknown",
   "https://akelections.maps.arcgis.com/apps/webappviewer/index.html?id=579890d66c7e40ae9f7cc227d76669b1": "live",
   "https://app.mt.gov/voterinfo/": "live",
   "https://app.sos.nh.gov/viphome": "unknown",
@@ -86,9 +86,9 @@
   "https://olvr.hawaii.gov/Default.aspx": "live",
   "https://olvr.hawaii.gov/altballotsearch3.aspx": "live",
   "https://olvr.ohiosos.gov/": "unknown",
-  "https://ova.elections.il.gov/": "live",
-  "https://ova.elections.il.gov/PollingPlaceLookup.aspx": "live",
-  "https://ova.elections.il.gov/RegistrationLookup.aspx": "live",
+  "https://ova.elections.il.gov/": "unknown",
+  "https://ova.elections.il.gov/PollingPlaceLookup.aspx": "unknown",
+  "https://ova.elections.il.gov/RegistrationLookup.aspx": "unknown",
   "https://ovr.sos.wv.gov/Register/Landing": "live",
   "https://portal.ct.gov/SOTS/Election-Services/Voter-Information/Absentee-Voting": "live",
   "https://portal.ct.gov/SOTS/Election-Services/Voter-Information/Voter-Registration-Information": "live",
@@ -249,8 +249,8 @@
   "https://www.elections.alaska.gov/election-results/": "live",
   "https://www.elections.alaska.gov/sample-ballots/": "live",
   "https://www.elections.alaska.gov/voter-information/#Reg": "live",
-  "https://www.elections.il.gov/electionoperations/ElectionVoteTotals.aspx": "live",
-  "https://www.elections.il.gov/electionoperations/votingbymail.aspx": "live",
+  "https://www.elections.il.gov/electionoperations/ElectionVoteTotals.aspx": "unknown",
+  "https://www.elections.il.gov/electionoperations/votingbymail.aspx": "unknown",
   "https://www.elections.maryland.gov/voter_registration/index.html": "live",
   "https://www.elections.virginia.gov/casting-a-ballot/polling-place-lookup/": "live",
   "https://www.elections.virginia.gov/registration/how-to-register/": "live",
@@ -334,7 +334,7 @@
   "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
   "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "live"
  },
- "linksChecked": "2026-11-11",
+ "linksChecked": "2026-11-12",
  "pages": {
   "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
   "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",

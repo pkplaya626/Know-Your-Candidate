@@ -2168,6 +2168,84 @@ def check_voting_links(cache):
     return issues
 
 
+def check_flagged_filers(profiles, field):
+    """Filers whose filing the FEC flags as the incumbent's (rule 17).
+
+    The flag is no record of who sits: from 2026-11-12 the FEC marks a
+    November winner an incumbent before they are seated, and this site once
+    set such a filing aside as "the sitting member's", so the winner had no
+    profile. A flagged filing no record ties to a member is read as a filer,
+    and named here: if it is a sitting member's whose record lacks the id,
+    their money is on two profiles until ``overrides.MEMBER_FEC_IDS`` holds
+    it.
+    """
+    from . import candidates
+
+    rows = candidates.filed_rows(field)
+    flagged = sorted(
+        (p for p in profiles
+         if p.get("isCandidate") and p.get("source") == "fec-field"
+         and (rows.get(p.get("fecCandidateId")) or {}).get("incumbent_challenge")
+         == candidates.INCUMBENT),
+        key=lambda p: (p.get("state") or "", p.get("name") or ""))
+    if not flagged:
+        return []
+    return [Issue(
+        "warn", "filer-flagged-incumbent",
+        f"{len(flagged)} filer(s) the FEC flags as the incumbent, shown as filers: no record "
+        f"ties the filing to a member (a November winner is flagged before being seated; a "
+        f"sitting member's whose record lacks the id needs overrides.MEMBER_FEC_IDS)",
+        [f"{p['name']} ({p.get('officeLabel')}; {p.get('fecCandidateId')}; "
+         f"{p.get('raceStatus') or 'no status'})" for p in flagged])]
+
+
+def check_winners_shown(profiles, results, field):
+    """A called winner whose filing is past the threshold has a profile.
+
+    The results give a status to an FEC id; the page shows a person. On
+    2026-11-12 the two came apart without a word in the build: the FEC
+    flagged CA-1's called winner as an incumbent, the pipeline set his
+    filing aside as a sitting member's, and the race read "Won by" over
+    nobody (rule 17). Only the page checks noticed. A winner under the
+    threshold has no profile by rule 22 and is named by the race itself.
+    """
+    from . import candidates
+
+    if not results or not field:
+        return []
+    rows = candidates.filed_rows(field)
+    carried = {}
+    for profile in profiles:
+        ids = [profile.get("fecCandidateId"), profile.get("rosterFecId")]
+        ids += list(profile.get("otherFecIds") or ()) + list(profile.get("otherIds") or ())
+        for cid in ids:
+            if cid:
+                carried.setdefault(cid, []).append(profile)
+    missing = []
+    for rid, race in sorted((results.get("races") or {}).items()):
+        for cid, status in sorted((race.get("status") or {}).items()):
+            row = rows.get(cid)
+            if status != "elected" or not row:
+                continue
+            if (row.get("receipts") or 0) < candidates.STATUTORY_THRESHOLD:
+                continue
+            name = (race.get("names") or {}).get(cid) or candidates.display_name(row.get("name"))
+            holders = carried.get(cid) or []
+            if not holders:
+                missing.append(f"{rid}: {name} ({cid}), called the winner, has no profile")
+            elif not any(p.get("raceStatus") == "elected" for p in holders):
+                # An id a profile carries but does not read its status by: the
+                # person is on the page, and the page does not say they won.
+                missing.append(f"{rid}: {name} ({cid}), called the winner, is on "
+                               f"{holders[0]['name']}'s profile, which does not read elected")
+    if not missing:
+        return []
+    return [Issue(
+        "error", "winner-without-profile",
+        f"{len(missing)} called winner(s) past the ${candidates.STATUTORY_THRESHOLD:,} threshold "
+        f"have no profile that reads elected, so their race names nobody as its winner", missing)]
+
+
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
@@ -2203,6 +2281,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_curated_photos(profiles, legislators, photo_manifest)
     issues += check_odds(races, odds)
     issues += check_races(profiles, races)
+    issues += check_flagged_filers(profiles, field)
+    issues += check_winners_shown(profiles, results, field)
     issues += check_markup(profiles)
     issues += check_geometry(profiles, geo)
     issues += check_snapshot(profiles, raw, snapshot)

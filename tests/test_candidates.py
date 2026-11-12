@@ -188,6 +188,138 @@ class TestEligibility(unittest.TestCase):
         # They already have a profile built from the roster.
         cache = candidates.build_cache([filing(challenge="I", receipts=1e6)])
         self.assertEqual(candidates.eligible(cache), [])
+        # The flag is the FEC's, and no record of who sits: the filings past
+        # the threshold hold it all the same, for to_profiles to decide.
+        self.assertEqual(len(candidates.over_threshold(cache)), 1)
+
+
+class TestTheFecsIncumbentFlag(unittest.TestCase):
+    """On 2026-11-12 the FEC began to flag November's winners as incumbents
+    ("I") weeks before they are seated. The pipeline set every flagged filing
+    aside as "the sitting member's", so Mike McGuire, called for CA-1,
+    vanished from his own race and the refresh that brought the flag failed
+    its checks. The flag sets nobody aside; a record does (rule 17)."""
+
+    def holder(self):
+        return {"id": "G000607", "name": "James Gallagher", "state": "CA", "chamber": "House",
+                "districtNum": 1, "raceId": "H-CA-01-2026", "isCandidate": False,
+                "fecCandidateId": "H6CA01285"}
+
+    def winner(self, challenge="I"):
+        return filing("H6CA01269", "MCGUIRE, MIKE", state="CA", district=1,
+                      receipts=2266830.12, challenge=challenge)
+
+    def test_a_winner_the_fec_flags_incumbent_keeps_their_profile(self):
+        for challenge in ("C", "I"):
+            made, _ = candidates.to_profiles(candidates.build_cache([self.winner(challenge)]),
+                                             [self.holder()])
+            self.assertEqual([p["id"] for p in made], ["FEC_H6CA01269"], challenge)
+            self.assertTrue(made[0]["isCandidate"])
+
+    def test_a_members_own_flagged_filing_is_still_set_aside_by_a_record(self):
+        # By the id on their profile, by an id the finance lookup claimed,
+        # and by the seat's sitting member's exact names: never by the flag.
+        own = filing("H6CA01285", "GALLAGHER, JAMES", state="CA", district=1, receipts=1e6,
+                     challenge="I")
+        made, _ = candidates.to_profiles(candidates.build_cache([own]), [self.holder()])
+        self.assertEqual(made, [])
+        other_id = dict(own, candidate_id="H6CA01999")
+        made, _ = candidates.to_profiles(candidates.build_cache([other_id]), [self.holder()])
+        self.assertEqual(made, [])           # the same first and last name, in his seat
+        claimed = dict(own, candidate_id="H6CA01777", name="GALLAGHER, J. M.")
+        made, _ = candidates.to_profiles(candidates.build_cache([claimed]), [self.holder()],
+                                         claimed={"H6CA01777"})
+        self.assertEqual(made, [])
+
+    DEPARTED = [
+        {"bioguide": "L000578", "chamber": "House", "district": 1, "left": "2026-01-05",
+         "name": "Doug LaMalfa", "party": "Republican", "state": "CA"},
+        {"bioguide": "G000359", "chamber": "Senate", "left": "2026-07-11", "name": "Lindsey Graham",
+         "party": "Republican", "senateClass": 2, "state": "SC"},
+        {"bioguide": "S001157", "chamber": "House", "district": 13, "left": "2026-04-21",
+         "name": "David Scott", "party": "Democrat", "state": "GA"},
+    ]
+
+    def test_a_member_who_left_this_congress_is_no_filer(self):
+        # The FEC still flags them; the departed-members record says whose
+        # the filing is, by the seat and both names.
+        rows = [filing("H2CA02142", "LAMALFA, DOUG", state="CA", district=1, receipts=9e5, challenge="I"),
+                filing("S0SC00149", "GRAHAM, LINDSEY O.", office="S", state="SC", district=0,
+                       receipts=9e6, challenge="I"),
+                filing("H2GA13012", "SCOTT, DAVID ALBERT", state="GA", district=13, receipts=4e5,
+                       challenge="I"),
+                self.winner()]
+        made, _ = candidates.to_profiles(candidates.build_cache(rows), [self.holder()],
+                                         departed=self.DEPARTED)
+        self.assertEqual([p["id"] for p in made], ["FEC_H6CA01269"])
+        # Without the record nobody is guessed away: they are filers, and
+        # validate names each (filer-flagged-incumbent).
+        made, _ = candidates.to_profiles(candidates.build_cache(rows), [self.holder()])
+        self.assertEqual(len(made), 4)
+
+    def test_the_departed_record_is_matched_on_the_seat_and_both_names(self):
+        match = candidates.departed_member
+        lamalfa = filing("H2CA02142", "LAMALFA, DOUG", state="CA", district=1, challenge="I")
+        self.assertEqual(match(lamalfa, self.DEPARTED)["bioguide"], "L000578")
+        self.assertIsNone(match(dict(lamalfa, district_number=2), self.DEPARTED))   # another seat
+        self.assertIsNone(match(dict(lamalfa, state="OR"), self.DEPARTED))
+        self.assertIsNone(match(dict(lamalfa, name="LAMALFA, JILL"), self.DEPARTED))  # a relative
+        self.assertIsNone(match(dict(lamalfa, office="S"), self.DEPARTED))
+        self.assertIsNone(match(self.winner(), self.DEPARTED))
+        self.assertIsNone(match(lamalfa, None))
+        # A departed member is set aside only where the FEC flags the filing
+        # as an incumbent's: a namesake filing as a challenger is a filer.
+        namesake = dict(lamalfa, candidate_id="H6CA01333", incumbent_challenge="C")
+        made, _ = candidates.to_profiles(candidates.build_cache([namesake]), [self.holder()],
+                                         departed=self.DEPARTED)
+        self.assertEqual(len(made), 1)
+
+    def test_validate_names_each_flagged_filer(self):
+        cache = candidates.build_cache([self.winner(), filing()])
+        made, _ = candidates.to_profiles(cache, [self.holder()])
+        issues = validate.check_flagged_filers(made + [self.holder()], cache)
+        self.assertEqual([(i.level, i.code) for i in issues], [("warn", "filer-flagged-incumbent")])
+        self.assertEqual(len(issues[0].detail), 1)
+        self.assertIn("Mike Mcguire", issues[0].detail[0].title())
+        self.assertIn("H6CA01269", issues[0].detail[0])
+        # None flagged, nothing said.
+        plain = candidates.build_cache([self.winner("C")])
+        made, _ = candidates.to_profiles(plain, [self.holder()])
+        self.assertEqual(validate.check_flagged_filers(made, plain), [])
+
+    def test_a_called_winner_with_no_profile_fails_the_build(self):
+        # The guard for the next way a winner goes missing: the results name
+        # an id the winner of a race, and no profile carries it.
+        cache = candidates.build_cache([self.winner(), filing()])
+        results = {"races": {"H-CA-01-2026": {"status": {"H6CA01269": "elected", "H6CA01285": "defeated"},
+                                              "names": {"H6CA01269": "Mike McGuire"}}}}
+        made, _ = candidates.to_profiles(cache, [self.holder()])
+        for p in made:
+            if p["id"] == "FEC_H6CA01269":
+                p["raceStatus"] = "elected"          # as results.apply_cache leaves him
+        self.assertEqual(validate.check_winners_shown(made + [self.holder()], results, cache), [])
+        # As the pipeline stood: the flagged filing set aside, the winner gone.
+        gone = [p for p in made if p["id"] != "FEC_H6CA01269"] + [self.holder()]
+        issues = validate.check_winners_shown(gone, results, cache)
+        self.assertEqual([(i.level, i.code) for i in issues], [("error", "winner-without-profile")])
+        self.assertIn("H-CA-01-2026: Mike McGuire (H6CA01269)", issues[0].detail[0])
+        self.assertIn("has no profile", issues[0].detail[0])
+        # On the page, and the page not saying they won, is as loud.
+        unread = [dict(p, raceStatus="nominee") if p["id"] == "FEC_H6CA01269" else p for p in made]
+        issues = validate.check_winners_shown(unread + [self.holder()], results, cache)
+        self.assertEqual([i.code for i in issues], ["winner-without-profile"])
+        self.assertIn("does not read elected", issues[0].detail[0])
+        # A winner under the threshold has no profile by rule 22: the race
+        # names them itself, and this check says nothing.
+        small = candidates.build_cache([dict(self.winner(), receipts=120.0)])
+        self.assertEqual(validate.check_winners_shown([self.holder()], results, small), [])
+        # An id on a member's profile by any of its fields is shown, where
+        # that profile reads elected.
+        folded = dict(self.holder(), otherFecIds=["H6CA01269"], raceStatus="elected")
+        self.assertEqual(validate.check_winners_shown([folded], results, cache), [])
+        self.assertEqual(len(validate.check_winners_shown(
+            [dict(folded, raceStatus="defeated")], results, cache)), 1)
+        self.assertEqual(validate.check_winners_shown([self.holder()], None, cache), [])
 
 
 class TestToProfiles(unittest.TestCase):
