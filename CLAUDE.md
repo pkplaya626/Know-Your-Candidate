@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3177 tests, no dependencies
-npm install && npm test                       # 4756 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3187 tests, no dependencies
+npm install && npm test                       # 4757 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2655,7 +2655,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     first round does not, and the cell says whose reading that is. What
     the sources disagree on stays withheld: Wikipedia's 99,655 for Ohio's
     4th runner-up in 2018 (the Clerk's 89,412 adds up), the Clerk's 63,606
-    for Texas's 14th in 2022 (the percentages say 68,606). The strip is the
+    for Texas's 14th in 2022 (the percentages say 68,606). A name the Clerk
+    prints otherwise than the second compilation joins it only through an
+    evidenced `overrides.SEAT_HISTORY_NAMES` entry quoting the state's own
+    returns, and only a row that is that whole name, the counts still
+    checked: Pennsylvania's returns and the Clerk print "Madeleine Dean
+    Cunnane" (PA-4, 2020), Texas's canvass "Monica De La Cruz-Hernandez"
+    (TX-15, 2020) and California's Statement of Vote 'G "Maebe A. Girl"
+    Pudlo' (CA-30, 2022), and the surname match withheld all three. Counts
+    the Clerk prints without saying they are a later round's are that round
+    only on the jurisdiction's own official results
+    (`overrides.SEAT_HISTORY_ROUNDS`, applied only where the file prints
+    exactly those names and counts, else an error), and the cell names and
+    links that document: Guam's 2020 delegate counts are the November 17
+    runoff's in the Guam Election Commission's official report (against
+    the November table they "disagreed"), and Maine's 2nd in 2018 is round
+    2 of the Secretary of State's certified tabulation, no longer
+    Wikipedia's reading alone. An entry the cache does not bear out is a
+    warning (`seat-history-override-stale`). The strip is the
     state's file's, not the index's (`emit.RACE_INDEX_LEAVES_OUT`, rule
     94), and its classes are its own: drawn as `seat-strip`, the
     legislature's seat squares, it set each word on a line of its own. The

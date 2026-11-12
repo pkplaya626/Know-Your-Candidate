@@ -921,5 +921,179 @@ class TestTheStripsReview(unittest.TestCase):
             sh.okina("`quoted' text")
 
 
+def _contest(*people, unnamed=0):
+    return {"rows": [{"name": n, "party": p, "votes": v, "lines": [p]} for n, p, v in people],
+            "unnamed": unnamed, "noVote": 0, "rcvRound": False}
+
+
+class TestNameFormsAndRounds(unittest.TestCase):
+    """What PR #187 left withheld for a person to settle: a name the Clerk
+    prints otherwise than the second compilation, joined only through an
+    evidenced overrides.SEAT_HISTORY_NAMES entry and only to a row that is
+    that whole name; and counts the Clerk prints without saying they are a
+    later round's, read as that round only on the jurisdiction's own
+    official results (overrides.SEAT_HISTORY_ROUNDS), named on the page."""
+
+    def test_a_legal_name_joins_the_name_the_second_source_writes_only_by_its_entry(self):
+        # Pennsylvania's 4th, 2020: the state's returns and the Clerk print
+        # "Madeleine Dean Cunnane", Wikipedia "Madeleine Dean".
+        result = _result(("Madeleine Dean Cunnane", "Democrat", 264637),
+                         ("Kathy Barnette", "Republican", 179926), year=2020)
+        rows = [{"name": "Madeleine Dean", "votes": 264637, "won": True},
+                {"name": "Kathy Barnette", "votes": 179926}]
+        self.assertEqual(sh._check(result, rows)[0], None)
+        forms = sh.name_forms("PA-4", 2020)
+        self.assertEqual(forms, {"Madeleine Dean Cunnane": ["Madeleine Dean"]})
+        self.assertEqual(sh._check(result, rows, forms)[0], "agree")
+        # The counts are still checked against the joined row.
+        self.assertEqual(sh._check(result, [dict(rows[0], votes=200000), rows[1]], forms)[0],
+                         "disagree")
+        # Another year or another seat has no form.
+        self.assertEqual(sh.name_forms("PA-4", 2022), {})
+        self.assertEqual(sh.name_forms("PA-3", 2020), {})
+
+    def test_a_form_joins_a_whole_name_never_a_word_of_it(self):
+        # Texas's 15th, 2020: "Monica De La Cruz-Hernandez" is Wikipedia's
+        # "Monica De La Cruz", not anyone else of the name De La Cruz.
+        clerk, forms = "Monica De La Cruz-Hernandez", ["Monica De La Cruz"]
+        self.assertIsNone(sh._find(clerk, [{"name": "Juan De La Cruz", "votes": 1}], forms))
+        self.assertIsNone(sh._find(clerk, [{"name": "Monica De La Cruz", "votes": 1}]))
+        row = {"name": "Monica De La Cruz", "votes": 1}
+        self.assertIs(sh._find(clerk, [{"name": "Vicente Gonzalez", "votes": 2}, row], forms), row)
+        # Two rows the name and the form find apart are nobody's.
+        self.assertIsNone(sh._find(clerk, [{"name": "Ann Hernandez", "votes": 2}, row], forms))
+        self.assertEqual(sh.name_forms("TX-15", 2020), {clerk: forms})
+
+    def test_a_ballots_quoted_name_is_joined_only_by_its_entry(self):
+        # California's 30th, 2022: the Clerk and the Statement of Vote print
+        # 'G. “Maebe A. Girl” Pudlo'; the second source "Maebe A. Girl".
+        result = _result(("Adam B. Schiff", "Democrat", 150100),
+                         ("G. “Maebe A. Girl” Pudlo", "Democrat", 60968), year=2022)
+        rows = [{"name": "Adam Schiff", "votes": 150100, "won": True},
+                {"name": "Maebe A. Girl", "votes": 60968}]
+        self.assertIsNone(sh._check(result, rows)[0])
+        self.assertEqual(sh._check(result, rows, sh.name_forms("CA-30", 2022))[0], "agree")
+
+    def test_the_winner_named_otherwise_is_not_named_again_as_who_served(self):
+        def cell():
+            return {"year": 2020, "result": {"candidates": [
+                {"name": "Madeleine Dean Cunnane", "party": "Democrat"},
+                {"name": "Kathy Barnette", "party": "Republican"}]},
+                "holders": [{"id": "D000631", "name": "Madeleine Dean", "party": "Democrat"}]}
+        plain = cell()
+        sh._mark_winner(plain)
+        self.assertNotIn("winner", plain["holders"][0])
+        joined = cell()
+        sh._mark_winner(joined, sh.name_forms("PA-4", 2020))
+        self.assertTrue(joined["holders"][0]["winner"])
+        # The form is matched whole, never by its surname: another Dean who
+        # served the term is not the winner (the second reader of PR #242).
+        other = cell()
+        other["holders"] = [{"id": "X000001", "name": "Howard Dean", "party": "Democrat"}]
+        sh._mark_winner(other, sh.name_forms("PA-4", 2020))
+        self.assertNotIn("winner", other["holders"][0])
+
+    def test_counts_the_clerk_does_not_call_a_runoffs_are_on_the_official_word(self):
+        # Guam's delegate, 2020: the Clerk prints the November 17 runoff's
+        # counts and no footnote; the Guam Election Commission's official
+        # report gives them as the runoff's.
+        contest = _contest(("Michael F. Q. San Nicolas", "Democrat", 10467),
+                           ("Robert A. Underwood", "Democrat", 7090))
+        plain = sh.result_of(contest, {}, 2020, "GU")
+        self.assertEqual((plain["kind"], plain["date"]), ("general", "2020-11-03"))
+        entry = sh.round_of("GU-0", 2020)
+        result = sh.result_of(contest, {}, 2020, "GU", round_=entry)
+        self.assertEqual((result["kind"], result["date"]), ("runoff", "2020-11-17"))
+        self.assertEqual(result["roundFrom"], "official")
+        self.assertIn("Guam Election Commission", result["roundSource"]["title"])
+        self.assertTrue(result["roundSource"]["url"].startswith("https://gec.guam.gov/"))
+        self.assertEqual(result["margin"], 19.2)
+        # Checked against the runoff's table, never the first round's.
+        section = (
+            "{{Election box begin no change|title=Guam Delegate general election results, 2020}}\n"
+            "{{Election box winning candidate with party link no change|candidate=[[Michael San "
+            "Nicolas|Michael F.Q. San Nicolas]]|votes=13,000}}\n{{Election box winning candidate "
+            "with party link no change|candidate=Robert Anacletus Underwood|votes=9,300}}\n"
+            "{{Election box candidate with party link no change|candidate=William Mendiola Castro"
+            "|votes=5,942}}\n{{Election box end}}\n{{Election box begin no change| title = Guam "
+            "Delegate election runoff results, 2020}}\n{{Election box winning candidate with party "
+            "link no change|candidate=Michael F.Q. San Nicolas|votes=10,467}}\n{{Election box "
+            "candidate with party link no change|candidate=Robert Anacletus Underwood|votes=7,090}}"
+            "\n{{Election box end}}")
+        self.assertEqual(sh.house_check(plain, section)[0], "disagree")
+        self.assertEqual(sh.house_check(result, section)[0], "agree")
+        # The page's copies carry whose word the round is.
+        self.assertEqual(sh._strip_result(result, "House")["roundSource"], result["roundSource"])
+        self.assertEqual(sh._shown(result, "House")["roundFrom"], "official")
+
+    def test_an_entry_a_changed_file_does_not_fit_is_an_error(self):
+        entry = sh.round_of("GU-0", 2020)
+        for contest in (
+                _contest(("Michael F. Q. San Nicolas", "Democrat", 10467),
+                         ("Robert A. Underwood", "Democrat", 7091)),
+                _contest(("Michael F. Q. San Nicolas", "Democrat", 10467),
+                         ("Robert A. Underwood", "Democrat", 7090),
+                         ("Wil Castro", "Republican", 5942)),
+                _contest(("Michael F. Q. San Nicolas", "Democrat", 10467),
+                         ("Robert A. Underwood", "Democrat", 7090), unnamed=51)):
+            with self.assertRaises(sh.ClerkFormatError):
+                sh.result_of(contest, {}, 2020, "GU", round_=entry)
+        # A round the file footnotes itself needs no entry: one beside it is stale.
+        noted = _contest(("Michael F. Q. San Nicolas", "Democrat", 10467),
+                         ("Robert A. Underwood", "Democrat", 7090))
+        for row in noted["rows"]:
+            row["note"] = "1"
+        with self.assertRaises(sh.ClerkFormatError):
+            sh.result_of(noted, {"1": "This vote count is from the runoff election held on "
+                                      "November 17, 2020."}, 2020, "GU", round_=entry)
+
+    def test_a_final_round_on_the_states_certified_tabulation_is_said_to_be_its(self):
+        # Maine's 2nd, 2018: the Clerk prints Golden 142,440 and Poliquin
+        # 138,931, Maine's certified tabulation's round 2.
+        contest = _contest(("Jared F. Golden", "Democrat", 142440),
+                           ("Bruce Poliquin", "Republican", 138931))
+        self.assertEqual(sh.result_of(contest, {}, 2018, "ME")["rankedChoice"], "first-choices")
+        result = sh.result_of(contest, {}, 2018, "ME", round_=sh.round_of("ME-2", 2018))
+        self.assertEqual(result["kind"], "rcv-final")
+        self.assertNotIn("rankedChoice", result)
+        self.assertEqual(result["roundFrom"], "official")
+        self.assertIn("maine.gov", result["roundSource"]["url"])
+        infobox = ("{{Infobox election\n| 1blank = First round\n| 2blank = Maximum round\n"
+                   "| nominee1 = '''[[Jared Golden]]'''\n| 1data1 = 132,013\n"
+                   "| 2data1 = '''142,440<br />50.62%'''\n| nominee2 = [[Bruce Poliquin]]\n"
+                   "| 1data2 = 134,184\n| 2data2 = 138,931<br />49.38%\n}}")
+        self.assertEqual(sh.house_check(result, infobox)[0], "agree")
+        self.assertEqual((result["kind"], result["roundFrom"]), ("rcv-final", "official"))
+
+    def test_every_entry_says_where_and_when_it_was_read(self):
+        from kyc.overrides import SEAT_HISTORY_NAMES, SEAT_HISTORY_ROUNDS
+        for key, (form, evidence) in SEAT_HISTORY_NAMES.items():
+            self.assertTrue(form and form != key[2], key)
+            self.assertRegex(evidence, r"read 20\d\d-\d\d-\d\d", key)
+        for key, entry in SEAT_HISTORY_ROUNDS.items():
+            self.assertRegex(entry["evidence"], r"read 20\d\d-\d\d-\d\d", key)
+            self.assertTrue(entry["source"][0] and entry["source"][1].startswith("https://"), key)
+            self.assertEqual(entry["kind"] == "runoff", bool(entry.get("date")), key)
+
+    def test_an_override_the_cache_does_not_bear_out_is_named(self):
+        held = {"seat": "PA-4", "year": 2020, "why": "unchecked",
+                "result": _result(("Madeleine Dean Cunnane", "Democrat", 264637),
+                                  ("Kathy Barnette", "Republican", 179926), year=2020)}
+        cache = {"read": "2026-11-01", "seats": {}, "house": {}, "houseEarlier": {"2020": {}},
+                 "senate": {}, "withheld": [held]}
+        stale = sh.stale_overrides(cache)
+        self.assertTrue(any(s.startswith("PA-4 2020 'Madeleine Dean Cunnane'") and "not shown" in s
+                            for s in stale), stale)
+        self.assertTrue(any(s.startswith("GU-0 2020 as the runoff") for s in stale), stale)
+        self.assertIn("seat-history-override-stale",
+                      [code for _level, code, _m, _d in sh.problems(cache, [])])
+
+    def test_the_committed_cache_bears_out_every_override(self):
+        cache = sh.load_cache(ROOT)
+        if cache is None or "seats" not in cache:
+            self.skipTest("no seat history strip in the cache")
+        self.assertEqual(sh.stale_overrides(cache), [])
+
+
 if __name__ == "__main__":
     unittest.main()
