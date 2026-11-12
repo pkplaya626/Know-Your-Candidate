@@ -551,14 +551,106 @@ class _Font:
         return "".join(out)
 
 
+# A number in a TJ array moves the next glyph back by that many thousandths
+# of an em (PDF 32000-1 9.4.3): a positive one tightens the type, a negative
+# one opens a gap. A gap is a space between words where it opens more than
+# WORD_GAP wider than the array's own letter spacing (``tracking``).
+WORD_GAP = 200
+# The most an array's letter spacing is taken to tighten its type; the fewest
+# numbers it is read from; and how evenly they must sit about their median
+# (half of them within EVEN_WITHIN of it) for the median to be its spacing.
+MAX_TRACKING = 100
+TRACKING_FROM = 3
+EVEN_WITHIN = 20
+# The smallest type, in points as the page draws it, whose letter spacing is
+# measured. The District of Columbia's 2026 sample ballots draw every name
+# again at one point, its letters placed on a grid of 0.12 of an em (600 to
+# the inch at that size): such a grid moves a letter as far as a space, and
+# measured from those arrays' medians "Hope Solomon", "Brooke Pinto" and
+# "Trent Holbrook" read "Hope Sol omon", "Brooke Pi nto" and "Trent Hol
+# brook". Smaller type is read as before.
+LEGIBLE = 3
+
+
+def _median(values):
+    """The median of a sorted, non-empty list."""
+    mid = len(values) // 2
+    return values[mid] if len(values) % 2 else (values[mid - 1] + values[mid]) / 2
+
+
+def tracking(pieces):
+    """How much a TJ array tightens the space between its letters, in
+    thousandths of an em: the median of its numbers, where the array has at
+    least TRACKING_FROM, the median tightens the type, and half of them sit
+    within EVEN_WITHIN of it; no more than MAX_TRACKING. Anything else is
+    nothing, and the array is read as before.
+
+    Guam's 2026 sample ballot sets "(Incumbent) TOUGHEST AG ON CRIME" in
+    tight type, every letter pulled +33 to +59 towards the one before (the
+    median +43, half of them within 7 of it), and the gap between ON and
+    CRIME is -183: 226 wider than the letters around it, and read against a
+    fixed -200 it was no space - "ONCRIME" (the reader of PR #236). Only an
+    evenly tightened array has a spacing to measure from: arrays whose
+    numbers scatter inside a word (from -139 to +259, half of them 37 to 84
+    from their median, in the District's one-point names) read "Hamilton"
+    and "Prince" as "Hamil ton" and "Pri nce" measured from their medians.
+    Never below nothing, so no space the fixed -200 found is lost."""
+    numbers = sorted(float(p) for p in pieces
+                     if isinstance(p, (int, float)) and not isinstance(p, bool))
+    if len(numbers) < TRACKING_FROM:
+        return 0.0
+    median = _median(numbers)
+    if median <= 0 or _median(sorted(abs(n - median) for n in numbers)) > EVEN_WITHIN:
+        return 0.0
+    return min(median, float(MAX_TRACKING))
+
+
+def tj_text(pieces, font=None, tight=0.0):
+    """The text a ``Tj`` or ``TJ`` shows: its strings in *font*'s words (or
+    WinAnsi's, with no font), with a space where a number in the array opens
+    more than WORD_GAP wider than its letters, *tight* (``tracking``). A
+    space the fixed -200 would not have found is put only between two
+    characters that are not spaces already."""
+    parts = []
+    for p in pieces:
+        if isinstance(p, bytes):
+            parts.append(font.text(p) if font else p.decode("cp1252", "replace"))
+        elif isinstance(p, (int, float)) and not isinstance(p, bool):
+            if p < -WORD_GAP:
+                parts.append(" ")
+            elif p < tight - WORD_GAP:
+                parts.append(None)
+    text = ""
+    for i, part in enumerate(parts):
+        if part is not None:
+            text += part
+            continue
+        after = next((q for q in parts[i + 1:] if q), "")
+        if text and after and not text[-1].isspace() and not after[0].isspace():
+            text += " "
+    return text
+
+
+def closes(tight, char_spacing, size):
+    """How much a run closes the space after it, in thousandths of an em: its
+    array's *tight* (``tracking``), less what its character spacing (``Tc``)
+    opens between the same letters - New York's 2026 political calendar
+    sets runs with Tc 0.123 and every number about +120, which together
+    leave its letters as the font sets them."""
+    opens = char_spacing * 1000 / abs(float(size)) if size else 0.0
+    return max(0.0, tight - max(opens, 0.0))
+
+
 def read_page(doc, page, depth=0):
     """``{"text": [(x, y, text, size)], "images": [{"ref", "info", "box"}]}``:
     every piece of text the page shows, at the point its text matrix puts it
     in page space and at the height its font is drawn, and every image it
     draws (``Do``), with the box - ``(x0, y0,
     x1, y1)`` in page space - the current matrix puts it in. Forms are read
-    through, to a depth of eight."""
-    out = {"text": [], "images": [], "ends": []}
+    through, to a depth of eight. Beside each piece of text, ``ends`` holds
+    where it ends (None where its font gives no widths) and ``tight`` how
+    much its array tightens its letters (``tracking``)."""
+    out = {"text": [], "images": [], "ends": [], "tight": []}
     contents = doc.resolve(page.get("Contents"))
     parts = contents if isinstance(contents, list) else [contents]
     data = b"\n".join(decode(doc.resolve(p), stop_at_image=False)[0]
@@ -640,23 +732,18 @@ def _run(doc, data, resources, ctm, out, depth):
                 word_spacing, char_spacing = float(args[0]), float(args[1])
             shown = args[-1] if args else b""
             pieces = shown if isinstance(shown, list) else [shown]
-            text = "".join(font.text(p) if font else p.decode("cp1252", "replace")
-                           for p in pieces if isinstance(p, bytes))
-            if op == "TJ":
-                # A wide gap in a TJ array is a space between words.
-                text = ""
-                for p in pieces:
-                    if isinstance(p, bytes):
-                        text += font.text(p) if font else p.decode("cp1252", "replace")
-                    elif isinstance(p, (int, float)) and p < -200:
-                        text += " "
             at = _mul(tm, ctm)
+            legible = isinstance(size, (int, float)) and \
+                abs(float(size)) * (abs(at[3]) or abs(at[2]) or 1) >= LEGIBLE
+            tight = tracking(pieces) if legible else 0.0
+            text = tj_text(pieces, font, tight)
             if text.strip():
                 drawn = abs(float(size)) * (abs(at[3]) or abs(at[2]) or 1)
                 out["text"].append((round(at[4], 1), round(at[5], 1), text, round(drawn, 1)))
                 tx = font.advance(pieces, float(size), char_spacing, word_spacing, scale) \
                     if font else None
                 out["ends"].append(None if tx is None else round(at[0] * tx + at[4], 1))
+                out["tight"].append(closes(tight, char_spacing, size))
         elif op == "Do" and args:
             target_ref = xobjects.get(str(args[0]))
             target = doc.resolve(target_ref)
@@ -686,23 +773,33 @@ def page_text(read):
     (within a fifth of the type's size): Alaska's statements set
     "Registered Demo" and "crat" as two runs, and joined with a space the
     cached words misquoted the page (the review of PR #138; rule 57's
-    "Keou gh"). Where a font gives no widths, runs are words."""
+    "Keou gh"). Where a font gives no widths, runs are words. A run set in
+    tight type closes the space after it as it closes its letters
+    (``closes``), so a gap after it is a space from a fifth less that
+    tightening: Guam's 2026 sample ballot sets "4. TAITAGUE," with its
+    letters +55 apart and starts "Joaquin" 2.0 points after it, at 11
+    points, and a fifth (2.2) read "TAITAGUE,Joaquin". An overlap is
+    measured as before: a word set in two runs may overlap by its own
+    tightening."""
     ends = read.get("ends") or []
+    tights = read.get("tight") or []
     lines = {}
     for i, (x, y, text, size) in enumerate(read["text"]):
         end = ends[i] if i < len(ends) else None
-        lines.setdefault(round(y), []).append((x, i, text, size, end))
+        tight = tights[i] if i < len(tights) else 0
+        lines.setdefault(round(y), []).append((x, i, text, size, end, tight))
     out = []
     for y in sorted(lines, reverse=True):
         line, last = "", None
-        for x, _i, text, size, end in sorted(lines[y]):
+        for x, _i, text, size, end, tight in sorted(lines[y]):
             if not line:
                 line = text.strip()
-            elif (last is not None and abs(x - last[0]) <= last[1] / 5
+            elif (last is not None
+                  and -last[1] / 5 <= x - last[0] <= last[1] / 5 - last[1] * last[3] / 1000
                   and not last[2][-1:].isspace() and not text[:1].isspace()):
                 line += text.rstrip()
             else:
                 line = line.rstrip() + " " + text.strip()
-            last = (end, size, text) if end is not None else None
+            last = (end, size, text, tight) if end is not None else None
         out.append(line.strip())
     return "\n".join(line for line in out if line.strip())

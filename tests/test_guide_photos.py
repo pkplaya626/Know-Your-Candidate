@@ -368,6 +368,200 @@ class TestPdfRead(unittest.TestCase):
         self.assertEqual(pdfread.read_page(doc, pages[0])["text"], [(9.0, 9.0, "Hi", 1.0)])
 
 
+GU_BALLOT = os.path.join(os.path.dirname(__file__), "fixtures", "pdf_gu_sample_ballot_2026.pdf")
+
+
+def one_page(body, size=10, matrix="1 0 0 1 50 700"):
+    """A page showing *body* (a TJ array's inside) in a font of 500-unit
+    letters, at *size* through *matrix*."""
+    widths = " ".join(["500"] * 95)
+    stream = f"BT /F1 {size} Tf {matrix} Tm [{body}] TJ ET".encode()
+    objects = {
+        1: b"<< /Type /Pages /Kids [2 0 R] /Count 1 >>",
+        2: b"<< /Type /Page /Parent 1 0 R /MediaBox [0 0 504 720] /Contents 3 0 R "
+           b"/Resources << /Font << /F1 4 0 R >> >> >>",
+        3: b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream
+           + b"\nendstream",
+        4: f"<< /Type /Font /Subtype /TrueType /BaseFont /Arial /FirstChar 32 "
+           f"/LastChar 126 /Widths [{widths}] >>".encode(),
+        5: b"<< /Type /Catalog /Pages 1 0 R >>",
+    }
+    out = b"%PDF-1.4\n"
+    for num in sorted(objects):
+        out += f"{num} 0 obj\n".encode() + objects[num] + b"\nendobj\n"
+    doc = pdfread.Document(out + b"trailer\n<< /Root 5 0 R >>\n%%EOF\n")
+    return pdfread.read_page(doc, doc.pages()[0])
+
+
+class TestTightType(unittest.TestCase):
+    """A gap in a TJ array is a space where it opens more than a fifth of an
+    em wider than the array's own letters (``pdfread.tracking``), and a run
+    set that tight closes the space after it too (``pdfread.closes``)."""
+
+    # Guam's sample ballot, "(Incumbent) TOUGHEST AG ON CRIME": its numbers.
+    MOYLAN = [38.511, 38.039, 54.272, 41.901, 43.365, 36.784, 54.272, 43.365, 43.365, 48.955,
+              -201.445, 32.921, 47.219, 45.764, 36.312, 45.764, 56.199, 45.292, -207.026,
+              56.199, -203.636, 36.312, -183.285, 45.755, 56.662, 38.048, 58.598]
+
+    def test_the_guam_ballot_reads_as_it_is_printed(self):
+        """tests/fixtures/pdf_gu_sample_ballot_2026.pdf is cut from the Guam
+        Election Commission's "2026 General Election Sample Ballot" (Google
+        Drive id 1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN, 241,157 bytes, sha256
+        515c3931...2512432, read 2026-11-11), the file
+        data/statewide_candidates.json cites for Guam's attorney general.
+        Its first page is the ballot's page 2's Attorney General column -
+        the content stream's text block from its BT to the right-hand
+        column's first Tf, verbatim, and an ET; its second the ballot's page
+        1's DEMOCRAT rows 4 and 5 of the Guam Legislature - the stream's
+        bytes from the row's Tf to the next row's Td, verbatim, after a BT
+        and a Tm that puts the line where the block's earlier Td moves left
+        it (279, 387). The fonts are the ballot's own Type0 fonts with their
+        ToUnicode maps and descriptors, their widths cut to the glyphs drawn
+        and without the glyph programs: each run reads at the place, end and
+        tightness it reads at in the ballot. The fixed -200 read "ONCRIME",
+        and a fifth of the type "TAITAGUE,JoaquinManuelPaulino" (PR #236)."""
+        with open(GU_BALLOT, "rb") as handle:
+            doc = pdfread.Document(handle.read())
+        ag, legislature = (pdfread.page_text(pdfread.read_page(doc, p)) for p in doc.pages())
+        self.assertEqual(ag.split("\n"), [
+            "Attorney General of Guam", "Abugao Hineråt Guåhan", "Mark one (1) oval only.",
+            "Måtka unu (1) ha' na ubalao.",
+            "1. TYDINGCO, Phillip James", "Phil Chief Prosecutor",
+            "2. PAULUHN, Jordan Lawrence Evangelista", "NO MORE DRAMA",
+            "3. FISHER, Thomas Joseph", "Attorney Fisher",
+            "4. SANTOS, Peter John", "GRASSROOTS SON OF GUAM",
+            "5. MOYLAN, Douglas B.", "(Incumbent) TOUGHEST AG ON CRIME", "Write-in"])
+        self.assertEqual(legislature.split("\n"), [
+            "4. TAITAGUE, Joaquin Manuel Paulino", "Donggo/Pomparu/Quin",
+            "5. PARKINSON, William Mark Alkonga"])
+
+    @staticmethod
+    def set_tight(words, gaps, between=45.0):
+        """A TJ array of *words*, every letter pulled *between* towards the
+        one before and the words *gaps* apart."""
+        pieces = []
+        for i, word in enumerate(words):
+            if i:
+                pieces.append(gaps[i - 1])
+            for k, letter in enumerate(word):
+                if k:
+                    pieces.append(between)
+                pieces.append(letter.encode())
+        return pieces
+
+    def test_a_gap_is_measured_from_the_letters_it_tightens(self):
+        self.assertEqual(pdfread.tracking(self.MOYLAN), 43.365)
+        pieces = self.set_tight(["(Incumbent)", "TOUGHEST", "AG", "ON", "CRIME"],
+                                [-201.445, -207.026, -203.636, -183.285])
+        self.assertEqual(pdfread.tracking(pieces), 45.0)
+        self.assertEqual(pdfread.tj_text(pieces, tight=pdfread.tracking(pieces)),
+                         "(Incumbent) TOUGHEST AG ON CRIME")
+        # Read against the fixed -200, as before: "ONCRIME".
+        self.assertEqual(pdfread.tj_text(pieces), "(Incumbent) TOUGHEST AG ONCRIME")
+        # A word whose letters abut is one word however tight: kerning
+        # pairs that close or open a little stay inside it.
+        pieces = self.set_tight(["Democrat"], [])
+        pieces[1] = -60                         # "e" opened from "D" by 60
+        self.assertEqual(pdfread.tj_text(pieces, tight=pdfread.tracking(pieces)), "Democrat")
+
+    def test_an_array_that_does_not_tighten_its_letters_is_read_as_before(self):
+        # Kerning about nothing: a -183 is no space, a -201 is.
+        loose = [b"Regis", 3, b"tered", -2, b"Demo", -183, b"crat", 1, b"s", -201, b"x"]
+        self.assertEqual(pdfread.tracking(loose), 0.0)
+        self.assertEqual(pdfread.tj_text(loose, tight=pdfread.tracking(loose)),
+                         "RegisteredDemocrats x")
+        # Fewer than three numbers say nothing of the letters.
+        self.assertEqual(pdfread.tracking([b"A", 45, b"B", -183, b"C"]), 0.0)
+        # Numbers scattered inside a word (the District's one-point names:
+        # "Rhonda Hamilton", half of them 41 from their median) are not a
+        # spacing: -139 after the "l" stays inside "Hamilton".
+        hamilton = [b"Rh", 74.624, b"o", 74.524, b"n", 74.524, b"d", 74.524, b"a", -286.461,
+                    b"H", 120.161, b"a", -45.838, b"m", 231.195, b"i", -18.656, b"l", -139.118,
+                    b"t", 37.312, b"o", 74.524, b"n"]
+        self.assertEqual(pdfread.tracking(hamilton), 0.0)
+        self.assertEqual(pdfread.tj_text(hamilton, tight=0.0), "Rhonda Hamilton")
+        # A loosening median is not a tightening.
+        self.assertEqual(pdfread.tracking([b"a", -20, b"b", -30, b"c", -25, b"d"]), 0.0)
+        # And a tightening is taken to a tenth of an em at most.
+        self.assertEqual(pdfread.tracking([b"a", 300, b"b", 300, b"c", 300, b"d"]), 100.0)
+
+    def test_no_space_the_fixed_test_found_is_lost(self):
+        import random
+        rng = random.Random(20261111)
+        tightened = 0
+        for n in range(3000):
+            # Half loose, half tight: letters about a tracking, some gaps.
+            track = rng.uniform(-40, 120) if n % 2 else 0.0
+            pieces = [b"a"]
+            for _ in range(rng.randint(1, 14)):
+                gap = rng.random() < 0.25
+                number = rng.uniform(-330, -100) if gap else track + rng.uniform(-25, 25)
+                pieces += [round(number, 1), b"b"]
+            tight = pdfread.tracking(pieces)
+            tightened += tight > 0
+            fixed = pdfread.tj_text(pieces).split(" ")
+            measured = pdfread.tj_text(pieces, tight=tight).split(" ")
+            # The measured words are the fixed words, each cut at most.
+            for word in fixed:
+                taken = ""
+                while taken != word:
+                    self.assertTrue(measured and word.startswith(taken + measured[0]),
+                                    (pieces, fixed, measured))
+                    taken += measured.pop(0)
+            self.assertEqual(measured, [])
+        self.assertGreater(tightened, 500)
+
+    def test_a_measured_space_never_doubles_one(self):
+        pieces = [b"Democratic, ", -183] + self.set_tight(["Republican"], [])
+        self.assertEqual(pdfread.tracking(pieces), 45.0)
+        self.assertEqual(pdfread.tj_text(pieces, tight=45.0), "Democratic, Republican")
+        pieces = self.set_tight(["Democratic,"], []) + [-183, b" Republican"]
+        self.assertEqual(pdfread.tj_text(pieces, tight=45.0), "Democratic, Republican")
+        # Nor stands at either end of the run.
+        pieces = [-183] + self.set_tight(["ABCD"], []) + [-183]
+        self.assertEqual(pdfread.tracking(pieces), 45.0)
+        self.assertEqual(pdfread.tj_text(pieces, tight=45.0), "ABCD")
+
+    def test_one_point_type_is_read_as_before(self):
+        # The District's 2026 ballots draw "Hope Solomon" again at one point,
+        # its letters on a 600-to-the-inch grid: half its numbers sit at
+        # +74.5, and -139 inside "Solomon" is as far from them (214) as -166
+        # between the words (241). At one point it is read against the fixed
+        # -200, as before; the same array at twelve points is measured.
+        body = ("(Ho) 74.624 (p) 74.524 (e) -166.2 (S) 65.196 (o) 74.524 (l) -139.018 "
+                "(o) 74.524 (m) 110.833 (o) 74.524 (n)")
+        small = one_page(body, size=0.997, matrix="1.003 0 0 1.003 50 700")
+        self.assertEqual(small["text"][0][3], 1.0)
+        self.assertEqual(small["text"][0][2], "HopeSolomon")
+        self.assertEqual(small["tight"], [0.0])
+        self.assertEqual(one_page(body, size=12)["tight"], [74.524])
+
+    def test_a_tight_run_closes_the_space_after_it(self):
+        # "4. TAITAGUE," ends at 330.3 with its letters 55 apart and the given
+        # names start 2.0 points on, at 11 points: a fifth (2.2) less 55
+        # thousandths of the type (0.61) is 1.59, and 2.0 is a space.
+        read = {"text": [(263.2, 371.0, "4. TAITAGUE,", 11.0), (332.3, 371.0, "Joaquin", 11.0)],
+                "ends": [330.3, 360.0], "tight": [55.467, 54.272]}
+        self.assertEqual(pdfread.page_text(read), "4. TAITAGUE, Joaquin")
+        self.assertEqual(pdfread.page_text(dict(read, tight=[0, 0])), "4. TAITAGUE,Joaquin")
+        # An overlap is measured as before: New York's calendar sets "filing
+        # sh" and "all" as two runs, the second starting 1.2 points before
+        # the first ends.
+        read = {"text": [(513.6, 217, "for filing sh", 10.0), (637.5, 217, "all", 10.0)],
+                "ends": [638.7, 646.9], "tight": [100.0, 0.0]}
+        self.assertEqual(pdfread.page_text(read), "for filing shall")
+        # A run whose character spacing opens its letters as far as its
+        # numbers close them is not tight (New York's Tc 0.123, numbers
+        # about +120), and a tightening by Tc alone is not counted.
+        self.assertEqual(pdfread.closes(100.0, 0.123, 1), 0.0)
+        self.assertEqual(pdfread.closes(55.467, 0.0, 11.002), 55.467)
+        self.assertEqual(pdfread.closes(0.0, -0.5, 11), 0.0)
+        self.assertEqual(pdfread.closes(55.467, -0.5, 11), 55.467)
+        # A read with no tightness recorded is read as before.
+        self.assertEqual(pdfread.page_text({"text": read["text"], "ends": read["ends"]}),
+                         "for filing shall")
+
+
 class Root(unittest.TestCase):
     """A scratch site with a manifest and photos/."""
 
