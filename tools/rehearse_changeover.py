@@ -142,6 +142,13 @@ def january(root=REPO):
     members = {p["id"]: p for p in profiles if not p["isCandidate"]}
     people = {p["bioguide"]: copy.deepcopy(p) for p in snap["legislators"]}
     member_fec = {i for p in snap["legislators"] for i in p.get("fecAll") or []}
+    # A filing is a member's own by a record, never by the FEC's incumbent
+    # flag (rule 17): from 2026-11-12 the flag marks November's winners, and
+    # dropping every flagged row seated CA-1's eliminated filer in the seat
+    # its called winner had won (the second reader of PR #245).
+    from kyc import departed as departed_mod
+    own = {p.get("fecCandidateId") for p in members.values()} - {None}
+    left = departed_mod.for_filings(raw.get("departed"))
     status_of = {}
     for rid, race in ((results.load_cache(root) or {}).get("races") or {}).items():
         for cid, status in (race.get("status") or {}).items():
@@ -149,7 +156,8 @@ def january(root=REPO):
     filers = {}
     for row in field["candidates"]:
         rid = candidates.race_id(row)
-        if rid and row["candidate_id"] not in member_fec and row.get("incumbent_challenge") != "I":
+        if rid and row["candidate_id"] not in member_fec | own and not (
+                row.get("incumbent_challenge") == "I" and candidates.departed_member(row, left)):
             filers.setdefault(rid, []).append(row)
     for rid, rows in filers.items():
         # Whoever the results elected, then a nominee: only someone on the

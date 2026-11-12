@@ -13127,8 +13127,12 @@ async function testSearchAnswers() {
     check("and no sitting member is ranked by a title's letters", byTitle.length === 0,
       byTitle.slice(0, 3).map((p) => p.name).join(", "));
   });
+  // By the pipeline's surname, not the name's last word: the January
+  // rehearsal seats "Raymond Edward Smith Jr." once NC-3 is called for him,
+  // and "... jr" hid him from this list while the page rightly ranked him
+  // among them (the refresh of 2026-11-12 failed on it).
   const houseSmiths = KYC.people().filter((p) => KYC.seated(p) && /House/.test(p.chamber) &&
-    / smith$/.test(KYC.searchFold(p.name)));
+    (KYC.searchFold(p.surname || "") === "smith" || / smith$/.test(KYC.searchFold(p.name))));
   await ask("Congresswoman Smith");
   suite("search — 'Congresswoman Smith' is the sitting House members named Smith first", () => {
     if (!houseSmiths.length) { check("no sitting House member named Smith (nothing to test)", true); return; }

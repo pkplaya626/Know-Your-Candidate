@@ -40,8 +40,15 @@ def build(historical, snapshot, sitting=None):
         raise ValueError("the snapshot has no read date")
     number = sitting or cycle.snapshot_congress(snapshot)
     began = cycle.congress_start(number).isoformat()
+    # Once the Congress a cycle elects sits, who left the Congress before it
+    # - during it, or with it on its last day - is kept beside the list
+    # (``previous``): the FEC goes on flagging their filings as incumbents'
+    # for the cycle just voted, and this list reset to nobody on January 3
+    # (``for_filings``; the second reader of PR #245).
+    keep_previous = number == cycle.electing_congress()
+    before = cycle.congress_start(number - 1).isoformat()
     seated = set(legislators.by_bioguide(snapshot))
-    members = []
+    members, previous = [], []
     for entry in historical or []:
         terms = entry.get("terms") or []
         if not terms:
@@ -50,7 +57,8 @@ def build(historical, snapshot, sitting=None):
         left = str(last.get("end") or "")[:10]
         # Ended after this Congress's first day: a term that ended on it
         # was the previous Congress's.
-        if not (began < left <= read):
+        this = began < left <= read
+        if not this and not (keep_previous and before < left <= began):
             continue
         person = legislators.trim(entry)
         if not person or person["bioguide"] in seated:
@@ -72,14 +80,36 @@ def build(historical, snapshot, sitting=None):
         found = legislators.aliases(person, name)
         if found:
             row["aliases"] = found
-        members.append(row)
+        (members if this else previous).append(row)
     members.sort(key=lambda r: (r["left"], r["bioguide"]))
-    return {
+    previous.sort(key=lambda r: (r["left"], r["bioguide"]))
+    out = {
         "source": legislators.HISTORICAL_URL,
         "congress": number,
         "membershipRead": read,
         "members": members,
     }
+    if keep_previous:
+        out["previous"] = previous
+    return out
+
+
+def for_filings(cache):
+    """The members whose own filings for the cycle the FEC may still flag as
+    incumbents': whoever left the Congress the cycle's seats were held in
+    (the one before the Congress it elects) - this list while that Congress
+    sits, its ``previous`` once the next one does. Anyone else's flagged
+    filing is not theirs to set aside (kyc/candidates.departed_member)."""
+    from . import cycle
+
+    held = cycle.electing_congress() - 1
+    if not cache:
+        return []
+    if cache.get("congress") == held:
+        return list(cache.get("members") or [])
+    if cache.get("congress") == held + 1:
+        return list(cache.get("previous") or [])
+    return []
 
 
 def save_cache(payload, root="."):

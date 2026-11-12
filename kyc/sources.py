@@ -73,7 +73,7 @@ def load_all(root="."):
             )
         )
 
-    from . import cycle
+    from . import cycle, departed
 
     return {
         "members": members,
@@ -84,4 +84,7 @@ def load_all(root="."):
         # The frozen race record for the cycle (kyc/record.py), or None
         # before one is frozen.
         "record": cycle.load_record(root),
+        # Who left this Congress (kyc/departed.py), or None before one is
+        # read: a filing the FEC still flags as the incumbent's may be theirs.
+        "departed": departed.load_cache(root),
     }
