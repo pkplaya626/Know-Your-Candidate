@@ -494,6 +494,15 @@ class TestARunoffsOwnDates(unittest.TestCase):
         self.assertTrue(all(l["keep"] for l in lines))
         entry = voting_dates.for_page(DATA)["states"]["MP"]
         self.assertEqual([entry["urls"][i] for i in by["runoff-early"]["src"]], [self.CALENDAR])
+        # The arrive line says "postmarked", and stays after the postmark line
+        # is gone: it links a quote that says so (rule 84), the law, never
+        # the calendar alone, which gives the day and not the word (the second
+        # reader of PR #237).
+        linked = [entry["urls"][i] for i in by["runoff-arrive"]["src"]]
+        self.assertTrue(linked)
+        quotes = [s.get("quote") or "" for s in DATA["states"]["MP"]["sources"]
+                  if s["url"] in linked and s["field"].startswith("runoff.mail.returnDeadline")]
+        self.assertTrue(any("postmarked" in q for q in quotes), (linked, quotes))
 
     def test_the_words_name_no_race_and_nobody_and_the_runoff_is_set(self):
         from kyc import statewide

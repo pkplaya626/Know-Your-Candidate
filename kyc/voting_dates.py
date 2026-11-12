@@ -859,7 +859,17 @@ def runoff_lines(code, record, links):
                         "p": f"The last day for mail ballots {of_mid} postmarked by "
                              f"{_long(returned)} to arrive",
                         "s": "Runoff mailed ballots arrive by",
-                        "src": links.of("runoff.mail.returnDeadline.receivedBy")})
+                        # The line says "postmarked", so it links a quote that
+                        # does (rule 84): the CNMI's calendar gives the day and
+                        # never the word, the law (1 CMC 6213(a)) both, and the
+                        # postmark line that linked the law is gone after the
+                        # runoff (the second reader of PR #237).
+                        "src": links.of("runoff.mail.returnDeadline.receivedBy",
+                                        "runoff.mail.returnDeadline.date",
+                                        "runoff.mail.returnDeadline.rule",
+                                        want=lambda s: bool(RULE_WORDS["postmarked"].search(
+                                            s.get("quote") or "")))
+                        or links.of("runoff.mail.returnDeadline.receivedBy")})
     elif rule == "received" and (returned or received):
         due = returned or received
         time = _time(get(record, "runoff.mail.returnDeadline.time"))
