@@ -7319,7 +7319,7 @@
   "name": "Adrian Boafo",
   "original": "https://mgaleg.maryland.gov/2026RS/images/boafo01.jpg",
   "page": "https://mgaleg.maryland.gov/mgawebsite/Members/Details/boafo01",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/0/09/Adrian_Boafo_Feb2023.jpg"
   ],
@@ -9078,7 +9078,7 @@
    "width": 2964
   },
   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "state": "NV",
   "url": "https://i0.wp.com/leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg?w=500&ssl=1",
   "via": "state-legislature",
@@ -11301,7 +11301,7 @@
   "name": "Fred Wellman",
   "original": "https://upload.wikimedia.org/wikipedia/commons/4/40/Fred_Wellman%2C_August_2025.png",
   "page": "https://www.wikidata.org/wiki/Q131344046",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "set": [
    [
     120,
@@ -11976,7 +11976,7 @@
   "name": "Jacqui V Irwin",
   "original": "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_42.jpg",
   "page": "https://www.assembly.ca.gov/assemblymembers/42",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg"
   ],
@@ -12143,7 +12143,7 @@
   "name": "James Talarico",
   "original": "https://house.texas.gov/images/members/3685.jpg?v=1",
   "page": "https://house.texas.gov/members/3685",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/7/70/James_Talarico_Press_Conference_(cropped).jpg",
    "https://upload.wikimedia.org/wikipedia/commons/8/8b/James_Talarico_Press_Conference.jpg"
@@ -12767,7 +12767,7 @@
    "width": 1500
   },
   "page": "https://senatedems.com/moss",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/2/22/Michigan_Senator_Jeremy_Moss_2019.jpg"
   ],
@@ -13205,7 +13205,7 @@
   "width": 1224
  },
  "person:john andrew williams|KY|H": {
-  "bytes": 10718,
+  "bytes": 10709,
   "credit": {
    "attribution": false,
    "by": "EPalmer221",
@@ -13225,7 +13225,7 @@
   "name": "John Andrew Williams",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/66/John_Drew_Williams_Headshot.jpg",
   "page": "https://www.wikidata.org/wiki/Q136086044",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "set": [
    [
     120,
@@ -15384,7 +15384,7 @@
   "name": "Martin R Zamora",
   "original": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "state": "NM",
   "url": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "via": "state-legislature",
@@ -17443,51 +17443,43 @@
   "width": 1200
  },
  "person:rebecca bennett|NJ|H": {
-  "bytes": 31964,
+  "bytes": 28825,
   "credit": {
    "attribution": false,
-   "by": "Sgt. Mandy Johnson",
-   "file": "https://commons.wikimedia.org/wiki/File:Littoral_combat_ship_USS_Independence_(LCS_2),_RIMPAC_2014_(Image_3_of_3)_(cropped).jpg",
+   "by": "Office of Senator Andy Kim",
+   "file": "https://commons.wikimedia.org/wiki/File:Rebecca_Bennett_and_Andy_Kim_Nov_2026_(cropped1).jpeg",
    "form": 4,
    "licence": "Public domain",
    "licenceUrl": null,
    "nonFree": false,
-   "year": 2014
+   "year": 2026
   },
-  "evidence": "Wikidata Q141373045 (\"Rebecca Bennett\") carries FEC candidate id H6NJ07201 (P1839) and the image File:Littoral combat ship USS Independence (LCS 2), RIMPAC 2014 (Image 3 of 3) (cropped).jpg (P18); its candidacy in election (P3602) is \"2026 United States House of Representatives elections in New Jersey\"",
+  "evidence": "Wikidata Q141373045 (\"Rebecca Bennett\") carries FEC candidate id H6NJ07201 (P1839) and the image File:Rebecca Bennett and Andy Kim Nov 2026 (cropped1).jpeg (P18); its candidacy in election (P3602) is \"2026 United States House of Representatives elections in New Jersey\"",
   "fec": "H6NJ07201",
-  "file": "File:Littoral combat ship USS Independence (LCS 2), RIMPAC 2014 (Image 3 of 3) (cropped).jpg",
-  "height": 729,
+  "file": "File:Rebecca Bennett and Andy Kim Nov 2026 (cropped1).jpeg",
+  "height": 331,
   "item": "Q141373045",
   "label": "Rebecca Bennett",
   "name": "Rebecca Bennett",
-  "original": "https://upload.wikimedia.org/wikipedia/commons/a/af/Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg",
+  "original": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Rebecca_Bennett_and_Andy_Kim_Nov_2026_%28cropped1%29.jpeg",
   "page": "https://www.wikidata.org/wiki/Q141373045",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "set": [
    [
     120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg/120px-Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Rebecca_Bennett_and_Andy_Kim_Nov_2026_%28cropped1%29.jpeg/120px-Rebecca_Bennett_and_Andy_Kim_Nov_2026_%28cropped1%29.jpeg"
    ],
    [
-    250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg/250px-Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg"
-   ],
-   [
-    330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg/330px-Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg"
-   ],
-   [
-    500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg/500px-Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg"
+    246,
+    "https://upload.wikimedia.org/wikipedia/commons/e/e9/Rebecca_Bennett_and_Andy_Kim_Nov_2026_%28cropped1%29.jpeg"
    ]
   ],
-  "shownHeight": 441,
-  "shownWidth": 330,
+  "shownHeight": 331,
+  "shownWidth": 246,
   "tie": "its candidacy in election (P3602) is \"2026 United States House of Representatives elections in New Jersey\"",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg/330px-Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Rebecca_Bennett_and_Andy_Kim_Nov_2026_%28cropped1%29.jpeg",
   "via": "wikidata-fec",
-  "width": 546
+  "width": 246
  },
  "person:rebecca cooke|WI|H": {
   "credit": {
@@ -17713,7 +17705,7 @@
   "name": "Rick Brattin",
   "original": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "page": "https://www.senate.mo.gov/Senators/Member?id=5",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "state": "MO",
   "url": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "via": "state-legislature",
@@ -18624,7 +18616,7 @@
   "name": "Sean McCann",
   "original": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "page": "https://senatedems.com/mccann",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "state": "MI",
   "url": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "via": "state-legislature",
@@ -19955,7 +19947,7 @@
   "name": "Yolanda Rena Prince",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/65/Yolanda_Prince.jpg",
   "page": "https://www.wikidata.org/wiki/Q139698851",
-  "read": "2026-11-11",
+  "read": "2026-11-12",
   "set": [
    [
     120,

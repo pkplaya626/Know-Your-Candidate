@@ -1,9 +1,9 @@
 {
  "count": 602,
- "edited": "2026-11-11",
+ "edited": "2026-11-12",
  "entries": [
   {
-   "id": "f2d5a70e-d6a6-47e3-bb48-a2107ccd17e0",
+   "id": "183184b4-ba9a-479a-9c8d-5cca2417c084",
    "kind": "tribe",
    "leader": "John Raymond Johnson",
    "name": "Absentee-Shawnee Tribe of Indians of Oklahoma",
@@ -12,7 +12,7 @@
    "title": "Governor"
   },
   {
-   "id": "f90c2c19-919c-4958-b0c8-31c62e5c7d52",
+   "id": "4f8231a5-a81c-4fb5-a2e3-bd906b4f01fa",
    "kind": "tribe",
    "leader": "Etta P Kuzakin",
    "name": "Agdaagux Tribe of King Cove",
@@ -21,7 +21,7 @@
    "title": "President"
   },
   {
-   "id": "2484327f-033b-4313-91cc-4f095d99f30b",
+   "id": "1fd8abdb-d79f-4922-8b78-2032a79e2f02",
    "kind": "tribe",
    "leader": "Jeff L. Grubbe",
    "name": "Agua Caliente Band of Cahuilla Indians of the Agua Caliente Indian Reservation, California",
@@ -30,7 +30,7 @@
    "title": "Chairman"
   },
   {
-   "id": "254e694b-6104-420e-8f7e-c894e0b1a17e",
+   "id": "6b0babc2-8f67-4219-85d2-295fbc8e60bc",
    "kind": "tribe",
    "leader": "Gabriel Lopez",
    "name": "Ak-Chin Indian Community",
@@ -39,7 +39,7 @@
    "title": "Chairman"
   },
   {
-   "id": "8f4b914b-951e-4448-bd67-5a522f5aff81",
+   "id": "a5b57ce6-1d9e-4bfa-a411-c10a79c0e457",
    "kind": "tribe",
    "leader": "Willie Kasayulie",
    "name": "Akiachak Native Community",
@@ -48,7 +48,7 @@
    "title": "Council Chairman"
   },
   {
-   "id": "32a2a97b-8f2f-4159-be4b-94c781ab6476",
+   "id": "9611a519-1415-46a9-b5ca-4e417cf35b7a",
    "kind": "tribe",
    "leader": "Michael P. Williams, Sr.",
    "name": "Akiak Native Community",
@@ -57,7 +57,7 @@
    "title": "Chief"
   },
   {
-   "id": "9f4d6d4a-ad27-4aa4-9e59-b23faae6ae0f",
+   "id": "177a5879-7b06-4572-a433-efd50c75f179",
    "kind": "tribe",
    "leader": "Rick Sylestine",
    "name": "Alabama-Coushatta Tribe of Texas",
@@ -67,7 +67,7 @@
   },
   {
    "disputed": true,
-   "id": "30b6f029-539a-4f0a-b8e7-b251cb733ab4",
+   "id": "e87895e5-08ef-4cc6-84d2-43e3acf786ec",
    "kind": "tribe",
    "leader": "Wilson Yargee / Sam Marshall",
    "name": "Alabama-Quassarte Tribal Town",
@@ -76,7 +76,7 @@
    "title": "Chief"
   },
   {
-   "id": "10200825-bff6-4859-b2a9-f809ca5aa5f8",
+   "id": "421ab451-14bb-4c89-9aa4-2eb14f1c30d7",
    "kind": "tribe",
    "leader": "Harding Sam",
    "name": "Alatna Village",
@@ -85,7 +85,7 @@
    "title": "1st Chief"
   },
   {
-   "id": "5151d22c-100c-4c4b-8c46-31aa899c4f0b",
+   "id": "cbad5dc7-9687-4502-a595-eb5478344368",
    "kind": "tribe",
    "leader": "John W Melovidov",
    "name": "Aleut Community of St. Paul Island (See Pribilof Islands Aleut Communities of St. Paul & St. George Islands) (previously listed as Saint Paul Island (See Pribilof Islands Aleut Communities of St. Paul & St. George Islands))",
@@ -94,7 +94,7 @@
    "title": "President"
   },
   {
-   "id": "37a8e9b9-5fe8-45dc-9caa-1edbb770e5da",
+   "id": "011c31c5-78a6-402a-88c1-11ea8dda61e4",
    "kind": "tribe",
    "leader": "Francis H. Thompson",
    "name": "Algaaciq Native Village (St. Mary's)",
@@ -103,7 +103,7 @@
    "title": "President"
   },
   {
-   "id": "793e5eae-3265-4668-8ebe-9325843d458c",
+   "id": "9104794a-45d5-4efc-b3c5-950135c81bfd",
    "kind": "tribe",
    "leader": "Pollack Simon, Jr.",
    "name": "Allakaket Village",
@@ -112,7 +112,7 @@
    "title": "First Chief"
   },
   {
-   "id": "8d120877-ed89-4d28-873f-d214d082e792",
+   "id": "23be401d-6156-481c-b76e-325f08c94abf",
    "kind": "tribe",
    "leader": "Phillip Del Rosa",
    "name": "Alturas Indian Rancheria, California",
@@ -121,7 +121,7 @@
    "title": "Chairman"
   },
   {
-   "id": "6af9ecba-fe75-4cd6-a820-ef557afd4cbf",
+   "id": "c7ae3c75-884e-49d6-812a-bc884fd42b4a",
    "kind": "tribe",
    "leader": "Jeffrey Peterson",
    "name": "Alutiiq Tribe of Old Harbor",
@@ -130,7 +130,7 @@
    "title": "Chief"
   },
   {
-   "id": "297e9ce6-3017-40e1-9d09-50347d7e0e0a",
+   "id": "3419af63-c440-4566-bc08-2fe064672d39",
    "kind": "tribe",
    "leader": "Mary Jean Duncan",
    "name": "Angoon Community Association",
@@ -139,7 +139,7 @@
    "title": "President"
   },
   {
-   "id": "7969554b-29b9-4859-ba13-4412516c0ba2",
+   "id": "952956b6-9425-4543-91d7-6958677970d3",
    "kind": "tribe",
    "leader": "Nathan Elswick",
    "name": "Anvik Village",
@@ -148,7 +148,7 @@
    "title": "First Chief"
   },
   {
-   "id": "bcadae17-d4cb-472d-895e-764aab6de296",
+   "id": "0b467bc9-5c6f-47e9-8586-53b67fb657db",
    "kind": "tribe",
    "leader": "Durell Cooper III",
    "name": "Apache Tribe of Oklahoma",
@@ -157,7 +157,7 @@
    "title": "Chairman"
   },
   {
-   "id": "ad89c22e-47c1-4fe1-b047-3df51798f949",
+   "id": "eb9285eb-9a97-4a04-a390-07b87c5fdf4e",
    "kind": "tribe",
    "leader": "Galen Gilbert",
    "name": "Arctic Village (See Native Village of Venetie Tribal Government)",
@@ -166,7 +166,7 @@
    "title": "First Chief"
   },
   {
-   "id": "e4eea92a-acee-4c16-b733-bd7e4a6b4305",
+   "id": "08d09fc7-5c51-43e0-9357-22c999ee565f",
    "kind": "tribe",
    "leader": "James C. Landlord",
    "name": "Asa'carsarmiut Tribe",
@@ -175,7 +175,7 @@
    "title": "First Chief"
   },
   {
-   "id": "c70eb2ff-6a01-4fa3-86da-e1d847f22945",
+   "id": "1090fd5d-1aa2-49be-8bbb-d69da3254c0f",
    "kind": "tribe",
    "leader": "Floyd Azure",
    "name": "Assiniboine and Sioux Tribes of the Fort Peck Indian Reservation, Montana",
@@ -184,7 +184,7 @@
    "title": "Chairman"
   },
   {
-   "id": "ce761011-b3e5-4ad7-abb6-509471cebade",
+   "id": "bb08f5f6-a1e4-4da7-897e-2b57a96b4c1d",
    "kind": "tribe",
    "leader": "Amanda Augustine",
    "name": "Augustine Band of Cahuilla Indians, California",
@@ -193,7 +193,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "0caed697-9a90-4314-8ddd-3442cc48c934",
+   "id": "c95aec7a-3a9f-4d37-bc82-995744cfb270",
    "kind": "tribe",
    "leader": "Elizabeth Arbuckle, Phd",
    "name": "Bad River Band of the Lake Superior Tribe of Chippewa Indians of the Bad River Reservation, Wisconsin",
@@ -202,7 +202,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "ec02b419-8850-497d-b9b9-2bd2eff57054",
+   "id": "a1ff45c7-1213-47f9-ba30-be9644b3ab24",
    "kind": "tribe",
    "leader": "Whitney Gravelle",
    "name": "Bay Mills Indian Community, Michigan",
@@ -211,7 +211,7 @@
    "title": "President"
   },
   {
-   "id": "4f1625be-cfc3-4f1a-b82b-f140f081fc76",
+   "id": "487a63ec-d810-4781-a292-cba5e4236b02",
    "kind": "tribe",
    "leader": "Josefina Frank",
    "name": "Bear River Band of the Rohnerville Rancheria, California",
@@ -220,7 +220,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "b47df556-ac0a-4f57-8f67-441081c06c33",
+   "id": "c1724967-3290-4a42-a7f0-cde871af5f5e",
    "kind": "tribe",
    "leader": "Rhonda Pitka",
    "name": "Beaver Village",
@@ -229,7 +229,7 @@
    "title": "First Chief"
   },
   {
-   "id": "71484303-e2f7-4408-b389-8b5595bd86a7",
+   "id": "e96f79f2-4fdb-4801-8dea-f9364af8d38d",
    "kind": "tribe",
    "leader": "Francis Steele, Jr.",
    "name": "Berry Creek Rancheria of Maidu Indians of California",
@@ -238,7 +238,7 @@
    "title": "Chairman"
   },
   {
-   "id": "96bb657c-340b-4cb0-944e-6c6e58bdb0ed",
+   "id": "c57bc6b0-bd4b-406a-a1f6-f4b84deaef8c",
    "kind": "tribe",
    "leader": "Virgil Moorehead",
    "name": "Big Lagoon Rancheria, California",
@@ -247,7 +247,7 @@
    "title": "Chairman"
   },
   {
-   "id": "3ae60939-c560-4bc7-8918-56fd637c0cae",
+   "id": "aae5eb90-c134-43a6-9529-1a5c172de28e",
    "kind": "tribe",
    "leader": "Cheyenne Stone",
    "name": "Big Pine Paiute Tribe of the Owens Valley",
@@ -256,7 +256,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "eca52532-0934-44eb-a8ee-f9a233872a06",
+   "id": "06a4e587-3f37-44ea-bdaf-828f0ceda2d7",
    "kind": "tribe",
    "leader": "Elizabeth Hutchins-Kipp",
    "name": "Big Sandy Rancheria of Western Mono Indians of California",
@@ -265,7 +265,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "1c667c3f-4494-4104-9aa4-62cbb1b2539d",
+   "id": "8d99c3b0-084f-4618-b99f-9d2f6869d696",
    "kind": "tribe",
    "leader": "Flaman McCloud, Jr.",
    "name": "Big Valley Band of Pomo Indians of the Big Valley Rancheria, California",
@@ -274,7 +274,7 @@
    "title": "Chairman"
   },
   {
-   "id": "e5d41c96-6683-4db3-bc86-f1d1a0cceddf",
+   "id": "751412c9-2f78-469c-8a73-ade4a3058f25",
    "kind": "tribe",
    "leader": "Jacqueline Baalam",
    "name": "Birch Creek Tribe",
@@ -283,7 +283,7 @@
    "title": "1st Chief"
   },
   {
-   "id": "a9be90fe-d40e-49fc-b7fa-288f4676fb67",
+   "id": "da452eb1-8a21-4d0a-87d8-c870e343e25e",
    "kind": "tribe",
    "leader": "William Vega",
    "name": "Bishop Paiute Tribe",
@@ -292,7 +292,7 @@
    "title": "Chairman"
   },
   {
-   "id": "22fa7251-f103-49fc-aa5c-25b902d2ca4d",
+   "id": "bdc76222-3281-47bd-9e0f-7ec162850fa7",
    "kind": "tribe",
    "leader": "Terry Tatsey",
    "name": "Blackfeet Tribe of the Blackfeet Indian Reservation of Montana",
@@ -301,7 +301,7 @@
    "title": "Chairman"
   },
   {
-   "id": "3d48aaef-9a3a-419b-a1f2-8889dac34a5d",
+   "id": "8444e81e-6d98-41b1-978c-09ab6b0e1d1b",
    "kind": "tribe",
    "leader": "Jason Ramos",
    "name": "Blue Lake Rancheria, California",
@@ -310,7 +310,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "2e8f97a4-ee0f-4ed9-8d0b-dcfd098ead46",
+   "id": "881c0099-a06d-4083-9323-67c01d2712ac",
    "kind": "tribe",
    "leader": "Kaitlin Crawford",
    "name": "Bridgeport Indian Colony",
@@ -319,7 +319,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "bc92ca5d-aa8b-4ab8-93dc-fa983d94ad69",
+   "id": "1a12d2d4-4779-45b9-9dc2-f9c4e08425a2",
    "kind": "tribe",
    "leader": "Jessalynn Pastran",
    "name": "Buena Vista Rancheria of Me-Wuk Indians of California",
@@ -328,7 +328,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "f2d883d6-ae74-4129-9c2b-2e1b14e393af",
+   "id": "3d07c240-647d-442d-b65f-46a8cb4963ee",
    "kind": "tribe",
    "leader": "Kennedy Tracy",
    "name": "Burns Paiute Tribe",
@@ -337,7 +337,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "ac5fd014-b455-49c6-9373-4f030e539a3f",
+   "id": "f52c369d-2f12-44e4-951c-77d2e8d7bb64",
    "kind": "tribe",
    "leader": "Doug Welmas",
    "name": "Cabazon Band of Cahuilla Indians (previously listed as Cabazon Band of Mission Indians, California)",
@@ -346,7 +346,7 @@
    "title": "Chairman"
   },
   {
-   "id": "bd8f7553-fee4-4762-8455-ef40f58986c8",
+   "id": "d09ba942-9c05-4f46-b8a0-d64c5b77b113",
    "kind": "tribe",
    "leader": "Wayne Mitchum, Jr.",
    "name": "Cachil DeHe Band of Wintun Indians of the Colusa Indian Community of the Colusa Rancheria, California",
@@ -355,7 +355,7 @@
    "title": "Chairman"
   },
   {
-   "id": "4559c281-f0e6-4883-ac59-b9265ce642b8",
+   "id": "ea1e5b8d-5d41-4af1-854d-70fc6524170e",
    "kind": "tribe",
    "leader": "Bobby Gonzalez",
    "name": "Caddo Nation of Oklahoma",
@@ -364,7 +364,7 @@
    "title": "Chairman"
   },
   {
-   "id": "9d135526-f21b-4b01-a539-2be6484a8e8b",
+   "id": "edda9f6b-a7a8-421b-8c1f-234e6652e9e4",
    "kind": "tribe",
    "leader": "Misty Davidson",
    "name": "Cahto Tribe of the Laytonville Rancheria",
@@ -373,7 +373,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "8ce18a68-7fb6-4446-93b6-3c0ed6c9c5d7",
+   "id": "5fd7fbe6-c54f-4667-a23a-dcb9efa04073",
    "kind": "tribe",
    "leader": "Erica Schenk",
    "name": "Cahuilla Band of Indians",
@@ -382,7 +382,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "460005a2-785d-45d7-a100-eeaa261fdb5c",
+   "id": "00ece697-37a0-472c-bcb2-4fa7797dd693",
    "kind": "tribe",
    "leader": "Antoinette Del Rio",
    "name": "California Valley Miwok Tribe, California",
@@ -391,7 +391,7 @@
    "title": "Interim Chairwoman"
   },
   {
-   "id": "28abdb99-e35e-4bff-b333-1ed48580415d",
+   "id": "82aa2da7-abf6-4264-87f1-a99e16ebb4e9",
    "kind": "tribe",
    "leader": "Marcus Cuerro",
    "name": "Campo Band of Diegueno Mission Indians of the Campo Indian Reservation, California",
@@ -400,7 +400,7 @@
    "title": "Chairman"
   },
   {
-   "id": "dc113b32-967f-4864-aeb5-208f5b09bc28",
+   "id": "64f7e7c9-5061-4444-9a8c-fc631d8f54f1",
    "kind": "tribe",
    "leader": null,
    "name": "Capitan Grande Band of Diegueno Mission Indians of California (Barona Group of Capitan Grande Band of Mission Indians of the Barona Reservation, California; Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California)",
@@ -409,27 +409,27 @@
    "title": null
   },
   {
-   "id": "0c3c3f1c-d4e4-4029-ae4b-d3e2905c8a2b",
+   "id": "9e323852-a1ea-4b0c-b883-4b7a2f8953b0",
    "kind": "affiliate",
    "leader": "Raymond Welch",
    "name": "Capitan Grande Band of Diegueno Mission Indians of California: Barona Group of Capitan Grande Band of Mission Indians of the Barona Reservation, California",
-   "parent": "dc113b32-967f-4864-aeb5-208f5b09bc28",
+   "parent": "64f7e7c9-5061-4444-9a8c-fc631d8f54f1",
    "region": "Pacific",
    "state": "CA",
    "title": "Spokesman"
   },
   {
-   "id": "7e278a19-64e7-4c63-a711-b6ddab7654bd",
+   "id": "81941695-1738-408f-be8e-112c93274e9b",
    "kind": "affiliate",
    "leader": "John Christman",
    "name": "Capitan Grande Band of Diegueno Mission Indians of California: Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California",
-   "parent": "dc113b32-967f-4864-aeb5-208f5b09bc28",
+   "parent": "64f7e7c9-5061-4444-9a8c-fc631d8f54f1",
    "region": "Pacific",
    "state": "CA",
    "title": "Chairman"
   },
   {
-   "id": "dc7a502a-1ce5-4932-bca6-076437e62ff4",
+   "id": "f864cfd4-0c7e-4aa6-9bf6-d2f0b6dd5b11",
    "kind": "tribe",
    "leader": "Brian Harris",
    "name": "Catawba Indian Nation",
@@ -438,7 +438,7 @@
    "title": "Chief"
   },
   {
-   "id": "f3fa3faa-c3ce-4a38-ad78-cdf16e37ad5b",
+   "id": "7ec77331-1a68-4109-9566-ff566cabb769",
    "kind": "tribe",
    "leader": "Clint Halftown",
    "name": "Cayuga Nation",
@@ -447,7 +447,7 @@
    "title": "Nation Representative"
   },
   {
-   "id": "680a59b1-4562-4216-9267-0cc0f758b66a",
+   "id": "5eb6fac0-4db4-40a4-9b07-4ef591fbfd3e",
    "kind": "tribe",
    "leader": "Monique Davis",
    "name": "Cedarville Rancheria, California",
@@ -456,7 +456,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "1dc7946b-6256-4f8f-b9a0-e414c34c0660",
+   "id": "377d5d3a-578d-426d-9e0c-d99447290173",
    "kind": "tribe",
    "leader": "Richard J. Peterson",
    "name": "Central Council of the Tlingit & Haida Indian Tribes",
@@ -465,7 +465,7 @@
    "title": "President"
   },
   {
-   "id": "d1e0d1f8-9306-48d6-8b91-50136b066fb5",
+   "id": "264a1d90-8629-44fd-b0ab-32506d7b9f48",
    "kind": "tribe",
    "leader": "Stephanie Herbert",
    "name": "Chalkyitsik Village",
@@ -474,7 +474,7 @@
    "title": "First Chief"
   },
   {
-   "id": "14ca4050-bb95-4d9a-8a38-34e5ce3078da",
+   "id": "b0c91278-c2ac-4493-8485-dc1bdaa2194d",
    "kind": "tribe",
    "leader": "Marilyn Beeter",
    "name": "Cheesh-Na Tribe",
@@ -483,7 +483,7 @@
    "title": "President"
   },
   {
-   "id": "563a3f4d-0217-4207-9b26-3f007a67e544",
+   "id": "1b85842f-d65a-4559-8dca-abe978fe5220",
    "kind": "tribe",
    "leader": "Daniel Leivas",
    "name": "Chemehuevi Indian Tribe of the Chemehuevi Reservation, California",
@@ -492,7 +492,7 @@
    "title": "Chairman"
   },
   {
-   "id": "31c8bb54-836b-4682-ae6b-2648ac9a155b",
+   "id": "63a0626f-9f54-4d8e-9c18-4b3dffe5e255",
    "kind": "tribe",
    "leader": "Garth Sundberg, Sr.",
    "name": "Cher-Ae Heights Indian Community of the Trinidad Rancheria, California",
@@ -501,7 +501,7 @@
    "title": "Chairman"
   },
   {
-   "id": "a9b44f07-8e34-4423-bde0-609ac860604b",
+   "id": "18ac8bcf-ca7c-4ccc-87b8-50f531afaabf",
    "kind": "tribe",
    "leader": "Chuck Hoskin, Jr.",
    "name": "Cherokee Nation",
@@ -510,7 +510,7 @@
    "title": "Principal Chief"
   },
   {
-   "id": "b732517a-b97b-405d-a752-6578ca6aa0e0",
+   "id": "c76dc132-70c4-4f0e-b371-1af083fb75c1",
    "kind": "tribe",
    "leader": "Esther Friday",
    "name": "Chevak Native Village",
@@ -519,7 +519,7 @@
    "title": "First Chief"
   },
   {
-   "id": "3fb989c0-ffc3-40f6-84bd-23329bc6b140",
+   "id": "f6d570d6-dbe9-4a51-8b41-93f2c3b31a10",
    "kind": "tribe",
    "leader": "Reggie Wassana",
    "name": "Cheyenne and Arapaho Tribes, Oklahoma",
@@ -528,7 +528,7 @@
    "title": "Governor"
   },
   {
-   "id": "33cc7560-7cfe-4a8b-9deb-ceb16fdbe84c",
+   "id": "044d63d2-7c95-4a82-a170-841976256d1c",
    "kind": "tribe",
    "leader": "Ryman LeBeau",
    "name": "Cheyenne River Sioux Tribe of the Cheyenne River Reservation, South Dakota",
@@ -537,7 +537,7 @@
    "title": "Chairman"
   },
   {
-   "id": "c8c45c7b-4d5d-43c0-87d1-c78f04b3aa55",
+   "id": "fd6f9da6-2966-4c16-9ab5-24d7c07d1712",
    "kind": "tribe",
    "leader": "Stephen R, Adkins",
    "name": "Chickahominy Indian Tribe",
@@ -546,7 +546,7 @@
    "title": "Chief"
   },
   {
-   "id": "8dac30d4-dfd9-4099-bf69-ec05278657d9",
+   "id": "8d0f333c-5650-4bed-a3a2-a044e16e90d5",
    "kind": "tribe",
    "leader": "Joanne Howard",
    "name": "Chickahominy Indian Tribe—Eastern Division",
@@ -555,7 +555,7 @@
    "title": "Chief"
   },
   {
-   "id": "4793d1f4-9f1b-4dbc-91ae-acf5718d6f61",
+   "id": "f4a3e694-77ab-4a62-98f9-3908feb7a298",
    "kind": "tribe",
    "leader": "Gary Harrison",
    "name": "Chickaloon Native Village",
@@ -564,7 +564,7 @@
    "title": "Chairman"
   },
   {
-   "id": "47a74795-9829-423f-9953-0e1d9b9ae207",
+   "id": "c1fc6034-6235-4ef3-83b7-30c523f9e253",
    "kind": "tribe",
    "leader": "Joseph Mathiesen-Powell",
    "name": "Chicken Ranch Rancheria of Me-Wuk Indians of California",
@@ -573,7 +573,7 @@
    "title": "Chairman"
   },
   {
-   "id": "46f26008-8af6-404b-a481-11da51e94198",
+   "id": "4b016582-0e06-4ca8-8873-7284982f0f3e",
    "kind": "tribe",
    "leader": "Roderick Carlson",
    "name": "Chignik Bay Tribal Council",
@@ -582,7 +582,7 @@
    "title": "President"
   },
   {
-   "id": "e2e010b0-6bb7-40d6-b67b-efa1dadd5380",
+   "id": "0c4bb258-ac3d-4d36-b22a-0d164d44417d",
    "kind": "tribe",
    "leader": "Terry Stepanoff",
    "name": "Chignik Lake Village",
@@ -591,7 +591,7 @@
    "title": "President"
   },
   {
-   "id": "32212810-a9eb-459f-b2b1-8b8989847649",
+   "id": "42b089fc-c80b-460b-ae8b-e6a10f9844bd",
    "kind": "tribe",
    "leader": "Kimberly Strong",
    "name": "Chilkat Indian Village (Klukwan)",
@@ -600,7 +600,7 @@
    "title": "President"
   },
   {
-   "id": "6a515eb8-93e6-4c69-8357-e0a8f300c198",
+   "id": "e84f616c-c041-46e8-bf29-bd5332dc4fa8",
    "kind": "tribe",
    "leader": "James Hart",
    "name": "Chilkoot Indian Association (Haines)",
@@ -609,7 +609,7 @@
    "title": "President"
   },
   {
-   "id": "4ce10225-91f5-407d-9937-e4008130cd5a",
+   "id": "d0cedb82-73c9-4a0f-92cd-790b51477096",
    "kind": "tribe",
    "leader": "Dean Peterson",
    "name": "Chinik Eskimo Community (Golovin)",
@@ -618,7 +618,7 @@
    "title": "President"
   },
   {
-   "id": "cfebf484-a661-4ed9-9a3a-41521c26f6cc",
+   "id": "58974b59-19e7-4109-942e-60b4f8c64f9c",
    "kind": "tribe",
    "leader": "Harlan Baker",
    "name": "Chippewa Cree Indians of the Rocky Boy's Reservation, Montana",
@@ -627,7 +627,7 @@
    "title": "Chairman"
   },
   {
-   "id": "8ff9ca6e-e887-4450-8021-5c29f93d2b67",
+   "id": "760d059b-a6c0-4b4f-a9b5-62cab9630785",
    "kind": "tribe",
    "leader": "Melissa M. Darden",
    "name": "Chitimacha Tribe of Louisiana",
@@ -636,7 +636,7 @@
    "title": "Chairman"
   },
   {
-   "id": "b9c37078-fcb6-4713-8a56-5631efff1f14",
+   "id": "e325fdaa-fc26-4348-ba63-31f86e7d5b63",
    "kind": "tribe",
    "leader": "Thomas Myomick",
    "name": "Chuloonawick Native Village",
@@ -645,7 +645,7 @@
    "title": "President"
   },
   {
-   "id": "b24dd03a-7252-47ab-b1de-7fd7dc9d0359",
+   "id": "f10cf582-a579-4e55-a316-856e0fca8c57",
    "kind": "tribe",
    "leader": "Dennis Carroll",
    "name": "Circle Native Community",
@@ -654,7 +654,7 @@
    "title": "1st Chief"
   },
   {
-   "id": "7eca3ae5-1d7b-440e-8136-94c2d69a9387",
+   "id": "76d353c9-012d-4230-99f4-33d922b129d2",
    "kind": "tribe",
    "leader": "John Barrett",
    "name": "Citizen Potawatomi Nation, Oklahoma",
@@ -663,7 +663,7 @@
    "title": "Chairman"
   },
   {
-   "id": "04af7927-a49e-48f1-8cd9-560001a9e9a8",
+   "id": "d64bf325-75d9-4563-8b71-10d16121d29e",
    "kind": "tribe",
    "leader": "Patricia Hermosillo",
    "name": "Cloverdale Rancheria of Pomo Indians of California",
@@ -672,7 +672,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "41e3b50b-a782-4d4a-8ae8-521a67a7a7ff",
+   "id": "8e473a5f-368f-484f-9381-eea1c92d66e9",
    "kind": "tribe",
    "leader": "Sherry Cordova",
    "name": "Cocopah Tribe of Arizona",
@@ -681,7 +681,7 @@
    "title": "Chairman"
   },
   {
-   "id": "cfac1978-4d4f-47d1-872f-a08798c64d00",
+   "id": "825534ac-f935-4e2f-9078-68edc1082b04",
    "kind": "tribe",
    "leader": "Chief J. Allan",
    "name": "Coeur D'Alene Tribe",
@@ -690,7 +690,7 @@
    "title": "Chairman"
   },
   {
-   "id": "3625a14c-7690-4df7-8462-b324bc5888d2",
+   "id": "931d3bf8-caf1-43f4-a814-2bb79a1317ce",
    "kind": "tribe",
    "leader": "Blossom Garcia",
    "name": "Cold Springs Rancheria of Mono Indians of California",
@@ -699,7 +699,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "6fa8b89a-9f4d-4aa7-9598-b925097d53b5",
+   "id": "2eec011b-c28b-4ef4-9e2d-0f41e21f35a7",
    "kind": "tribe",
    "leader": "Amelia Flores",
    "name": "Colorado River Indian Tribes of the Colorado River Indian Reservation, Arizona and California",
@@ -708,7 +708,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "f68af8a3-b6b3-4252-8889-dab3906621e1",
+   "id": "bcfc5141-b0fe-4540-8e1c-6361dfe22d1d",
    "kind": "tribe",
    "leader": "Forrest Tahdooahnippah",
    "name": "Comanche Nation, Oklahoma",
@@ -717,7 +717,7 @@
    "title": "Chairman"
   },
   {
-   "id": "47f00dd4-d55e-4374-897d-dbe4371dd573",
+   "id": "ba65d62d-b452-4f66-bb1b-38898aa21801",
    "kind": "tribe",
    "leader": "Michael Dolson",
    "name": "Confederated Salish and Kootenai Tribes of the Flathead Reservation",
@@ -726,7 +726,7 @@
    "title": "Chairman"
   },
   {
-   "id": "51603f70-a3ae-4f49-9abd-5645e9e8709b",
+   "id": "078ab15e-5794-433c-9709-99ffbd0b0ab7",
    "kind": "tribe",
    "leader": "Gerald Lewis",
    "name": "Confederated Tribes and Bands of the Yakama Nation",
@@ -735,7 +735,7 @@
    "title": "Chairman"
   },
   {
-   "id": "862fa1ee-4a40-4615-a4f1-2341166a42f6",
+   "id": "9e76d14c-21d8-45a9-8ef7-9f63c05ffe17",
    "kind": "tribe",
    "leader": "Delores Pigsley",
    "name": "Confederated Tribes of Siletz Indians of Oregon",
@@ -744,7 +744,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "e7a133f4-5bf1-4672-a17e-72cc84daf752",
+   "id": "7460a7cd-8210-42a3-85fe-4c41c75dde9b",
    "kind": "tribe",
    "leader": "Sheilah Bray",
    "name": "Confederated Tribes of the Chehalis Reservation",
@@ -753,7 +753,7 @@
    "title": "Chairman"
   },
   {
-   "id": "773169ed-ff7f-4f2b-bdf7-ae529e2b0123",
+   "id": "e5066cee-a047-4e21-a18d-6ce48074ded6",
    "kind": "tribe",
    "leader": "Cindy Marchand",
    "name": "Confederated Tribes of the Colville Reservation",
@@ -762,7 +762,7 @@
    "title": "Chairman"
   },
   {
-   "id": "88eeb240-9f8c-482f-bd2f-ff72e0521451",
+   "id": "4393e772-e1cf-4e9d-855e-b3a059ffd0ba",
    "kind": "tribe",
    "leader": "Teresa Spangler",
    "name": "Confederated Tribes of the Coos, Lower Umpqua and Siuslaw Indians",
@@ -771,7 +771,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "83dc7d95-f073-4b2e-818a-9aac6dbcc83a",
+   "id": "c85d113f-d3cf-4810-a203-4ef3397d93c5",
    "kind": "tribe",
    "leader": "Amos Murphy",
    "name": "Confederated Tribes of the Goshute Reservation, Nevada and Utah",
@@ -780,7 +780,7 @@
    "title": "Chairman"
   },
   {
-   "id": "2f6be1d4-4fab-4fd7-b8cd-2d0fc1e36569",
+   "id": "46888178-5e65-494b-ba66-e89a6b0733fb",
    "kind": "tribe",
    "leader": "Cheryle Kennedy",
    "name": "Confederated Tribes of the Grand Ronde Community of Oregon",
@@ -789,7 +789,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "0796df03-8f9a-49f4-9877-1465008414dd",
+   "id": "48c791c5-3ab5-410e-a465-c090d51013ff",
    "kind": "tribe",
    "leader": "Kathryn Brigham",
    "name": "Confederated Tribes of the Umatilla Indian Reservation",
@@ -798,7 +798,7 @@
    "title": "Board of Trustees Chair"
   },
   {
-   "id": "df5b3b4b-f569-4345-9ce6-47f7c1abb124",
+   "id": "164d6bf4-ee7c-4523-81cf-5830259fefad",
    "kind": "tribe",
    "leader": "Dennis White, III",
    "name": "Confederated Tribes of the Warm Springs Reservation of Oregon",
@@ -807,7 +807,7 @@
    "title": "Chairman"
   },
   {
-   "id": "74c7c987-55ab-442a-93e9-3ce873f431f1",
+   "id": "5dd8b236-1554-4f21-bec3-bc3257747cf7",
    "kind": "tribe",
    "leader": "Brenda Meade",
    "name": "Coquille Indian Tribe",
@@ -816,7 +816,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "2b43c22b-289f-42e4-8218-40c520c5894a",
+   "id": "cc6dec6f-4b92-4266-95f1-d6c53552b413",
    "kind": "tribe",
    "leader": "David Sickey",
    "name": "Coushatta Tribe of Louisiana",
@@ -825,7 +825,7 @@
    "title": "Chairman"
   },
   {
-   "id": "c004b29f-458c-4cdf-a693-37cc20f53229",
+   "id": "9025d253-8500-4b3d-a340-f164b89bcfd2",
    "kind": "tribe",
    "leader": "Carla Keene",
    "name": "Cow Creek Band of Umpqua Tribe of Indians",
@@ -834,7 +834,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "22bcfc4b-71c5-4bd7-a3dc-1dc5efdf9059",
+   "id": "265cf5c8-5578-4f9c-838c-3078e30a44f0",
    "kind": "tribe",
    "leader": "William Iyall",
    "name": "Cowlitz Indian Tribe",
@@ -843,7 +843,7 @@
    "title": "Chairman"
   },
   {
-   "id": "70b43629-4816-4b26-9aa6-31d6d1cc3655",
+   "id": "c811bae3-8cff-4973-b1c8-da3d10a0323d",
    "kind": "tribe",
    "leader": "Jennifer Feliz",
    "name": "Coyote Valley Band of Pomo Indians of California",
@@ -852,7 +852,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "80f6a359-8ff4-468b-8900-465956e5c035",
+   "id": "960fbf58-3ab5-4adc-9761-ab0a95f576e8",
    "kind": "tribe",
    "leader": "Clinton E. Cook, Sr.",
    "name": "Craig Tribal Association",
@@ -861,7 +861,7 @@
    "title": "President"
   },
   {
-   "id": "0f5f157f-1c19-4526-a9d4-3a199617d8bd",
+   "id": "f8a183f4-1abb-4535-a256-a71bf4b25c91",
    "kind": "tribe",
    "leader": "Peter Lengkeek",
    "name": "Crow Creek Sioux Tribe of the Crow Creek Reservation, South Dakota",
@@ -870,7 +870,7 @@
    "title": "Chairman"
   },
   {
-   "id": "3b1866f0-52b8-41a7-ba13-aca035373dd6",
+   "id": "2a29219e-4886-48b4-8999-f16a77c848ee",
    "kind": "tribe",
    "leader": "Frank Whiteclay",
    "name": "Crow Tribe of Montana",
@@ -879,7 +879,7 @@
    "title": "Chairman"
   },
   {
-   "id": "dcae982e-4fc8-48f6-809e-aab75bcf7c5b",
+   "id": "e063772d-8ceb-4ee5-9c18-9ae5a02dbe75",
    "kind": "tribe",
    "leader": "Gayla Hoseth",
    "name": "Curyung Tribal Council",
@@ -888,7 +888,7 @@
    "title": "First Chief"
   },
   {
-   "id": "4150974c-5cd0-45ca-b028-f29cdd0e1150",
+   "id": "19f1f670-dbb6-44ee-a2e5-f1756bae5860",
    "kind": "tribe",
    "leader": "Michael McLane",
    "name": "Delaware Nation, Oklahoma",
@@ -897,7 +897,7 @@
    "title": "President"
   },
   {
-   "id": "d882c6fc-b77e-46c0-aac7-98979ff47a12",
+   "id": "f183230d-75b0-436c-876f-1756f5ac320c",
    "kind": "tribe",
    "leader": "Brad KillsCrow",
    "name": "Delaware Tribe of Indians",
@@ -906,7 +906,7 @@
    "title": "Chief"
   },
   {
-   "id": "5af87e67-976f-405b-be27-ac1e73712e05",
+   "id": "3f9c2b9b-8d23-4792-b80d-382c5fe3c67c",
    "kind": "tribe",
    "leader": "Clarence Laiti",
    "name": "Douglas Indian Association",
@@ -915,7 +915,7 @@
    "title": "President"
   },
   {
-   "id": "d8f96ab8-b4e6-41b6-92da-d0fae88b7cba",
+   "id": "6e13c260-3ca0-4e67-886e-160e4abd6156",
    "kind": "tribe",
    "leader": "Chris Wright",
    "name": "Dry Creek Rancheria Band of Pomo Indians, California",
@@ -924,7 +924,7 @@
    "title": "Chairman"
   },
   {
-   "id": "d038743b-3c55-4375-bfcb-5eb0132daf43",
+   "id": "e39d9f85-6aea-4f9d-af00-6d2b5a6c9c67",
    "kind": "tribe",
    "leader": "Warren Graham",
    "name": "Duckwater Shoshone Tribe (previously listed as Duckwater Shoshone Tribe of the Duckwater Reservation, Nevada)",
@@ -933,7 +933,7 @@
    "title": "Chairman"
   },
   {
-   "id": "bf9d1b9a-5c62-43d5-b270-31d5286f3c39",
+   "id": "e53b3758-b414-4a2d-9d9b-951caffd0972",
    "kind": "tribe",
    "leader": "Michell Hicks",
    "name": "Eastern Band of Cherokee Indians",
@@ -942,7 +942,7 @@
    "title": "Principal Chief"
   },
   {
-   "id": "86258cfe-d7c2-432f-93ba-d1c4de75c07c",
+   "id": "8600407c-a61d-4bf2-8060-3447b1517b72",
    "kind": "tribe",
    "leader": "Chris Samples",
    "name": "Eastern Shawnee Tribe of Oklahoma",
@@ -951,7 +951,7 @@
    "title": "Chief"
   },
   {
-   "id": "cae8a835-a15a-4c87-8f57-b537b32eba52",
+   "id": "8462a049-d9d3-4bdc-910a-20f47c72837a",
    "kind": "tribe",
    "leader": "Wayland Large",
    "name": "Eastern Shoshone Tribe of the Wind River Reservation, Wyoming",
@@ -960,7 +960,7 @@
    "title": "Chairman"
   },
   {
-   "id": "50d583b4-8a7a-46ef-8742-584e3671de07",
+   "id": "05b9e75c-8e02-4b82-8f48-7fe8847d1918",
    "kind": "tribe",
    "leader": "Justin Alto",
    "name": "Egegik Village",
@@ -969,7 +969,7 @@
    "title": "First Chief"
   },
   {
-   "id": "f5eea884-eef3-490d-a964-75a86437845f",
+   "id": "5de21074-9ebf-40ca-b5ce-656d2b2d9f9d",
    "kind": "tribe",
    "leader": "Aaron Leggett",
    "name": "Eklutna Native Village",
@@ -978,7 +978,7 @@
    "title": "President"
   },
   {
-   "id": "492ccd3e-8330-4f9d-9709-11df4e3f13f0",
+   "id": "33d03336-70ae-46e0-90b5-2514d777d223",
    "kind": "tribe",
    "leader": "Agustin Garcia",
    "name": "Elem Indian Colony of Pomo Indians of the Sulphur Bank Rancheria, California",
@@ -987,7 +987,7 @@
    "title": "Chairman"
   },
   {
-   "id": "6c53dd00-27bc-40d9-a45e-320617adfc50",
+   "id": "f0236c74-9e01-4cee-abd0-c5d46e4758f2",
    "kind": "tribe",
    "leader": "Dale Miller",
    "name": "Elk Valley Rancheria, California",
@@ -996,7 +996,7 @@
    "title": "Chairman"
   },
   {
-   "id": "9b61d4e0-86e3-4f8d-8044-8a65a88a77de",
+   "id": "f4dc35e8-e123-4e75-a1fc-74a8918d1385",
    "kind": "tribe",
    "leader": "Alvin S. Marques",
    "name": "Ely Shoshone Tribe of Nevada",
@@ -1005,7 +1005,7 @@
    "title": "Chairman"
   },
   {
-   "id": "28cb3e64-2ddf-44ef-9093-79e45b2dbc06",
+   "id": "bad9fe93-d938-40c8-bd06-f53d9475461d",
    "kind": "tribe",
    "leader": "Melvin J Gregory",
    "name": "Emmonak Village",
@@ -1014,7 +1014,7 @@
    "title": "President"
   },
   {
-   "id": "6502cb2f-aab0-4ea9-a5f4-b077e5e2c934",
+   "id": "0647f36a-4323-4a83-b7a4-31abd182deac",
    "kind": "tribe",
    "leader": "Glenda Nelson",
    "name": "Enterprise Rancheria of Maidu Indians of California",
@@ -1023,7 +1023,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "b1b03ce2-31b7-4940-ab74-f539c4492cce",
+   "id": "893d3c1a-2361-43bc-99d9-d684523314cc",
    "kind": "tribe",
    "leader": "Frank Thompson",
    "name": "Evansville Village (aka Bettles Field)",
@@ -1032,7 +1032,7 @@
    "title": "1st Chief"
   },
   {
-   "id": "e0a89364-1b91-4903-b7d7-06b443d3d2e3",
+   "id": "2ea9efeb-beac-4aff-8f54-5bbf36b842ef",
    "kind": "tribe",
    "leader": "Robert Pinto, Sr.",
    "name": "Ewiiaapaayp Band of Kumeyaay Indians (previously listed as Ewiiaapaayp Band of Kumeyaay Indians, California)",
@@ -1041,7 +1041,7 @@
    "title": "Chairman"
   },
   {
-   "id": "bf4a3f6e-8cf1-43fd-93b9-e9c93df9e6d8",
+   "id": "9554e488-bb11-4991-9500-19fd85a9cce6",
    "kind": "tribe",
    "leader": "Greg Sarris",
    "name": "Federated Indians of Graton Rancheria, California",
@@ -1050,7 +1050,7 @@
    "title": "Chairman"
   },
   {
-   "id": "33534487-b15a-4079-8d88-6bd196da2f44",
+   "id": "4e97e8b9-ce89-469f-8487-155ba18c779e",
    "kind": "tribe",
    "leader": "Ryan Kills-A-Hundred",
    "name": "Flandreau Santee Sioux Tribe of South Dakota",
@@ -1059,7 +1059,7 @@
    "title": "President"
   },
   {
-   "id": "d8fbb096-6dd6-4fe4-8e6f-d1c75d13827f",
+   "id": "5830423b-ae80-4176-a3f5-ef9562326a1f",
    "kind": "tribe",
    "leader": "Brooks Boyd, Sr.",
    "name": "Forest County Potawatomi Community, Wisconsin",
@@ -1068,7 +1068,7 @@
    "title": "Chairman"
   },
   {
-   "id": "9822554b-568c-4777-bc77-5e158ae3eda2",
+   "id": "3f13e2c5-4e83-43db-b67c-904fa1932af0",
    "kind": "tribe",
    "leader": "Randall Werk, Sr.",
    "name": "Fort Belknap Indian Community of the Fort Belknap Reservation of Montana",
@@ -1077,7 +1077,7 @@
    "title": "President"
   },
   {
-   "id": "37eb90e4-2173-4ccf-b0a2-d3c6f4b09744",
+   "id": "cefc99c8-9de5-4926-a8ca-5e234ec1d043",
    "kind": "tribe",
    "leader": "Dean Townsend",
    "name": "Fort Bidwell Indian Community of the Fort Bidwell Reservation of California",
@@ -1086,7 +1086,7 @@
    "title": "Chairman"
   },
   {
-   "id": "db58da68-afce-46f5-b929-973f8e3881c7",
+   "id": "6cf5e6d7-9116-4653-93a2-d328cde78e8d",
    "kind": "tribe",
    "leader": "Carl Dahlberg",
    "name": "Fort Independence Indian Community of Paiute Indians of the Fort Independence Reservation, California",
@@ -1095,7 +1095,7 @@
    "title": "Chairman"
   },
   {
-   "id": "6b9efdd7-4fd8-4ab6-9c42-d10b2cc3a5ad",
+   "id": "559f5c7b-cf79-43aa-b884-d10aa08f2a79",
    "kind": "tribe",
    "leader": "David Hinkey",
    "name": "Fort McDermitt Paiute and Shoshone Tribes of the Fort McDermitt Indian Reservation, Nevada and Oregon",
@@ -1104,7 +1104,7 @@
    "title": "Chairman"
   },
   {
-   "id": "d3e206f5-ad7f-4833-bb5b-9172e1595563",
+   "id": "02d3883e-391f-4c5f-bc9c-4c0a914d7d0a",
    "kind": "tribe",
    "leader": "Sandra Pattea",
    "name": "Fort McDowell Yavapai Nation, Arizona",
@@ -1113,7 +1113,7 @@
    "title": "President"
   },
   {
-   "id": "f37a4471-3750-4819-b095-b48ff7f3bdd6",
+   "id": "29701948-9f0a-4496-b1cb-aeaafa7c01e5",
    "kind": "tribe",
    "leader": "Timothy Williams",
    "name": "Fort Mojave Indian Tribe of Arizona, California & Nevada",
@@ -1122,7 +1122,7 @@
    "title": "Chairman"
   },
   {
-   "id": "862910c7-fa9f-43bb-b876-151730a79742",
+   "id": "878b357f-6d9e-4cde-a9ed-24528907e60a",
    "kind": "tribe",
    "leader": "Jennifer Heminokeky",
    "name": "Fort Sill—Chiricahua—Warm Springs—Apache Tribe (previously listed as Fort Sill Apache Tribe of Oklahoma)",
@@ -1131,7 +1131,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "77fefd74-b2be-4b02-812f-f76c8fa516be",
+   "id": "80b64c37-e2b0-459f-967c-ae55b1be4e2a",
    "kind": "tribe",
    "leader": "Stephen R. Lewis",
    "name": "Gila River Indian Community of the Gila River Indian Reservation, Arizona",
@@ -1140,7 +1140,7 @@
    "title": "Governor"
   },
   {
-   "id": "f542d675-df1b-4b3f-80f5-4d21eade71d8",
+   "id": "b786d916-6ed1-4d41-95ae-c0e7bd42ee30",
    "kind": "tribe",
    "leader": "Sandra Witherspoon",
    "name": "Grand Traverse Band of Ottawa and Chippewa Indians, Michigan",
@@ -1149,7 +1149,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "6460fde2-7d27-49f1-a03c-96760ecbf341",
+   "id": "281532ac-ba06-4f66-aeea-94a6e553d1f9",
    "kind": "tribe",
    "leader": "Kyle Self",
    "name": "Greenville Rancheria",
@@ -1158,7 +1158,7 @@
    "title": "Chairman"
   },
   {
-   "id": "d56024dc-b9fe-434b-b286-f586f6e0801b",
+   "id": "af7962f9-bbdb-4d80-8ef0-f0193e920c3a",
    "kind": "tribe",
    "leader": "Ronald Kirk",
    "name": "Grindstone Indian Rancheria of Wintun-Wailaki Indians of California",
@@ -1167,7 +1167,7 @@
    "title": "Chairman"
   },
   {
-   "id": "6a5c7eb9-c93c-4739-ac72-94e72b163e6c",
+   "id": "fcf901e1-487a-41e2-a426-40d4076490ab",
    "kind": "tribe",
    "leader": "Donald Duncan",
    "name": "Guidiville Rancheria of California",
@@ -1176,7 +1176,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "2386e9b8-c7f3-49d8-964d-0594af066590",
+   "id": "91cf4e7d-b552-42ef-95d1-6ee2e12f42f8",
    "kind": "tribe",
    "leader": "Eileen L. Ewan",
    "name": "Gulkana Village Council",
@@ -1185,7 +1185,7 @@
    "title": "President"
   },
   {
-   "id": "164e649a-47ac-47de-9c8d-90115da12d77",
+   "id": "4d506c5b-e3a0-4266-87b8-aad358bf2a5f",
    "kind": "tribe",
    "leader": "Danielle Cirelli",
    "name": "Habematolel Pomo of Upper Lake, California",
@@ -1194,7 +1194,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "095f1452-566e-45ef-81bf-43ffb1b2d947",
+   "id": "384dd1fd-77ec-45e7-b321-4957b7a1d463",
    "kind": "tribe",
    "leader": "Kenneth Meshigaud",
    "name": "Hannahville Indian Community, Michigan",
@@ -1203,7 +1203,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "a812d866-0924-4682-8087-63c85b89007b",
+   "id": "335c9e80-147d-4865-aaec-37c0790a5d1c",
    "kind": "tribe",
    "leader": "Melinda Yaiva",
    "name": "Havasupai Tribe of the Havasupai Reservation, Arizona",
@@ -1212,7 +1212,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "61bf157f-ffed-44d0-9c85-161cb5b1b083",
+   "id": "84e0251f-9d6c-4029-8b34-cb47524e50e9",
    "kind": "tribe",
    "leader": "Alissa Perez",
    "name": "Healy Lake Village",
@@ -1221,7 +1221,7 @@
    "title": "President"
   },
   {
-   "id": "b0db1abb-0ddb-4a03-bdc2-1104521af3c4",
+   "id": "7b870d60-54f9-4cd1-9460-0a4f296eedc5",
    "kind": "tribe",
    "leader": "Jon Greendeer",
    "name": "Ho-Chunk Nation of Wisconsin",
@@ -1230,7 +1230,7 @@
    "title": "President"
   },
   {
-   "id": "2e673a1f-c8ca-4deb-9053-ecaae2be83ee",
+   "id": "2bab0d44-3d92-4197-a5cf-e9bbe344fd99",
    "kind": "tribe",
    "leader": "Darlene Hollum",
    "name": "Hoh Indian Tribe",
@@ -1239,7 +1239,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "17dc13f7-33ea-4163-a3e2-62a490481eb4",
+   "id": "107842d2-0352-4fb4-94cd-941bb2db70e9",
    "kind": "tribe",
    "leader": "David J. Turner",
    "name": "Holy Cross Tribe",
@@ -1248,7 +1248,7 @@
    "title": "First Chief"
   },
   {
-   "id": "20392265-cc81-4879-9a89-fcfdb5d38a35",
+   "id": "ef4a359e-6e74-4051-8f45-21c1b6ea7394",
    "kind": "tribe",
    "leader": "Frank Wright, Jr.",
    "name": "Hoonah Indian Association",
@@ -1257,7 +1257,7 @@
    "title": "President"
   },
   {
-   "id": "e64b2c73-cd20-4419-a847-1ceb9f6a2127",
+   "id": "f2eec6ad-df4f-4754-96ae-e05dfa938f75",
    "kind": "tribe",
    "leader": "Joe Davis",
    "name": "Hoopa Valley Tribe, California",
@@ -1266,7 +1266,7 @@
    "title": "Chairman"
   },
   {
-   "id": "1d638adc-50ff-4150-b4a2-cca60f2df433",
+   "id": "0018d605-28d0-4d75-aa01-7d2f8a726fe1",
    "kind": "tribe",
    "leader": "Lamar Keevama",
    "name": "Hopi Tribe of Arizona",
@@ -1275,7 +1275,7 @@
    "title": "Chairman"
   },
   {
-   "id": "a1d2b81d-34b9-4b8b-bd7c-035bcf8cefe8",
+   "id": "a7d63806-50e5-48fa-8e6a-21291c1250d0",
    "kind": "tribe",
    "leader": "Sonny Elliot",
    "name": "Hopland Band of Pomo Indians, California",
@@ -1284,7 +1284,7 @@
    "title": "Chairman"
   },
   {
-   "id": "df5140c5-c72e-4dd4-acb1-9cbce6833083",
+   "id": "c3c25b36-38db-4e37-a1a7-451d51ee5349",
    "kind": "tribe",
    "leader": "Clarissa Sabattis",
    "name": "Houlton Band of Maliseet Indians",
@@ -1293,7 +1293,7 @@
    "title": "Tribal Chief"
   },
   {
-   "id": "efa1cb75-ca02-4494-9dca-e8c38f12248b",
+   "id": "ab086f3f-4616-4d0e-8456-0666a27784b5",
    "kind": "tribe",
    "leader": "Duane Clarke",
    "name": "Hualapai Indian Tribe of the Hualapai Indian Reservation, Arizona",
@@ -1302,7 +1302,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "fe60c3b4-a15e-43cc-924f-db52f0c1a5c5",
+   "id": "fe22aa05-16b8-4782-991d-61c1941dea94",
    "kind": "tribe",
    "leader": "Thelma Nicholia",
    "name": "Hughes Village",
@@ -1311,7 +1311,7 @@
    "title": "First Chief"
   },
   {
-   "id": "9f792861-f7bc-4717-a617-d2309cd8ecf2",
+   "id": "e438c87c-b2a7-4c0c-9063-fe139ac526e5",
    "kind": "tribe",
    "leader": "Dereck Starr, Sr.",
    "name": "Huslia Village",
@@ -1320,7 +1320,7 @@
    "title": "First Chief"
   },
   {
-   "id": "c52e02a3-910b-4c37-b931-d5d35df2d766",
+   "id": "bf64f0b8-a451-4ff4-a281-0c9401944197",
    "kind": "tribe",
    "leader": "Sidney Edenshaw",
    "name": "Hydaburg Cooperative Association",
@@ -1329,7 +1329,7 @@
    "title": "President"
   },
   {
-   "id": "de5fdbff-33ab-480a-8235-5c115f1a8ec5",
+   "id": "0392e3d7-eaad-4a52-bba7-e7ea211f379f",
    "kind": "tribe",
    "leader": "AlexAnna Salmon",
    "name": "Igiugig Village",
@@ -1338,7 +1338,7 @@
    "title": "President"
   },
   {
-   "id": "67a04f57-976d-4a81-b3ae-1fee9b38cd21",
+   "id": "110c9f2a-a93c-4416-9d4b-caa3b4e8f896",
    "kind": "tribe",
    "leader": "Kevin Osuna",
    "name": "Iipay Nation of Santa Ysabel, California",
@@ -1347,7 +1347,7 @@
    "title": "Chairman"
   },
   {
-   "id": "0e4ff8c7-5014-4bec-8f9e-23af963984cc",
+   "id": "e9978601-23d4-4fef-af29-83cddb64febe",
    "kind": "tribe",
    "leader": "Rebecca Osuna",
    "name": "Inaja Band of Diegueno Mission Indians of the Inaja and Cosmit Reservation, California",
@@ -1356,7 +1356,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "3026c881-edad-4453-b531-918f300beca5",
+   "id": "3008d1b3-77d3-4df1-b455-fa286300802c",
    "kind": "tribe",
    "leader": "Nicole Wojciechowski",
    "name": "Inupiat Community of the Arctic Slope",
@@ -1365,7 +1365,7 @@
    "title": "President"
   },
   {
-   "id": "225162f6-7623-409e-85df-b3da0b0f15fe",
+   "id": "495d1539-d3e7-42f6-b638-7900c1db16da",
    "kind": "tribe",
    "leader": "Sara Dutschke",
    "name": "Ione Band of Miwok Indians of California",
@@ -1374,7 +1374,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "6172c160-19d9-4837-a4ad-9a84b240afb5",
+   "id": "410a5e7a-bcd4-4467-9ec9-6db2bd1618b9",
    "kind": "tribe",
    "leader": "Missty Slater",
    "name": "Iowa Tribe of Kansas and Nebraska",
@@ -1383,7 +1383,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "cdbbce06-a882-4584-8149-e2fd94a375d8",
+   "id": "227406ed-b95c-49b2-85d1-99666449efba",
    "kind": "tribe",
    "leader": "Jacob Keyes",
    "name": "Iowa Tribe of Oklahoma",
@@ -1392,7 +1392,7 @@
    "title": "Chairman"
   },
   {
-   "id": "50139721-6ce9-4c5c-8967-442088cc2c47",
+   "id": "d6eeb7f5-6666-43f0-a47a-42d5e9e38565",
    "kind": "tribe",
    "leader": "Wassily Alexie",
    "name": "Iqugmiut Traditional Council",
@@ -1401,7 +1401,7 @@
    "title": "President"
   },
   {
-   "id": "a8ddbd0c-0681-43c7-816a-3f3451f249a3",
+   "id": "35686ac6-1ae9-4b03-bd29-0dcd6743cc0d",
    "kind": "tribe",
    "leader": "Edgar John Shangin",
    "name": "Ivanof Bay Tribe",
@@ -1410,7 +1410,7 @@
    "title": "President"
   },
   {
-   "id": "8e37b2b8-c5d3-4d75-b5a7-217a92385a77",
+   "id": "700b76e0-ea80-461f-b9af-c00292bf3460",
    "kind": "tribe",
    "leader": "Adam Dalton",
    "name": "Jackson Band of Miwuk Indians",
@@ -1419,7 +1419,7 @@
    "title": "Chairman"
   },
   {
-   "id": "ab9c1078-da23-459c-8202-141e17ad3ba4",
+   "id": "9d397043-564e-4c61-b7f7-bc59ebc1c448",
    "kind": "tribe",
    "leader": "W. Ron Allen",
    "name": "Jamestown S'Klallam Tribe",
@@ -1428,7 +1428,7 @@
    "title": "Chairman"
   },
   {
-   "id": "9f459d2b-d9af-4fe8-b137-f4a9d2e75c55",
+   "id": "286f28ac-7f5b-464d-ba77-0d9741efe093",
    "kind": "tribe",
    "leader": "Erica Pinto",
    "name": "Jamul Indian Village of California",
@@ -1437,7 +1437,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "f5afd030-c3d1-43ff-b12a-4d33b148f77d",
+   "id": "9c9edb7b-455f-4e59-b790-cc8c71d29645",
    "kind": "tribe",
    "leader": "B. Cheryl Smith",
    "name": "Jena Band of Choctaw Indians",
@@ -1446,7 +1446,7 @@
    "title": "Tribal Chief"
   },
   {
-   "id": "92f2c5c4-4d59-4fc6-b9ec-665a14db0a05",
+   "id": "333b5632-3f9f-418d-9ee4-bf5ca79a2695",
    "kind": "tribe",
    "leader": "Adrian Notsinneh",
    "name": "Jicarilla Apache Nation, New Mexico",
@@ -1455,7 +1455,7 @@
    "title": "President"
   },
   {
-   "id": "3e116960-1b83-4f6b-8b1d-0a09fd48c704",
+   "id": "5ae1a85c-f2dd-40e5-9f10-b678063e6fc5",
    "kind": "tribe",
    "leader": "Phyllis Amodo",
    "name": "Kaguyak Village",
@@ -1464,7 +1464,7 @@
    "title": "President"
   },
   {
-   "id": "15e24707-0264-4016-bb8a-9dfb4549264e",
+   "id": "5b825ca0-40a6-4418-963e-63b8fb85ab00",
    "kind": "tribe",
    "leader": "Roland Maldonado",
    "name": "Kaibab Band of Paiute Indians of the Kaibab Indian Reservation, Arizona",
@@ -1473,7 +1473,7 @@
    "title": "Chairman"
   },
   {
-   "id": "27f9dc11-7175-43d0-abc2-887c9470257c",
+   "id": "2707440c-f87c-4031-a60f-1fdeec72c39f",
    "kind": "tribe",
    "leader": "George Kaleak, Sr.",
    "name": "Kaktovik Village (aka Barter Island)",
@@ -1482,7 +1482,7 @@
    "title": "President"
   },
   {
-   "id": "9c517d88-2561-47da-baf4-a5605391c811",
+   "id": "fdd9133e-d084-4b38-8772-b2f89159863b",
    "kind": "tribe",
    "leader": "Glen Nenema",
    "name": "Kalispel Indian Community of the Kalispel Reservation",
@@ -1491,7 +1491,7 @@
    "title": "Chairman"
   },
   {
-   "id": "2573fe3e-f350-4474-96b6-22073a4acee9",
+   "id": "03375f6d-9c6d-402a-8740-39a37e0fc35a",
    "kind": "tribe",
    "leader": "Russell Attebery",
    "name": "Karuk Tribe",
@@ -1500,7 +1500,7 @@
    "title": "Chairman"
   },
   {
-   "id": "38a8632d-58f8-4212-a9ac-47a8b38e5c89",
+   "id": "848d4219-526e-49c0-b3c6-12db0ac6bb97",
    "kind": "tribe",
    "leader": "Kim Gentry",
    "name": "Kashia Band of Pomo Indians of the Stewarts Point Rancheria, California",
@@ -1509,7 +1509,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "34518c79-1589-461f-a5e0-917ad258f59a",
+   "id": "2bd6d8a4-44ea-475d-bed9-826ef0982cdc",
    "kind": "tribe",
    "leader": "Sam Tinker, Sr.",
    "name": "Kasigluk Traditional Elders Council",
@@ -1518,7 +1518,7 @@
    "title": "President"
   },
   {
-   "id": "37613b4c-f012-47e4-8359-e5065c4b9c62",
+   "id": "ed4b3e48-3a88-4a45-9580-92b5e7ff89d7",
    "kind": "tribe",
    "leader": "James \"Jim\" Pepper Henry",
    "name": "Kaw Nation, Oklahoma",
@@ -1527,7 +1527,7 @@
    "title": "Chairman"
   },
   {
-   "id": "bca46b70-03b9-46a2-a04f-ea73db8fbd27",
+   "id": "944e95f7-e932-4900-bf70-a47c711c261e",
    "kind": "tribe",
    "leader": "Bernadine Atchison",
    "name": "Kenaitze Indian Tribe",
@@ -1536,7 +1536,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "f98c655c-ca17-4bfe-ae1c-f81a74d813f8",
+   "id": "c2b0cc6e-df77-4790-8315-5f979bfb6a48",
    "kind": "tribe",
    "leader": "Norman Skan",
    "name": "Ketchikan Indian Community",
@@ -1545,7 +1545,7 @@
    "title": "President"
   },
   {
-   "id": "ac17eb7b-4023-42cf-bdb8-60e0498c8445",
+   "id": "311f4b30-5237-45f5-a97a-9f53f12c1327",
    "kind": "tribe",
    "leader": "Everett Ekdahl, Jr.",
    "name": "Keweenaw Bay Indian Community, Michigan",
@@ -1554,7 +1554,7 @@
    "title": "President"
   },
   {
-   "id": "21297e89-79ce-472d-9f28-7fdde8897557",
+   "id": "9b56cd1c-8b45-4fd7-997f-ec2c58cd5ef0",
    "kind": "tribe",
    "leader": "Stephanie Yahola",
    "name": "Kialegee Tribal Town",
@@ -1563,7 +1563,7 @@
    "title": "Town King"
   },
   {
-   "id": "b2a9077c-cead-4d9f-bda9-291fa142ac53",
+   "id": "72f67a10-d565-48ef-bc98-bbf027278ca4",
    "kind": "tribe",
    "leader": "Estavio Elizondo, Sr.",
    "name": "Kickapoo Traditional Tribe of Texas",
@@ -1572,7 +1572,7 @@
    "title": "Chairman"
   },
   {
-   "id": "cf6c0d50-d4d3-4dd2-a4fd-593de908b961",
+   "id": "f51ba128-ade5-41f0-874e-2f3c3f6806da",
    "kind": "tribe",
    "leader": "Priscilla Wakole",
    "name": "Kickapoo Tribe of Indians of the Kickapoo Reservation in Kansas",
@@ -1581,7 +1581,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "df778a39-8a1a-4f6b-9295-eda2cf5eb9c3",
+   "id": "b3b610f4-b35d-41ef-a880-033a8d96d1b6",
    "kind": "tribe",
    "leader": "Darwin Kaskaske",
    "name": "Kickapoo Tribe of Oklahoma",
@@ -1590,7 +1590,7 @@
    "title": "Chairman"
   },
   {
-   "id": "71e793b3-0710-4a00-b74a-c27b03b24688",
+   "id": "52f24927-4fbf-4172-a824-23355ca6188e",
    "kind": "tribe",
    "leader": "Megan Onders",
    "name": "King Island Native Community",
@@ -1599,7 +1599,7 @@
    "title": "Chief"
   },
   {
-   "id": "fe33faeb-2d0d-4c64-8bae-d054fdcdea1c",
+   "id": "993c5dff-408a-4d4a-bc1c-47f6ae182c75",
    "kind": "tribe",
    "leader": "Ralph Angasan, Sr.",
    "name": "King Salmon Tribe",
@@ -1608,7 +1608,7 @@
    "title": "President"
   },
   {
-   "id": "70726cc5-80bf-48cd-9b29-03916b07dbcf",
+   "id": "cba4ec4b-9fbb-4c91-9d04-b12942114db9",
    "kind": "tribe",
    "leader": "David Sullivan",
    "name": "Kiowa Tribe (previously listed as Kiowa Indian Tribe of Oklahoma)",
@@ -1617,7 +1617,7 @@
    "title": "Chairman"
   },
   {
-   "id": "b4dd899f-cd8f-4456-b85c-8bc1f08b0dad",
+   "id": "651240ed-135d-4b93-a904-26f79c6c0353",
    "kind": "tribe",
    "leader": "William E Ray, Jr.",
    "name": "Klamath Tribes",
@@ -1626,7 +1626,7 @@
    "title": "Chairman"
   },
   {
-   "id": "cb905e2f-d33f-481b-8a02-6e39b1d101fc",
+   "id": "2966e3d7-7a70-4074-b314-95f4a7ebfb7e",
    "kind": "tribe",
    "leader": "Anna Keene",
    "name": "Klawock Cooperative Association",
@@ -1635,7 +1635,7 @@
    "title": "President"
   },
   {
-   "id": "19fd6437-2c78-494e-a7bb-626d66eb30a1",
+   "id": "ae7a3b31-e0ee-4b24-afa3-12b6e5c7a5bb",
    "kind": "tribe",
    "leader": "Charlie Wright",
    "name": "Kletsel Dehe Wintun Nation of the Cortina Rancheria (previously listed as Kletsel Dehe Band of Wintun Indians)",
@@ -1644,7 +1644,7 @@
    "title": "Chairman"
   },
   {
-   "id": "df5e7ccb-5da3-44bc-9ae7-39decf6dae2d",
+   "id": "111d915d-4aae-45cd-957a-780098e12be8",
    "kind": "tribe",
    "leader": "Alfred Tellman",
    "name": "Knik Tribe",
@@ -1653,7 +1653,7 @@
    "title": "President"
   },
   {
-   "id": "a25cbaa5-5193-4fa9-9bcf-5e12a6525847",
+   "id": "02c02939-b001-40cd-a647-08fc2237f9a0",
    "kind": "tribe",
    "leader": "Darin Beltran",
    "name": "Koi Nation of Northern California",
@@ -1662,7 +1662,7 @@
    "title": "Chairman"
   },
   {
-   "id": "3e0f171c-4ea5-472a-a147-a04905bd1628",
+   "id": "b91645e8-fd55-40e4-bfe6-8d00f11f9ec7",
    "kind": "tribe",
    "leader": "Nathan Hill",
    "name": "Kokhanok Village",
@@ -1671,7 +1671,7 @@
    "title": "President"
   },
   {
-   "id": "0b861afc-90b4-48de-8c79-1ef933acd0d4",
+   "id": "9ec81e11-c6fb-4cac-a85e-4acdbe6cd3e3",
    "kind": "tribe",
    "leader": "Jennifer Porter",
    "name": "Kootenai Tribe of Idaho",
@@ -1680,7 +1680,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "a91d1e5e-5b88-4036-b7ae-eb26a0f3f32f",
+   "id": "ad89d863-8893-42ff-8b73-da0624d58d2c",
    "kind": "tribe",
    "leader": "Percy Lolnitz",
    "name": "Koyukuk Native Village",
@@ -1689,7 +1689,7 @@
    "title": "1st Chief"
   },
   {
-   "id": "ad3508d2-d319-4670-afa3-e5f8a7cd6cf8",
+   "id": "ef7d99e1-1a23-49bb-9b82-df10290c765d",
    "kind": "tribe",
    "leader": "Wesley Ruise, Jr.",
    "name": "La Jolla Band of Luiseno Indians, California",
@@ -1698,7 +1698,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "d27a9f33-e5e6-4dff-ba1d-ec2c5747f087",
+   "id": "057568c8-cbe8-4189-8059-d56fc957ba67",
    "kind": "tribe",
    "leader": "Eric La Chappa",
    "name": "La Posta Band of Diegueno Mission Indians of the La Posta Indian Reservation, California",
@@ -1707,7 +1707,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "e9d291cb-cf51-4165-b0ea-a98e54fa7006",
+   "id": "122bbc20-94bc-4ce6-8616-221da4aac801",
    "kind": "tribe",
    "leader": "Gary Clause",
    "name": "Lac Courte Oreilles Band of Lake Superior Chippewa Indians of Wisconsin",
@@ -1716,7 +1716,7 @@
    "title": "Chairman"
   },
   {
-   "id": "5df2c533-3b52-48da-956b-989d04f0c59b",
+   "id": "5b3e110d-630e-4794-afcf-3e5aa9427570",
    "kind": "tribe",
    "leader": "John D. Johnson, Sr.",
    "name": "Lac du Flambeau Band of Lake Superior Chippewa Indians of the Lac du Flambeau Reservation of Wisconsin",
@@ -1725,7 +1725,7 @@
    "title": "President"
   },
   {
-   "id": "8b350b13-d9fd-4394-9e60-e9628dd7c77e",
+   "id": "0d44ed15-6fe5-4fa7-89ad-93898e633b31",
    "kind": "tribe",
    "leader": "James Williams, Jr.",
    "name": "Lac Vieux Desert Band of Lake Superior Chippewa Indians of Michigan",
@@ -1734,7 +1734,7 @@
    "title": "Chairman"
   },
   {
-   "id": "0108df76-1ff8-40a2-b45a-a5631465e823",
+   "id": "0b5ffbdc-1406-4e0b-88f1-4363622b41a4",
    "kind": "tribe",
    "leader": "Benny Tso",
    "name": "Las Vegas Tribe of Paiute Indians of the Las Vegas Indian Colony, Nevada",
@@ -1743,7 +1743,7 @@
    "title": "Chairman"
   },
   {
-   "id": "1483475b-2d5a-49a7-a702-d4c628c63c3b",
+   "id": "821ac8c3-1d34-4d29-8dcb-a2655dcc3674",
    "kind": "tribe",
    "leader": "Alexander Tallekpalek",
    "name": "Levelock Village",
@@ -1752,7 +1752,7 @@
    "title": "President"
   },
   {
-   "id": "50cd279d-aa14-4447-932d-ebc398e2b6a7",
+   "id": "5080df2c-f288-425a-bc50-c1371dc369d5",
    "kind": "tribe",
    "leader": "Travis Bobby",
    "name": "Lime Village",
@@ -1761,7 +1761,7 @@
    "title": "President"
   },
   {
-   "id": "95fec52a-860b-4d40-940c-81128ddd0c74",
+   "id": "b850d7e1-e466-4729-8a6b-1eb818893998",
    "kind": "tribe",
    "leader": "Larry Romanelli",
    "name": "Little River Band of Ottawa Indians, Michigan",
@@ -1770,7 +1770,7 @@
    "title": "Ogema"
   },
   {
-   "id": "0d493d57-be43-4ed0-9640-a97324dfed0a",
+   "id": "8e22acbd-b84c-43a9-97e0-251bdf4ca3f8",
    "kind": "tribe",
    "leader": "Gerald Gray",
    "name": "Little Shell Tribe of Chippewa Indians of Montana",
@@ -1779,7 +1779,7 @@
    "title": "Chairman"
   },
   {
-   "id": "81eb6e14-0e7f-432d-bc5b-0c37f8ea84f4",
+   "id": "2deaae2d-3b7b-4c61-91ae-1430447c3a52",
    "kind": "tribe",
    "leader": "Winnay J Wemigwase",
    "name": "Little Traverse Bay Bands of Odawa Indians, Michigan",
@@ -1788,7 +1788,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "89b4ce64-1f4e-4d13-bef7-d4445153b801",
+   "id": "2edaf859-04e0-43cc-bc9d-6884c6647fa1",
    "kind": "tribe",
    "leader": "Thomas Swab, Jr.",
    "name": "Lone Pine Paiute-Shoshone Tribe",
@@ -1797,7 +1797,7 @@
    "title": "Chairman"
   },
   {
-   "id": "4358ea20-8d8c-4ce2-8409-e18e2b7575f7",
+   "id": "7790f653-cfdc-4919-bc85-c9a4c2d185c3",
    "kind": "tribe",
    "leader": "Ray Chapparosa",
    "name": "Los Coyotes Band of Cahuilla and Cupeno Indians, California",
@@ -1806,7 +1806,7 @@
    "title": "Spokesperson"
   },
   {
-   "id": "b1647de5-d9d3-46a8-abac-24f2fd4a4d92",
+   "id": "a2ee49f8-c096-49b3-b8de-50ff7d124898",
    "kind": "tribe",
    "leader": "Charlie Green",
    "name": "Louden Tribe (previously listed as Galena Village (aka Louden Village))",
@@ -1815,7 +1815,7 @@
    "title": "1st Chief"
   },
   {
-   "id": "e6f4e366-c782-472d-87a4-70342008b515",
+   "id": "7ff398b5-f44c-4500-8b48-fcdcbffd5682",
    "kind": "tribe",
    "leader": "Tia Happy",
    "name": "Lovelock Paiute Tribe of the Lovelock Indian Colony, Nevada",
@@ -1824,7 +1824,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "b40fdfd9-2a5f-4175-8142-901a650958d3",
+   "id": "37eec13e-171a-41ec-8923-968e70992201",
    "kind": "tribe",
    "leader": "Boyd I. Gourneau",
    "name": "Lower Brule Sioux Tribe of the Lower Brule Reservation, South Dakota",
@@ -1833,7 +1833,7 @@
    "title": "Chairman"
   },
   {
-   "id": "6e65fbc7-e869-4db2-998e-602f5fc5f035",
+   "id": "53a9d7d4-b101-46c4-9a99-de5fba4f45ad",
    "kind": "tribe",
    "leader": "Melissa Gilman",
    "name": "Lower Elwha Tribal Community",
@@ -1842,7 +1842,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "37ed68ee-7129-4695-bb67-299dc69ad776",
+   "id": "d92e0715-5591-4669-8023-cdd57142abd6",
    "kind": "tribe",
    "leader": "Joseph O'Brien",
    "name": "Lower Sioux Indian Community in the State of Minnesota",
@@ -1851,7 +1851,7 @@
    "title": "President"
   },
   {
-   "id": "4a4d8780-886a-4df3-b42c-e9d38d784b46",
+   "id": "2d195550-6e57-4a3a-9626-77214ae1cab8",
    "kind": "tribe",
    "leader": "John L. Lowery",
    "name": "Lumbee Tribe of North Carolina",
@@ -1860,7 +1860,7 @@
    "title": "Chairman"
   },
   {
-   "id": "0da0888a-2d40-4222-8337-1cabf5c9b7b5",
+   "id": "6518d337-9dd8-462a-b092-7161bc4d21ba",
    "kind": "tribe",
    "leader": "Anthony Hillaire",
    "name": "Lummi Tribe of the Lummi Reservation",
@@ -1869,7 +1869,7 @@
    "title": "Chairman"
   },
   {
-   "id": "7f052925-5d07-458d-9c0c-fb582d5a32d9",
+   "id": "2c405fe5-41fa-4480-957d-c402241248a1",
    "kind": "tribe",
    "leader": "Andrew Mejia",
    "name": "Lytton Rancheria of California",
@@ -1878,7 +1878,7 @@
    "title": "Chairman"
   },
   {
-   "id": "b2faa7cc-6066-40e4-a5f7-9e8495534c1c",
+   "id": "3cf9b182-6fab-4cde-9516-498fe3a5394f",
    "kind": "tribe",
    "leader": "Timothy J. Greene, Sr.",
    "name": "Makah Indian Tribe of the Makah Indian Reservation",
@@ -1887,7 +1887,7 @@
    "title": "Chairman"
   },
   {
-   "id": "80c1fb57-00d3-403d-8d6f-9f91b690cd81",
+   "id": "e02225f9-da62-429e-88ee-14e87f73c6b6",
    "kind": "tribe",
    "leader": "Tisha Jones",
    "name": "Manchester Band of Pomo Indians of the Manchester Rancheria, California",
@@ -1896,7 +1896,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "8969b8f6-ae88-404b-9f03-e38539601c69",
+   "id": "c812f20e-1433-4d98-8ea6-1b352d57ff4b",
    "kind": "tribe",
    "leader": "Raymond P. Woods",
    "name": "Manley Hot Springs Village",
@@ -1905,7 +1905,7 @@
    "title": "Chief"
   },
   {
-   "id": "645f552d-40ae-4d18-a572-24521f050ad8",
+   "id": "fd3ddee0-a986-411d-bad3-f397adc872d6",
    "kind": "tribe",
    "leader": "Diane Mochin",
    "name": "Manokotak Village",
@@ -1914,7 +1914,7 @@
    "title": "President"
   },
   {
-   "id": "cc9d27ca-4f67-43fa-9b2c-7023ae0bbddc",
+   "id": "a3af2c83-5877-47d2-9369-7746efc49f2b",
    "kind": "tribe",
    "leader": "Angela Santos",
    "name": "Manzanita Band of Diegueno Mission Indians of the Manzanita Reservation, California",
@@ -1923,7 +1923,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "cf02829e-7afc-4537-9567-1f44306ba8d0",
+   "id": "141dcf3a-41f2-43cb-b969-9265a94f934e",
    "kind": "tribe",
    "leader": "Rodney A. Butler",
    "name": "Mashantucket Pequot Indian Tribe",
@@ -1932,7 +1932,7 @@
    "title": "Chairman"
   },
   {
-   "id": "1350a1de-80df-4bef-966a-7d285059b88c",
+   "id": "4a769686-4176-42f4-af30-f91a1b75c5ae",
    "kind": "tribe",
    "leader": "Brian M. Weeden",
    "name": "Mashpee Wampanoag Tribe",
@@ -1941,7 +1941,7 @@
    "title": "Chairman"
   },
   {
-   "id": "5bf355fc-31eb-4305-a958-1fba23911916",
+   "id": "20a569c8-f91a-4974-b254-1dd278dc5ef1",
    "kind": "tribe",
    "leader": "Jodie Palmer",
    "name": "Match-E-Be-Nash-She-Wish Band of Pottawatomi (previously listed as Match-E-Be-Nash-She-Wish Band of Pottawatomi Indians of Michigan)",
@@ -1950,7 +1950,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "913ef28c-6e50-4926-9f68-6fcb7281ec6b",
+   "id": "9f954b11-4166-4e8b-82b5-b07f558f2e5d",
    "kind": "tribe",
    "leader": "Alice Dale",
    "name": "McGrath Native Village",
@@ -1959,7 +1959,7 @@
    "title": "First Chief"
   },
   {
-   "id": "dfe14340-1ac4-4c89-af70-5125a0987806",
+   "id": "b33536ab-4ac1-479a-be10-9d56f75aa4b5",
    "kind": "tribe",
    "leader": "Dennis Ramirez",
    "name": "Mechoopda Indian Tribe of Chico Rancheria, California",
@@ -1968,7 +1968,7 @@
    "title": "Chairman"
   },
   {
-   "id": "38a313d0-5ad1-4a10-8a5e-1cfb84b8c553",
+   "id": "d0bd642b-c362-4e4c-be6f-7b11f3fe4cd3",
    "kind": "tribe",
    "leader": "Joey Awonohopay",
    "name": "Menominee Indian Tribe of Wisconsin",
@@ -1977,7 +1977,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "de0d206c-2f50-4646-8c0b-3ac04ac25930",
+   "id": "51f865cb-3c42-4214-bbc7-545ea2d11005",
    "kind": "tribe",
    "leader": "Susie Martin",
    "name": "Mentasta Traditional Council",
@@ -1986,7 +1986,7 @@
    "title": "First Chief"
   },
   {
-   "id": "f08e0063-9f21-4141-b103-97473cdf9f97",
+   "id": "660913e0-0af1-43a3-9f18-3f8b48c96a81",
    "kind": "tribe",
    "leader": "Curtis La Chusa",
    "name": "Mesa Grande Band of Diegueno Mission Indians of the Mesa Grande Reservation, California",
@@ -1995,7 +1995,7 @@
    "title": "Chairman"
   },
   {
-   "id": "60a55d99-0291-45dc-a0bc-1f0e1678cf9d",
+   "id": "d1a70cc4-fa7f-4291-aa7c-b2b8211f85d9",
    "kind": "tribe",
    "leader": "Duane Duffy",
    "name": "Mescalero Apache Tribe of the Mescalero Reservation, New Mexico",
@@ -2004,7 +2004,7 @@
    "title": "President"
   },
   {
-   "id": "8b6fb125-b0ee-4932-b3fe-50e18c96661f",
+   "id": "0961fd34-6e91-4f56-94b9-8eb1e3a58d1c",
    "kind": "tribe",
    "leader": "Albert G. Smith",
    "name": "Metlakatla Indian Community, Annette Island Reserve",
@@ -2013,7 +2013,7 @@
    "title": "Mayor"
   },
   {
-   "id": "958a21d7-5659-48ed-aaad-09525aca4a65",
+   "id": "17824144-af1b-4017-a738-da59ec001b14",
    "kind": "tribe",
    "leader": "Sheila McCormack",
    "name": "Mi'kmaq Nation (previously listed as Aroostook Band of Micmacs)",
@@ -2022,7 +2022,7 @@
    "title": "Chief"
   },
   {
-   "id": "19a7ce55-33d0-4b86-b576-6f97a866f429",
+   "id": "9b7ef936-e674-43a0-8092-b4ea43e8348f",
    "kind": "tribe",
    "leader": "Douglas G. Lankford",
    "name": "Miami Tribe of Oklahoma",
@@ -2031,7 +2031,7 @@
    "title": "Chief"
   },
   {
-   "id": "0455715e-e121-424b-b3ae-0ac6ca656268",
+   "id": "9ec695f3-63aa-489e-841d-a3102f916db6",
    "kind": "tribe",
    "leader": "Talbert Cypress",
    "name": "Miccosukee Tribe of Indians",
@@ -2040,7 +2040,7 @@
    "title": "Chairman"
   },
   {
-   "id": "f8a94cd2-4f85-435c-a6e8-c0bb26ca3f10",
+   "id": "fc335f9f-c41c-41ba-986a-d83ca1f2fae5",
    "kind": "tribe",
    "leader": "Jose Simon III",
    "name": "Middletown Rancheria of Pomo Indians of California",
@@ -2049,57 +2049,57 @@
    "title": "Chairman"
   },
   {
-   "id": "e9b9eb22-00a3-4202-aa27-3e577b86ac7d",
+   "id": "910cc423-6f4f-4b61-b743-d11b350a7f4e",
    "kind": "affiliate",
    "leader": "Catherine J Chavers",
    "name": "Minnesota Chippewa Tribe, Minnesota (Bois Forte Band (Nett Lake))",
-   "parent": "c927ac7b-3c1d-4c22-834a-2a41b974c939",
+   "parent": "84b1b384-ef96-4b07-8850-331135922762",
    "region": "Midwest",
    "state": "MN",
    "title": "Chairperson"
   },
   {
-   "id": "13ed6a57-c9a3-4933-8afa-e04ea26cbf60",
+   "id": "b1e03906-116e-4125-a5e9-1dddb2c26914",
    "kind": "affiliate",
    "leader": "Bruce Savage",
    "name": "Minnesota Chippewa Tribe, Minnesota (Fond du Lac Band)",
-   "parent": "c927ac7b-3c1d-4c22-834a-2a41b974c939",
+   "parent": "84b1b384-ef96-4b07-8850-331135922762",
    "region": "Midwest",
    "state": "MN",
    "title": "Chairman"
   },
   {
-   "id": "32e1cab4-71a9-453b-b0d6-bfe4622b609b",
+   "id": "e04374e1-5850-4499-af3a-5d108c86bce0",
    "kind": "affiliate",
    "leader": "Robert Deschampe",
    "name": "Minnesota Chippewa Tribe, Minnesota (Grand Portage Band)",
-   "parent": "c927ac7b-3c1d-4c22-834a-2a41b974c939",
+   "parent": "84b1b384-ef96-4b07-8850-331135922762",
    "region": "Midwest",
    "state": "MN",
    "title": "Chairman"
   },
   {
-   "id": "29b0dcc9-d133-4b7b-910b-8d5999d6531d",
+   "id": "445aa6ec-97b4-4cbe-9110-42b2f23ac71a",
    "kind": "affiliate",
    "leader": "Faron Jackson, Sr.",
    "name": "Minnesota Chippewa Tribe, Minnesota (Leech Lake Band)",
-   "parent": "c927ac7b-3c1d-4c22-834a-2a41b974c939",
+   "parent": "84b1b384-ef96-4b07-8850-331135922762",
    "region": "Midwest",
    "state": "MN",
    "title": "Chairman"
   },
   {
-   "id": "da4bea6e-db28-48fe-a845-7aff07252b4e",
+   "id": "dadcf839-5e8e-4f7d-802d-986f2ccf357c",
    "kind": "affiliate",
    "leader": "Virgil Wind",
    "name": "Minnesota Chippewa Tribe, Minnesota (Mille Lacs Band)",
-   "parent": "c927ac7b-3c1d-4c22-834a-2a41b974c939",
+   "parent": "84b1b384-ef96-4b07-8850-331135922762",
    "region": "Midwest",
    "state": "MN",
    "title": "Chief Executive"
   },
   {
-   "id": "c927ac7b-3c1d-4c22-834a-2a41b974c939",
+   "id": "84b1b384-ef96-4b07-8850-331135922762",
    "kind": "tribe",
    "leader": "Michael LaRoque",
    "name": "Minnesota Chippewa Tribe, Minnesota (Six component reservations: Bois Forte Band (Nett Lake); Fond du Lac Band; Grand Portage Band; Leech Lake Band; Mille Lacs Band; White Earth Band)",
@@ -2108,17 +2108,17 @@
    "title": "President"
   },
   {
-   "id": "c9abb3ec-7071-4a1d-a35f-0c322f1f4a5c",
+   "id": "ee094920-dd47-4bb4-8790-a677655b2624",
    "kind": "affiliate",
    "leader": "Michael A. Fairbanks",
    "name": "Minnesota Chippewa Tribe, Minnesota (White Earth Band)",
-   "parent": "c927ac7b-3c1d-4c22-834a-2a41b974c939",
+   "parent": "84b1b384-ef96-4b07-8850-331135922762",
    "region": "Midwest",
    "state": "MN",
    "title": "Chairman"
   },
   {
-   "id": "2b421805-85a7-4fba-a92f-249b0f7ec139",
+   "id": "44093def-2682-46d4-912e-93bfbd7b70ff",
    "kind": "tribe",
    "leader": "Cyrus Ben",
    "name": "Mississippi Band of Choctaw Indians",
@@ -2127,7 +2127,7 @@
    "title": "Chief"
   },
   {
-   "id": "56a40f9d-9962-43cf-b8ca-c805aa9db3e8",
+   "id": "027dffa1-9461-433e-814d-ee6f05989be3",
    "kind": "tribe",
    "leader": "Janet Myers",
    "name": "Moapa Band of Paiute Indians of the Moapa River Indian Reservation, Nevada",
@@ -2136,7 +2136,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "c36b624b-22f6-484b-bc54-4c7cce35630d",
+   "id": "e1dfa940-a134-45fb-ade5-b60bd18a971b",
    "kind": "tribe",
    "leader": "Robert Burkybile III",
    "name": "Modoc Nation",
@@ -2145,7 +2145,7 @@
    "title": "Chief"
   },
   {
-   "id": "4dff956e-0c2c-4a28-960c-1695982106ee",
+   "id": "ba3c915b-c30d-4b44-b155-c4882d1fcacc",
    "kind": "tribe",
    "leader": "R. James Gessner, Jr.",
    "name": "Mohegan Tribe of Indians of Connecticut",
@@ -2154,7 +2154,7 @@
    "title": "Chairman"
   },
   {
-   "id": "4e215937-ece2-4e28-a143-fec9e41e6f25",
+   "id": "53f9e4ef-f0dd-4943-ae66-64d20dc25910",
    "kind": "tribe",
    "leader": "Diane Shields",
    "name": "Monacan Indian Nation",
@@ -2163,7 +2163,7 @@
    "title": "Chief"
   },
   {
-   "id": "832a0aa7-605e-4b72-bf72-188b5621d834",
+   "id": "7c8b5644-552b-498b-ae69-8f308ca93736",
    "kind": "tribe",
    "leader": "Benjamin Clark",
    "name": "Mooretown Rancheria of Maidu Indians of California",
@@ -2172,7 +2172,7 @@
    "title": "Chairman"
   },
   {
-   "id": "4f00c247-25aa-4619-9fb1-3d74ca680a01",
+   "id": "b16369a6-ee11-4945-9097-3d4d6451e185",
    "kind": "tribe",
    "leader": "Charles Martin",
    "name": "Morongo Band of Mission Indians, California",
@@ -2181,7 +2181,7 @@
    "title": "Chairman"
   },
   {
-   "id": "829fa66f-dd20-4181-b88b-582042c36724",
+   "id": "24661112-5e50-404c-8d90-6964237f4d6d",
    "kind": "tribe",
    "leader": "Donald Stevenson",
    "name": "Muckleshoot Indian Tribe",
@@ -2190,7 +2190,7 @@
    "title": "Chairman"
   },
   {
-   "id": "15b98033-1907-4949-ac7f-6ecd814b4e6a",
+   "id": "afec0d58-24e4-4ce3-b039-50b3958f0d2e",
    "kind": "tribe",
    "leader": "Judy Jo Matson",
    "name": "Naknek Native Village",
@@ -2199,7 +2199,7 @@
    "title": "President"
   },
   {
-   "id": "e33095d6-c06d-4e31-a40e-e6f109f9d4e5",
+   "id": "47b376d9-1aa4-4d19-aab1-e85f97c71050",
    "kind": "tribe",
    "leader": "Keith F. Anderson",
    "name": "Nansemond Indian Nation",
@@ -2208,7 +2208,7 @@
    "title": "Chief"
   },
   {
-   "id": "d34b8a45-09cd-42b3-811e-739521f4bb44",
+   "id": "327f8034-5a80-40d9-9966-fcddc6423e79",
    "kind": "tribe",
    "leader": "Anthony Dean Stanton",
    "name": "Narragansett Indian Tribe",
@@ -2217,7 +2217,7 @@
    "title": "Chief Sachem"
   },
   {
-   "id": "91f7d6c2-58bc-4bc5-8480-77fa9408d605",
+   "id": "ea7cb1ac-33c4-402c-91c1-0f6c0061cf99",
    "kind": "tribe",
    "leader": "Meagan Christiansen",
    "name": "Native Village of Afognak",
@@ -2226,7 +2226,7 @@
    "title": "Chairman"
   },
   {
-   "id": "03ec55d0-0c8f-4e3d-a24e-22fa45813f44",
+   "id": "dcab163a-0253-4fe2-9c9c-68d2e26d1451",
    "kind": "tribe",
    "leader": "Speridon Simeonoff, Jr.",
    "name": "Native Village of Akhiok",
@@ -2236,7 +2236,7 @@
    "title": "President"
   },
   {
-   "id": "114d7c19-17e1-4eb4-9a16-76f5728f8a2f",
+   "id": "159063f5-0932-4652-82c7-d1cacaea7b4b",
    "kind": "tribe",
    "leader": "Joseph Bereskin, Sr.",
    "name": "Native Village of Akutan",
@@ -2245,7 +2245,7 @@
    "title": "President"
   },
   {
-   "id": "836d0bbf-445f-49a2-b03d-ce3fa1bf0ac2",
+   "id": "f83779af-dfd2-403e-a01f-9bedde5fd832",
    "kind": "tribe",
    "leader": "Gusty Ilutsik, Jr.",
    "name": "Native Village of Aleknagik",
@@ -2254,7 +2254,7 @@
    "title": "President"
   },
   {
-   "id": "edf79d7a-ff27-4c0b-a23f-8905419275d2",
+   "id": "a8aed694-de3e-4cea-aeea-4de961d47caf",
    "kind": "tribe",
    "leader": "Molly Brown",
    "name": "Native Village of Ambler",
@@ -2263,7 +2263,7 @@
    "title": "First Chief"
   },
   {
-   "id": "813e09f6-fe07-41cb-9c92-49f737727299",
+   "id": "af2e313c-9b96-4c80-9981-1b4f8d9555ac",
    "kind": "tribe",
    "leader": "Crystal Dushkin",
    "name": "Native Village of Atka",
@@ -2272,7 +2272,7 @@
    "title": "President"
   },
   {
-   "id": "3fa887c7-8d1c-4dc5-a763-be01eaf9947b",
+   "id": "a463696a-577c-4165-820b-b3c4a9a026eb",
    "kind": "tribe",
    "leader": "Michelle Bordeaux",
    "name": "Native Village of Atqasuk",
@@ -2281,7 +2281,7 @@
    "title": "President"
   },
   {
-   "id": "ba6ed6c0-0541-4acd-8263-08f98e981b14",
+   "id": "6e28746b-c07d-44ea-8b20-056dae2fa4ce",
    "kind": "tribe",
    "leader": "Esther Evikana",
    "name": "Native Village of Barrow Inupiat Traditional Government",
@@ -2290,7 +2290,7 @@
    "title": "President"
   },
   {
-   "id": "144e791d-cebb-4291-83e0-0c2c399d2092",
+   "id": "667534d2-bd17-48e5-956d-666c738da1e8",
    "kind": "tribe",
    "leader": "Lynn Farr",
    "name": "Native Village of Belkofski",
@@ -2299,7 +2299,7 @@
    "title": "President"
   },
   {
-   "id": "34260b38-43aa-4858-bccb-49567035ca08",
+   "id": "243bc6ef-f864-4724-9b31-d8d6aa873ff8",
    "kind": "tribe",
    "leader": "Gilbert Tocktoo",
    "name": "Native Village of Brevig Mission",
@@ -2308,7 +2308,7 @@
    "title": "President"
   },
   {
-   "id": "ab4457a5-c6d0-4953-9300-c3344215c069",
+   "id": "3577d70c-340c-454e-a188-4ff93d4141e3",
    "kind": "tribe",
    "leader": "Percy Ballot, Sr.",
    "name": "Native Village of Buckland",
@@ -2317,7 +2317,7 @@
    "title": "President"
   },
   {
-   "id": "846538c8-0a84-46b1-ae5c-ceb28c16cf84",
+   "id": "7a5e31bb-1e37-492b-800f-7b75bd3f1aab",
    "kind": "tribe",
    "leader": "Rene Nicklie",
    "name": "Native Village of Cantwell",
@@ -2326,7 +2326,7 @@
    "title": "President"
   },
   {
-   "id": "8ecf5747-e34f-4728-b3f6-1ce157c090b3",
+   "id": "600fdb2d-ac48-4dc7-adf4-2b0db5c1694b",
    "kind": "tribe",
    "leader": "Charles W. Totemoff",
    "name": "Native Village of Chenega",
@@ -2335,7 +2335,7 @@
    "title": "President"
   },
   {
-   "id": "821adfc2-f45e-4a8b-bbab-03577ffdc4b2",
+   "id": "d5443c6d-14a8-4259-a31d-bd76a35adac7",
    "kind": "tribe",
    "leader": "Daniel Grunert",
    "name": "Native Village of Chignik Lagoon",
@@ -2344,7 +2344,7 @@
    "title": "President"
   },
   {
-   "id": "c1dd6799-5f96-4f4e-b8c5-68dd5e00ce84",
+   "id": "ce20d7b7-380f-4a9b-b597-c8f0fce3fb44",
    "kind": "tribe",
    "leader": "Corina Ewan",
    "name": "Native Village of Chitina",
@@ -2353,7 +2353,7 @@
    "title": "President"
   },
   {
-   "id": "8e94e8f2-558b-4f47-8fdb-4c2accf31cb8",
+   "id": "e0b3b995-a0a2-4f5a-b1d2-71aa13d042df",
    "kind": "tribe",
    "leader": "Teresa Simeon-Hunter",
    "name": "Native Village of Chuathbaluk (Russian Mission, Kuskokwim)",
@@ -2362,7 +2362,7 @@
    "title": "Chairman"
   },
   {
-   "id": "b02c9560-79a9-492a-892b-fb0aafa54006",
+   "id": "0d1c3deb-ff1d-48d7-8e39-4a42163dccb7",
    "kind": "tribe",
    "leader": "Barbara Gray",
    "name": "Native Village of Council",
@@ -2371,7 +2371,7 @@
    "title": "Chairman"
   },
   {
-   "id": "48858bc5-20ca-44e1-8fda-9ca370f612ba",
+   "id": "c24828c2-d977-44ce-97d9-4cb1deddfcac",
    "kind": "tribe",
    "leader": "Bobbie Sue Thomas",
    "name": "Native Village of Deering",
@@ -2380,7 +2380,7 @@
    "title": "President"
   },
   {
-   "id": "e8706c69-49a0-4faa-b4fc-37dee6a3f669",
+   "id": "27d0c133-a4d5-460e-b7d6-2e0186f19163",
    "kind": "tribe",
    "leader": "Samantha Ozenna",
    "name": "Native Village of Diomede (aka Inalik)",
@@ -2389,7 +2389,7 @@
    "title": "President"
   },
   {
-   "id": "8d89aad8-66d7-4826-b8fb-67ef0de10ba3",
+   "id": "07a17399-a349-4b92-82d7-a60425238571",
    "kind": "tribe",
    "leader": "Karma Ulvi",
    "name": "Native Village of Eagle",
@@ -2398,7 +2398,7 @@
    "title": "First Chief"
   },
   {
-   "id": "4263a96a-c3ca-44e4-a0cd-09dda951a219",
+   "id": "60a68edf-9f3e-4452-a553-7613e4ae22e0",
    "kind": "tribe",
    "leader": "Annie M. Pete",
    "name": "Native Village of Eek",
@@ -2407,7 +2407,7 @@
    "title": "President"
   },
   {
-   "id": "efc021d8-9b79-47e8-afc6-1eafdbc5c699",
+   "id": "1e3b4f48-f421-4507-8af2-ff4527caccab",
    "kind": "tribe",
    "leader": "Robert Heyano",
    "name": "Native Village of Ekuk",
@@ -2416,7 +2416,7 @@
    "title": "President"
   },
   {
-   "id": "df34da02-8ecd-484c-a62e-c6268a286d87",
+   "id": "a36f5c9f-11e0-4edd-b00b-72a009d8e338",
    "kind": "tribe",
    "leader": "Luki Akelkok, Sr.",
    "name": "Native Village of Ekwok",
@@ -2425,7 +2425,7 @@
    "title": "President"
   },
   {
-   "id": "cb6c15a5-9e21-4888-82e8-288d640f847a",
+   "id": "506714f1-1692-49b9-94cb-5c39c9bea9f0",
    "kind": "tribe",
    "leader": "Robert A. Keith",
    "name": "Native Village of Elim",
@@ -2434,7 +2434,7 @@
    "title": "President"
   },
   {
-   "id": "23ab7fec-24fa-4581-9bd3-245a7912b7fb",
+   "id": "b476148a-d2ef-4852-9c6b-d398a18814b4",
    "kind": "tribe",
    "leader": "Brooke Mallory",
    "name": "Native Village of Eyak (Cordova)",
@@ -2443,7 +2443,7 @@
    "title": "Chairman"
   },
   {
-   "id": "14951ae3-b45e-4e47-8953-8a6c5fadd72c",
+   "id": "88871ff9-d364-4425-8ba2-242109e96cad",
    "kind": "tribe",
    "leader": "Travis Hoblet",
    "name": "Native Village of False Pass",
@@ -2452,7 +2452,7 @@
    "title": "President"
   },
   {
-   "id": "56c290a5-3f00-4069-9294-2404a6edb480",
+   "id": "f14f44ac-db3d-41d9-adb3-07db941d6125",
    "kind": "tribe",
    "leader": "Nancy James",
    "name": "Native Village of Fort Yukon",
@@ -2461,7 +2461,7 @@
    "title": "First Chief"
   },
   {
-   "id": "e8d5779a-2c20-42ac-ba1c-8cead453c952",
+   "id": "ae378fb4-69ef-417c-8f0b-b9970596b2e1",
    "kind": "tribe",
    "leader": "Linda Tyone",
    "name": "Native Village of Gakona",
@@ -2470,7 +2470,7 @@
    "title": "President"
   },
   {
-   "id": "7a5746e6-87d5-43cb-a1d3-6937bc94eeea",
+   "id": "a6a34c98-8ae0-4252-b9a4-4a7226a302f4",
    "kind": "tribe",
    "leader": "Jill Campbell",
    "name": "Native Village of Gambell",
@@ -2479,7 +2479,7 @@
    "title": "President"
   },
   {
-   "id": "3b710acd-c087-4431-b3bd-486b5317714d",
+   "id": "ed1ed419-c17e-41f5-891f-38259071dbf8",
    "kind": "tribe",
    "leader": "Jonathan Samuelson",
    "name": "Native Village of Georgetown",
@@ -2488,7 +2488,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "8a59c62f-8e96-4e3f-ab70-9daf61d40eef",
+   "id": "9ad72bcb-38f6-46b3-8c76-456fb0d0f172",
    "kind": "tribe",
    "leader": "Brian Barnes",
    "name": "Native Village of Goodnews Bay",
@@ -2497,7 +2497,7 @@
    "title": "President"
   },
   {
-   "id": "7b9f7453-c546-4cb5-9b5c-eecc7dd877f9",
+   "id": "8ca91931-fad3-4d2c-b3c8-24fca4a11381",
    "kind": "tribe",
    "leader": "Richard Kamkoff",
    "name": "Native Village of Hamilton",
@@ -2506,7 +2506,7 @@
    "title": "President"
   },
   {
-   "id": "db9a0ab4-972f-4cb8-922b-224b6a9d39c1",
+   "id": "6a50b69f-12eb-41ad-be3d-603cfa3d93aa",
    "kind": "tribe",
    "leader": "Edgar I Tall, Sr.",
    "name": "Native Village of Hooper Bay",
@@ -2515,7 +2515,7 @@
    "title": "Tribal Chief"
   },
   {
-   "id": "e205360c-9106-4841-bde3-23f9676da50b",
+   "id": "f01702ee-ae91-4537-85f8-39bdfcd15db0",
    "kind": "tribe",
    "leader": "Henry F. Forshey",
    "name": "Native Village of Kanatak",
@@ -2524,7 +2524,7 @@
    "title": "President"
   },
   {
-   "id": "0515d642-b0d4-4b08-b211-b2b895319e1f",
+   "id": "ea9a80eb-c6b5-43df-897a-545b488571a1",
    "kind": "tribe",
    "leader": "Alicia Andrew",
    "name": "Native Village of Karluk",
@@ -2533,7 +2533,7 @@
    "title": "Tribal Chief"
   },
   {
-   "id": "417a8487-4d0c-415b-a296-f69b98a734ce",
+   "id": "ce8ac503-6033-4b7c-b6e7-1be2534ea5df",
    "kind": "tribe",
    "leader": "Lorena Walker",
    "name": "Native Village of Kiana",
@@ -2542,7 +2542,7 @@
    "title": "President"
   },
   {
-   "id": "2f98cbe7-a22d-4e86-9626-bd51b11046c4",
+   "id": "27110ea5-4a2d-41b3-86eb-a9617d7e659a",
    "kind": "tribe",
    "leader": "Daniel Paul",
    "name": "Native Village of Kipnuk",
@@ -2551,7 +2551,7 @@
    "title": "President"
   },
   {
-   "id": "5e61f3b2-826a-4c2d-aebc-355b604c5859",
+   "id": "fcffa5b3-ee2f-4041-befd-8f92c456ca22",
    "kind": "tribe",
    "leader": "Enoch Adams, Jr.",
    "name": "Native Village of Kivalina",
@@ -2560,7 +2560,7 @@
    "title": "President"
   },
   {
-   "id": "9da181ad-7bb4-43be-b4b2-8cc960fab174",
+   "id": "5b487ab2-9a2f-42f5-bc00-a22b0f41a4d6",
    "kind": "tribe",
    "leader": "Katherine McConkey",
    "name": "Native Village of Kluti Kaah (aka Copper Center)",
@@ -2569,7 +2569,7 @@
    "title": "President"
   },
   {
-   "id": "94ce5e58-16fe-4534-983b-8c7080c2eb36",
+   "id": "10be1483-4448-4eca-aca3-cffcffd35bf4",
    "kind": "tribe",
    "leader": "Johnetta Horner",
    "name": "Native Village of Kobuk",
@@ -2578,7 +2578,7 @@
    "title": "President"
   },
   {
-   "id": "e86ac9fd-3459-45b2-bdf7-fb636bc7239e",
+   "id": "e085375f-e4db-4244-847c-6647cbc28e1f",
    "kind": "tribe",
    "leader": "Daniel Azean, Sr.",
    "name": "Native Village of Kongiganak",
@@ -2587,7 +2587,7 @@
    "title": "President"
   },
   {
-   "id": "6d2d2c7f-ffdb-4ef6-ab3b-2d9260c14a33",
+   "id": "0b4b006d-bd1c-4e33-b807-3397dd4803ad",
    "kind": "tribe",
    "leader": "Toni Raye Bergan",
    "name": "Native Village of Kotzebue",
@@ -2596,7 +2596,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "3f4fd8ab-57ef-4eb0-a00e-4107358c2e8f",
+   "id": "490b1e0a-643a-4797-8c49-13a9629ec9a0",
    "kind": "tribe",
    "leader": "Lola C. Hannon",
    "name": "Native Village of Koyuk",
@@ -2605,7 +2605,7 @@
    "title": "President"
   },
   {
-   "id": "37e44857-7f10-4b4c-8fe3-66676e4c5a20",
+   "id": "c4c9ae2f-b7f7-4492-b599-1595f9f55227",
    "kind": "tribe",
    "leader": "William Igkurak",
    "name": "Native Village of Kwigillingok",
@@ -2614,7 +2614,7 @@
    "title": "President"
   },
   {
-   "id": "5179a13d-b0d3-4ab0-9274-d39d81f63d00",
+   "id": "a70bf441-a234-4a34-93ca-1425f942af6c",
    "kind": "tribe",
    "leader": "Jacqueline Cleveland",
    "name": "Native Village of Kwinhagak (aka Quinhagak)",
@@ -2623,7 +2623,7 @@
    "title": "President"
   },
   {
-   "id": "7ea4b8dd-5c95-4db5-9b9d-fc874080ad02",
+   "id": "042f763c-adf6-4b1b-beca-00e653aef157",
    "kind": "tribe",
    "leader": "Richard Henson",
    "name": "Native Village of Larsen Bay",
@@ -2632,7 +2632,7 @@
    "title": "President"
   },
   {
-   "id": "110bdeca-9b41-4510-9afb-bc4e322baf1e",
+   "id": "60468f4c-ffd0-4621-8275-2234dd3c2706",
    "kind": "tribe",
    "leader": "John Tikiun, Jr.",
    "name": "Native Village of Marshall (aka Fortuna Ledge)",
@@ -2641,7 +2641,7 @@
    "title": "Tribal President"
   },
   {
-   "id": "6e8ee8a6-516a-473e-ac49-23ddfdfd2801",
+   "id": "17a7134e-ae43-4069-b7bd-ce1cbecad0c0",
    "kind": "tribe",
    "leader": "Iris D. Topkok",
    "name": "Native Village of Mary's Igloo",
@@ -2650,7 +2650,7 @@
    "title": "President"
   },
   {
-   "id": "256d5dfc-9a10-44b3-93c3-96ba7578f81e",
+   "id": "98fed93d-6e4a-453c-8aef-d03380040272",
    "kind": "tribe",
    "leader": "Edward I. Kiokun",
    "name": "Native Village of Mekoryuk",
@@ -2659,7 +2659,7 @@
    "title": "President"
   },
   {
-   "id": "178c419f-6aa2-4c5a-aa29-f115bf55c8bf",
+   "id": "b10e7371-51d2-4a42-974b-5e9221352d49",
    "kind": "tribe",
    "leader": "Lori Baker",
    "name": "Native Village of Minto",
@@ -2668,7 +2668,7 @@
    "title": "Chief"
   },
   {
-   "id": "b485d981-a4dd-4925-be65-7e0a4726f3ea",
+   "id": "6019b6f4-fab8-4840-9247-fe6aaaa5c463",
    "kind": "tribe",
    "leader": "Larissa Jimmy",
    "name": "Native Village of Nanwalek (aka English Bay)",
@@ -2677,7 +2677,7 @@
    "title": "First Chief"
   },
   {
-   "id": "9e4a6751-739a-4c2b-983c-8f3414b34bcd",
+   "id": "fd815151-a7b1-4466-95bc-7ca6930b6902",
    "kind": "tribe",
    "leader": "Shelly Leary",
    "name": "Native Village of Napaimute",
@@ -2686,7 +2686,7 @@
    "title": "Acting President"
   },
   {
-   "id": "50ebe0ba-35a3-45d7-a6c0-28e20cccbc9d",
+   "id": "ce3df120-36d9-464c-a806-393dac65a576",
    "kind": "tribe",
    "leader": "Robert N. Ayagalria, Jr.",
    "name": "Native Village of Napakiak",
@@ -2695,7 +2695,7 @@
    "title": "President"
   },
   {
-   "id": "bd594d3d-ec27-4e60-84b3-26a310630394",
+   "id": "211a53fc-cc5e-478c-8d96-9c6ede5aff24",
    "kind": "tribe",
    "leader": "Sharon Williams",
    "name": "Native Village of Napaskiak",
@@ -2704,7 +2704,7 @@
    "title": "Chief"
   },
   {
-   "id": "5962f6aa-9eb2-4274-ae06-b5e64cbe59b8",
+   "id": "4be686fb-fd3d-40eb-a72c-d6e73c6ca97e",
    "kind": "tribe",
    "leader": "Angela Johnson",
    "name": "Native Village of Nelson Lagoon",
@@ -2713,7 +2713,7 @@
    "title": "President"
   },
   {
-   "id": "e61b79b8-0fc7-461d-87dc-fab424cb6149",
+   "id": "12859551-5ebf-49f6-9a8f-7095f6b51e4c",
    "kind": "tribe",
    "leader": "Simeon Tulik",
    "name": "Native Village of Nightmute",
@@ -2722,7 +2722,7 @@
    "title": "President"
   },
   {
-   "id": "01b99e70-999a-4c25-ba5a-e3b810656ae3",
+   "id": "17438abf-e16b-4c29-9711-3f78af70f1cd",
    "kind": "tribe",
    "leader": "Arnold Dushkin",
    "name": "Native Village of Nikolski",
@@ -2731,7 +2731,7 @@
    "title": "President"
   },
   {
-   "id": "ae062be0-a4cd-43f3-834d-f0150148206d",
+   "id": "c783532d-79d4-4338-b492-26d2b97b8038",
    "kind": "tribe",
    "leader": "Noah Penn, Sr.",
    "name": "Native Village of Noatak",
@@ -2740,7 +2740,7 @@
    "title": "President"
   },
   {
-   "id": "fb9e45b8-f702-4977-ab68-b2bc7ef7f8be",
+   "id": "658d1058-c8bf-40cf-b23c-1e6d2ca045f4",
    "kind": "tribe",
    "leader": "Vernon Bennet",
    "name": "Native Village of Nuiqsut (aka Nooiksut)",
@@ -2749,7 +2749,7 @@
    "title": "President"
   },
   {
-   "id": "6cc5bc4d-4bc2-4358-bb28-177d45090b22",
+   "id": "5f79c46e-83f3-4f51-a166-1a40d4eb4649",
    "kind": "tribe",
    "leader": "Alan Peter",
    "name": "Native Village of Nunam Iqua",
@@ -2758,7 +2758,7 @@
    "title": "President"
   },
   {
-   "id": "6ab064bd-df42-480d-a1a1-d480d6ed04bc",
+   "id": "3cd5c41c-5def-4c20-a711-0e2b619c26d0",
    "kind": "tribe",
    "leader": "Wassilie Pleasant",
    "name": "Native Village of Nunapitchuk",
@@ -2767,7 +2767,7 @@
    "title": "President"
   },
   {
-   "id": "33cbab07-3837-4aa3-9199-ed327c580b44",
+   "id": "2ea263cf-518b-4dab-8983-6aa546aa7d8c",
    "kind": "tribe",
    "leader": "Robert Boskofsky, Sr.",
    "name": "Native Village of Ouzinkie",
@@ -2776,7 +2776,7 @@
    "title": "President"
   },
   {
-   "id": "82d573df-9294-4d00-a7e6-1b6e2d5187f6",
+   "id": "bdca8d04-cc4f-4cff-8fe2-51ac52035622",
    "kind": "tribe",
    "leader": "Estelle Thomson",
    "name": "Native Village of Paimiut",
@@ -2785,7 +2785,7 @@
    "title": "President"
   },
   {
-   "id": "2f9141b5-5ecd-471b-ad2c-23a1bd1aeb3f",
+   "id": "bae717fb-a3a2-488e-bcd3-a38397dbf892",
    "kind": "tribe",
    "leader": "Gerald B. Kosbruk",
    "name": "Native Village of Perryville",
@@ -2794,7 +2794,7 @@
    "title": "President"
   },
   {
-   "id": "a51e719a-13eb-423d-b0a6-ae1a0def4215",
+   "id": "d074e968-0e9a-4cb4-a492-e71c8f52a142",
    "kind": "tribe",
    "leader": "Victor Seybert",
    "name": "Native Village of Pilot Point",
@@ -2803,7 +2803,7 @@
    "title": "President"
   },
   {
-   "id": "1b93afed-ec1a-4aab-acd0-8e7b6db5fecb",
+   "id": "705ea39e-9e0b-4f2b-acf5-40eef3dd9a28",
    "kind": "tribe",
    "leader": "Adela Lane",
    "name": "Native Village of Point Hope",
@@ -2812,7 +2812,7 @@
    "title": "President"
   },
   {
-   "id": "01216aeb-5dcd-4075-8d2b-35cefe9a7ebc",
+   "id": "6d0b8cb1-86f7-4a2e-a25e-824c8b3c6050",
    "kind": "tribe",
    "leader": "Leo Ferreira III",
    "name": "Native Village of Point Lay",
@@ -2821,7 +2821,7 @@
    "title": "President"
   },
   {
-   "id": "bb2dcbf2-8ca4-42f4-84e0-96a5e3de1f13",
+   "id": "90c476f2-093c-4bda-aa60-1198199e62f2",
    "kind": "tribe",
    "leader": "Patrick N. Norman",
    "name": "Native Village of Port Graham",
@@ -2830,7 +2830,7 @@
    "title": "First Chief"
   },
   {
-   "id": "3d2c7ea5-926d-4799-9e06-1808b10fe2a4",
+   "id": "b928744a-a1ca-42a7-b79c-ac73bff727ae",
    "kind": "tribe",
    "leader": "John Christensen, Jr.",
    "name": "Native Village of Port Heiden",
@@ -2839,7 +2839,7 @@
    "title": "President"
   },
   {
-   "id": "252373db-006d-489b-af71-9ffcb96a9ce3",
+   "id": "46c7bf49-11b7-4440-8d34-108fb810453b",
    "kind": "tribe",
    "leader": "Charlea Kewan-Bartleson",
    "name": "Native Village of Port Lions",
@@ -2848,7 +2848,7 @@
    "title": "President"
   },
   {
-   "id": "6703ff28-9ff1-4d57-ae08-9aa8fd2e905d",
+   "id": "800c63b8-81f5-4c81-aea1-81e6844becf8",
    "kind": "tribe",
    "leader": "Katherine Dozette",
    "name": "Native Village of Ruby",
@@ -2857,7 +2857,7 @@
    "title": "First Chief"
   },
   {
-   "id": "b73068af-8040-49e5-ac28-fb0fe493c517",
+   "id": "868bd2cd-6e93-4883-8554-05816736bd74",
    "kind": "tribe",
    "leader": "Theresa Kobuk",
    "name": "Native Village of Saint Michael",
@@ -2866,7 +2866,7 @@
    "title": "President"
   },
   {
-   "id": "12becca7-a9b9-4325-874a-bdba96077178",
+   "id": "786aa430-2a19-4b53-9723-8e35e84c5b28",
    "kind": "tribe",
    "leader": "Bengamin Pungowiyi",
    "name": "Native Village of Savoonga",
@@ -2875,7 +2875,7 @@
    "title": "President"
   },
   {
-   "id": "3f0b299a-0d4e-4470-b16d-6a78805aedb8",
+   "id": "7d615216-44b5-4bc2-909f-0dffc6675784",
    "kind": "tribe",
    "leader": "Anthony Ulak",
    "name": "Native Village of Scammon Bay",
@@ -2884,7 +2884,7 @@
    "title": "President"
   },
   {
-   "id": "3221434d-a78e-4516-bc3d-6f3186978cb0",
+   "id": "2883a877-2d30-44f5-b2ef-823315f40213",
    "kind": "tribe",
    "leader": "Allen Ticket, Sr.",
    "name": "Native Village of Selawik",
@@ -2893,7 +2893,7 @@
    "title": "President"
   },
   {
-   "id": "7579cef1-c240-468a-b882-147bc178f395",
+   "id": "737d59a8-0d59-46cd-908e-632ecbf16ceb",
    "kind": "tribe",
    "leader": "Axel W. Jackson",
    "name": "Native Village of Shaktoolik",
@@ -2902,7 +2902,7 @@
    "title": "President"
   },
   {
-   "id": "50312314-4856-4baf-9d5c-35e91bd1c536",
+   "id": "19dec0bf-fce7-411c-b5d5-b67b330e2c09",
    "kind": "tribe",
    "leader": "Nancy Kokeok",
    "name": "Native Village of Shishmaref",
@@ -2911,7 +2911,7 @@
    "title": "President"
   },
   {
-   "id": "5ca96deb-d07a-43fd-862e-6940bac7bd59",
+   "id": "1bd53c22-62ce-4ace-b423-f6d3fd9e5de8",
    "kind": "tribe",
    "leader": "Frederick Sun, Sr.",
    "name": "Native Village of Shungnak",
@@ -2920,7 +2920,7 @@
    "title": "President"
   },
   {
-   "id": "556ed3e6-e0dd-4cbd-bfe3-9a6f9e7e8233",
+   "id": "c01443e8-5b9b-4552-8c20-c0a5d71a73a8",
    "kind": "tribe",
    "leader": "Fred T. Angasan, Sr.",
    "name": "Native Village of South Naknek (previously listed as South Naknek Village)",
@@ -2929,7 +2929,7 @@
    "title": "President"
   },
   {
-   "id": "bf5934c5-19c4-4ba7-850f-9b0dfa8b5971",
+   "id": "2107afa4-2ed5-40ea-9447-6e8242544ea4",
    "kind": "tribe",
    "leader": "David Kriska",
    "name": "Native Village of Stevens",
@@ -2938,7 +2938,7 @@
    "title": "First Chief"
   },
   {
-   "id": "ae733f47-11f5-4277-b259-a8f1e652d2d3",
+   "id": "96d54399-2c31-4906-aad9-001d96c1b267",
    "kind": "tribe",
    "leader": "Herbert F. Demit",
    "name": "Native Village of Tanacross",
@@ -2947,7 +2947,7 @@
    "title": "President"
   },
   {
-   "id": "e1a0abc8-8e5e-459d-bede-aaacb2325b0b",
+   "id": "8c99ba73-0ae2-4ee4-9eea-510cb1e26632",
    "kind": "tribe",
    "leader": "Julie Roberts-Hyslop",
    "name": "Native Village of Tanana",
@@ -2956,7 +2956,7 @@
    "title": "First Chief"
   },
   {
-   "id": "10e7de21-c281-4162-8883-95966f7884dd",
+   "id": "8429f120-fd16-4aaa-bbd7-46651d3d944c",
    "kind": "tribe",
    "leader": "Nanci Robart",
    "name": "Native Village of Tatitlek",
@@ -2965,7 +2965,7 @@
    "title": "President"
   },
   {
-   "id": "42165299-e768-4c04-a9c2-15792e8dffc8",
+   "id": "dd04cc31-2213-44e0-ab4b-9e3da0213ff6",
    "kind": "tribe",
    "leader": "Gloria Stickwan",
    "name": "Native Village of Tazlina",
@@ -2974,7 +2974,7 @@
    "title": "President"
   },
   {
-   "id": "8f894a9f-2046-46e8-9643-035c7536df59",
+   "id": "fc0b2a7c-946a-432f-a231-1bdfa8feced4",
    "kind": "tribe",
    "leader": "Kacey Okbaok",
    "name": "Native Village of Teller",
@@ -2983,7 +2983,7 @@
    "title": "President"
   },
   {
-   "id": "2dcbc743-dce6-4195-ada6-798a20217ad2",
+   "id": "a8fe20d5-c996-4638-88f9-d28ee658d1c7",
    "kind": "tribe",
    "leader": "Michael Sam",
    "name": "Native Village of Tetlin",
@@ -2992,7 +2992,7 @@
    "title": "President"
   },
   {
-   "id": "f831cee2-49f1-4c51-a1c2-99390740b5a3",
+   "id": "071e76e1-29c6-4a4d-9de5-a5e4f3256f81",
    "kind": "tribe",
    "leader": "Robert Enoch",
    "name": "Native Village of Tuntutuliak",
@@ -3001,7 +3001,7 @@
    "title": "President"
   },
   {
-   "id": "8a4da589-18b1-438c-8bbd-a86895c7c5f8",
+   "id": "0c9bc16c-c1e0-47ff-b73b-541d209ade12",
    "kind": "tribe",
    "leader": "Susie Walter",
    "name": "Native Village of Tununak",
@@ -3010,7 +3010,7 @@
    "title": "President"
   },
   {
-   "id": "c0b4f8a0-87e5-415d-9570-64791a96de61",
+   "id": "fa770177-8b2a-4567-b2dd-c8be7dc01947",
    "kind": "tribe",
    "leader": "Robert Stephan, Sr.",
    "name": "Native Village of Tyonek",
@@ -3019,7 +3019,7 @@
    "title": "President"
   },
   {
-   "id": "3b414c29-9ed2-4fdb-a471-078ceb46fd18",
+   "id": "c7a24c92-c485-4ee5-b383-9ab16a8534aa",
    "kind": "tribe",
    "leader": "Frank Katchatag",
    "name": "Native Village of Unalakleet",
@@ -3028,7 +3028,7 @@
    "title": "President"
   },
   {
-   "id": "75f278a5-8fa0-4298-a1d5-e504ff0cf3bc",
+   "id": "11e1d2a4-25a6-47e3-a47b-3f63061c68bd",
    "kind": "tribe",
    "leader": "John A. Foster",
    "name": "Native Village of Unga",
@@ -3037,7 +3037,7 @@
    "title": "President"
   },
   {
-   "id": "a8e2eaea-de4c-4143-8807-a0795da3c6ad",
+   "id": "c629e27b-2257-4741-b581-28ce353e2c29",
    "kind": "tribe",
    "leader": "Raeann Garnett",
    "name": "Native Village of Venetie Tribal Government (Arctic Village and Village of Venetie)",
@@ -3046,7 +3046,7 @@
    "title": "First Chief"
   },
   {
-   "id": "2a72027e-fc63-4e6f-8652-69a7d97f0b03",
+   "id": "38ece454-49f1-43d8-8d0e-986ebb8701f4",
    "kind": "tribe",
    "leader": "Anna M. Oxereok",
    "name": "Native Village of Wales",
@@ -3055,7 +3055,7 @@
    "title": "President"
   },
   {
-   "id": "b7908e1d-6eec-42a8-92bd-6985ef61de90",
+   "id": "d1483e45-3b8f-4c98-b008-1493c6d2ec44",
    "kind": "tribe",
    "leader": "Mary D. Charles",
    "name": "Native Village of White Mountain",
@@ -3064,7 +3064,7 @@
    "title": "President"
   },
   {
-   "id": "880e792d-c636-46c2-889a-c77fb304f106",
+   "id": "6b34a2c1-d64f-4e32-9974-c8b14914ac99",
    "kind": "tribe",
    "leader": "Buu Nygren",
    "name": "Navajo Nation, Arizona, New Mexico, & Utah",
@@ -3073,7 +3073,7 @@
    "title": "President"
   },
   {
-   "id": "ced248af-21c6-4c1d-ab3c-57c2df973934",
+   "id": "d9a3bc82-ee29-4334-a6c1-2a72820e2eda",
    "kind": "tribe",
    "leader": "Caroline Ketzler",
    "name": "Nenana Native Association",
@@ -3082,7 +3082,7 @@
    "title": "First Chief"
   },
   {
-   "id": "8c308e46-26ac-48dd-aac8-7f667aa208c7",
+   "id": "43bba76a-c14d-41a5-81c0-fe437c399184",
    "kind": "tribe",
    "leader": "Gust Tunguing, Jr.",
    "name": "New Koliganek Village Council",
@@ -3091,7 +3091,7 @@
    "title": "President"
   },
   {
-   "id": "000a6e19-6e34-49ec-8e6d-5c06b19dd63b",
+   "id": "252b65dd-fc5e-45d1-b16b-92134d69d358",
    "kind": "tribe",
    "leader": "Lucy Weedman",
    "name": "New Stuyahok Village",
@@ -3100,7 +3100,7 @@
    "title": "President"
   },
   {
-   "id": "8c80d6c9-ba3e-4294-af4a-83ca050e75f7",
+   "id": "33799f7a-0e5e-4c83-b8bf-89c3772f1493",
    "kind": "tribe",
    "leader": "Henry Olympic",
    "name": "Newhalen Village",
@@ -3109,7 +3109,7 @@
    "title": "President"
   },
   {
-   "id": "45cf4037-7705-4721-9aeb-d90bc0ae42f5",
+   "id": "c132bb79-969a-4f7a-9f25-d9f579b4865c",
    "kind": "tribe",
    "leader": "Simeon Fairbanks, Jr.",
    "name": "Newtok Village",
@@ -3118,7 +3118,7 @@
    "title": "President"
   },
   {
-   "id": "370b4d54-e421-4529-bf3e-83c3457bf00b",
+   "id": "2be4564f-8cbf-451c-b4c6-0a2357c47de8",
    "kind": "tribe",
    "leader": "Samuel N Penney",
    "name": "Nez Perce Tribe",
@@ -3127,7 +3127,7 @@
    "title": "Chairman"
   },
   {
-   "id": "d7dc17b1-04c2-40f5-a36f-d7ceaf2f2504",
+   "id": "901632c0-46be-474e-a0ce-0908400b86dd",
    "kind": "tribe",
    "leader": "Phillip Runkle",
    "name": "Nikolai Village",
@@ -3136,7 +3136,7 @@
    "title": "First Chief"
   },
   {
-   "id": "4c91cb87-4bbf-4c45-a38b-d65d7bc7e91a",
+   "id": "6cd9e587-f07a-4e7d-97f3-2723f64f6721",
    "kind": "tribe",
    "leader": "Richard G. Encelewski",
    "name": "Ninilchik Village",
@@ -3145,7 +3145,7 @@
    "title": "President"
   },
   {
-   "id": "f39ec731-3994-42fd-8eda-0188c4d72feb",
+   "id": "8be0a016-185f-44c1-8a1d-8a21e0027426",
    "kind": "tribe",
    "leader": "James Slape, Jr.",
    "name": "Nisqually Indian Tribe",
@@ -3154,7 +3154,7 @@
    "title": "Chairman"
   },
   {
-   "id": "965b6798-252b-473b-b142-61f8504d71c7",
+   "id": "ffae6233-8c50-46f0-81ec-82e9e4e721d3",
    "kind": "tribe",
    "leader": "Becka Baker",
    "name": "Nome Eskimo Community",
@@ -3163,7 +3163,7 @@
    "title": "President"
   },
   {
-   "id": "90fbb2a0-09a0-4502-a3a7-81da0e0d3a70",
+   "id": "46c6f7f3-7bc9-471e-a15d-e543502fc066",
    "kind": "tribe",
    "leader": "George Alexie",
    "name": "Nondalton Tribe (previously listed as Nondalton Village)",
@@ -3172,7 +3172,7 @@
    "title": "Vice-President"
   },
   {
-   "id": "df07ce1a-812e-49e9-85db-22a178b5a464",
+   "id": "d986dbab-892b-45be-b8a9-2d3551e6a891",
    "kind": "tribe",
    "leader": "Roswell Cline, Sr.",
    "name": "Nooksack Indian Tribe",
@@ -3181,7 +3181,7 @@
    "title": "Chairman"
   },
   {
-   "id": "d6d4b49b-c2d4-475c-b969-e4e714b8c4a9",
+   "id": "8b5cb94f-3e03-4ffb-a8b0-1206b02e0179",
    "kind": "tribe",
    "leader": "Elmer Armstrong",
    "name": "Noorvik Native Community",
@@ -3190,7 +3190,7 @@
    "title": "President"
   },
   {
-   "id": "bc8c8f17-f0d6-4df4-a6f3-6790705c02b2",
+   "id": "c13047a8-8d45-4eb4-b98b-090d7ac9c6b7",
    "kind": "tribe",
    "leader": "Keenan Groesbeck",
    "name": "Northern Arapaho Tribe of the Wind River Reservation, Wyoming",
@@ -3199,7 +3199,7 @@
    "title": "Chairman"
   },
   {
-   "id": "3153b612-cc7a-4d51-ba55-9ec607c48789",
+   "id": "db8f3708-b900-4b33-8af1-19b4446d4601",
    "kind": "tribe",
    "leader": "Gene Small",
    "name": "Northern Cheyenne Tribe of the Northern Cheyenne Indian Reservation, Montana",
@@ -3208,7 +3208,7 @@
    "title": "President"
   },
   {
-   "id": "5e2c7343-1780-4566-b71c-2786c95f6ac2",
+   "id": "a21f478b-8cc4-4c45-932d-1586b7c73e27",
    "kind": "tribe",
    "leader": "Fred Beihn",
    "name": "Northfork Rancheria of Mono Indians of California",
@@ -3217,7 +3217,7 @@
    "title": "Chairman"
   },
   {
-   "id": "b4e65b4e-6077-411c-83c4-e3780097366c",
+   "id": "b4c71e3b-f473-45ae-8f88-c2587a460743",
    "kind": "tribe",
    "leader": "William Chaaiy Albert",
    "name": "Northway Village",
@@ -3226,7 +3226,7 @@
    "title": "President"
   },
   {
-   "id": "229950dd-f505-4d17-92a6-b58961f9dd95",
+   "id": "d65ddb35-091d-4188-b7f4-ea537caef4b9",
    "kind": "tribe",
    "leader": "Jason Walker",
    "name": "Northwestern Band of the Shoshone Nation",
@@ -3235,7 +3235,7 @@
    "title": "Chairman"
   },
   {
-   "id": "a953bad1-9c3b-4646-86d2-75812a7e5f6c",
+   "id": "4031c522-bc27-48ae-8265-d91b5f6a222d",
    "kind": "tribe",
    "leader": "Homer A. Mandoka",
    "name": "Nottawaseppi Huron Band of the Potawatomi, Michigan",
@@ -3244,7 +3244,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "3c9dc4d6-feef-4c42-868d-ca1550a77dac",
+   "id": "a20b5d4b-4be0-41a4-8435-598c00bc2009",
    "kind": "tribe",
    "leader": "Gloria Patsy",
    "name": "Nulato Village",
@@ -3253,7 +3253,7 @@
    "title": "1st Chief"
   },
   {
-   "id": "010fc5b4-8259-4f8e-a90b-c6d7267906a4",
+   "id": "4fea3172-d2f5-4c48-be96-1e83900b0ece",
    "kind": "tribe",
    "leader": "Charles J. Moses",
    "name": "Nunakauyarmiut Tribe",
@@ -3262,7 +3262,7 @@
    "title": "President"
   },
   {
-   "id": "efc072c7-d822-429e-bcf1-15b46b48075b",
+   "id": "247dffc2-0bf8-4f60-aacc-3b6b36a6e68f",
    "kind": "tribe",
    "leader": "Frank Star Comes Out",
    "name": "Oglala Sioux Tribe",
@@ -3271,7 +3271,7 @@
    "title": "President"
   },
   {
-   "id": "2dbcc2c5-a4c5-4352-818e-2dfe559213e9",
+   "id": "04ce3e55-e66a-4716-97e1-236996bdc591",
    "kind": "tribe",
    "leader": "Benny Lujan",
    "name": "Ohkay Owingeh, New Mexico",
@@ -3280,7 +3280,7 @@
    "title": "Governor"
   },
   {
-   "id": "fa341a57-f195-48ae-8492-873c162172ee",
+   "id": "5467b410-df29-42fe-b1d4-f1c894e88c68",
    "kind": "tribe",
    "leader": "Jeffery Gilpin",
    "name": "Omaha Tribe of Nebraska",
@@ -3289,7 +3289,7 @@
    "title": "Chairman"
   },
   {
-   "id": "2fa91047-c13d-48ba-8c92-485678ba5da5",
+   "id": "7165a1cd-75bc-4cec-8706-e8b8c074a9bd",
    "kind": "tribe",
    "leader": "Ray Halbritter",
    "name": "Oneida Indian Nation",
@@ -3298,7 +3298,7 @@
    "title": "Nation Representative"
   },
   {
-   "id": "d01144a6-8a7d-4ac4-b395-2154eadf2840",
+   "id": "d53797b4-1e85-494e-bfe8-e4b2795e0cef",
    "kind": "tribe",
    "leader": "Tehassi Hill",
    "name": "Oneida Nation",
@@ -3307,7 +3307,7 @@
    "title": "Chairman"
   },
   {
-   "id": "07bf907c-9350-4c49-a2e3-51aa7aa4eeec",
+   "id": "c497fd5f-cc76-4785-b576-aacfa66297aa",
    "kind": "tribe",
    "leader": "Spencer Lyons; Alson Gibson; Shannon Booth",
    "name": "Onondaga Nation",
@@ -3316,7 +3316,7 @@
    "title": "Chiefs (3)"
   },
   {
-   "id": "21d405f8-22ad-4199-9335-25e235a5c434",
+   "id": "eede838d-82bd-43cb-ad07-dff4c994ddb9",
    "kind": "tribe",
    "leader": "Ivan Demientiff",
    "name": "Organized Village of Grayling (aka Holikachuk)",
@@ -3325,7 +3325,7 @@
    "title": "First Chief"
   },
   {
-   "id": "65c32885-8c3e-48ab-9922-874c0cb60bf5",
+   "id": "95bd0c26-732d-4c7c-9570-6690aff19e49",
    "kind": "tribe",
    "leader": "Joel M. Jackson",
    "name": "Organized Village of Kake",
@@ -3334,7 +3334,7 @@
    "title": "President"
   },
   {
-   "id": "b3a78be7-3f0b-4fc0-aa01-12f7980a0ae9",
+   "id": "ee17d828-3972-4537-8426-49e3da73b530",
    "kind": "tribe",
    "leader": "Michael Jones",
    "name": "Organized Village of Kasaan",
@@ -3343,7 +3343,7 @@
    "title": "President"
   },
   {
-   "id": "3d87fe7d-f628-4f28-927a-f4544e64fbb9",
+   "id": "eceeb22b-a1c9-4837-8bf5-66cf9c61d8a7",
    "kind": "tribe",
    "leader": "Mary K. Nicolai",
    "name": "Organized Village of Kwethluk",
@@ -3352,7 +3352,7 @@
    "title": "President"
   },
   {
-   "id": "a8fcd384-9aa2-4be0-8e55-25f424338c9f",
+   "id": "ac41cb60-8e81-4979-93c2-85d1f6635952",
    "kind": "tribe",
    "leader": "Joseph Williams, Jr.",
    "name": "Organized Village of Saxman",
@@ -3361,7 +3361,7 @@
    "title": "President"
   },
   {
-   "id": "d309bd12-e755-45d6-91db-96258c015817",
+   "id": "a3c40d03-2bfe-4110-8aa4-115fe98f4243",
    "kind": "tribe",
    "leader": "Valerie Davidson",
    "name": "Orutsararmiut Traditional Native Council",
@@ -3370,7 +3370,7 @@
    "title": "Chairman"
   },
   {
-   "id": "e515192a-2173-4e39-b047-3a3ed6de603a",
+   "id": "9b80ffbf-a377-46ab-be30-86d7fcb6e503",
    "kind": "tribe",
    "leader": "Nicolai M. Steven",
    "name": "Oscarville Traditional Village",
@@ -3379,7 +3379,7 @@
    "title": "President"
   },
   {
-   "id": "77f45d26-4a65-49af-a458-a5b5c6e3ecad",
+   "id": "f9145f1d-7ce0-4d55-82fc-363874f0f478",
    "kind": "tribe",
    "leader": "John R. Shotton",
    "name": "Otoe-Missouria Tribe of Indians, Oklahoma",
@@ -3388,7 +3388,7 @@
    "title": "Chairman"
   },
   {
-   "id": "779f93d3-fc9c-4d9a-be6f-7ae5839cad7b",
+   "id": "ac46df58-5839-47fb-80b5-80a25a8d2064",
    "kind": "tribe",
    "leader": "Cody Hollenbeck",
    "name": "Ottawa Tribe of Oklahoma",
@@ -3397,18 +3397,18 @@
    "title": "Chief"
   },
   {
-   "id": "6acbd95f-a74a-4560-9b47-0d3b64b5ce70",
+   "id": "f4b3564e-b632-41d2-95d0-2140f07a4eb7",
    "kind": "affiliate",
    "leader": "Betty Cuch",
    "name": "Paiute Indian Tribe of Utah (Cedar Band of Paiutes)",
-   "parent": "d66a2ba0-9efe-488c-b2aa-008c29e30e07",
+   "parent": "bb0ee510-772d-4af5-83da-9d75a0824a90",
    "region": "Western",
    "state": "UT",
    "stateFrom": "mailing",
    "title": "Chairperson"
   },
   {
-   "id": "d66a2ba0-9efe-488c-b2aa-008c29e30e07",
+   "id": "bb0ee510-772d-4af5-83da-9d75a0824a90",
    "kind": "tribe",
    "leader": "Laurel Yellowhorse",
    "name": "Paiute Indian Tribe of Utah (Cedar Band of Paiutes, Kanosh Band of Paiutes, Koosharem Band of Paiutes, Indian Peaks Band of Paiutes, and Shivwits Band of Paiutes)",
@@ -3417,47 +3417,47 @@
    "title": "Chairwoman"
   },
   {
-   "id": "e614af68-bab2-4a1f-8010-664b191c5f54",
+   "id": "52635fee-ae7e-494a-b5e2-9a36c93fa60a",
    "kind": "affiliate",
    "leader": "Tami Slayton",
    "name": "Paiute Indian Tribe of Utah (Indian Peaks Band of Paiutes)",
-   "parent": "d66a2ba0-9efe-488c-b2aa-008c29e30e07",
+   "parent": "bb0ee510-772d-4af5-83da-9d75a0824a90",
    "region": "Western",
    "state": null,
    "title": "Chairperson"
   },
   {
-   "id": "bbede471-e0f5-48f9-9531-988e77936396",
+   "id": "89907e7a-b713-4c34-98e2-c255cb8b15fc",
    "kind": "affiliate",
    "leader": "Gari Lafferty",
    "name": "Paiute Indian Tribe of Utah (Kanosh Band of Paiutes)",
-   "parent": "d66a2ba0-9efe-488c-b2aa-008c29e30e07",
+   "parent": "bb0ee510-772d-4af5-83da-9d75a0824a90",
    "region": "Western",
    "state": null,
    "title": "Chairperson"
   },
   {
-   "id": "ec452c72-d13d-4abb-8800-386f85c6369c",
+   "id": "30627390-f8d8-490b-bcf5-3de528faae5d",
    "kind": "affiliate",
    "leader": "Heather John",
    "name": "Paiute Indian Tribe of Utah (Koosharem Band of Paiutes)",
-   "parent": "d66a2ba0-9efe-488c-b2aa-008c29e30e07",
+   "parent": "bb0ee510-772d-4af5-83da-9d75a0824a90",
    "region": "Western",
    "state": null,
    "title": "Chairperson"
   },
   {
-   "id": "2295d637-a546-4cdd-86a1-f821c3d0ab71",
+   "id": "8a04ff4f-e2bf-4fca-bb87-c54b68141e79",
    "kind": "affiliate",
    "leader": null,
    "name": "Paiute Indian Tribe of Utah (Shivwits Band of Paiutes)",
-   "parent": "d66a2ba0-9efe-488c-b2aa-008c29e30e07",
+   "parent": "bb0ee510-772d-4af5-83da-9d75a0824a90",
    "region": "Western",
    "state": null,
    "title": null
   },
   {
-   "id": "66c8f71c-d14a-4a19-9b46-5c961a05ab1f",
+   "id": "6f3f6fa2-5cc2-4126-ba00-79d6f5e0a01b",
    "kind": "tribe",
    "leader": "Catherine Williams-Tuni",
    "name": "Paiute-Shoshone Tribe of the Fallon Reservation and Colony, Nevada",
@@ -3466,7 +3466,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "9c3c162e-52d8-4042-9737-cda4e37fda4f",
+   "id": "acb80045-4025-4b6f-bfbe-b7bdd0e5e79c",
    "kind": "tribe",
    "leader": "Robert Smith",
    "name": "Pala Band of Mission Indians",
@@ -3475,7 +3475,7 @@
    "title": "Chairman"
   },
   {
-   "id": "1fe3f3ba-4161-4895-ba49-f46a071e292d",
+   "id": "caf36a8b-01cb-44ca-a8a6-57d23441e358",
    "kind": "tribe",
    "leader": "Kevin Brown",
    "name": "Pamunkey Indian Tribe",
@@ -3484,7 +3484,7 @@
    "title": "Chief"
   },
   {
-   "id": "1ca5ae91-d06b-4e07-9308-ccae1d514b55",
+   "id": "43c24a2f-b37a-4424-8bb0-9044ef7f0647",
    "kind": "tribe",
    "leader": "Julian Hernandez",
    "name": "Pascua Yaqui Tribe of Arizona",
@@ -3493,7 +3493,7 @@
    "title": "Chairman"
   },
   {
-   "id": "4f3dffe6-bd68-4c46-8bff-547741e2b3ce",
+   "id": "b4d15a5a-fde6-4313-ad54-aee4c5e4a63d",
    "kind": "tribe",
    "leader": "Brandin Paya",
    "name": "Paskenta Band of Nomlaki Indians of California",
@@ -3502,7 +3502,7 @@
    "title": "Chairman"
   },
   {
-   "id": "88cb7cb5-25d7-41ea-a2f8-8d6cf6797853",
+   "id": "49adaa8d-aeb3-422f-a42a-c61e137d506c",
    "kind": "tribe",
    "leader": null,
    "name": "Passamaquoddy Tribe",
@@ -3511,27 +3511,27 @@
    "title": null
   },
   {
-   "id": "fea5de22-3133-4a49-bb79-caacbcc26e63",
+   "id": "2470950f-e74e-4785-8dc7-925fb1f75828",
    "kind": "affiliate",
    "leader": "William Nicholas, Sr.",
    "name": "Passamaquoddy Tribe - Indian Township",
-   "parent": "88cb7cb5-25d7-41ea-a2f8-8d6cf6797853",
+   "parent": "49adaa8d-aeb3-422f-a42a-c61e137d506c",
    "region": "Eastern",
    "state": "ME",
    "title": "Chief"
   },
   {
-   "id": "9b8f01df-61f3-48b0-8eda-3648390c94e5",
+   "id": "0f63a879-593f-4fcb-baa0-9c4dc1b4681a",
    "kind": "affiliate",
    "leader": "Amkuwiposohehs \"Pos\" Bassett",
    "name": "Passamaquoddy Tribe - Pleasant Point",
-   "parent": "88cb7cb5-25d7-41ea-a2f8-8d6cf6797853",
+   "parent": "49adaa8d-aeb3-422f-a42a-c61e137d506c",
    "region": "Eastern",
    "state": "ME",
    "title": "Chief"
   },
   {
-   "id": "c45a726a-0f56-4901-9d85-3785e45a1da7",
+   "id": "2d56abe2-7138-4316-9a2a-a798cf8f769c",
    "kind": "tribe",
    "leader": "George P. Gunderson",
    "name": "Pauloff Harbor Village",
@@ -3540,7 +3540,7 @@
    "title": "President"
   },
   {
-   "id": "70a96f34-95e6-4c56-bf58-282a27fceba4",
+   "id": "d812cb6c-1016-4ce7-91a8-c28015037b51",
    "kind": "tribe",
    "leader": "Temet Majel",
    "name": "Pauma Band of Luiseno Mission Indians of the Pauma & Yuima Reservation, California",
@@ -3549,7 +3549,7 @@
    "title": "Chairman"
   },
   {
-   "id": "8d32f680-ccc8-4e25-ae40-a9f900a91142",
+   "id": "358a8bdf-3612-4f50-bde8-1aec6d2e3ee4",
    "kind": "tribe",
    "leader": "Misty M Nuttle",
    "name": "Pawnee Nation of Oklahoma",
@@ -3558,7 +3558,7 @@
    "title": "President"
   },
   {
-   "id": "ad4b4db4-d2e5-4c13-a7cf-c8c7b601462b",
+   "id": "c8a97ac3-6c7d-488f-8299-fcd095427ce6",
    "kind": "tribe",
    "leader": "Mark Macarro",
    "name": "Pechanga Band of Indians (previously listed as Pechanga Band of Luiseno Mission Indians of the Pechanga Reservation, California)",
@@ -3567,7 +3567,7 @@
    "title": "Chairman"
   },
   {
-   "id": "49dca480-da8a-4689-b46f-2afd20b6a199",
+   "id": "68680040-9bc8-4301-b38b-4f68839e4eca",
    "kind": "tribe",
    "leader": "Keith Jensen",
    "name": "Pedro Bay Village",
@@ -3576,7 +3576,7 @@
    "title": "President"
   },
   {
-   "id": "9c252488-e501-460e-b679-e67ad2856f7c",
+   "id": "04da835f-dfa5-4b00-aefc-321706066977",
    "kind": "tribe",
    "leader": "Kirk Francis",
    "name": "Penobscot Nation",
@@ -3585,7 +3585,7 @@
    "title": "Chief"
   },
   {
-   "id": "0cd84b85-a873-4486-ab89-833489a5af22",
+   "id": "67579e92-0dee-49df-bf59-b20959fb2916",
    "kind": "tribe",
    "leader": "Rosanna Dobbs",
    "name": "Peoria Tribe of Indians of Oklahoma",
@@ -3594,7 +3594,7 @@
    "title": "Chief"
   },
   {
-   "id": "e4bb701e-f3a3-48c2-ad7d-4d0bc63a148e",
+   "id": "18012c42-c5fc-4524-9cab-2bfce85fd4ff",
    "kind": "tribe",
    "leader": "Carol Martinez",
    "name": "Petersburg Indian Association",
@@ -3603,7 +3603,7 @@
    "title": "President"
   },
   {
-   "id": "ca7982d8-a1d8-45ab-9b04-3fa655acf7e9",
+   "id": "27edf37a-0bb0-4f9b-8639-741970ec916d",
    "kind": "tribe",
    "leader": "Tracey Hopkins",
    "name": "Picayune Rancheria of Chukchansi Indians of California",
@@ -3612,7 +3612,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "5cafe791-ee40-4bb7-9d48-2982550dc9f9",
+   "id": "bea3c768-be7e-4a33-a229-805d4a05eb3b",
    "kind": "tribe",
    "leader": "Cynthia Fancyboy",
    "name": "Pilot Station Traditional Village",
@@ -3621,7 +3621,7 @@
    "title": "President"
   },
   {
-   "id": "c02a589e-933d-41d5-9646-88b25df37827",
+   "id": "c0203772-2bee-4f79-8934-42e65cef9bde",
    "kind": "tribe",
    "leader": "Leona Williams",
    "name": "Pinoleville Pomo Nation, California",
@@ -3630,7 +3630,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "4becd5c4-3d36-4b08-a6a1-6d0ecf274fdb",
+   "id": "714ec7f3-5165-4b30-bb61-b045139ba6e1",
    "kind": "tribe",
    "leader": "Yatch Bamford",
    "name": "Pit River Tribe, California (includes XL Ranch, Big Bend, Likely, Lookout, Montgomery Creek, and Roaring Creek Rancherias)",
@@ -3639,7 +3639,7 @@
    "title": "Chairman"
   },
   {
-   "id": "bee81baf-d38c-4c8b-94ea-3aacbe3e9e4f",
+   "id": "e3506def-9ca1-4808-9d59-6face0074c55",
    "kind": "tribe",
    "leader": "William Riley, Jr.",
    "name": "Pitka's Point Traditional Council",
@@ -3648,7 +3648,7 @@
    "title": "President"
   },
   {
-   "id": "ab79c68f-2ab6-47a6-aef5-01b13f7979da",
+   "id": "fcd19a6a-ef1d-407d-b22e-1e2888e597b0",
    "kind": "tribe",
    "leader": "Anna M Fox",
    "name": "Platinum Traditional Village",
@@ -3657,7 +3657,7 @@
    "title": "President"
   },
   {
-   "id": "716f514f-2121-4e04-8e2d-5b6ac335c32b",
+   "id": "663f393b-69cd-4bbd-85e3-7c9ac748324a",
    "kind": "tribe",
    "leader": "Stephanie Bryan",
    "name": "Poarch Band of Creek Indians",
@@ -3666,7 +3666,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "1f40ab48-d050-4fa9-bfe0-e15cbebefb7c",
+   "id": "6636bfc6-7e91-49ac-bc94-f6435ec2323d",
    "kind": "tribe",
    "leader": "Matthew J. Wesaw",
    "name": "Pokagon Band of Potawatomi Indians, Michigan and Indiana",
@@ -3675,7 +3675,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "5d772a0b-4d0e-459d-aeaf-967d8babc3f4",
+   "id": "e7ac1d8e-2cf2-447c-b003-0f62eebe611c",
    "kind": "tribe",
    "leader": "Trey Howe",
    "name": "Ponca Tribe of Indians of Oklahoma",
@@ -3684,7 +3684,7 @@
    "title": "Chairman"
   },
   {
-   "id": "d6e8bd5c-63f2-4c4c-9cd8-3e2b684fcd04",
+   "id": "88a9974f-f9aa-431b-94cd-73a9c3daff5c",
    "kind": "tribe",
    "leader": "Candace Schmidt",
    "name": "Ponca Tribe of Nebraska",
@@ -3693,7 +3693,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "5c013164-684a-4598-a8c6-6b650096f86d",
+   "id": "a9d949db-931c-44bc-9046-508730b15063",
    "kind": "tribe",
    "leader": "Amber Caldera",
    "name": "Port Gamble S'Klallam Tribe",
@@ -3702,7 +3702,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "cb86e6cd-90e4-4f00-a1b4-0183b7409212",
+   "id": "2d9935a0-1e1c-4480-a6c1-cdf1112d044a",
    "kind": "tribe",
    "leader": "Charlie J. Johnson",
    "name": "Portage Creek Village (aka Ohgsenakale)",
@@ -3711,7 +3711,7 @@
    "title": "President"
   },
   {
-   "id": "ef3a2629-5d27-4aa1-9d6a-36c797ee85b6",
+   "id": "85282358-4cea-4cb8-b12b-6970fc74af99",
    "kind": "tribe",
    "leader": "Salvador Rosales",
    "name": "Potter Valley Tribe, California",
@@ -3720,7 +3720,7 @@
    "title": "Chairman"
   },
   {
-   "id": "971d4115-fe9d-4e06-b93f-4ae57d99fb8e",
+   "id": "155f35db-a0c1-4641-ad16-6430b5ebbafd",
    "kind": "tribe",
    "leader": "Joseph Rupnick",
    "name": "Prairie Band Potawatomi Nation",
@@ -3729,7 +3729,7 @@
    "title": "Chairman"
   },
   {
-   "id": "144bb1c7-4ee4-4008-9710-3bc2cd1a54c2",
+   "id": "0fea97a5-114b-4d5c-b512-d8d18b60d22f",
    "kind": "tribe",
    "leader": "Grant Johnson",
    "name": "Prairie Island Indian Community in the State of Minnesota",
@@ -3738,7 +3738,7 @@
    "title": "President"
   },
   {
-   "id": "df37256e-c98b-4dc7-8823-072edca1a8db",
+   "id": "3d2733f8-a3bf-4e6e-8ea3-f9c11ba529e4",
    "kind": "tribe",
    "leader": null,
    "name": "Pribilof Islands Aleut Communities of St. Paul & St. George Islands (St. George Island and Saint Paul Island)",
@@ -3748,7 +3748,7 @@
    "title": null
   },
   {
-   "id": "10de3771-254d-434e-9be0-465f4ee01417",
+   "id": "e6cb5218-806d-4fad-9f38-fe7e8e6bcf1b",
    "kind": "tribe",
    "leader": "Charles P. Riley",
    "name": "Pueblo of Acoma, New Mexico",
@@ -3757,7 +3757,7 @@
    "title": "Governor"
   },
   {
-   "id": "175c3d8d-6200-4b00-bd8b-85400dd18a44",
+   "id": "0df216d7-7707-4f01-8708-96855c60f900",
    "kind": "tribe",
    "leader": "Phillip Quintana",
    "name": "Pueblo of Cochiti, New Mexico",
@@ -3766,7 +3766,7 @@
    "title": "Governor"
   },
   {
-   "id": "1faf9411-5737-4e9b-a423-2d22f06559a1",
+   "id": "a73a06bc-6a42-4c13-9e5e-8b9115e99888",
    "kind": "tribe",
    "leader": "Eugene Jiron",
    "name": "Pueblo of Isleta, New Mexico",
@@ -3775,7 +3775,7 @@
    "title": "Governor"
   },
   {
-   "id": "200f48b5-95ec-4655-a79b-948f4c2f50ee",
+   "id": "27a6dc83-0df5-4882-96ea-d371bfd47e8c",
    "kind": "tribe",
    "leader": "John Galvan",
    "name": "Pueblo of Jemez, New Mexico",
@@ -3784,7 +3784,7 @@
    "title": "Governor"
   },
   {
-   "id": "3752fc72-96c0-4dea-a3cd-1b015935a657",
+   "id": "fed88c50-6909-47d0-b97f-bc36dc68dea9",
    "kind": "tribe",
    "leader": "Harry Antonio, Jr.",
    "name": "Pueblo of Laguna, New Mexico",
@@ -3793,7 +3793,7 @@
    "title": "Governor"
   },
   {
-   "id": "504b14e6-24c5-4acd-b97c-e94243e94941",
+   "id": "51c5b0c9-6e27-4d2b-9489-69a07e399153",
    "kind": "tribe",
    "leader": "Nathaniel S. Porter",
    "name": "Pueblo of Nambe, New Mexico",
@@ -3802,7 +3802,7 @@
    "title": "Governor"
   },
   {
-   "id": "e6907956-096f-492f-88ed-596681e9511f",
+   "id": "d3500222-85a3-4183-b2e0-065afc36399e",
    "kind": "tribe",
    "leader": "Craig Quanchello",
    "name": "Pueblo of Picuris, New Mexico",
@@ -3811,7 +3811,7 @@
    "title": "Governor"
   },
   {
-   "id": "f6a66e74-956f-418d-851d-ac6554a05d74",
+   "id": "c6c057ed-9028-49cf-a9db-c426d590b7f7",
    "kind": "tribe",
    "leader": "Jenelle Roybal",
    "name": "Pueblo of Pojoaque, New Mexico",
@@ -3820,7 +3820,7 @@
    "title": "Governor"
   },
   {
-   "id": "8c216382-92c5-4d49-8458-b65a0dd0c9b5",
+   "id": "63a815ce-421e-4c56-9b37-9145632c56ff",
    "kind": "tribe",
    "leader": "Mark Calabaza",
    "name": "Pueblo of San Felipe, New Mexico",
@@ -3829,7 +3829,7 @@
    "title": "Governor"
   },
   {
-   "id": "4f12536a-eaa0-4f47-aa7c-407c052b73c0",
+   "id": "37206686-8f48-4db7-954f-4c78207100df",
    "kind": "tribe",
    "leader": "Christopher Moquino",
    "name": "Pueblo of San Ildefonso, New Mexico",
@@ -3838,7 +3838,7 @@
    "title": "Governor"
   },
   {
-   "id": "627085d0-5d0c-46ca-b66a-e0426bba3821",
+   "id": "32228b31-4642-442f-abc1-4f00a33398ce",
    "kind": "tribe",
    "leader": "Stuart Paisano",
    "name": "Pueblo of Sandia, New Mexico",
@@ -3847,7 +3847,7 @@
    "title": "Governor"
   },
   {
-   "id": "9771c077-b6cf-4946-9d0e-5bfb3363e82d",
+   "id": "2a292205-527d-46b7-a75c-f519f79ce8ac",
    "kind": "tribe",
    "leader": "Myron Armijo",
    "name": "Pueblo of Santa Ana, New Mexico",
@@ -3856,7 +3856,7 @@
    "title": "Governor"
   },
   {
-   "id": "3a938d19-6831-441c-817a-567bff5bde5d",
+   "id": "62d6e800-de50-4550-8281-9e2b382ff13c",
    "kind": "tribe",
    "leader": "James A. Naranjo",
    "name": "Pueblo of Santa Clara, New Mexico",
@@ -3865,7 +3865,7 @@
    "title": "Governor"
   },
   {
-   "id": "5f010180-6656-459d-80b3-e94c54e6c620",
+   "id": "486e8819-f55b-4145-b1d7-ced09797b6ed",
    "kind": "tribe",
    "leader": "Michael E. Martinez",
    "name": "Pueblo of Taos, New Mexico",
@@ -3874,7 +3874,7 @@
    "title": "Governor"
   },
   {
-   "id": "027899bc-1c11-4f7c-9dde-675b68348a7b",
+   "id": "70af31c4-bb58-4ccf-a509-16b4a51dc74d",
    "kind": "tribe",
    "leader": "Mark Mitchell",
    "name": "Pueblo of Tesuque, New Mexico",
@@ -3883,7 +3883,7 @@
    "title": "Governor"
   },
   {
-   "id": "96a278bd-660a-4009-8c91-0b9f3742a448",
+   "id": "27dc707a-7737-49cc-a0f6-0c337dac0473",
    "kind": "tribe",
    "leader": "Boyd Toribio",
    "name": "Pueblo of Zia, New Mexico",
@@ -3892,7 +3892,7 @@
    "title": "Governor"
   },
   {
-   "id": "d5a93919-d692-4f5f-aef0-c1489f69c4f1",
+   "id": "997ab9ae-45dd-4b61-b7cc-6fa94b70dca4",
    "kind": "tribe",
    "leader": "Fawn Murphy",
    "name": "Pulikla Tribe of Yurok People (previously listed as Resighini Rancheria, California)",
@@ -3901,7 +3901,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "5f39ec8e-7d06-4f16-b749-097aac17059c",
+   "id": "99bb8392-b5e1-4d37-a0a6-12330be569cb",
    "kind": "tribe",
    "leader": "Bill Sterud",
    "name": "Puyallup Tribe of the Puyallup Reservation",
@@ -3910,7 +3910,7 @@
    "title": "Chairman"
   },
   {
-   "id": "0e17d719-91d6-4615-95ec-84c49261dbb1",
+   "id": "de43f4cf-c930-45cc-9901-f79428a59ccc",
    "kind": "tribe",
    "leader": "Steven Wadsworth",
    "name": "Pyramid Lake Paiute Tribe of the Pyramid Lake Reservation, Nevada",
@@ -3919,7 +3919,7 @@
    "title": "Chairman"
   },
   {
-   "id": "ff2d696b-67ae-43fd-afeb-95a9c4aef0a7",
+   "id": "71902db8-c9be-493a-a61c-1335e79218ba",
    "kind": "tribe",
    "leader": "Jason Bjornstad",
    "name": "Qagan Tayagungin Tribe of Sand Point",
@@ -3928,7 +3928,7 @@
    "title": "President"
   },
   {
-   "id": "841cb073-51ba-4acc-aa1d-863a777b9c67",
+   "id": "c87feeb7-8d4c-451c-95ed-c9f143a4a317",
    "kind": "tribe",
    "leader": "Shayla Shaishnikoff",
    "name": "Qawalangin Tribe of Unalaska",
@@ -3937,7 +3937,7 @@
    "title": "President"
   },
   {
-   "id": "af1cae99-67c7-426e-9ab8-8606dfbf2501",
+   "id": "d88fdba1-c07d-4877-9766-e94f66d8b18d",
    "kind": "tribe",
    "leader": "Jesse Manz McKibben II",
    "name": "Quapaw Nation",
@@ -3946,7 +3946,7 @@
    "title": "Chair"
   },
   {
-   "id": "68c2e43b-6da0-4f95-b974-fbb0689ac281",
+   "id": "ae860f18-3517-4d25-a253-aff2f6455751",
    "kind": "tribe",
    "leader": "Leonard Lincoln",
    "name": "Quartz Valley Indian Community of the Quartz Valley Reservation of California",
@@ -3955,7 +3955,7 @@
    "title": "Chairman"
   },
   {
-   "id": "bafe52a8-90bd-4f52-b81e-78cb0de48e86",
+   "id": "87d21f07-7698-45ee-a306-bf4fcb55e34f",
    "kind": "tribe",
    "leader": "Jonathan E. Koteen",
    "name": "Quechan Tribe of the Fort Yuma Indian Reservation, California & Arizona",
@@ -3964,7 +3964,7 @@
    "title": "President"
   },
   {
-   "id": "6a38691d-5680-43e0-bc33-f051f287433e",
+   "id": "a8ebbd0f-ba32-4d7a-ab94-5c1e4ae71612",
    "kind": "tribe",
    "leader": "Justin \"Rio\" Jaime, Jr.",
    "name": "Quileute Tribe of the Quileute Reservation",
@@ -3973,7 +3973,7 @@
    "title": "Chairman"
   },
   {
-   "id": "5543fca1-be0a-430c-8d7a-f5dae0ed2511",
+   "id": "e49678e0-e0f6-4ac8-89fc-b2a8da80396b",
    "kind": "tribe",
    "leader": "Guy Capoeman",
    "name": "Quinault Indian Nation",
@@ -3982,7 +3982,7 @@
    "title": "President"
   },
   {
-   "id": "109668e3-e6b6-4100-a8be-f944526ee195",
+   "id": "c9f45e1b-a3a3-4af3-9106-bd48cffc30b2",
    "kind": "affiliate",
    "leader": "Martha Garcia",
    "name": "Ramah Navajo Chapter of the Navajo Nation",
@@ -3991,7 +3991,7 @@
    "title": "President"
   },
   {
-   "id": "73f8d034-77a4-4564-ae4c-8c407cf10893",
+   "id": "a91b1cd8-34a9-4661-ace4-cbfbd9c65e41",
    "kind": "tribe",
    "leader": "Danae Hamilton Vega",
    "name": "Ramona Band of Cahuilla, California",
@@ -4000,7 +4000,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "80a5ffbf-11df-49d8-9e42-e031aca41075",
+   "id": "c5b5ff43-d340-42ec-9cac-23b123820181",
    "kind": "tribe",
    "leader": "Dawn Newman",
    "name": "Rampart Village",
@@ -4009,7 +4009,7 @@
    "title": "First Chief"
   },
   {
-   "id": "645a419a-7448-47b7-8087-048239dc790a",
+   "id": "b7142126-fa49-49ef-856c-4d05ad9b786f",
    "kind": "tribe",
    "leader": "G. Anne Richardson",
    "name": "Rappahannock Tribe, Inc.",
@@ -4018,7 +4018,7 @@
    "title": "Chief"
   },
   {
-   "id": "39b2b39f-127c-4769-9804-e82e98358a86",
+   "id": "113fae90-47fa-4715-80e2-7717c44b70a9",
    "kind": "tribe",
    "leader": "Nicole L Boyd",
    "name": "Red Cliff Band of Lake Superior Chippewa Indians of Wisconsin",
@@ -4027,7 +4027,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "c7ba1dd9-4ad0-4e01-99ee-d524c192c235",
+   "id": "f5c89dda-f9a3-43fc-ae3d-5d75de9cc34e",
    "kind": "tribe",
    "leader": "Darrell G. Seki, Sr.",
    "name": "Red Lake Band of Chippewa Indians, Minnesota",
@@ -4036,7 +4036,7 @@
    "title": "Chairman"
   },
   {
-   "id": "b7b98ea2-12d5-40fe-a17d-2a1f41977d1e",
+   "id": "41afacd6-498e-41d5-9b5b-f9ed11cd66d6",
    "kind": "tribe",
    "leader": "Jack Potter, Jr.",
    "name": "Redding Rancheria, California",
@@ -4045,7 +4045,7 @@
    "title": "Chairman"
   },
   {
-   "id": "f6b16d2a-850c-4e3b-8422-ced619153d12",
+   "id": "0e0880db-bb5b-4a3f-ae46-d3129d830490",
    "kind": "tribe",
    "leader": "Debra Ramirez",
    "name": "Redwood Valley or Little River Band of Pomo Indians of the Redwood Valley Rancheria California",
@@ -4054,7 +4054,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "df5f1059-7ffc-4d2f-b73b-376b7a6e21f5",
+   "id": "a0240661-27b1-425b-9423-50939436297f",
    "kind": "tribe",
    "leader": "Daryl D. Gardipe",
    "name": "Reno-Sparks Indian Colony, Nevada",
@@ -4063,7 +4063,7 @@
    "title": "Chairman"
   },
   {
-   "id": "a2526e9a-3455-481d-8388-d937598bbb8c",
+   "id": "087b9816-ee43-42d6-b30e-d586b9c2f6cd",
    "kind": "tribe",
    "leader": "Steve Stallings",
    "name": "Rincon Band of Luiseno Indians (previously listed as Rincon Band of Luiseno Mission Indians of Rincon Reservation, California)",
@@ -4072,7 +4072,7 @@
    "title": "Chairman"
   },
   {
-   "id": "4572ca41-f8d5-4f24-843e-ffab3ed4c907",
+   "id": "562e23f7-2d29-4578-8809-eb0abfa18932",
    "kind": "tribe",
    "leader": "Sonja Poe",
    "name": "Robinson Rancheria",
@@ -4081,7 +4081,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "e0afcdc5-f810-4832-94aa-a9e9beec747c",
+   "id": "4691892e-5850-485b-8572-54562deb26c0",
    "kind": "tribe",
    "leader": "Kathleen Wooden Knife",
    "name": "Rosebud Sioux Tribe of the Rosebud Indian Reservation, South Dakota",
@@ -4090,7 +4090,7 @@
    "title": "President"
   },
   {
-   "id": "877935c1-a3ea-4759-bdcd-71e5fa75ce0d",
+   "id": "43ce9256-4d34-4894-976f-ab4f5fe515df",
    "kind": "tribe",
    "leader": "Joseph Parker",
    "name": "Round Valley Indian Tribes, Round Valley Reservation, California",
@@ -4099,7 +4099,7 @@
    "title": "President"
   },
   {
-   "id": "e03fb478-6486-4b3a-b3c5-499226240045",
+   "id": "832ae657-10f7-4dd3-a918-0240d6faa191",
    "kind": "tribe",
    "leader": "Tiauna Carnes",
    "name": "Sac & Fox Nation of Missouri in Kansas and Nebraska",
@@ -4108,7 +4108,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "1e1ba962-64fb-4976-bb48-f8667aaed594",
+   "id": "d692aefb-9eaf-4ca8-b601-a54f7b52fd76",
    "kind": "tribe",
    "leader": "Audrey R. Lee",
    "name": "Sac & Fox Nation, Oklahoma",
@@ -4117,7 +4117,7 @@
    "title": "Principal Chief"
   },
   {
-   "id": "16df6665-57bb-48fa-9335-cd39d243bb56",
+   "id": "427765bc-6555-47af-8f7e-f59a0dbb3d48",
    "kind": "tribe",
    "leader": "Lucie Roberts",
    "name": "Sac & Fox Tribe of the Mississippi in Iowa",
@@ -4126,7 +4126,7 @@
    "title": "Chair"
   },
   {
-   "id": "95439d67-a55d-42db-992e-59cd5a6938af",
+   "id": "710dba8d-1539-4bc9-ae25-6e1445055757",
    "kind": "tribe",
    "leader": "Lucas Sprague",
    "name": "Saginaw Chippewa Indian Tribe of Michigan",
@@ -4135,7 +4135,7 @@
    "title": "Chief"
   },
   {
-   "id": "b07788a0-f2fb-4b52-9964-3face4954fdc",
+   "id": "08cdd731-b5e8-428b-b98b-a0f2addbf4b2",
    "kind": "tribe",
    "leader": "Michael Conners, Donald Thompson, Jr.; Ross Garrow",
    "name": "Saint Regis Mohawk Tribe",
@@ -4144,7 +4144,7 @@
    "title": "Chiefs (3)"
   },
   {
-   "id": "95fd5ca8-cbeb-48f2-9236-3f96be719b03",
+   "id": "6c24468f-4894-447b-ae9a-d63c064c1f9a",
    "kind": "tribe",
    "leader": "Chris Monfor",
    "name": "Salamatof Tribe",
@@ -4153,7 +4153,7 @@
    "title": "Chairman"
   },
   {
-   "id": "9585fbee-beaa-4cda-a67c-4124409cb09f",
+   "id": "d027ef16-076d-4edd-b94b-6abd0eee34a5",
    "kind": "tribe",
    "leader": "Martin Harvier",
    "name": "Salt River Pima-Maricopa Indian Community of the Salt River Reservation, Arizona",
@@ -4162,7 +4162,7 @@
    "title": "President"
   },
   {
-   "id": "c2f8f5f6-99f2-43df-af3a-02f0fb08f915",
+   "id": "834abbe6-d531-4fcc-a886-896ef6fe56a6",
    "kind": "tribe",
    "leader": "Tom Wooten",
    "name": "Samish Indian Nation",
@@ -4171,7 +4171,7 @@
    "title": "Chairman"
   },
   {
-   "id": "42e63f74-5df7-4349-860b-28a61528e735",
+   "id": "c64676a6-1064-4545-92e2-9dc862ff696e",
    "kind": "tribe",
    "leader": "Terry Rambler",
    "name": "San Carlos Apache Tribe of the San Carlos Reservation, Arizona",
@@ -4180,7 +4180,7 @@
    "title": "Chairman"
   },
   {
-   "id": "df36748b-fd17-49bb-b76c-40d206c206f9",
+   "id": "6072571a-cf77-479a-9482-03b3e0bd4f62",
    "kind": "tribe",
    "leader": "Carlene Yellowhair",
    "name": "San Juan Southern Paiute Tribe of Arizona",
@@ -4189,7 +4189,7 @@
    "title": "President"
   },
   {
-   "id": "e5426e7d-c9ee-4486-aa0f-72283c1c4b26",
+   "id": "57c5db4a-c4bc-4f77-b7d1-894af69b4323",
    "kind": "tribe",
    "leader": "Stephen W. Cope",
    "name": "San Pasqual Band of Diegueno Mission Indians of California",
@@ -4198,7 +4198,7 @@
    "title": "Spokesman"
   },
   {
-   "id": "8e4eaf9c-3d68-4697-9545-9619c03a0d99",
+   "id": "d52ba835-f4a7-4ef9-a36f-cf0ad467355c",
    "kind": "tribe",
    "leader": "Steven Estrada",
    "name": "Santa Rosa Band of Cahuilla Indians, California",
@@ -4207,7 +4207,7 @@
    "title": "Chairman"
   },
   {
-   "id": "bb34fc2c-d89e-4951-9e7c-c3ac72ea5a78",
+   "id": "58250d7b-d3b0-41ee-a7c6-4ac68ecbfc3e",
    "kind": "tribe",
    "leader": "Leo Sisco",
    "name": "Santa Rosa Indian Community of the Santa Rosa Rancheria, California",
@@ -4216,7 +4216,7 @@
    "title": "Chairman"
   },
   {
-   "id": "935426b9-9609-4ace-9ff6-c56d3a464780",
+   "id": "7116a9c6-c64a-46af-8363-deb8c875a92d",
    "kind": "tribe",
    "leader": "Kenneth Khan",
    "name": "Santa Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California",
@@ -4225,7 +4225,7 @@
    "title": "Chairman"
   },
   {
-   "id": "beacda93-2267-41ca-b03f-bf08f21551b5",
+   "id": "7d23a3e9-9af1-41ff-989c-dfcb19282743",
    "kind": "tribe",
    "leader": "Alonzo Denney",
    "name": "Santee Sioux Nation, Nebraska",
@@ -4234,7 +4234,7 @@
    "title": "Chairman"
   },
   {
-   "id": "dddcda3a-93ae-4b81-b44a-661db4a3492f",
+   "id": "ee559461-4116-474d-a2aa-f1809e3dc40e",
    "kind": "tribe",
    "leader": "Raymond Aguilar, Jr.",
    "name": "Santo Domingo Pueblo",
@@ -4243,7 +4243,7 @@
    "title": "Governor"
   },
   {
-   "id": "d8e59c6d-c3a7-4c48-a4b6-5c84704059ac",
+   "id": "1bded44e-3b1c-4a23-99ee-50aebcebb2ce",
    "kind": "tribe",
    "leader": "Nino Maltos II",
    "name": "Sauk-Suiattle Indian Tribe",
@@ -4252,7 +4252,7 @@
    "title": "Chairman"
   },
   {
-   "id": "749c7ffc-25b1-44b4-81e4-4a66c2fbf635",
+   "id": "c5feade3-b50b-49ec-bf33-1911a6a52d42",
    "kind": "tribe",
    "leader": "Austin Lowes",
    "name": "Sault Ste. Marie Tribe of Chippewa Indians, Michigan",
@@ -4261,7 +4261,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "92025906-90b4-440a-801b-78cc71d08ad1",
+   "id": "9c78bb44-d0df-46b0-b12f-4e734bbde465",
    "kind": "tribe",
    "leader": "Shawn Davis",
    "name": "Scotts Valley Band of Pomo Indians of California",
@@ -4270,7 +4270,7 @@
    "title": "Chairman"
   },
   {
-   "id": "9ce58833-3efc-485d-a543-f294643f70ee",
+   "id": "6f11d17c-7a37-4341-8e0f-e9b97e3f99e3",
    "kind": "tribe",
    "leader": "Crystal Collier",
    "name": "Seldovia Village Tribe",
@@ -4279,7 +4279,7 @@
    "title": "President/CEO"
   },
   {
-   "id": "8032c65f-11e2-486f-8195-4105ae5adb7e",
+   "id": "117ad0d0-eb46-422e-aa90-55d3fac4c203",
    "kind": "tribe",
    "leader": "Marcellus W. Osceola, Jr.",
    "name": "Seminole Tribe of Florida",
@@ -4288,7 +4288,7 @@
    "title": "Chairman"
   },
   {
-   "id": "f9e42d7b-433b-4dc4-834d-7d66db6d4d8a",
+   "id": "e11aed3c-3d66-48ad-af41-f92816ea7389",
    "kind": "tribe",
    "leader": "J. Conrad Seneca",
    "name": "Seneca Nation of Indians",
@@ -4297,7 +4297,7 @@
    "title": "President"
   },
   {
-   "id": "c1b6bfa1-c2d6-4581-b480-01ad63ff3c9f",
+   "id": "468a4e61-e0de-49c4-899e-7fa0a2d48242",
    "kind": "tribe",
    "leader": "Charles Diebold",
    "name": "Seneca-Cayuga Nation",
@@ -4306,7 +4306,7 @@
    "title": "Chief"
   },
   {
-   "id": "99cc80dd-973d-4ef8-967f-3888357bfc27",
+   "id": "34b3e2c4-b121-4a98-b35f-f85caaefb158",
    "kind": "tribe",
    "leader": "Keith Workman",
    "name": "Shageluk Native Village",
@@ -4315,7 +4315,7 @@
    "title": "Chief"
   },
   {
-   "id": "793c76a5-8546-40bf-b671-3be710bd9f6a",
+   "id": "e17b2cd3-5bf4-4b3e-88fd-5279c117ce7f",
    "kind": "tribe",
    "leader": "Cole Miller",
    "name": "Shakopee Mdewakanton Sioux Community of Minnesota",
@@ -4324,7 +4324,7 @@
    "title": "Chairman"
   },
   {
-   "id": "39ccdaf3-d939-4603-8514-bbbfb71a49de",
+   "id": "92c5e3ef-5c19-4192-b0c0-8162890abb76",
    "kind": "tribe",
    "leader": "Benjamin Joseph Barnes",
    "name": "Shawnee Tribe",
@@ -4333,7 +4333,7 @@
    "title": "Chief"
   },
   {
-   "id": "91126ca2-ef34-4952-9cfc-36b2e75ac435",
+   "id": "acfaf477-d6e4-4efe-b4dd-c528b1ee360b",
    "kind": "tribe",
    "leader": "Hazel Ramirez",
    "name": "Sherwood Valley Rancheria of Pomo Indians of California",
@@ -4342,7 +4342,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "8542db9a-53f1-4bfc-b835-17da4f5c106d",
+   "id": "8d6dbed9-985a-4239-8c98-e1b0e5d107d3",
    "kind": "tribe",
    "leader": "Regina Cuellar",
    "name": "Shingle Springs Band of Miwok Indians, Shingle Springs Rancheria (Verona Tract), California",
@@ -4351,7 +4351,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "0f437ca5-c429-46d0-8b19-5de7ac4c2511",
+   "id": "7c1fb174-cd78-4784-93f1-afa9b91c9ef8",
    "kind": "tribe",
    "leader": "Lisa Goree, Lance Gumbs, Daniel Collins",
    "name": "Shinnecock Indian Nation",
@@ -4360,7 +4360,7 @@
    "title": "Council of Trustees"
   },
   {
-   "id": "4b413cf2-a984-45ed-9407-7a6038e8fefa",
+   "id": "0f63a0fe-0453-4cf8-be84-0e642ced565b",
    "kind": "tribe",
    "leader": "Quintin Swanson",
    "name": "Shoalwater Bay Indian Tribe of the Shoalwater Bay Indian Reservation",
@@ -4369,7 +4369,7 @@
    "title": "Chairman"
   },
   {
-   "id": "00c5e1d0-3086-4b26-8c50-af16610b8fed",
+   "id": "f76e7b00-f0c3-42ba-847b-f9fb54f4bfdc",
    "kind": "tribe",
    "leader": "Donna Thompson",
    "name": "Shoshone-Bannock Tribes of the Fort Hall Reservation",
@@ -4378,7 +4378,7 @@
    "title": "Chairman"
   },
   {
-   "id": "894f5891-0e4b-402b-b728-9bf0ec081cd7",
+   "id": "87e6d70d-ef7c-4428-b515-6dcb52923fab",
    "kind": "tribe",
    "leader": "Brian Mason",
    "name": "Shoshone-Paiute Tribes of the Duck Valley Reservation, Nevada",
@@ -4387,7 +4387,7 @@
    "title": "Chairman"
   },
   {
-   "id": "28e5d558-c38a-4f8d-b718-2c083c74b8a2",
+   "id": "dbb331b0-d293-4e1f-9135-29e3216d0ad7",
    "kind": "tribe",
    "leader": "J. Garret Renville",
    "name": "Sisseton-Wahpeton Oyate of the Lake Traverse Reservation, South Dakota",
@@ -4396,7 +4396,7 @@
    "title": "Tribal Chairman"
   },
   {
-   "id": "99d8fe7b-7168-4ae3-99a1-200671825d4f",
+   "id": "92073f1c-fe81-47cb-8457-7691ece9a4d7",
    "kind": "tribe",
    "leader": "Yeidikook'aa Dionne Brady-Howard",
    "name": "Sitka Tribe of Alaska",
@@ -4405,7 +4405,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "e8d8234a-3d29-4248-9ba3-ede58f7a1a5c",
+   "id": "3a2ed732-1cf1-4ff8-bb7e-b9ae06238622",
    "kind": "tribe",
    "leader": "Jaime Bricker",
    "name": "Skagway Village",
@@ -4414,7 +4414,7 @@
    "title": "President"
   },
   {
-   "id": "70178a58-27cb-4cf1-80f0-4133a5578bd5",
+   "id": "de94bee9-a673-489d-8de5-02d6adfae48d",
    "kind": "tribe",
    "leader": "Charles Strong",
    "name": "Skokomish Indian Tribe",
@@ -4423,7 +4423,7 @@
    "title": "Chairman"
   },
   {
-   "id": "085d32f8-0ef8-42da-a450-7a0edce49c20",
+   "id": "21ccfcf2-7b58-488b-8c1c-22942a17985c",
    "kind": "tribe",
    "leader": null,
    "name": "Skull Valley Band of Goshute Indians of Utah",
@@ -4432,7 +4432,7 @@
    "title": null
   },
   {
-   "id": "ad47082f-6847-4d0e-854e-395f4cd05696",
+   "id": "7983b7bf-96cc-4c6c-a70b-e7335289b9ec",
    "kind": "tribe",
    "leader": "Robert de los Angeles",
    "name": "Snoqualmie Indian Tribe",
@@ -4441,7 +4441,7 @@
    "title": "Chairman"
   },
   {
-   "id": "abddf1bd-a7be-442f-88d2-f94686c201a5",
+   "id": "888f8332-9bf6-4ec6-aa79-1545a669ac1f",
    "kind": "tribe",
    "leader": "Isaiah Vivanco",
    "name": "Soboba Band of Luiseno Indians, California",
@@ -4450,7 +4450,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "9529cef9-eb0f-4fec-b3b3-aa1aea490e4f",
+   "id": "f4ab5f1b-9be2-41cb-88f6-af05e7a0ff53",
    "kind": "tribe",
    "leader": "Robert VanZile, Jr.",
    "name": "Sokaogon Chippewa Community, Wisconsin",
@@ -4459,7 +4459,7 @@
    "title": "Chairman"
   },
   {
-   "id": "3ce5cd38-6619-461f-932d-4c26258fb068",
+   "id": "1354edbf-8ba7-41ea-98fe-4cf25b52b241",
    "kind": "tribe",
    "leader": "Christine Sage",
    "name": "Southern Ute Indian Tribe of the Southern Ute Reservation, Colorado",
@@ -4468,7 +4468,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "eab628a5-a177-442c-ac15-a5008f8a12ba",
+   "id": "b43cdc70-f142-4eb8-9e6a-d5cecb85e697",
    "kind": "tribe",
    "leader": "Lonna Street",
    "name": "Spirit Lake Tribe, North Dakota",
@@ -4477,7 +4477,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "85eadc9d-0668-4e61-b28e-73599f6ef3a8",
+   "id": "9c0a09db-ad9c-43eb-929b-8597206f377b",
    "kind": "tribe",
    "leader": "Greg Abrahamson",
    "name": "Spokane Tribe of the Spokane Reservation",
@@ -4486,7 +4486,7 @@
    "title": "Chairman"
   },
   {
-   "id": "1bb8cdb6-cfbd-474c-b25d-4586bed00942",
+   "id": "2d21ac38-d40a-4330-a87e-bcd2a1de3ee9",
    "kind": "tribe",
    "leader": "Kristopher Peters",
    "name": "Squaxin Island Tribe of the Squaxin Island Reservation",
@@ -4495,7 +4495,7 @@
    "title": "Chairman"
   },
   {
-   "id": "91c954a2-bb56-4553-8f01-13af607ece9d",
+   "id": "70042693-5e89-4a7d-a68e-ce0c1534f644",
    "kind": "tribe",
    "leader": "Conrad St. John",
    "name": "St. Croix Chippewa Indians of Wisconsin",
@@ -4504,7 +4504,7 @@
    "title": "Chairman"
   },
   {
-   "id": "0e9e29ef-288d-4be2-a0a3-4dd5d38d362b",
+   "id": "02785296-6c5b-4886-a7c4-718c8637c593",
    "kind": "tribe",
    "leader": "Darlene Lekanof",
    "name": "St. George Island (See Pribilof Islands Aleut Communities of St. Paul & St. George Islands)",
@@ -4513,7 +4513,7 @@
    "title": "President"
   },
   {
-   "id": "7b873b8f-db81-48dc-9640-a131683a45b3",
+   "id": "a361c391-7680-4a4c-9ada-a7af16d1fa85",
    "kind": "tribe",
    "leader": "Steve Sitting Bear",
    "name": "Standing Rock Sioux Tribe of North & South Dakota",
@@ -4522,7 +4522,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "5d539ec8-2dcf-4a20-8d7f-2ec7441316c9",
+   "id": "ba802b4c-3c95-4862-a186-c81ad42fc1cf",
    "kind": "tribe",
    "leader": "Nora C. Tom",
    "name": "Stebbins Community Association",
@@ -4531,7 +4531,7 @@
    "title": "President"
   },
   {
-   "id": "8575d66a-d6b5-4c26-ad8e-a02fedec2b43",
+   "id": "65bc8624-9332-4991-a490-c9b09fdd6d14",
    "kind": "tribe",
    "leader": "Eric White",
    "name": "Stillaguamish Tribe of Indians of Washington",
@@ -4540,7 +4540,7 @@
    "title": "Chairman"
   },
   {
-   "id": "c72cb305-50f5-42b8-bd01-2e85fbf894b3",
+   "id": "e64a46cb-ffa6-40c7-8bec-5b14db76f4c7",
    "kind": "tribe",
    "leader": "Shannon Holsey",
    "name": "Stockbridge Munsee Community, Wisconsin",
@@ -4549,7 +4549,7 @@
    "title": "President"
   },
   {
-   "id": "cb66452b-1d24-4813-8a5e-ac585d653f4b",
+   "id": "382726ba-5fde-44f2-b0af-30dbbae4c200",
    "kind": "tribe",
    "leader": "Randi Lone Eagle",
    "name": "Summit Lake Paiute Tribe of Nevada",
@@ -4558,7 +4558,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "22670c43-1ca2-4143-bd03-0d44b6828345",
+   "id": "7eb1dad3-08e0-42a7-b6a0-f5633723ed64",
    "kind": "tribe",
    "leader": "Christopher Pruitt",
    "name": "Sun'aq Tribe of Kodiak",
@@ -4567,7 +4567,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "6ad6c7b1-d47d-4168-9386-569ff3e0fd43",
+   "id": "05429d1e-03c1-4e9c-9dea-ce02a1fc5e1a",
    "kind": "tribe",
    "leader": "Leonard Forsman",
    "name": "Suquamish Indian Tribe of the Port Madison Reservation",
@@ -4576,7 +4576,7 @@
    "title": "Chairman"
   },
   {
-   "id": "203c527e-6d84-4cdd-9177-d462c6b14b30",
+   "id": "c9d2f688-b4a1-42b4-8deb-c0771b5def97",
    "kind": "tribe",
    "leader": "Arian Hart",
    "name": "Susanville Indian Rancheria, California",
@@ -4585,7 +4585,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "ee3d9b2a-014b-49e4-993e-5e875635caa1",
+   "id": "4508cbd8-d634-42d3-ba04-7da78518f141",
    "kind": "tribe",
    "leader": "Steve Edwards",
    "name": "Swinomish Indian Tribal Community",
@@ -4594,7 +4594,7 @@
    "title": "Chairman"
   },
   {
-   "id": "c92bdc4b-666a-45cb-b40d-6b0cf179de3a",
+   "id": "85a2d7a4-4875-4941-8fea-a28d8636ddac",
    "kind": "tribe",
    "leader": "Cody Martinez",
    "name": "Sycuan Band of the Kumeyaay Nation",
@@ -4603,7 +4603,7 @@
    "title": "Chairman"
   },
   {
-   "id": "00b13828-06fd-4f7a-b85f-e7e5bf5398e4",
+   "id": "5721fdd2-f46c-4c32-b5ec-c5e4a97ed455",
    "kind": "tribe",
    "leader": "Michelle Heredia-Cordova",
    "name": "Table Mountain Rancheria",
@@ -4612,7 +4612,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "b8a20262-f67e-4807-a697-c980e723936c",
+   "id": "def076a2-e36e-4fe2-82c3-642091b77495",
    "kind": "tribe",
    "leader": "Thomas S. Abraham",
    "name": "Takotna Village",
@@ -4621,7 +4621,7 @@
    "title": "First Chief"
   },
   {
-   "id": "c57e5cc3-0ad0-48f7-aad4-744bdf921910",
+   "id": "6d7a811d-9254-4959-bbeb-c2768e8d7d66",
    "kind": "tribe",
    "leader": "Debbie Lukin",
    "name": "Tangirnaq Native Village",
@@ -4630,27 +4630,27 @@
    "title": "President"
   },
   {
-   "id": "71efa07d-3591-4894-a575-eaf18e284543",
+   "id": "8035a3dc-d951-461d-b75d-dee5cd626434",
    "kind": "affiliate",
    "leader": "Evan Jim",
    "name": "Te-Moak Tribe of Western Shoshone Indians of Nevada (Battle Mountain Band)",
-   "parent": "6405d0c4-0772-4baf-8080-d65cdfa88334",
+   "parent": "ba6a21c5-b2ff-4917-b556-0f6bf68ab682",
    "region": "Western",
    "state": null,
    "title": "Chairman"
   },
   {
-   "id": "738a9bd0-131a-4a68-888c-cc4475e21c58",
+   "id": "cf5ef4a4-a5bc-4ae3-ba65-a6e8154105f3",
    "kind": "affiliate",
    "leader": "Raquel Yepez",
    "name": "Te-Moak Tribe of Western Shoshone Indians of Nevada (Elko Band)",
-   "parent": "6405d0c4-0772-4baf-8080-d65cdfa88334",
+   "parent": "ba6a21c5-b2ff-4917-b556-0f6bf68ab682",
    "region": "Western",
    "state": null,
    "title": "Chairwoman"
   },
   {
-   "id": "6405d0c4-0772-4baf-8080-d65cdfa88334",
+   "id": "ba6a21c5-b2ff-4917-b556-0f6bf68ab682",
    "kind": "tribe",
    "leader": "Suzanna Sandoval",
    "name": "Te-Moak Tribe of Western Shoshone Indians of Nevada (Four constituent bands: Battle Mountain Band; Elko Band; South Fork Band; and Wells Band)",
@@ -4659,27 +4659,27 @@
    "title": "Chairperson"
   },
   {
-   "id": "2cbcd558-7258-4efd-a3b9-3f059dc12d3f",
+   "id": "1fcd879e-f72c-4948-b2dc-5f2462026cec",
    "kind": "affiliate",
    "leader": "Ronnie Woods",
    "name": "Te-Moak Tribe of Western Shoshone Indians of Nevada (South Fork Band)",
-   "parent": "6405d0c4-0772-4baf-8080-d65cdfa88334",
+   "parent": "ba6a21c5-b2ff-4917-b556-0f6bf68ab682",
    "region": "Western",
    "state": null,
    "title": "Chairman"
   },
   {
-   "id": "b9f4d0c4-4fc6-401e-b227-0ff9e7790510",
+   "id": "4f7f2cfa-3c39-47f3-9233-d715614cbaa4",
    "kind": "affiliate",
    "leader": "Casey Franco",
    "name": "Te-Moak Tribe of Western Shoshone Indians of Nevada (Wells Band)",
-   "parent": "6405d0c4-0772-4baf-8080-d65cdfa88334",
+   "parent": "ba6a21c5-b2ff-4917-b556-0f6bf68ab682",
    "region": "Western",
    "state": null,
    "title": "Chairperson"
   },
   {
-   "id": "41edf17f-d499-415a-b5cc-b6d275602a9d",
+   "id": "7c8c3383-c5e1-4059-89cf-cd725d1d4898",
    "kind": "tribe",
    "leader": "Octavio Escobedo III",
    "name": "Tejon Indian Tribe",
@@ -4688,7 +4688,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "2bfd06ba-49f7-43e6-b2b4-2c12a3c6c4f0",
+   "id": "9d057127-fa2f-468b-b28e-beaa7b6aefa4",
    "kind": "tribe",
    "leader": "Oline Ticknor",
    "name": "Telida Village",
@@ -4697,7 +4697,7 @@
    "title": "First Chief"
   },
   {
-   "id": "2dbd5d14-e4b1-4200-b16e-dc161c4b10da",
+   "id": "de74a10c-5ddc-4d65-87f1-56a50543b576",
    "kind": "tribe",
    "leader": "Chris Anoatubby",
    "name": "The Chickasaw Nation",
@@ -4706,7 +4706,7 @@
    "title": "Governor"
   },
   {
-   "id": "ca887405-3fc9-4cf2-8e29-cec95f479d33",
+   "id": "70659808-41f5-4d27-b339-64e92fa63e3c",
    "kind": "tribe",
    "leader": "Gary Batton",
    "name": "The Choctaw Nation of Oklahoma",
@@ -4715,7 +4715,7 @@
    "title": "Chief"
   },
   {
-   "id": "6360ec93-ea56-40eb-b6d6-73e4fe936e4a",
+   "id": "8113e65c-22e1-48cf-8dbe-03a07e7793d7",
    "kind": "tribe",
    "leader": "David Hill",
    "name": "The Muscogee (Creek) Nation",
@@ -4724,7 +4724,7 @@
    "title": "Principal Chief"
   },
   {
-   "id": "55d5ccb2-50c8-4ae3-afa0-02fdaf5e7969",
+   "id": "5ef4b78d-d32a-40e0-a929-90da400e118c",
    "kind": "tribe",
    "leader": "Joe Tillman",
    "name": "The Osage Nation",
@@ -4733,7 +4733,7 @@
    "title": "Principal Chief"
   },
   {
-   "id": "fbc046cc-a44f-4374-9e55-9a3b51fd2a8f",
+   "id": "c55955fd-5002-4344-af36-96e8a4ce8a86",
    "kind": "tribe",
    "leader": "Sena M. Yesslith",
    "name": "The Seminole Nation of Oklahoma",
@@ -4743,7 +4743,7 @@
   },
   {
    "disputed": true,
-   "id": "9f0dc090-f54e-4a5a-b11c-bd86e36ff6b9",
+   "id": "35a0a524-30e2-4eca-8585-58ad1e92c1d7",
    "kind": "tribe",
    "leader": "Brent Brown/Nathan Anderson/Brent Smith",
    "name": "Thlopthlocco Tribal Town",
@@ -4752,7 +4752,7 @@
    "title": "Town King"
   },
   {
-   "id": "d8dd8d59-c782-4299-8e16-58d4aab819e7",
+   "id": "46be832b-076b-43c6-a9f4-e878f1f62723",
    "kind": "tribe",
    "leader": "Darwin Williams",
    "name": "Three Affiliated Tribes of the Fort Berthold Reservation, North Dakota",
@@ -4761,7 +4761,7 @@
    "title": "Chairman"
   },
   {
-   "id": "9ff3dd04-3309-4704-bdb1-9db45e37b441",
+   "id": "ab7c1a19-4088-4670-a2ca-3da28c27a759",
    "kind": "tribe",
    "leader": "Margaret Cortez",
    "name": "Timbisha Shoshone Tribe",
@@ -4770,7 +4770,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "58b93347-99ad-4920-8f32-df17b25d514a",
+   "id": "fc9503a5-6ad5-43a5-a34e-a1c5c08d294b",
    "kind": "tribe",
    "leader": "Verlon Jose",
    "name": "Tohono O'odham Nation of Arizona",
@@ -4779,7 +4779,7 @@
    "title": "Chairman"
   },
   {
-   "id": "1d42e6e8-8685-4ddd-82f1-01dd738346cb",
+   "id": "937e9d1a-5b2a-4812-a96e-738c7c5181c3",
    "kind": "tribe",
    "leader": "Debbie Boardman",
    "name": "Tolowa Dee-ni' Nation",
@@ -4788,7 +4788,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "6ffbfb85-c153-49fe-b027-92ba548fb2aa",
+   "id": "8420e17c-e6af-4314-bdb2-94b77cf263b9",
    "kind": "tribe",
    "leader": "Roger Hill",
    "name": "Tonawanda Band of Seneca",
@@ -4797,7 +4797,7 @@
    "title": "Chief"
   },
   {
-   "id": "5576b70a-8524-42e0-9862-fadd92fb2817",
+   "id": "697d7251-d607-4c04-b211-95ed37d2eded",
    "kind": "tribe",
    "leader": "Russell Martin",
    "name": "Tonkawa Tribe of Indians of Oklahoma",
@@ -4806,7 +4806,7 @@
    "title": "President"
   },
   {
-   "id": "edbcdbc6-2be1-4496-83c8-5b04189087f5",
+   "id": "484b1e0b-a634-4951-8df9-13b3141c5d37",
    "kind": "tribe",
    "leader": "Calvin Johnson",
    "name": "Tonto Apache Tribe of Arizona",
@@ -4815,7 +4815,7 @@
    "title": "Chairman"
   },
   {
-   "id": "690aab85-f2ea-4709-8951-85d01e48f0d0",
+   "id": "a2b6de0c-e253-4fcd-a535-fb65ec570c5b",
    "kind": "tribe",
    "leader": "Joseph Mirelez",
    "name": "Torres Martinez Desert Cahuilla Indians, California",
@@ -4824,7 +4824,7 @@
    "title": "Chairman"
   },
   {
-   "id": "f854bfcc-eab5-4a96-8fd7-9fe18b4d4711",
+   "id": "78cb50a4-b8b5-4797-925b-5a750ec564fd",
    "kind": "tribe",
    "leader": "Anecia Krtiz",
    "name": "Traditional Village of Togiak",
@@ -4833,7 +4833,7 @@
    "title": "President"
   },
   {
-   "id": "d3d6242b-8166-4896-a822-99d9749a32f5",
+   "id": "73a49efe-aef4-453c-8421-2547b353ac57",
    "kind": "tribe",
    "leader": "Hazen Shopbell",
    "name": "Tulalip Tribes of Washington",
@@ -4842,7 +4842,7 @@
    "title": "Chairman"
   },
   {
-   "id": "4a964764-8287-4677-9222-b9ae282bab01",
+   "id": "4cda0342-0c84-4d91-90d6-845d36b8b06e",
    "kind": "tribe",
    "leader": "Neil Peyron",
    "name": "Tule River Indian Tribe of the Tule River Reservation, California",
@@ -4851,7 +4851,7 @@
    "title": "Chairman"
   },
   {
-   "id": "30e50c65-d8c3-432d-8340-060b84945e99",
+   "id": "9cba0cbd-88d6-442b-a44f-917bd1f472f0",
    "kind": "tribe",
    "leader": "Mike Lott",
    "name": "Tuluksak Native Community",
@@ -4860,7 +4860,7 @@
    "title": "President"
   },
   {
-   "id": "58699bf9-9d75-4498-aa7a-a932f24efe18",
+   "id": "a84b09ad-fa46-4666-bf41-8b23dd2b9b38",
    "kind": "tribe",
    "leader": "Marshall Pierite",
    "name": "Tunica-Biloxi Indian Tribe",
@@ -4869,7 +4869,7 @@
    "title": "Chairman"
   },
   {
-   "id": "af8b51b9-1889-41fc-bb69-eeb0d8ef7240",
+   "id": "33ede002-e3b4-4eb2-9058-fd16d05585fc",
    "kind": "tribe",
    "leader": "Kevin Day",
    "name": "Tuolumne Band of Me-Wuk Indians of the Tuolumne Rancheria of California",
@@ -4878,7 +4878,7 @@
    "title": "Chairman"
   },
   {
-   "id": "a28060c9-238d-4462-b032-124babdc99ea",
+   "id": "5414d7de-190c-4b7d-8b36-760c8de192f6",
    "kind": "tribe",
    "leader": "Jamie Azure",
    "name": "Turtle Mountain Band of Chippewa Indians of North Dakota",
@@ -4887,7 +4887,7 @@
    "title": "Chairman"
   },
   {
-   "id": "6c8e6ecf-ddcc-4dc4-865f-004402d88958",
+   "id": "15434a49-a587-4075-ad42-d57490abddbe",
    "kind": "tribe",
    "leader": "Tom Jonathan, Brennen Ferguson",
    "name": "Tuscarora Nation",
@@ -4896,7 +4896,7 @@
    "title": "Chief's"
   },
   {
-   "id": "d875e429-bd6b-4223-a633-dca8c73cb1a9",
+   "id": "4208bd46-e2a0-4681-8792-c3782295f920",
    "kind": "tribe",
    "leader": "Darrell Mike",
    "name": "Twenty-Nine Palms Band of Mission Indians of California",
@@ -4905,7 +4905,7 @@
    "title": "Chairman"
   },
   {
-   "id": "5674d5d6-6609-4c05-acab-9b3ca7351862",
+   "id": "43183cf7-71a3-48d5-8bd7-89d2c27814af",
    "kind": "tribe",
    "leader": "John W. Sharp",
    "name": "Twin Hills Village",
@@ -4914,7 +4914,7 @@
    "title": "President"
   },
   {
-   "id": "212120bc-56f9-4db0-97d2-ee36913a08ec",
+   "id": "910a4fca-3cf8-4a68-bd99-eec1ed57822a",
    "kind": "tribe",
    "leader": "Fred Matsuno",
    "name": "Ugashik Village",
@@ -4923,7 +4923,7 @@
    "title": "President"
   },
   {
-   "id": "d384a8f4-81fb-4c62-bff8-68f4d5b952eb",
+   "id": "3ef898a6-c49e-40a4-ace6-fe9bd892a6d6",
    "kind": "tribe",
    "leader": "Noah I Agnus",
    "name": "Umkumiut Native Village",
@@ -4932,7 +4932,7 @@
    "title": "President"
   },
   {
-   "id": "1fae2f2e-1000-4045-8e47-c42416ed9ee3",
+   "id": "67267bbb-d3ff-446e-bea5-0c439574182a",
    "kind": "tribe",
    "leader": "John Williams",
    "name": "United Auburn Indian Community of the Auburn Rancheria of California",
@@ -4941,7 +4941,7 @@
    "title": "Chairman"
   },
   {
-   "id": "2d4fb78f-7bf1-4aa8-ae29-22af121fee92",
+   "id": "dd94bb91-04ff-4103-8386-817d02f13860",
    "kind": "tribe",
    "leader": "Jeffrey Wacoche",
    "name": "United Keetoowah Band of Cherokee Indians in Oklahoma",
@@ -4950,7 +4950,7 @@
    "title": "Chief"
   },
   {
-   "id": "4da7b52c-aac7-496d-9b16-a3a43498587e",
+   "id": "483d2a6c-f160-4d20-9c4f-91137cd49562",
    "kind": "tribe",
    "leader": "W. Frank Adams",
    "name": "Upper Mattaponi Tribe",
@@ -4959,7 +4959,7 @@
    "title": "Chief"
   },
   {
-   "id": "fe5c6761-d866-4e60-a00c-b58524712633",
+   "id": "86b2e2c7-cb74-4ffe-8fe5-e62fa4f4ab1e",
    "kind": "tribe",
    "leader": "Kevin Jensvold",
    "name": "Upper Sioux Community, Minnesota",
@@ -4968,7 +4968,7 @@
    "title": "Chairman"
   },
   {
-   "id": "b87ecf59-1ff6-4661-9c10-a14e69555b97",
+   "id": "e13049ba-ba40-4c58-a95d-88ea55b50d91",
    "kind": "tribe",
    "leader": "Jennifer R Washington",
    "name": "Upper Skagit Indian Tribe",
@@ -4977,7 +4977,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "87ebbf38-f6e6-47d7-ad15-20508e80f7f8",
+   "id": "8ed76e6b-9dae-4fbd-9997-aa118bfd35ae",
    "kind": "tribe",
    "leader": "Shaun Chapoose",
    "name": "Ute Indian Tribe of the Uintah & Ouray Reservation, Utah",
@@ -4986,7 +4986,7 @@
    "title": "Chairman"
   },
   {
-   "id": "95edb024-eb8c-4414-abbc-f3866d0ee34f",
+   "id": "0101b196-4644-421e-b05d-282eb1c81e22",
    "kind": "tribe",
    "leader": "Selwyn Whiteskunk",
    "name": "Ute Mountain Ute Tribe",
@@ -4995,7 +4995,7 @@
    "title": "Chairman"
   },
   {
-   "id": "8e5e5a80-8f12-472c-9d5c-e61e169d0ff2",
+   "id": "c876d231-8cf5-47c5-93de-e985de82e075",
    "kind": "tribe",
    "leader": "Shane Saulque",
    "name": "Utu Utu Gwaitu Paiute Tribe of the Benton Paiute Reservation, California",
@@ -5004,7 +5004,7 @@
    "title": "Chairman"
   },
   {
-   "id": "ce9cfb6c-ba89-4754-a620-7352d90b7e07",
+   "id": "3216459a-0356-4809-a6b2-25335d9eb89f",
    "kind": "tribe",
    "leader": "Raymond J. Oney",
    "name": "Village of Alakanuk",
@@ -5013,7 +5013,7 @@
    "title": "President"
   },
   {
-   "id": "0bd11072-3a7a-43ea-a181-86b28351a44e",
+   "id": "71bf0ab7-50d2-48e2-9215-b2277c21dd97",
    "kind": "tribe",
    "leader": "Charles Hugo",
    "name": "Village of Anaktuvuk Pass",
@@ -5022,7 +5022,7 @@
    "title": "President"
   },
   {
-   "id": "ed1fa346-c411-4e66-b9d5-7666afb35a4d",
+   "id": "384db4bc-351d-4bf6-92e8-86b23a4608f3",
    "kind": "tribe",
    "leader": "Jeanette Hoffman",
    "name": "Village of Aniak",
@@ -5031,7 +5031,7 @@
    "title": "Chief"
   },
   {
-   "id": "708b3848-7b48-45c8-83a0-9130f9aa337e",
+   "id": "ab6e5879-c93a-416a-9fe6-f18997793c63",
    "kind": "tribe",
    "leader": "Pauline Waska",
    "name": "Village of Atmautluak",
@@ -5040,7 +5040,7 @@
    "title": "President"
   },
   {
-   "id": "ada7e784-7d45-487b-a7f6-88785d534230",
+   "id": "43c2b701-1fc3-4c90-9d23-00895c2f8d28",
    "kind": "tribe",
    "leader": "Wayne A. Okitkun",
    "name": "Village of Bill Moore's Slough",
@@ -5049,7 +5049,7 @@
    "title": "President"
   },
   {
-   "id": "6949e82d-885d-403d-b403-940a12e965b0",
+   "id": "f117d0c9-a09e-476b-965b-1ba89ddf2140",
    "kind": "tribe",
    "leader": "Janet Erik",
    "name": "Village of Chefornak",
@@ -5058,7 +5058,7 @@
    "title": "President"
   },
   {
-   "id": "9b4302f5-d4ab-442c-956e-9ca604eb9275",
+   "id": "4d725e91-cb5a-4c85-b47c-f73478f023cf",
    "kind": "tribe",
    "leader": "Henry Wassily, Sr.",
    "name": "Village of Clarks Point",
@@ -5067,7 +5067,7 @@
    "title": "President"
   },
   {
-   "id": "a07f960d-f8a7-4cf3-a457-74a13bff60f4",
+   "id": "b28ebc7b-f890-4401-849f-6a8343d08979",
    "kind": "tribe",
    "leader": "Ronald N. Underwood, Sr.",
    "name": "Village of Crooked Creek",
@@ -5076,7 +5076,7 @@
    "title": "President"
   },
   {
-   "id": "939d5bce-e7d0-4eea-a5a4-7ee020561703",
+   "id": "47b74ab5-e360-45d0-9c41-cfd885ca5081",
    "kind": "tribe",
    "leader": "Tracy Charles-Smith",
    "name": "Village of Dot Lake",
@@ -5085,7 +5085,7 @@
    "title": "President"
   },
   {
-   "id": "9c8e9028-923d-4363-9790-f809f3fe6696",
+   "id": "0fd15c06-a457-4756-b841-62f24dce949c",
    "kind": "tribe",
    "leader": "Timothy Anelon, Sr.",
    "name": "Village of Iliamna",
@@ -5094,7 +5094,7 @@
    "title": "President"
   },
   {
-   "id": "a384551e-5b86-4dbd-93b0-f7a0f014b5f1",
+   "id": "543d58d9-8c7d-454e-9286-0aea16ff26b5",
    "kind": "tribe",
    "leader": "Julia Dorris",
    "name": "Village of Kalskag",
@@ -5103,7 +5103,7 @@
    "title": "President"
   },
   {
-   "id": "5cb281cc-601c-428a-84bf-b37ab3d2c503",
+   "id": "5130057d-7a13-4ae0-b037-36e2e3900660",
    "kind": "tribe",
    "leader": "Calvin McGinty",
    "name": "Village of Kaltag",
@@ -5112,7 +5112,7 @@
    "title": "First Chief"
   },
   {
-   "id": "edf7255c-07bc-4da5-b880-13bd177c6243",
+   "id": "e529396f-622d-43bd-bcd7-62201ebc2555",
    "kind": "tribe",
    "leader": "Theresa M. Prince",
    "name": "Village of Kotlik",
@@ -5121,7 +5121,7 @@
    "title": "Tribal President"
   },
   {
-   "id": "40cf018f-dd51-4454-813d-570f348a71c9",
+   "id": "0d517c45-5696-48dd-a28e-4910bd251abd",
    "kind": "tribe",
    "leader": "Sarah Levi",
    "name": "Village of Lower Kalskag",
@@ -5130,7 +5130,7 @@
    "title": "Vice-President"
   },
   {
-   "id": "d2dac48b-855b-43fa-b472-89901a1242b0",
+   "id": "9bbb4b61-2735-4c2c-ae79-fd755e4622c5",
    "kind": "tribe",
    "leader": "William Andrew",
    "name": "Village of Ohogamiut",
@@ -5139,7 +5139,7 @@
    "title": "President"
   },
   {
-   "id": "4423c57b-a450-4d09-91ef-523c19c9c5b5",
+   "id": "d114af4c-43bb-4c44-985d-7265d7d73051",
    "kind": "tribe",
    "leader": "Christine Dixon Vice-President",
    "name": "Village of Red Devil",
@@ -5148,7 +5148,7 @@
    "title": "Secretary"
   },
   {
-   "id": "5b18e80c-0ebf-440a-b2b1-fe852e51af58",
+   "id": "0da62832-f3bc-49e4-b698-63cb427ba3b7",
    "kind": "tribe",
    "leader": "Marie Yako",
    "name": "Village of Sleetmute",
@@ -5157,7 +5157,7 @@
    "title": "President"
   },
   {
-   "id": "d6799175-9611-4d5e-8643-06433d178cd6",
+   "id": "447f4f53-071f-4704-a954-dbd5dac6c9d8",
    "kind": "tribe",
    "leader": "Kirsten Timbers",
    "name": "Village of Solomon",
@@ -5166,7 +5166,7 @@
    "title": "President"
   },
   {
-   "id": "bb49f64d-af7b-484b-903c-3ab1a44de495",
+   "id": "156f5826-c944-47e8-8fd8-536bad54550a",
    "kind": "tribe",
    "leader": "Sheila Willis",
    "name": "Village of Stony River",
@@ -5175,7 +5175,7 @@
    "title": "President"
   },
   {
-   "id": "209dd04c-1909-44d1-92b2-578798005ac1",
+   "id": "872d1615-8e91-4727-9b99-f9ba2c306cd1",
    "kind": "tribe",
    "leader": "Karlas Norman",
    "name": "Village of Venetie (See Native Village of Venetie Tribal Government)",
@@ -5184,7 +5184,7 @@
    "title": "First Chief"
   },
   {
-   "id": "5a0fa319-c3fa-4883-9030-076a0c65eb2b",
+   "id": "de3a8160-706a-4fee-ac29-e9caf24d2600",
    "kind": "tribe",
    "leader": "John Hopson, Jr.",
    "name": "Village of Wainwright",
@@ -5193,7 +5193,7 @@
    "title": "President"
   },
   {
-   "id": "07a4cb51-891a-40d9-ab36-f601bf551878",
+   "id": "342056af-4644-4e2f-b977-90ec33af6edf",
    "kind": "tribe",
    "leader": "Melanie McFalls",
    "name": "Walker River Paiute Tribe of the Walker River Reservation, Nevada",
@@ -5202,7 +5202,7 @@
    "title": "Chairwoman"
   },
   {
-   "id": "3ebf8a9a-7d0b-44c5-81d0-37d8037e4937",
+   "id": "ab3c5329-2c91-460d-8658-77e4ebc96806",
    "kind": "tribe",
    "leader": "Kevin Devine",
    "name": "Wampanoag Tribe of Gay Head (Aquinnah)",
@@ -5211,17 +5211,17 @@
    "title": "Chairman"
   },
   {
-   "id": "05421c14-dcc4-46a6-b2af-cf48ec48cb1c",
+   "id": "79190ad8-0ff2-40d9-aad3-5b4a2241b472",
    "kind": "affiliate",
    "leader": "Gary Nevers",
    "name": "Washoe Tribe of Nevada & California (Carson Colony)",
-   "parent": "75be50ca-4e8f-4f77-a34a-5eb508c5a437",
+   "parent": "8a8c2a1f-a96f-480e-90e2-80007d93e0d7",
    "region": "Western",
    "state": null,
    "title": "Chairman"
   },
   {
-   "id": "75be50ca-4e8f-4f77-a34a-5eb508c5a437",
+   "id": "8a8c2a1f-a96f-480e-90e2-80007d93e0d7",
    "kind": "tribe",
    "leader": "Serrell Smokey",
    "name": "Washoe Tribe of Nevada & California (Carson Colony, Dresslerville Colony, Woodfords Community, Stewart Community, & Washoe Ranches)",
@@ -5230,47 +5230,47 @@
    "title": "Chairman"
   },
   {
-   "id": "fa72db5d-98d9-4d33-b14e-0f5cec160863",
+   "id": "154bc244-78dd-40f5-841a-b2d7de337d5b",
    "kind": "affiliate",
    "leader": "Patrick Burtt",
    "name": "Washoe Tribe of Nevada & California (Dresslerville Colony)",
-   "parent": "75be50ca-4e8f-4f77-a34a-5eb508c5a437",
+   "parent": "8a8c2a1f-a96f-480e-90e2-80007d93e0d7",
    "region": "Western",
    "state": null,
    "title": "Chairman"
   },
   {
-   "id": "b72f7bc0-6c1e-4604-9dd2-4c048b69c3bd",
+   "id": "0712db7c-7be8-4e89-8f25-ce5f8ceab995",
    "kind": "affiliate",
    "leader": "Darienne Tenorio",
    "name": "Washoe Tribe of Nevada & California (Stewart Community)",
-   "parent": "75be50ca-4e8f-4f77-a34a-5eb508c5a437",
+   "parent": "8a8c2a1f-a96f-480e-90e2-80007d93e0d7",
    "region": "Western",
    "state": null,
    "title": "Chairman"
   },
   {
-   "id": "48d593cc-a438-4102-b771-db13ed3b6d5c",
+   "id": "0a750d8b-38a3-4edb-8ba9-92caefa0a7a6",
    "kind": "affiliate",
    "leader": null,
    "name": "Washoe Tribe of Nevada & California (Washoe Ranches)",
-   "parent": "75be50ca-4e8f-4f77-a34a-5eb508c5a437",
+   "parent": "8a8c2a1f-a96f-480e-90e2-80007d93e0d7",
    "region": "Western",
    "state": null,
    "title": null
   },
   {
-   "id": "fce93123-8820-42f2-b815-8371a2fc354e",
+   "id": "e2901752-402e-41e6-ac01-4886be4f604d",
    "kind": "affiliate",
    "leader": "Geoff Ellis",
    "name": "Washoe Tribe of Nevada & California (Woodfords Community)",
-   "parent": "75be50ca-4e8f-4f77-a34a-5eb508c5a437",
+   "parent": "8a8c2a1f-a96f-480e-90e2-80007d93e0d7",
    "region": "Western",
    "state": null,
    "title": "Chairman"
   },
   {
-   "id": "db22ee59-bbfc-4283-a5e9-26e353724f03",
+   "id": "fb6c469a-5ce8-476c-ad03-6c49c9f4a15d",
    "kind": "tribe",
    "leader": "Orlando Carroll",
    "name": "White Mountain Apache Tribe of the Fort Apache Reservation, Arizona",
@@ -5279,7 +5279,7 @@
    "title": "Chairman"
   },
   {
-   "id": "d1e40334-cbbd-4c34-bf54-e2c8e4fee0a2",
+   "id": "3bda1453-f464-4b50-9206-b6e6424ebb33",
    "kind": "tribe",
    "leader": "Amber Silverhorn-Wolfe",
    "name": "Wichita and Affiliated Tribes (Wichita, Keechi, Waco, & Tawakonie), Oklahoma",
@@ -5288,7 +5288,7 @@
    "title": "President"
   },
   {
-   "id": "c5bbf34b-6128-43bb-8ceb-6cf3518b2bc6",
+   "id": "415fabd7-6f29-42c1-a571-58fb894d9521",
    "kind": "tribe",
    "leader": "Jesus Tarango, Jr.",
    "name": "Wilton Rancheria, California",
@@ -5297,7 +5297,7 @@
    "title": "Chairman"
   },
   {
-   "id": "65cebd4c-d2ec-4d93-b83f-8ca1a98ae56f",
+   "id": "821c0fb8-9321-48f6-9623-49fb379e442c",
    "kind": "tribe",
    "leader": "Coly Brown",
    "name": "Winnebago Tribe of Nebraska",
@@ -5306,7 +5306,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "435c722c-ffa8-4e6f-8112-237f5dfddd01",
+   "id": "dcd4ed01-bb82-461b-a14b-91a44e62473b",
    "kind": "tribe",
    "leader": "Eric Magiera",
    "name": "Winnemucca Indian Colony of Nevada",
@@ -5315,7 +5315,7 @@
    "title": "Chairman"
   },
   {
-   "id": "74b4eb83-a385-4cfe-b886-31c438b28ead",
+   "id": "f53dc0ef-a96b-4ab7-a5cf-49cdc03f6f82",
    "kind": "tribe",
    "leader": "Brian Mead",
    "name": "Wiyot Tribe, California",
@@ -5324,7 +5324,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "11f50ea7-7f6e-4d4d-b292-e17135f80106",
+   "id": "dd259e0b-3c6f-4b7d-bd5d-35d9a12bf7cc",
    "kind": "tribe",
    "leader": "Edward Rilatos",
    "name": "Wrangell Cooperative Association",
@@ -5333,7 +5333,7 @@
    "title": "President"
   },
   {
-   "id": "66c3239f-16a0-4577-ad86-60a20e5196cf",
+   "id": "aad64830-7944-4ade-abc6-25959e4b73aa",
    "kind": "tribe",
    "leader": "Billy Friend",
    "name": "Wyandotte Nation",
@@ -5342,7 +5342,7 @@
    "title": "Chief"
   },
   {
-   "id": "7109d1c7-b1ed-4f1e-b52e-03fbc41d601b",
+   "id": "73c50b11-1c76-4f8e-8852-6aab7e05e874",
    "kind": "tribe",
    "leader": "Cynthia Petersen",
    "name": "Yakutat Tlingit Tribe",
@@ -5351,7 +5351,7 @@
    "title": "President"
   },
   {
-   "id": "30b77233-ffad-4e73-a880-1de0c120cd7e",
+   "id": "c1f7f7dc-3f04-4de3-a1d4-e411741c0bab",
    "kind": "tribe",
    "leader": "Chelaine Knudsen",
    "name": "Yankton Sioux Tribe of South Dakota",
@@ -5360,7 +5360,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "4131af37-7ee8-4af5-8af4-fd5ae4b7aa76",
+   "id": "1948ec51-4aff-419f-b073-7c47d519a5ae",
    "kind": "tribe",
    "leader": "Buddy Jr. Rocha",
    "name": "Yavapai-Apache Nation of the Camp Verde Indian Reservation, Arizona",
@@ -5369,7 +5369,7 @@
    "title": "Chairman"
   },
   {
-   "id": "343a3932-f7f8-4421-9443-593cfdb3f23f",
+   "id": "ab8b7512-210f-4163-8d0b-5fbc82adbd07",
    "kind": "tribe",
    "leader": "Robert Ogo",
    "name": "Yavapai-Prescott Indian Tribe",
@@ -5378,7 +5378,7 @@
    "title": "President"
   },
   {
-   "id": "f4e1179b-5666-4963-ba65-1a538a213418",
+   "id": "273fdbe8-379f-4aa6-9f53-ec2969f57d0f",
    "kind": "tribe",
    "leader": "Ginny Hatch",
    "name": "Yerington Paiute Tribe of the Yerington Colony & Campbell Ranch, Nevada",
@@ -5387,7 +5387,7 @@
    "title": "Chairman"
   },
   {
-   "id": "e4b11f80-cd02-45a6-89cb-58c54410e2bd",
+   "id": "ed7b127c-039a-467d-99d6-469f29e1014a",
    "kind": "tribe",
    "leader": "Anthony Roberts",
    "name": "Yocha Dehe Wintun Nation, California",
@@ -5396,7 +5396,7 @@
    "title": "Chairman"
   },
   {
-   "id": "f72d8f68-38c7-4ac3-9616-26a93bcaef62",
+   "id": "6a150c53-1af9-4a9f-9ddd-cb695bef43ef",
    "kind": "tribe",
    "leader": null,
    "name": "Yomba Shoshone Tribe of the Yomba Reservation, Nevada",
@@ -5405,7 +5405,7 @@
    "title": null
   },
   {
-   "id": "7a5e2fbb-f020-4f7e-b8fa-b973747b739e",
+   "id": "c498419a-3d91-4f0a-89b6-46a913d2d099",
    "kind": "tribe",
    "leader": "E. Michael Silvas",
    "name": "Ysleta del Sur Pueblo",
@@ -5414,7 +5414,7 @@
    "title": "Governor"
   },
   {
-   "id": "3adb963a-3384-4983-b543-cd205d55b467",
+   "id": "c31b0b8d-edd9-49fd-9e29-d18e65b51200",
    "kind": "tribe",
    "leader": "Lynn Valbuena",
    "name": "Yuhaaviatam of San Manuel Nation (previously listed as San Manuel Band of Mission Indians, California)",
@@ -5423,7 +5423,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "7462e1be-78f6-44d7-959a-14539fe61c52",
+   "id": "d35e2a63-e21e-4897-9938-90065f2962a4",
    "kind": "tribe",
    "leader": "Geraldine Beans, Sr.",
    "name": "Yupiit of Andreafski",
@@ -5432,7 +5432,7 @@
    "title": "President"
   },
   {
-   "id": "59490bf1-d27a-45b2-b9de-c58d3b9f4668",
+   "id": "b0862927-ca7f-4757-8ef6-4cf5bd941f46",
    "kind": "tribe",
    "leader": "Joseph L. James",
    "name": "Yurok Tribe of the Yurok Reservation, California",
@@ -5441,7 +5441,7 @@
    "title": "Chairperson"
   },
   {
-   "id": "b9803079-ce7e-4a1c-b72d-c66c51e0fa0d",
+   "id": "4fa1e366-8e4a-4ce5-a2ba-a053a001a193",
    "kind": "tribe",
    "leader": "Arden L. Kucate",
    "name": "Zuni Tribe of the Zuni Reservation, New Mexico",
@@ -5450,7 +5450,7 @@
    "title": "Governor"
   }
  ],
- "fetched": "2026-11-11T16:26:39+00:00",
+ "fetched": "2026-11-12T17:09:13+00:00",
  "service": "https://services1.arcgis.com/UxqqIfhng71wUT9x/arcgis/rest/services/TribalLeadership_Directory/FeatureServer/0",
  "source": "https://www.bia.gov/service/tribal-leaders-directory"
 }
