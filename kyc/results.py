@@ -1424,7 +1424,8 @@ _FILE_LINK = re.compile(r"\[\[\s*(?:file|image)\s*:(?:[^\[\]]|\[\[[^\[\]]*\]\])*
 # Any word of leaving at all, however loosely said (the first version's test,
 # PR #214): never enough to honour a sentence, enough to doubt a surname.
 _LEFT_LOOSE = re.compile(
-    r"\b(?:withdr\w*|drop(?:s|ped)? out|quit\w*|exit\w*|step(?:s|ped)? (?:aside|down)|"
+    r"\b(?:withdr\w*|drop(?:s|ped)? out|quit(?:s|ting)?|exit(?:s|ed|ing)?|"
+    r"step(?:s|ped)? (?:aside|down)|"
     r"st(?:and|ands|ood) down|replac\w*|succeed\w*|substitut\w*|remov\w*|disqualif\w*|"
     r"ineligib\w*|declin\w*|resign\w*|relinquish\w*|vacat\w*|suspend\w*|end(?:s|ed)|"
     r"abandon\w*|left|leav\w*|die[sd]?|death|dead|passed away|passing|killed|depart\w*)\b")
@@ -1495,13 +1496,12 @@ def _may_have_left(name, section):
     """The first sentence of the race's section that holds *name*'s surname
     and any word of leaving at all, in any case and anywhere in it, or "":
     the first version's loose test (PR #214), lists' bullets and images'
-    captions included. It
-    honours nothing (:func:`_left_in_prose` does that); it only doubts. A
-    row is never the nominee's by a shared surname alone beside such a
-    sentence: read narrowly, "Swan withdrew from the race for health
-    reasons" and "Swan, 58, died" were not honoured, and the departed
-    nominee took the row of the relative named in her place, and its loss,
-    with only a renamed row's warning (PR #217's second reader)."""
+    captions included. It honours nothing (:func:`_left_in_prose` does
+    that); it only doubts. A row is never the nominee's by a shared surname
+    alone beside such a sentence: read narrowly, "Swan withdrew from the
+    race for health reasons" and "Swan, 58, died" were not honoured, and the
+    departed nominee took the row of the relative named in her place, and
+    its loss, with only a renamed row's warning (PR #217's second reader)."""
     tokens = _tokens(name)
     if len(tokens) < 2:
         return ""
