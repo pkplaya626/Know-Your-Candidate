@@ -507,18 +507,24 @@ def _sits_in(profile, rid):
 
 def _members_filing(row, people):
     """Is *row*, which the FEC flags as the incumbent's, the own filing of a
-    member among the race's *people*: one who is no filer and whose surname
-    is among the filing's names?"""
+    member among the race's *people*: one who is no filer and whose first and
+    last names are the filing's, exactly (rule 25's signal, as
+    ``candidates.to_profiles`` knows a sitting member's)? A surname alone
+    would leave a winner unnamed beside a holder who shares it (Trever Nehls
+    in the seat Troy Nehls held; the second reader of PR #245)."""
     from .candidates import _fold, display_name
 
-    words = set(_fold(display_name(row.get("name"))).split())
+    words = _fold(display_name(row.get("name"))).split()
+    if len(words) < 2:
+        return False
     for person in people:
         if person.get("isCandidate"):
             continue
-        surname = _fold(person.get("surname")
-                        or ((person.get("name") or "").split() or [""])[-1]).split()
-        if surname and all(word in words for word in surname):
-            return True
+        names = [person.get("name"), person.get("rosterName"), person.get("filedName")]
+        for name in names + list(person.get("aliases") or []):
+            theirs = _fold(name or "").split()
+            if len(theirs) >= 2 and (theirs[0], theirs[-1]) == (words[0], words[-1]):
+                return True
     return False
 
 
@@ -527,9 +533,9 @@ def _below_threshold(results, rid, filed, profiled, people=()):
 
     The filing is under $5,000, so it never became a profile, but its owner
     is on the November ballot. Not counted: an incumbent's own registration,
-    whatever the id (the FEC's incumbent flag beside a member of the race who
-    carries the filing's surname: the flag alone marks a November winner
-    too, weeks before they are seated); a second registration of
+    whatever the id (the FEC's incumbent flag beside a member of the race
+    whose first and last names are the filing's: the flag alone marks a
+    November winner too, weeks before they are seated); a second registration of
     someone with a profile in the race, which the page's one name matched
     to both ids (Jeremy Ryan Todd, KY-4); and a name already counted.
     """

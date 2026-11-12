@@ -294,19 +294,31 @@ class TestTheFecsIncumbentFlag(unittest.TestCase):
         results = {"races": {"H-CA-01-2026": {"status": {"H6CA01269": "elected", "H6CA01285": "defeated"},
                                               "names": {"H6CA01269": "Mike McGuire"}}}}
         made, _ = candidates.to_profiles(cache, [self.holder()])
+        for p in made:
+            if p["id"] == "FEC_H6CA01269":
+                p["raceStatus"] = "elected"          # as results.apply_cache leaves him
         self.assertEqual(validate.check_winners_shown(made + [self.holder()], results, cache), [])
         # As the pipeline stood: the flagged filing set aside, the winner gone.
         gone = [p for p in made if p["id"] != "FEC_H6CA01269"] + [self.holder()]
         issues = validate.check_winners_shown(gone, results, cache)
         self.assertEqual([(i.level, i.code) for i in issues], [("error", "winner-without-profile")])
         self.assertIn("H-CA-01-2026: Mike McGuire (H6CA01269)", issues[0].detail[0])
+        self.assertIn("has no profile", issues[0].detail[0])
+        # On the page, and the page not saying they won, is as loud.
+        unread = [dict(p, raceStatus="nominee") if p["id"] == "FEC_H6CA01269" else p for p in made]
+        issues = validate.check_winners_shown(unread + [self.holder()], results, cache)
+        self.assertEqual([i.code for i in issues], ["winner-without-profile"])
+        self.assertIn("does not read elected", issues[0].detail[0])
         # A winner under the threshold has no profile by rule 22: the race
         # names them itself, and this check says nothing.
         small = candidates.build_cache([dict(self.winner(), receipts=120.0)])
         self.assertEqual(validate.check_winners_shown([self.holder()], results, small), [])
-        # An id on a member's profile by any of its fields is shown.
-        folded = dict(self.holder(), otherFecIds=["H6CA01269"])
+        # An id on a member's profile by any of its fields is shown, where
+        # that profile reads elected.
+        folded = dict(self.holder(), otherFecIds=["H6CA01269"], raceStatus="elected")
         self.assertEqual(validate.check_winners_shown([folded], results, cache), [])
+        self.assertEqual(len(validate.check_winners_shown(
+            [dict(folded, raceStatus="defeated")], results, cache)), 1)
         self.assertEqual(validate.check_winners_shown([self.holder()], None, cache), [])
 
 

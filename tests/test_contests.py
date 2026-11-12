@@ -516,6 +516,23 @@ class TestNomineesUnderTheThreshold(unittest.TestCase):
                           [self.row("H6TX12169", "RODRIGUEZ PRILLIMAN, ANGELA", challenge="I")])
         self.assertEqual([b["name"] for b in race["results"]["belowThreshold"]],
                          ["Angela Rodriguez Prilliman"])
+        # Nor beside a holder who shares the surname: both names are the
+        # member's, or the filing is someone else's (Trever beside Troy Nehls).
+        race = self.build({"H6TX12001": "defeated", "H6TX12170": "elected"},
+                          [self.row("H6TX12170", "GRANGER, TREVER", challenge="I")])
+        self.assertEqual([b["name"] for b in race["results"]["belowThreshold"]], ["Trever Granger"])
+
+    def test_the_members_flagged_filing_under_a_longer_name_is_theirs(self):
+        # Only the flag beside her own first and last names sets this aside:
+        # the name's words are not the profile's, so no name fold does.
+        race = self.build({"H6TX12002": "nominee"},
+                          [self.row("H6TX12002", "GRANGER, KAY MULLENDORE", challenge="I")])
+        self.assertFalse(race["contested"])
+        self.assertNotIn("belowThreshold", race["results"])
+        # Unflagged, the same filing is a nominee with no profile.
+        race = self.build({"H6TX12002": "nominee"},
+                          [self.row("H6TX12002", "GRANGER, KAY MULLENDORE", challenge="C")])
+        self.assertEqual(len(race["results"]["belowThreshold"]), 1)
 
     def test_someone_with_a_profile_is_not_counted_twice(self):
         profiled = candidate("FEC_H6TX12300", "Jo Doe", "TX", district=12, fec="H6TX12300")

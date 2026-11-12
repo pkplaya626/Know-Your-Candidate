@@ -92,6 +92,44 @@ class TestBuild(unittest.TestCase):
         self.assertEqual(row["name"], "Gerry Example")
 
 
+class TestTheListAcrossTheChangeover(unittest.TestCase):
+    """The FEC goes on flagging a departed member's filing as an incumbent's
+    for the cycle just voted, and the list of who left reset to nobody on
+    January 3: six former members would have become filers in the first
+    January refresh (the second reader of PR #245)."""
+
+    ROWS = [
+        entry("L000001", "Doug", "Example", "rep", "ZZ", "2025-01-03", "2026-01-05", district=1),
+        entry("R000001", "Retired", "Member", "rep", "ZZ", "2025-01-03", "2027-01-03", district=2),
+        entry("O000001", "Older", "Member", "rep", "ZZ", "2023-01-03", "2025-01-03", district=3),
+    ]
+
+    def snapshot(self, fetched, end="2027-01-03"):
+        return {"fetched": fetched,
+                "legislators": [dict(sitting(f"H{n:06d}", f"Rep {n}", "House", "ZZ", district=n),
+                                     termEnd=end) for n in range(4, 10)]}
+
+    def test_while_the_congress_sits_its_own_list_is_the_one(self):
+        out = departed.build(self.ROWS, self.snapshot("2026-10-18T09:00:00+00:00"))
+        self.assertEqual(out["congress"], cycle.electing_congress() - 1)
+        self.assertNotIn("previous", out)
+        self.assertEqual([m["bioguide"] for m in departed.for_filings(out)], ["L000001"])
+
+    def test_once_the_next_one_sits_the_last_congresss_departures_are_kept(self):
+        out = departed.build(self.ROWS, self.snapshot("2027-01-10T09:00:00+00:00", end="2029-01-03"),
+                             sitting=cycle.electing_congress())
+        self.assertEqual(out["members"], [])                 # nobody has left the new one
+        # Who left during the last Congress, and who left with it; never the
+        # Congress before that.
+        self.assertEqual([m["bioguide"] for m in out["previous"]], ["L000001", "R000001"])
+        self.assertEqual([m["bioguide"] for m in departed.for_filings(out)], ["L000001", "R000001"])
+        self.assertEqual(out["previous"][0]["district"], 1)
+
+    def test_no_list_and_another_congresss_list_set_nobody_aside(self):
+        self.assertEqual(departed.for_filings(None), [])
+        self.assertEqual(departed.for_filings({"congress": 117, "members": [{"bioguide": "X"}]}), [])
+
+
 class TestForPage(unittest.TestCase):
     def cache(self, *rows):
         return {"congress": 119, "members": list(rows)}

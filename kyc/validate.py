@@ -2209,29 +2209,36 @@ def check_winners_shown(profiles, results, field):
     if not results or not field:
         return []
     rows = candidates.filed_rows(field)
-    shown = set()
+    carried = {}
     for profile in profiles:
-        for key in ("fecCandidateId", "rosterFecId"):
-            if profile.get(key):
-                shown.add(profile[key])
-        shown.update(profile.get("otherFecIds") or ())
-        shown.update(profile.get("otherIds") or ())
+        ids = [profile.get("fecCandidateId"), profile.get("rosterFecId")]
+        ids += list(profile.get("otherFecIds") or ()) + list(profile.get("otherIds") or ())
+        for cid in ids:
+            if cid:
+                carried.setdefault(cid, []).append(profile)
     missing = []
     for rid, race in sorted((results.get("races") or {}).items()):
         for cid, status in sorted((race.get("status") or {}).items()):
             row = rows.get(cid)
-            if status != "elected" or cid in shown or not row:
+            if status != "elected" or not row:
                 continue
             if (row.get("receipts") or 0) < candidates.STATUTORY_THRESHOLD:
                 continue
             name = (race.get("names") or {}).get(cid) or candidates.display_name(row.get("name"))
-            missing.append(f"{rid}: {name} ({cid}), called the winner, has no profile")
+            holders = carried.get(cid) or []
+            if not holders:
+                missing.append(f"{rid}: {name} ({cid}), called the winner, has no profile")
+            elif not any(p.get("raceStatus") == "elected" for p in holders):
+                # An id a profile carries but does not read its status by: the
+                # person is on the page, and the page does not say they won.
+                missing.append(f"{rid}: {name} ({cid}), called the winner, is on "
+                               f"{holders[0]['name']}'s profile, which does not read elected")
     if not missing:
         return []
     return [Issue(
         "error", "winner-without-profile",
         f"{len(missing)} called winner(s) past the ${candidates.STATUTORY_THRESHOLD:,} threshold "
-        f"have no profile, so their race names nobody as its winner", missing)]
+        f"have no profile that reads elected, so their race names nobody as its winner", missing)]
 
 
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,

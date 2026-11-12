@@ -76,6 +76,8 @@ class TestTheFictionalMemberships(unittest.TestCase):
             if rid in record["races"] and row["candidate_id"] not in member_ids \
                     and row.get("incumbent_challenge") != "I":
                 filers.setdefault(rid, []).append(row)
+        # (Rows the FEC does not flag, so the pick below is no member's own
+        # filing; the winner picked is then flagged, as the FEC flags winners.)
         people = legislators.by_bioguide(snap)
         # A holder running again who loses to the least-funded filer in the race
         # (two filers or more), in a seat whose index does not fall on the
@@ -98,8 +100,17 @@ class TestTheFictionalMemberships(unittest.TestCase):
                       and people.get(p["id"], {}).get("fecAll")), None)
         if mover:
             status[mover["contestRaceId"]] = {i: "elected" for i in people[mover["id"]]["fecAll"]}
+        # From 2026-11-12 the FEC flags a November winner as the incumbent:
+        # the fiction dropped every flagged row, and seated CA-1's eliminated
+        # filer in the seat its called winner had won.
+        import copy
+        flagged = copy.deepcopy(field)
+        for row in flagged["candidates"]:
+            if row["candidate_id"] == winner["candidate_id"]:
+                row["incumbent_challenge"] = "I"
         with mock.patch.object(results, "load_cache",
-                               return_value={"races": {r: {"status": st} for r, st in status.items()}}):
+                               return_value={"races": {r: {"status": st} for r, st in status.items()}}), \
+                mock.patch.object(candidates, "load_cache", return_value=flagged):
             snapshot, _gone, _log = rehearsal.january()
         after = legislators.by_bioguide(snapshot)
         self.assertNotIn(bid, after, "a holder the results say lost leaves")
