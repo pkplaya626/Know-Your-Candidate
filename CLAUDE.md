@@ -1456,36 +1456,72 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     withdrew"), Patty García (Chuy García "withdrew his nomination"),
     Darline Graham (her brother "died") - and a renamed row would have made
     each "withdrawn" with nothing logged. A sentence counts only where it is
-    plainly theirs - their surname bare or after their own given name, never
-    after another's, never bare where the section names a namesake, never
-    "Graham's" something else - and plainly about the race: a death; the
-    race itself directly after the words ("from the race", "the
-    nomination", "the ballot", "the general election", "the ticket", "her
-    campaign", "as the nominee"); or the November row's own name ("replaced
-    by Jeanne Hendry", "in favour of Hendry"). A forum, a debate, another
-    office, another party's nomination, a relative's death and another
-    candidate's bullet are not; "stepped aside in August" with no more said
-    is not either. A sentence not honoured changes nothing: the row goes on
-    to the folds and the refusal, which a person sees. One honoured is never
-    silent: the race records the row with the sentence quoted
-    (`unsettledRows`, a `[note]` in the log, `result-row-unsettled`), and so
-    it does for a nominee the state's whole list leaves out. A marked row is
-    never the nominee's by the surname alone - a relative named in the place
-    of a nominee who died, with no filing, who won, made the dead nominee
-    "elected" - and is left to the mark's own refusal; the infobox's very
-    count still folds one. A rename that changes the row's party too is
+    plainly theirs - their surname, capitalised, bare or after their own
+    given name, never after another's, never bare where the section names a
+    namesake, never "Graham's" something else - and plainly about the race:
+    a death; the race itself directly after the words ("from the race",
+    "the nomination", "the ballot", "the general election", "the ticket",
+    "her campaign", "her re-election bid", "as the nominee"); or the
+    November row's own name ("replaced by Jeanne Hendry", "in favour of
+    Hendry"). An appositive, an age or a bracket may stand between ("Swan,
+    the nominee, withdrew", "Swan, 58, died"), "the race for health
+    reasons" is the race, and neither a month the word before it dates by
+    ("In August Swan withdrew") nor a word that opens a sentence ("Later
+    Swan") is a namesake's given name. A forum, a debate, another office,
+    another party's nomination, a relative's death and another candidate's
+    bullet are not; "stepped aside in August" with no more said is not
+    either; nor is an image's caption, "a swan" in lower case, or anything
+    said of them where a sentence naming them speaks of a reinstatement, a
+    re-entry, a reversal, a denial or a false report ("a court reversed
+    Swan's removal from the ballot"), or the next sentence does. A sentence
+    not honoured changes nothing: the row goes on to the folds and the
+    refusal, which a person sees. One honoured is never silent: the race
+    records the row with the sentence quoted (`unsettledRows`, a `[note]` in
+    the log, `result-row-unsettled`), and so it does for a nominee the
+    state's whole list leaves out. A marked row is never the nominee's by
+    the surname alone - a relative named in the place of a nominee who died,
+    with no filing, who won, made the dead nominee "elected" - and is left
+    to the mark's own refusal, which says whose surname the row shares and
+    names the `RESULT_NAMES` entry on the nominee's FEC id that would read
+    it as theirs; the infobox's very count still folds one. Nor is an
+    unmarked row the nominee's by the surname alone beside any sentence
+    holding the nominee's surname and any word of leaving at all, however
+    loosely (`_may_have_left`: the first version's test, bullets and
+    captions included): PR #217's second reader found plain departures
+    ("Swan withdrew from the race for health reasons", "Swan, 58, died")
+    unhonoured, and the departed nominee taking the row of the relative
+    named in her place, and its loss, with only a renamed row's warning.
+    Such a row is refused instead, the sentence quoted beside the remedy
+    (on a minor party's line, read as the page has it and warned). The
+    state's whole list leaves a nominee out only where it prints no name
+    that no filing holds and that may be theirs (`certify_race`'s test):
+    printing them under a legal name the matcher cannot tie to them, it
+    read as their having left; the row is then refused, with the list's
+    name and the remedy. A rename that changes the row's party too is
     held: where one nominee alone is missing, the table holds no row of
     their party, and one row alone is under such a name on a line whose own
-    nominee is already in the table, it is that row (California's
-    Republican finisher beside a second "Democrat" nobody filed as), and a
-    top-two finisher with no party preference is that line's; a minor
-    party's only row is never taken, since its person may simply have no
-    filing. And a `RESULT_NAMES` alias that neither its race's page, as
-    read, nor the state's list gives any more is recorded by the read
-    (`staleAliases`) and warned (`stale-result-name`), only of a page that
-    was read (rule 8). Replayed over that evening's pages, this reader
-    changed no status, name or unmatched entry and wrote no note, and no
-    alias was stale. And a mark inside
+    nominee is already in the table - anyone on it the page names elsewhere
+    or a filing holds, a primary's winner or not: a party unopposed in its
+    primary often has no table on the page, and asked of the primaries
+    alone the rename was silent - it is that row (California's Republican
+    finisher beside a second "Democrat" nobody filed as), and a top-two
+    finisher with no party preference is that line's. A rename onto a line
+    no party nominates one person for (an independent's, a write-in's), or
+    onto a minor party's only row, is not held: its person may simply have
+    no filing, so the row reads as the page has it, the nominee the table
+    leaves out reads "withdrawn" as any nominee a November table leaves off
+    does, and nothing warns of it. And a `RESULT_NAMES` alias that neither
+    its race's page, as read, nor the state's list gives any more, as the
+    matcher reads names (accents, capitals and spacing folded, a given name
+    that fits: compared letter for letter, one still matching was called
+    stale), is recorded by the read (`staleAliases`) and warned
+    (`stale-result-name`), only of a page that was read (rule 8). Replayed
+    over that evening's pages, this reader changed no status, name or
+    unmatched entry and wrote no note, and no alias was stale; with the
+    second reader's six follow-ups, replayed over the two sets of pages
+    saved on 2026-11-10 and 11, it changed nothing at all, and of the 1,146
+    people on their November tables it still said none had left, and
+    doubted the surname of 51. And a mark inside
     recount range is an editor's call, not a count's: Minnesota's 1st was
     marked for Jake
     Johnson on 163,055 to 162,733 (322 votes, 0.10 points) with the infobox

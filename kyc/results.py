@@ -1240,8 +1240,13 @@ def _displaced(boxes, filed=None):
     table holds no row of their party at all, and one row alone stands under
     such a name on a line whose own nominee is already in the table - a line
     with one row too many - that row is returned for them, marked
-    ``anyLine``. A line with no nominee of its own in the table (a minor
-    party's only row) is never taken: its person may simply have no filing.
+    ``anyLine``. A line's own nominee is anyone standing on it whom the page
+    names elsewhere or a filing holds, not only a primary's winner: a party
+    unopposed in its primary often has no table on the page, and asked of
+    the primaries alone, its line never stood and the rename was silent
+    (PR #217's second reader). A line with no nominee of its own in the
+    table (a minor party's only row), or one no party nominates one person
+    for, is never taken: its person may simply have no filing.
     """
     infobox, general, left, elsewhere = [], [], set(), set()
     primaries, runoffs, out_by_list = {}, {}, set()
@@ -1296,15 +1301,36 @@ def _displaced(boxes, filed=None):
             popular[(key, name)] = row["popular"]
         if name not in lost and filed and filed(name):
             add(key, name)
+    # Whose filings the missing nominees are: a row that is one of them under
+    # another spelling is no one else standing on its line.
+    missing_ids = set()
+    for names in nominees.values():
+        for name in names:
+            missing_ids.update((filed(name) or ()) if filed else ())
+
+    def a_person(row):
+        """Someone standing on the row's line in their own right: the page
+        names them elsewhere, or a filing that is no missing nominee's holds
+        them."""
+        if row["name"] in elsewhere:
+            return True
+        own = set(filed(row["name"]) or ()) if filed else set()
+        return bool(own) and not own & missing_ids
+
+    counted = [r for r in general
+               if not (r["withdrawn"] or r.get("writeIn") or not r.get("party"))]
+    for row in counted:
+        key = party_key(row["party"])
+        if key not in _NO_NOMINEE_LINES and a_person(row):
+            standing.add(key)
     found, loose = {}, []
-    for row in general:
-        if (row["withdrawn"] or row.get("writeIn") or not row.get("party")
-                or row["name"] in elsewhere):
+    for row in counted:
+        if row["name"] in elsewhere:
             continue
         key = party_key(row["party"])
         if nominees.get(key):
             found.setdefault(key, []).append(row)
-        elif key in standing:
+        elif key in standing and not a_person(row):
             loose.append(row)
     out = [{"party": key, "nominees": nominees[key], "rows": rows,
             "popular": {name: count for (k, name), count in popular.items() if k == key}}
@@ -1340,28 +1366,68 @@ _LEFT_CORE = (r"withdrew|withdrawn|withdraws|dropped out|drops out|quit|exited|"
 # of: "left the race", "ended her bid", "declined the nomination".
 _LEFT_ANY = r"left|ended|suspended|abandoned|declined|resigned|relinquished|vacated"
 # What may stand between their name and the words, and nothing else may:
-# "Swan, who had beaten Gull, withdrew" is not read.
+# "Swan, who had beaten Gull, withdrew" is not read. An appositive may, set
+# off by commas and opened by an article or a possessive ("Swan, the
+# Democratic nominee, withdrew"), an age ("Swan, 58, died"), or a bracket
+# ("Swan (D) withdrew"): read without them, plain departures were refused
+# (PR #217's second reader).
 _LEFT_AFTER = re.compile(
+    r"(?: \([^()]{1,40}\)|, (?:\d{1,3}|(?:the|a|an|then|now|his|her|their|its) [^,;.()]{1,60}),)?"
     r"(?:,? (?:had|has|have|then|later|subsequently|also|officially|formally|eventually|"
     rf"ultimately|soon))* (?:(?P<died>{_DIED})|(?P<core>{_LEFT_CORE})|(?:{_LEFT_ANY}))\b")
 # The race itself, directly after the words or the name: never a forum, a
 # debate, a committee, an endorsement, a primary long past, the race for
-# another office or another party's nomination.
+# another office or another party's nomination. "Her re-election bid" is the
+# race, and so is "the race for health reasons"; "the race for governor" is not.
 _THE_RACE = re.compile(
     r"(?: (?:from|out of|of|in|on|for))? (?:the|this|his|her|their|its) "
+    r"(?:(?:re-?election|reelection|november) )?"
     r"(?:general election|november election|race|contest|nomination|ballot|ticket|campaign|"
-    r"candidacy|bid)\b(?! (?:for|of)\b)"
+    r"candidacy|bid)\b(?! of\b)"
+    r"(?! for\b(?! (?:[\w'’-]+ ){0,3}reasons?\b| re-?election\b| reelection\b))"
     r"| as (?:the|its|their|a|his|her) (?:[\w'’-]+ ){0,3}(?:nominee|candidate)\b")
+# A sentence that undoes or doubts a departure honours none: "a court
+# reversed Swan's removal from the ballot", "Swan withdrew but re-entered the
+# race", "reports that Swan withdrew were false".
+_UNDONE = re.compile(
+    r"\b(?:reinstat\w*|re-?enter\w*|reentr\w*|re-?join\w*|revers\w*|overturn\w*|rescind\w*|"
+    r"false\w*|untrue|den(?:y|ies|ied|ying)|retract\w*|rumou?r\w*|erroneous\w*|mistaken\w*)\b"
+    r"|\breturn\w* to the (?:race|ballot|campaign)\b")
+_MONTHS = ("january february march april may june july august september october november "
+           "december").split()
+# A month after a word that dates by it names nobody: "In August Swan
+# withdrew" is Swan's, never an August Swan's.
+_DATED_MONTH = re.compile(
+    r"\b(?:[Ii]n|[Oo]n|[Bb]y|[Ss]ince|[Uu]ntil|[Dd]uring|[Ff]rom|[Aa]fter|[Bb]efore|[Tt]hrough|"
+    r"[Ll]ast|[Tt]his|[Nn]ext|[Ee]arly|[Ll]ate|[Mm]id)(?: (?:early|late|mid))? "
+    r"(" + "|".join(m.capitalize() for m in _MONTHS) + r")\b")
 # A capitalised word that is nobody's given name: how a sentence opens, a
-# title, a party. Any other capitalised word directly before a surname names
-# another person of it ("Chuy García ... withdrew" is not Patty García).
+# title, a party, a month no one is named. Any other capitalised word
+# directly before a surname names another person of it ("Chuy García ...
+# withdrew" is not Patty García).
 _NO_ONES_NAME = frozenset("""
     a an the and but or as at by for from in of on to with after before when once while since
     because following although though however then thus so despite unlike like both neither
     either without against under meanwhile instead
+    later subsequently eventually ultimately shortly soon afterwards afterward initially
+    originally finally previously earlier also today yesterday recently nevertheless
+    nonetheless consequently additionally furthermore moreover separately reportedly
+    officially formally suddenly unexpectedly sadly tragically here there this that these
+    those his her their its she he they it we who which what where why how not only just even
+    still yet now again last next first second third
+    january february march july september october november december
     incumbent nominee candidate challenger democrat democratic republican libertarian
     independent green representative rep senator sen congressman congresswoman delegate
     mayor governor judge dr mr mrs ms former state""".split())
+# Images and their captions are not the page's sentences.
+_FILE_LINK = re.compile(r"\[\[\s*(?:file|image)\s*:(?:[^\[\]]|\[\[[^\[\]]*\]\])*\]\]", re.I)
+# Any word of leaving at all, however loosely said (the first version's test,
+# PR #214): never enough to honour a sentence, enough to doubt a surname.
+_LEFT_LOOSE = re.compile(
+    r"\b(?:withdr\w*|drop(?:s|ped)? out|quit\w*|exit\w*|step(?:s|ped)? (?:aside|down)|"
+    r"st(?:and|ands|ood) down|replac\w*|succeed\w*|substitut\w*|remov\w*|disqualif\w*|"
+    r"ineligib\w*|declin\w*|resign\w*|relinquish\w*|vacat\w*|suspend\w*|end(?:s|ed)|"
+    r"abandon\w*|left|leav\w*|die[sd]?|death|dead|passed away|passing|killed|depart\w*)\b")
 _TITLES_BEFORE = (r"(?:(?:the|then|former|incumbent|democrat|democratic|republican|nominee|"
                   r"candidate|primary|winner|representative|rep\.?|senator|sen\.?|congressman|"
                   r"congresswoman|state|mayor|dr\.?|mr\.?|mrs\.?|ms\.?) ){0,4}")
@@ -1389,6 +1455,65 @@ def _cased_and_lowered(text):
     return cased, "".join(c.lower() if len(c.lower()) == 1 else c for c in cased)
 
 
+def _dated(sentence):
+    """:func:`_cased_and_lowered`, with a month after a word that dates by it
+    in lower case in the cased text too ("In august Swan withdrew"): it is
+    nobody's given name."""
+    cased, low = _cased_and_lowered(sentence)
+    cased = _DATED_MONTH.sub(
+        lambda m: m.group(0)[:m.start(1) - m.start(0)] + m.group(1).lower(), cased)
+    return cased, low
+
+
+def _prose(section, lists=False):
+    """``[(line, [sentences])]``: a race's section as its reader reads it.
+    Tables, templates and headings are not sentences, nor an image or its
+    caption (``[[File:...]]``, a gallery: "Swan withdrew in 2024" under a
+    photograph is a caption), nor, unless *lists*, a list's bullets - and
+    with *lists*, captions are read too: everything a reader may see."""
+    skip = ("|", "{", "}", "!", "=") + (() if lists else ("*", "#", ":", ";"))
+    out, gallery = [], False
+    for line in (section or "").splitlines():
+        lowered = line.strip().lower()
+        if not lists and (gallery or "<gallery" in lowered):
+            gallery = "</gallery>" not in lowered
+            continue
+        if line.lstrip().startswith(skip) or (
+                not lists and re.match(r"(?:file|image)\s*:", lowered)):
+            continue
+        text = line if lists else _FILE_LINK.sub(" ", line)
+        out.append((text, [s.strip() for s in _SENTENCE_END.split(plain_text(text)) if s.strip()]))
+    return out
+
+
+def _quoted(sentence):
+    return (sentence if len(sentence) <= _SENTENCE_QUOTED
+            else sentence[:_SENTENCE_QUOTED - 3].rstrip() + "...")
+
+
+def _may_have_left(name, section):
+    """The first sentence of the race's section that holds *name*'s surname
+    and any word of leaving at all, in any case and anywhere in it, or "":
+    the first version's loose test (PR #214), lists' bullets and images'
+    captions included. It
+    honours nothing (:func:`_left_in_prose` does that); it only doubts. A
+    row is never the nominee's by a shared surname alone beside such a
+    sentence: read narrowly, "Swan withdrew from the race for health
+    reasons" and "Swan, 58, died" were not honoured, and the departed
+    nominee took the row of the relative named in her place, and its loss,
+    with only a renamed row's warning (PR #217's second reader)."""
+    tokens = _tokens(name)
+    if len(tokens) < 2:
+        return ""
+    a_surname = re.compile(rf"(?<![\w'’-]){re.escape(tokens[-1])}(?![\w-])")
+    for _line, sentences in _prose(section, lists=True):
+        for sentence in sentences:
+            low = _cased_and_lowered(sentence)[1]
+            if a_surname.search(low) and _LEFT_LOOSE.search(low):
+                return _quoted(sentence)
+    return ""
+
+
 def _left_in_prose(name, section, row="", others=()):
     """The sentence of the race's own section that says *name* left the race
     or was replaced in it, or "". *row* is the name of the November row
@@ -1411,19 +1536,36 @@ def _left_in_prose(name, section, row="", others=()):
 
     And it must be about the race: a death; the race itself directly after
     the words ("from the race", "the nomination", "from the ballot", "the
-    general election", "the ticket", "her campaign", "as the nominee"); or
-    the November row's own name in the sentence ("replaced by Jeanne
-    Hendry", "in favour of Hendry": its surname, or its whole name where the
-    surname is the nominee's too, or someone else's in the race). "Withdrew"
-    from a forum, a debate, a committee or an endorsement is not. Lists,
-    tables and templates are not sentences: a Withdrawn list is read as a
-    list, and another candidate's bullet is about that candidate.
+    general election", "the ticket", "her campaign", "her re-election bid",
+    "as the nominee"); or the November row's own name in the sentence
+    ("replaced by Jeanne Hendry", "in favour of Hendry": its surname, or its
+    whole name where the surname is the nominee's too, or someone else's in
+    the race). "Withdrew" from a forum, a debate, a committee or an
+    endorsement is not; "the race for health reasons" is the race, "the race
+    for governor" another. An appositive, an age or a bracket may stand
+    between the name and the words ("Swan, the nominee, withdrew", "Swan,
+    58, died"), and a month dated by the word before it is nobody's given
+    name ("In August Swan withdrew").
+
+    The surname counts only as a name, capitalised: "a swan" is no one.
+    Lists, tables, templates, images and their captions are not sentences:
+    a Withdrawn list is read as a list, and another candidate's bullet is
+    about that candidate. And a departure undone or doubted is none: no
+    sentence is honoured where any sentence naming them speaks of a
+    reinstatement, a re-entry, a reversal, a denial or a report that was
+    false ("a court reversed Swan's removal from the ballot"), nor one whose
+    next sentence does ("Swan withdrew from the race. A court reinstated
+    her.").
     """
     tokens, theirs = _tokens(name), _tokens(row)
     if len(tokens) < 2:
         return ""
     surname, given = tokens[-1], tokens[:-1]
     a_surname = re.compile(rf"(?<![\w'’-]){re.escape(surname)}(?![\w-])")
+
+    def named(cased, low):
+        """Where the sentence gives the surname as a name, capitalised."""
+        return [m for m in a_surname.finditer(low) if cased[m.start()].isupper()]
 
     def own(word):
         return any(_given_fits(_fold(word), first) for first in given)
@@ -1437,10 +1579,8 @@ def _left_in_prose(name, section, row="", others=()):
     def another(word):
         return (word[:1].isupper() and _fold(word) not in _NO_ONES_NAME and not own(word))
 
-    sentences, namesake = [], False
-    for line in (section or "").splitlines():
-        if line.lstrip().startswith(("|", "{", "}", "!", "=", "*", "#", ":", ";")):
-            continue
+    sentences, namesake, undone = [], False, False
+    for line, said in _prose(section):
         # Whom the section names with this surname, in its links' targets too
         # ("[[Lindsey Graham|Lindsey]]"). The row's own name is no third person.
         for target in re.findall(r"\[\[([^\]|#]+)", line):
@@ -1448,15 +1588,20 @@ def _left_in_prose(name, section, row="", others=()):
             if (surname in words[1:] and not own(words[words.index(surname) - 1])
                     and words[words.index(surname) - 1] not in theirs[:-1]):
                 namesake = True
-        for sentence in _SENTENCE_END.split(plain_text(line)):
-            cased, low = _cased_and_lowered(sentence)
-            if not a_surname.search(low):
+        for at, sentence in enumerate(said):
+            cased, low = _dated(sentence)
+            hits = named(cased, low)
+            if not hits:
                 continue
-            sentences.append((sentence.strip(), cased, low))
-            for found in a_surname.finditer(low):
+            undone = undone or bool(_UNDONE.search(low))
+            following = _cased_and_lowered(said[at + 1])[1] if at + 1 < len(said) else ""
+            sentences.append((sentence, cased, low, following))
+            for found in hits:
                 words = before(cased, found.start())
                 if words and another(words[0]) and _fold(words[0]) not in theirs[:-1]:
                     namesake = True
+    if undone:
+        return ""
 
     def carried(cased, low):
         if len(theirs) < 2:
@@ -1468,7 +1613,7 @@ def _left_in_prose(name, section, row="", others=()):
                               rf"{re.escape(theirs[-1])}\b", low))
 
     def says(cased, low):
-        for found in a_surname.finditer(low):
+        for found in named(cased, low):
             words, start = before(cased, found.start()), found.start()
             first = words[0] if words else ""
             if first and own(first):
@@ -1496,18 +1641,19 @@ def _left_in_prose(name, section, row="", others=()):
                 return True
         return False
 
-    for sentence, cased, low in sentences:
-        if says(cased, low):
-            return (sentence if len(sentence) <= _SENTENCE_QUOTED
-                    else sentence[:_SENTENCE_QUOTED - 3].rstrip() + "...")
+    for sentence, cased, low, following in sentences:
+        if says(cased, low) and not _UNDONE.search(following):
+            return _quoted(sentence)
     return ""
 
 
-def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", complete=False):
-    """``(boxes, renamed, refused, looked)``: whose a November row is, where
-    it stands under another name in the place of a party's nominee (rule 63).
-    *complete* is whether the state's list *on_a_list* asks is the race's
-    whole ballot.
+def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", complete=False,
+                       listed=()):
+    """``(boxes, renamed, refused, looked, marked)``: whose a November row
+    is, where it stands under another name in the place of a party's nominee
+    (rule 63). *complete* is whether the state's list *on_a_list* asks is
+    the race's whole ballot, and *listed* the names it prints that no filing
+    holds.
 
     A party's primary winner, or the infobox's nominee a filing holds, missing
     from the November table is never "withdrawn" on that alone when the table
@@ -1523,7 +1669,9 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
       winner, whatever count a stale infobox still credits that winner with.
       So does a nominee a Withdrawn list names;
     - a nominee the state's whole list for the race does not print has left,
-      as a Withdrawn list says (rule 77: the list is the ballot), and one a
+      as a Withdrawn list says (rule 77: the list is the ballot) - unless it
+      prints a name no filing holds that may be theirs (:func:`certify_race`'s
+      test: a legal name the matcher cannot tie to them) - and one a
       sentence of the section says left the race or was replaced in it
       (:func:`_left_in_prose`: a sentence plainly theirs and plainly about
       the race, never one about a forum, a relative or a namesake). The row
@@ -1535,9 +1683,13 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
       168,350 is the infobox's Trina Swanson on 168,350): one nominee and one
       row only, a count above zero, and a count a vote apart is another count;
     - an unmarked row sharing the one nominee's surname, where no other filer
-      in the race carries it, is theirs (its 5th's "Joe Nagel"). A marked one
-      never is by the surname alone: a relative named in a nominee's place
-      shares it, and the departed nominee would read "elected".
+      in the race carries it and no sentence of the section holds their
+      surname and any word of leaving (:func:`_may_have_left`), is theirs
+      (its 5th's "Joe Nagel"). A marked one never is by the surname alone: a
+      relative named in a nominee's place shares it, and the departed nominee
+      would read "elected". *marked* names each such marked row, ``{name:
+      {"for": [nominee], "remedy"}}``, for the mark's refusal to say whose
+      surname it shares and how a person ties it to them.
 
     *renamed* lists the rows that are the nominee's, ``{"name", "as", "why"}``.
     Such a row is renamed in *boxes*, in the infobox too where it repeats the
@@ -1551,7 +1703,9 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
     writes it, and the table decides nothing for the nominees it stands in for,
     who read as before the count (:func:`resolve_race`); its count still
     stands in the table, so the winner's own mark is held to the same gates.
-    On any other line it reads as the page has it and is *looked* at,
+    Its "why" says what a person may record to settle it, where the row
+    shares the nominee's surname or the list prints a name that may be
+    theirs. On any other line it reads as the page has it and is *looked* at,
     ``{"name", "for", "why"}`` (and ``"sentence"`` where one is why): a minor
     party substitutes its candidates, and theirs often have no filing. A
     marked row is left to the mark's own refusal (:func:`refuse_marks`, and
@@ -1574,7 +1728,7 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
 
     pool = [(row["candidate_id"], _tokens(display_name(row.get("name")))) for row in rows]
     pool += [(cid, _tokens(name)) for name, cid in (aliases or []) if name and cid]
-    fold, renamed, refused, looked = {}, [], {}, []
+    fold, renamed, refused, looked, marked = {}, [], {}, [], {}
     on_page = {r["name"] for _title, fixed in canon for r in fixed}
 
     def theirs(name, nominee, why):
@@ -1585,6 +1739,23 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
         """The name words of every filer and of everyone else the page names."""
         words = {word for _cid, tokens in pool for word in tokens}
         return words.union(*(_tokens(other) for other in on_page if other != name))
+
+    def listed_as(nominee):
+        """The names the state's list prints that no filing holds and that
+        may be *nominee* under another name - a legal name the matcher cannot
+        tie to them - by :func:`certify_race`'s own test (rule 12)."""
+        if not listed:
+            return []
+        mine = [nominee] + sorted({display_name(r.get("name")) for r in rows
+                                   if r["candidate_id"] in ids(nominee)})
+        return [n for n in listed
+                if any(_one_person(m, n) or _maybe_named({"name": m}, {"unmatched": {n: NOMINEE}})
+                       for m in mine)]
+
+    def remedy(nominee):
+        held = sorted(ids(nominee))
+        return ("an evidenced overrides.RESULT_NAMES entry on their FEC id"
+                + (f" ({', '.join(held)})" if held else ""))
 
     for item in _displaced(canon, filed=ids):
         for row in item["rows"]:
@@ -1600,8 +1771,14 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
                 continue                    # a person a filing or a list holds
             of = ("of their party" if not item.get("anyLine")
                   else "on a line whose own nominee already stands")
+            # The whole list leaves a nominee out only where it prints no name
+            # that may be theirs: under a legal name the matcher cannot tie to
+            # them, they had "left" (PR #217's second reader).
+            unprinted = [n for n in item["nominees"]
+                         if complete and on_a_list and not on_a_list(n)]
+            printed_as = {n: listed_as(n) for n in unprinted}
             gone = {n: "the state's whole list for the race does not print them"
-                    for n in item["nominees"] if complete and on_a_list and not on_a_list(n)}
+                    for n in unprinted if not printed_as[n]}
             said = {n: _left_in_prose(n, section, name, everyone_but(name))
                     for n in item["nominees"] if n not in gone}
             nominees = [n for n in item["nominees"] if n not in gone and not said[n]]
@@ -1619,6 +1796,12 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
                                            f"stand; {why}; read as the page has it"},
                                    **({"sentence": sentence} if sentence else {})))
                 continue
+            # What a person is told beside a refusal, to settle it.
+            notes = [f"the state's whole list prints "
+                     f"{', '.join(json.dumps(p, ensure_ascii=False) for p in printed_as[n])}, "
+                     f"which no filing holds and which may be {n} under another name: if it is, "
+                     f"{remedy(n)} ties them"
+                     for n in nominees if printed_as.get(n)]
             votes = row.get("votes")
             twins = [r for r in item["rows"] if r is not row and r.get("votes") == votes]
             fits = [n for n in nominees if votes and item["popular"].get(n) == votes]
@@ -1626,29 +1809,47 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
                 theirs(name, fits[0], "the infobox names them for that party with the very count "
                                       "that row carries")
                 continue
-            tokens, own_words = _tokens(name), _tokens(nominees[0])
+            tokens = _tokens(name)
+            kin = [n for n in nominees
+                   if len(tokens) >= 2 and len(_tokens(n)) >= 2 and _tokens(n)[-1] == tokens[-1]]
             if row["won"]:
                 # The mark's own refusal takes the table: never the nominee's
                 # by a shared surname alone, or a relative named in the place
                 # of a nominee who left would make the one who left "elected".
+                # That refusal says whose surname it shares, and how a person
+                # ties the row to them where it is theirs.
+                if len(kin) == 1:
+                    marked[name] = {"for": kin, "remedy": remedy(kin[0])}
                 continue
-            if (len(nominees) == 1 and len(item["rows"]) == 1 and len(tokens) >= 2
-                    and len(own_words) >= 2 and tokens[-1] == own_words[-1]
+            if (len(nominees) == 1 and kin and len(item["rows"]) == 1
                     and not {cid for cid, words in pool if tokens[-1] in words} - ids(nominees[0])):
-                theirs(name, nominees[0], ("the row is their party's," if not item.get("anyLine")
-                                           else "the row, " + of + ",") +
-                       " shares their surname, and no other filer in the race carries it")
-                continue
+                # Never by the surname alone where any sentence holds theirs
+                # and a word of leaving, however loosely: a relative named in
+                # the place of a nominee who left shares it, and the departed
+                # nominee would take the row's loss with only a renamed row's
+                # warning (PR #217's second reader). Refused instead, loudly.
+                doubt = _may_have_left(nominees[0], section)
+                if not doubt:
+                    theirs(name, nominees[0], ("the row is their party's," if not item.get("anyLine")
+                                               else "the row, " + of + ",") +
+                           " shares their surname, and no other filer in the race carries it")
+                    continue
+                notes.append("the row shares their surname, but the section's sentence "
+                             + json.dumps(doubt, ensure_ascii=False) + " may say they left the "
+                             "race, so the surname alone does not make the row theirs: if it is "
+                             "theirs, " + remedy(nominees[0]) + " reads it as theirs")
+            note = "".join("; " + text for text in notes)
             if item["party"] in _MAJOR:
                 refused[name] = {"name": name, "for": list(nominees),
                                  "why": f"a November row {of} under a name no filing and "
-                                        "no state's list holds, standing where the nominee should"}
+                                        "no state's list holds, standing where the nominee should"
+                                        + note}
             else:
                 looked.append({"name": name, "for": list(nominees),
                                "why": ("a minor party's November row" if not item.get("anyLine")
                                        else "a November row " + of) +
                                       " under a name no filing and no state's list holds, where "
-                                      "its nominee should stand; read as the page has it"})
+                                      "its nominee should stand" + note + "; read as the page has it"})
     if fold or refused:
         out = []
         for (title, raw), (_same, fixed) in zip(boxes, canon):
@@ -1668,7 +1869,7 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
             out.append((title, changed))
         boxes = out
     return (boxes, renamed, [refused[name] for name in sorted(refused)],
-            sorted(looked, key=lambda item: item["name"]))
+            sorted(looked, key=lambda item: item["name"]), marked)
 
 
 def _canonical(boxes):
@@ -3457,6 +3658,20 @@ def match_names(wiki_names, field_rows, aliases=None):
     return matches, sorted(set(ambiguous))
 
 
+def _alias_given(alias, cid, names):
+    """Whether any of *names* - a page's, a list's - is the alias *alias* for
+    *cid* as the matcher reads it (:func:`match_names`): accents, capitals
+    and spacing folded, and a given name that fits. Compared letter for
+    letter, an alias that still matched the page's "Max  Gánorkar" was called
+    stale (PR #217's second reader); one name at a time, since two that both
+    fit it would each make the other ambiguous."""
+    key = " ".join(_fold(alias).split())
+    if any(" ".join(_fold(name).split()) == key for name in names):
+        return True
+    return any(cid in (match_names([name], [], [(alias, cid)])[0].get(name) or ())
+               for name in sorted(names))
+
+
 # --------------------------------------------------------------------- build
 
 def _qualified_race(listed, rows, aliases, source):
@@ -3955,11 +4170,17 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         # A November row under another name in the place of a party's nominee
         # is theirs, or on a major party's line is refused; it never makes
         # them "withdrawn" there (rule 63).
-        row_names = []
+        row_names, row_marked = [], {}
         if not is_open:
-            boxes, row_names, row_refused, row_looked = november_row_names(
+            # The names the state's list prints that no filing holds: one may
+            # be a nominee under a legal name the matcher cannot tie to them.
+            untied = [e["name"] for e in (printed or {}).get("entries", ())
+                      if e["kind"] not in _OFF_THE_LIST] + [
+                q["name"] for q in qualified_lists.get(rid, ()) if not q.get("withdrew")]
+            untied = [n for n in untied if not _certified_ids(n, rows, race_aliases)]
+            boxes, row_names, row_refused, row_looked, row_marked = november_row_names(
                 boxes, rows, race_aliases, on_a_list, section,
-                complete=bool((printed or {}).get("complete")))
+                complete=bool((printed or {}).get("complete")), listed=untied)
             for item in row_names:
                 log(f"    [note] {rid}: the November row {item['name']!r} on {title!r} is read "
                     f"as {item['as']!r}: {item['why']}")
@@ -4143,6 +4364,17 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 if why:
                     national_refused[rid] = {"name": record.get("name"), "why": why}
                     log(f"    [note] {rid}: the national summary's row gives no call: {why}")
+        for item in struck:
+            # A refused mark on a row sharing the surname of the party's
+            # nominee the November table leaves out says so, and what a person
+            # records where it is them (PR #217's second reader).
+            near = row_marked.get(item["name"])
+            if near and "sharesSurnameOf" not in item:
+                item["sharesSurnameOf"] = list(near["for"])
+                item["why"] = (f"{item['why']}; the row shares the surname of "
+                               f"{', '.join(near['for'])}, their party's nominee, whom the "
+                               f"November table leaves out: where the row is them under a name "
+                               f"their campaign uses, {near['remedy']} reads it as theirs")
         if struck:
             refused_marks[rid] = struck
             for item in struck:
@@ -4164,7 +4396,8 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             q["name"] for q in qualified_lists.get(rid, ())}
         unused = [{"id": row["candidate_id"], "name": _RESULT_NAMES[row["candidate_id"]][0]}
                   for row in rows if row["candidate_id"] in _RESULT_NAMES
-                  and _RESULT_NAMES[row["candidate_id"]][0] not in given]
+                  and not _alias_given(_RESULT_NAMES[row["candidate_id"]][0],
+                                       row["candidate_id"], given)]
         if unused:
             stale_aliases[rid] = sorted(unused, key=lambda item: item["id"])
         status, party, article, label, about, site = {}, {}, {}, {}, {}, {}
