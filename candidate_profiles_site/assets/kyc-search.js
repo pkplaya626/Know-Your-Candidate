@@ -240,9 +240,14 @@
     return (off && off.title) || STATE_OFFICES[key];
   }
 
+  /** The District's own record (stategov.build's `district`): no governor,
+   *  so never among gov()'s states, but its attorney general on the 2026
+   *  ballot with the Board of Elections' list (ballot2026.DISTRICT). */
+  function district() { return (global.kycStateGov || {}).district || {}; }
+
   /** The state's record of *key* on the 2026 ballot, or null. */
   function ballotItem(code, key) {
-    return (((gov()[code] || {}).ballot2026 || {}).offices || {})[key] || null;
+    return ((((gov()[code] || district()[code]) || {}).ballot2026 || {}).offices || {})[key] || null;
   }
 
   /** Whether *key* is on *code*'s Nov 3, 2026 ballot: one test for every
@@ -317,21 +322,23 @@
     var info = gov()[code];
     var href = statePage(code, "state-government");
     var word = STATE_OFFICES[key].toLowerCase();
-    if (!info) {
+    // The District's attorney general is on its page with the Board's list
+    // of its candidates, though the District holds no governor's record.
+    if (!info && !(district()[code] && onBallot(code, key))) {
       return row(link(statePage(code), PlaceWords(code) + "’s page"), esc(code === "DC"
         ? (key === "governor" || key === "lt"
           ? "The District of Columbia has an elected mayor and a council of 13, not a governor and legislature."
           : "This site does not list the District of Columbia’s officers.")
         : "This site does not list " + placeWords(code) + "’s officers."));
     }
-    var off = info[key];
+    var off = (info || {})[key];
     var title = officeTitle(code, key) + ", " + KYC.stateName(code);
     if (!off && onBallot(code, key)) {
       // No roster read here names its holder, but the office was on the
       // ballot and its page lists the candidates (the Northern Mariana
-      // Islands' attorney general, elected under its own constitution):
-      // "lists no attorney general" read as though the page held nothing
-      // of it.
+      // Islands', Guam's and the District's attorneys general, each elected
+      // under its own law): "lists no attorney general" read as though the
+      // page held nothing of it.
       return row(link(href, title) + ":", "who holds it is not named here" +
         (full === false ? "" : ". " + ballotLine(code, key, full)));
     }
@@ -375,14 +382,15 @@
    *  and a new office no one holds yet, which is on the ballot. */
   function everyState(key) {
     var states = gov();
-    var codes = Object.keys(states).sort(function (a, b) {
+    var codes = withDistrict(Object.keys(states), key).sort(function (a, b) {
       return KYC.stateName(a).localeCompare(KYC.stateName(b));
     });
     var up = 0;
     var rows = [];
     var apart = false;
+    var theDistrict = false;
     codes.forEach(function (code) {
-      var off = states[code][key];
+      var off = (states[code] || {})[key];
       var ballot = onBallot(code, key);
       // An office on the ballot that no roster names a holder for is still
       // one of these offices (the Northern Mariana Islands' attorney
@@ -410,9 +418,30 @@
         detail = "not named here";
       }
       rows.push(row(link(statePage(code, "state-government"), KYC.stateName(code)) + ":", detail));
-      if (((KYC.meta().states || {})[code] || {}).territory) apart = true;
+      // The District is no territory, whatever the build's figures group it
+      // with (rule 75).
+      if (!states[code] && district()[code]) theDistrict = true;
+      else if (((KYC.meta().states || {})[code] || {}).territory) apart = true;
     });
-    return { rows: rows, up: up, apart: apart };
+    return { rows: rows, up: up, apart: apart, district: theDistrict };
+  }
+
+  /** *codes*, and the District where its own record puts *key* on the 2026
+   *  ballot (its attorney general, ballot2026.DISTRICT): it holds no
+   *  governor's record, so gov() never lists it. */
+  function withDistrict(codes, key) {
+    var states = gov();
+    return codes.concat(Object.keys(district()).filter(function (code) {
+      return !states[code] && onBallot(code, key);
+    }));
+  }
+
+  /** "Each state’s", "Each state’s and territory’s", "Each state’s,
+   *  territory’s and the District’s": the places among an every-place
+   *  list's rows, in their own words (rule 75). */
+  function eachWords(all) {
+    return "Each state’s" + (all.apart && all.district ? ", territory’s and the District’s"
+      : all.apart ? " and territory’s" : all.district ? " and the District’s" : "");
   }
 
   function stateOffice(ctx) {
@@ -438,27 +467,36 @@
     var all = everyState(key);
     var was = past();
     if (found.race) {
-      var codes = Object.keys(gov()).filter(function (code) { return onBallot(code, key); })
+      var codes = withDistrict(Object.keys(gov()), key).filter(function (code) { return onBallot(code, key); })
         .sort(function (a, b) { return KYC.stateName(a).localeCompare(KYC.stateName(b)); });
+      // The District among them is counted as itself, never as a state or
+      // a territory (rule 75), and the count is still every row (rule 73).
+      var others = codes.filter(function (code) { return !district()[code] || gov()[code]; }).length;
       out.push(block("offices", name + " races on the Nov 3, 2026 ballot",
         codes.map(function (code) {
           return row(link(statePage(code, "state-government"), KYC.stateName(code)) + ":",
             ballotLine(code, key, false));
-        }), { compact: true, note: esc(plural(codes.length,
-          was ? "state or territory elected" : "state or territory elects",
-          was ? "states and territories elected" : "states and territories elect") +
-          " this office on Nov 3, 2026, as each state’s own record says. Type a state with the office (") +
+        }), { compact: true, note: esc((others === codes.length
+          ? plural(codes.length,
+            was ? "state or territory elected" : "state or territory elects",
+            was ? "states and territories elected" : "states and territories elect") +
+            " this office on Nov 3, 2026, as each state’s own record says."
+          : plural(others, "state or territory", "states and territories") + " and the District of " +
+            "Columbia " + (was ? "elected" : "elect") + " this office on Nov 3, 2026, as each one’s own " +
+            "record says.") + " Type a state with the office (") +
           searchLink("Ohio " + name.toLowerCase()) + esc(") to see its candidates.") }));
       return out;
     }
     // A territory among the rows is not a state (rule 75): the Northern
     // Mariana Islands' attorney general stood under "Each state's attorney
-    // general" (the second reader of PR #234).
+    // general" (the second reader of PR #234); nor is the District a
+    // territory.
     out.push(block("offices", (key === "ag" || key === "sos"
-      ? (all.apart ? "Each state’s and territory’s " : "Each state’s ") + name.toLowerCase()
+      ? eachWords(all) + " " + name.toLowerCase()
       : name + "s"),
       all.rows, { compact: true,
-        note: esc("Each state’s and territory’s " + name.toLowerCase() + ", as its page lists them, " +
+        note: esc(eachWords({ apart: true, district: all.district }) + " " + name.toLowerCase() +
+          ", as its page lists them, " +
           "with the title it gives an acting officer. " + plural(all.up, "of these offices", "of these offices") +
           (all.up === 1 ? (was ? " was" : " is") : (was ? " were" : " are")) + " on the Nov 3, 2026 ballot. " +
           "Type a state with the office (") +

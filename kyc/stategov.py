@@ -692,6 +692,47 @@ def build(root="."):
     if unfit:
         raise StateGovError("overrides.OFFICERS_READ_BY_HAND: " + "; ".join(unfit))
     problems.extend(officers.by_hand_stale())
+    def ballot_record(code, entry):
+        """Which of these offices and seats are elected on November 3, and
+        for each office on it, who the election office lists as its
+        candidates and whether its holder is among them - or, said in
+        words, that nothing here checked. *entry*: what the rosters hold
+        for *code* (its governor and officers; nothing for the District)."""
+        nonlocal candidates_heavy
+        record = ballot2026.for_state(code)
+        for key, item in record["offices"].items():
+            if not item["up"]:
+                continue
+            holder = entry["governor"] if key == "governor" else entry.get(key) or {}
+            listed = statewide.office(lists, code, key)
+            status, problem = holder_line(code, key, holder.get("name"), holder.get("terms"),
+                                          listed, after)
+            if problem:
+                problems.append(problem)
+            if status:
+                item["holderStatus"] = status
+            # The day the term this election chooses begins, from the
+            # state's own law (kyc/terms_begin.py), and the holder who
+            # will not hold it past then: once it has begun, on the
+            # reader's day, the page says so in place of "In office
+            # since" (the January sweep, state-exec-past-inauguration).
+            term = terms_begin.for_page(code, key)
+            if term:
+                item["termBegins"] = term
+            leaving = terms_begin.outgoing(
+                key, holder, status, (exec_cache if key == "governor"
+                                      else officer_cache).get("fetched", "")[:10])
+            if leaving:
+                item["outgoing"] = leaving
+            if listed:
+                item["candidates"] = statewide.for_page(
+                    code, listed, status.get("name") if status and status["why"] == "listed"
+                    else None)
+                candidates_heavy += statewide_photos.attach(
+                    code, key, item["candidates"]["candidates"], listed, holder, status,
+                    photo_cache, guide_cache, copies_manifest)
+        return record
+
     states = {}
     for code in sorted(governors):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
@@ -709,42 +750,7 @@ def build(root="."):
         if federal_for_state(code):
             entry["federalCourts"] = federal_for_state(code)
         if code in ballot2026.STATES or code in ballot2026.TERRITORIES:
-            # Which of these offices and seats are elected on November 3, and
-            # for each office on it, who the election office lists as its
-            # candidates and whether its holder is among them - or, said in
-            # words, that nothing here checked.
-            entry["ballot2026"] = ballot2026.for_state(code)
-            for key, item in entry["ballot2026"]["offices"].items():
-                if not item["up"]:
-                    continue
-                holder = entry["governor"] if key == "governor" else entry.get(key) or {}
-                listed = statewide.office(lists, code, key)
-                status, problem = holder_line(code, key, holder.get("name"), holder.get("terms"),
-                                              listed, after)
-                if problem:
-                    problems.append(problem)
-                if status:
-                    item["holderStatus"] = status
-                # The day the term this election chooses begins, from the
-                # state's own law (kyc/terms_begin.py), and the holder who
-                # will not hold it past then: once it has begun, on the
-                # reader's day, the page says so in place of "In office
-                # since" (the January sweep, state-exec-past-inauguration).
-                term = terms_begin.for_page(code, key)
-                if term:
-                    item["termBegins"] = term
-                leaving = terms_begin.outgoing(
-                    key, holder, status, (exec_cache if key == "governor"
-                                          else officer_cache).get("fetched", "")[:10])
-                if leaving:
-                    item["outgoing"] = leaving
-                if listed:
-                    item["candidates"] = statewide.for_page(
-                        code, listed, status.get("name") if status and status["why"] == "listed"
-                        else None)
-                    candidates_heavy += statewide_photos.attach(
-                        code, key, item["candidates"]["candidates"], listed, holder, status,
-                        photo_cache, guide_cache, copies_manifest)
+            entry["ballot2026"] = ballot_record(code, entry)
         # The offices held, articles and the agreed date of birth for the
         # governor's overlay and the candidates' (rule 91, rule 69).
         attach_history(code, entry, governors[code], history_cache, photo_cache, problems,
@@ -760,6 +766,15 @@ def build(root="."):
     missing = [c for c in STATES if c not in states]
     if missing:
         problems.append(f"no governor for {', '.join(missing)}")
+    # The District of Columbia elects a mayor, not a governor, so it has no
+    # entry among the states, every one of which holds a governor (their
+    # count, their cards and overlays, and the places a page offers a
+    # governor for, emit.stategov_state_payload's `governed`); but its own
+    # law elects an office of the four, its attorney general, and the Board
+    # of Elections lists the candidates (ballot2026.DISTRICT). No roster read
+    # here names its holder, so the record holds the office and its list.
+    district = {code: {"district": True, "ballot2026": ballot_record(code, {})}
+                for code in sorted(ballot2026.DISTRICT)}
     problems.extend(unpictured(states))
     if candidates_heavy:
         # Shown all the same (rule 87; the owner's decision of 2026-10-25).
@@ -771,6 +786,7 @@ def build(root="."):
     problems.extend(stale_name_forms(states))
     payload = {
         "states": states,
+        "district": district,
         "sources": {
             "nga": [executives.SOURCE, executives.ROSTER_URL, exec_cache.get("fetched", "")[:10]],
             "openstates": [statelegs.SOURCE, "https://openstates.org/",

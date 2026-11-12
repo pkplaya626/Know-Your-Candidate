@@ -148,10 +148,13 @@ class TestTerritories(unittest.TestCase):
             self.assertFalse(ballot2026.TERRITORIES[code]["governor"][1], code)
 
     def test_a_territory_record_says_it_is_one(self):
-        record = ballot2026.for_state("GU")
+        record = ballot2026.for_state("VI")
         self.assertTrue(record["territory"])
         self.assertEqual(sorted(record["offices"]), ["governor", "lt"])
         self.assertEqual(record["chambers"], {})
+        # Guam's holds its attorney general too, elected under its own law
+        # (5 GCA s.30101).
+        self.assertEqual(sorted(ballot2026.for_state("GU")["offices"]), ["ag", "governor", "lt"])
 
     def test_a_missing_territory_fails(self):
         territories = dict(ballot2026.TERRITORIES)
@@ -159,8 +162,43 @@ class TestTerritories(unittest.TestCase):
         with self.assertRaises(ballot2026.Ballot2026Error):
             ballot2026.check(territories=territories)
 
-    def test_dc_has_no_record(self):
-        self.assertEqual(ballot2026.for_state("DC"), {})
+
+class TestTheDistrict(unittest.TestCase):
+    """The District of Columbia elects a mayor and a council, not a governor
+    and a legislature, so it had no record and every page named its
+    attorney general among the contests "which this site does not list",
+    while the Board of Elections' 2026 sample ballots printed two candidates
+    for the office (rule 19; read 2026-11-11). Its record holds that office
+    alone, and says it is the District's, never a state's or a territory's
+    (rule 75)."""
+
+    def test_its_record_is_its_attorney_general_alone(self):
+        record = ballot2026.for_state("DC")
+        self.assertTrue(record["district"])
+        self.assertNotIn("territory", record)
+        self.assertEqual(sorted(record["offices"]), ["ag"])
+        self.assertEqual(record["chambers"], {})
+        ag = record["offices"]["ag"]
+        self.assertEqual((ag["selection"], ag["up"]), ("elected", True))
+        self.assertTrue(ag["note"].startswith("4-year term;"), ag["note"])
+        self.assertTrue(ag["source"].startswith("https://www.dcboe.org/"), ag["source"])
+        self.assertNotIn("DC", ballot2026.STATES)
+        self.assertNotIn("DC", ballot2026.TERRITORIES)
+        self.assertIn("DC", ballot2026.every_jurisdiction())
+
+    def test_never_a_governor_or_a_chamber(self):
+        for extra in ({"governor": ("elected", True, "x", "https://www.dcboe.org/")},
+                      {"upper": ("Council", 13, 7, "x", "https://www.dcboe.org/")}):
+            district = {"DC": dict(ballot2026.DISTRICT["DC"], **extra)}
+            with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+                ballot2026.check(district=district)
+            self.assertIn("the District's record holds only", str(caught.exception))
+
+    def test_an_office_it_holds_is_one_it_elects(self):
+        district = {"DC": {"ag": ("appointed", False, "Appointed", "https://www.dcboe.org/")}}
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(district=district)
+        self.assertIn("DC ag", str(caught.exception))
 
 
 class TestNextElection(unittest.TestCase):

@@ -1063,10 +1063,13 @@ STATES = {
 # Mariana Islands have elected their attorney general since the 2012
 # amendment of N.M.I. Const. art. III, s.11, and its three candidates were on
 # the November 3 specimen ballots, while the page said nothing of the office
-# (rule 19; read 2026-11-11). This site reads attorneys general for the
-# fifty states only (kyc/officers.py), so its holder is not on the page; the
-# election office's list is. No other territory's attorney general or secretary of state has
-# been read here: a record without one is not a finding that it elects none.
+# (rule 19; read 2026-11-11); Guam elects its own under 5 GCA s.30101, and
+# five candidates for it were on the Guam Election Commission's sample ballot
+# (read 2026-11-11). This site reads attorneys general for the fifty states
+# only (kyc/officers.py), so neither holder is on the page; the election
+# office's list is. No other territory's attorney general or secretary of
+# state has been read here: a record without one is not a finding that it
+# elects none.
 TERRITORIES = {
     "GU": {
         "governor": ("elected", True,
@@ -1076,6 +1079,18 @@ TERRITORIES = {
         "lt": ("elected-jointly-with-governor", True,
             "Elected on one ticket with the governor (48 U.S.C. 1422)",
             "https://www.law.cornell.edu/uscode/text/48/1422"),
+        # 5 GCA s.30101 (the Compiler of Laws' Title 5, ch. 30, COL
+        # 2026-10-26, read 2026-11-11): "the Attorney General of Guam, who
+        # shall be elected by the people of Guam for a term of four (4)
+        # years"; "A candidate for the position of Attorney General of Guam
+        # shall declare no political party affiliation." The Commission's
+        # 2026 general election sample ballot prints five candidates under
+        # "Attorney General of Guam", none beside a party, the same file its
+        # governor's list is read from.
+        "ag": ("elected", True,
+            "4-year term; elected by the people of Guam, its candidates declaring no party (5 GCA "
+            "s.30101); five candidates on the Commission's 2026 general election sample ballot",
+            "https://drive.google.com/file/d/1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN/view?usp=sharing"),
     },
     "VI": {
         "governor": ("elected", True,
@@ -1127,6 +1142,35 @@ TERRITORIES = {
     },
 }
 TERRITORY_CODES = ("AS", "GU", "MP", "PR", "VI")
+
+# The District of Columbia, which elects a mayor and a council, not a
+# governor and a legislature (its page says so), and is neither a state nor
+# a territory (rule 75): only an office of the four this table follows that
+# the District's own law elects. Its attorney general has been elected since
+# 2014, and the Board of Elections' 2026 general election sample ballots
+# print two candidates for the office, while every page named it among "the
+# District's own contests ... which this site does not list" (rule 19; read
+# 2026-11-11). This site reads attorneys general for the fifty states only
+# (kyc/officers.py), so its holder is not on the page; the Board's list is.
+# The Board's ballot access page: "The Attorney General is elected to a
+# four-year term every non-presidential election year."
+DISTRICT = {
+    "DC": {
+        "ag": ("elected", True,
+            "4-year term; elected every non-presidential election year, as the Board of "
+            "Elections' ballot access page says; two candidates on the Board's 2026 general "
+            "election sample ballots",
+            "https://www.dcboe.org/candidates/candidate-ballot-access-information"),
+    },
+}
+DISTRICT_CODES = ("DC",)
+
+
+def every_jurisdiction():
+    """Every record this table holds, the states', the territories' and the
+    District's, by code: what the election offices' lists and the new terms'
+    days must cover (kyc/statewide.py, kyc/terms_begin.py)."""
+    return dict(STATES, **TERRITORIES, **DISTRICT)
 
 # When an office or chamber that is not on the 2026 ballot is next elected,
 # where the state's own record says so (audit 2026-10-17, PERSONA-19): "No
@@ -1244,13 +1288,29 @@ class Ballot2026Error(ValueError):
     pass
 
 
-def check(states=None, territories=None, next_=None, open_seats=None):
+def check(states=None, territories=None, next_=None, open_seats=None, district=None):
     """Every rule the tables must keep; raises with every breach at once."""
     states = STATES if states is None else states
     territories = TERRITORIES if territories is None else territories
+    district = DISTRICT if district is None else district
     next_ = NEXT if next_ is None else next_
     open_seats = OPEN_SEATS if open_seats is None else open_seats
     problems = []
+    if sorted(district) != sorted(DISTRICT_CODES):
+        problems.append(f"district: {', '.join(sorted(district))}, not {', '.join(DISTRICT_CODES)}")
+    for code, entry in sorted(district.items()):
+        # Never a governor, a lieutenant governor or a chamber: the District
+        # has a mayor and a council, which this table does not follow, and
+        # holds an office of the four only where its own law elects it.
+        if not entry or set(entry) - {"ag", "sos"}:
+            problems.append(f"{code}: the District's record holds only an attorney general or "
+                            f"secretary its own law elects")
+            continue
+        for office in sorted(entry):
+            if not entry[office][0].startswith("elected"):
+                problems.append(f"{code} {office}: the District's record holds an office only "
+                                f"where it is elected")
+        problems.extend(_office_problems(code, entry))
     if sorted(territories) != sorted(TERRITORY_CODES):
         problems.append(f"territories: {', '.join(sorted(territories))}, not "
                         f"{', '.join(TERRITORY_CODES)}")
@@ -1268,7 +1328,7 @@ def check(states=None, territories=None, next_=None, open_seats=None):
                 problems.append(f"{code} {office}: a territory's record holds an office beyond "
                                 f"its governor's only where it is elected")
         problems.extend(_office_problems(code, entry))
-    every = dict(states, **territories)
+    every = dict(states, **territories, **district)
     for (code, key), value in sorted(next_.items()):
         item = _item(every.get(code), key)
         year, source, *rest = value
@@ -1343,6 +1403,9 @@ def _office_problems(code, entry):
         problems.extend(_source_problems(code, office, source))
         if not note:
             problems.append(f"{code} {office}: no note")
+    if "lt" not in entry or "governor" not in entry:
+        # The District's record: no governor, so no ticket to hold together.
+        return problems
     lt_sel, lt_up = entry["lt"][:2]
     if lt_sel == "elected-jointly-with-governor" and lt_up != entry["governor"][1]:
         problems.append(f"{code}: a joint ticket, but the lieutenant governor's "
@@ -1411,14 +1474,16 @@ def _source_problems(code, field, source):
 
 
 def for_state(code):
-    """The page's record for *code*: a state's or a territory's, or ``{}``
-    for D.C. A territory's holds its governor and lieutenant governor, and
-    another office only where its own law elects it (the Northern Mariana
-    Islands' attorney general).
+    """The page's record for *code*: a state's, a territory's or the
+    District's, or ``{}`` for a code none holds. A territory's holds its
+    governor and lieutenant governor, and another office only where its own
+    law elects it (the Northern Mariana Islands' and Guam's attorneys
+    general); the District's holds its attorney general alone, marked
+    ``district``.
     An office or chamber not up carries ``next`` where NEXT gives its year.
     Open seats are not here: they depend on who holds the office, which
     ``open_seat`` checks against the rosters."""
-    entry = STATES.get(code) or TERRITORIES.get(code)
+    entry = STATES.get(code) or TERRITORIES.get(code) or DISTRICT.get(code)
     if not entry:
         return {}
     out = {"offices": {}, "chambers": {}}
@@ -1443,6 +1508,8 @@ def for_state(code):
             target["next"] = {"year": year, "source": source, **({"month": month[0]} if month else {})}
     if code in TERRITORIES:
         out["territory"] = True
+    if code in DISTRICT:
+        out["district"] = True
     return out
 
 
