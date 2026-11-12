@@ -37,7 +37,10 @@ null: the state's own links stay beside it.
 - a qualifier that is a claim of its own is said in a quote it stands on
   (``SAID``): a runoff's early voting that may begin before its first date
   ("as soon as possible, but no later than"), an application taken in
-  person alone ("over the counter");
+  person alone ("over the counter"); and a line that says ballots
+  "postmarked by" one day count if they arrive by another links a quote
+  that says "postmarked" (``arrive_sources``), on the general election's
+  line as on a runoff's;
 - a December date the results reader also holds (``overrides.GENERAL_RUNOFFS``,
   ``OPEN_PRIMARY_SEATS``) must be the same date here (rule 53).
 
@@ -297,6 +300,22 @@ RUNOFF_SHORT_DEFAULT = ("Runoff, if needed", "Runoff date")
 # else, as that runoff's own words are conditional (Georgia's). Neither says
 # which race went to one, or who is in it (rule 91).
 RUNOFF_SET = frozenset({"MP"})
+# What a runoff's own dates are for, where "a runoff" and "Runoff" would say
+# what it is not: {code: (in their sentences, at the start of their strip
+# labels)}. Louisiana's December 12 is a general election for any U.S.
+# House seat the November 3 open primary did not decide, never a runoff, as
+# its line says (RUNOFF_WORDS); Arkansas's and Mississippi's December 1 are
+# no runoff for Congress, and a strip cell that said only "Runoff early
+# voting" there would read as one, as a bare "Runoff, if needed" did (PR
+# #102 review). Their sentences follow the runoff's own line, which says what
+# it decides; a strip cell stands alone. None names which race went to one,
+# or who is in it (rule 91).
+RUNOFF_OWN = {
+    "AR": ("a runoff", "Local runoff"),
+    "LA": ("a U.S. House general election", "House general"),
+    "MS": ("a runoff", "Judicial, school board runoff"),
+}
+RUNOFF_OWN_DEFAULT = ("a runoff", "Runoff")
 
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # A time of day as the record gives it; anything longer ("7:00 pm (postmark);
@@ -631,6 +650,36 @@ class _Links:
         return out
 
 
+def _says_postmarked(source):
+    return bool(RULE_WORDS["postmarked"].search(source.get("quote") or ""))
+
+
+def arrive_sources(links, deadline):
+    """The links of a line that says ballots "postmarked by" one day count if
+    they arrive by another (``deadline`` is ``mail.returnDeadline`` or
+    ``runoff.mail.returnDeadline``). The line shows two things, the arrival
+    day and the word, and each keeps its source (rule 84): the arrival day's
+    own source where its quote says "postmarked"; else one of its sources on
+    a page that says it under any of the deadline's fields; else the sources
+    that say the word, followed by the arrival day's own. The first version
+    linked only the page saying the word, so a shown day lost its source (the
+    CNMI's December 4, which the law counts and the calendar names; the
+    second reader of PR #238)."""
+    day_field = f"{deadline}.receivedBy"
+    rest = (f"{deadline}.date", f"{deadline}.rule")
+    own = links.of(day_field, want=_says_postmarked)
+    if own:
+        return own
+    saying = {s["url"] for field in (day_field,) + rest
+              for s in _sources(links.record, field) if _says_postmarked(s)}
+    page = links.of(day_field, want=lambda s: s["url"] in saying)
+    if page:
+        return page
+    word = links.of(*rest, want=_says_postmarked)
+    day = links.of(day_field)
+    return word + [i for i in day if i not in word]
+
+
 def lines(code, record, place):
     """The page's lines for one record: ``(lines, register, links)``.
 
@@ -777,7 +826,13 @@ def lines(code, record, place):
                         "p": f"The last day for mail ballots postmarked by {_long(returned)} to "
                              f"arrive",
                         "s": "Mailed ballots arrive by",
-                        "src": links.of("mail.returnDeadline.receivedBy")})
+                        # Its words say "postmarked", so it links a quote that
+                        # does (rule 84), as the runoff's arrive line does:
+                        # Illinois's, Mississippi's, Nevada's and Virginia's
+                        # receipt-day quotes give the day and never the word,
+                        # and from the day after the election the postmark line
+                        # that linked one is gone (the reader of PR #237).
+                        "src": arrive_sources(links, "mail.returnDeadline")})
     elif get(record, "mail.returnDeadline.rule") == "received" and (returned or received):
         due = returned or received
         line = {"k": "return", "d": due,
@@ -812,10 +867,14 @@ def runoff_lines(code, record, links):
     election's are said: each kept after Election Day ("keep") until its day
     has passed, on the reader's calendar, so they go with the runoff but for a
     ballot still arriving after it (rule 84). "For the runoff" where the
-    office has set one (``RUNOFF_SET``), else "for a runoff, if one is held";
-    never which race went to one or who is in it (rule 91)."""
+    office has set one (``RUNOFF_SET``), else "for a runoff, if one is held"
+    (Louisiana's December 12 is "a U.S. House general election", and a strip
+    label names whose runoff it is where "Runoff" would read as one for
+    Congress: ``RUNOFF_OWN``); never which race went to one or who is in it
+    (rule 91)."""
     held = code in RUNOFF_SET
-    of = "for the runoff" if held else "for a runoff, if one is held"
+    what, name = RUNOFF_OWN.get(code, RUNOFF_OWN_DEFAULT)
+    of = "for the runoff" if held else f"for {what}, if one is held"
     # Inside a sentence the condition is set off on both sides.
     of_mid = of if held else of + ","
     needed = "" if held else ", if needed"
@@ -827,7 +886,7 @@ def runoff_lines(code, record, links):
                     "t": f"In-person early voting {of}" + (
                         f"; it begins as soon as possible, and no later than {_long(start)}"
                         if sooner else ""),
-                    "s": "Runoff early voting" + needed,
+                    "s": f"{name} early voting" + needed,
                     "src": links.of("runoff.earlyVoting.start", "runoff.earlyVoting.end")})
     request = _shown(record, "runoff.mail.requestDeadline.date")
     if request:
@@ -840,8 +899,8 @@ def runoff_lines(code, record, links):
                           else "Last day to apply for a mail ballot ") + of +
                          (" (the application must arrive by then)"
                           if received and not in_person else ""),
-                    "s": ("Runoff absentee application, in person" if in_person
-                          else "Runoff mail ballot application due") + needed,
+                    "s": name + (" absentee application, in person" if in_person
+                                 else " mail ballot application due") + needed,
                     "src": links.of("runoff.mail.requestDeadline.date")})
     returned = _shown(record, "runoff.mail.returnDeadline.date")
     received = _shown(record, "runoff.mail.returnDeadline.receivedBy")
@@ -849,7 +908,7 @@ def runoff_lines(code, record, links):
     if rule == "postmarked" and returned:
         out.append({"k": "runoff-postmark", "d": returned, "keep": True,
                     "t": f"Mail ballots {of_mid} must be postmarked by this day",
-                    "s": "Runoff postmark deadline" + needed,
+                    "s": f"{name} postmark deadline" + needed,
                     "src": links.of("runoff.mail.returnDeadline.date",
                                     "runoff.mail.returnDeadline.rule")})
         if received:
@@ -858,25 +917,20 @@ def runoff_lines(code, record, links):
                              f"they arrive by this day",
                         "p": f"The last day for mail ballots {of_mid} postmarked by "
                              f"{_long(returned)} to arrive",
-                        "s": "Runoff mailed ballots arrive by",
+                        "s": f"{name} mailed ballots arrive by",
                         # The line says "postmarked", so it links a quote that
                         # does (rule 84): the CNMI's calendar gives the day and
                         # never the word, the law (1 CMC 6213(a)) both, and the
                         # postmark line that linked the law is gone after the
                         # runoff (the second reader of PR #237).
-                        "src": links.of("runoff.mail.returnDeadline.receivedBy",
-                                        "runoff.mail.returnDeadline.date",
-                                        "runoff.mail.returnDeadline.rule",
-                                        want=lambda s: bool(RULE_WORDS["postmarked"].search(
-                                            s.get("quote") or "")))
-                        or links.of("runoff.mail.returnDeadline.receivedBy")})
+                        "src": arrive_sources(links, "runoff.mail.returnDeadline")})
     elif rule == "received" and (returned or received):
         due = returned or received
         time = _time(get(record, "runoff.mail.returnDeadline.time"))
         out.append({"k": "runoff-return", "d": due, "keep": True,
                     "t": f"Mail ballots {of_mid} must arrive at the election office by " +
                          (time + " on " if time else "") + "this day",
-                    "s": "Runoff mail ballots due" + needed,
+                    "s": f"{name} mail ballots due" + needed,
                     "src": links.of("runoff.mail.returnDeadline.date" if returned
                                     else "runoff.mail.returnDeadline.receivedBy",
                                     "runoff.mail.returnDeadline.receivedBy")})

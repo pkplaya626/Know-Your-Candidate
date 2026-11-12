@@ -9,6 +9,7 @@ own page; a compiled table is a lead, never a source (rule 50).
 
 import copy
 import os
+import re
 import sys
 import unittest
 
@@ -661,6 +662,241 @@ class TestARunoffsOwnDates(unittest.TestCase):
         self.assertEqual(by["runoff-return"]["t"], "Mail ballots for a runoff, if one is held, must "
                                                    "arrive at the election office by 7:00 pm on this day")
         self.assertEqual(by["runoff-return"]["s"], "Runoff mail ballots due, if needed")
+
+
+class TestMoreRunoffsOwnDates(unittest.TestCase):
+    """The other runoffs' own dates, each the office's own words for that
+    runoff, read 2026-11-12 (rule 84): the Virgin Islands' November 17
+    runoff (the Elections System's 2026 calendar), Louisiana's December 12
+    general election for U.S. House seats (the Secretary of State's
+    election-dates page), Arkansas's and Mississippi's December 1 runoffs
+    (each Secretary of State's 2026 calendar). Guam's Election Commission
+    publishes none: null, a gap, and nothing on the page. The words never
+    name which race went to one, or who is in it (rule 91)."""
+
+    VI_CAL = "https://vivote.gov/wp-content/uploads/2026/07/2026-Elections-Calendar-Amended-06.10.2026.pdf"
+    LA_DATES = "https://www.sos.la.gov/elections-voting/election-dates"
+    AR_CAL = "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf"
+    MS_CAL = "https://www.sos.ms.gov/content/documents/elections/2026%20Elections%20Calendar.pdf"
+    page = voting_dates.for_page(DATA)
+
+    def own(self, code):
+        """The runoff's own lines (not the runoff's), by kind."""
+        return {l["k"]: l for l in self.page["states"][code]["lines"] if l["k"].startswith("runoff-")}
+
+    def linked(self, code, line):
+        entry = self.page["states"][code]
+        return [entry["urls"][i] for i in line["src"]]
+
+    def first(self, code, field):
+        return next(s for s in DATA["states"][code]["sources"] if s["field"] == field)
+
+    def test_the_virgin_islands_dates_are_the_elections_systems_calendar(self):
+        rec = DATA["states"]["VI"]["runoff"]
+        self.assertEqual((rec["earlyVoting"]["start"], rec["earlyVoting"]["end"]),
+                         ("2026-11-14", "2026-11-15"))
+        self.assertEqual(rec["mail"]["requestDeadline"],
+                         {"date": "2026-11-10", "rule": "received", "how": None})
+        # No page gives the day a runoff's mailed ballot must arrive: null.
+        self.assertTrue(all(v is None for v in rec["mail"]["returnDeadline"].values()))
+        start = self.first("VI", "runoff.earlyVoting.start")
+        self.assertEqual(start["url"], self.VI_CAL)
+        # Between the general election's certification and the runoff: the
+        # runoff's early voting, in the calendar's own words.
+        for words in ("13-November (Friday) CERTIFICATION OF THE GENERAL ELECTION RESULTS",
+                      "14-November (Saturday) FIRST DAY OF EARLY VOTING", "RUN-OFF ELECTION DAY"):
+            self.assertIn(words, start["quote"])
+        self.assertIn("15-November (Sunday) LAST DAY OF EARLY VOTING",
+                      self.first("VI", "runoff.earlyVoting.end")["quote"])
+        self.assertIn("DEADLINE for receipt by the Supervisor of Elections of applications for "
+                      "Mail Out ABSENTEE BALLOTS for the RUN OFF ELECTION",
+                      self.first("VI", "runoff.mail.requestDeadline.date")["quote"])
+        for source in DATA["states"]["VI"]["sources"]:
+            if source["field"].startswith(("runoff.earlyVoting", "runoff.mail")):
+                self.assertEqual(source["read"], "2026-11-12", source["field"])
+                self.assertEqual(voting_dates.official_source(source["url"], "VI"),
+                                 (True, "vivote.gov"), source["url"])
+        own = self.own("VI")
+        self.assertEqual(sorted(own), ["runoff-early", "runoff-request"])
+        self.assertEqual(own["runoff-early"]["t"], "In-person early voting for a runoff, if one is held")
+        self.assertEqual(own["runoff-early"]["s"], "Runoff early voting, if needed")
+        self.assertEqual(own["runoff-request"]["t"], "Last day to apply for a mail ballot for a runoff, "
+                                                     "if one is held (the application must arrive by then)")
+        self.assertEqual(self.linked("VI", own["runoff-early"]), [self.VI_CAL])
+
+    def test_louisianas_december_12_is_a_general_election_not_a_runoff(self):
+        rec = DATA["states"]["LA"]["runoff"]
+        self.assertEqual((rec["earlyVoting"]["start"], rec["earlyVoting"]["end"]),
+                         ("2026-11-28", "2026-12-05"))
+        self.assertEqual(rec["mail"]["requestDeadline"]["date"], "2026-12-08")
+        # No quoted word says the request must arrive by then, as November 3's.
+        self.assertIsNone(rec["mail"]["requestDeadline"]["rule"])
+        self.assertEqual(rec["mail"]["returnDeadline"], {"date": "2026-12-11", "time": "4:30 pm",
+                                                         "rule": "received", "receivedBy": "2026-12-11"})
+        for field, words in (("runoff.earlyVoting.start", "Early voting is November 28-December 5 "
+                                                          "(excluding Sunday, November 29)"),
+                             ("runoff.mail.requestDeadline.date", "The deadline to request an "
+                                                                  "absentee ballot is December 8"),
+                             ("runoff.mail.returnDeadline.receivedBy", "to receive a voted absentee "
+                                                                       "ballot is December 11 by 4:30")):
+            source = self.first("LA", field)
+            self.assertEqual(source["url"], self.LA_DATES)
+            self.assertIn("important information for the Saturday, December 12, 2026 Election",
+                          source["quote"])
+            self.assertIn(words, source["quote"])
+        own = self.own("LA")
+        self.assertEqual([(k, own[k]["d"]) for k in ("runoff-early", "runoff-request", "runoff-return")],
+                         [("runoff-early", "2026-11-28"), ("runoff-request", "2026-12-08"),
+                          ("runoff-return", "2026-12-11")])
+        self.assertEqual(own["runoff-early"]["t"],
+                         "In-person early voting for a U.S. House general election, if one is held")
+        self.assertEqual(own["runoff-return"]["t"],
+                         "Mail ballots for a U.S. House general election, if one is held, must arrive "
+                         "at the election office by 4:30 pm on this day")
+        for line in own.values():
+            # Its own words call it a general election, never a runoff.
+            self.assertNotRegex(line["t"] + " " + line["s"], r"(?i)runoff")
+            self.assertTrue(line["s"].startswith("House general "), line["s"])
+            self.assertEqual(self.linked("LA", line), [self.LA_DATES])
+
+    def test_arkansas_and_mississippi_dates_say_whose_runoff_on_the_strip(self):
+        ar = DATA["states"]["AR"]["runoff"]
+        self.assertEqual((ar["earlyVoting"]["start"], ar["earlyVoting"]["end"]),
+                         ("2026-11-24", "2026-11-30"))
+        self.assertEqual(ar["mail"]["returnDeadline"], {"date": "2026-12-01", "time": "7:30 pm",
+                                                        "rule": "received", "receivedBy": "2026-12-01"})
+        # The calendar puts in-person applications under November 27 and calls
+        # them due "the day before the election": the days disagree, so null.
+        self.assertIsNone(ar["mail"]["requestDeadline"]["date"])
+        self.assertIn("Early voting for the general runoff election shall be available",
+                      self.first("AR", "runoff.earlyVoting.start")["quote"])
+        self.assertIn("“instant runoff” ballots", self.first("AR", "runoff.mail.returnDeadline.date")["quote"])
+        ms = DATA["states"]["MS"]["runoff"]
+        # Mississippi has no early voting; its runoff none either.
+        self.assertIsNone(ms["earlyVoting"]["start"])
+        self.assertEqual(ms["mail"]["returnDeadline"], {"date": "2026-12-01", "time": None,
+                                                        "rule": "postmarked", "receivedBy": "2026-12-08"})
+        self.assertIn("8th Absentee Ballots Returned by Mail Receipt Deadline for the General Election "
+                      "Runoff", self.first("MS", "runoff.mail.returnDeadline.receivedBy")["quote"])
+        self.assertEqual(sorted(self.own("AR")), ["runoff-early", "runoff-return"])
+        self.assertEqual(sorted(self.own("MS")), ["runoff-arrive", "runoff-postmark"])
+        self.assertEqual(self.own("MS")["runoff-arrive"]["t"],
+                         "Mail ballots for a runoff, if one is held, postmarked by December 1 are counted "
+                         "if they arrive by this day")
+        # Neither is a runoff for Congress, so no strip cell says a bare
+        # "Runoff" (PR #102 review): each names whose runoff it is, as the
+        # runoff's own cell does.
+        for code, name in (("AR", "Local runoff "), ("MS", "Judicial, school board runoff ")):
+            for line in self.own(code).values():
+                self.assertTrue(line["s"].startswith(name), line["s"])
+                self.assertTrue(line["keep"])
+        self.assertEqual(self.linked("AR", self.own("AR")["runoff-early"]), [self.AR_CAL])
+
+    def test_guams_commission_publishes_none_so_nothing_is_shown(self):
+        rec = DATA["states"]["GU"]["runoff"]
+        self.assertTrue(all(v is None for v in rec["earlyVoting"].values()))
+        self.assertTrue(all(v is None for part in rec["mail"].values() for v in part.values()))
+        self.assertIn("No Guam Election Commission page read on 2026-11-12", rec["note"])
+        self.assertEqual(self.own("GU"), {})
+        self.assertEqual([l["k"] for l in self.page["states"]["GU"]["lines"] if l["k"].startswith("runoff")],
+                         ["runoff"])
+
+    def test_every_strip_label_names_the_runoff_as_the_record_does(self):
+        for code, entry in self.page["states"].items():
+            what, name = voting_dates.RUNOFF_OWN.get(code, voting_dates.RUNOFF_OWN_DEFAULT)
+            held = code in voting_dates.RUNOFF_SET
+            for line in self.own(code).values():
+                self.assertTrue(line["s"].startswith(name + " "), (code, line["s"]))
+                if not held:
+                    self.assertIn(f"for {what}, if one is held", line["t"], code)
+
+    def test_the_words_name_no_race_and_nobody(self):
+        from kyc import statewide
+        cache = statewide.load(ROOT)
+        for code in ("VI", "LA", "AR", "MS", "GA", "MP"):
+            names = [p["name"] for key in ("governor", "lt", "ag", "sos")
+                     for p in (statewide.office(cache, code, key) or {}).get("candidates") or []]
+            for line in self.own(code).values():
+                words = " ".join((line["t"], line["s"], line.get("p", "")))
+                self.assertNotRegex(words, r"(?i)\b(?:District|Delegate|Senate|Governor)\b", code)
+                for name in names:
+                    surname = name.split(",")[0].split()[-1].strip().lower()
+                    self.assertNotRegex(words.lower(), rf"\b{re.escape(surname)}\b", (code, name))
+
+
+class TestArriveLinesSayPostmarked(unittest.TestCase):
+    """A line that says ballots "postmarked by" one day count if they arrive
+    by another links a quote that says "postmarked" (rule 84), on the general
+    election's line as on a runoff's. The general election's line linked the
+    arrival day's source alone, and in Illinois, Mississippi, Nevada and
+    Virginia that quote gives the day and never the word (the reader of PR
+    #237); from the day after the election the postmark line that linked one
+    is gone."""
+
+    page = voting_dates.for_page(DATA)
+    PARTS = {"arrive": "mail.returnDeadline", "runoff-arrive": "runoff.mail.returnDeadline",
+             "postmark": "mail.returnDeadline", "runoff-postmark": "runoff.mail.returnDeadline"}
+
+    def test_every_arrive_line_links_the_word_and_its_day_in_every_jurisdiction(self):
+        # A postmark or arrive line shows a word ("postmarked") and a day:
+        # among its links is a page whose quote says the word, and, for an
+        # arrive line, a page that gives the arrival day (rule 84; the second
+        # reader of PR #238 - the first version could link the word's page
+        # alone and leave the day without its source).
+        seen = set()
+        for code, entry in self.page["states"].items():
+            sources = DATA["states"][code]["sources"]
+            for line in entry["lines"]:
+                part = self.PARTS.get(line["k"])
+                if not part:
+                    continue
+                seen.add((code, line["k"]))
+                fields = (f"{part}.receivedBy", f"{part}.date", f"{part}.rule")
+                self.assertTrue(line["src"], (code, line["k"]))
+                linked = [entry["urls"][i] for i in line["src"]]
+                quotes = [s["quote"] for s in sources if s["url"] in linked and s["field"] in fields]
+                self.assertTrue(any(voting_dates.RULE_WORDS["postmarked"].search(q) for q in quotes),
+                                (code, line["k"], linked, quotes))
+                if line["k"].endswith("arrive"):
+                    days = {s["url"] for s in sources if s["field"] == f"{part}.receivedBy"}
+                    self.assertTrue(days & set(linked), (code, line["k"], linked, days))
+        # Every postmarked state's and runoff's arrive line was asked.
+        self.assertTrue({("IL", "arrive"), ("MS", "arrive"), ("NV", "arrive"), ("VA", "arrive"),
+                         ("MP", "runoff-arrive"), ("MS", "runoff-arrive")} <= seen, seen)
+
+    def test_an_arrive_line_links_the_word_and_the_day(self):
+        # Made, not the day's data: the arrival day's source on one page says
+        # only the day, the postmark day's on another says the word.
+        rec = record("IL")
+        rec["sources"] = [s for s in rec["sources"] if not s["field"].startswith("mail.returnDeadline")]
+        rec["sources"] += [
+            {"field": "mail.returnDeadline.date", "url": "https://www.elections.il.gov/postmark",
+             "quote": "Ballots must be postmarked on or before November 3."},
+            {"field": "mail.returnDeadline.receivedBy", "url": "https://www.elections.il.gov/arrive",
+             "quote": "They must arrive by November 17 to be counted."}]
+        data = with_state("IL", rec)
+        self.assertEqual(voting_dates.problems(data), [])
+        entry = voting_dates.for_page(data)["states"]["IL"]
+        arrive = next(l for l in entry["lines"] if l["k"] == "arrive")
+        # Both things the line shows keep their source: the word's page first,
+        # then the page that gives the arrival day (rule 84; the second reader
+        # of PR #238 - the first version linked the word's page alone).
+        self.assertEqual([entry["urls"][i] for i in arrive["src"]],
+                         ["https://www.elections.il.gov/postmark", "https://www.elections.il.gov/arrive"])
+        # Where the arrival day's own quote says it, that one is linked first.
+        rec["sources"][-1]["quote"] = "Ballots postmarked by November 3 must arrive by November 17."
+        entry = voting_dates.for_page(with_state("IL", rec))["states"]["IL"]
+        arrive = next(l for l in entry["lines"] if l["k"] == "arrive")
+        self.assertEqual([entry["urls"][i] for i in arrive["src"]], ["https://www.elections.il.gov/arrive"])
+
+    def test_mississippis_line_links_the_calendar_that_says_both(self):
+        # Its absentee page's receipt quote gives November 10 and never the
+        # word; the calendar's gives the day and "postmarked on or before
+        # Election Day".
+        entry = self.page["states"]["MS"]
+        arrive = next(l for l in entry["lines"] if l["k"] == "arrive")
+        self.assertEqual([entry["urls"][i] for i in arrive["src"]],
+                         ["https://www.sos.ms.gov/content/documents/elections/2026%20Elections%20Calendar.pdf"])
 
 
 class TestVoteGov(unittest.TestCase):
