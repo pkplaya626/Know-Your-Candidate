@@ -220,7 +220,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3152 tests, no dependencies
+python -m unittest discover tests             # 3153 tests, no dependencies
 npm install && npm test                       # 4691 real-DOM checks (needs jsdom)
 ```
 
@@ -526,11 +526,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     crat". And a gap in type set tight is measured from the letters around
     it, not from a fixed fifth of an em (`pdfread.tracking`: the median
     adjustment of an array that tightens its letters evenly, in type of
-    three points or more; `closes` for the space after a run): Guam's 2026
-    sample ballot pulls the letters of "TOUGHEST AG ON CRIME" 33 to 59
-    thousandths of an em together and opens ON from CRIME by 183, and the
-    reader of PR #236 read "ONCRIME" (its quote was corrected by hand). No
-    space the fixed fifth found is lost.
+    three points or more; the same tightening for the gap after a run, an
+    overlap measured as before): Guam's 2026 sample ballot pulls the
+    letters of "TOUGHEST AG ON CRIME" 33 to 59 thousandths of an em
+    together and opens ON from CRIME by 183, and the reader of PR #236 read
+    "ONCRIME" (its quote was corrected by hand). No space the fixed fifth
+    found is lost.
 
 25. **Report look-alike people; never merge them.** Alaska's Senate race holds
     both Dan Sullivan and a different Daniel J Sullivan.

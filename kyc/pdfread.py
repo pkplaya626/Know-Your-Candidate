@@ -631,16 +631,6 @@ def tj_text(pieces, font=None, tight=0.0):
     return text
 
 
-def closes(tight, char_spacing, size):
-    """How much a run closes the space after it, in thousandths of an em: its
-    array's *tight* (``tracking``), less what its character spacing (``Tc``)
-    opens between the same letters - New York's 2026 political calendar
-    sets runs with Tc 0.123 and every number about +120, which together
-    leave its letters as the font sets them."""
-    opens = char_spacing * 1000 / abs(float(size)) if size else 0.0
-    return max(0.0, tight - max(opens, 0.0))
-
-
 def read_page(doc, page, depth=0):
     """``{"text": [(x, y, text, size)], "images": [{"ref", "info", "box"}]}``:
     every piece of text the page shows, at the point its text matrix puts it
@@ -743,7 +733,7 @@ def _run(doc, data, resources, ctm, out, depth):
                 tx = font.advance(pieces, float(size), char_spacing, word_spacing, scale) \
                     if font else None
                 out["ends"].append(None if tx is None else round(at[0] * tx + at[4], 1))
-                out["tight"].append(closes(tight, char_spacing, size))
+                out["tight"].append(tight)
         elif op == "Do" and args:
             target_ref = xobjects.get(str(args[0]))
             target = doc.resolve(target_ref)
@@ -774,13 +764,16 @@ def page_text(read):
     "Registered Demo" and "crat" as two runs, and joined with a space the
     cached words misquoted the page (the review of PR #138; rule 57's
     "Keou gh"). Where a font gives no widths, runs are words. A run set in
-    tight type closes the space after it as it closes its letters
-    (``closes``), so a gap after it is a space from a fifth less that
-    tightening: Guam's 2026 sample ballot sets "4. TAITAGUE," with its
-    letters +55 apart and starts "Joaquin" 2.0 points after it, at 11
-    points, and a fifth (2.2) read "TAITAGUE,Joaquin". An overlap is
-    measured as before: a word set in two runs may overlap by its own
-    tightening."""
+    tight type closes the space after it as it closes its letters (its
+    ``tracking``, kept in ``tight``), so a gap after it is a space from a
+    fifth less that tightening: Guam's 2026 sample ballot sets "4.
+    TAITAGUE," with its letters +55 apart and starts "Joaquin" 2.0 points
+    after it, at 11 points, and a fifth (2.2) read "TAITAGUE,Joaquin". An
+    overlap is measured as before, to a fifth: a word set in two runs may
+    overlap by its own tightening. New York's 2026 political calendar sets
+    "filing sh" and "all" as two runs, its numbers +120, and "all" starts
+    1.2 points - that tightening, at 10 points - before "sh" ends; the
+    overlap rule alone keeps "shall" whole."""
     ends = read.get("ends") or []
     tights = read.get("tight") or []
     lines = {}

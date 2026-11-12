@@ -374,8 +374,14 @@ GU_BALLOT = os.path.join(os.path.dirname(__file__), "fixtures", "pdf_gu_sample_b
 def one_page(body, size=10, matrix="1 0 0 1 50 700"):
     """A page showing *body* (a TJ array's inside) in a font of 500-unit
     letters, at *size* through *matrix*."""
+    return page_of(f"BT /F1 {size} Tf {matrix} Tm [{body}] TJ ET")
+
+
+def page_of(content):
+    """A page whose content stream is *content*, its font /F1 of 500-unit
+    letters, read by ``pdfread.read_page``."""
     widths = " ".join(["500"] * 95)
-    stream = f"BT /F1 {size} Tf {matrix} Tm [{body}] TJ ET".encode()
+    stream = content.encode()
     objects = {
         1: b"<< /Type /Pages /Kids [2 0 R] /Count 1 >>",
         2: b"<< /Type /Page /Parent 1 0 R /MediaBox [0 0 504 720] /Contents 3 0 R "
@@ -396,7 +402,7 @@ def one_page(body, size=10, matrix="1 0 0 1 50 700"):
 class TestTightType(unittest.TestCase):
     """A gap in a TJ array is a space where it opens more than a fifth of an
     em wider than the array's own letters (``pdfread.tracking``), and a run
-    set that tight closes the space after it too (``pdfread.closes``)."""
+    set that tight closes the space after it too (``page_text``)."""
 
     # Guam's sample ballot, "(Incumbent) TOUGHEST AG ON CRIME": its numbers.
     MOYLAN = [38.511, 38.039, 54.272, 41.901, 43.365, 36.784, 54.272, 43.365, 43.365, 48.955,
@@ -550,16 +556,34 @@ class TestTightType(unittest.TestCase):
         read = {"text": [(513.6, 217, "for filing sh", 10.0), (637.5, 217, "all", 10.0)],
                 "ends": [638.7, 646.9], "tight": [100.0, 0.0]}
         self.assertEqual(pdfread.page_text(read), "for filing shall")
-        # A run whose character spacing opens its letters as far as its
-        # numbers close them is not tight (New York's Tc 0.123, numbers
-        # about +120), and a tightening by Tc alone is not counted.
-        self.assertEqual(pdfread.closes(100.0, 0.123, 1), 0.0)
-        self.assertEqual(pdfread.closes(55.467, 0.0, 11.002), 55.467)
-        self.assertEqual(pdfread.closes(0.0, -0.5, 11), 0.0)
-        self.assertEqual(pdfread.closes(55.467, -0.5, 11), 55.467)
         # A read with no tightness recorded is read as before.
         self.assertEqual(pdfread.page_text({"text": read["text"], "ends": read["ends"]}),
                          "for filing shall")
+
+    def test_character_spacing_leaves_a_tight_run_tight(self):
+        # New York's 2026 calendar's way: type of one unit drawn at 10 points,
+        # Tc 0.123 and every number +120. The run's tightness is its array's
+        # (+120, taken as a tenth of an em), whatever Tc opens; "all" starting
+        # 1.2 points before "filing sh" ends is the overlap rule's, and joins
+        # ("shall" reads whole), while "shall" starting 1.5 points after
+        # "papers" ends is past a fifth (2.0) less that tightening (1.0).
+        def tracked(letters):
+            return " 120 ".join(f"({letter})" for letter in letters)
+        read = page_of(
+            "BT /F1 1 Tf 0.123 Tc "
+            f"10 0 0 10 50 700 Tm [{tracked('filing sh')}] TJ "
+            "10 0 0 10 95.3 700 Tm [(all)] TJ "
+            f"10 0 0 10 50 680 Tm [{tracked('papers')}] TJ "
+            "10 0 0 10 82.9 680 Tm [(shall)] TJ ET")
+        self.assertEqual([size for *_rest, size in read["text"]], [10.0] * 4)
+        # 9 letters of 0.5 plus 0.123 less 8 numbers of 0.12, ten times: 46.47.
+        self.assertEqual(read["ends"][0], 96.5)
+        self.assertEqual(read["ends"][2], 81.4)
+        self.assertEqual(read["tight"], [100.0, 0.0, 100.0, 0.0])
+        self.assertEqual(pdfread.page_text(read), "filing shall\npapers shall")
+        # Read against a fifth of the type, as before, the gap is no space.
+        self.assertEqual(pdfread.page_text(dict(read, tight=[0.0] * 4)),
+                         "filing shall\npapersshall")
 
 
 class Root(unittest.TestCase):
