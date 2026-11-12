@@ -657,13 +657,27 @@ def _says_postmarked(source):
 def arrive_sources(links, deadline):
     """The links of a line that says ballots "postmarked by" one day count if
     they arrive by another (``deadline`` is ``mail.returnDeadline`` or
-    ``runoff.mail.returnDeadline``): a source of the arrival day, the
-    postmark day or the rule whose own quote says "postmarked", the arrival
-    day's first, else the arrival day's own. ``check`` holds every record
-    whose rule is "postmarked" to such a quote (``RULES``), so the fallback
-    is never reached by a record the page is sent."""
-    fields = (f"{deadline}.receivedBy", f"{deadline}.date", f"{deadline}.rule")
-    return links.of(*fields, want=_says_postmarked) or links.of(f"{deadline}.receivedBy")
+    ``runoff.mail.returnDeadline``). The line shows two things, the arrival
+    day and the word, and each keeps its source (rule 84): the arrival day's
+    own source where its quote says "postmarked"; else one of its sources on
+    a page that says it under any of the deadline's fields; else the sources
+    that say the word, followed by the arrival day's own. The first version
+    linked only the page saying the word, so a shown day lost its source (the
+    CNMI's December 4, which the law counts and the calendar names; the
+    second reader of PR #238)."""
+    day_field = f"{deadline}.receivedBy"
+    rest = (f"{deadline}.date", f"{deadline}.rule")
+    own = links.of(day_field, want=_says_postmarked)
+    if own:
+        return own
+    saying = {s["url"] for field in (day_field,) + rest
+              for s in _sources(links.record, field) if _says_postmarked(s)}
+    page = links.of(day_field, want=lambda s: s["url"] in saying)
+    if page:
+        return page
+    word = links.of(*rest, want=_says_postmarked)
+    day = links.of(day_field)
+    return word + [i for i in day if i not in word]
 
 
 def lines(code, record, place):

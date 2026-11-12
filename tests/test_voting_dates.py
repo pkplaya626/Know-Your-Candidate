@@ -837,7 +837,12 @@ class TestArriveLinesSayPostmarked(unittest.TestCase):
     PARTS = {"arrive": "mail.returnDeadline", "runoff-arrive": "runoff.mail.returnDeadline",
              "postmark": "mail.returnDeadline", "runoff-postmark": "runoff.mail.returnDeadline"}
 
-    def test_every_arrive_lines_linked_quote_says_postmarked_in_every_jurisdiction(self):
+    def test_every_arrive_line_links_the_word_and_its_day_in_every_jurisdiction(self):
+        # A postmark or arrive line shows a word ("postmarked") and a day:
+        # among its links is a page whose quote says the word, and, for an
+        # arrive line, a page that gives the arrival day (rule 84; the second
+        # reader of PR #238 - the first version could link the word's page
+        # alone and leave the day without its source).
         seen = set()
         for code, entry in self.page["states"].items():
             sources = DATA["states"][code]["sources"]
@@ -848,16 +853,18 @@ class TestArriveLinesSayPostmarked(unittest.TestCase):
                 seen.add((code, line["k"]))
                 fields = (f"{part}.receivedBy", f"{part}.date", f"{part}.rule")
                 self.assertTrue(line["src"], (code, line["k"]))
-                for i in line["src"]:
-                    url = entry["urls"][i]
-                    quotes = [s["quote"] for s in sources if s["url"] == url and s["field"] in fields]
-                    self.assertTrue(any(voting_dates.RULE_WORDS["postmarked"].search(q) for q in quotes),
-                                    (code, line["k"], url, quotes))
+                linked = [entry["urls"][i] for i in line["src"]]
+                quotes = [s["quote"] for s in sources if s["url"] in linked and s["field"] in fields]
+                self.assertTrue(any(voting_dates.RULE_WORDS["postmarked"].search(q) for q in quotes),
+                                (code, line["k"], linked, quotes))
+                if line["k"].endswith("arrive"):
+                    days = {s["url"] for s in sources if s["field"] == f"{part}.receivedBy"}
+                    self.assertTrue(days & set(linked), (code, line["k"], linked, days))
         # Every postmarked state's and runoff's arrive line was asked.
         self.assertTrue({("IL", "arrive"), ("MS", "arrive"), ("NV", "arrive"), ("VA", "arrive"),
                          ("MP", "runoff-arrive"), ("MS", "runoff-arrive")} <= seen, seen)
 
-    def test_the_arrival_days_own_quote_is_linked_only_where_it_says_postmarked(self):
+    def test_an_arrive_line_links_the_word_and_the_day(self):
         # Made, not the day's data: the arrival day's source on one page says
         # only the day, the postmark day's on another says the word.
         rec = record("IL")
@@ -871,7 +878,11 @@ class TestArriveLinesSayPostmarked(unittest.TestCase):
         self.assertEqual(voting_dates.problems(data), [])
         entry = voting_dates.for_page(data)["states"]["IL"]
         arrive = next(l for l in entry["lines"] if l["k"] == "arrive")
-        self.assertEqual([entry["urls"][i] for i in arrive["src"]], ["https://www.elections.il.gov/postmark"])
+        # Both things the line shows keep their source: the word's page first,
+        # then the page that gives the arrival day (rule 84; the second reader
+        # of PR #238 - the first version linked the word's page alone).
+        self.assertEqual([entry["urls"][i] for i in arrive["src"]],
+                         ["https://www.elections.il.gov/postmark", "https://www.elections.il.gov/arrive"])
         # Where the arrival day's own quote says it, that one is linked first.
         rec["sources"][-1]["quote"] = "Ballots postmarked by November 3 must arrive by November 17."
         entry = voting_dates.for_page(with_state("IL", rec))["states"]["IL"]
