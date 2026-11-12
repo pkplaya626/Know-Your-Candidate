@@ -44,8 +44,15 @@ CYCLE = 2026
 # raising or spending more than $5,000. See the module docstring.
 STATUTORY_THRESHOLD = 5000
 
-# The FEC's incumbent_challenge codes. "I" is the sitting member, who already
-# has a profile from the roster.
+# The FEC's incumbent_challenge codes. "I" is the incumbent as the FEC has it,
+# which is no record of who sits (rule 17): it kept Lindsey Graham the
+# incumbent of a seat that had changed hands, and from 2026-11-12 it marks a
+# November winner who is not seated until January 3 - Mike McGuire, called
+# for CA-1, whose filing this module then set aside as "the sitting member's",
+# so the winner vanished from his own race and held that day's refresh. A
+# filing so flagged is a member's own only where a record says whose it is
+# (to_profiles): an id on a member's profile, the seat's sitting member's
+# exact names, or a member who left this Congress (departed_member).
 INCUMBENT = "I"
 
 _FIELDS = (
@@ -545,14 +552,18 @@ def same_filed_name(a, b):
     return bool(norm(a)) and norm(a) == norm(b)
 
 
-def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
+def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None, departed=None):
     """Profile records for filed candidates the roster does not already have.
 
-    Deduplicated three ways, because the same person reaches this function by
-    three routes: the FEC id already attached to a profile by the finance
-    lookup, the folded name and seat, and the incumbent flag. A sitting member
-    running for a different seat (a House member seeking a Senate seat) is the
-    case that exercises all of them at once.
+    Deduplicated by records, because the same person reaches this function by
+    more than one route: the FEC id already attached to a profile by the
+    finance lookup, the folded name and seat, and - for a filing the FEC flags
+    as the incumbent's - the record of a member who left this Congress
+    (*departed*, :func:`departed_member`). The flag alone sets nobody aside:
+    the FEC marks a November winner an incumbent weeks before they are seated,
+    and a winner set aside as "the sitting member" has no profile at all. A
+    sitting member running for a different seat (a House member seeking a
+    Senate seat) is the case that exercises all of them at once.
     """
     from . import fec
     from .normalize import fmt_curr, office_label
@@ -598,7 +609,7 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
                 if rid:
                     incumbents[(rid, words[0], words[-1])] = p
 
-    rows = eligible(cache, threshold)
+    rows = over_threshold(cache, threshold)
     merged = registrations(rows, (cache or {}).get("committeeOf"),
                            every=(cache or {}).get("candidates") or ())
     folded = {other for others in merged.values() for other in others}
@@ -631,6 +642,10 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
             continue
         if key in seen_people:
             skipped += 1
+            continue
+        if (row.get("incumbent_challenge") or "") == INCUMBENT \
+                and departed_member(row, departed) is not None:
+            skipped += 1        # a member who left this Congress: no filer
             continue
         seen_ids.add(candidate_id)
 
@@ -704,16 +719,51 @@ def filed_rows(cache):
     return {row["candidate_id"]: row for row in (cache or {}).get("candidates", [])}
 
 
-def eligible(cache, threshold=STATUTORY_THRESHOLD):
-    """Filings at or above the statutory threshold, incumbents excluded.
-
-    A sitting member already has a profile built from the roster; their own
-    committee filing would duplicate them.
-    """
+def over_threshold(cache, threshold=STATUTORY_THRESHOLD):
+    """Filings at or above the statutory threshold for a seat, whatever the
+    FEC's incumbent flag says of them (see INCUMBENT)."""
     return [
         row for row in (cache or {}).get("candidates", [])
         if (row.get("receipts") or 0) >= threshold
-        and (row.get("incumbent_challenge") or "") != INCUMBENT
         and row.get("state")
         and race_id(row)
     ]
+
+
+def eligible(cache, threshold=STATUTORY_THRESHOLD):
+    """Filings at or above the statutory threshold that the FEC does not flag
+    as the incumbent's: a count for the field's report. Who becomes a profile
+    is :func:`to_profiles`'s to say, which does not take the flag's word.
+    """
+    return [row for row in over_threshold(cache, threshold)
+            if (row.get("incumbent_challenge") or "") != INCUMBENT]
+
+
+def departed_member(row, departed):
+    """The member who left this Congress whose own filing *row* is, or None.
+
+    *departed* is the departed-members record's list (kyc/departed.py, from
+    congress-legislators' historical file). The row's seat is the one they
+    held - the state and chamber, and a House seat's district - and its
+    first and last names are theirs exactly, the signal a sitting member's
+    own filing is known by (rule 25): Doug LaMalfa's, David Scott's, Mikie
+    Sherrill's, Sheila Cherfilus-McCormick's, Lindsey Graham's and Markwayne
+    Mullin's filings stay flagged as incumbents' long after they left.
+    """
+    words = _fold(display_name(row.get("name"))).split()
+    if len(words) < 2:
+        return None
+    senate = row.get("office") == "S"
+    for member in departed or ():
+        if member.get("state") != row.get("state"):
+            continue
+        if (member.get("chamber") == "Senate") != senate:
+            continue
+        if not senate and member.get("district") is not None \
+                and member.get("district") != (district_number(row) or 0):
+            continue
+        for name in [member.get("name")] + list(member.get("aliases") or []):
+            theirs = _fold(name or "").split()
+            if len(theirs) >= 2 and (theirs[0], theirs[-1]) == (words[0], words[-1]):
+                return member
+    return None

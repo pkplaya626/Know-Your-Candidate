@@ -506,6 +506,17 @@ class TestNomineesUnderTheThreshold(unittest.TestCase):
         self.assertFalse(race["contested"])
         self.assertNotIn("belowThreshold", race["results"])
 
+    def test_a_winner_the_fec_flags_incumbent_is_still_named(self):
+        # From 2026-11-12 the FEC flags a November winner as the incumbent
+        # weeks before they are seated. Under the threshold they have no
+        # profile, and the flag alone took them out of the race's names: it
+        # sets aside only a filing that carries the surname of a member in
+        # the race (the member's own, above).
+        race = self.build({"H6TX12001": "defeated", "H6TX12169": "elected"},
+                          [self.row("H6TX12169", "RODRIGUEZ PRILLIMAN, ANGELA", challenge="I")])
+        self.assertEqual([b["name"] for b in race["results"]["belowThreshold"]],
+                         ["Angela Rodriguez Prilliman"])
+
     def test_someone_with_a_profile_is_not_counted_twice(self):
         profiled = candidate("FEC_H6TX12300", "Jo Doe", "TX", district=12, fec="H6TX12300")
         profiled["raceStatus"] = "nominee"

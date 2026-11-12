@@ -505,12 +505,31 @@ def _sits_in(profile, rid):
     return race_id(profile["chamber"], profile["state"], profile.get("districtNum")) == rid
 
 
+def _members_filing(row, people):
+    """Is *row*, which the FEC flags as the incumbent's, the own filing of a
+    member among the race's *people*: one who is no filer and whose surname
+    is among the filing's names?"""
+    from .candidates import _fold, display_name
+
+    words = set(_fold(display_name(row.get("name"))).split())
+    for person in people:
+        if person.get("isCandidate"):
+            continue
+        surname = _fold(person.get("surname")
+                        or ((person.get("name") or "").split() or [""])[-1]).split()
+        if surname and all(word in words for word in surname):
+            return True
+    return False
+
+
 def _below_threshold(results, rid, filed, profiled, people=()):
     """Nominees the results page matched to an FEC filing with no profile.
 
     The filing is under $5,000, so it never became a profile, but its owner
     is on the November ballot. Not counted: an incumbent's own registration,
-    whatever the id (the FEC's incumbent flag); a second registration of
+    whatever the id (the FEC's incumbent flag beside a member of the race who
+    carries the filing's surname: the flag alone marks a November winner
+    too, weeks before they are seated); a second registration of
     someone with a profile in the race, which the page's one name matched
     to both ids (Jeremy Ryan Todd, KY-4); and a name already counted.
     """
@@ -528,7 +547,7 @@ def _below_threshold(results, rid, filed, profiled, people=()):
         row = (filed or {}).get(cid)
         if status not in NOVEMBER or cid in profiled or not row:
             continue
-        if row.get("incumbent_challenge") == "I":
+        if row.get("incumbent_challenge") == "I" and _members_filing(row, people):
             continue
         # The name the ballot or the results page gives them where one was
         # matched to this filing: Alaska's "Eric Hafner", whom the FEC

@@ -220,7 +220,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3187 tests, no dependencies
+python -m unittest discover tests             # 3194 tests, no dependencies
 npm install && npm test                       # 4757 real-DOM checks (needs jsdom)
 ```
 
@@ -337,6 +337,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     on bioguide id. The same rule sends FEC lookups through the authoritative
     candidate id rather than a name search - the FEC files people under their
     legal name, and a loose match puts someone else's money on a profile.
+    Nor is the FEC's incumbent flag (`incumbent_challenge` "I") a record of
+    who sits: on 2026-11-12 it began to mark November's winners, weeks before
+    they are seated, and `candidates` set every flagged filing aside as "the
+    sitting member's" - so Mike McGuire, called for CA-1, lost his profile,
+    his race read "Won by" over nobody, and that day's refresh failed its
+    page checks. A flagged filing is a member's own only by a record
+    (`candidates.to_profiles`): an id on a member's profile, the seat's
+    sitting member's exact names, or the seat and both names of a member who
+    left this Congress (`departed_member`, from `data/departed_members.json`:
+    six former members' filings stay flagged). Any other is a filer, named
+    by the build (`filer-flagged-incumbent`), and a called winner past the
+    threshold with no profile is a build error (`winner-without-profile`).
 
 18. **Do not answer "is this in sync?" by diffing whole files.** CI used to
     rebuild and `git diff --exit-code`, which conflates sync with build time.
