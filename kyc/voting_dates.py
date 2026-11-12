@@ -278,6 +278,12 @@ _WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
 # What says a day is not held: "excluding", "except", "closed", "no early
 # voting" (Delaware's "October 25, 2026 – NO EARLY VOTING").
 _CLOSED = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early voting(?: on)?)"
+# The words that close a day named AFTER them: never a bare "no early
+# voting", which ends Delaware's sentence for one day and runs on into the
+# next ("October 25, 2026 - NO EARLY VOTING October 26, 2026 - October 27"),
+# and never a day that opens a range (the second reader of PR #240).
+_BEFORE = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early voting on)"
+_NOT_A_RANGE = r"(?![,\s\d]*[–—-]|[,\s\d]*(?:through|to)\b)"
 # A weekday the office closes as a class, beside the words that close it:
 # Hawaii's "(Excluding Sundays)", or "Sundays ... excepted".
 CLOSED_CLASS = re.compile(
@@ -581,13 +587,20 @@ def closes(quote, iso):
     "Closed Sunday, October 25", "October 25, 2026 – NO EARLY VOTING"), or
     its weekday closed as a class ("Excluding Sundays")? A day the words do
     not name is not closed, whatever the calendar makes of it (rule 84)."""
+    if closes_on_date(quote, iso):
+        return True
+    return _WEEKDAYS[datetime.date.fromisoformat(iso).weekday()] in closed_weekdays(str(quote or ""))
+
+
+def closes_on_date(quote, iso):
+    """Does *quote* name the day *iso* itself closed ("excluding Sunday,
+    November 29", "October 25, 2026 - NO EARLY VOTING"), its weekday as a
+    class aside?"""
     quote = str(quote or "")
     day = _day_words(iso)
-    if re.search(r"\b" + _CLOSED + r"\W{0,3}(?:on\s+)?" + day, quote, re.I):
+    if re.search(r"\b" + _BEFORE + r"\W{0,3}(?:on\s+)?" + day + _NOT_A_RANGE, quote, re.I):
         return True
-    if re.search(day + r"\s*\W{0,3}\s*(?:no early voting|closed)\b", quote, re.I):
-        return True
-    return _WEEKDAYS[datetime.date.fromisoformat(iso).weekday()] in closed_weekdays(quote)
+    return bool(re.search(day + r"\s*\W{0,3}\s*(?:no early voting|closed)\b", quote, re.I))
 
 
 def _window_days(start, end):
@@ -607,6 +620,22 @@ def except_problems(code, record):
     for path, window in EXCEPT.items():
         days = get(record, path)
         if days is None or days == []:
+            # An office's words that name a day closed hold the record to
+            # listing it, or the page calls that day "Under way": Louisiana's
+            # October 25 shipped so (the second reader of PR #240). A weekday
+            # closed as a class is not asked here: Colorado's and Nevada's
+            # words close a class for some sites only.
+            start, end = get(record, f"{window}.start"), get(record, f"{window}.end")
+            if (isinstance(start, str) and isinstance(end, str) and _DATE.match(start)
+                    and _DATE.match(end) and start <= end):
+                quotes = [s.get("quote") or "" for s in record.get("sources") or []
+                          if s.get("field") in (path,) + SHOWN[path]]
+                named = [day.isoformat() for day in _window_days(start, end)
+                         if start < day.isoformat() < end
+                         and any(closes_on_date(q, day.isoformat()) for q in quotes)]
+                if named:
+                    out.append(f"{code} {path}: a quote the window stands on names "
+                               f"{', '.join(named)} closed, but no day is listed")
             continue
         if not (isinstance(days, list) and all(isinstance(d, str) and _DATE.match(d) for d in days)):
             out.append(f"{code} {path}: {days!r} is not a list of dates")
@@ -630,6 +659,12 @@ def except_problems(code, record):
                   if s.get("field") in (path,) + SHOWN[path]]
         out += [f"{code} {path}: {value}, but no quote it stands on names that day closed"
                 for value in days if not any(closes(q, value) for q in quotes)]
+        named = [day.isoformat() for day in _window_days(start, end)
+                 if start < day.isoformat() < end and day.isoformat() not in days
+                 and any(closes_on_date(q, day.isoformat()) for q in quotes)]
+        if named:
+            out.append(f"{code} {path}: a quote the window stands on names "
+                       f"{', '.join(named)} closed, but it is not listed")
         weekdays = set().union(*(closed_weekdays(q) for q in quotes))
         missing = [day.isoformat() for day in _window_days(start, end)
                    if _WEEKDAYS[day.weekday()] in weekdays and day.isoformat() not in days]

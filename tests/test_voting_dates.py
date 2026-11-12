@@ -1139,9 +1139,13 @@ class TestDaysEarlyVotingIsNotHeld(unittest.TestCase):
             line, _ = self.early(DATA, code)
             self.assertNotIn("x", line, code)
             self.assertNotIn("excluding", line["t"], code)
-        # A window with no closed days is said as it was.
+        # A window with no closed days is said as it was: words that name
+        # none, and no list (words that name one hold the record to it).
         rec = record("LA")
         del rec["earlyVoting"]["except"]
+        for s in rec["sources"]:
+            if s["field"].startswith("earlyVoting."):
+                s["quote"] = s["quote"].replace(" (excluding Sunday, October 25)", "")
         line, _ = self.early(with_state("LA", rec), "LA")
         self.assertEqual(line["t"], "In-person early voting")
         self.assertNotIn("x", line)
@@ -1163,6 +1167,26 @@ class TestDaysEarlyVotingIsNotHeld(unittest.TestCase):
         self.assertFalse(closes("Open Sunday, October 25, noon to 5", "2026-10-25"))
         self.assertFalse(closes("Monday through Friday, and Saturday", "2026-10-25"))
         self.assertFalse(closes("(Excluding Sundays)", "2026-10-24"))
+        # Delaware's sentence closes October 25 and opens October 26: a bare
+        # "no early voting" does not run on into the next day, and a day that
+        # opens a range is not closed (the second reader of PR #240).
+        delaware = "October 25, 2026 – NO EARLY VOTING October 26, 2026 – October 27, 2026"
+        self.assertTrue(closes(delaware, "2026-10-25"))
+        self.assertFalse(closes(delaware, "2026-10-26"))
+        self.assertFalse(closes("closed November 2 through November 4", "2026-11-02"))
+
+    def test_a_day_the_words_close_must_be_listed(self):
+        # The office's words name November 29 closed; a record without the
+        # list, or one that leaves the day out, is a problem, or the page
+        # calls the day "Under way" (Louisiana's October 25 shipped so).
+        rec = record("LA")
+        del rec["runoff"]["earlyVoting"]["except"]
+        self.assertProblem(with_state("LA", rec), "LA runoff.earlyVoting.except: a quote the window "
+                                                  "stands on names 2026-11-29 closed, but no day is listed")
+        rec = record("LA")
+        rec["earlyVoting"]["except"] = []
+        self.assertProblem(with_state("LA", rec), "LA earlyVoting.except: a quote the window stands on "
+                                                  "names 2026-10-25 closed, but no day is listed")
 
     def test_check_holds_the_days_to_the_words(self):
         rec = record("LA")
@@ -1193,11 +1217,12 @@ class TestDaysEarlyVotingIsNotHeld(unittest.TestCase):
         rec = record("LA")
         rec["runoff"]["earlyVoting"]["start"] = rec["runoff"]["earlyVoting"]["end"] = None
         self.assertProblem(with_state("LA", rec), "days the window is not held, with no window")
-        # An empty list is no list, and says nothing.
+        # An empty list beside words that close a day is a problem, not
+        # silence (the second reader of PR #240).
         rec = record("SC")
         rec["earlyVoting"]["except"] = []
-        self.assertEqual(voting_dates.problems(with_state("SC", rec)), [])
-        self.assertNotIn("x", self.early(with_state("SC", rec), "SC")[0])
+        self.assertProblem(with_state("SC", rec), "SC earlyVoting.except: a quote the window stands "
+                                                  "on names 2026-10-25 closed, but no day is listed")
 
 
 class TestVoteGov(unittest.TestCase):
