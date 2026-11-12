@@ -1379,7 +1379,8 @@ def _field(args):
     print(f"\n  {cache['count']} people have filed for {cache['cycle']}")
     print(f"  {len(counts)} seats have at least one filing")
     print(f"  {len(keep)} are past the ${candidates.STATUTORY_THRESHOLD:,} "
-          f"statutory threshold and are not the sitting member")
+          f"statutory threshold and not flagged by the FEC as an incumbent's "
+          f"(the flag is no record of who sits: rule 17)")
 
     busiest = sorted(counts.items(), key=lambda kv: -kv[1])[:8]
     print("\n  most contested seats by filings:")
