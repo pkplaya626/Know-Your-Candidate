@@ -17345,6 +17345,39 @@ async function testRaceMoney() {
     check("a final round the Clerk does not name says whose reading it is",
       /won the final round by/.test(meText) && /Wikipedia’s page gives them as the final round’s/.test(meText),
       meText);
+    // A round the jurisdiction's own official results give (overrides.
+    // SEAT_HISTORY_ROUNDS: Guam's November 17, 2020 runoff, Maine's
+    // certified 2018 tabulation) names and links that document; a runoff
+    // the Clerk footnotes itself says nothing more.
+    const official = (kind, title, url) => {
+      const r = JSON.parse(JSON.stringify(me));
+      const c = r.seatHistory.cells[me.seatHistory.cells.indexOf(cell)];
+      c.result.kind = kind;
+      delete c.result.rankedChoice;
+      c.result.roundFrom = "official";
+      c.result.roundSource = { title: title, url: url };
+      return draw(r, campaign).querySelectorAll(".strip-cell")[me.seatHistory.cells.indexOf(cell)];
+    };
+    const gu = official("runoff", "the Guam Election Commission’s official results report",
+      "https://gec.guam.gov/report/?a=1&b=<2>");
+    const guLink = gu.querySelector('a[href^="https://gec.guam.gov/"]');
+    const meOfficial = official("rcv-final", "the Maine Secretary of State’s certified ranked-choice tabulation", "");
+    const footnoted = JSON.parse(JSON.stringify(me));
+    const fc = footnoted.seatHistory.cells[me.seatHistory.cells.indexOf(cell)];
+    fc.result.kind = "runoff";
+    delete fc.result.roundFrom;
+    const footText = draw(footnoted, campaign).querySelectorAll(".strip-cell")[
+      me.seatHistory.cells.indexOf(cell)].textContent;
+    check("a round the Clerk does not name is the official document's word, named and linked",
+      /won the runoff by/.test(gu.textContent) &&
+        /The Clerk prints these counts without naming the runoff; the Guam Election Commission’s official results report gives them as the runoff’s\./.test(gu.textContent) &&
+        !!guLink && guLink.getAttribute("href") === "https://gec.guam.gov/report/?a=1&b=<2>" &&
+        guLink.getAttribute("rel") === "noopener noreferrer" &&
+        /won the final round by/.test(meOfficial.textContent) &&
+        /naming the round; the Maine Secretary of State’s certified ranked-choice tabulation gives them as the final round’s\./.test(meOfficial.textContent) &&
+        !meOfficial.querySelector("a") && !/Wikipedia/.test(meOfficial.textContent + gu.textContent) &&
+        /won the runoff by/.test(footText) && !/The Clerk prints/.test(footText),
+      gu.textContent + " | " + meOfficial.textContent + " | " + footText);
     const mt = whole.filter((r) => r.state === "MT" && r.district === 1)[0];
     check("Montana's 1st says its 2018 and 2020 results are the whole state's, elected at large",
       !!mt && /elected one member at large then: the results are the whole state’s/.test(

@@ -2543,6 +2543,112 @@ STATEWIDE_NAME_FORMS = {
         "reader read it as the governor"),
 }
 
+# A candidate the Clerk of the House's "Statistics of the Presidential and
+# Congressional Election" prints under one form of their name and the second
+# compilation its counts are checked against (kyc/seat_history.py, rule 90)
+# under another: the legal name a state's returns print beside the name the
+# person goes by. Keyed on the seat as the cache keys it ("PA-4"), the
+# election's year and the Clerk's name exactly as read; (the second
+# compilation's name exactly as its table or infobox gives it, the evidence
+# that the two are one person: the state's own returns, their words and the
+# day read). The name then joins only a row whose whole name is that one,
+# never a surname (rules 3, 17, 25), and the counts are still checked
+# (seat_history.TOLERANCE). Without one the result is withheld, as PR #187
+# left these three: the check matches by surname, and "Cunnane", "Hernandez"
+# and "Pudlo" are on neither page's row.
+SEAT_HISTORY_NAMES = {
+    ("PA-4", 2020, "Madeleine Dean Cunnane"): (
+        "Madeleine Dean",
+        "the Pennsylvania Department of State's returns of the 2020 general election "
+        "(electionreturns.pa.gov, election 83, Representative in Congress, read 2026-11-12) "
+        "give the 4th Congressional District as 'DEM CUNNANE, MADELEINE DEAN 264637 59.53' and "
+        "'REP BARNETTE, KATHY 179926', the Clerk's 'Madeleine Dean Cunnane, Democrat' 264,637 "
+        "and 'Kathy Barnette, Republican' 179,926; Wikipedia's 2020 Pennsylvania page gives "
+        "'Madeleine Dean (incumbent)' 264,637, and her article opens \"Madeleine Dean Cunnane "
+        "(born June 6, 1959) ... U.S. representative for Pennsylvania's 4th congressional "
+        "district since 2019\"; the Clerk's 2018, 2022 and 2024 statistics name the district's "
+        "winner 'Madeleine Dean', and congress-legislators seats D000631, Madeleine Dean, in "
+        "PA-4 for the term the 2020 election chose"),
+    ("TX-15", 2020, "Monica De La Cruz-Hernandez"): (
+        "Monica De La Cruz",
+        "the Texas Secretary of State's County by County Canvass Report of the 2020 November "
+        "3rd General Election (results.texas-election.com/static/data/Reports/44144/"
+        "CountybyCountyCanvassReport.pdf, page 73; the address answers this project's reader "
+        "403, so read 2026-11-12 from the Internet Archive's capture of 2020-12-16) gives 'U. S. "
+        "REPRESENTATIVE DISTRICT 15 ... MONICA DE LA CRUZ-HERNANDEZ [REP] ... TOTAL VOTES "
+        "109,017', the Clerk's 'Monica De La Cruz-Hernandez, Republican' 109,017; Wikipedia's "
+        "2020 Texas page lists the Republican nominee as 'Monica de la Cruz-Hernandez, insurance "
+        "agent' and gives '[[Monica De La Cruz]]' 109,017 in the district's infobox and "
+        "general-election table (read 2026-11-12); the Clerk's 2022 and 2024 statistics name "
+        "the district's winner 'Monica De La Cruz'"),
+    ("CA-30", 2022, "G. “Maebe A. Girl” Pudlo"): (
+        "Maebe A. Girl",
+        "the California Secretary of State's Statement of Vote of the November 8, 2022 general "
+        "election, 'United States Representative in Congress by District' (elections.cdn.sos."
+        "ca.gov/sov/2022-general/sov/48-congress.pdf, page 54, read 2026-11-12), gives '30th "
+        "Congressional District: G \"Maebe A. Girl\" Pudlo DEM 60,968' beside 'Adam B. Schiff "
+        "DEM 150,100', the ballot's quoted name being the one the Clerk prints; Wikipedia's 2022 "
+        "California page gives 'Maebe A. Girl' 60,968 in the district's infobox, and her article "
+        "opens \"Maebe A. Girl (also known as G. Pudlo; born July 27, 1986)\""),
+}
+
+# The Clerk's counts for a contest that are a later round than the Clerk's
+# statistics say (kyc/seat_history.py, rule 90): the file prints them as the
+# election's with no footnote, and the jurisdiction's own official results
+# give them as a runoff's or as a ranked-choice tabulation's final round.
+# Keyed on the seat as the cache keys it and the election's year; "kind" is
+# "runoff" or "rcv-final", "date" a runoff's day, "counts" every candidate
+# the Clerk lists, by the Clerk's name, with the count the document gives
+# them, "source" (the words the page names the document by, a singular noun
+# phrase the strip's cell sets before "gives them as the runoff's" or "the
+# final round's", and its address) and the evidence. Applied only where the Clerk's
+# file prints exactly those names and counts and no other (a reissued file
+# that differs is an error, seat_history.result_of), and the result is
+# still checked against the second compilation's table of that round.
+SEAT_HISTORY_ROUNDS = {
+    ("GU-0", 2020): {
+        "kind": "runoff",
+        "date": "2020-11-17",
+        "counts": {"Michael F. Q. San Nicolas": 10467, "Robert A. Underwood": 7090},
+        "source": ("the Guam Election Commission’s official results report",
+                   "https://gec.guam.gov/2020-runoff-election-unofficial-results-precinct-report/"),
+        "evidence": (
+            "the Clerk's 2020 statistics list for Guam's delegate 'Michael F. Q. San Nicolas, "
+            "Democrat 10,467', 'Robert A. Underwood, Democrat 7,090', 'Under Votes 28', 'Over "
+            "Votes 5', 'Total 17,590', and say nothing of a runoff; the Guam Election "
+            "Commission's post '2020 Runoff Election, Official Results Precinct Report' (gec.guam."
+            "gov, posted 2020-12-03) links its 'Election Summary Report' (drive.google.com/file/"
+            "d/1Y8lzyXXcAiRJh28RnNjJKPpjZvu69KO6, read 2026-11-12), headed 'Summary Results "
+            "Report OFFICIAL RESULTS Guam 2020 Runoff November 17, 2020', which gives "
+            "'Non-Voting Delegate to the U.S. House of Representatives ... DEM San Nicolas, "
+            "Michael F.Q. 10,467 59.62% DEM Underwood, Robert Anacletus 7,090 40.38% Total Votes "
+            "Cast 17,557 ... Overvotes 5 Undervotes 28 Contest Totals 17,590'; the November 3 "
+            "round had three candidates (Wikipedia's 2020 Guam page: San Nicolas 13,000, "
+            "Underwood 9,300, Wil Castro 5,942), and no one a majority (48 U.S.C. 1712)"),
+    },
+    ("ME-2", 2018): {
+        "kind": "rcv-final",
+        "counts": {"Jared F. Golden": 142440, "Bruce Poliquin": 138931},
+        "source": ("the Maine Secretary of State’s certified ranked-choice tabulation (an "
+                   "archived copy)",
+                   "https://web.archive.org/web/20181214213948/https://www.maine.gov/sos/cec/"
+                   "elec/results/2018/updated-summary-report-CD2.xls"),
+        "evidence": (
+            "the Clerk's 2018 statistics list Maine's 2nd district as 'Jared F. Golden, "
+            "Democrat 142,440' and 'Bruce Poliquin, Republican 138,931', with no other name and "
+            "no word of a round; the Secretary of State's 'Tabulations for Elections held in "
+            "2018' page linked 'Representative to Congress - District 2 - Results Certified to "
+            "the Governor 11/26/18' to www.maine.gov/sos/cec/elec/results/2018/updated-summary-"
+            "report-CD2.xls, whose 'Summary Report ... Congressional District 2' gives 'Round 1' "
+            "'DEM Golden, Jared F. 132013', 'REP Poliquin, Bruce 134184', 'Bond, Tiffany L. "
+            "16552', 'Hoar, William R.S. 6875' and 'Round 2' 'DEM Golden, Jared F. 142440', 'REP "
+            "Poliquin, Bruce 138931', 'Continuing Ballots 281371'. maine.gov refuses this "
+            "project's reader (403) and the address answered 404 from 2026, so the file was read "
+            "2026-11-12 from the Internet Archive's capture of 2018-12-14, the one digest it "
+            "holds for the address from then to 2025-03-22"),
+    },
+}
+
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.
 NOT_SEEKING_MARKERS = ("retiring", "not running", "defeated", "ineligible", "resigned")
 

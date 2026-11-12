@@ -18354,7 +18354,11 @@
     "margin": 1.2,
     "others": 0,
     "othersShare": 0.0,
-    "roundFrom": "second-compilation",
+    "roundFrom": "official",
+    "roundSource": {
+     "title": "the Maine Secretary of State’s certified ranked-choice tabulation (an archived copy)",
+     "url": "https://web.archive.org/web/20181214213948/https://www.maine.gov/sos/cec/elec/results/2018/updated-summary-report-CD2.xls"
+    },
     "total": 281371,
     "year": 2018
    },
@@ -29244,6 +29248,39 @@
     "total": 372547,
     "year": 2020
    },
+   "GU-0": {
+    "allCandidates": 2,
+    "candidates": [
+     {
+      "name": "Michael F. Q. San Nicolas",
+      "party": "Democrat",
+      "share": 59.6,
+      "votes": 10467
+     },
+     {
+      "name": "Robert A. Underwood",
+      "party": "Democrat",
+      "share": 40.4,
+      "votes": 7090
+     }
+    ],
+    "checked": {
+     "by": "wikipedia",
+     "page": "2020 United States House of Representatives election in Guam"
+    },
+    "date": "2020-11-17",
+    "kind": "runoff",
+    "margin": 19.2,
+    "others": 0,
+    "othersShare": 0.0,
+    "roundFrom": "official",
+    "roundSource": {
+     "title": "the Guam Election Commission’s official results report",
+     "url": "https://gec.guam.gov/2020-runoff-election-unofficial-results-precinct-report/"
+    },
+    "total": 17557,
+    "year": 2020
+   },
    "HI-1": {
     "allCandidates": 2,
     "candidates": [
@@ -35642,6 +35679,34 @@
     "total": 375379,
     "year": 2020
    },
+   "PA-4": {
+    "allCandidates": 2,
+    "candidates": [
+     {
+      "name": "Madeleine Dean Cunnane",
+      "party": "Democrat",
+      "share": 59.5,
+      "votes": 264637
+     },
+     {
+      "name": "Kathy Barnette",
+      "party": "Republican",
+      "share": 40.5,
+      "votes": 179926
+     }
+    ],
+    "checked": {
+     "by": "wikipedia",
+     "page": "2020 United States House of Representatives elections in Pennsylvania"
+    },
+    "date": "2020-11-03",
+    "kind": "general",
+    "margin": 19.1,
+    "others": 0,
+    "othersShare": 0.0,
+    "total": 444563,
+    "year": 2020
+   },
    "PA-5": {
     "allCandidates": 2,
     "candidates": [
@@ -36480,6 +36545,34 @@
     "others": 0,
     "othersShare": 0.0,
     "total": 309115,
+    "year": 2020
+   },
+   "TX-15": {
+    "allCandidates": 3,
+    "candidates": [
+     {
+      "name": "Vicente Gonzalez",
+      "party": "Democrat",
+      "share": 50.5,
+      "votes": 115605
+     },
+     {
+      "name": "Monica De La Cruz-Hernandez",
+      "party": "Republican",
+      "share": 47.6,
+      "votes": 109017
+     }
+    ],
+    "checked": {
+     "by": "wikipedia",
+     "page": "2020 United States House of Representatives elections in Texas"
+    },
+    "date": "2020-11-03",
+    "kind": "general",
+    "margin": 2.9,
+    "others": 4295,
+    "othersShare": 1.9,
+    "total": 228917,
     "year": 2020
    },
    "TX-16": {
@@ -39630,6 +39723,34 @@
     "others": 0,
     "othersShare": 0.0,
     "total": 338199,
+    "year": 2022
+   },
+   "CA-30": {
+    "allCandidates": 2,
+    "candidates": [
+     {
+      "name": "Adam B. Schiff",
+      "party": "Democrat",
+      "share": 71.1,
+      "votes": 150100
+     },
+     {
+      "name": "G. “Maebe A. Girl” Pudlo",
+      "party": "Democrat",
+      "share": 28.9,
+      "votes": 60968
+     }
+    ],
+    "checked": {
+     "by": "wikipedia",
+     "page": "2022 United States House of Representatives elections in California"
+    },
+    "date": "2022-11-08",
+    "kind": "general",
+    "margin": 42.2,
+    "others": 0,
+    "othersShare": 0.0,
+    "total": 211068,
     "year": 2022
    },
    "CA-31": {
@@ -62570,36 +62691,6 @@
    "year": 2020
   },
   {
-   "page": "2020 United States House of Representatives election in Guam",
-   "result": {
-    "allCandidates": 2,
-    "candidates": [
-     {
-      "name": "Michael F. Q. San Nicolas",
-      "party": "Democrat",
-      "share": 59.6,
-      "votes": 10467
-     },
-     {
-      "name": "Robert A. Underwood",
-      "party": "Democrat",
-      "share": 40.4,
-      "votes": 7090
-     }
-    ],
-    "date": "2020-11-03",
-    "kind": "general",
-    "margin": 19.2,
-    "others": 0,
-    "othersShare": 0.0,
-    "total": 17557,
-    "year": 2020
-   },
-   "seat": "GU-0",
-   "why": "disagree",
-   "year": 2020
-  },
-  {
    "page": "2020 United States House of Representatives elections in New York",
    "result": {
     "allCandidates": 2,
@@ -62654,66 +62745,6 @@
    "year": 2020
   },
   {
-   "page": "2020 United States House of Representatives elections in Pennsylvania",
-   "result": {
-    "allCandidates": 2,
-    "candidates": [
-     {
-      "name": "Madeleine Dean Cunnane",
-      "party": "Democrat",
-      "share": 59.5,
-      "votes": 264637
-     },
-     {
-      "name": "Kathy Barnette",
-      "party": "Republican",
-      "share": 40.5,
-      "votes": 179926
-     }
-    ],
-    "date": "2020-11-03",
-    "kind": "general",
-    "margin": 19.1,
-    "others": 0,
-    "othersShare": 0.0,
-    "total": 444563,
-    "year": 2020
-   },
-   "seat": "PA-4",
-   "why": "unchecked",
-   "year": 2020
-  },
-  {
-   "page": "2020 United States House of Representatives elections in Texas",
-   "result": {
-    "allCandidates": 3,
-    "candidates": [
-     {
-      "name": "Vicente Gonzalez",
-      "party": "Democrat",
-      "share": 50.5,
-      "votes": 115605
-     },
-     {
-      "name": "Monica De La Cruz-Hernandez",
-      "party": "Republican",
-      "share": 47.6,
-      "votes": 109017
-     }
-    ],
-    "date": "2020-11-03",
-    "kind": "general",
-    "margin": 2.9,
-    "others": 4295,
-    "othersShare": 1.9,
-    "total": 228917,
-    "year": 2020
-   },
-   "seat": "TX-15",
-   "why": "unchecked",
-   "year": 2020
-  },
-  {
    "page": "2020 United States House of Representatives election in the United States Virgin Islands",
    "result": {
     "allCandidates": 2,
@@ -62742,36 +62773,6 @@
    "seat": "VI-0",
    "why": "unchecked",
    "year": 2020
-  },
-  {
-   "page": "2022 United States House of Representatives elections in California",
-   "result": {
-    "allCandidates": 2,
-    "candidates": [
-     {
-      "name": "Adam B. Schiff",
-      "party": "Democrat",
-      "share": 71.1,
-      "votes": 150100
-     },
-     {
-      "name": "G. “Maebe A. Girl” Pudlo",
-      "party": "Democrat",
-      "share": 28.9,
-      "votes": 60968
-     }
-    ],
-    "date": "2022-11-08",
-    "kind": "general",
-    "margin": 42.2,
-    "others": 0,
-    "othersShare": 0.0,
-    "total": 211068,
-    "year": 2022
-   },
-   "seat": "CA-30",
-   "why": "unchecked",
-   "year": 2022
   },
   {
    "page": "2022 United States House of Representatives elections in Pennsylvania",

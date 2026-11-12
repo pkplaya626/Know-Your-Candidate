@@ -1721,17 +1721,35 @@
         ? name + " won a majority of first choices, " + pct(won.share)
         : name + " led first choices by " + pts;
     }
-    if (result.kind === "runoff") return name + " won the runoff by " + pts;
-    // The Clerk printed two names and the final round's counts without
-    // saying so (Maine's 2nd in 2018): the second compilation is what gives
-    // them as the final round's, and the cell says so (seat_history.
-    // final_round_check).
-    if (result.kind === "rcv-final") {
-      return name + " won the final round by " + pts + (result.roundFrom
-        ? '<span class="strip-held"> The Clerk prints these counts without naming the ' +
-          "round; Wikipedia&rsquo;s page gives them as the final round&rsquo;s.</span>" : "");
-    }
+    if (result.kind === "runoff") return name + " won the runoff by " + pts + roundWhose(result);
+    if (result.kind === "rcv-final") return name + " won the final round by " + pts + roundWhose(result);
     return name + " won by " + pts;
+  }
+
+  /* Whose word a round is that the Clerk prints without naming it. The
+   * jurisdiction's own official results, named and linked, through an
+   * evidenced overrides.SEAT_HISTORY_ROUNDS entry (roundFrom "official":
+   * Guam's November 17, 2020 runoff, Maine's certified 2018 tabulation of
+   * its 2nd district); else the second compilation's reading
+   * (seat_history.final_round_check, "second-compilation"). A round the
+   * Clerk footnotes itself says nothing more. */
+  function roundWhose(result) {
+    var runoff = result.kind === "runoff";
+    var src = result.roundSource;
+    if (result.roundFrom === "official" && src && src.title) {
+      var title = src.url
+        ? '<a href="' + KYC.escapeAttr(src.url) + '" target="_blank" rel="noopener noreferrer">' +
+          KYC.escapeHtml(src.title) + "</a>"
+        : KYC.escapeHtml(src.title);
+      return '<span class="strip-held"> The Clerk prints these counts without naming the ' +
+        (runoff ? "runoff" : "round") + "; " + title + " gives them as the " +
+        (runoff ? "runoff" : "final round") + "&rsquo;s.</span>";
+    }
+    if (result.roundFrom === "second-compilation" && !runoff) {
+      return '<span class="strip-held"> The Clerk prints these counts without naming the ' +
+        "round; Wikipedia&rsquo;s page gives them as the final round&rsquo;s.</span>";
+    }
+    return "";
   }
 
   /* An "until" is said only once it has come, on the reader's day: a date

@@ -631,7 +631,7 @@ def _runoff_day(text):
     return _date_of(found.group(1)) if found else None
 
 
-def result_of(contest, footnotes, year, state=None):
+def result_of(contest, footnotes, year, state=None, round_=None):
     """The contest as the page shows it: who won, with what share, by what
     margin, all computed from the Clerk's counts.
 
@@ -640,11 +640,35 @@ def result_of(contest, footnotes, year, state=None):
     footnotes counts as a runoff's (Georgia's January 5, 2021 runoff), the
     result is the runoff's, between the people it lists, dated from the
     footnote. A ranked-choice tabulation's final round (Maine's 2nd district
-    in 2024) is shown as that round."""
+    in 2024) is shown as that round.
+
+    *round_* is an ``overrides.SEAT_HISTORY_ROUNDS`` entry: counts the
+    Clerk prints with no footnote that the jurisdiction's own official
+    results give as a later round's (Guam's November 17, 2020 runoff). It
+    applies only where the file prints exactly its names and counts and no
+    other; anything else is an error a person must look at, never a reading
+    kept on a file that has changed (rule 8's loud side)."""
     rows = list(contest["rows"])
     kind = "general"
     date = ELECTION_DAYS[year]
     unnamed = contest["unnamed"]
+    if round_ is not None:
+        printed = {r["name"]: r["votes"] for r in rows}
+        # A footnote or a round the file names is the file's own word, and
+        # an entry beside it is stale.
+        if printed != round_["counts"] or unnamed or len(printed) != len(rows) or \
+                contest.get("rcvRound") or \
+                any(r.get("note") or r.get("unopposed") is not None for r in rows):
+            raise ClerkFormatError(
+                f"{year}: overrides.SEAT_HISTORY_ROUNDS names counts the Clerk's file does not "
+                f"print as its only ones: {round_['counts']} against {printed} "
+                f"(and {unnamed} unnamed)")
+        if round_["kind"] not in ("runoff", "rcv-final") or \
+                (round_["kind"] == "runoff") != bool(round_.get("date")):
+            raise ClerkFormatError(f"{year}: a SEAT_HISTORY_ROUNDS entry of kind "
+                                   f"{round_['kind']!r} with date {round_.get('date')!r}")
+        kind = round_["kind"]
+        date = round_.get("date") or date
     unopposed = [r for r in rows if r.get("unopposed") is not None]
     if unopposed:
         if len(rows) != 1:
@@ -709,6 +733,11 @@ def result_of(contest, footnotes, year, state=None):
     if state and ranked_choice(state, year) and kind == "general":
         # Counts with no final round under them are the first choices.
         out["rankedChoice"] = "first-choices"
+    if round_ is not None:
+        # Whose word the round is: the page names the document and links it.
+        title, url = round_["source"]
+        out["roundFrom"] = "official"
+        out["roundSource"] = {"title": title, "url": url}
     return out
 
 
@@ -741,12 +770,36 @@ def surname(name):
 TOLERANCE = 0.01
 
 
-def _check(result, rows):
+def name_forms(seat, year):
+    """``{the Clerk's name: [the second compilation's name]}`` for the
+    contest the cache keys *seat* in *year*: what an evidenced
+    ``overrides.SEAT_HISTORY_NAMES`` entry says the second source writes
+    for a name the Clerk prints otherwise (the legal name Pennsylvania's
+    returns print, "Madeleine Dean Cunnane", beside "Madeleine Dean")."""
+    from .overrides import SEAT_HISTORY_NAMES
+    out = {}
+    for (where, when, clerk), (form, _evidence) in SEAT_HISTORY_NAMES.items():
+        if where == seat and when == year:
+            out.setdefault(clerk, []).append(form)
+    return out
+
+
+def round_of(seat, year):
+    """The ``overrides.SEAT_HISTORY_ROUNDS`` entry for the contest the cache
+    keys *seat* in *year*, or None: the Clerk's counts that its file prints
+    without a footnote and the jurisdiction's own results give as a runoff's
+    or a final round's (:func:`result_of`)."""
+    from .overrides import SEAT_HISTORY_ROUNDS
+    return SEAT_HISTORY_ROUNDS.get((seat, year))
+
+
+def _check(result, rows, forms=None):
     """Does a second source's table *rows* (``[{"name", "votes", "won"?}]``)
     name the Clerk's winner and runner-up, in that order, with counts within
     :data:`TOLERANCE` of the Clerk's? Returns ``(verdict, differences)``:
     ``"agree"``, ``"disagree"``, or ``None`` when the table is not about
-    these people."""
+    these people. *forms* is :func:`name_forms`'s for the contest: another
+    form of a Clerk's name that the second source writes, by evidence."""
     wanted = result["candidates"]
     # A write-in runner-up (Kentucky's 4th: 1,131 votes) is a name the
     # other compilations do not list: the winner alone is checked.
@@ -754,7 +807,7 @@ def _check(result, rows):
         wanted = wanted[:1]
     found = []
     for person in wanted:
-        match = _find(person["name"], rows)
+        match = _find(person["name"], rows, (forms or {}).get(person["name"], ()))
         if match is None:
             return None, []
         found.append(match)
@@ -785,11 +838,27 @@ def _one_apart(a, b):
     return any(long_[:i] + long_[i + 1:] == short for i in range(len(long_)))
 
 
-def _find(name, rows):
+def _find(name, rows, forms=()):
     """The one row of *rows* that is *name*: by surname; among two of one
     surname (South Dakota's Dusty and Sheryl Johnson) by the first name
     too; and only where no surname matches, a surname a letter apart
-    (Tennessee's 9th: "Bergmann" and "Bergman"), so long as one row has it."""
+    (Tennessee's 9th: "Bergmann" and "Bergman"), so long as one row has it.
+
+    *forms* are other names the same person goes by, from an evidenced
+    ``overrides.SEAT_HISTORY_NAMES`` entry ("Madeleine Dean" for the Clerk's
+    "Madeleine Dean Cunnane"): a row whose whole name is one of them is the
+    person too, never a row sharing only a word of it, and two rows that
+    either way finds are nobody's."""
+    found = _find_by_name(name, rows)
+    if not forms:
+        return found
+    wanted = {tuple(_fold(form).split()) for form in forms}
+    exact = [r for r in rows if tuple(_fold(r["name"]).split()) in wanted]
+    either = {id(r): r for r in ([found] if found is not None else []) + exact}
+    return next(iter(either.values())) if len(either) == 1 else None
+
+
+def _find_by_name(name, rows):
     last = surname(name)
     if not last:
         return None
@@ -934,7 +1003,7 @@ def infobox_rounds(text):
                   if m and re.search(r"round", v or "", re.I))
 
 
-def final_round_check(result, text):
+def final_round_check(result, text, forms=None):
     """Is a ranked-choice contest the Clerk prints with two names and no
     footnote its final round? Maine's 2nd district in 2018: the Clerk lists
     Golden 142,440 and Poliquin 138,931, the counts of the final round
@@ -943,17 +1012,19 @@ def final_round_check(result, text):
     choices", which he did not. It is the final round only where the second
     compilation's own final round (its infobox's last round, of more than
     one) names the same two with the same counts, and its first round does
-    not. Returns ``(verdict, differences)``: "agree" only then, else None."""
+    not. Returns ``(verdict, differences)``: "agree" only then, else None.
+    (Maine's own certified tabulation now says so of that contest, through
+    ``overrides.SEAT_HISTORY_ROUNDS``, which this reading stands behind.)"""
     rounds = infobox_rounds(text)
     if len(rounds) < 2 or len(result["candidates"]) != 2 or result.get("allCandidates") != 2:
         return None, []
-    if _check(result, _summed(infobox_rows(text, rounds[0])))[0] == "agree":
+    if _check(result, _summed(infobox_rows(text, rounds[0])), forms)[0] == "agree":
         return None, []
-    verdict, differences = _check(result, _summed(infobox_rows(text, rounds[-1])))
+    verdict, differences = _check(result, _summed(infobox_rows(text, rounds[-1])), forms)
     return ("agree", differences) if verdict == "agree" else (None, [])
 
 
-def wiki_check(result, text, stage="general"):
+def wiki_check(result, text, stage="general", forms=None):
     """Check *result* against a Wikipedia page's results boxes (*text*: the
     district's section, or a Senate election's page). Returns ``(verdict,
     differences)``. An unopposed winner, whom Florida and Oklahoma print on
@@ -976,7 +1047,7 @@ def wiki_check(result, text, stage="general"):
     for box_stage, rows in boxes:
         if box_stage != stage:
             continue
-        verdict, diff = _check(result, _summed(rows))
+        verdict, diff = _check(result, _summed(rows), forms)
         if verdict:
             verdicts.append(verdict)
             if verdict == "agree" and not differences:
@@ -986,7 +1057,7 @@ def wiki_check(result, text, stage="general"):
     return ("disagree" if verdicts else None), []
 
 
-def house_check(result, section):
+def house_check(result, section, forms=None):
     """A House result against its district's section of the state's page.
     A runoff's counts (Louisiana's 5th in 2020) are checked against the
     runoff's table, never the first round's: against the open primary's,
@@ -995,9 +1066,9 @@ def house_check(result, section):
     (:func:`final_round_check`) becomes the final round's result, and says
     the second compilation is what gives it as such (``roundFrom``)."""
     stage = "runoff" if result["kind"] == "runoff" else "general"
-    verdict, differences = wiki_check(result, section, stage=stage)
+    verdict, differences = wiki_check(result, section, stage=stage, forms=forms)
     if verdict != "agree" and result.get("rankedChoice") == "first-choices":
-        final, diff = final_round_check(result, section)
+        final, diff = final_round_check(result, section, forms)
         if final == "agree":
             result["kind"] = "rcv-final"
             result.pop("rankedChoice")
@@ -1031,11 +1102,11 @@ def read_mit_senate(raw):
     return out
 
 
-def mit_check(result, mit, state, special):
+def mit_check(result, mit, state, special, forms=None):
     rows = mit.get((result["year"], state, special, "runoff" if result["kind"] == "runoff" else "general"))
     if not rows or any(r["unofficial"] for r in rows):
         return None, []
-    return _check(result, _summed(rows))
+    return _check(result, _summed(rows), forms)
 
 
 # ------------------------------------------------------------------ fetching
@@ -1236,12 +1307,15 @@ def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=Non
                 cache["noResult"].setdefault(str(year), []).append(f"{state}-{district}")
             sections, page = house_page_sections(state, read=wiki, year=year)
             for district, contest in sorted(contests.items()):
-                result = result_of(contest, entry["footnotes"], year, state)
+                key = f"{state}-{district}"
+                result = result_of(contest, entry["footnotes"], year, state,
+                                   round_=round_of(key, year))
                 if not result:
                     continue
                 section = sections.get(district) or (sections.get(0) if len(contests) == 1 else None)
-                verdict, differences = house_check(result, section) if section else (None, [])
-                keep(store, f"{state}-{district}", result, verdict, differences,
+                verdict, differences = (house_check(result, section, name_forms(key, year))
+                                        if section else (None, []))
+                keep(store, key, result, verdict, differences,
                      {"by": "wikipedia", "page": page}, page)
             log(f"  {year} {state}: {len(contests)} House contest(s) read")
 
@@ -1256,23 +1330,25 @@ def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=Non
             for contest in entry.get("senate") or []:
                 if senate_class_of(contest["termEnds"]) != senate_class:
                     continue
-                result = result_of(contest, entry.get("footnotes") or {}, year, state)
+                key = f"{state}-{year}-{contest['term']}"
+                result = result_of(contest, entry.get("footnotes") or {}, year, state,
+                                   round_=round_of(key, year))
                 if not result:
                     continue
                 special = contest["term"] == "unexpired"
                 result.update(term=contest["term"], termEnds=contest["termEnds"])
-                verdict, differences = mit_check(result, mit, state, special)
+                forms = name_forms(key, year)
+                verdict, differences = mit_check(result, mit, state, special, forms)
                 checked, page = {"by": "mit"}, None
                 if verdict is None:
                     titles = page_titles(state, "S", cycle=year)
                     page = titles[1] if special else titles[0]
                     text = wiki(page)
                     stage = "runoff" if result["kind"] == "runoff" else "general"
-                    verdict, differences = (wiki_check(result, text, stage=stage) if text
-                                            else (None, []))
+                    verdict, differences = (wiki_check(result, text, stage=stage, forms=forms)
+                                            if text else (None, []))
                     checked = {"by": "wikipedia", "page": page}
-                keep(cache["senate"], f"{state}-{year}-{contest['term']}", result, verdict,
-                     differences, checked, page)
+                keep(cache["senate"], key, result, verdict, differences, checked, page)
     for key in cache["noResult"]:
         cache["noResult"][key].sort()
     return cache
@@ -1315,7 +1391,8 @@ def _shown(result, chamber):
     """The page's copy of a cached result: what a race block draws. Its
     sources are the page's table (:func:`page_sources`), by year."""
     keys = ("year", "date", "kind", "total", "margin", "others", "othersShare",
-            "allCandidates", "note", "unopposedByName", "rankedChoice", "roundFrom")
+            "allCandidates", "note", "unopposedByName", "rankedChoice", "roundFrom",
+            "roundSource")
     out = {k: result[k] for k in keys if k in result}
     out["candidates"] = [{k: c[k] for k in ("name", "party", "votes", "share") if k in c}
                          for c in result["candidates"]]
@@ -1442,7 +1519,8 @@ STRIP_GRACE = SEATING_GRACE
 
 def _strip_result(result, chamber):
     """A cell's copy of a result: who won, by what, as the strip draws it."""
-    keys = ("year", "date", "kind", "margin", "rankedChoice", "allCandidates", "roundFrom")
+    keys = ("year", "date", "kind", "margin", "rankedChoice", "allCandidates", "roundFrom",
+            "roundSource")
     out = {k: result[k] for k in keys if k in result}
     out["candidates"] = [{k: c[k] for k in ("name", "party", "share") if k in c}
                          for c in result["candidates"]]
@@ -1543,7 +1621,7 @@ def _holders(terms, start, end):
     return out
 
 
-def _mark_winner(cell):
+def _mark_winner(cell, forms=None):
     """Mark the holder who is the counted winner, seated with the term
     (``winner``), so the page need not name them twice. Only someone who
     served the whole term from its first day is compared, and by surname
@@ -1551,16 +1629,20 @@ def _mark_winner(cell):
     congress-legislators the member's ("Robert J. Wittman"): a comparison
     that leaves a holder unremarked, never one that attributes a result.
     Anyone seated late, or who left early, is named with their dates
-    whoever they are (Adelita Grijalva after Raúl Grijalva)."""
+    whoever they are (Adelita Grijalva after Raúl Grijalva). *forms* is
+    :func:`name_forms`'s for the contest: the Clerk's "Madeleine Dean
+    Cunnane" is the "Madeleine Dean" who served, by the evidence there, and
+    is not named a second time as though someone else had."""
     result = cell.get("result") or {}
     if not result.get("candidates"):
         return
     winner = result["candidates"][0]["name"]
     if result.get("rankedChoice") == "first-choices" and not result.get("firstChoiceMajority"):
         return                       # a lead in first choices is not a win
+    surnames = {surname(winner)} | {surname(f) for f in (forms or {}).get(winner, ())}
     for holder in cell.get("holders") or []:
         if "from" not in holder and "until" not in holder and \
-                surname(holder["name"]) == surname(winner):
+                surname(holder["name"]) in surnames:
             holder["winner"] = True
 
 
@@ -1642,7 +1724,7 @@ def _house_strip(race, cache):
         else:
             cell["withheld"] = "unchecked"
         cell["holders"] = _holders(terms.get(key), f"{year + 1}-01-03", f"{year + 3}-01-03")
-        _mark_winner(cell)
+        _mark_winner(cell, name_forms(key, year))
         cells.append(cell)
     changes = [dict(change, year=year) for year, change in sorted(breaks.items())]
     return {"eras": eras, "cells": cells, "breaks": changes}
@@ -1676,7 +1758,7 @@ def _senate_strip(race, cache):
     for key, result in (cache.get("senate") or {}).items():
         if key.startswith(state + "-") and senate_class_of(result.get("termEnds")) == senate_class:
             found.append((result["date"], {"result": _strip_result(result, "Senate"),
-                                           "ends": result["termEnds"]}))
+                                           "ends": result["termEnds"], "key": key}))
     for item in cache.get("withheld") or []:
         result = item.get("result") or {}
         if item["seat"].startswith(state + "-") and result.get("termEnds") and \
@@ -1690,6 +1772,7 @@ def _senate_strip(race, cache):
         year = (item.get("result") or {}).get("year") or int(date[:4])
         cell = {"year": year, "era": 0}
         ends = item.pop("ends")
+        key = item.pop("key", None)
         cell.update(item)
         # Who served the term it chose: from January 3 after a regular
         # election; after a special, from the day its winner took the seat
@@ -1701,7 +1784,7 @@ def _senate_strip(race, cache):
         else:
             start = f"{year + 1}-01-03"
         cell["holders"] = _holders(seat_terms, start, ends)
-        _mark_winner(cell)
+        _mark_winner(cell, name_forms(key, year) if key else None)
         cells.append(cell)
     return {"eras": [{"from": YEARS[0], "to": YEARS[-1], "same": True}],
             "cells": cells, "breaks": []}
@@ -1810,4 +1893,50 @@ def problems(cache, races):
                     f"{len(strip_held)} earlier results in the seats' strips are not shown: the "
                     "Clerk's and the second source's disagree or no second source covers them",
                     strip_held))
+    stale = stale_overrides(cache)
+    if stale:
+        out.append(("warn", "seat-history-override-stale",
+                    f"{len(stale)} overrides.SEAT_HISTORY_NAMES or SEAT_HISTORY_ROUNDS entries "
+                    "the cache does not bear out: read again (python build_profile_site.py "
+                    "seats), and if they still do not, the Clerk's file or the second source "
+                    "has changed and a person must look", stale))
+    return out
+
+
+def _cached(cache, seat, year):
+    """Every result the cache holds for the contest it keys *seat* in
+    *year*, shown or withheld: ``[(result, shown)]``."""
+    if re.fullmatch(r"[A-Z]{2}-\d+", seat):
+        store = cache.get("house") if year == HOUSE_YEAR else \
+            (cache.get("houseEarlier") or {}).get(str(year))
+    else:
+        store = cache.get("senate")
+    out = [(store[seat], True)] if seat in (store or {}) else []
+    out += [(w.get("result") or {}, False) for w in cache.get("withheld") or []
+            if w.get("seat") == seat and w.get("year") == year]
+    return out
+
+
+def stale_overrides(cache):
+    """The ``overrides.SEAT_HISTORY_NAMES`` and ``SEAT_HISTORY_ROUNDS``
+    entries the cache does not bear out, as the build reports any curated
+    entry that matches nothing (CLAUDE.md, "Curated data"): a name form
+    whose contest is not shown, or does not name that Clerk's name; a round
+    whose contest is not shown as that round on the official document's
+    word. A stale override is invisible on the page and quietly wrong."""
+    from .overrides import SEAT_HISTORY_NAMES, SEAT_HISTORY_ROUNDS
+    out = []
+    for (seat, year, clerk), (form, _evidence) in sorted(SEAT_HISTORY_NAMES.items()):
+        found = _cached(cache, seat, year)
+        if not any(shown and any(c.get("name") == clerk for c in r.get("candidates") or [])
+                   for r, shown in found):
+            out.append(f"{seat} {year} {clerk!r} as {form!r}: "
+                       + ("not shown" if found else "no such contest in the cache"))
+    for (seat, year), entry in sorted(SEAT_HISTORY_ROUNDS.items()):
+        found = _cached(cache, seat, year)
+        if not any(shown and r.get("kind") == entry["kind"] and r.get("roundFrom") == "official"
+                   for r, shown in found):
+            what = "the runoff" if entry["kind"] == "runoff" else "the final round"
+            out.append(f"{seat} {year} as {what}: "
+                       + ("not shown as that round" if found else "no such contest in the cache"))
     return out
