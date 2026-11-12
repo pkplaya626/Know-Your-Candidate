@@ -30,7 +30,14 @@ null: the state's own links stay beside it.
   Wikipedia, vote.gov, Vote.org and the like are refused wherever they
   appear;
 - every date parses and falls in the cycle, windows run forwards, and no
-  deadline falls after the election it is for;
+  deadline falls after the election it is for: a runoff's own early voting
+  and mail-ballot dates (``runoff.earlyVoting``, ``runoff.mail``) fall
+  between November 3 and the runoff, but for a ballot still arriving after
+  it, and none stands without the runoff's date;
+- a qualifier that is a claim of its own is said in a quote it stands on
+  (``SAID``): a runoff's early voting that may begin before its first date
+  ("as soon as possible, but no later than"), an application taken in
+  person alone ("over the counter");
 - a December date the results reader also holds (``overrides.GENERAL_RUNOFFS``,
   ``OPEN_PRIMARY_SEATS``) must be the same date here (rule 53).
 
@@ -180,10 +187,35 @@ SHOWN = {
     "mail.returnDeadline.rule": ("mail.returnDeadline.date", "mail.returnDeadline.receivedBy"),
     "mail.returnDeadline.receivedBy": (),
     "runoff.date": (),
+    # A runoff's own early voting and mail ballots, kept as the general
+    # election's are: the Northern Mariana Islands' Commission published its
+    # runoff's on 2026-11-08, and only the runoff's date had a field, so the
+    # page never said that early voting for it opened on November 13.
+    "runoff.earlyVoting.start": (),
+    "runoff.earlyVoting.end": (),
+    # The start is the latest day early voting may begin, not the first day
+    # it is offered: Georgia's calendar gives its runoff's "As soon as
+    # possible, but no later than 11/23/26" (``SAID``).
+    "runoff.earlyVoting.startsBy": ("runoff.earlyVoting.start",),
+    "runoff.mail.requestDeadline.date": (),
+    "runoff.mail.requestDeadline.rule": ("runoff.mail.requestDeadline.date",),
+    # How an application must reach the office by that day, where the office
+    # names one way alone (the Commission's "over the counter"; ``HOWS``).
+    "runoff.mail.requestDeadline.how": ("runoff.mail.requestDeadline.date",),
+    "runoff.mail.returnDeadline.date": (),
+    "runoff.mail.returnDeadline.time": ("runoff.mail.returnDeadline.date",),
+    "runoff.mail.returnDeadline.rule": ("runoff.mail.returnDeadline.date",
+                                        "runoff.mail.returnDeadline.receivedBy"),
+    "runoff.mail.returnDeadline.receivedBy": (),
 }
 # Flags shown only when true: false says nothing on the page.
 SHOWN_WHEN_TRUE = {"noElection", "registration.none", "registration.sameDay.available",
-                   "mail.allMail", "earlyVoting.setLocally"}
+                   "mail.allMail", "earlyVoting.setLocally", "runoff.earlyVoting.startsBy"}
+# A runoff's own dates, each beside the runoff's: none of them may stand
+# without a runoff date in the record.
+RUNOFF_DATES = ("runoff.earlyVoting.start", "runoff.earlyVoting.end",
+                "runoff.mail.requestDeadline.date", "runoff.mail.returnDeadline.date",
+                "runoff.mail.returnDeadline.receivedBy")
 
 # "Postmarked by then" and "must arrive by then" are claims of their own:
 # each must be said in a quote the value stands on (its own source or a
@@ -194,7 +226,17 @@ RULE_WORDS = {
     "received": re.compile(r"receiv|receipt|arriv|\breach|in the hands of|in (?:the )?possession"
                            r"|deliver(?:y|ed) to", re.I),
 }
-RULES = ("registration.mail.rule", "mail.requestDeadline.rule", "mail.returnDeadline.rule")
+RULES = ("registration.mail.rule", "mail.requestDeadline.rule", "mail.returnDeadline.rule",
+         "runoff.mail.requestDeadline.rule", "runoff.mail.returnDeadline.rule")
+# A qualifier that is a claim of its own is said in a quote it stands on, as
+# "postmarked" and "received" are: a start that is only the latest day early
+# voting may begin, and an application taken in person alone.
+SAID = {
+    "runoff.earlyVoting.startsBy": re.compile(r"as soon as possible|no later than", re.I),
+    "runoff.mail.requestDeadline.how": re.compile(r"over the counter|in person", re.I),
+}
+# The ways an application may be limited to (``runoff.mail.requestDeadline.how``).
+HOWS = ("in person",)
 
 # What a runoff in the record decides, in words the page shows beside its
 # date, each from the record's runoff source and note: Arkansas's and
@@ -249,6 +291,12 @@ RUNOFF_SHORT = {
     "MP": ("Governor or attorney general runoff", "Governor or attorney general runoff date"),
 }
 RUNOFF_SHORT_DEFAULT = ("Runoff, if needed", "Runoff date")
+# Where the office has set its runoff, not "if one is needed" (the
+# Commission's calendar, as RUNOFF_WORDS["MP"] says): the runoff's own dates
+# are "for the runoff" there, and "for a runoff, if one is held" anywhere
+# else, as that runoff's own words are conditional (Georgia's). Neither says
+# which race went to one, or who is in it (rule 91).
+RUNOFF_SET = frozenset({"MP"})
 
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # A time of day as the record gives it; anything longer ("7:00 pm (postmark);
@@ -380,6 +428,16 @@ def state_problems(code, record, runoffs):
                   if s.get("field") in (path,) + SHOWN[path]]
         if not any(RULE_WORDS[rule].search(q) for q in quotes):
             out.append(f"{code} {path}: {rule!r}, but no quote it stands on says so")
+    how = get(record, "runoff.mail.requestDeadline.how")
+    if how is not None and how not in HOWS:
+        out.append(f"{code} runoff.mail.requestDeadline.how: {how!r} is not one of {HOWS}")
+    for path, words in SAID.items():
+        if _shown(record, path) is None:
+            continue
+        quotes = [s.get("quote") or "" for s in record.get("sources") or []
+                  if s.get("field") in (path,) + SHOWN[path]]
+        if not any(words.search(q) for q in quotes):
+            out.append(f"{code} {path}: shown, but no quote it stands on says so")
     out += where_problems(code, record)
     out += _date_problems(code, record)
     date = get(record, "runoff.date")
@@ -466,12 +524,52 @@ def _date_problems(code, record):
     runoff = day("runoff.date")
     if runoff and runoff <= ELECTION:
         out.append(f"{code} runoff.date: {runoff} is not after the election")
+    out += _runoff_date_problems(code, record, runoff, day)
     if get(record, "registration.online.deadline") and get(
             record, "registration.online.available") is not True:
         out.append(f"{code} registration.online: a deadline for registration not offered online")
     if get(record, "registration.sameDay.through") and get(
             record, "registration.sameDay.available") is not True:
         out.append(f"{code} registration.sameDay.through: an end to same-day registration not offered")
+    return out
+
+
+def _runoff_date_problems(code, record, runoff, day):
+    """A runoff's own dates (``runoff.earlyVoting``, ``runoff.mail``): each
+    after the election it follows and in order with the runoff's date, and
+    none without one. *day* reads and checks a date as ``_date_problems``
+    does."""
+    out = []
+    dates = {path: day(path) for path in RUNOFF_DATES}
+    if not runoff:
+        out += [f"{code} {path}: a runoff's own date, with no runoff date in the record"
+                for path, value in dates.items() if value]
+        return out
+    start, end = dates["runoff.earlyVoting.start"], dates["runoff.earlyVoting.end"]
+    if (start is None) != (end is None):
+        out.append(f"{code} runoff.earlyVoting: a window with one end")
+    elif start and not ELECTION < start <= end < runoff:
+        out.append(f"{code} runoff.earlyVoting: {start} to {end} does not run forwards between "
+                   f"the election and the runoff on {runoff}")
+    if get(record, "runoff.earlyVoting.startsBy") is True and not start:
+        out.append(f"{code} runoff.earlyVoting.startsBy: a latest start with no start")
+    request = dates["runoff.mail.requestDeadline.date"]
+    if request and not ELECTION < request <= runoff:
+        out.append(f"{code} runoff.mail.requestDeadline.date: {request} is not between the "
+                   f"election and the runoff on {runoff}")
+    returned = dates["runoff.mail.returnDeadline.date"]
+    received = dates["runoff.mail.returnDeadline.receivedBy"]
+    if returned and not ELECTION < returned <= runoff:
+        out.append(f"{code} runoff.mail.returnDeadline.date: {returned} is not between the "
+                   f"election and the runoff on {runoff}")
+    if received and received <= ELECTION:
+        out.append(f"{code} runoff.mail.returnDeadline.receivedBy: {received} is not after the "
+                   "election")
+    if returned and received and received < returned:
+        out.append(f"{code} runoff.mail.returnDeadline: received by {received}, before {returned}")
+    if (get(record, "runoff.mail.returnDeadline.rule") == "postmarked" and returned
+            and received == returned):
+        out.append(f"{code} runoff.mail.returnDeadline: postmarked, yet received the same day")
     return out
 
 
@@ -702,7 +800,87 @@ def lines(code, record, place):
         short, short_past = RUNOFF_SHORT.get(code, RUNOFF_SHORT_DEFAULT)
         out.append({"k": "runoff", "d": runoff, "t": before, "p": after, "keep": True,
                     "s": short, "sp": short_past, "src": links.of("runoff.date")})
+        # After the runoff's own line, which says what it decides: "for the
+        # runoff" in each of them is the runoff it names. In the order of
+        # their days; the calendar strip sorts every date alike.
+        out += sorted(runoff_lines(code, record, links), key=lambda line: line["d"])
     return out, register, links
+
+
+def runoff_lines(code, record, links):
+    """The runoff's own early voting and mail-ballot dates, as the general
+    election's are said: each kept after Election Day ("keep") until its day
+    has passed, on the reader's calendar, so they go with the runoff but for a
+    ballot still arriving after it (rule 84). "For the runoff" where the
+    office has set one (``RUNOFF_SET``), else "for a runoff, if one is held";
+    never which race went to one or who is in it (rule 91)."""
+    held = code in RUNOFF_SET
+    of = "for the runoff" if held else "for a runoff, if one is held"
+    # Inside a sentence the condition is set off on both sides.
+    of_mid = of if held else of + ","
+    needed = "" if held else ", if needed"
+    out = []
+    start, end = _shown(record, "runoff.earlyVoting.start"), _shown(record, "runoff.earlyVoting.end")
+    if start and end:
+        sooner = _shown(record, "runoff.earlyVoting.startsBy")
+        out.append({"k": "runoff-early", "d": start, "e": end, "keep": True,
+                    "t": f"In-person early voting {of}" + (
+                        f"; it begins as soon as possible, and no later than {_long(start)}"
+                        if sooner else ""),
+                    "s": "Runoff early voting" + needed,
+                    "src": links.of("runoff.earlyVoting.start", "runoff.earlyVoting.end")})
+    request = _shown(record, "runoff.mail.requestDeadline.date")
+    if request:
+        # An application made in person may be for a ballot picked up there,
+        # not mailed (1 CMC 6509(e)): an absentee ballot, then, not a mail one.
+        in_person = get(record, "runoff.mail.requestDeadline.how") == "in person"
+        received = get(record, "runoff.mail.requestDeadline.rule") == "received"
+        out.append({"k": "runoff-request", "d": request, "keep": True,
+                    "t": ("Last day to apply in person for an absentee ballot " if in_person
+                          else "Last day to apply for a mail ballot ") + of +
+                         (" (the application must arrive by then)"
+                          if received and not in_person else ""),
+                    "s": ("Runoff absentee application, in person" if in_person
+                          else "Runoff mail ballot application due") + needed,
+                    "src": links.of("runoff.mail.requestDeadline.date")})
+    returned = _shown(record, "runoff.mail.returnDeadline.date")
+    received = _shown(record, "runoff.mail.returnDeadline.receivedBy")
+    rule = get(record, "runoff.mail.returnDeadline.rule")
+    if rule == "postmarked" and returned:
+        out.append({"k": "runoff-postmark", "d": returned, "keep": True,
+                    "t": f"Mail ballots {of_mid} must be postmarked by this day",
+                    "s": "Runoff postmark deadline" + needed,
+                    "src": links.of("runoff.mail.returnDeadline.date",
+                                    "runoff.mail.returnDeadline.rule")})
+        if received:
+            out.append({"k": "runoff-arrive", "d": received, "keep": True,
+                        "t": f"Mail ballots {of_mid} postmarked by {_long(returned)} are counted if "
+                             f"they arrive by this day",
+                        "p": f"The last day for mail ballots {of_mid} postmarked by "
+                             f"{_long(returned)} to arrive",
+                        "s": "Runoff mailed ballots arrive by",
+                        # The line says "postmarked", so it links a quote that
+                        # does (rule 84): the CNMI's calendar gives the day and
+                        # never the word, the law (1 CMC 6213(a)) both, and the
+                        # postmark line that linked the law is gone after the
+                        # runoff (the second reader of PR #237).
+                        "src": links.of("runoff.mail.returnDeadline.receivedBy",
+                                        "runoff.mail.returnDeadline.date",
+                                        "runoff.mail.returnDeadline.rule",
+                                        want=lambda s: bool(RULE_WORDS["postmarked"].search(
+                                            s.get("quote") or "")))
+                        or links.of("runoff.mail.returnDeadline.receivedBy")})
+    elif rule == "received" and (returned or received):
+        due = returned or received
+        time = _time(get(record, "runoff.mail.returnDeadline.time"))
+        out.append({"k": "runoff-return", "d": due, "keep": True,
+                    "t": f"Mail ballots {of_mid} must arrive at the election office by " +
+                         (time + " on " if time else "") + "this day",
+                    "s": "Runoff mail ballots due" + needed,
+                    "src": links.of("runoff.mail.returnDeadline.date" if returned
+                                    else "runoff.mail.returnDeadline.receivedBy",
+                                    "runoff.mail.returnDeadline.receivedBy")})
+    return out
 
 
 _MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August",

@@ -1489,7 +1489,26 @@
    },
    "runoff": {
     "date": "2026-12-01",
-    "note": "If no candidate wins a majority, a General Election/Special Election Runoff is held December 1, 2026. Advance voting for it begins as soon as possible, but no later than November 23, and runs to November 25. Registration deadline for the runoff: October 5, or November 2 for a federal contest."
+    "earlyVoting": {
+     "start": "2026-11-23",
+     "end": "2026-11-25",
+     "startsBy": true,
+     "note": "Advance voting for the December 1 runoff begins as soon as possible, and no later than November 23; it ends November 25."
+    },
+    "mail": {
+     "requestDeadline": {
+      "date": null,
+      "rule": null,
+      "how": null
+     },
+     "returnDeadline": {
+      "date": null,
+      "time": null,
+      "rule": null,
+      "receivedBy": null
+     }
+    },
+    "note": "If no candidate wins a majority, a General Election/Special Election Runoff is held December 1, 2026. Advance voting for it begins as soon as possible, but no later than November 23, and runs to November 25. Registration deadline for the runoff: October 5, or November 2 for a federal contest. The calendar's advance voting dates for the runoff are in runoff.earlyVoting (read again 2026-11-11): November 23 is the latest day advance voting may begin, not the first, so startsBy is true. No Secretary of State page read on 2026-11-11 gives the runoff's own absentee application or return deadline: the absentee application (App-25) is one form for a 'Primary, Election, or Runoff' and says the application 'must be received by your election office* 11 days before the election', without saying a runoff's day is counted from the runoff; the calendar page links only the 2026 calendar, and its 'Election Specific Details' are My Voter Page's, drawn by script. So runoff.mail is null: a gap, not a guess."
    },
    "sources": [
     {
@@ -1588,6 +1607,27 @@
      "quote": "You can return your ballot by drop boxes available inside early voting locations during early voting hours only. You can delivery your ballot directly to your County Board of Registrar's Office by 7 p.m. on Election Day.",
      "pageUpdated": null,
      "addedBy": "skeptic 2026-10-17: the note said 'a county drop box' without the early-voting-hours limit, and claimed an extra day for hospital patients that no cited source states (removed)"
+    },
+    {
+     "field": "runoff.earlyVoting.start",
+     "url": "https://sos.ga.gov/sites/default/files/forms/2026%20Short%20Calendar%20.pdf",
+     "quote": "ELECTION ELECTION DATE ADVANCE VOTING DATES ... General Election/Special Election Runoff 12/01/2026 As soon as possible, but no later than 11/23/26 – 11/25/26",
+     "pageUpdated": "2026-02-25 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.earlyVoting.end",
+     "url": "https://sos.ga.gov/sites/default/files/forms/2026%20Short%20Calendar%20.pdf",
+     "quote": "ELECTION ELECTION DATE ADVANCE VOTING DATES ... General Election/Special Election Runoff 12/01/2026 As soon as possible, but no later than 11/23/26 – 11/25/26",
+     "pageUpdated": "2026-02-25 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.mail.note",
+     "url": "https://sos.ga.gov/sites/default/files/2025-10/Absentee%20Ballot%20Application_App-25.pdf",
+     "quote": "Date of Primary, Election, or Runoff (mm/dd/yyyy) ... The application must be received by your election office* 11 days before the election.",
+     "pageUpdated": null,
+     "read": "2026-11-11"
     }
    ],
    "notes": "Georgia has no same-day registration; the deadline (October 5) has passed. Absentee ballots are available to any voter without an excuse; the application must be received by the county by October 23. The ballot may be returned by mail, in a drop box inside an early voting location during early voting hours only, or delivered to the county board of registrars' office, and must be received by the county registrar by 7:00 p.m. on Election Day; postmarks do not count. The Secretary of State's absentee guide is revision 3-30-22, before Watson v. RNC (June 29, 2026); Georgia already required receipt by the close of polls, and the state portal georgia.gov repeats 'received by 7 p.m. on Election Day' for 2026. Polls are open 7 a.m. to 7 p.m. Neither SOS page found gives a time of day for the online registration deadline (news reports say 11:59 p.m.; not used), or says whether a mailed registration counts by postmark, so those are left null. The SOS calendar applies O.C.G.A. 21-2-14: a deadline falling on a weekend or holiday moves to the next business day.",
@@ -3658,7 +3698,27 @@
    },
    "runoff": {
     "date": "2026-11-20",
-    "note": "The Commonwealth Election Commission certified the general election results on November 6, 2026 (its home page: 'The General Election results were certified on November 6, 2026.'), and its 2026 Run-Off Election Important Dates (a PDF its 'Run-Off Election Important Dates' page embeds, server last-modified 2026-11-08) and its home page give the 2026 Run-Off Election as Friday, November 20, 2026: the fourteenth day after certification, as 1 CMC § 6509(a) and (b) count it. Under that section a runoff between the two highest is held where no candidate for governor and lieutenant governor, or for attorney general, receives more than one-half of the votes. No Commission page read on 2026-11-11 says in words which office or offices this runoff decides, or who is in it: not the runoff calendar, its page, the home page, or the agenda of the November 6 meeting, which listed 'Approval of Ballot Layout for the 2026 Run-Off Election'; so the record does not say, and this site reads no territorial result (rule 91). The same calendar gives: November 10, last day to mail out the runoff absentee ballots; November 12, last day to receive absentee ballot applications over the counter; November 13 to November 19, early voting for the runoff (specimen ballots posted in each polling place from November 13); December 4, last day to receive runoff absentee ballots (1 CMC § 6213(a): postmarked by the day of the runoff). The cache has no fields for a runoff's own early voting or absentee deadlines, so only the runoff's date is shown. Read 2026-11-11, every request sending the project's User-Agent; not yet re-opened by a second reader. 1 CMC § 6524(b) also holds a runoff where two or more persons tie for any office; the page's words name the offices § 6509 holds a majority runoff for."
+    "earlyVoting": {
+     "start": "2026-11-13",
+     "end": "2026-11-19",
+     "startsBy": null,
+     "note": "Early voting for the 2026 Run-Off Election: first day November 13 (specimen ballots posted in each polling place that day), last day November 19. The calendar names no separate Northern Islands period for the runoff."
+    },
+    "mail": {
+     "requestDeadline": {
+      "date": "2026-11-12",
+      "rule": "received",
+      "how": "in person"
+     },
+     "returnDeadline": {
+      "date": "2026-11-20",
+      "time": null,
+      "rule": "postmarked",
+      "receivedBy": "2026-12-04"
+     },
+     "note": "Applications over the counter are received through November 12; the calendar gives no deadline for applications by mail or electronic means for the runoff. A runoff absentee ballot must be postmarked by the day of the runoff and received by the Commission within fourteen days after it (1 CMC § 6213(a) and (h))."
+    },
+    "note": "The Commonwealth Election Commission certified the general election results on November 6, 2026 (its home page: 'The General Election results were certified on November 6, 2026.'), and its 2026 Run-Off Election Important Dates (a PDF its 'Run-Off Election Important Dates' page embeds, server last-modified 2026-11-08) and its home page give the 2026 Run-Off Election as Friday, November 20, 2026: the fourteenth day after certification, as 1 CMC § 6509(a) and (b) count it. Under that section a runoff between the two highest is held where no candidate for governor and lieutenant governor, or for attorney general, receives more than one-half of the votes. No Commission page read on 2026-11-11 says in words which office or offices this runoff decides, or who is in it: not the runoff calendar, its page, the home page, or the agenda of the November 6 meeting, which listed 'Approval of Ballot Layout for the 2026 Run-Off Election'; so the record does not say, and this site reads no territorial result (rule 91). The same calendar gives: November 10, last day to mail out the runoff absentee ballots; November 12, last day to receive absentee ballot applications over the counter; November 13 to November 19, early voting for the runoff (specimen ballots posted in each polling place from November 13); December 4, last day to receive runoff absentee ballots (1 CMC § 6213(a): postmarked by the day of the runoff). Those that are a voter's to act on are in runoff.earlyVoting and runoff.mail (read again 2026-11-11 from the calendar and the home page's 'Important Dates for Election 2026', which give the same days): the over-the-counter application deadline (November 12), early voting (November 13 to 19, the seventh day before the runoff through the day before it, as 1 CMC § 6222(a) sets early voting), the postmark (the day of the runoff, as 1 CMC § 6213(a) sets it) and the last day ballots are received (December 4). November 10, the last day for the Commission to mail out runoff absentee ballots (1 CMC § 6509(e): not less than ten days before the runoff, other than ballots picked up in person), is the Commission's own duty and is not shown. Each date is the Commonwealth's own calendar day (the Commission gives its polling hours in ChST); whether one has passed is counted on the reader's device. Read 2026-11-11, every request sending the project's User-Agent; not yet re-opened by a second reader. 1 CMC § 6524(b) also holds a runoff where two or more persons tie for any office; the page's words name the offices § 6509 holds a majority runoff for."
    },
    "sources": [
     {
@@ -3859,6 +3919,90 @@
      "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
      "quote": "§ 6524. Tabulation of Votes. ... (b) In any election where it is impossible to declare a winner because two or more persons receive an equal number of votes for any office, there shall be a run-off to determine the winning candidate or candidates.",
      "pageUpdated": "2020-07-30 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.earlyVoting.start",
+     "url": "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf",
+     "quote": "2026 Run-Off Election - Important Dates ... NOVEMBER 13 First day of early voting Specimen ballots to be posted in each polling place.",
+     "pageUpdated": "2026-11-08 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.earlyVoting.start",
+     "url": "https://www.votecnmi.gov.mp/",
+     "quote": "Important Dates for Election 2026 ... November 13, 2026 7 days ‣ First day of early voting. ‣ Specimen ballots to be posted in each polling place.",
+     "pageUpdated": null,
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.earlyVoting.end",
+     "url": "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf",
+     "quote": "2026 Run-Off Election - Important Dates ... NOVEMBER 19 Last day of (Run-Off) Early Voting",
+     "pageUpdated": "2026-11-08 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.earlyVoting.end",
+     "url": "https://www.votecnmi.gov.mp/",
+     "quote": "November 19, 2026 1 day ‣ Last day of Run-Off early voting.",
+     "pageUpdated": null,
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.earlyVoting.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
+     "quote": "§ 6222. Early Voting: Period for Early Voting; Hours. (a) The period for early voting by personal appearance begins the 7th day preceding an election and extends through the last day before election day",
+     "pageUpdated": "2020-07-30 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.mail.requestDeadline.date",
+     "url": "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf",
+     "quote": "2026 Run-Off Election - Important Dates ... NOVEMBER 12 Last day to receive absentee ballot applications over the counter",
+     "pageUpdated": "2026-11-08 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.mail.requestDeadline.date",
+     "url": "https://www.votecnmi.gov.mp/",
+     "quote": "November 12, 2026 8 days ‣ Last day to receive absentee ballot applications over the counter.",
+     "pageUpdated": null,
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.date",
+     "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
+     "quote": "§ 6213. Absentee Voting: Counting Ballots. (a) To be eligible to be counted, an absentee ballot shall be received by the Commission not later than the date of election; provided that in the case of a runoff election an absentee ballot shall be postmarked not later than the day of the runoff election and shall be received by the Commission no later than fourteen days after the date of the runoff election.",
+     "pageUpdated": "2020-07-30 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.receivedBy",
+     "url": "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf",
+     "quote": "2026 Run-Off Election - Important Dates ... DECEMBER 04 Last day to receive run-off election absentee ballots",
+     "pageUpdated": "2026-11-08 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.receivedBy",
+     "url": "https://www.votecnmi.gov.mp/",
+     "quote": "December 4, 2026 14 days after ‣ Last day to receive run-off election absentee ballots.",
+     "pageUpdated": null,
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.mail.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/CNMI-Election-Law-1_CMC_6001-6706.pdf",
+     "quote": "(e) The Commission shall mail absentee ballots, other than absentee ballots that are picked up in person, not less than ten days before the runoff election date. All other matters pertaining to runoff election absentee ballots shall be as provided in chapter 2 of this part.",
+     "pageUpdated": "2020-07-30 (server last-modified)",
+     "read": "2026-11-11"
+    },
+    {
+     "field": "runoff.mail.note",
+     "url": "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf",
+     "quote": "NOVEMBER 10 Last day to mail out the 2026 run-off absentee ballots",
+     "pageUpdated": "2026-11-08 (server last-modified)",
      "read": "2026-11-11"
     }
    ],

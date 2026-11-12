@@ -4049,7 +4049,10 @@ async function testStates() {
     const kinds = (p) => [...p.D.querySelectorAll("#voting .vote-dates li")].map((li) => li.getAttribute("data-kind"));
     check("California keeps the mailed ballots arriving by November 10, and nothing about registering",
       kinds(caAfter).join(",") === "arrive" && !caAfter.D.querySelector("#voting .vote-lead"), kinds(caAfter).join(","));
-    check("Georgia keeps its December 1 runoff alone", kinds(gaAfter).join(",") === "runoff", kinds(gaAfter).join(","));
+    // And the runoff's advance voting, from the Secretary of State's own
+    // calendar; its absentee dates are null there, and add nothing.
+    check("Georgia keeps its December 1 runoff and the runoff's advance voting alone",
+      kinds(gaAfter).join(",") === "runoff,runoff-early", kinds(gaAfter).join(","));
     const button = gaAfter.D.querySelector('#voting .state-links a[data-kind="register"]');
     check("'Register to vote' is not marked closed once the election is past",
       !!button && !button.hasAttribute("data-closed") && button.textContent.trim() === "Register to vote",
@@ -4066,6 +4069,35 @@ async function testStates() {
     const strip = [...gaLater.D.querySelectorAll("#voting ol.vote-cal li")].map((li) => li.textContent);
     check("Georgia's strip names December 1 for what it was, after it",
       strip.some((t) => /Dec 1Runoff date/.test(t)) && !strip.some((t) => /if needed/.test(t)), strip.join(" | "));
+  });
+  /* Georgia's runoff advance voting, as the Secretary of State's 2026
+   * calendar gives it: "As soon as possible, but no later than 11/23/26 –
+   * 11/25/26". November 23 is the latest start, not the first day, and the
+   * runoff is held only if one is needed. No Secretary of State page gives
+   * the runoff's own absentee dates: null in the record, and the block says
+   * nothing of them (rule 84: a null is a gap). */
+  const gaRunoffDays = await buildPage("states/ga.html", { now: "2026-11-24T09:00:00" });
+  suite("states/ga.html — the runoff's advance voting, and nothing where the record is null", () => {
+    const early = (p) => p.D.querySelector('#voting .vote-dates li[data-kind="runoff-early"]');
+    const words = /^November 23 – November 25, 2026\. In-person early voting for a runoff, if one is held; it begins as soon as possible, and no later than November 23\./;
+    for (const [name, p] of [["before the election", georgia], ["on November 5", gaAfter], ["on November 24", gaRunoffDays]]) {
+      const li = early(p);
+      check(name + ": advance voting for a runoff, if one is held, in the calendar's words, linked to it",
+        !!li && words.test(li.textContent) &&
+          li.querySelector(".vote-src a").getAttribute("href") === "https://sos.ga.gov/sites/default/files/forms/2026%20Short%20Calendar%20.pdf",
+        li && li.innerHTML);
+      const kinds = [...p.D.querySelectorAll("#voting .vote-dates li")].map((x) => x.getAttribute("data-kind"));
+      check(name + ": no runoff mail-ballot line, the record's fields being null",
+        kinds.filter((k) => /^runoff-/.test(k)).join(",") === "runoff-early", kinds.join(","));
+    }
+    check("under way on November 24", /Under way/.test(early(gaRunoffDays).textContent), early(gaRunoffDays).textContent);
+    check("ahead, and said so in words only, on November 5", !/Under way|Ended/.test(early(gaAfter).textContent),
+      early(gaAfter).textContent);
+    const strip = [...gaAfter.D.querySelectorAll("#voting ol.vote-cal li")].map((li) => li.textContent);
+    check("the strip calls it 'if needed', as the runoff's own cell does",
+      strip.includes("Nov 23–25Runoff early voting, if needed") && strip.includes("Dec 1Runoff, if needed"), strip.join(" | "));
+    check("gone once it has ended, the runoff staying", ![...gaLater.D.querySelectorAll("#voting .vote-dates li")]
+      .some((li) => li.getAttribute("data-kind") === "runoff-early"));
   });
   const caLate = await buildPage("states/ca.html", { now: "2026-11-12T09:00:00" });
   suite("states/ca.html once the last ballot could arrive — no dates left to show", () => {
@@ -11304,7 +11336,8 @@ async function testMarianasRunoff() {
       [now, day, later].map((p) => p.errors.join(" | ")).join(" / "));
     const voting = now.D.getElementById("voting");
     const kinds = [...voting.querySelectorAll(".vote-dates li")].map((li) => li.getAttribute("data-kind"));
-    check("after Election Day the block keeps the runoff alone", kinds.join(",") === "runoff", kinds.join(","));
+    check("after Election Day the block keeps the runoff, then the runoff's own dates in the order of their days",
+      kinds.join(",") === "runoff,runoff-request,runoff-early,runoff-postmark,runoff-arrive", kinds.join(","));
     const ahead = line(voting);
     check("November 20, 2026, set by the Commission, for the offices the law holds one for",
       !!ahead && AHEAD.test(ahead.textContent) && !/Today|Passed/.test(ahead.textContent), ahead && ahead.textContent);
@@ -11348,6 +11381,135 @@ async function testMarianasRunoff() {
     const gone = dates(ballotLater) && line(dates(ballotLater));
     check("and after November 20, the date set for it",
       !!gone && GONE.test(gone.textContent), gone && gone.textContent);
+  });
+  await testMarianasRunoffDates(AHEAD, GONE);
+}
+
+/* The runoff's own early voting and mail-ballot dates (runoff.earlyVoting,
+ * runoff.mail): the Commission's runoff calendar gives early voting from
+ * November 13 to 19, applications over the counter until November 12, and
+ * ballots postmarked by the runoff received until December 4 (1 CMC 6213(a)).
+ * The record held only the runoff's date, so neither page said early voting
+ * for it opened on November 13. Each line is in the reader's day's tense, as
+ * every other date is (rule 84), and goes once its day has passed, the
+ * runoff's own line in the past tense and a ballot still arriving staying
+ * after it; none names a race or a person (rule 91). One module draws both
+ * pages (KYC.ballot, rule 12). */
+async function testMarianasRunoffDates(AHEAD, GONE) {
+  const DAYS = ["2026-11-12", "2026-11-13", "2026-11-19", "2026-11-21", "2026-12-05"];
+  const KINDS = {
+    "2026-11-12": "runoff,runoff-request,runoff-early,runoff-postmark,runoff-arrive",
+    "2026-11-13": "runoff,runoff-early,runoff-postmark,runoff-arrive",
+    "2026-11-19": "runoff,runoff-early,runoff-postmark,runoff-arrive",
+    "2026-11-21": "runoff,runoff-arrive",
+    "2026-12-05": "runoff",
+  };
+  const REQUEST = /^November 12, 2026\. Last day to apply in person for an absentee ballot for the runoff\./;
+  const EARLY = /^November 13 – November 19, 2026\. In-person early voting for the runoff\./;
+  const POSTMARK = /^November 20, 2026\. Mail ballots for the runoff must be postmarked by this day\./;
+  const ARRIVE = /^December 4, 2026\. Mail ballots for the runoff postmarked by November 20 are counted if they arrive by this day\./;
+  const CALENDAR = "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf";
+  const kinds = (root) => [...root.querySelectorAll(".vote-dates li")].map((li) => li.getAttribute("data-kind")).join(",");
+  const item = (root, kind) => root.querySelector('.vote-dates li[data-kind="' + kind + '"]');
+  const text = (root, kind) => (item(root, kind) || {}).textContent || "";
+  const cell = (root, words) => [...root.querySelectorAll("ol.vote-cal li")].find((li) => li.textContent === words);
+  const cells = (root) => [...root.querySelectorAll("ol.vote-cal li")].map((li) => li.textContent).join(" | ");
+  const pages = {};
+  const ballots = {};
+  for (const day of DAYS) {
+    pages[day] = await buildPage("states/mp.html", { now: day + "T09:00:00" });
+    ballots[day] = await ballotFor("#/?zip=96950", { now: day + "T09:00:00" });
+  }
+  const each = (fn) => DAYS.map((day) => [day, pages[day].D.getElementById("voting"), ballots[day].out.querySelector(".ballot-dates")])
+    .map(([day, page, ballot]) => fn(day, page, ballot));
+
+  suite("states/mp.html and Your ballot (96950) — the runoff's own dates, on the reader's day", () => {
+    check("no page errors", DAYS.every((d) => !pages[d].errors.length && !ballots[d].errors.length),
+      DAYS.map((d) => pages[d].errors.concat(ballots[d].errors).join(" | ")).join(" / "));
+    const wrong = each((day, page, ballot) => [day, kinds(page), ballot ? kinds(ballot) : "no dates"])
+      .filter(([day, page, ballot]) => page !== KINDS[day] || ballot !== KINDS[day]);
+    check("each day keeps the lines still to come, and the runoff, on both pages alike", wrong.length === 0,
+      wrong.map((w) => w.join(": ")).join(" || "));
+
+    // November 12: the last day to apply over the counter is today.
+    const p12 = pages["2026-11-12"].D.getElementById("voting");
+    check("Nov 12: today is the last day to apply in person, in the Commission's own terms",
+      REQUEST.test(text(p12, "runoff-request")) && /Today/.test(text(p12, "runoff-request")),
+      text(p12, "runoff-request"));
+    check("Nov 12: early voting for the runoff is ahead, said without a status",
+      EARLY.test(text(p12, "runoff-early")) && !/Under way|Ended|Passed|Today/.test(text(p12, "runoff-early")),
+      text(p12, "runoff-early"));
+    check("Nov 12: postmarked by the runoff's day, and received by December 4, ahead",
+      POSTMARK.test(text(p12, "runoff-postmark")) && ARRIVE.test(text(p12, "runoff-arrive")) &&
+        !/Today|Passed/.test(text(p12, "runoff-postmark") + text(p12, "runoff-arrive")),
+      text(p12, "runoff-postmark") + " | " + text(p12, "runoff-arrive"));
+    check("Nov 12: the runoff itself, ahead, in its own words", AHEAD.test(text(p12, "runoff")), text(p12, "runoff"));
+    // A line that says "postmarked" links the law, which says it; the
+    // calendar gives the days alone (rule 84; the second reader of PR #237).
+    check("Nov 12: each line links the Commission's own runoff calendar or its law",
+      ["runoff-request", "runoff-early"].every((k) =>
+        [...item(p12, k).querySelectorAll(".vote-src a")].map((a) => a.getAttribute("href")).join(" ") === CALENDAR) &&
+        ["runoff-postmark", "runoff-arrive"].every((k) =>
+          /votecnmi\.gov\.mp\/downloads\/CNMI-Election-Law/.test(item(p12, k).querySelector(".vote-src a").getAttribute("href"))),
+      ["runoff-request", "runoff-early", "runoff-postmark", "runoff-arrive"].map((k) => item(p12, k).innerHTML).join(" || "));
+    check("Nov 12: the strip marks the day as today's, and early voting ahead",
+      !!cell(p12, "Nov 12Runoff absentee application, in person") &&
+        cell(p12, "Nov 12Runoff absentee application, in person").classList.contains("is-now") &&
+        !!cell(p12, "Nov 13–19Runoff early voting") &&
+        !/is-now|is-past/.test(cell(p12, "Nov 13–19Runoff early voting").className), cells(p12));
+    // How a date of the islands is read: the islands' own day, counted on
+    // the reader's device (no time zone is typed in).
+    check("the note says each date is the islands' own day, counted on the reader's device",
+      /Each date is a calendar day in the Northern Mariana Islands; whether it has passed is counted on your device's calendar, which in another time zone turns to the next day some hours sooner or later\./.test(p12.textContent),
+      p12.textContent.slice(-900));
+
+    // November 13 and 19: early voting under way; the application day gone.
+    for (const day of ["2026-11-13", "2026-11-19"]) {
+      const p = pages[day].D.getElementById("voting");
+      const short = day.slice(-2).replace(/^0/, "");
+      check("Nov " + short + ": early voting for the runoff is under way",
+        EARLY.test(text(p, "runoff-early")) && /Under way/.test(text(p, "runoff-early")), text(p, "runoff-early"));
+      check("Nov " + short + ": the strip draws it as under way, and no longer the passed application day",
+        !!cell(p, "Nov 13–19Runoff early voting") && cell(p, "Nov 13–19Runoff early voting").classList.contains("is-now") &&
+          !/Nov 12/.test(cells(p)), cells(p));
+    }
+
+    // November 21: the runoff has gone; a ballot still arriving stays.
+    const p21 = pages["2026-11-21"].D.getElementById("voting");
+    check("Nov 21: the runoff in the past tense, and the ballots still arriving by December 4",
+      GONE.test(text(p21, "runoff")) && ARRIVE.test(text(p21, "runoff-arrive")) &&
+        !/Today|Passed/.test(text(p21, "runoff-arrive")), text(p21, "runoff") + " | " + text(p21, "runoff-arrive"));
+    check("Nov 21: the strip names the runoff for what it was, the arrival ahead",
+      !!cell(p21, "Nov 20Governor or attorney general runoff date") && !!cell(p21, "Dec 4Runoff mailed ballots arrive by") &&
+        !/Runoff early voting|postmark/.test(cells(p21)), cells(p21));
+
+    // December 5: nothing of the runoff's own is left but its date.
+    const p5 = pages["2026-12-05"].D.getElementById("voting");
+    check("Dec 5: the runoff's date alone, in the past tense", GONE.test(text(p5, "runoff")) &&
+      !/Runoff mailed ballots|December 4/.test(p5.querySelector(".vote-dates").textContent), cells(p5));
+
+    // Your ballot says each day what the state page says (one module).
+    const differ = each((day, page, ballot) => {
+      if (!ballot) return day + ": no dates";
+      const a = [...page.querySelectorAll(".vote-dates li")].map((li) => li.textContent);
+      const b = [...ballot.querySelectorAll(".vote-dates li")].map((li) => li.textContent);
+      return JSON.stringify(a) === JSON.stringify(b) ? "" : day + ": " + b.join(" | ") + " / " + a.join(" | ");
+    }).filter(Boolean);
+    check("Your ballot's key dates are the state page's, word for word, every day", differ.length === 0, differ.join(" || "));
+    const b12 = ballots["2026-11-12"].out.querySelector(".ballot-dates");
+    check("Your ballot on Nov 12: today is the last day to apply in person; early voting opens Nov 13",
+      !!b12 && REQUEST.test(text(b12, "runoff-request")) && /Today/.test(text(b12, "runoff-request")) &&
+        EARLY.test(text(b12, "runoff-early")), b12 && b12.textContent.slice(0, 600));
+    const b13 = ballots["2026-11-13"].out.querySelector(".ballot-dates");
+    check("Your ballot on Nov 13: early voting for the runoff is under way",
+      !!b13 && /Under way/.test(text(b13, "runoff-early")), b13 && text(b13, "runoff-early"));
+    // Nobody on the election office's lists is named in any of them (rule 91).
+    const offices = ((pages["2026-11-12"].window.KYC.stategov.ballotOf("MP") || {}).offices) || {};
+    const names = Object.keys(offices).flatMap((k) => (((offices[k] || {}).candidates || {}).candidates || [])
+      .map((c) => c.name));
+    const all = DAYS.map((d) => pages[d].D.querySelector("#voting .vote-dates").textContent).join(" ");
+    check("names no candidate on the lists, on any day", names.length > 0 &&
+      names.every((n) => all.indexOf(n) === -1), names.join(", "));
   });
 }
 
