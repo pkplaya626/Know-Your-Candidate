@@ -294,7 +294,27 @@
    },
    "runoff": {
     "date": "2026-12-01",
-    "note": "December 1, 2026 is the General Runoff Election for county and municipal offices (and, in case of a tie, certain state or township offices). It is not a runoff for federal offices. The registration deadline for it is Monday, November 2, 2026."
+    "earlyVoting": {
+     "start": "2026-11-24",
+     "end": "2026-11-30",
+     "startsBy": null,
+     "note": "Early voting for the general runoff election is at the county clerk's office during regular office hours, from seven days before the runoff through the day before it, closing when the clerk's office regularly closes (Ark. Code 7-5-418(a)(2))."
+    },
+    "mail": {
+     "requestDeadline": {
+      "date": null,
+      "rule": null,
+      "how": null
+     },
+     "returnDeadline": {
+      "date": "2026-12-01",
+      "time": "7:30 pm",
+      "rule": "received",
+      "receivedBy": "2026-12-01"
+     },
+     "note": "Absentee ballots by mail must reach the county clerk by 7:30 p.m. on the runoff's day (military and overseas voters who did not cast 'instant runoff' ballots excepted). The calendar gives no deadline for applications by mail, fax or electronic mail for the runoff, and puts the deadline for in-person applications under Friday, November 27 while saying it is 'the close of regular business hours on the day before the election': the two days disagree, so runoff.mail.requestDeadline is null."
+    },
+    "note": "December 1, 2026 is the General Runoff Election for county and municipal offices (and, in case of a tie, certain state or township offices). It is not a runoff for federal offices. The registration deadline for it is Monday, November 2, 2026. The runoff's own early voting and absentee dates are in runoff.earlyVoting and runoff.mail (read 2026-11-12 from the Secretary of State's 2026 election calendar, Rev. July 2026). Read 2026-11-12, every request sending the project's User-Agent; not yet re-opened by a second reader."
    },
    "sources": [
     {
@@ -374,6 +394,41 @@
      "url": "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf",
      "quote": "DECEMBER 1, 2026 General Runoff Election (County and Municipal) Ark. Code 7-5-106 o Or in case of a tie for certain state or township offices.",
      "pageUpdated": "Rev. July 2026"
+    },
+    {
+     "field": "runoff.earlyVoting.start",
+     "url": "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf",
+     "quote": "November 24, 2026 – Tuesday 7 DAYS PRIOR TO THE GENERAL RUNOFF ELECTION Early voting for the general runoff election shall be available to any qualified elector who applies to the county clerk during regular office hours, beginning seven (7) days before the election and ending on the day before the election day at the time the county clerk’s office regularly closes. Ark. Code § 7-5-418(a)(2)",
+     "pageUpdated": "Rev. July 2026 (server last-modified 2026-07-13)",
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.earlyVoting.end",
+     "url": "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf",
+     "quote": "November 30, 2026 – Monday 1 DAY PRIOR TO THE GENERAL RUNOFF ELECTION Last day for voter to participate in early voting. Early voting closes the day before the Election Day at the time the county clerk’s office regularly closes. Ark. Code § 7-5-418(a)(2)",
+     "pageUpdated": "Rev. July 2026 (server last-modified 2026-07-13)",
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.date",
+     "url": "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf",
+     "quote": "December 1, 2026 – Tuesday GENERAL RUNOFF ELECTION Polls open 7:30 am to 7:30 pm. ... 7:30 pm – Deadline for county clerk to receive absentee ballots by mail (excluding military and overseas absentee voters who did not cast “instant runoff” ballots), or by physical delivery of the authorized agent of the voter who is medically unable to vote at regular polling site. Ark. Code § 7-5-411(a)(1)(B) and (a)(1)(A)(i)",
+     "pageUpdated": "Rev. July 2026 (server last-modified 2026-07-13)",
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.receivedBy",
+     "url": "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf",
+     "quote": "December 1, 2026 – Tuesday GENERAL RUNOFF ELECTION Polls open 7:30 am to 7:30 pm. ... 7:30 pm – Deadline for county clerk to receive absentee ballots by mail (excluding military and overseas absentee voters who did not cast “instant runoff” ballots), or by physical delivery of the authorized agent of the voter who is medically unable to vote at regular polling site. Ark. Code § 7-5-411(a)(1)(B) and (a)(1)(A)(i)",
+     "pageUpdated": "Rev. July 2026 (server last-modified 2026-07-13)",
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.mail.note",
+     "url": "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf",
+     "quote": "November 27, 2026 – Friday FRIDAY PRIOR TO THE ELECTION Deadline for county clerk to receive in-person applications for absentee ballots for the General Runoff Election and Annual School Runoff Election from the voter, designated bearer, or administrator is no later than the close of regular business hours on the day before the election.",
+     "pageUpdated": "Rev. July 2026 (server last-modified 2026-07-13)",
+     "read": "2026-11-12"
     }
    ],
    "notes": "Absentee voting requires a qualifying reason (unavoidably absent, illness or disability, uniformed services or overseas). Applications by mail, fax or email must be received by the county clerk by Tuesday, October 27; applications in person (or by designated bearer or administrator) by close of business Friday, October 30; by an authorized agent for a hospital or nursing-home patient by 1:30 p.m. on Election Day. A ballot delivered in person or by designated bearer must reach the county clerk by close of business Friday, October 30; a mailed ballot must be received by 7:30 p.m. on Election Day. Military and overseas ballots must be mailed by Election Day and received by 5:00 p.m. ten days after the election. Arkansas has no grace period for domestic mailed ballots, so Watson v. RNC does not change its deadline. Polls are open 7:30 a.m. to 7:30 p.m. (calendar). Voters must show photo identification or vote a provisional ballot and show it by noon on Monday, November 9. Arkansas has no online voter registration: the paper application can be printed or requested online and mailed.",
@@ -1677,7 +1732,25 @@
    },
    "runoff": {
     "date": "2026-11-17",
-    "note": "Governor and Lieutenant Governor, and Delegate to the U.S. House: each must win a majority of the votes cast. If no ticket or candidate does, federal law holds a runoff between the top two on the fourteenth day after the election (48 U.S.C. § 1422 for Governor and Lieutenant Governor, 48 U.S.C. § 1712 for Delegate), which is Tuesday, November 17, 2026 (computed by us; the Guam Election Commission's 2026 calendar does not list a runoff date). A runoff happens only if needed."
+    "earlyVoting": {
+     "start": null,
+     "end": null,
+     "startsBy": null
+    },
+    "mail": {
+     "requestDeadline": {
+      "date": null,
+      "rule": null,
+      "how": null
+     },
+     "returnDeadline": {
+      "date": null,
+      "time": null,
+      "rule": null,
+      "receivedBy": null
+     }
+    },
+    "note": "Governor and Lieutenant Governor, and Delegate to the U.S. House: each must win a majority of the votes cast. If no ticket or candidate does, federal law holds a runoff between the top two on the fourteenth day after the election (48 U.S.C. § 1422 for Governor and Lieutenant Governor, 48 U.S.C. § 1712 for Delegate), which is Tuesday, November 17, 2026 (computed by us; the Guam Election Commission's 2026 calendar does not list a runoff date). A runoff happens only if needed. No Guam Election Commission page read on 2026-11-12 gives a runoff's own early voting or absentee dates, or mentions a runoff at all: not its home page, its '2026 Important Dates' calendar (whose last entries are the absentee ballot deadline of November 18, the tentative tabulation and certification of November 19 and the post-election report of November 23), its '2026 General Election Info', absentee, off-island, early in-office and homebound pages, its public meetings page, or the packets of its October 12 and November 1 meetings that page links. So runoff.earlyVoting and runoff.mail are null: a gap, not a guess. Read 2026-11-12, every request sending the project's User-Agent."
    },
    "sources": [
     {
@@ -2793,7 +2866,27 @@
    },
    "runoff": {
     "date": "2026-12-12",
-    "note": "November 3 is the U.S. Senate general election (after the spring closed party primaries) and the open primary for U.S. Representative and other offices. A U.S. House race not decided on November 3 goes to the Open U.S. Representative General on Saturday, December 12, 2026. For December 12: register in person, by mail or at OMV by November 12, online by November 21; early voting November 28-December 5 (excluding Sunday November 29); absentee request by December 8 at 4:30 p.m.; voted absentee ballot received by December 11 at 4:30 p.m.; polls 7 a.m.-8 p.m."
+    "earlyVoting": {
+     "start": "2026-11-28",
+     "end": "2026-12-05",
+     "startsBy": null,
+     "note": "November 28 to December 5, excluding Sunday, November 29, 8:30 a.m. to 6 p.m."
+    },
+    "mail": {
+     "requestDeadline": {
+      "date": "2026-12-08",
+      "rule": null,
+      "how": null
+     },
+     "returnDeadline": {
+      "date": "2026-12-11",
+      "time": "4:30 pm",
+      "rule": "received",
+      "receivedBy": "2026-12-11"
+     },
+     "note": "An absentee ballot is requested by 4:30 p.m. December 8, online through the Voter Portal or in writing through the Registrar of Voters (no quoted word says the request must be received by then, so rule is null, as November 3's is); a voted absentee ballot must reach the Registrar of Voters by 4:30 p.m. December 11; military and overseas voters excepted from both."
+    },
+    "note": "November 3 is the U.S. Senate general election (after the spring closed party primaries) and the open primary for U.S. Representative and other offices. A U.S. House race not decided on November 3 goes to the Open U.S. Representative General on Saturday, December 12, 2026. For December 12: register in person, by mail or at OMV by November 12, online by November 21; early voting November 28-December 5 (excluding Sunday November 29); absentee request by December 8 at 4:30 p.m.; voted absentee ballot received by December 11 at 4:30 p.m.; polls 7 a.m.-8 p.m. The December 12 dates for early voting and absentee ballots are in runoff.earlyVoting and runoff.mail (read 2026-11-12 from the Secretary of State's election-dates page, under 'The following is important information for the Saturday, December 12, 2026 Election'); its registration deadlines have no field and are not shown. The page's words call December 12 a general election, not a runoff. Read 2026-11-12, every request sending the project's User-Agent; not yet re-opened by a second reader."
    },
    "sources": [
     {
@@ -2861,6 +2954,41 @@
      "url": "https://www.sos.la.gov/elections-voting/election-dates",
      "quote": "The deadline for a Registrar of Voters to receive a voted absentee ballot is November 2 by 4:30 p.m. (other than military and overseas voters).",
      "pageUpdated": null
+    },
+    {
+     "field": "runoff.earlyVoting.start",
+     "url": "https://www.sos.la.gov/elections-voting/election-dates",
+     "quote": "The following is important information for the Saturday, December 12, 2026 Election: ... Early voting is November 28-December 5 (excluding Sunday, November 29) from 8:30 a.m.- 6 p.m.",
+     "pageUpdated": null,
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.earlyVoting.end",
+     "url": "https://www.sos.la.gov/elections-voting/election-dates",
+     "quote": "The following is important information for the Saturday, December 12, 2026 Election: ... Early voting is November 28-December 5 (excluding Sunday, November 29) from 8:30 a.m.- 6 p.m.",
+     "pageUpdated": null,
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.mail.requestDeadline.date",
+     "url": "https://www.sos.la.gov/elections-voting/election-dates",
+     "quote": "The following is important information for the Saturday, December 12, 2026 Election: ... The deadline to request an absentee ballot is December 8 by 4:30 p.m. (other than military and overseas voters). You can request an absentee ballot online through our Voter Portal or in writing through your Registrar of Voters Office.",
+     "pageUpdated": null,
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.date",
+     "url": "https://www.sos.la.gov/elections-voting/election-dates",
+     "quote": "The following is important information for the Saturday, December 12, 2026 Election: ... The deadline for a Registrar of Voters to receive a voted absentee ballot is December 11 by 4:30 p.m. (other than military and overseas voters).",
+     "pageUpdated": null,
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.receivedBy",
+     "url": "https://www.sos.la.gov/elections-voting/election-dates",
+     "quote": "The following is important information for the Saturday, December 12, 2026 Election: ... The deadline for a Registrar of Voters to receive a voted absentee ballot is December 11 by 4:30 p.m. (other than military and overseas voters).",
+     "pageUpdated": null,
+     "read": "2026-11-12"
     }
    ],
    "notes": "Louisiana's November 3 ballot is unusual: it is the U.S. Senate general election and an open (all-candidate) primary for U.S. Representative; per Act 7 of the 2026 Regular Session, U.S. Representative is not a closed party office for the November and December cycle. Absentee voting by mail requires a qualifying reason (military and overseas voters excepted). Voted absentee ballots must reach the parish Registrar of Voters by 4:30 p.m. on Monday, November 2, the day before Election Day; military, overseas and hospitalized voters' ballots may arrive by Election Day. Receipt-based rule, so Watson v. RNC (June 29, 2026) does not move it. The 4:30 p.m. October 30 request deadline also applies. Polls open 6 a.m.-8 p.m. on November 3. The online registration cut-off time is not stated on the Secretary of State's pages.",
@@ -4053,7 +4181,27 @@
    },
    "runoff": {
     "date": "2026-12-01",
-    "note": "The Secretary of State's calendar schedules a December 1 runoff, if required, only for Supreme Court, Court of Appeals, chancery, circuit and county court judges and school board members/trustees. The calendar notes that the regularly scheduled Supreme Court election is currently enjoined by a federal court order. Runoff registration deadline: November 2."
+    "earlyVoting": {
+     "start": null,
+     "end": null,
+     "startsBy": null,
+     "note": "Mississippi has no early voting open to every voter (earlyVoting.available is false). For the runoff the calendar gives in-person absentee voting in the circuit clerk's office, for voters with a reason the law accepts, with the offices open 8 a.m. to noon on Saturday, November 21, and an in-person absentee voting deadline of noon on Saturday, November 28; neither is early voting, and neither is shown."
+    },
+    "mail": {
+     "requestDeadline": {
+      "date": null,
+      "rule": null,
+      "how": null
+     },
+     "returnDeadline": {
+      "date": "2026-12-01",
+      "time": null,
+      "rule": "postmarked",
+      "receivedBy": "2026-12-08"
+     },
+     "note": "Absentee ballots returned by mail for the runoff must be postmarked on or before its day and received by the circuit clerk by 5:00 p.m. on December 8 (Miss. Code Ann. 23-15-637(1)(a)). The calendar gives no deadline to apply for one."
+    },
+    "note": "The Secretary of State's calendar schedules a December 1 runoff, if required, only for Supreme Court, Court of Appeals, chancery, circuit and county court judges and school board members/trustees. The calendar notes that the regularly scheduled Supreme Court election is currently enjoined by a federal court order. Runoff registration deadline: November 2. The runoff's own mail-ballot dates are in runoff.mail (read 2026-11-12 from the Secretary of State's 2026 Elections Calendar, last revised 9/8/2026). Read 2026-11-12, every request sending the project's User-Agent; not yet re-opened by a second reader."
    },
    "sources": [
     {
@@ -4133,6 +4281,27 @@
      "url": "https://www.sos.ms.gov/content/documents/elections/2026%20Elections%20Calendar.pdf",
      "quote": "1st General Election/Special Election Runoff Day (if required) for Mississippi Supreme Court, Court of Appeals, Chancery, Circuit, and County Court Judges; School Board Members/Trustees. Polls open from 7 a.m. - 7 p.m.",
      "pageUpdated": "Last Revised: 9/8/2026"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.date",
+     "url": "https://www.sos.ms.gov/content/documents/elections/2026%20Elections%20Calendar.pdf",
+     "quote": "DECEMBER 1st General Election/Special Election Runoff Day (if required) for Mississippi Supreme Court, Court of Appeals, Chancery, Circuit, and County Court Judges; School Board Members/Trustees. ... Postmark Deadline: Absentee ballots returned by mail MUST be postmarked on or before Election Day and received by the Circuit Clerk’s Office within five (5) business days. (Miss. Code Ann.. §23-15-637).",
+     "pageUpdated": "Last Revised: 9/8/2026 (server last-modified 2026-09-08)",
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.mail.returnDeadline.receivedBy",
+     "url": "https://www.sos.ms.gov/content/documents/elections/2026%20Elections%20Calendar.pdf",
+     "quote": "8th Absentee Ballots Returned by Mail Receipt Deadline for the General Election Runoff, 5:00 p.m.: Circuit Clerks' Offices must be in actual receipt of absentee ballots returned by mail for ballots to be timely. Ballots returned by mail must be postmarked on or before Election Day. (Miss. Code Ann. § 23-15-637(1)(a)).",
+     "pageUpdated": "Last Revised: 9/8/2026 (server last-modified 2026-09-08)",
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.earlyVoting.note",
+     "url": "https://www.sos.ms.gov/content/documents/elections/2026%20Elections%20Calendar.pdf",
+     "quote": "21st Absentee Voting for the General Election Runoff, 12:00 p.m.: Circuit Clerks’ offices MUST remain open from 8 a.m. until 12 p.m. (Miss. Code Ann.. § 23-15-653). ... 28th In-Person Runoff Election Absentee Voting Deadline, 12:00 p.m.: Circuit Clerks’ offices MUST remain open from 8 a.m. until 12 noon. (Miss. Code Ann.. § 23-15-653)",
+     "pageUpdated": "Last Revised: 9/8/2026 (server last-modified 2026-09-08)",
+     "read": "2026-11-12"
     }
    ],
    "notes": "Mail-ballot return: postmarked on or before Election Day (November 3) and received by the Circuit Clerk by 5:00 p.m. on November 10 (five business days). This is the rule the Supreme Court upheld in Watson v. RNC (June 29, 2026), which came from Mississippi; the Secretary of State's calendar (last revised September 8, 2026) and its current absentee FAQ both state it. Mail absentee voting requires a reason (65 or older, disability, temporarily residing outside the county, and others) and the application and ballot envelope must be signed by a notary or other official authorized to administer oaths unless the voter is disabled. No statewide deadline to request a mail absentee ballot was found on the Secretary of State's pages, so requestDeadline is null; voters should contact their Circuit Clerk. Polls are open 7 a.m. to 7 p.m. Photo ID is required to vote in person and for in-person absentee voting. Mississippi has no online voter registration for new voters; registered voters can update a name or address online.",
@@ -7069,7 +7238,27 @@
    },
    "runoff": {
     "date": "2026-11-17",
-    "note": "A runoff is held only if needed, for Governor and Lieutenant Governor (Revised Organic Act § 11) or Delegate to the House of Representatives, under the Elections System's 2026 calendar. Absentee applications for a runoff are accepted from November 4; mail-out applications are due November 10."
+    "earlyVoting": {
+     "start": "2026-11-14",
+     "end": "2026-11-15",
+     "startsBy": null,
+     "note": "The Elections System's 2026 calendar (amended June 10, 2026) gives early voting on Saturday, November 14 and Sunday, November 15, between the certification of the general election's results (November 13) and the runoff (November 17). It gives no hours or sites for those two days, and says nothing of St. John apart. The Elections System's early-voting page records early voting at the 2018 runoff, on two days."
+    },
+    "mail": {
+     "requestDeadline": {
+      "date": "2026-11-10",
+      "rule": "received",
+      "how": null
+     },
+     "returnDeadline": {
+      "date": null,
+      "time": null,
+      "rule": null,
+      "receivedBy": null
+     },
+     "note": "The calendar gives November 4 as the first day applications for runoff absentee ballots are received and November 10 as the deadline for receipt of applications for mail-out absentee ballots for the runoff. It also gives a 'Deadline for Emailed Absentee Ballot - 5 p.m.' on the runoff's day, which is not a mail ballot and is not shown. No Elections System page read on 2026-11-12 gives the day a runoff's mailed ballot must arrive: 18 V.I.C. 665(a), as the Board's 2024 canvass notice quotes it, counts ballots received within ten days of 'the election', but no page applies it to a runoff, so runoff.mail.returnDeadline is null."
+    },
+    "note": "A runoff is held only if needed, for Governor and Lieutenant Governor (Revised Organic Act § 11) or Delegate to the House of Representatives, under the Elections System's 2026 calendar. Absentee applications for a runoff are accepted from November 4; mail-out applications are due November 10. The runoff's own dates (read 2026-11-12 from the same calendar, the only Elections System document that gives them; no news release or page read that day mentions a runoff, and none says one is or is not needed): early voting November 14 and 15, and applications for mail-out absentee ballots received by November 10. Each date is the territory's own calendar day. Read 2026-11-12, every request sending the project's User-Agent; not yet re-opened by a second reader. This site reads no territory's result and names no race or person in a runoff (rule 91)."
    },
    "sources": [
     {
@@ -7167,6 +7356,34 @@
      "url": "https://vivote.gov/wp-content/uploads/2024/10/Fillable-General-Election-Absentee-Application.pdf",
      "quote": "*Please Note: To receive an absentee ballot via email, you must waive your right to a secret ballot.",
      "pageUpdated": "2024-10-01 (server last-modified)"
+    },
+    {
+     "field": "runoff.earlyVoting.start",
+     "url": "https://vivote.gov/wp-content/uploads/2026/07/2026-Elections-Calendar-Amended-06.10.2026.pdf",
+     "quote": "13-November (Friday) CERTIFICATION OF THE GENERAL ELECTION RESULTS ... 14-November (Saturday) FIRST DAY OF EARLY VOTING ... 17-November (Tuesday) Deadline for Emailed Absentee Ballot – 5 p.m. RUN-OFF ELECTION DAY",
+     "pageUpdated": "Amended Version as of June 10, 2026 (server last-modified 2026-07-01)",
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.earlyVoting.end",
+     "url": "https://vivote.gov/wp-content/uploads/2026/07/2026-Elections-Calendar-Amended-06.10.2026.pdf",
+     "quote": "15-November (Sunday) LAST DAY OF EARLY VOTING ... 17-November (Tuesday) Deadline for Emailed Absentee Ballot – 5 p.m. RUN-OFF ELECTION DAY",
+     "pageUpdated": "Amended Version as of June 10, 2026 (server last-modified 2026-07-01)",
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.earlyVoting.note",
+     "url": "https://vivote.gov/elections/early-voting/",
+     "quote": "Election Type/Year St. Croix St. Thomas St. John Voters Days ... RUN-OFF - 2018 3340 3646 348 7334 2",
+     "pageUpdated": null,
+     "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.mail.requestDeadline.date",
+     "url": "https://vivote.gov/wp-content/uploads/2026/07/2026-Elections-Calendar-Amended-06.10.2026.pdf",
+     "quote": "4-November (Wednesday) FIRST DAY for receipt by the Supervisor of Elections all applications for ABSENTEE BALLOTS FOR THE RUN-OFF ELECTION ... 10-November (Tuesday) DEADLINE for receipt by the Supervisor of Elections of applications for Mail Out ABSENTEE BALLOTS for the RUN OFF ELECTION.",
+     "pageUpdated": "Amended Version as of June 10, 2026 (server last-modified 2026-07-01)",
+     "read": "2026-11-12"
     }
    ],
    "notes": "Any registered voter may apply for an absentee ballot; no reason is asked on the Elections System's application. An application for a ballot to be MAILED had to be received by the Supervisor of Elections by Tuesday, October 20; an emailed ballot or an in-person absentee ballot can be requested until 5:00 p.m. on Election Day, November 3 (a voter who takes an emailed ballot waives the secret ballot). Return deadline: the only official statement found is the Board of Elections' 2024 canvass notice citing 18 V.I.C. § 665(a), that absentee ballots are counted if received by the Board no later than ten days after the election; applied to 2026 that is November 13, computed by us. No 2026 page restates it, no page found says whether a postmark is required, and that notice predates Watson v. RNC, so confirm with the Elections System (St. Croix 340-773-1021, St. Thomas 340-774-3107). Registration closed October 4 (online portal October 2 at 6:00 p.m.) and stays closed until five days after the election; there is no Election Day registration, and no official page mentions registration by mail. Early voting: St. Croix and St. Thomas October 16-31, St. John October 23-31. If no candidate for Governor and Lieutenant Governor, or for Delegate, wins a majority, the runoff is Tuesday, November 17.",
