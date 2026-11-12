@@ -926,7 +926,18 @@ fed in as aliases so the match does not depend on how the FEC spells them.
   "declined the nomination", "as the nominee"), or the row's own name
   ("replaced by ..."); one about a forum or another office changes nothing.
   Where a sentence or the list is why the row stands, the race says so
-  (`unsettledRows`, with the `sentence` quoted). Otherwise the row is the
+  (`unsettledRows`, with the `sentence` quoted). The reader honours only the
+  sentences it always honoured (`tests/fixtures/results/departure_sentences.json`
+  pins them). Anything else that may be a departure is a doubt
+  (`results._departure`): a shape it never honoured (an age, a party's
+  bracket or title, "her re-election bid", a word or a month opening the
+  sentence), an image's caption, another year than the cycle's, another
+  party's title before the name, a departure another sentence may undo. So is
+  a name the state's whole list prints under the nominee's party that no
+  filing holds and that may be theirs, and a row read as standing in their
+  place only on a line a filing alone holds. Beside any of these no fold is
+  taken and the row is refused on any party's line, marked or not, with the
+  reason and the remedy quoted. Otherwise the row is the
   nominee's if the infobox credits them with its very count, or, unmarked, it
   shares their surname and no other filer in the race carries it (a marked
   row is left to the mark's own refusal; the cache's `renamedRows`, `{race id: [{name, as,
