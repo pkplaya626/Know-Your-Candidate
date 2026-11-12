@@ -124,11 +124,36 @@
     return { mine: mine, lines: lines, today: today, election: election, after: after };
   }
 
-  /** Where a line's date stands on the reader's calendar. */
+  /** The ISO day after *iso*, on the calendar (no clock, no time zone). */
+  function nextDay(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] + 1));
+    return d.getUTCFullYear() + "-" + ("0" + (d.getUTCMonth() + 1)).slice(-2) + "-" +
+      ("0" + d.getUTCDate()).slice(-2);
+  }
+
+  /** Is *today* a day inside a window the office says it is not held
+   *  (the pipeline's "x": Louisiana's "excluding Sunday, November 29")? */
+  function offDay(line, today) {
+    return !!(line.e && line.x && line.x.indexOf(today) !== -1 && line.d <= today && today <= line.e);
+  }
+
+  /** Where a line's date stands on the reader's calendar. A window is
+   *  never "Under way" on a day its office says it is not held: on Sunday,
+   *  October 25, Louisiana's, Delaware's, South Carolina's and Hawaii's
+   *  pages called early voting under way on a day each office had excluded.
+   *  That day says there is none, and the next day of the window the office
+   *  has not excluded, which its own dates name (rule 84). */
   function when(line, today) {
     if (!line.d) return null;
     if (line.e) {
       if (today > line.e) return { cls: "is-past", word: "Ended" };
+      if (offDay(line, today)) {
+        var next = nextDay(today);
+        while (next <= line.e && line.x.indexOf(next) !== -1) next = nextDay(next);
+        return { cls: "is-off", word: "No early voting today" +
+          (next <= line.e ? "; resumes " + longDate(next).replace(/, \d{4}$/, "") : "") };
+      }
       if (today >= line.d) return { cls: "is-now", word: "Under way" };
       return null;
     }
@@ -237,8 +262,11 @@
       var end = item.e || item.d;
       if (!marked && !onToday && info.today < item.d) today();
       var past = end < info.today;
+      // A window's bar marks it under way, never on a day its office says
+      // it is not held (offDay).
       var cls = past ? " is-past"
-        : (item.d <= info.today && info.today <= end ? " is-now" : "");
+        : (item.d <= info.today && info.today <= end && !(item.line && offDay(item.line, info.today))
+          ? " is-now" : "");
       var date = shortDate(item.d) + (item.e ? "–" + shortDate(item.e).replace(
         shortDate(item.d).split(" ")[0] + " ", "") : "");
       // A date gone is named for what it was ("Runoff date"), never what
