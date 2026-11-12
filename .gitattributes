@@ -26,3 +26,6 @@ us_atlas_states_topo.json                 linguist-vendored=true -diff
 *.jpg       binary
 *.ico       binary
 *.jp2       binary
+# A PDF's streams are counted in bytes (/Length): a line ending rewritten
+# inside one breaks the file (tests/fixtures/pdf_gu_sample_ballot_2026.pdf).
+*.pdf       binary
