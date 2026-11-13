@@ -926,24 +926,38 @@ fed in as aliases so the match does not depend on how the FEC spells them.
   "declined the nomination", "as the nominee"), or the row's own name
   ("replaced by ..."); one about a forum or another office changes nothing.
   Where a sentence or the list is why the row stands, the race says so
-  (`unsettledRows`, with the `sentence` quoted). Otherwise the row is the
+  (`unsettledRows`, with the `sentence` quoted). The reader honours only the
+  sentences it always honoured (`tests/fixtures/results/departure_sentences.json`
+  pins them). Anything else that may be a departure is a doubt
+  (`results._departure`): a shape it never honoured (an age, a party's
+  bracket or title, "her re-election bid", a word or a month opening the
+  sentence), an image's caption, another year than the cycle's, another
+  party's title before the name, a departure another sentence may undo. So is
+  a name the state's whole list prints under the nominee's party that no
+  filing holds and that may be theirs, and a row read as standing in their
+  place only on a line a filing alone holds. Beside any of these no fold is
+  taken and the row is refused on any party's line, marked or not, with the
+  reason and the remedy quoted. Otherwise the row is the
   nominee's if the infobox credits them with its very count, or, unmarked, it
   shares their surname and no other filer in the race carries it (a marked
   row is left to the mark's own refusal; the cache's `renamedRows`, `{race id: [{name, as,
   why}]}`; `result-row-renamed`): they take its result under their own name,
   and the row's own link is not theirs. Any other such row on a Democratic or
   Republican line is refused (`refusedRows`, `{race id: [{name, for, ids,
-  why}]}`; `result-row-refused`): the name is not shown and the nominee reads
-  as before the count, until the page is corrected or a person records what
-  the warning names (a `RESULT_NAMES` entry, or the state's certified list in
-  `overrides.CERTIFIED_BALLOTS`). On any other line it reads as the page has
+  why, marked?}]}`; `result-row-refused`): the name is not shown and the
+  nominee reads as before the count, until the page is corrected or a person
+  records what the warning names (a `RESULT_NAMES` entry, or the state's
+  certified list in `overrides.CERTIFIED_BALLOTS`). Where the refused row bore
+  the table's mark (`marked`), after the count the race keeps its last read,
+  as under a refused mark. On any other line it reads as the page has
   it, with a warning (`unsettledRows`, `{race id: [{name, for, why,
   sentence?}]}`; `result-row-unsettled`). A rename that changes the row's
   party too is held the same way where one nominee alone is missing, no row
   of their party stands, and one row alone is under such a name on a line
   whose own nominee is already in the table. An `overrides.RESULT_NAMES`
   alias that neither its race's page, as read, nor the state's list gives any
-  more is recorded (`staleAliases`, `{race id: [{id, name}]}`) and warned
+  more, letter for letter (as an alias is applied), is recorded
+  (`staleAliases`, `{race id: [{id, name}]}`) and warned
   (`stale-result-name`).
 - **A write-in the November table lists is not read as on the ballot or as
   left off it**, unless the table marks them the winner: the row gives its
