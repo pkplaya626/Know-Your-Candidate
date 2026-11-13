@@ -13496,6 +13496,30 @@ async function testSearchAnswers() {
           KYC.stateNamed("cnm") === null && KYC.stateNamed("nmi") === null);
     });
   }
+  // The territory is "U.S. Virgin Islands" wherever a page names it (the
+  // owner's decision of 2026-11-13), and every form a reader types finds it.
+  if ((KYC.meta().states || {}).VI) {
+    await ask("Virgin Islands");
+    const short = cards().map((p) => p && p.id).join(",");
+    await ask("U.S. Virgin Islands");
+    suite("the grid — the U.S. Virgin Islands by any of its names", () => {
+      const people = cards();
+      check("its page's name finds its people, the same cards 'Virgin Islands' gives",
+        people.length > 0 && people.every((p) => p && p.state === "VI") &&
+          people.map((p) => p.id).join(",") === short, label());
+      check("the name the build gives it", KYC.stateName("VI") === "U.S. Virgin Islands", KYC.stateName("VI"));
+      check("each form is the place, as a whole name",
+        ["Virgin Islands", "US Virgin Islands", "U.S. Virgin Islands", "United States Virgin Islands",
+          "USVI", "U.S.V.I."].every((q) => KYC.stateNamed(q) === "VI") &&
+          KYC.stateNamed("usvis") === null && KYC.stateNamed("British Virgin Islands") !== "VI",
+        ["Virgin Islands", "USVI", "U.S.V.I.", "British Virgin Islands"].map((q) => q + "=" + KYC.stateNamed(q)).join(" "));
+      check("in a sentence it is 'the U.S. Virgin Islands', from the one table (rule 12)",
+        KYC.placeWords("VI") === "the U.S. Virgin Islands" &&
+          KYC.placeWords("TX", "Texas") === "Texas" && KYC.placeWords("DC", "x") === "the District of Columbia" &&
+          KYC.possessive(KYC.placeWords("VI")) === "the U.S. Virgin Islands'",
+        KYC.placeWords("VI"));
+    });
+  }
   if (missing) {
     await ask(KYC.stateName(missing) + " attorney general");
     suite(`search answers — '${KYC.stateName(missing)} attorney general': an office this site does not list`, () => {

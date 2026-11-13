@@ -52,15 +52,43 @@ class TestAPlaceInASentence(unittest.TestCase):
 
     def test_a_link_to_a_state_page_names_it_as_the_page_names_itself(self):
         # Rule 75: one name in the navigation, the title and the links. The
-        # page is titled "Virgin Islands"; "the U.S. Virgin Islands’ page"
-        # named it otherwise (the review of PR #229).
+        # page is titled "U.S. Virgin Islands" (the owner's decision of
+        # 2026-11-13); while it was titled "Virgin Islands", "the U.S. Virgin
+        # Islands’ page" named it otherwise (the review of PR #229).
+        from kyc import pages
         person = {"id": "P000610", "name": "Pat Example", "party": "Democrat", "state": "VI",
                   "chamber": "House", "officeLabel": "House • VI-AL"}
         html = share.render_profile(person, "example.org", {"P000610": person}, {})
-        self.assertIn("the Virgin Islands&#x27; page</a>", html)
-        self.assertNotIn("U.S. Virgin Islands&#x27; page", html)
-        self.assertEqual(share.page_place("VI"), "the Virgin Islands")
+        self.assertIn("the U.S. Virgin Islands&#x27; page</a>", html)
+        self.assertNotIn("the Virgin Islands&#x27; page", html)
+        self.assertEqual(share.page_place("VI"), "the " + pages.state_name("VI"))
         self.assertEqual(share.page_place("TX"), "Texas")
+
+    def test_the_virgin_islands_have_one_name_and_sources_another(self):
+        # What a page shows, and what sources write: a roster's "Virgin
+        # Islands", a Wikidata label, an association's address are matched by
+        # the short name, never by the page's (kyc/pages.short_name).
+        from kyc import normalize, pages, voting_dates
+        self.assertEqual(pages.state_name("VI"), "U.S. Virgin Islands")
+        self.assertEqual(pages.short_name("VI"), "Virgin Islands")
+        self.assertEqual(normalize.US_STATES["VIRGIN ISLANDS"], "VI")
+        self.assertEqual(voting_dates.place("VI"), "the U.S. Virgin Islands")
+        # Every other place is shown by the name sources write.
+        for code in pages.STATE_NAMES:
+            if code != "VI":
+                self.assertEqual(pages.state_name(code), pages.short_name(code), code)
+        self.assertEqual(pages.short_name("ZZ"), "ZZ")
+        # The page's own headline, and a territory in a sentence (rule 75).
+        headline, intro = pages.district_page_text("VI", 1)
+        self.assertEqual(headline, "U.S. Virgin Islands' seat in the House")
+        self.assertTrue(intro.startswith("The U.S. Virgin Islands elects a non-voting delegate"), intro)
+        self.assertTrue(pages.district_page_text("DC", 1)[1].startswith("The District of Columbia elects"))
+        self.assertTrue(pages.district_page_text("GU", 1)[1].startswith("Guam elects"))
+        # Text is matched by the short name: a label naming the territory in
+        # either form is found, and never by a longer state's name.
+        from kyc import nominee_photos
+        self.assertIn("Virgin Islands", nominee_photos.states_named(
+            "Delegate to the U.S. House from the United States Virgin Islands"))
 
     def test_the_governor_overlays_never_call_a_territory_a_state(self):
         self.assertNotIn("state", governor_share.PAST)

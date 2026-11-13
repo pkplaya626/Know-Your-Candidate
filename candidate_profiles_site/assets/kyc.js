@@ -3064,8 +3064,11 @@
         ["washington dc", "washington d c", "d c"].forEach(function (n) { stateByName[n] = "DC"; });
       }
       if (states.VI) {
+        // Its page is "U.S. Virgin Islands" (the owner's decision of
+        // 2026-11-13); a reader types any of these, each a whole name.
         stateByName["us virgin islands"] = stateByName["u s virgin islands"] = "VI";
-        stateByName["virgin islands"] = "VI";
+        stateByName["virgin islands"] = stateByName["united states virgin islands"] = "VI";
+        stateByName.usvi = stateByName["u s v i"] = "VI";
       }
       // "CNMI", the Commonwealth's own short form (its election commission is
       // votecnmi.gov.mp): "CNMI attorney general" answered nothing. A whole
@@ -3550,8 +3553,10 @@
   var PLACE_WORDS = { DC: "the District of Columbia", MP: "the Northern Mariana Islands",
     VI: "the U.S. Virgin Islands" };
 
-  function placeWords(code) {
-    return PLACE_WORDS[code] || stateName(code);
+  function placeWords(code, name) {
+    // *name*: the place's name where this page holds no build figures (Your
+    // ballot and the lookup name a state from the lookup's index).
+    return PLACE_WORDS[code] || name || stateName(code);
   }
 
   /** Where the page for a state lives, relative to the current page. The

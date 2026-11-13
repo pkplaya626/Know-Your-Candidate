@@ -322,11 +322,11 @@ def _article_title(url):
 def states_named(text):
     """The state names *text* carries, the longest first so "West Virginia"
     is never also Virginia (rule 5)."""
-    from .pages import STATE_NAMES
+    from .pages import SHORT_NAMES
 
     text = f" {text or ''} "
     found = set()
-    for name in sorted(STATE_NAMES.values(), key=len, reverse=True):
+    for name in sorted(SHORT_NAMES.values(), key=len, reverse=True):
         pattern = re.compile(r"(?<![A-Za-z])" + re.escape(name) + r"(?![A-Za-z])")
         if pattern.search(text):
             found.add(name)
@@ -411,7 +411,8 @@ def second_tie(profile, rows):
         if born not in births:
             return None, f"the item's year of birth {sorted(births)} is not the profile's {born}"
         return f"its year of birth, {born}, is the profile's", ""
-    state = state_name(profile.get("state"))
+    from .pages import short_name
+    state = short_name(profile.get("state"))          # matched in a label's words
     for election in sorted({r.get("election") for r in rows if r.get("election")}):
         if candidacy_for(election, state):
             return f"its candidacy in election (P3602) is \"{election}\"", ""

@@ -145,9 +145,8 @@
 
   /* A place in a sentence, in its own words (rule 75): "the District of
    * Columbia", "the Northern Mariana Islands". */
-  var WITH_THE = { DC: true, MP: true, VI: true };
   function placeWords(code) {
-    return (WITH_THE[code] ? "the " : "") + KYC.stateName(code);
+    return KYC.placeWords(code);       // one table, in kyc.js (rule 12)
   }
 
   /** "Louisiana, Mississippi and Texas". */

@@ -18,17 +18,31 @@ import re
 import string
 
 from .courts import STALE_DAYS as COURT_STALE_DAYS
-from .normalize import TERRITORIES, US_STATES
+from .normalize import DISPLAY_NAMES, TERRITORIES, US_STATES
 
+# STATE_NAMES is the name a page shows; SHORT_NAMES the one sources write.
+# They differ for one place: the Virgin Islands are "U.S. Virgin Islands"
+# wherever this site names them (normalize.DISPLAY_NAMES), and "Virgin
+# Islands" in the text this site matches a place's name against.
+SHORT_NAMES = {}
 STATE_NAMES = {}
 for _name, _code in US_STATES.items():
     _words = [w.lower() if w.lower() == "of" else w.capitalize() for w in _name.split()]
-    STATE_NAMES[_code] = " ".join(_words)
+    SHORT_NAMES[_code] = " ".join(_words)
+    STATE_NAMES[_code] = DISPLAY_NAMES.get(_code, SHORT_NAMES[_code])
 
 
 def state_name(code):
-    """``"TX"`` -> ``"Texas"``."""
+    """``"TX"`` -> ``"Texas"``, ``"VI"`` -> ``"U.S. Virgin Islands"``: the
+    name a page shows."""
     return STATE_NAMES.get(code, code)
+
+
+def short_name(code):
+    """``"VI"`` -> ``"Virgin Islands"``: the name sources write, for matching
+    a place's name in their text, building a source's address from it, or
+    naming another body as that body does. Never for a page's own words."""
+    return SHORT_NAMES.get(code, code)
 
 
 def page_path(code):
@@ -1691,8 +1705,13 @@ def district_page_text(code, seats=None, post=False, seated=0, moved=None):
                 "Puerto Rico elects a non-voting resident commissioner to the House, at "
                 f"large, for a four-year term. The seat {was} not on the ballot in 2026.")
     if code in TERRITORIES:
+        # The place as a sentence names it: "The U.S. Virgin Islands elects",
+        # "The District of Columbia elects", "Guam elects".
+        from .voting_dates import place
+        subject = place(code)
         return (f"{_possessive(name)} seat in the House",
-                f"{name} elects a non-voting delegate to the House, at large.")
+                f"{subject[:1].upper()}{subject[1:]} elects a non-voting delegate to the House, "
+                f"at large.")
     if seats == 1:
         return (f"{_possessive(name)} seat in the House",
                 f"{name} elects one member of the House, at large: the whole state is "

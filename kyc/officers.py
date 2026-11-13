@@ -458,7 +458,8 @@ def names_holder(name, text, office="ag", code=None):
         return True
     if re.search(rf"{_PAST}{ADJACENT[office]} {last}\b", folded):
         return True
-    allowed = _BETWEEN | ({code.lower()} | set(_fold(state_name(code)).split()) if code else set())
+    from .pages import short_name
+    allowed = _BETWEEN | ({code.lower()} | set(_fold(short_name(code)).split()) if code else set())
     for match in re.finditer(rf"{full}((?: [a-z0-9]+){{0,5}}?) {title}", folded):
         between = match.group(1).split()
         if all(w in allowed or re.fullmatch(r"\d+(st|nd|rd|th)", w) for w in between):
@@ -787,7 +788,8 @@ def likeness_candidates(name, code, pages):
     if len(initials) > 1:
         firsts.add(initials)
     middles = set(words[1:-1])
-    plain = set(words) | firsts | _TITLE_WORDS | set(_fold(state_name(code)).split()) \
+    from .pages import short_name
+    plain = set(words) | firsts | _TITLE_WORDS | set(_fold(short_name(code)).split()) \
         | {code.lower()}
     pieces = plain | firsts | set(_LIKENESS_FILE) | {"official", "photo", "pic", "img"}
     found, seen = [], set()
@@ -1250,7 +1252,8 @@ def fetch_attorneys_general(pause=0.5, previous=None, previous_day=None):
     raga, daga = parse_raga(_get(RAGA_URL)), parse_daga(_get(DAGA_URL))
     texts, read = {}, {}
     for code in STATES:
-        slug = re.sub(r"[^a-z]+", "-", state_name(code).lower()).strip("-")
+        from .pages import short_name
+        slug = re.sub(r"[^a-z]+", "-", short_name(code).lower()).strip("-")   # the roster's address
         url = usagov_office(_get(USAGOV_URL.format(slug=slug)))
         read[code], texts[code] = office_read(OFFICE_PAGES.get(code, [url]),
                                               OFFICE_LINK.get(code, url), pause)

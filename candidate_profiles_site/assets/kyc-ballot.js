@@ -46,12 +46,8 @@
     ["info", "Election information"],
     ["results", "Official results"],
   ];
-  // A place's own name where its short name is not one (rule 75).
-  var PLACE = {
-    DC: "the District of Columbia",
-    MP: "the Northern Mariana Islands",
-    VI: "the U.S. Virgin Islands",
-  };
+  // A place's own name in a sentence is KYC.placeWords', the one table
+  // (rules 12 and 75); this file kept a copy of it.
 
   // One possessive for every page, as kyc/pages.py writes it (rules 12 and
   // 75): "Virgin Islands'", "Texas's" - this file's own copy wrote "Texas'".
@@ -460,7 +456,7 @@
     // Dakota does not register voters (overrides.VOTING_LINKS); a
     // territory's office words its own pages (voting.TERRITORY_LINKS).
     var labels = (all._labels || {})[code] || {};
-    var place = PLACE[code] || name;
+    var place = KYC.placeWords(code, name);
     var info = datesFor(all, code);
     var closed = registrationClosed(info);
     return '<section class="state-section vote-box" id="voting" aria-labelledby="votingHead">' +
@@ -976,7 +972,7 @@
 
   function stateInfo(code) { return (KYC.meta().states || {})[code] || {}; }
 
-  function placeName(code) { return PLACE[code] || KYC.findRep.nameOf(code); }
+  function placeName(code) { return KYC.placeWords(code, KYC.findRep.nameOf(code)); }
 
   function votingOf(code) { return (KYC.meta().voting || {})[code] || {}; }
 

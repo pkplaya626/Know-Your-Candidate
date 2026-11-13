@@ -1516,7 +1516,7 @@ COURTS = {
                      "searches for foreign intelligence. A Court of Review of three judges "
                      "hears appeals (50 U.S.C. 1803)."),
                     ("Territorial courts",
-                     "The district courts of Guam, the Northern Mariana Islands and the Virgin "
+                     "The district courts of Guam, the Northern Mariana Islands and the U.S. Virgin "
                      "Islands were created under Congress's power over the territories "
                      "(Article IV), not Article III, so their judges serve ten-year terms."),
                     ("Administrative law judges",
@@ -2662,7 +2662,7 @@ ELECTIONS = {
                         ("2026-11-10", "Nov 10", "California's late mail", [
                             "The last day for ballots postmarked by Election Day to reach a "
                             "California county."]),
-                        ("2026-11-17", "Nov 17", "Guam's and the Virgin Islands' runoff", [
+                        ("2026-11-17", "Nov 17", "Guam's and the U.S. Virgin Islands' runoff", [
                             "Where no one won a majority for Delegate on November 3, the top two "
                             "meet again. They read", ("runoff", "In the runoff"),
                             "until it is held; from the day after, until a winner is marked "

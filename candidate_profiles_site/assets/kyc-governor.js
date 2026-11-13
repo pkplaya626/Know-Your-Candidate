@@ -629,9 +629,8 @@
   /* A place in its own words (rule 75): "the District of Columbia", "the
    * U.S. Virgin Islands", never "District of Columbia" in a sentence, and
    * no territory or the District called a state. */
-  var WITH_THE = { DC: true, MP: true, VI: true };
   function placeWords(code) {
-    return (WITH_THE[code] ? "the " : "") + KYC.stateName(code);
+    return KYC.placeWords(code);       // one table, in kyc.js (rule 12)
   }
   function placeOwn(code) {
     var w = placeWords(code);

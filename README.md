@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (4757 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (4761 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1116,7 +1116,7 @@ result.
   runoff result" on a card, "Ran in the December 1 general election runoff:
   awaiting result" in the dialog and on a share page (`KYC.raceStatus`'s
   `heldRunoff`, `share._held_runoff`), never "In the runoff" as though it
-  were still to be held. The Delegates from Guam and the Virgin Islands are
+  were still to be held. The Delegates from Guam and the U.S. Virgin Islands are
   elected by a majority too (48 U.S.C. 1712): their runoff is on November 17,
   and its two read the same words with that day's date.
 - **Louisiana's House seats** are an open primary whose first round is the
@@ -2472,7 +2472,7 @@ elected with the governor, a source is a compiled table, or a chamber's size
 disagrees with `government_maps.SEATS` (rule 53); a county's page is not a
 state's record. The counts on the page are derived, never typed.
 `ballot2026.TERRITORIES` covers the territories' governors and lieutenant
-governors: Guam's and the Virgin Islands' from the Organic Acts (48 U.S.C.
+governors: Guam's and the U.S. Virgin Islands' from the Organic Acts (48 U.S.C.
 1422, 1591), the Northern Mariana Islands' from its Commission's certified
 list; American Samoa and Puerto Rico elected theirs in 2024. A territory's
 record holds another of the four offices only where its own law elects it:

@@ -366,7 +366,8 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
                 read["photoRefused"] = still
             continue
         url = recipe["url"]
-        place = set(_split(state_name(code[:2]))) | set(_split((HIGH_COURTS.get(code[:2]) or ("",))[0]))
+        from .pages import short_name
+        place = set(_split(short_name(code[:2]))) | set(_split((HIGH_COURTS.get(code[:2]) or ("",))[0]))
         links = bio_pages(url, roster, read["members"]) if not recipe.get("browser") else {}
         photos, misses, refusals = {}, {}, {}
         for name in read["members"]:
