@@ -1473,6 +1473,30 @@ _UNDONE = re.compile(
 # ("[[August 20]]") or an external one ("[https://x source]").
 _FILE_LINK = re.compile(
     r"\[\[\s*(?:file|image)\s*:(?:[^\[\]]|\[\[[^\[\]]*\]\]|\[[^\[\]]*\])*\]\]", re.I)
+# "Left" as the verb of departure it is in "left the race", "left the party",
+# "left office", "left the stage early" - never the direction or the politics
+# (PR #241's fourth read: "her left-wing rival", "the left", "her left",
+# "from left to right" and "to the left of Stone" each doubted a surname). It
+# is no verb where it is hyphenated ("left-wing", "centre-left") or an
+# image's alignment ("|left|thumb|"); after an article or a possessive
+# pronoun, with or without the word that makes it a wing ("the left", "his
+# left", "the far left"), or "from", "at", "right and", "right or"; before
+# "to right", "and right", "or right", "wing", "hand", "side" or "of" ("left
+# of centre" - "left of her own accord" is a departure); after a name's
+# possessive where the clause ends there ("ran to Morelle's left,"); or alone
+# in brackets, a caption's "(left)". Anywhere else it is still a word of
+# leaving, however loosely said ("the last progressive left the race", "This
+# left Stone unopposed"): when in doubt, a doubt.
+_LEFT_AFTER_THESE = ("the", "a", "her", "his", "its", "their")
+_LEFT_VERB = (
+    r"(?<![\w|–-])"
+    + "".join(rf"(?<!\b{before} )" for before in _LEFT_AFTER_THESE + tuple(
+        f"{article} {wing}" for article in _LEFT_AFTER_THESE
+        for wing in ("far", "hard", "new", "centre", "center", "political"))
+        + ("from", "at", "right and", "right or"))
+    + r"left(?![\w|–-])(?! (?:to right|(?:and|or) right|wing|hand|side)\b)"
+    r"(?! of\b(?! (?:his|her|their|its) own\b))(?!(?<=\(left)\))"
+    r"(?!(?:(?<=['’]s left)|(?<=s['’] left))\s*(?:[,.;:)]|$))")
 # Any word of leaving at all, however loosely said (the first version's test,
 # PR #214): never enough to honour a sentence, enough to doubt a surname.
 _LEFT_LOOSE = re.compile(
@@ -1480,7 +1504,8 @@ _LEFT_LOOSE = re.compile(
     r"step(?:s|ped)? (?:aside|down)|"
     r"st(?:and|ands|ood) down|replac\w*|succeed\w*|substitut\w*|remov\w*|disqualif\w*|"
     r"ineligib\w*|declin\w*|resign\w*|relinquish\w*|vacat\w*|suspend\w*|end(?:s|ed)|"
-    r"abandon\w*|left|leav\w*|die[sd]?|death|dead|passed away|passing|killed|depart\w*)\b")
+    rf"abandon\w*|{_LEFT_VERB}|leav\w*|die[sd]?|death|dead|passed away|passing|killed|"
+    r"depart\w*)\b")
 # A year: a departure dated to another year than the cycle's is another race's.
 _A_YEAR = re.compile(r"(?<![\w-])(1[89]\d\d|20\d\d)(?![\w-])")
 _TITLE_WORDS = frozenset("the then former incumbent nominee candidate primary winner representative "
@@ -1887,7 +1912,10 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
     name or being ``held`` is refused as an unmarked one is, on any day: its
     mark elects nobody, and the race reads as before the count (left to the
     mark's refusal, it stood as the page has it until the count, and after
-    it wherever anything else vouched for its name).
+    it wherever anything else vouched for its name). Such a row says
+    ``"marked"``: after the count the race keeps its last read, as a refused
+    mark's does (:func:`carry_refused`), so a call an earlier read took is
+    not undone by a row renamed beside a sentence the reader only doubts.
     """
     from .candidates import display_name
 
@@ -2050,7 +2078,7 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
                 # anything vouched for the row's name. Refused, its mark
                 # elects nobody, and the race reads as before the count.
                 notes.append("the table's mark is on this row, and elects nobody while it is "
-                             "refused")
+                             "refused: after the count the race keeps the last read of it")
             if (len(nominees) == 1 and kin and len(item["rows"]) == 1 and not unsure
                     and not {cid for cid, words in pool if tokens[-1] in words} - ids(nominees[0])):
                 # Never by the surname alone where any sentence holds theirs
@@ -2067,10 +2095,16 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
                                                else "the row, " + of + ",") +
                            " shares their surname, and no other filer in the race carries it")
                     continue
+                # A person settles it either way (rule 63): the alias where
+                # the row is theirs; the state's list where it is someone
+                # certified in their place - the one remedy there is for a
+                # nominee with no filing to key an alias on.
                 notes.append("the row shares their surname, but the section's sentence "
                              + json.dumps(doubt, ensure_ascii=False) + " may say they left the "
                              "race, so the surname alone does not make the row theirs: if it is "
-                             "theirs, " + remedy(nominees[0]) + " reads it as theirs")
+                             "theirs, " + remedy(nominees[0]) + " reads it as theirs; if it is a "
+                             "replacement the state certified, the state's list for the race in "
+                             "overrides.CERTIFIED_BALLOTS")
                 unsure = True
             note = "".join("; " + text for text in notes)
             if item["party"] in _MAJOR or unsure:
@@ -2079,6 +2113,10 @@ def november_row_names(boxes, rows, aliases=None, on_a_list=None, section="", co
                                          else "a minor party's November row" if not item.get("anyLine")
                                          else "a November row " + of) +
                                         f" {under}, standing where the nominee should" + note}
+                if row["won"]:
+                    # It bore the table's mark: the race's last read is kept,
+                    # as a refused mark's is (carry_refused, rule 8).
+                    refused[name]["marked"] = True
             else:
                 looked.append({"name": name, "for": list(nominees),
                                "why": ("a minor party's November row" if not item.get("anyLine")
@@ -3893,18 +3931,20 @@ def match_names(wiki_names, field_rows, aliases=None):
     return matches, sorted(set(ambiguous))
 
 
-def _alias_given(alias, cid, names):
-    """Whether any of *names* - a page's, a list's - is the alias *alias* for
-    *cid* as the matcher reads it (:func:`match_names`): accents, capitals
-    and spacing folded, and a given name that fits. Compared letter for
-    letter, an alias that still matched the page's "Max  Gánorkar" was called
-    stale (PR #217's second reader); one name at a time, since two that both
-    fit it would each make the other ambiguous."""
-    key = " ".join(_fold(alias).split())
-    if any(" ".join(_fold(name).split()) == key for name in names):
-        return True
-    return any(cid in (match_names([name], [], [(alias, cid)])[0].get(name) or ())
-               for name in sorted(names))
+def _alias_given(alias, names):
+    """Whether any of *names* - a page's, a list's - is the alias *alias*,
+    letter for letter: the only way an ``overrides.RESULT_NAMES`` entry is
+    ever applied (:func:`_exact_filing`, :func:`_claim_unmatched`,
+    :func:`_ballot_name`, ``november_row_names``' ``recorded``).
+
+    An alias a name only folds to or fits is not given: beside the page's
+    "Kit Swán", "Kit R. Swan", "KIT SWAN", "Kitty Swan" or "Kit Swan Jr." the
+    entry "Kit Swan" settles nobody, and a refusal's remedy typed a letter
+    off the row's own spelling leaves the row refused. Called "given" there
+    (PR #241, until its fourth read), such an entry was no longer reported
+    stale though it no longer applied - invisible, and quietly doing
+    nothing."""
+    return alias in names
 
 
 # --------------------------------------------------------------------- build
@@ -4422,8 +4462,15 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 log(f"    [note] {rid}: the November row {item['name']!r} on {title!r} is read "
                     f"as {item['as']!r}: {item['why']}")
             for item in row_refused:
+                # A refused row that bore the table's mark keeps the race's
+                # last read (carry_refused) only once there is a count to
+                # mark: before it no mark is read, and none can be refused.
+                if item.get("marked") and not general_held(today):
+                    del item["marked"]
                 log(f"    [REFUSED] {rid}: the November row {item['name']!r} on {title!r}: "
-                    f"{item['why']} ({', '.join(item['for'])}), who reads as before the count")
+                    f"{item['why']} ({', '.join(item['for'])}), who reads as before the count"
+                    + ("; the row bore the table's mark, and the race keeps the last read of it"
+                       if item.get("marked") else ""))
             for item in row_looked:
                 # A sentence that is why a row stands is a note, said the day
                 # it is read; either way a person is told (validate).
@@ -4633,8 +4680,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             q["name"] for q in qualified_lists.get(rid, ())}
         unused = [{"id": row["candidate_id"], "name": _RESULT_NAMES[row["candidate_id"]][0]}
                   for row in rows if row["candidate_id"] in _RESULT_NAMES
-                  and not _alias_given(_RESULT_NAMES[row["candidate_id"]][0],
-                                       row["candidate_id"], given)]
+                  and not _alias_given(_RESULT_NAMES[row["candidate_id"]][0], given)]
         if unused:
             stale_aliases[rid] = sorted(unused, key=lambda item: item["id"])
         status, party, article, label, about, site = {}, {}, {}, {}, {}, {}
@@ -4771,11 +4817,13 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     # page, no longer makes - its row lost its mark, became two, or went - with
     # no state's page result in its place and no withdrawal said: a person is
     # told (validate), never left to a line of the log (PR #220 review). A
-    # refused mark's race keeps its last read (carry_refused), so is not one.
+    # refused mark's race keeps its last read (carry_refused), so is not one;
+    # nor is the race of a refused row that bore the mark.
     dropped_calls = {}
     for rid, prev in sorted(((previous or {}).get("races") or {}).items()):
         if (prev.get("calledBy") != CALLED_NATIONAL or rid not in races
-                or races[rid].get("calledBy") or rid in withdrawn_calls or rid in refused_marks):
+                or races[rid].get("calledBy") or rid in withdrawn_calls or rid in refused_marks
+                or any(item.get("marked") for item in refused_rows.get(rid, ()))):
             continue
         dropped_calls[rid] = {
             "name": (prev.get("national") or {}).get("name"),
@@ -4813,8 +4861,10 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         "refusedNames": dict(sorted(refused_names.items())),
         # Each November row of a major party under a name no filing and no list
         # holds, standing where the party's nominee should, that this read
-        # refused (rule 63): the nominee reads as before the count; and each
-        # such row, on any line, read as the nominee's own, with why.
+        # refused (rule 63): the nominee reads as before the count - and where
+        # the row bore the table's mark ("marked"), the race keeps its last
+        # read (carry_refused); and each such row, on any line, read as the
+        # nominee's own, with why.
         "refusedRows": dict(sorted(refused_rows.items())),
         "renamedRows": dict(sorted(renamed_rows.items())),
         # Each such row read as the page has it, for a person to look at: on a
@@ -4901,13 +4951,24 @@ def carry_refused(cache, previous):
     or a table the mid-edit page has since lost, is not undone by a page that
     cannot be vouched for tonight. ``refusedMarks`` still names the race.
 
+    So does the race of a November row refused for its name that bore the
+    table's mark (``refusedRows``, ``"marked"``: a doubt beside it, the
+    list's name, a held row): its mark elects nobody, exactly as a refused
+    mark's, and ``refusedRows`` still names it. Kept out of this, a race
+    called yesterday lost its call - the winner and the loser both "nominee"
+    again - the day the winner's row was renamed beside a sentence the
+    reader only doubts, where main, refusing the mark, kept it (PR #241's
+    fourth read).
+
     Except a national call this read withdrew (``nationalWithdrawn``): the
     state's page's own counts no longer stand behind it - too close, too early
     or led by someone else - and keeping it would read "Elected" over the very
     refusal of the page's own declaration for that reason (PR #220 review)."""
     kept = []
     withdrawn = (cache or {}).get("nationalWithdrawn") or {}
-    for rid in sorted((cache or {}).get("refusedMarks") or {}):
+    marked_rows = {rid for rid, items in ((cache or {}).get("refusedRows") or {}).items()
+                   if any(item.get("marked") for item in items)}
+    for rid in sorted(set((cache or {}).get("refusedMarks") or {}) | marked_rows):
         race = ((previous or {}).get("races") or {}).get(rid)
         if race and rid in withdrawn and race.get("calledBy") == CALLED_NATIONAL:
             continue

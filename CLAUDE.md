@@ -220,7 +220,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3219 tests, no dependencies
+python -m unittest discover tests             # 3224 tests, no dependencies
 npm install && npm test                       # 4757 real-DOM checks (needs jsdom)
 ```
 
@@ -1507,7 +1507,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     which comes only after the count, it stood as the page has it until
     then - the nominee the very count had made "nominee" read "withdrawn"
     without a word - and after it wherever anything else vouched for the
-    row's name. Refused, its mark elects nobody. Any other
+    row's name. Refused, its mark elects nobody, and after the count the
+    race keeps the last read of it, as under a refused mark (`carry_refused`,
+    the row's `marked`): kept out of that, a race called the day before lost
+    its call - winner and loser both "nominee" again - the day the winner's
+    row was renamed beside "Stone withdrew from the race in 2018", where the
+    mark's refusal had kept it (PR #241's fourth read). Any other
     sentence not honoured changes nothing: the row goes on to the folds and
     the refusal, which a person sees. One honoured is never silent: the
     race records the row with the sentence quoted (`unsettledRows`, a
@@ -1526,9 +1531,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "Swan, 58, died") unhonoured, and the departed nominee taking the row of
     the relative named in her place, and its loss, with only a renamed
     row's warning. Such a row is refused instead, the sentence quoted beside
-    the remedy, on a minor party's line too: read there as the page has it,
+    both remedies - the alias, and the state's certified list, the only one
+    for a nominee with no filing to key an alias on - on a minor party's
+    line too: read there as the page has it,
     "Free withdrew from the October debate" made a minor party's filed
-    nominee "withdrawn" (PR #241's second reader). The state's whole list
+    nominee "withdrawn" (PR #241's second reader). "Left" is such a word
+    only as the verb ("left the party", "left office", "left the stage
+    early"), never the direction, the politics or an image's alignment
+    ("left-wing", "the left", "her left", "from left to right", "left of
+    centre", "|left|thumb|": of the 27 sentences holding the word on the
+    pages saved on 2026-11-11, 22 are those). The state's whole list
     leaves a nominee out only where it prints no name, under their party,
     that no filing holds and that may be theirs (`certify_race`'s test):
     printing them under a legal name the matcher cannot tie to them, it
@@ -1565,18 +1577,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     page has it, the nominee the table leaves out reads "withdrawn" as any
     nominee a November table leaves off does, and nothing warns of it. And
     a `RESULT_NAMES` alias that neither its race's page, as read, nor the
-    state's list gives any more, as the matcher reads names (accents,
-    capitals and spacing folded, a given name that fits: compared letter
-    for letter, one still matching was called stale), is recorded by the
+    state's list gives any more, letter for letter, is recorded by the
     read (`staleAliases`) and warned (`stale-result-name`), only of a page
-    that was read (rule 8). Replayed over that evening's pages, this reader
+    that was read (rule 8). Letter for letter is how an alias is applied,
+    and nowhere otherwise: PR #241 called one "given" where a page's name
+    only folded to it or fitted it (accents, capitals, spacing, a given
+    name that fits), so the entry "Kit Swan" beside the page's "Kit Swán",
+    "Kit R. Swan" or "Kitty Swan", or a refusal's remedy typed a letter off
+    the row's spelling, settled nobody and was no longer reported (its
+    fourth read). Replayed over that evening's pages, this reader
     changed no status, name or unmatched entry and wrote no note, and no
     alias was stale; with the second reader's six follow-ups, replayed over
     the two sets of pages saved on 2026-11-10 and 11, it changed nothing at
     all, and of the 1,146 people on their November tables it still said
     none had left, and doubted the surname of 51; with PR #241's readers'
     follow-ups too, it changes nothing on either set, says none of the
-    1,146 left, doubts none of their departures and the same 51 surnames,
+    1,146 left, doubts none of their departures and 45 of their surnames
+    (51 before "left" was read only as a verb),
     and the reader that honours gives the sentence it gave before to each
     of the 18,560 questions (a person a section names, a November row)
     asked of every race section of both sets, and to each of 450,000

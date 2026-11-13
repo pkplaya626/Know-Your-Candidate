@@ -944,17 +944,20 @@ fed in as aliases so the match does not depend on how the FEC spells them.
   why}]}`; `result-row-renamed`): they take its result under their own name,
   and the row's own link is not theirs. Any other such row on a Democratic or
   Republican line is refused (`refusedRows`, `{race id: [{name, for, ids,
-  why}]}`; `result-row-refused`): the name is not shown and the nominee reads
-  as before the count, until the page is corrected or a person records what
-  the warning names (a `RESULT_NAMES` entry, or the state's certified list in
-  `overrides.CERTIFIED_BALLOTS`). On any other line it reads as the page has
+  why, marked?}]}`; `result-row-refused`): the name is not shown and the
+  nominee reads as before the count, until the page is corrected or a person
+  records what the warning names (a `RESULT_NAMES` entry, or the state's
+  certified list in `overrides.CERTIFIED_BALLOTS`). Where the refused row bore
+  the table's mark (`marked`), after the count the race keeps its last read,
+  as under a refused mark. On any other line it reads as the page has
   it, with a warning (`unsettledRows`, `{race id: [{name, for, why,
   sentence?}]}`; `result-row-unsettled`). A rename that changes the row's
   party too is held the same way where one nominee alone is missing, no row
   of their party stands, and one row alone is under such a name on a line
   whose own nominee is already in the table. An `overrides.RESULT_NAMES`
   alias that neither its race's page, as read, nor the state's list gives any
-  more is recorded (`staleAliases`, `{race id: [{id, name}]}`) and warned
+  more, letter for letter (as an alias is applied), is recorded
+  (`staleAliases`, `{race id: [{id, name}]}`) and warned
   (`stale-result-name`).
 - **A write-in the November table lists is not read as on the ballot or as
   left off it**, unless the table marks them the winner: the row gives its

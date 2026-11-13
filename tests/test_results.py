@@ -4321,6 +4321,176 @@ class TestARenamedNovemberRow(NoGap):
         self.assertFalse(cache["refusedRows"])
         self.assertEqual(cache["refusedMarks"][self.RACE][0]["name"], "Jeanne Hendry")
 
+    def test_a_refused_row_that_bore_the_mark_keeps_the_last_read_of_the_race(self):
+        # PR #241's fourth read: yesterday the race was called; today the
+        # winner's marked row is renamed beside a sentence the reader only
+        # doubts. The row is refused, not the mark, so carry_refused kept
+        # nothing and both read "nominee" again - a call undone by a page
+        # that cannot be vouched for (rule 8), where main, refusing the
+        # mark, kept the last read. It keeps it here too, the refusal still
+        # logged and warned.
+        import copy
+        called = party_box(self.GENERAL, ("Pat Stone", REP, 190744, True),
+                           ("Trina Swan", DEM, 168350, False))
+        yesterday = self.read(self.infobox(), called, today=datetime.date(2026, 11, 8))
+        self.assertEqual(self.race(yesterday)["status"], self.CALLED)
+        renamed = party_box(self.GENERAL, ("Rocky Rhodes", REP, 190744, True),
+                            ("Trina Swan", DEM, 168350, False))
+        uncalled = dict(self.CALLED, H6OH05001="nominee", H6OH05003="nominee")
+        before_the_count = self.read(self.infobox(), called, today=datetime.date(2026, 11, 2))
+        self.assertEqual(self.race(before_the_count)["status"], uncalled)
+        for doubt in ("Stone withdrew from the race in 2018.",
+                      "[[File:Stone.jpg|thumb|Stone withdrew from the race in August.]]",
+                      "Stone withdrew from the race in August. His campaign denied it."):
+            logged = []
+            today = self.read(doubt, self.infobox(), renamed, logged=logged)
+            # As read, the mark elects nobody: the race is as before the count.
+            self.assertEqual(self.race(today)["status"], uncalled, doubt)
+            self.assertEqual(self.race(today)["unmatched"], {}, doubt)
+            refused = today["refusedRows"][self.RACE]
+            self.assertEqual([(r["name"], r["for"], r.get("marked")) for r in refused],
+                             [("Rocky Rhodes", ["Pat Stone"], True)], doubt)
+            self.assertFalse(today["refusedMarks"], doubt)
+            self.assertIn("elects nobody", refused[0]["why"], doubt)
+            self.assertTrue(any("[REFUSED]" in line and "Rocky Rhodes" in line
+                                and "keeps the last read" in line for line in logged), doubt)
+            # The last read's call is kept, and the refusal is still told.
+            self.assertEqual(results.carry_refused(today, copy.deepcopy(yesterday)),
+                             [self.RACE], doubt)
+            self.assertEqual(self.race(today)["status"], self.CALLED, doubt)
+            self.assertEqual(self.race(today)["unmatched"], {}, doubt)
+            self.assertEqual([r["name"] for r in today["refusedRows"][self.RACE]],
+                             ["Rocky Rhodes"], doubt)
+            self.assertEqual(self.codes(today), ["result-row-refused"], doubt)
+            # With no earlier call the race reads as before the count: with
+            # no last read at all, and over a last read taken before it.
+            fresh = self.read(doubt, self.infobox(), renamed)
+            self.assertEqual(results.carry_refused(fresh, None), [], doubt)
+            self.assertEqual(self.race(fresh)["status"], uncalled, doubt)
+            self.assertEqual(results.carry_refused(fresh, copy.deepcopy(before_the_count)),
+                             [self.RACE], doubt)
+            self.assertEqual(self.race(fresh)["status"], uncalled, doubt)
+            self.assertNotIn("elected", self.race(fresh)["status"].values(), doubt)
+            # Before the count no mark is read and none can be refused: the
+            # row is refused all the same, and nothing is carried.
+            for day in (datetime.date(2026, 10, 20), datetime.date(2026, 11, 3)):
+                early = self.read(doubt, self.infobox(), renamed, today=day)
+                self.assertEqual([(r["name"], r.get("marked"))
+                                  for r in early["refusedRows"][self.RACE]],
+                                 [("Rocky Rhodes", None)], (doubt, day))
+                self.assertEqual(results.carry_refused(early, copy.deepcopy(yesterday)), [],
+                                 (doubt, day))
+                self.assertEqual(self.race(early)["status"], uncalled, (doubt, day))
+        # An unmarked refused row keeps only the loss the last read took for
+        # its nominee, while this read still names the winner - as before.
+        cache = self.read(self.november())
+        self.assertNotIn("marked", cache["refusedRows"][self.RACE][0])
+        # A national call this read withdrew is not brought back by a
+        # refused row that bore the mark, any more than by a refused mark.
+        national = {"races": {self.RACE: {"status": dict(self.CALLED), "calledBy": "national"}}}
+        held = {"races": {self.RACE: {"status": dict(uncalled)}},
+                "refusedRows": {self.RACE: [{"name": "Rocky Rhodes", "for": ["Pat Stone"],
+                                             "marked": True, "ids": ["H6OH05001"]}]}}
+        withdrawn = dict(copy.deepcopy(held), nationalWithdrawn={self.RACE: {"name": "Pat Stone"}})
+        self.assertEqual(results.carry_refused(withdrawn, copy.deepcopy(national)), [])
+        self.assertEqual(withdrawn["races"][self.RACE]["status"], uncalled)
+        kept = copy.deepcopy(held)
+        self.assertEqual(results.carry_refused(kept, copy.deepcopy(national)), [self.RACE])
+        self.assertEqual(kept["races"][self.RACE]["status"], self.CALLED)
+
+    def test_the_surname_notes_remedy_names_the_states_list_too(self):
+        # PR #241's fourth read: the surname note named only an alias on the
+        # nominee's FEC id, which a nominee with no filing does not have. A
+        # person settles a refusal either way (rule 63): the alias where the
+        # row is theirs, the state's certified list where it is someone
+        # certified in their place.
+        sentence = "Swan withdrew from the primary debate in April."
+        cache = self.read(sentence, self.infobox(swan=168349), self.november("Jo Swan"))
+        why = cache["refusedRows"][self.RACE][0]["why"]
+        self.assertIn("shares their surname", why)
+        self.assertIn("overrides.RESULT_NAMES entry on their FEC id (H6OH05003) reads it as theirs",
+                      why)
+        self.assertIn("if it is a replacement the state certified, the state's list for the race "
+                      "in overrides.CERTIFIED_BALLOTS", why)
+        # A nominee nobody filed as: no id to key an alias on, and the list
+        # is the remedy the note must name.
+        self.field["candidates"] = [r for r in self.field["candidates"]
+                                    if r["candidate_id"] != "H6OH05003"]
+        cache = self.read(sentence, self.infobox(swan=168349), self.november("Jo Swan"))
+        refused = cache["refusedRows"][self.RACE]
+        self.assertEqual([(r["name"], r["for"]) for r in refused], [("Jo Swan", ["Trina Swan"])])
+        self.assertIn("shares their surname", refused[0]["why"])
+        self.assertNotIn("FEC id (", refused[0]["why"])
+        self.assertIn("overrides.CERTIFIED_BALLOTS", refused[0]["why"])
+        self.assertEqual(self.race(cache)["unmatched"], {"Trina Swan": "nominee"})
+        # And the list, recorded, settles it: the row stands as the page has it.
+        certified = {"OH": {"source": "Ohio Secretary of State (made up)", "url": "https://x",
+                            "fetched": "2026-10-17", "complete": True, "races": {self.RACE: [
+                                {"name": "Pat Stone", "party": "Republican", "kind": "ballot"},
+                                {"name": "Jo Swan", "party": "Democratic", "kind": "ballot"}]}}}
+        cache = self.read(sentence, self.infobox(swan=168349), self.november("Jo Swan"),
+                          certified=certified)
+        self.assertFalse(cache["refusedRows"])
+        self.assertEqual(self.race(cache)["unmatched"].get("Jo Swan"), "defeated")
+        self.assertEqual(self.race(cache)["status"]["H6OH05001"], "elected")
+
+    # "Left" that is no verb of departure: the direction and the politics.
+    NOT_LEAVING = (
+        "Swan was attacked by her left-wing rival.",
+        "Swan is a centre-left Democrat.",
+        "Swan ran as the candidate of the left.",
+        "Swan drew support from the far left.",
+        "Swan stood to her left at the forum.",
+        "Stone stood on his left, Swan beside him.",
+        "Swan and Gull turned to their left.",
+        "The candidates, from left to right: Swan, Gull and Stone.",
+        "Swan ran to the left of Gull.",
+        "Swan ran left of centre.",
+        "Swan drew support from the party's left wing.",
+        "Gull ran to Swan's left, accusing her of timidity.",
+        "[[File:Forum.jpg|thumb|Swan (left) and Stone at the forum]]",
+        "[[File:Swan.jpg|left|thumb|Trina Swan at a rally]]",
+    )
+    # And "left" that is, or may be: each is still a doubt.
+    LEAVING = (
+        "Swan left the party in March.",
+        "Swan left office in January.",
+        "Swan, visibly tired, left the race.",
+        "Swan left the stage early at the October debate.",
+        "Swan left of her own accord.",
+        "When Swan left, the committee named her husband.",
+        "After the last progressive left the race, Swan had the line to herself.",
+        "Swan's left the race, her campaign said.",
+    )
+
+    def test_left_doubts_a_surname_only_as_a_verb_of_departure(self):
+        # PR #241's fourth read: the loose test counted "left" in "left-wing",
+        # "her left" and "left to right", and refused a row that is the
+        # nominee's by her surname over a sentence about where she stood. It
+        # is a word of leaving only as the verb; anything else that is not
+        # plainly the direction or the politics still doubts.
+        for sentence in self.NOT_LEAVING:
+            self.assertEqual(results._may_have_left("Trina Swan", sentence), "", sentence)
+            self.assertEqual(results._departure("Trina Swan", sentence), ("", "", ""), sentence)
+            # The row is hers by the surname, as main reads it.
+            cache = self.read(sentence, self.infobox(swan=168349), self.november("Jo Swan"))
+            self.assertEqual(self.race(cache)["status"], self.CALLED, sentence)
+            self.assertEqual(self.codes(cache), ["result-row-renamed"], sentence)
+        asked = 0
+        for sentence in self.LEAVING:
+            self.assertTrue(results._may_have_left("Trina Swan", sentence), sentence)
+            if results._departure("Trina Swan", sentence) != ("", "", ""):
+                continue                    # honoured or doubted before the surname is asked
+            asked += 1
+            cache = self.read(sentence, self.infobox(swan=168349), self.november("Jo Swan"))
+            self.assertEqual(self.race(cache)["status"], self.HELD, sentence)
+            self.assertIn("may say they left", cache["refusedRows"][self.RACE][0]["why"], sentence)
+            self.assertEqual(self.codes(cache), ["result-row-refused"], sentence)
+        self.assertGreaterEqual(asked, 4)
+        # Every other word of leaving doubts as it did.
+        for sentence in self.LOOSE:
+            self.assertTrue(results._may_have_left("Trina Swan", sentence), sentence)
+
     def test_the_reader_honours_only_what_it_honoured_before(self):
         # PR #241's third read: the reader that honours is the one main had,
         # sentence for sentence, and no shape is ever added to it. The fixture
@@ -4667,24 +4837,79 @@ class TestARenamedNovemberRow(NoGap):
             self.assertEqual(self.race(cache)["status"]["H6OH05003"], "defeated", party)
             self.assertIn("a filing of theirs", cache["renamedRows"][self.RACE][0]["why"])
 
-    def test_an_alias_the_page_spells_otherwise_is_not_stale(self):
-        # Follow-up 4: the matcher folds accents, capitals and spacing, and
-        # a given name that fits; compared letter for letter, an alias that
-        # still matched the page was called stale.
+    def test_an_alias_the_page_spells_otherwise_is_stale(self):
+        # An alias is applied letter for letter and nowhere else, so one the
+        # page now spells otherwise settles nobody, and is reported: called
+        # "given" where a page's name only folded to it or fitted it (PR
+        # #241, until its fourth read), it was no longer warned stale though
+        # it no longer applied.
         from unittest import mock
         from kyc import overrides
+        stale = {self.RACE: [{"id": "H6OH05003", "name": "Kit Swan"}]}
+        primaries = self.PRIMARIES.replace("Trina Swan", "{}")
+        for page_name in ("Kit Swán", "Kit R. Swan", "KIT SWAN", "Kitty Swan", "Kit Swan Jr.",
+                          "kit swan"):
+            entry = {"H6OH05003": ("Kit Swan", "committee C00000000 (made up)")}
+            with mock.patch.dict(overrides.RESULT_NAMES, entry):
+                cache = self.read(self.infobox(name=page_name), self.november(page_name),
+                                  primaries=primaries.format(page_name))
+                # The alias is not applied: the page's name is nobody's filing.
+                self.assertEqual(results._exact_filing(page_name, self.field["candidates"]), [],
+                                 page_name)
+                self.assertNotIn("H6OH05003", self.race(cache)["status"], page_name)
+                self.assertEqual(cache["staleAliases"], stale, page_name)
+                self.assertIn("stale-result-name", self.codes(cache), page_name)
+        # The name the page writes, letter for letter, is no finding.
+        with mock.patch.dict(overrides.RESULT_NAMES, entry):
+            cache = self.read(self.infobox(name="Kit Swan"), self.november("Kit Swan"),
+                              primaries=primaries.format("Kit Swan"))
+            self.assertEqual(results._exact_filing("Kit Swan", self.field["candidates"]),
+                             ["H6OH05003"])
+            self.assertEqual(cache["staleAliases"], {})
+            self.assertNotIn("stale-result-name", self.codes(cache))
+        # Nor does an alias that only folds to the name the matcher already
+        # ties to the filing apply to anything: stale, as main reads it.
         for alias in ("Trína Swan", "TRINA SWAN", "Trina  Swan", "trina swan"):
             entry = {"H6OH05003": (alias, "committee C00000000 (made up)")}
             with mock.patch.dict(overrides.RESULT_NAMES, entry):
                 cache = self.read(self.november("Trina Swan"))
-            self.assertEqual(cache["staleAliases"], {}, alias)
-            self.assertNotIn("stale-result-name", self.codes(cache), alias)
-        self.assertTrue(results._alias_given("Max Gánorkar", "H1", {"Max  Ganorkar"}))
-        self.assertTrue(results._alias_given("Max Ganorkar", "H1", {"Max R. Ganorkar"}))
-        self.assertFalse(results._alias_given("Max Ganorkar", "H1", {"Mahesh Ganorkar"}))
-        # Two names that both fit it do not make each other ambiguous here.
-        self.assertTrue(results._alias_given("Max Ganorkar", "H1",
-                                             {"Max Ganorkar Jr.", "Max R. Ganorkar"}))
+                self.assertEqual(cache["staleAliases"],
+                                 {self.RACE: [{"id": "H6OH05003", "name": alias}]}, alias)
+                self.assertIn("stale-result-name", self.codes(cache), alias)
+        self.assertTrue(results._alias_given("Max Ganorkar", {"Mahesh Ganorkar", "Max Ganorkar"}))
+        for names in ({"Max  Ganorkar"}, {"Max Gánorkar"}, {"Max R. Ganorkar"},
+                      {"MAX GANORKAR"}, {"Max Ganorkar Jr."}, {"Mahesh Ganorkar"}, set()):
+            self.assertFalse(results._alias_given("Max Ganorkar", names), names)
+
+    def test_a_refusals_remedy_typed_a_letter_off_is_stale_and_settles_nothing(self):
+        # The refusal names an alias as its remedy. Typed otherwise than the
+        # row's own spelling, the entry leaves the row refused - and says so
+        # of itself, or a person who recorded it would wait on a refusal the
+        # entry can never lift (PR #241's fourth read).
+        from unittest import mock
+        from kyc import overrides
+        for row_name, alias in (("Jeanne Héndry", "Jeanne Hendry"),
+                                ("Jeanne Hendry", "Jeanne  Hendry"),
+                                ("Jeanne Hendry", "JEANNE HENDRY"),
+                                ("Jeanne M. Hendry", "Jeanne Hendry")):
+            entry = {"H6OH05003": (alias, "committee C00000000 (made up)")}
+            with mock.patch.dict(overrides.RESULT_NAMES, entry):
+                cache = self.read(self.infobox(swan=168349), self.november(row_name))
+                case = (row_name, alias)
+                self.assertEqual(self.race(cache)["status"], self.HELD, case)
+                self.assertEqual([r["name"] for r in cache["refusedRows"][self.RACE]],
+                                 [row_name], case)
+                self.assertEqual(cache["staleAliases"],
+                                 {self.RACE: [{"id": "H6OH05003", "name": alias}]}, case)
+                self.assertEqual(self.codes(cache), ["result-row-refused", "stale-result-name"],
+                                 case)
+        # Typed as the row writes it, it settles the row and is no finding.
+        entry = {"H6OH05003": ("Jeanne Héndry", "committee C00000000 (made up)")}
+        with mock.patch.dict(overrides.RESULT_NAMES, entry):
+            cache = self.read(self.infobox(swan=168349), self.november("Jeanne Héndry"))
+            self.assertEqual(self.race(cache)["status"], self.CALLED)
+            self.assertEqual(cache["staleAliases"], {})
+            self.assertEqual(self.codes(cache), ["result-row-renamed"])
 
     def test_a_refused_mark_on_a_row_sharing_her_surname_says_so(self):
         # Follow-up 5: the mark's refusal said only "no filing", and nothing
@@ -5627,6 +5852,47 @@ class TestTheNationalSummarysMark(TestTheInfoboxDeclaresTheWinner):
         self.assertFalse(cache["nationalWithdrawn"])
         self.assertEqual(results.carry_refused(cache, previous), [self.race_id()])
         self.assertEqual(self.status(cache)[self.STONE], "elected")
+
+    def test_a_refused_row_that_bore_the_mark_is_kept_or_withdrawn_as_a_refused_mark_is(self):
+        # PR #241's fourth read: a refused row that bore the table's mark
+        # keeps the race's last read, as a refused mark does - a national
+        # call too, never reported dropped - and, as under a refused mark,
+        # never a national call the page's own counts no longer stand behind.
+        from kyc import validate
+        rid, previous = self.race_id(), self.previous()
+        infobox = call_infobox(("Pat Stone", REP, 190744), ("Trina Swan", DEM, 168350))
+        doubt = "Swan withdrew from the race in 2018."
+        # A vandal's mark on the loser's renamed row: the counts still put
+        # the called winner first.
+        vandal = party_box(self.general(), ("Pat Stone", REP, 190744, False),
+                           ("Jeanne Hendry", DEM, 168350, True))
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                           parts=(doubt, infobox, vandal), previous=previous)
+        self.assertEqual([(r["name"], r.get("marked")) for r in cache["refusedRows"][rid]],
+                         [("Jeanne Hendry", True)])
+        self.assertNotIn("elected", self.status(cache).values())
+        self.assertFalse(cache["nationalWithdrawn"])
+        self.assertFalse(cache["nationalDropped"])
+        self.assertEqual(results.carry_refused(cache, previous), [rid])
+        self.assertEqual(self.status(cache)[self.STONE], "elected")
+        self.assertEqual(self.race(cache)["calledBy"], "national")
+        codes = [i.code for i in validate.check_results_pages(cache)]
+        self.assertIn("result-row-refused", codes)
+        self.assertNotIn("result-national-dropped", codes)
+        # The winner's own marked row renamed: the page's counts now put a
+        # name nobody filed as first, so the national call is withdrawn and
+        # not brought back - loudly, both warnings given.
+        renamed = party_box(self.general(), ("Rocky Rhodes", REP, 190744, True),
+                            ("Trina Swan", DEM, 168350, False))
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                           parts=("Stone withdrew from the race in 2018.", infobox, renamed),
+                           previous=previous)
+        self.assertEqual([(r["name"], r.get("marked")) for r in cache["refusedRows"][rid]],
+                         [("Rocky Rhodes", True)])
+        self.assertEqual(results.carry_refused(cache, previous), [])
+        self.assertWithdrawn(cache, "put Rocky Rhodes first")
+        self.assertIn("result-row-refused",
+                      [i.code for i in validate.check_results_pages(cache)])
 
     # PR #224 review: the withdrawal asks the page about the person the call
     # would name - by their filing, never by the row's spelling - and a page
