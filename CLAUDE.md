@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3250 tests, no dependencies
-npm install && npm test                       # 4881 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3251 tests, no dependencies
+npm install && npm test                       # 4897 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2005,6 +2005,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (`recordChipWords`, one table for a chip's label, hover and results
     line). The words are true of everyone listed: "Did not run for
     re-election" stood over fourteen cards reading "Lost primary".
+    A member's run for another seat is said once, by the badge that names
+    the seat: on November 13, 2026 Andy Barr's card and the map's row for
+    KY-6 read "Elected to Senate KY" beside a bare "Elected", under "House •
+    KY-6", as though he had won the seat he holds - and every House member
+    who ran for the Senate read so ("Ran for Senate IA" beside "Lost in
+    November", "Ran for Senate IL" beside "Lost primary"), and in January a
+    former member's "Former member" beside "Lost in November". A card or row
+    drawn under the seat a member holds or held (the grid, a state's
+    delegation, the map's panel, the search) carries "Elected to Senate KY",
+    "Ran for Senate IA", the run's result in its hover (`KYC.contestLine`),
+    and the run's bare status only where it is drawn in the race run for
+    (TX-33's list, Julie Johnson's "Lost primary": `KYC.cards.statusBadge`'s
+    *race*, which a race's section, the Senate view and Your ballot pass),
+    or for a member running again under a new number, whose run is
+    re-election and keeps both. `testOtherSeatWords` asks it of everyone
+    with a `contestLabel` and of a made-up member in every status, sitting
+    or former, on each clock the data reaches.
 
 75. **Write a place's own words.** A territory or D.C. is never "the
     state"; a legislature carries the name its constitution gives it
@@ -3348,7 +3365,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the card the pages unfurl with said "every fact names its source" over
     pages that named none. The seat is in words in a description ("member
     of the U.S. House for AL-4"; a card's bullet read as a glitch in an
-    unfurl), a race's description credits its source before its list and
+    unfurl), and so is the seat a member ran for in every sentence that says
+    so, on a page or shared: "Held by Andy Barr, who was elected to Senate
+    KY in November" stood over KY-6's race, the card's label with its bullet
+    taken out (rule 4), and the same clause in every stage ("is running for
+    Senate KY", "ran for Senate IA and lost in November") on its share
+    page, its description, the hovers and the state pages' plain lists. A
+    Senate seat is "the U.S. Senate in Kentucky", a district its code ("ran
+    for TX-33", "was re-elected in TX-37 under the state’s new district
+    map", an at-large one "WY-AL" as the badges write it), from one helper
+    a side (`share.seat_in_words`, `KYC.seatInWords`), held together for
+    every state by the status table's `seatWords` and `contestSeats` rows;
+    a badge keeps its label ("Elected to Senate KY"). The longer clause
+    leaves less of a race description's length for its list: KY-6's now
+    names its winner and "and 2 more". A race's description credits its source before its list and
     stops at `share.DESCRIPTION_MAX` characters with how many more (an
     unfurler's cut took 62 races' later candidates and every credit), the
     holder of a race's seat is marked while seated (rule 67),

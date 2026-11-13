@@ -208,8 +208,9 @@ class TestStatusWords(unittest.TestCase):
             rows = [row for row in share.status_table()["contestRounds"]
                     if row[1] == day and row[0] == kind and not row[3]]
             self.assertEqual([row[4] for row in rows],
-                             ["is running for Senate AL", "is running for Senate AL",
-                              "ran for Senate AL; the result is awaited"], day)
+                             ["is running for the U.S. Senate in Alabama",
+                              "is running for the U.S. Senate in Alabama",
+                              "ran for the U.S. Senate in Alabama; the result is awaited"], day)
 
     def test_no_other_status_reads_georgias_runoff(self):
         ga = race(id="H-GA-13-2026", state="GA", generalRunoff="2026-12-01")
@@ -571,10 +572,11 @@ class TestSharePages(unittest.TestCase):
         self.assertFalse(share.sits_in(r, barr))
         self.assertFalse(share.holds(r, barr))
         self.assertIn('<a href="../p/B001282.html">Andy Barr</a>, who held this seat, won the race '
-                      "for Senate KY.", page)
+                      "for the U.S. Senate in Kentucky.", page)
         self.assertNotIn("holds the seat", page)
         self.assertNotIn("Held by", page + description)
-        self.assertIn("Andy Barr, who held this seat, won the race for Senate KY.", description)
+        self.assertIn("Andy Barr, who held this seat, won the race for the U.S. Senate in "
+                      "Kentucky.", description)
         # Apart from the race's people: never "Elected" on the seat he left.
         self.assertNotIn('data-id="B001282"', page)
         self.assertNotIn("Andy Barr (Republican): Elected", description)
@@ -604,6 +606,32 @@ class TestSharePages(unittest.TestCase):
         self.assertIn("Held by <a", page)
         self.assertTrue(description.split(" — U.S. House. ")[1].startswith(
             "Held by Kevin Kiley, who ran in CA-6"), description)
+
+    def test_a_seat_in_a_sentence_is_in_words(self):
+        # "Held by Andy Barr, who was elected to Senate KY in November": the
+        # card's label with its bullet taken out, run into a sentence (rules
+        # 4, 96). A Senate seat is in words, a House district its code.
+        self.assertEqual([share.seat_in_words(label) for label in (
+            "Senate • KY", "House • TX-33", "House • WY-AL", "Governor")],
+            ["the U.S. Senate in Kentucky", "TX-33", "WY-AL", "Governor"])
+        table = share.status_table()
+        clauses = ([row[-1] for row in table["contest"]] + [row[-1] for row in table["contestRounds"]]
+                   + [row[-1] for row in table["contestSeats"]] + [row[-1] for row in table["moved"]])
+        label = re.compile(r"\b(?:Senate|House) [A-Z]{2}\b|•")
+        self.assertEqual([c for c in clauses if label.search(c)], [])
+        for status in ("", "nominee", "elected", "defeated", "eliminated", "withdrawn", "unlisted"):
+            for post in (False, "2026-11-05"):
+                for rid, seat, words in (("S-KY-2026", "Senate • KY", "the U.S. Senate in Kentucky"),
+                                         ("H-TX-33-2026", "House • TX-33", "TX-33")):
+                    member = person(id="M", contestLabel=seat, contestRaceId=rid,
+                                    raceStatusRace=rid, raceStatus=status)
+                    clause = share.contest_clause(member, {}, {}, post)
+                    self.assertIn(" " + words, clause, (status, post))
+        # Every stage the decided words name, and the moved holder's.
+        self.assertIn("was elected to the U.S. Senate in Alabama in November",
+                      [row[-1] for row in table["contest"]])
+        self.assertIn("A Member, who held this seat, won the race for the U.S. Senate in Alabama.",
+                      [row[-1] for row in table["moved"]])
 
     def test_the_seat_words_of_a_race_id(self):
         self.assertEqual([share.seat_words(r) for r in ("S-KY-2026", "H-CA-40-2026", "H-WY-00-2026")],

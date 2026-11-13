@@ -113,13 +113,42 @@
       '">' + KYC.escapeHtml(label || spec.label) + "</span>";
   }
 
-  function statusBadge(item) {
+  /* A member's run for another seat, on their card (statusBadge). Rule 74:
+   * a status word describes the race it badges. The card is the member's,
+   * drawn under the seat they hold or held (its office line, "House •
+   * KY-6"), and "Elected to Senate KY" says where the run went: a bare
+   * "Elected" beside it read as though Andy Barr had won KY-6, and in
+   * January "Former member" beside "Lost in November" as though Mike Collins
+   * had lost GA-10. So the badge that says where is the one statement of the
+   * run, its result in its hover (KYC.contestLine); the run's own status
+   * stands bare only on a card drawn in the race run for (TX-33's list,
+   * Julie Johnson's "Lost primary"), and for a member running again under a
+   * new district number (renumbered), whose run is for re-election.
+   * *drawnIn*: the id of the race the card is drawn in, or "". */
+  function otherRun(item, drawnIn) {
+    var line = KYC.contestLine(item);
+    var own = line.renumbered || (!!drawnIn && drawnIn === item.contestRaceId);
+    return { line: line, how: own ? raceBadge(item) : "" };
+  }
+
+  function lineBadge(line) {
+    return '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(line.title) + '">' +
+      KYC.escapeHtml(line.label) + "</span>";
+  }
+
+  /* *race*: the race the card is drawn in, where it is drawn in one (a race
+   * id, or the race): a member's run for another seat is said bare of its
+   * status anywhere else (otherRun). */
+  function statusBadge(item, race) {
     var status = String(item.status || "").toLowerCase();
+    var drawnIn = race && typeof race === "object" ? race.id : typeof race === "string" ? race : "";
+    var elsewhere = !item.isCandidate && !!item.contestLabel;
 
     /* A 2026 incumbent who has left Congress: that first, then how their
      * race went. Never "seat up", never a sitting member's badge. */
     if (item.formerMember) {
-      var how = raceBadge(item);
+      var run = elsewhere ? otherRun(item, drawnIn) : null;
+      var how = !run ? raceBadge(item) : run.how || (run.line.renumbered ? "" : lineBadge(run.line));
       // A 2026 winner who has since left (raceRole, no seat held on the
       // ballot) won the seat in that race; they did not hold it in it.
       var won = item.raceRole === "winner" && !item.heldRaceId;
@@ -137,10 +166,9 @@
     /* A member contesting another seat - the other chamber, or a redrawn
      * district - is leaving this one, and the reader should see where they
      * went before anything else. */
-    if (!item.isCandidate && item.contestLabel) {
-      var line = KYC.contestLine(item);
-      return '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(line.title) + '">' +
-        KYC.escapeHtml(line.label) + "</span>" + (raceBadge(item) ? " " + raceBadge(item) : "");
+    if (elsewhere) {
+      var other = otherRun(item, drawnIn);
+      return lineBadge(other.line) + (other.how ? " " + other.how : "");
     }
     /* A sitting member the primary eliminated is leaving too, and a reader
      * should see that before "seat up" - and where they are going, when a
@@ -273,14 +301,17 @@
    * under an age sort, where a search matched (kyc-directory.js). A sitting
    * member's card carries a way to reach their office beside it, outside
    * the button: a link cannot sit inside one. */
+  /* *opts.race*: the race the card is drawn in (statusBadge). Called by
+   * Array.map, *opts* is an index, and says nothing. */
   function card(item, opts) {
     var note = opts && typeof opts === "object" ? opts.note : "";
+    var race = opts && typeof opts === "object" ? opts.race : null;
     var contact = contactLink(item);
-    var html = cardButton(item, note);
+    var html = cardButton(item, note, race);
     return contact ? '<div class="card-cell">' + html + contact + "</div>" : html;
   }
 
-  function cardButton(item, note) {
+  function cardButton(item, note, race) {
     // No portrait (rule 24 guesses none): a disc with the person's
     // initials, not a 150x190 grey silhouette (VISUALS-16).
     var photo = KYC.hasPortrait(item)
@@ -301,7 +332,7 @@
       heldLine(item),
       '<span class="card-party ', KYC.partyClass(item), '">',
       KYC.escapeHtml(item.party), "</span>",
-      statusBadge(item),
+      statusBadge(item, race),
       note ? '<span class="card-note clamp-2">' + KYC.escapeHtml(note) + "</span>" : "",
       "</span></button>",
     ].join("");
@@ -524,7 +555,7 @@
     var holder = movedHolder(race);
     if (!holder) {
       return race.holderMoved.name + ", who holds this seat, is running for " +
-        race.holderMoved.to.replace(/ • /, " ") + " under the state’s new district map";
+        KYC.seatInWords(race.holderMoved.to) + " under the state’s new district map";
     }
     // "who held this seat" once they no longer sit in it (KYC.sitsIn): Kevin
     // Kiley, who left on January 3, read "who holds this seat, ran in CA-6"
@@ -568,7 +599,7 @@
     return !holder ? (named ? named + " no longer holds the seat." : noMember()) :
       // Seated since in the seat they won elsewhere (kyc/record.py).
       holder.raceRole === "winner" && holder.raceId !== race.id
-        ? holder.name + " won the race for " + holder.officeLabel.replace(/ • /, " ") + "." :
+        ? holder.name + " won the race for " + KYC.seatInWords(holder.officeLabel) + "." :
       // Their other run, in the one set of words (KYC.contestLine).
       holder.contestLabel ? holder.name + " " + heldByWhat(holder, race) + "." :
       holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
@@ -948,7 +979,7 @@
     var people = lazyPeople[key];
     var grid = details.querySelector(".card-grid");
     if (!people || !grid || grid.childElementCount) return;
-    grid.innerHTML = people.map(function (p) { return card(p); }).join("");
+    grid.innerHTML = people.map(function (p) { return card(p, { race: key }); }).join("");
   }
 
   /** A race's people as every view that lists the race splits them: the
@@ -991,7 +1022,8 @@
     people = split.people;
     var body = moved.map(function (p) { return heldByLine(p, race); }).join("") +
       split.holders.map(function (p) { return holderLine(p, "", race); }).join("") +
-      '<div class="card-grid">' + running.map(function (p) { return card(p); }).join("") + "</div>" +
+      '<div class="card-grid">' + running.map(function (p) { return card(p, { race: race }); }).join("") +
+      "</div>" +
       unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
     if (out.length) {
       if (opts.lazyOut) lazyPeople[race.id] = out;
@@ -1000,8 +1032,8 @@
           KYC.escapeAttr(race.id) + '"' : "") + "><summary>" + out.length +
         " no longer in this race &mdash; lost the primary, withdrew, or were " +
         "not on the primary ballot</summary>" +
-        '<div class="card-grid">' + (opts.lazyOut ? "" : out.map(function (p) { return card(p); })
-          .join("")) + "</div></details>";
+        '<div class="card-grid">' + (opts.lazyOut ? ""
+          : out.map(function (p) { return card(p, { race: race }); }).join("")) + "</div></details>";
     }
     var title = opts.title || race.label;
     var link = opts.stateLink === false ? "" :

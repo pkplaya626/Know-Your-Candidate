@@ -231,8 +231,9 @@
           // election; the verbs are KYC.contestLine's.
           defender.seekingReelection2026 ? (counted ? " ran" : " running") :
           defender.contestLabel ? " " + lowerFirst(KYC.contestLine(defender).verb) + " " +
-            defender.contestLabel :
-          defender.alsoRunningSeat ? (counted ? " ran for " : " running for ") + defender.alsoRunningSeat :
+            KYC.seatInWords(defender.contestLabel) :
+          defender.alsoRunningSeat ? (counted ? " ran for " : " running for ") +
+            KYC.seatInWords(defender.alsoRunningSeat) :
           counted ? " did not run" : " not running") + ")",
     };
   }
@@ -397,6 +398,17 @@
     return spec ? badge(spec, item) : "";
   }
 
+  /* The run's own status beside the seat it is for, on a member's row: the
+   * panel lists members under the seat they hold ("House • KY-6"), so a bare
+   * "Elected" there read as Andy Barr's win in KY-6 (rule 74). "Elected to
+   * Senate" is the one statement of a run for another seat; a member
+   * re-elected under a new number (renumbered) keeps the result beside
+   * "Re-elected in CA-40 (redrawn)", as their card does
+   * (KYC.cards.statusBadge). */
+  function contestResult(item) {
+    return KYC.contestLine(item).renumbered ? contestBadge(item) : "";
+  }
+
   function rowBadge(item) {
     var status = String(item.status || "").toLowerCase();
     // "Renominated", "Leaving seat": about the seat a member holds, not the
@@ -426,11 +438,12 @@
   }
 
   function personRow(item) {
-    // A member contesting another seat carries two badges. Both at the row's
-    // end squeezed the name to nothing and broke "House • CA-38" over four
-    // lines, so the seat ("Running for CA-41") takes a line under the text
-    // and the result ("Nominee") stays at the end, in line with every other
-    // row's "Renominated". The grid in kyc.css places them.
+    // A member re-elected under a new number carries two badges. Both at the
+    // row's end squeezed the name to nothing and broke "House • CA-38" over
+    // four lines, so the seat ("Running in CA-41 (redrawn)") takes a line
+    // under the text and the result ("Nominee") stays at the end, in line
+    // with every other row's "Renominated". The grid in kyc.css places them.
+    // A run for another seat is the seat's badge alone (contestResult).
     var elsewhere = !item.isCandidate && item.contestLabel;
     return [
       '<button type="button" class="person-row" data-id="',
@@ -442,7 +455,7 @@
       '<span class="party ', KYC.partyClass(item), '">',
       KYC.escapeHtml(item.party), "</span>",
       "</span>",
-      elsewhere ? contestSeat(item) + contestBadge(item) : rowBadge(item),
+      elsewhere ? contestSeat(item) + contestResult(item) : rowBadge(item),
       KYC.icon("chevron"),
       "</button>",
     ].join("");

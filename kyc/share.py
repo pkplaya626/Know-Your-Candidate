@@ -446,6 +446,42 @@ def _member_elsewhere(status, renumbered, decided, unconfirmed):
     return item
 
 
+# The other seats the table's "contestSeats" rows ask about, beside the
+# "contest" rows' Senate • AL and (renumbered) House • AL-1: a Senate seat of
+# another state, a district run for under no new number (Julie Johnson's
+# TX-33), an at-large district - each as its race id and label.
+_CONTEST_SEATS = (("S-KY-2026", "Senate • KY"), ("H-TX-33-2026", "House • TX-33"),
+                  ("H-WY-00-2026", "House • WY-AL"))
+
+
+def _contest_seats():
+    """What :func:`contest_clause` says of a run for each of
+    :data:`_CONTEST_SEATS`, in each stage before and after Election Day
+    (``[label, race id, status, post, clause]``): the seat in a sentence's
+    words (:func:`seat_in_words`), as KYC.contestLine writes it."""
+    rows = []
+    for rid, label in _CONTEST_SEATS:
+        for status in ("", "nominee", "elected", "defeated", "eliminated", "withdrawn", "unlisted"):
+            for post in (0, 1):
+                item = _member_elsewhere(status, 0, None, 0)
+                item.update(contestLabel=label, contestRaceId=rid, raceStatusRace=rid)
+                rows.append([label, rid, status, post,
+                             contest_clause(item, {}, {}, _TABLE_AFTER if post else False)])
+    return rows
+
+
+def _seat_words_table():
+    """``[label, words]``: :func:`seat_in_words` for every state's Senate
+    seat and a few House seats, which ``KYC.seatInWords`` must say alike
+    (its place names are the build's, ``voting_dates.place``'s here)."""
+    from .normalize import TERRITORIES, US_STATES
+
+    codes = sorted(set(US_STATES.values()))
+    labels = [f"Senate • {code}" for code in codes if code not in TERRITORIES]
+    labels += ["House • CA-6", "House • WY-AL", "House • DC-AL", "House • PR-AL", "Governor"]
+    return [[label, seat_in_words(label)] for label in labels]
+
+
 def _contest_rounds():
     """What :func:`contest_clause` says of a member's other run in a December
     round or a general election runoff, read the day before it, on the day
@@ -506,8 +542,9 @@ def status_table():
     "moved": [...], "filers": [...], "record": [...], "former": [...]}``:
     what :func:`_race_status` and :func:`_race_source` say for every
     combination of status and option, what :func:`contest_clause` says of a
-    member's other run in every status and every kind of round, what
-    :func:`moved_sentence` says of a seat's holder whose run went elsewhere
+    member's other run in every status and every kind of round
+    (``contestSeats``: for other kinds of seat; ``seatWords``: each seat in a
+    sentence's words), what :func:`moved_sentence` says of a seat's holder whose run went elsewhere
     (seated in it or not, a member seated since for the seat they won or
     not), what :func:`standing` says for each kind of filer the results do
     not settle, (``record``) what :func:`_race_status` says in the record
@@ -641,7 +678,8 @@ def status_table():
     return {"words": ["status", "allParty", "source", "round", "runoff", "held", "decided", "own",
                       "appointed", "unconfirmed", "minor", "post", "label", "off"],
             "statuses": words, "credits": credits, "contest": contest, "moved": moved,
-            "contestRounds": _contest_rounds(), "filers": filers, "record": record,
+            "contestRounds": _contest_rounds(), "contestSeats": _contest_seats(),
+            "seatWords": _seat_words_table(), "filers": filers, "record": record,
             "former": former, "seated": seated, "seatedOthers": seated_others}
 
 
@@ -661,8 +699,8 @@ def status_table_text():
     """The fixture's text: one row a line, so a change reads as a diff."""
     table = status_table()
     lines = ["{", f'"words": {json.dumps(table["words"])},']
-    keys = ("statuses", "credits", "contest", "contestRounds", "moved", "filers", "record",
-            "former", "seated", "seatedOthers")
+    keys = ("statuses", "credits", "contest", "contestRounds", "contestSeats", "seatWords",
+            "moved", "filers", "record", "former", "seated", "seatedOthers")
     for key in keys:
         rows = table[key]
         lines.append(f'"{key}": [')
@@ -971,6 +1009,22 @@ def seat_phrase(label):
     return f"the {parts[0]} in {parts[1]}" if parts else str(label or "")
 
 
+def seat_in_words(label):
+    """A seat in a sentence that follows "who" (``KYC.seatInWords``): a
+    Senate seat in words, "the U.S. Senate in Kentucky" (:func:`seat_phrase`),
+    and a House district by its code, as the site writes districts in every
+    sentence ("CA-6", "WY-AL"). The label is read, never rebuilt (rule 4):
+    "Senate KY", the card's label with its bullet taken out, read "Held by
+    Andy Barr, who was elected to Senate KY in November". A label of another
+    shape is returned as it is."""
+    parts = _seat_parts(label)
+    if not parts:
+        return str(label or "")
+    if parts[0] == "U.S. Senate":
+        return seat_phrase(label)
+    return str(label).partition(" • ")[2]
+
+
 def _role(person, post=False):
     from .record import seated
 
@@ -1156,7 +1210,8 @@ def sits_in(race, person):
 
 
 def seat_words(rid):
-    """``KYC``'s seatWords: "Senate KY", "CA-40", "WY-AL"."""
+    """``KYC``'s seatWords, a race id's seat as a badge names it: "Senate KY",
+    "CA-40", "WY-AL". Never in a sentence: :func:`seat_in_words` is."""
     from .races import seat_label
 
     seat = seat_label(rid).replace(" • ", " ", 1)
@@ -1167,19 +1222,22 @@ def moved_clause(race, person, by_id, races_by_id=None, post=False):
     """``KYC.movedLine``'s clause for a holder :func:`moved_from` names: their
     own :func:`contest_clause` where their profile still holds the run, else
     the record's words - "was re-elected in CA-40 under the state's new
-    district map", "won the race for Senate KY" - or "ran for" the race their
-    result is for."""
+    district map", "won the race for the U.S. Senate in Kentucky" - or "ran
+    for" the race their result is for."""
+    from .races import seat_label
+
     if person.get("contestLabel") and not person.get("isCandidate"):
         return contest_clause(person, by_id, races_by_id, post)
     won = (person.get("raceRole") == "winner" and bool(person.get("raceId"))
            and person["raceId"] != race["id"])
-    seat = seat_words(person["raceId"] if won else
-                      (person.get("contestRaceId") or person.get("raceStatusRace")))
+    rid = person["raceId"] if won else (person.get("contestRaceId") or person.get("raceStatusRace"))
+    seat = seat_words(rid)
+    words = seat_in_words(seat_label(rid))
     where = f"{seat} under the state’s new district map"
     moved = bool(person.get("renumbered"))
     if won:
-        return f"was re-elected in {where}" if moved else f"won the race for {seat}"
-    return ("ran " if post else "is running ") + (f"in {where}" if moved else f"for {seat}")
+        return f"was re-elected in {where}" if moved else f"won the race for {words}"
+    return ("ran " if post else "is running ") + (f"in {where}" if moved else f"for {words}")
 
 
 def moved_sentence(race, person, by_id, races_by_id=None, post=False):
@@ -1209,14 +1267,14 @@ def split_people(race, by_id):
 
 
 def contest_clause(person, by_id, races_by_id=None, post=False):
-    """KYC.contestLine's clause, the words after "who": "is running for
-    CA-6", "was elected to Senate KY in November", "ran for Senate IA and
+    """KYC.contestLine's clause, the words after "who", the seat in words
+    (:func:`seat_in_words`): "is running for CA-6", "was elected to the U.S.
+    Senate in Kentucky in November", "ran for the U.S. Senate in Iowa and
     lost in November". The render suite asks the page code for every case
     (tests/fixtures/share_status_words.json), and *post* is
-    :func:`post_election`'s."""
-    seat = str(person.get("contestLabel")).replace(" • ", " ", 1)
-    if seat.startswith("House "):
-        seat = seat[len("House "):]
+    :func:`post_election`'s. A renumbered member's district is its code, as
+    every district is in a sentence."""
+    seat = seat_in_words(person.get("contestLabel"))
     status = contest_status(person, by_id)
     spec = standing(person, by_id, races_by_id or {}, post)
     stage = ("won" if status == "elected" else "lost" if status == "defeated"

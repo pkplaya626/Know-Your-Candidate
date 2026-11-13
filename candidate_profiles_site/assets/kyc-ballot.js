@@ -1021,11 +1021,12 @@
       body + "</li>";
   }
 
-  function personRow(p) {
+  /* *race*: the race the person is listed in (KYC.cards.statusBadge). */
+  function personRow(p, race) {
     return '<li class="ballot-person"><button type="button" class="link-button" data-id="' +
       KYC.escapeAttr(p.id) + '">' + esc(p.name) + "</button> " +
       '<span class="party-chip ' + KYC.partyClass(p) + '">' + esc(p.party) + "</span> " +
-      KYC.cards.statusBadge(p) + "</li>";
+      KYC.cards.statusBadge(p, race) + "</li>";
   }
 
   /** A race for Congress as the race views show it: its badges (the
@@ -1056,7 +1057,8 @@
       '<p class="ballot-badges">' + KYC.cards.raceBadges(race) + "</p>" +
       split.moved.map(function (p) { return KYC.cards.heldByLine(p, race); }).join("") +
       holders.map(function (p) { return KYC.cards.holderLine(p, "ballot-holder", race); }).join("") +
-      (running.length ? '<ul class="ballot-people">' + running.map(personRow).join("") + "</ul>" : "") +
+      (running.length ? '<ul class="ballot-people">' +
+        running.map(function (p) { return personRow(p, race); }).join("") + "</ul>" : "") +
       (none ? '<p class="ballot-note">Nobody with a profile here is ' +
         (unsure.length ? "known to be on this ballot" : "in this race") + ".</p>" : "") +
       KYC.cards.unprofiledNote(race, "ballot-note") +
@@ -1065,7 +1067,8 @@
         ? '<p class="ballot-note ballot-unsure-note">Filed for this seat; whether ' +
           (unsure.length === 1 ? "this person is" : "these people are") + " on the " +
           (held() ? "" : "November ") + "ballot is not known here:</p>" +
-          '<ul class="ballot-people ballot-unsure">' + unsure.map(personRow).join("") + "</ul>"
+          '<ul class="ballot-people ballot-unsure">' +
+          unsure.map(function (p) { return personRow(p, race); }).join("") + "</ul>"
         : "") +
       (gone.length
         ? '<p class="ballot-note">' + gone.length + (holders.length ? " other" : "") +
