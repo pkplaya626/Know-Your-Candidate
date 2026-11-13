@@ -524,7 +524,7 @@
       text += place ? " for “" + typed() + "” (" + place + ")"
         : " matching “" + typed() + "”";
     }
-    if (state.state !== "all") text += " in " + KYC.stateName(state.state);
+    if (state.state !== "all") text += " in " + KYC.placeWords(state.state);
     return text;
   }
 
@@ -1069,8 +1069,8 @@
     var text = "";
     if (query && query.terms !== undefined) text += " matching “" + typed() + "”";
     else if (query && !query.state) text += " for “" + typed() + "”";
-    else if (query && query.state !== state.state) text += " in " + KYC.stateName(query.state);
-    if (state.state !== "all") text += " in " + KYC.stateName(state.state);
+    else if (query && query.state !== state.state) text += " in " + KYC.placeWords(query.state);
+    if (state.state !== "all") text += " in " + KYC.placeWords(state.state);
     return text;
   }
 

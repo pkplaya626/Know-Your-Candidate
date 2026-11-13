@@ -2207,9 +2207,12 @@
 
   /** A place's possessive, as kyc/pages.py writes it (rule 75): "Virgin
    *  Islands'", never "Virgin Islands's"; "Texas's". */
-  function possessive(name) {
+  function possessive(name, mark) {
+    // *mark*: the apostrophe the sentence around it is written with ("’" in
+    // the search's answers). A name ending "Islands" takes no second s.
     name = String(name || "");
-    return name + (/Islands$/.test(name) ? "'" : "'s");
+    mark = mark || "'";
+    return name + (/Islands$/.test(name) ? mark : mark + "s");
   }
 
   /** The election office's sample-ballot page in a sentence, said as the
@@ -3186,7 +3189,7 @@
     if (!place || place.district === undefined || place.any) return "";
     var seats = houseSeats(place.state);
     if (!seats) return "";
-    var name = stateName(place.state);
+    var name = placeStart(place.state);      // it opens the sentence
     if (seats === 1) {
       return place.district <= 1 ? "" : name + " has one House seat, elected at large (" +
         place.state + "-AL).";
@@ -3206,11 +3209,14 @@
       return place.any ? "district " + seat + " in every state" : place.state + "-" + seat;
     }
     var name = stateName(place.state);
+    // In a sentence the place is named as one names it (rule 75): "the U.S.
+    // Virgin Islands’ sitting House members", never "U.S. Virgin Islands’s".
+    var whose = possessive(placeWords(place.state), "’");
     if (place.seated) {
-      return name + "’s sitting " + (place.chamber === "House" ? "House members" : "members of Congress");
+      return whose + " sitting " + (place.chamber === "House" ? "House members" : "members of Congress");
     }
-    if (place.chamber === "Senate") return name + "’s Senate seats";
-    if (place.chamber === "House") return name + "’s House seats";
+    if (place.chamber === "Senate") return whose + " Senate seats";
+    if (place.chamber === "House") return whose + " House seats";
     return name;
   }
 
@@ -3479,7 +3485,7 @@
       return loadPeople(person.state).then(function (whole) {
         var again = byId(id);
         if (!whole || !isFull(again)) {
-          throw new Error(KYC.stateName(person.state) + "'s profiles did not load");
+          throw new Error(possessive(placeStart(person.state)) + " profiles did not load");
         }
         return again;
       });
@@ -3557,6 +3563,11 @@
     // *name*: the place's name where this page holds no build figures (Your
     // ballot and the lookup name a state from the lookup's index).
     return PLACE_WORDS[code] || name || stateName(code);
+  }
+  /** The same where it opens a sentence: "The District of Columbia". */
+  function placeStart(code, name) {
+    var words = placeWords(code, name);
+    return words.charAt(0).toUpperCase() + words.slice(1);
   }
 
   /** Where the page for a state lives, relative to the current page. The
@@ -4514,6 +4525,7 @@
     // states
     stateName: stateName,
     placeWords: placeWords,
+    placeStart: placeStart,
     senateBases: senateBases,
     seatUpYear: seatUpYear,
     stateUrl: stateUrl,

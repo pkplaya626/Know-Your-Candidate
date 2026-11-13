@@ -308,9 +308,12 @@ NO_LINE_ITEM_VETO = ("IN", "NV", "NH", "NC", "RI", "VT")
 
 
 def _names():
-    """Names as a sentence uses them: "the District of Columbia"."""
-    from .pages import state_name
-    return lambda code: ("the " if code == "DC" else "") + state_name(code)
+    """Names as a sentence uses them: "the District of Columbia", "the
+    Northern Mariana Islands", "the U.S. Virgin Islands" (one table,
+    ``voting_dates.PLACES``; the circuits' sentences said "Guam, Hawaii and
+    Northern Mariana Islands")."""
+    from .pages import sentence_place
+    return sentence_place
 
 
 def _join(words):

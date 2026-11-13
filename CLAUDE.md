@@ -1892,7 +1892,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     place in their text, building their addresses and naming another body
     as it names itself ("District Court of the Virgin Islands"); a place in
     a sentence is `KYC.placeWords`' on the page, the one table, of which
-    three modules kept copies. Where a city's name join
+    three modules kept copies. And a sentence takes the place as a sentence
+    names it, wherever the words are built: read on the branch's own built
+    pages, every territory's governor's share page said "Open their record
+    on Northern Mariana Islands’s page", the races' heading "2026 races for
+    Congress in District of Columbia", the guide's map "also hears appeals
+    from New Jersey, Pennsylvania and Virgin Islands", and some thirty of the
+    page code's sentences (the search's answers, the grid's filter line, a
+    card's hover) put the page's name after "in", "for" or "about" and "’s"
+    after "Islands". The words are `pages.sentence_place` and
+    `KYC.placeWords` (`placeStart` where they open a sentence), and a
+    possessive is `pages._possessive` or `KYC.possessive`, which take the
+    sentence's own apostrophe and give "Islands" no second s. A title a
+    source gives in quotation marks is the source's. Where a city's name join
     cannot work, a place is joined to a government only through the
     listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
     the government `county_areas` names, never to a town it replaced.

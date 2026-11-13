@@ -10978,7 +10978,34 @@ async function testCertifiedBallots() {
   });
   const vi = await buildPage("states/vi.html");
   suite("states/vi.html — a plural name's possessive", () => {
-    check("never Virgin Islands's", !/Islands's/.test(vi.D.body.textContent));
+    check("never Virgin Islands's", !/Islands[’']s/.test(vi.D.body.textContent));
+  });
+  // A sentence names these places with "the" (rule 75): the races heading
+  // read "2026 races for Congress in Virgin Islands", in D.C. "in District of
+  // Columbia", on the plain page and on the drawn one.
+  const dcPage = await buildPage("states/dc.html");
+  suite("states — a heading that is a sentence names the place as one does (rule 75)", () => {
+    const heading = (page) => {
+      const h = page.D.querySelector("#races .state-heading");
+      return h ? h.textContent.replace(/\s+/g, " ") : "";
+    };
+    check("the U.S. Virgin Islands", !heading(vi) || /in the U\.S\. Virgin Islands$/.test(heading(vi)), heading(vi));
+    check("the Northern Mariana Islands", !heading(mp) || /in the Northern Mariana Islands$/.test(heading(mp)), heading(mp));
+    check("the District of Columbia", !heading(dcPage) || /in the District of Columbia$/.test(heading(dcPage)),
+      heading(dcPage));
+    check("at least one of them has races to head", !!(heading(vi) || heading(mp) || heading(dcPage)));
+    // A title in quotation marks is a source's own, not this site's sentence.
+    // What a reader sees: a data file a page loads is a script in its body.
+    const seen = (page) => {
+      const copy = page.D.body.cloneNode(true);
+      copy.querySelectorAll("script, style, template").forEach((node) => node.remove());
+      return copy.textContent.replace(/\s+/g, " ");
+    };
+    const bare = [vi, mp, dcPage].map((page) => seen(page).replace(/“[^”]*”/g, "“”"))
+      .map((text) => (text.match(
+        /.{0,40}\b(?:in|for|from|on|about) (?:U\.S\. Virgin Islands|Northern Mariana Islands|District of Columbia)\b.{0,20}/) || [""])[0])
+      .filter(Boolean);
+    check("and no sentence on their pages names one bare after a preposition", bare.length === 0, bare.join(" | "));
   });
 
   // PERSONA-09: a nominee with no profile carries their party.
@@ -13518,6 +13545,52 @@ async function testSearchAnswers() {
           KYC.placeWords("TX", "Texas") === "Texas" && KYC.placeWords("DC", "x") === "the District of Columbia" &&
           KYC.possessive(KYC.placeWords("VI")) === "the U.S. Virgin Islands'",
         KYC.placeWords("VI"));
+      check("a possessive takes its sentence's apostrophe, and 'Islands' no second s",
+        KYC.possessive("Texas", "’") === "Texas’s" && KYC.possessive("Guam") === "Guam's" &&
+          KYC.possessive(KYC.placeWords("VI"), "’") === "the U.S. Virgin Islands’" &&
+          KYC.possessive(KYC.placeWords("MP"), "’") === "the Northern Mariana Islands’",
+        KYC.possessive(KYC.placeWords("VI"), "’"));
+      check("and opens a sentence with its article's capital",
+        KYC.placeStart("DC") === "The District of Columbia" && KYC.placeStart("TX") === "Texas" &&
+          KYC.placeStart("VI") === "The U.S. Virgin Islands", KYC.placeStart("VI"));
+    });
+    // The state filter's words are a sentence's: "... in the U.S. Virgin
+    // Islands" (the grid said "in Virgin Islands", "in District of Columbia").
+    for (const [code, words] of [["VI", "in the U.S. Virgin Islands"], ["DC", "in the District of Columbia"]]) {
+      const filtered = await buildPage("index.html", { hash: "#/?state=" + code });
+      const line = filtered.D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+      suite("the grid — the state filter names " + code + " as a sentence does (rule 75)", () => {
+        check("'" + words + "'", line.indexOf(" " + words) !== -1, line);
+      });
+    }
+    // Every answer and label that names the place in a sentence (rule 75):
+    // main said "Virgin Islands’s page" and "in Virgin Islands".
+    const asked = {};
+    for (const q of ["Virgin Islands delegation", "Virgin Islands attorney general", "Virgin Islands legislature",
+      "Virgin Islands counties", "Virgin Islands courts", "Northern Mariana Islands delegation",
+      "Northern Mariana Islands counties", "District of Columbia governor", "District of Columbia courts"]) {
+      await ask(q);
+      asked[q] = { label: label(), answers: box().textContent.replace(/\s+/g, " ") };
+    }
+    suite("search — a place named with 'the' keeps it, and 'Islands' takes no second s (rule 75)", () => {
+      check("'the U.S. Virgin Islands’ sitting members of Congress'",
+        /the U\.S\. Virgin Islands’ sitting members of Congress/.test(asked["Virgin Islands delegation"].label),
+        asked["Virgin Islands delegation"].label);
+      check("'the Northern Mariana Islands’ sitting members of Congress'",
+        /the Northern Mariana Islands’ sitting members of Congress/.test(
+          asked["Northern Mariana Islands delegation"].label), asked["Northern Mariana Islands delegation"].label);
+      const wrong = Object.keys(asked).filter((q) => {
+        const text = asked[q].label + " " + asked[q].answers;
+        return /Islands[’']s/.test(text) ||
+          /\b(?:in|of|for|from|on|about|and) (?:U\.S\. Virgin Islands|Northern Mariana Islands|District of Columbia)/
+            .test(text.replace(/(?:Court|Circuit|Attorney|Council|Mayor|Legislature|Senate|House|Government) (?:of|for) (?:the )?[A-Z]/g, "#"));
+      });
+      check("no answer or label says 'Islands’s', or names such a place bare after a preposition",
+        wrong.length === 0, wrong.map((q) => q + ": " + asked[q].label + " | " + asked[q].answers.slice(0, 400)).join(" || "));
+      check("a page is named 'The U.S. Virgin Islands’ page' where an answer links it",
+        Object.keys(asked).every((q) => !/Virgin Islands’s? page/.test(asked[q].answers) ||
+          /The U\.S\. Virgin Islands’ page/.test(asked[q].answers)),
+        asked["Virgin Islands attorney general"].answers.slice(0, 300));
     });
   }
   if (missing) {

@@ -659,7 +659,7 @@
       if (sr.length) {
         rows.push(row(record ? "The Senate race" : "Senate race", sr.map(function (r) {
           return '<div class="findrep-item">' + raceLine(code, r, (r.special ? "Special election"
-            : "U.S. Senate") + " in " + nameOf(code)) + "</div>";
+            : "U.S. Senate") + " in " + placeWords(code)) + "</div>";
         }).join("")));
       }
     }

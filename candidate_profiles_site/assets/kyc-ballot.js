@@ -913,7 +913,7 @@
     return '<p class="measures-lead measures-failed">The list of ' + esc(section) + " did not " +
       "load, so this page cannot say whether any is on this ballot. Reload the page, or see " +
       '<a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#measures") + '">' +
-      esc(placeName(code)) + "'s page</a>" +
+      esc(KYC.possessive(placeName(code))) + " page</a>" +
       (sample ? " or the election office's sample-ballot page: " + sample : "") + ".</p>";
   }
 

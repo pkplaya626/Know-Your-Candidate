@@ -9,6 +9,7 @@ testTheJanuaryPage).
 """
 
 import os
+import re
 import sys
 import unittest
 from unittest import mock
@@ -89,6 +90,51 @@ class TestAPlaceInASentence(unittest.TestCase):
         from kyc import nominee_photos
         self.assertIn("Virgin Islands", nominee_photos.states_named(
             "Delegate to the U.S. House from the United States Virgin Islands"))
+
+    def test_a_sentence_names_a_place_with_its_article_and_islands_take_no_second_s(self):
+        # Rule 75, found on PR #246's own built pages: "Open their record on
+        # U.S. Virgin Islands’s page", "2026 races for Congress in U.S. Virgin
+        # Islands", "also hears appeals from New Jersey, Pennsylvania and U.S.
+        # Virgin Islands". Each predates the rename (main: "Northern Mariana
+        # Islands’s page", "in District of Columbia").
+        from kyc import government_maps, governor_share, pages, voting_dates
+        for code, words in voting_dates.PLACES.items():
+            self.assertEqual(pages.sentence_place(code), words)
+            self.assertTrue(words.startswith("the "), words)
+        self.assertEqual(pages.sentence_place("TX"), "Texas")
+        self.assertEqual(pages._opening(pages.sentence_place("DC")), "The District of Columbia")
+        # A governor's share page names the state page it opens.
+        for code, words in (("VI", "the U.S. Virgin Islands’ page"), ("MP", "the Northern Mariana Islands’ page"),
+                            ("GU", "Guam’s page"), ("GA", "Georgia’s page")):
+            for kind in ("governor", "candidate"):
+                _href, label, plain = governor_share._view({"code": code, "kind": kind}, "gov-" + code)
+                self.assertTrue(label.endswith(" on " + words), label)
+                self.assertIn(">" + words + "</a>", plain)
+                self.assertNotIn("Islands’s", label + plain)
+        # A district page: its headline is the page's name, its sentences the place's.
+        for code, opening in (("VI", "The U.S. Virgin Islands' "), ("MP", "The Northern Mariana Islands' "),
+                              ("DC", "The District of Columbia's "), ("GU", "Guam's "), ("TX", "Texas's ")):
+            html = pages.render_district_page(code, "example.org")
+            description = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+            self.assertTrue(description.replace("&#x27;", "'").startswith(opening + "House districts"), description)
+            self.assertNotIn("Islands&#x27;s", html)
+            self.assertNotIn("Islands's", html)
+        self.assertIn("the District of Columbia&#x27;s page</a> lists its",
+                      pages.render_district_page("DC", "example.org"))
+        # A state page's description, and its races' heading.
+        for code, opening in (("VI", "The U.S. Virgin Islands' delegate"), ("DC", "The District of Columbia's delegate"),
+                              ("GU", "Guam's delegate")):
+            html = pages.render_state(code, "example.org")
+            description = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+            self.assertTrue(description.replace("&#x27;", "'").startswith(opening), description)
+        # The circuits' sentences on the guide's map.
+        facts = government_maps._circuits()["facts"]
+        self.assertTrue(facts["PA"].endswith("Delaware, New Jersey and the U.S. Virgin Islands."), facts["PA"])
+        self.assertIn("Hawaii and the Northern Mariana Islands.", facts["CA"])
+        for code, text in facts.items():
+            self.assertIsNone(re.search(
+                r"\b(?:from|and|,) (?:U\.S\. Virgin Islands|Northern Mariana Islands|District of Columbia)\b", text),
+                (code, text))
 
     def test_the_governor_overlays_never_call_a_territory_a_state(self):
         self.assertNotIn("state", governor_share.PAST)

@@ -1483,7 +1483,7 @@
       stateLink.hidden = false;
       stateLink.href = KYC.stateUrl(item.state);
       stateLink.textContent = KYC.stateName(item.state) + " \u203a";
-      stateLink.title = "Everything about " + KYC.stateName(item.state) + ": its delegation and 2026 races";
+      stateLink.title = "Everything about " + KYC.placeWords(item.state) + ": its delegation and 2026 races";
     } else {
       stateLink.hidden = true;
     }
