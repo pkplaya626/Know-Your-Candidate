@@ -109,7 +109,8 @@ OFFICIAL_ELSEWHERE = {
         "embedded on the Commission's 'Register online' page, https://gec.guam.gov/register/"),
     # Title 48 of the U.S. Code is the territories' organic law: Guam's
     # Organic Act sets its governor's runoff (48 U.S.C. 1422), and chapter
-    # 16 its Delegate's and American Samoa's (48 U.S.C. 1712, 1731).
+    # 16 its Delegate's runoff and how American Samoa's Delegate is elected
+    # (48 U.S.C. 1712; 1732, by a plurality, with no runoff since 2004).
     "https://www.govinfo.gov/content/pkg/USCODE-2024-title48/": (
         ("AS", "GU"), "govinfo.gov (48 U.S.C.)",
         "the Code as the Government Publishing Office publishes it; Title 48 governs elections "

@@ -395,7 +395,7 @@ SOURCES = {
                 "https://www.law.cornell.edu/uscode/text/2/1"),
     "usc-2-7": ("2 U.S.C. 7 (the day of the House election)",
                 "https://www.law.cornell.edu/uscode/text/2/7"),
-    "usc-48-1712": ("48 U.S.C. 1712 (the Delegates from Guam and the Virgin Islands)",
+    "usc-48-1712": ("48 U.S.C. 1712 (the Delegates from Guam and the U.S. Virgin Islands)",
                     "https://www.law.cornell.edu/uscode/text/48/1712"),
     "usc-52-21082": ("52 U.S.C. 21082 (provisional ballots)",
                      "https://www.law.cornell.edu/uscode/text/52/21082"),
@@ -2291,8 +2291,6 @@ ELECTIONS = {
                        "elections: quote the Division of Elections' recorded outcome, and if it "
                        "passed, say from when the description of Alaska's elections no longer "
                        "stands (primaries and ranked-choice sections)"),
-        ("2026-12-13", "Guam's and the Virgin Islands' November 17 runoff has passed: its "
-                       "paragraph's second read is the owner's"),
     ],
     "description": ("When federal elections are held and who runs them; primaries, runoffs and "
                     "ranked-choice counts; how votes are counted, certified and recounted; and "
@@ -2519,9 +2517,23 @@ ELECTIONS = {
                      "no candidate has one, the top two meet in a runoff (O.C.G.A. 21-2-501). In "
                      "2026 the date for a general-election runoff was December 1, four weeks "
                      "after Election Day."))),
-                ("p", "The Delegates from Guam and the Virgin Islands are elected by a majority "
-                      "too; when no candidate has one, the top two meet in a runoff on the "
-                      "fourteenth day after the election (48 U.S.C. 1712), November 17 in 2026."),
+                # Read a second time on 2026-11-13 (rule 48), against the section's
+                # text at the Law Revision Counsel's site and in govinfo's 2024
+                # edition: each Delegate "by a majority of the votes cast for the
+                # office", a runoff "on the fourteenth day following such election
+                # ... between the candidates receiving the highest and the second
+                # highest number of votes". The section has no primary clause (that
+                # is American Samoa's, 48 U.S.C. 1732, a plurality since 2004), and
+                # 1714 leaves each legislature only what is "not otherwise
+                # expressly provided". The Virgin Islands' 2026 calendar names
+                # November 17 "RUN-OFF ELECTION DAY"; Guam's lists no runoff day,
+                # and 3 GCA 13105 counts the same fourteenth. The sentence states
+                # the rule and names the day: it says nothing of a runoff being
+                # held, so it is true before the day and after it, in one form.
+                ("p", "The Delegates from Guam and the U.S. Virgin Islands are elected by a "
+                      "majority too; when no candidate has one, the top two meet in a runoff on "
+                      "the fourteenth day after the election (48 U.S.C. 1712), November 17 in "
+                      "2026."),
                 ("p", Tense(
                     ("campaign",
                      "Louisiana's December round is not a primary runoff: for its House seats in "

@@ -2017,9 +2017,11 @@ GENERAL_RUNOFFS = {
                          "days = November 17, 2026"),
     "VI": ("2026-11-17", "48 U.S.C. 1712 elects the Delegate from the Virgin Islands by a "
                          "majority, with a runoff between the top two on the fourteenth day "
-                         "after the election; the Virgin Islands Elections System's 2026 "
-                         "calendar holds a runoff, only if needed, for Delegate on November "
-                         "17, 2026"),
+                         "after the election; the Elections System of the Virgin Islands' "
+                         "2026 Elections Calendar (amended June 10, 2026) lists November 17 "
+                         "as \"RUN-OFF ELECTION DAY (Revised Organic Act of 1954, Sec., 11 re: "
+                         "Gov.-Lt. Gov.; P.L. 92-271 re: Delegate to House of "
+                         "Representatives)\""),
 }
 
 # Seats whose November election is their only round: no primary, so the
