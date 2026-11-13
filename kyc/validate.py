@@ -1123,10 +1123,17 @@ def check_results_pages(cache):
                  for item in items]
     if rows_left:
         issues.append(Issue("warn", "result-row-refused",
-                            f"{len(rows_left)} November rows of a major party under a name no "
-                            "filing and no state's list holds, standing where the party's "
-                            "nominee should (rule 63): the name is left off the page and the "
-                            "nominee reads as before the count, never \"withdrawn\". A person "
+                            f"{len(rows_left)} November rows under a name no filing and no "
+                            "state's list holds, standing where the party's nominee should "
+                            "(rule 63) - a major party's, or any party's where the state's list "
+                            "prints a name that may be the nominee, a sentence may say they "
+                            "left that the reader does not honour (a shape it never honoured, "
+                            "a caption, another year, a departure something undoes), or the "
+                            "row stands in their place only by a filing or the page's other "
+                            "words: the name is left off the page and the "
+                            "nominee reads as before the count, never \"withdrawn\" (where the "
+                            "row bore the table's mark, the race reads as the last read had "
+                            "it, as under a refused mark). A person "
                             "should look at each and record which it is: where the row is the "
                             "nominee under a name their campaign uses, an evidenced "
                             "overrides.RESULT_NAMES entry on their FEC id, and the row is read as "
