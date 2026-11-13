@@ -5710,7 +5710,8 @@ async function testRunningElsewhere() {
       return /Not running for (this seat|re-election)|Renominated/.test(html + held) ||
         !FILING_BADGE[filingOf(p).raceStatus].test(html) ||
         (filingOf(p).raceStatus !== "unlisted" && /Not on primary ballot/.test(html)) ||
-        (held.match(/class="badge /g) || []).length !== 1 ||
+        // One badge, after "Former member" for one who has left (January).
+        (held.match(/class="badge /g) || []).length !== (p.formerMember ? 2 : 1) ||
         FILING_BADGE[filingOf(p).raceStatus].test(held.replace(/<[^>]*>/g, ""));
     });
     check("each card shows the result of their race in that race, and only where they ran under " +
