@@ -1,5 +1,5 @@
 {
- "asked": 2628,
+ "asked": 2629,
  "candidates": {
   "H0AL01055": {
    "oppose": [],
@@ -49,6 +49,12 @@
      "committeeId": "C00527226",
      "count": 1,
      "total": 13.12
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -234,6 +240,12 @@
   "H0FL03175": {
    "oppose": [],
    "support": [
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 100000.0
+    },
     {
      "committee": "LATINOS FOR CONSERVATIVE VALUES",
      "committeeId": "C00888867",
@@ -627,6 +639,12 @@
      "total": 81100.0
     },
     {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 35,
+     "total": 80047.62
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 1,
@@ -669,6 +687,12 @@
      "committeeId": "C00836221",
      "count": 2,
      "total": 511996.46
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 352213.55
     },
     {
      "committee": "AMERICA PAC",
@@ -836,6 +860,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 2,
+     "total": 79306.04
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 4,
@@ -870,6 +900,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 5,
+     "total": 1698762.13
+    },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
@@ -1035,6 +1071,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 5,
+     "total": 89262.74
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 3,
@@ -1121,6 +1163,12 @@
      "committeeId": "C00960658",
      "count": 6,
      "total": 260771.68
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 5,
+     "total": 211386.27
     },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
@@ -1316,6 +1364,12 @@
      "total": 153880.0
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 8,
+     "total": 122007.6
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 6,
@@ -1324,14 +1378,14 @@
     {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
-     "count": 1,
-     "total": 20000.0
+     "count": 2,
+     "total": 65000.0
     },
     {
      "committee": "DRIVING FORCE ACTION",
      "committeeId": "C00879965",
-     "count": 2,
-     "total": 9338.0
+     "count": 3,
+     "total": 28014.0
     },
     {
      "committee": "AMERICAN MAJORITY ACTION PAC",
@@ -1423,6 +1477,12 @@
      "total": 371997.58
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 5,
+     "total": 139526.54
+    },
+    {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
      "count": 21,
@@ -1500,6 +1560,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 5,
+     "total": 941246.52
+    },
+    {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
      "count": 98,
@@ -1558,6 +1624,18 @@
      "total": 130850.0
     },
     {
+     "committee": "BOLD AMERICA",
+     "committeeId": "C00854299",
+     "count": 2,
+     "total": 99020.2
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 4,
+     "total": 65357.45
+    },
+    {
      "committee": "VICTORY PAC",
      "committeeId": "C00869321",
      "count": 1,
@@ -1598,12 +1676,6 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 302.25
-    },
-    {
-     "committee": "PLANNED PARENTHOOD VOTES",
-     "committeeId": "C00489799",
-     "count": 1,
-     "total": 190.51
     }
    ],
    "support": [
@@ -1620,10 +1692,22 @@
      "total": 249516.27
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 12,
+     "total": 228185.23
+    },
+    {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 1,
+     "total": 208333.5
+    },
+    {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
-     "count": 1,
-     "total": 20000.0
+     "count": 4,
+     "total": 40400.0
     },
     {
      "committee": "AMERICAN MAJORITY ACTION PAC",
@@ -1717,6 +1801,12 @@
      "committeeId": "C00504530",
      "count": 7,
      "total": 2778591.09
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 108371.21
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -2246,6 +2336,12 @@
   "H2FL22171": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 17,
+     "total": 7442603.22
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 11,
@@ -2309,6 +2405,12 @@
      "committeeId": "C00504530",
      "count": 14,
      "total": 4233692.65
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 331313.35
     },
     {
      "committee": "AMERICA PAC",
@@ -2395,6 +2497,12 @@
      "committeeId": "C00930321",
      "count": 2,
      "total": 420.0
+    },
+    {
+     "committee": "EVERYTOWN FOR GUN SAFETY VICTORY FUND (EVERYTOWN VICTORY FUND)",
+     "committeeId": "C00688655",
+     "count": 4,
+     "total": 312.45
     },
     {
      "committee": "RURAL FREEDOM NETWORK",
@@ -2707,6 +2815,12 @@
      "total": 25311.56
     },
     {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 46,
+     "total": 21991.7
+    },
+    {
      "committee": "TOMORROW TOGETHER",
      "committeeId": "C00958603",
      "count": 1,
@@ -2757,22 +2871,28 @@
      "total": 169800.0
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 111956.92
+    },
+    {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
      "count": 1,
      "total": 50987.5
     },
     {
+     "committee": "DRIVING FORCE ACTION",
+     "committeeId": "C00879965",
+     "count": 3,
+     "total": 40615.0
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 4,
      "total": 30285.44
-    },
-    {
-     "committee": "DRIVING FORCE ACTION",
-     "committeeId": "C00879965",
-     "count": 2,
-     "total": 13538.0
     },
     {
      "committee": "CLUB FOR GROWTH PAC",
@@ -2829,8 +2949,8 @@
     {
      "committee": "TAKEACTION MN FEDERAL FUND",
      "committeeId": "C00738815",
-     "count": 44,
-     "total": 19010.83
+     "count": 58,
+     "total": 28188.06
     },
     {
      "committee": "MINNESOTA DEMOCRATIC-FARMER-LABOR PARTY",
@@ -2857,6 +2977,12 @@
      "committeeId": "C00886614",
      "count": 1,
      "total": 500000.0
+    },
+    {
+     "committee": "DEFENDING MAIN STREET SUPERPAC INC.",
+     "committeeId": "C00540203",
+     "count": 2,
+     "total": 45996.19
     },
     {
      "committee": "SAVE AMERICAN FREEDOM",
@@ -2943,6 +3069,18 @@
      "committeeId": "C00504530",
      "count": 8,
      "total": 3905713.82
+    },
+    {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 1,
+     "total": 1478467.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 12,
+     "total": 261824.95
     },
     {
      "committee": "RESTORATION OF AMERICA PAC",
@@ -3261,6 +3399,12 @@
      "total": 1867098.04
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 18,
+     "total": 1163220.2
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 2,
@@ -3303,6 +3447,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 153.47
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -3354,7 +3504,14 @@
    ]
   },
   "H2NY04244": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 128483.2
+    }
+   ],
    "support": [
     {
      "committee": "ROLLING SEA ACTION FUND",
@@ -3540,10 +3697,22 @@
      "total": 473782.56
     },
     {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 14,
+     "total": 252295.13
+    },
+    {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
      "count": 1,
      "total": 174960.0
+    },
+    {
+     "committee": "AMERICAN DEMOCRACY COMMITTEE",
+     "committeeId": "C00951269",
+     "count": 1,
+     "total": 125000.0
     },
     {
      "committee": "NEW YORKERS FOR A RETURN TO FAIR AND HONEST GOVERNMENT",
@@ -3560,14 +3729,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 4,
-     "total": 1565.02
-    },
-    {
-     "committee": "PLANNED PARENTHOOD VOTES",
-     "committeeId": "C00489799",
-     "count": 7,
-     "total": 341.19
+     "count": 5,
+     "total": 1942.95
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -3582,6 +3745,12 @@
      "committeeId": "C00906701",
      "count": 3,
      "total": 288774.79
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 135055.29
     },
     {
      "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
@@ -3604,6 +3773,12 @@
      "committeeId": "C00504530",
      "count": 5,
      "total": 1566117.12
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 481168.4
     },
     {
      "committee": "AMERICA PAC",
@@ -3696,7 +3871,14 @@
      "total": 266.45
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 224718.5
+    }
+   ]
   },
   "H2OH03125": {
    "oppose": [],
@@ -3722,6 +3904,12 @@
      "committeeId": "C00487470",
      "count": 7,
      "total": 706276.7
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 226755.0
     },
     {
      "committee": "AMERICA PAC",
@@ -3861,6 +4049,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 162.93
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -3896,7 +4090,20 @@
      "total": 263.33
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 1,
+     "total": 312500.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 310287.53
+    }
+   ]
   },
   "H2OH16051": {
    "oppose": [
@@ -4030,6 +4237,12 @@
      "committeeId": "C00802389",
      "count": 8,
      "total": 243.0
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -4110,16 +4323,22 @@
      "total": 684375.34
     },
     {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 6,
+     "total": 563870.72
+    },
+    {
      "committee": "AMERICA FIRST AGRICULTURE ACTION INC.",
      "committeeId": "C00906701",
      "count": 3,
      "total": 321742.11
     },
     {
-     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
-     "committeeId": "C00657866",
-     "count": 1,
-     "total": 229500.0
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 182777.5
     },
     {
      "committee": "AMERICA PAC",
@@ -4384,6 +4603,12 @@
      "total": 2903034.25
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 105251.23
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 6,
@@ -4457,6 +4682,17 @@
     }
    ]
   },
+  "H2TX35011": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
+  },
   "H2TX35144": {
    "oppose": [],
    "support": [
@@ -4521,6 +4757,12 @@
      "total": 260293.12
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 232289.93
+    },
+    {
      "committee": "AMERICA FIRST AGRICULTURE ACTION INC.",
      "committeeId": "C00906701",
      "count": 2,
@@ -4547,8 +4789,8 @@
     {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
-     "count": 1,
-     "total": 20000.0
+     "count": 4,
+     "total": 40400.0
     }
    ]
   },
@@ -4576,6 +4818,12 @@
   },
   "H2WA03217": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 16,
+     "total": 3938148.7
+    },
     {
      "committee": "CLF",
      "committeeId": "C00504530",
@@ -4613,6 +4861,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 184.95
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -4665,6 +4919,12 @@
   "H4AL02170": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 18,
+     "total": 926228.03
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 2,
@@ -4711,6 +4971,12 @@
   "H4AZ01194": {
    "oppose": [
     {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 4,
+     "total": 3759166.0
+    },
+    {
      "committee": "CLF",
      "committeeId": "C00504530",
      "count": 8,
@@ -4739,6 +5005,12 @@
      "committeeId": "C00879221",
      "count": 4,
      "total": 275197.18
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 210054.66
     },
     {
      "committee": "FIGHT TO WIN",
@@ -4783,6 +5055,12 @@
      "committeeId": "C00004036",
      "count": 1,
      "total": 7022.98
+    },
+    {
+     "committee": "AANHPI RISING TIDE",
+     "committeeId": "C00891028",
+     "count": 1,
+     "total": 4000.0
     },
     {
      "committee": "WESTERN STATES REGIONAL COUNCIL OF CARPENTERS LEGISLATIVE IMPROVEMENT CMTE UNITED BROTHERHOOD OF CARPENTERS & JOINERS OF AMERICA",
@@ -4848,6 +5126,12 @@
   },
   "H4AZ02184": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 942961.08
+    },
     {
      "committee": "CLUB FOR GROWTH ACTION",
      "committeeId": "C00487470",
@@ -5025,6 +5309,12 @@
      "committeeId": "C00953588",
      "count": 2,
      "total": 20903.16
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 19145.64
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -5442,6 +5732,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 305922.56
+    },
+    {
      "committee": "CENTER FORWARD INITIATIVE INC (CFI)",
      "committeeId": "C00875450",
      "count": 1,
@@ -5498,6 +5794,12 @@
      "committeeId": "C00627372",
      "count": 2,
      "total": 100207.03
+    },
+    {
+     "committee": "BOLD AMERICA",
+     "committeeId": "C00854299",
+     "count": 2,
+     "total": 100000.0
     },
     {
      "committee": "314 ACTION FUND",
@@ -5971,6 +6273,12 @@
      "total": 1602759.09
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 93519.62
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 6,
@@ -6007,6 +6315,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 202.54
+    },
+    {
+     "committee": "EVERYTOWN FOR GUN SAFETY VICTORY FUND (EVERYTOWN VICTORY FUND)",
+     "committeeId": "C00688655",
+     "count": 1,
+     "total": 101.55
     },
     {
      "committee": "MOMSRISING PAC",
@@ -6131,6 +6445,12 @@
      "total": 509067.22
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 243802.95
+    },
+    {
      "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
      "committeeId": "C00923516",
      "count": 4,
@@ -6227,6 +6547,12 @@
      "committeeId": "C00915181",
      "count": 1,
      "total": 150000.0
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -6260,7 +6586,14 @@
    ]
   },
   "H4NJ09194": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 155813.77
+    }
+   ],
    "support": [
     {
      "committee": "THE TURNOUT PROJECT",
@@ -6316,11 +6649,17 @@
     {
      "committee": "PLANNED PARENTHOOD VOTES",
      "committeeId": "C00489799",
-     "count": 2,
-     "total": 277.58
+     "count": 9,
+     "total": 13295.48
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 2,
+     "total": 81556.99
+    },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
@@ -6394,13 +6733,24 @@
     }
    ]
   },
+  "H4NY16087": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
+  },
   "H4NY22051": {
    "oppose": [
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 8,
-     "total": 2939.55
+     "count": 9,
+     "total": 3034.66
     },
     {
      "committee": "INDIVISIBLE PROJECT INC.",
@@ -6432,6 +6782,17 @@
      "count": 1,
      "total": 30.92
     },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
+  },
+  "H4NY26078": {
+   "oppose": [],
+   "support": [
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
@@ -6475,6 +6836,18 @@
    ],
    "support": [
     {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 3,
+     "total": 1175000.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 226712.0
+    },
+    {
      "committee": "CLUB FOR GROWTH ACTION",
      "committeeId": "C00487470",
      "count": 2,
@@ -6503,6 +6876,17 @@
      "committeeId": "C00681825",
      "count": 1,
      "total": 12000.0
+    }
+   ]
+  },
+  "H4OR03192": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -6564,8 +6948,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 3,
-     "total": 3017.16
+     "count": 4,
+     "total": 3176.19
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -6578,6 +6962,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 246.91
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 2,
+     "total": 145.71
     }
    ],
    "support": [
@@ -6586,6 +6976,12 @@
      "committeeId": "C00906701",
      "count": 3,
      "total": 359606.04
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 105430.19
     },
     {
      "committee": "AMERICA PAC",
@@ -6603,6 +6999,12 @@
   },
   "H4PA10104": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 15,
+     "total": 2146926.5
+    },
     {
      "committee": "CLF",
      "committeeId": "C00504530",
@@ -6662,8 +7064,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 3,
-     "total": 26822.43
+     "count": 6,
+     "total": 29591.36
     },
     {
      "committee": "SENIORS EMPOWERING AN EFFECTIVE DEMOCRACY (SEED-PAC)",
@@ -6712,6 +7114,12 @@
      "committeeId": "C00612820",
      "count": 2,
      "total": 10589.0
+    },
+    {
+     "committee": "UNIDOSUS ACTION PAC",
+     "committeeId": "C00684258",
+     "count": 1,
+     "total": 5590.0
     },
     {
      "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
@@ -6896,6 +7304,12 @@
      "total": 631579.59
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 280849.66
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 3,
@@ -7058,6 +7472,17 @@
     }
    ]
   },
+  "H4VA08224": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
+  },
   "H4VA10279": {
    "oppose": [],
    "support": [
@@ -7129,6 +7554,18 @@
   },
   "H4WI03169": {
    "oppose": [
+    {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 4,
+     "total": 1601540.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 13,
+     "total": 130207.63
+    },
     {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
@@ -7202,6 +7639,12 @@
      "committeeId": "C00626036",
      "count": 2,
      "total": 29.51
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -7261,6 +7704,12 @@
      "total": 200000.0
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 9,
+     "total": 143583.87
+    },
+    {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
      "count": 1,
@@ -7308,6 +7757,12 @@
      "committeeId": "C00928390",
      "count": 12,
      "total": 959908.28
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 365585.47
     },
     {
      "committee": "CONSERVATIVES FOR AMERICAN EXCELLENCE INC.",
@@ -7422,6 +7877,12 @@
      "total": 794162.5
     },
     {
+     "committee": "REPRODUCTIVE FREEDOM FOR ALL FREEDOM FUND",
+     "committeeId": "C00738674",
+     "count": 1,
+     "total": 27765.0
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -7446,6 +7907,12 @@
      "committeeId": "C00923516",
      "count": 2,
      "total": 212000.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 130374.5
     },
     {
      "committee": "TURNING POINT PAC INC.",
@@ -7505,6 +7972,18 @@
      "total": 2276828.24
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 18,
+     "total": 277766.97
+    },
+    {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 1,
+     "total": 208333.5
+    },
+    {
      "committee": "ARIZONANS FOR THE AMERICAN DREAM PAC",
      "committeeId": "C00936443",
      "count": 3,
@@ -7525,6 +8004,12 @@
      "total": 99403.87
     },
     {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 4,
+     "total": 96259.2
+    },
+    {
      "committee": "VICTORY PAC",
      "committeeId": "C00869321",
      "count": 1,
@@ -7543,16 +8028,16 @@
      "total": 20300.0
     },
     {
+     "committee": "AANHPI RISING TIDE",
+     "committeeId": "C00891028",
+     "count": 2,
+     "total": 7664.31
+    },
+    {
      "committee": "INDIVISIBLE PROJECT INC.",
      "committeeId": "C90017492",
      "count": 3,
      "total": 6532.27
-    },
-    {
-     "committee": "AANHPI RISING TIDE",
-     "committeeId": "C00891028",
-     "count": 1,
-     "total": 2364.31
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -7677,6 +8162,41 @@
      "committeeId": "C00832493",
      "count": 1,
      "total": 35000.0
+    }
+   ]
+  },
+  "H6CA01269": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PROTECT PROGRESS",
+     "committeeId": "C00848440",
+     "count": 4,
+     "total": 372059.62
+    },
+    {
+     "committee": "HEALTH CARE SAVES LIVES",
+     "committeeId": "C00888081",
+     "count": 10,
+     "total": 142857.7
+    },
+    {
+     "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
+     "committeeId": "C00490375",
+     "count": 2,
+     "total": 102005.68
+    },
+    {
+     "committee": "SONOMA COUNTY DEMOCRATIC PARTY",
+     "committeeId": "C00405233",
+     "count": 4,
+     "total": 6819.63
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -8190,16 +8710,16 @@
      "total": 500000.0
     },
     {
+     "committee": "THE GOVERNING MAJORITY FUND",
+     "committeeId": "C00737411",
+     "count": 15,
+     "total": 400864.32
+    },
+    {
      "committee": "HEALTH CARE SAVES LIVES",
      "committeeId": "C00888081",
      "count": 4,
      "total": 307309.41
-    },
-    {
-     "committee": "THE GOVERNING MAJORITY FUND",
-     "committeeId": "C00737411",
-     "count": 11,
-     "total": 301406.32
     },
     {
      "committee": "STRATEGIC MAJORITY PAC",
@@ -8630,6 +9150,12 @@
      "committeeId": "C00848440",
      "count": 3,
      "total": 367531.33
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -8792,6 +9318,12 @@
      "total": 653454.1
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 8,
+     "total": 195574.24
+    },
+    {
      "committee": "HEALTH CARE SAVES LIVES",
      "committeeId": "C00888081",
      "count": 1,
@@ -8882,6 +9414,12 @@
      "committeeId": "C00802389",
      "count": 4,
      "total": 66.95
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -8913,6 +9451,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 4,
+     "total": 134302.6
+    },
     {
      "committee": "MAJORITY PAC",
      "committeeId": "C00741355",
@@ -9060,6 +9604,18 @@
   "H6CO03253": {
    "oppose": [
     {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 2,
+     "total": 868050.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 323935.16
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 2,
@@ -9140,6 +9696,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 4,
+     "total": 174913.5
+    },
+    {
      "committee": "DEFENDING MAIN STREET SUPERPAC INC.",
      "committeeId": "C00540203",
      "count": 1,
@@ -9161,6 +9723,12 @@
   },
   "H6CO05324": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 16,
+     "total": 2202993.5
+    },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
@@ -9208,6 +9776,12 @@
      "committeeId": "C00504530",
      "count": 14,
      "total": 3719481.83
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 12,
+     "total": 1406067.0
     },
     {
      "committee": "WOMEN VOTE",
@@ -9330,6 +9904,12 @@
      "committeeId": "C00802389",
      "count": 4,
      "total": 17.24
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -9632,8 +10212,8 @@
     {
      "committee": "FLORIDIANS FOR GOOD GOVERNMENT JAXPAC",
      "committeeId": "C00946210",
-     "count": 2,
-     "total": 4014.0
+     "count": 5,
+     "total": 11215.8
     }
    ]
   },
@@ -9801,6 +10381,12 @@
   "H6FL07215": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 131619.23
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 2,
@@ -9839,6 +10425,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 125691.23
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 3,
@@ -9858,13 +10450,19 @@
     {
      "committee": "AFFORDABLE FLORIDA",
      "committeeId": "C00952812",
-     "count": 3,
-     "total": 60562.0
+     "count": 4,
+     "total": 160562.0
     }
    ]
   },
   "H6FL09179": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 12,
+     "total": 167494.63
+    },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
@@ -9915,6 +10513,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 158713.11
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 3,
@@ -9936,6 +10540,12 @@
   },
   "H6FL11126": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 16,
+     "total": 6405422.7
+    },
     {
      "committee": "CLF",
      "committeeId": "C00504530",
@@ -10079,6 +10689,12 @@
      "committeeId": "C00552851",
      "count": 7,
      "total": 583568.74
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 172178.12
     },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
@@ -10280,10 +10896,16 @@
   "H6FL21059": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 17,
+     "total": 3798618.84
+    },
+    {
      "committee": "STRONGER AMERICA TOGETHER",
      "committeeId": "C00959833",
-     "count": 2,
-     "total": 33944.0
+     "count": 5,
+     "total": 96447.0
     },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
@@ -10312,6 +10934,12 @@
      "total": 4177.38
     },
     {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 1,
+     "total": 1394.78
+    },
+    {
      "committee": "MOMSRISING PAC",
      "committeeId": "C00878025",
      "count": 1,
@@ -10332,8 +10960,8 @@
     {
      "committee": "FOR OUR CHILDREN FLORIDA PAC",
      "committeeId": "C00935395",
-     "count": 8,
-     "total": 206549.92
+     "count": 11,
+     "total": 229350.67
     }
    ]
   },
@@ -10392,6 +11020,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 300381.01
+    },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
@@ -10473,6 +11107,12 @@
      "committeeId": "C00928390",
      "count": 16,
      "total": 857425.53
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 13,
+     "total": 435531.82
     },
     {
      "committee": "CONSERVATIVE LEADERSHIP FOR FLORIDA",
@@ -10602,7 +11242,14 @@
    ]
   },
   "H6FL27098": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "LATINO VOTE FOR AMERICA PAC",
+     "committeeId": "C00742130",
+     "count": 2,
+     "total": 45000.0
+    }
+   ],
    "support": [
     {
      "committee": "BUILDING TOGETHER",
@@ -10830,6 +11477,12 @@
   "H6IA02211": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 15,
+     "total": 3485263.36
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 4,
@@ -10958,6 +11611,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 4,
+     "total": 322416.87
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 1,
@@ -10984,6 +11643,12 @@
      "committeeId": "C00504530",
      "count": 16,
      "total": 2252300.67
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 15,
+     "total": 1299786.0
     },
     {
      "committee": "AMERICA PAC",
@@ -11194,6 +11859,23 @@
      "committeeId": "C00710848",
      "count": 1,
      "total": 381.82
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
+  },
+  "H6IL04153": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -11252,7 +11934,14 @@
      "total": 2479136.22
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
   },
   "H6IL07420": {
    "oppose": [],
@@ -11594,8 +12283,8 @@
     {
      "committee": "NEW POWER PAC",
      "committeeId": "C00489252",
-     "count": 1,
-     "total": 1.51
+     "count": 4,
+     "total": 87.72
     }
    ]
   },
@@ -11654,6 +12343,12 @@
   },
   "H6KY06184": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 16,
+     "total": 1233401.92
+    },
     {
      "committee": "SAVE AMERICAN FREEDOM",
      "committeeId": "C00819508",
@@ -11716,6 +12411,18 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 12,
+     "total": 1227195.96
+    },
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 3,
+     "total": 205089.54
+    },
     {
      "committee": "CONSERVATIVES FOR AMERICAN EXCELLENCE INC.",
      "committeeId": "C00835967",
@@ -11919,6 +12626,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "DEFENDING MAIN STREET SUPERPAC INC.",
+     "committeeId": "C00540203",
+     "count": 1,
+     "total": 65368.8
+    },
+    {
      "committee": "UNITY & JUSTICE FUND",
      "committeeId": "C00881011",
      "count": 1,
@@ -12057,10 +12770,22 @@
    ],
    "support": [
     {
+     "committee": "POVERTY TO PROSPERITY",
+     "committeeId": "C00902577",
+     "count": 1,
+     "total": 100000.0
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 6,
      "total": 68238.41
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 4,
+     "total": 66631.48
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -12079,10 +12804,28 @@
      "total": 2240689.46
     },
     {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 3,
+     "total": 1840008.0
+    },
+    {
+     "committee": "POVERTY TO PROSPERITY",
+     "committeeId": "C00902577",
+     "count": 2,
+     "total": 190000.0
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 6,
      "total": 101289.4
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 92676.78
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -12198,6 +12941,12 @@
   "H6MI04204": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 17,
+     "total": 4742967.56
+    },
+    {
      "committee": "MICHIGAN CONSERVATIVE ACTION",
      "committeeId": "C00806760",
      "count": 2,
@@ -12222,6 +12971,12 @@
      "committeeId": "C00718353",
      "count": 1,
      "total": 113900.0
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 38,
+     "total": 98346.22
     },
     {
      "committee": "COMMUNITY CHANGE VOTERS",
@@ -12371,6 +13126,12 @@
      "committeeId": "C00822536",
      "count": 2,
      "total": 17522.6
+    },
+    {
+     "committee": "DEMOCRATS WORK FOR AMERICA, INC",
+     "committeeId": "C00650432",
+     "count": 3,
+     "total": 480.6
     }
    ]
   },
@@ -12381,6 +13142,12 @@
      "committeeId": "C00504530",
      "count": 12,
      "total": 2772859.51
+    },
+    {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 2,
+     "total": 1086269.0
     },
     {
      "committee": "ROLLING SEA ACTION FUND",
@@ -12399,6 +13166,12 @@
      "committeeId": "C00487470",
      "count": 9,
      "total": 605152.17
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 12,
+     "total": 117403.92
     },
     {
      "committee": "AMERICA PAC",
@@ -12437,6 +13210,12 @@
      "committeeId": "C00495028",
      "count": 4,
      "total": 140519.89
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 49,
+     "total": 40620.73
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -12541,6 +13320,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 90747.87
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 4,
@@ -12555,6 +13340,12 @@
      "committeeId": "C00504530",
      "count": 5,
      "total": 2659832.86
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 15,
+     "total": 106197.51
     },
     {
      "committee": "AMERICA PAC",
@@ -12589,6 +13380,12 @@
      "total": 95000.0
     },
     {
+     "committee": "AMERICAN DEMOCRACY COMMITTEE",
+     "committeeId": "C00951269",
+     "count": 1,
+     "total": 63818.0
+    },
+    {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
      "count": 2,
@@ -12611,6 +13408,12 @@
      "committeeId": "C00800995",
      "count": 2,
      "total": 10150.0
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 2,
+     "total": 3241.09
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -12670,6 +13473,12 @@
      "committeeId": "C00933614",
      "count": 2,
      "total": 2125.0
+    },
+    {
+     "committee": "DEMOCRATS WORK FOR AMERICA, INC",
+     "committeeId": "C00650432",
+     "count": 3,
+     "total": 386.26
     },
     {
      "committee": "BLUE MAJORITY MAKERS PAC",
@@ -12739,6 +13548,12 @@
      "total": 153003.5
     },
     {
+     "committee": "AMERICAN DEMOCRACY COMMITTEE",
+     "committeeId": "C00951269",
+     "count": 1,
+     "total": 61770.0
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 4,
@@ -12757,6 +13572,18 @@
      "committeeId": "C00913269",
      "count": 15,
      "total": 232083.87
+    },
+    {
+     "committee": "PATRIOTIC FUND, INC.",
+     "committeeId": "C00899419",
+     "count": 4,
+     "total": 106621.84
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 99807.5
     },
     {
      "committee": "AMERICA PAC",
@@ -12891,8 +13718,8 @@
     {
      "committee": "UNITY & JUSTICE FUND",
      "committeeId": "C00881011",
-     "count": 8,
-     "total": 10406.25
+     "count": 12,
+     "total": 10730.79
     },
     {
      "committee": "SF SOLIDARITY PAC",
@@ -12929,6 +13756,12 @@
   "H6MN01190": {
    "oppose": [
     {
+     "committee": "DEFENDING MAIN STREET SUPERPAC INC.",
+     "committeeId": "C00540203",
+     "count": 1,
+     "total": 439200.0
+    },
+    {
      "committee": "SAVE AMERICAN FREEDOM",
      "committeeId": "C00819508",
      "count": 1,
@@ -12937,16 +13770,16 @@
    ],
    "support": [
     {
+     "committee": "TAKEACTION MN FEDERAL FUND",
+     "committeeId": "C00738815",
+     "count": 60,
+     "total": 31767.22
+    },
+    {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
      "count": 1,
      "total": 21009.63
-    },
-    {
-     "committee": "TAKEACTION MN FEDERAL FUND",
-     "committeeId": "C00738815",
-     "count": 45,
-     "total": 20613.64
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -13090,6 +13923,12 @@
      "committeeId": "C00742205",
      "count": 14,
      "total": 2324.02
+    },
+    {
+     "committee": "EVERYTOWN FOR GUN SAFETY VICTORY FUND (EVERYTOWN VICTORY FUND)",
+     "committeeId": "C00688655",
+     "count": 1,
+     "total": 27.62
     }
    ]
   },
@@ -13134,6 +13973,18 @@
      "committeeId": "C00909994",
      "count": 9,
      "total": 4243.01
+    },
+    {
+     "committee": "DEMOCRATS WORK FOR AMERICA, INC",
+     "committeeId": "C00650432",
+     "count": 4,
+     "total": 3113.23
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -13272,6 +14123,12 @@
   "H6MT01137": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 17,
+     "total": 3355998.68
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 2,
@@ -13393,6 +14250,12 @@
      "total": 228495.44
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 124151.05
+    },
+    {
      "committee": "SEAL PAC USA",
      "committeeId": "C00722025",
      "count": 2,
@@ -13405,16 +14268,16 @@
      "total": 77764.38
     },
     {
+     "committee": "SPECIAL OPERATIONS FOR AMERICA",
+     "committeeId": "C00523241",
+     "count": 4,
+     "total": 40400.0
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 3,
      "total": 40231.47
-    },
-    {
-     "committee": "SPECIAL OPERATIONS FOR AMERICA",
-     "committeeId": "C00523241",
-     "count": 1,
-     "total": 20000.0
     }
    ]
   },
@@ -13556,8 +14419,8 @@
     {
      "committee": "WE THE PEOPLE...CAN'T EVEN",
      "committeeId": "C00957100",
-     "count": 53,
-     "total": 19016.16
+     "count": 88,
+     "total": 33385.66
     },
     {
      "committee": "RED WINE AND BLUE",
@@ -13569,6 +14432,12 @@
   },
   "H6NC11248": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 17,
+     "total": 4994642.03
+    },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
@@ -13704,6 +14573,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 84835.8
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 3,
@@ -13768,6 +14643,12 @@
      "committeeId": "C00504530",
      "count": 9,
      "total": 1418067.54
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 5,
+     "total": 122248.48
     },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
@@ -14018,6 +14899,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 39074.21
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 3,
@@ -14057,6 +14944,12 @@
      "total": 320433.69
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 118158.94
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 4,
@@ -14069,6 +14962,12 @@
      "committeeId": "C00931774",
      "count": 18,
      "total": 1046779.23
+    },
+    {
+     "committee": "AMERICAN DEMOCRACY COMMITTEE",
+     "committeeId": "C00951269",
+     "count": 3,
+     "total": 752400.89
     },
     {
      "committee": "LCV VICTORY FUND",
@@ -14122,6 +15021,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 8,
+     "total": 114116.98
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 4,
@@ -14160,6 +15065,12 @@
      "committeeId": "C00870923",
      "count": 1,
      "total": 1750.0
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -14198,6 +15109,12 @@
      "committeeId": "C00950345",
      "count": 9,
      "total": 660675.85
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 4,
+     "total": 81269.88
     },
     {
      "committee": "AMERICA PAC",
@@ -14278,6 +15195,12 @@
      "committeeId": "C00802389",
      "count": 3,
      "total": 49.16
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -14313,6 +15236,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 8,
+     "total": 149142.63
+    },
     {
      "committee": "RNJ 2 SAVE AMERICA T/A RNJ 2 SA",
      "committeeId": "C00868984",
@@ -14440,6 +15369,12 @@
      "committeeId": "C00776419",
      "count": 4,
      "total": 262.5
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -14561,6 +15496,12 @@
      "committeeId": "C00893461",
      "count": 1,
      "total": 5000.0
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -14591,6 +15532,12 @@
   "H6NM02127": {
    "oppose": [
     {
+     "committee": "BOLD AMERICA",
+     "committeeId": "C00854299",
+     "count": 2,
+     "total": 225864.21
+    },
+    {
      "committee": "HMP",
      "committeeId": "C00495028",
      "count": 3,
@@ -14610,6 +15557,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 195087.3
+    },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
@@ -14709,6 +15662,12 @@
   "H6NV04020": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 4,
+     "total": 121195.45
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 2,
@@ -14780,11 +15739,34 @@
      "committeeId": "C00909994",
      "count": 9,
      "total": 1227.49
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
+  },
+  "H6NY02140": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
   "H6NY03247": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 10,
+     "total": 4924038.12
+    },
     {
      "committee": "CLF",
      "committeeId": "C00504530",
@@ -14863,7 +15845,14 @@
      "total": 244.15
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 8,
+     "total": 122632.64
+    }
+   ]
   },
   "H6NY07164": {
    "oppose": [
@@ -15149,16 +16138,22 @@
      "total": 1500000.0
     },
     {
-     "committee": "AMERICA PAC",
-     "committeeId": "C00879510",
-     "count": 6,
-     "total": 48874.04
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 16,
+     "total": 139014.93
     },
     {
      "committee": "THE GOVERNING MAJORITY FUND",
      "committeeId": "C00737411",
-     "count": 2,
-     "total": 32951.81
+     "count": 5,
+     "total": 72320.55
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 48874.04
     }
    ],
    "support": [
@@ -15181,16 +16176,22 @@
      "total": 150000.0
     },
     {
-     "committee": "DEMOCRATIC MESSAGING PROJECT",
-     "committeeId": "C00800995",
-     "count": 2,
-     "total": 20300.0
+     "committee": "AMERICAN DEMOCRACY COMMITTEE",
+     "committeeId": "C00951269",
+     "count": 1,
+     "total": 125000.0
     },
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 3,
-     "total": 16265.26
+     "count": 5,
+     "total": 25511.12
+    },
+    {
+     "committee": "DEMOCRATIC MESSAGING PROJECT",
+     "committeeId": "C00800995",
+     "count": 2,
+     "total": 20300.0
     },
     {
      "committee": "NEW YORKERS FOR A RETURN TO FAIR AND HONEST GOVERNMENT",
@@ -15233,6 +16234,12 @@
      "committeeId": "C00802389",
      "count": 4,
      "total": 17.22
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -15281,16 +16288,16 @@
    ],
    "support": [
     {
+     "committee": "RURAL FREEDOM NETWORK",
+     "committeeId": "C00647966",
+     "count": 13,
+     "total": 42004.75
+    },
+    {
      "committee": "BLUEWAVEAMERICA",
      "committeeId": "C00787945",
      "count": 2,
      "total": 39088.0
-    },
-    {
-     "committee": "RURAL FREEDOM NETWORK",
-     "committeeId": "C00647966",
-     "count": 10,
-     "total": 22568.01
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -15331,6 +16338,12 @@
      "committeeId": "C00932673",
      "count": 1,
      "total": 149.64
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -15340,8 +16353,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 5,
-     "total": 4773.57
+     "count": 6,
+     "total": 5587.97
     }
    ]
   },
@@ -15360,6 +16373,12 @@
      "committeeId": "C00912337",
      "count": 23,
      "total": 286609.83
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 85431.6
     },
     {
      "committee": "AMERICA PAC",
@@ -15505,8 +16524,8 @@
     {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
-     "count": 1,
-     "total": 75.0
+     "count": 2,
+     "total": 125.0
     }
    ]
   },
@@ -15539,7 +16558,20 @@
    ]
   },
   "H6OH10121": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 2,
+     "total": 1400000.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 4,
+     "total": 146735.5
+    }
+   ],
    "support": [
     {
      "committee": "NEIGHBOR VOICES PAC",
@@ -15580,6 +16612,18 @@
      "committeeId": "C00540203",
      "count": 2,
      "total": 321868.8
+    },
+    {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 1,
+     "total": 312500.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 5,
+     "total": 195337.41
     }
    ],
    "support": [
@@ -15793,6 +16837,12 @@
      "committeeId": "C90020058",
      "count": 2,
      "total": 103.4
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -15981,6 +17031,18 @@
      "total": 2310915.81
     },
     {
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 3,
+     "total": 750000.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 331557.0
+    },
+    {
      "committee": "LEAD LEFT PAC",
      "committeeId": "C00948208",
      "count": 7,
@@ -16045,8 +17107,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 5,
-     "total": 30756.92
+     "count": 8,
+     "total": 34188.39
     },
     {
      "committee": "MAKE THE ROAD ACTION POLITICAL COMMITTEE",
@@ -16107,6 +17169,12 @@
      "committeeId": "C00704593",
      "count": 1,
      "total": 9116.67
+    },
+    {
+     "committee": "UNIDOSUS ACTION PAC",
+     "committeeId": "C00684258",
+     "count": 1,
+     "total": 5000.0
     },
     {
      "committee": "MAJORITY BLUE PAC",
@@ -16251,16 +17319,16 @@
      "total": 6302.52
     },
     {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 6,
+     "total": 504.25
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
      "total": 258.46
-    },
-    {
-     "committee": "PLANNED PARENTHOOD VOTES",
-     "committeeId": "C00489799",
-     "count": 2,
-     "total": 158.05
     }
    ],
    "support": [
@@ -16305,16 +17373,28 @@
      "total": 2364142.19
     },
     {
-     "committee": "AMERICA PAC",
-     "committeeId": "C00879510",
-     "count": 5,
-     "total": 76140.5
+     "committee": "SAFETY & AFFORDABILITY PAC INC.",
+     "committeeId": "C00960443",
+     "count": 2,
+     "total": 1216666.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 144299.84
     },
     {
      "committee": "THE GOVERNING MAJORITY FUND",
      "committeeId": "C00737411",
-     "count": 2,
-     "total": 56040.25
+     "count": 5,
+     "total": 135766.46
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 76140.5
     },
     {
      "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
@@ -16339,8 +17419,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 5,
-     "total": 31870.38
+     "count": 6,
+     "total": 32032.23
     },
     {
      "committee": "SENIORS EMPOWERING AN EFFECTIVE DEMOCRACY (SEED-PAC)",
@@ -16479,8 +17559,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 4,
-     "total": 3391.52
+     "count": 6,
+     "total": 4072.21
     }
    ]
   },
@@ -16497,8 +17577,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 2,
-     "total": 1359.32
+     "count": 6,
+     "total": 3450.7
     }
    ]
   },
@@ -16616,6 +17696,12 @@
      "total": 377011.07
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 12,
+     "total": 336815.64
+    },
+    {
      "committee": "AMERICAN LIBERTY FOUNDATION",
      "committeeId": "C00830042",
      "count": 2,
@@ -16648,6 +17734,12 @@
      "committeeId": "C00923516",
      "count": 2,
      "total": 363000.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 16,
+     "total": 354000.4
     },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
@@ -17090,8 +18182,8 @@
     {
      "committee": "THE EQUITY ALLIANCE FUND ACTION PAC",
      "committeeId": "C00827618",
-     "count": 4,
-     "total": 2829.35
+     "count": 5,
+     "total": 4532.35
     },
     {
      "committee": "JUSTICE DEMOCRATS PAC",
@@ -17481,6 +18573,12 @@
      "total": 245026.34
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 215803.9
+    },
+    {
      "committee": "SENATE CONSERVATIVES ACTION",
      "committeeId": "C00524181",
      "count": 1,
@@ -17529,7 +18627,14 @@
    ]
   },
   "H6TX09231": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 522929.63
+    }
+   ],
    "support": [
     {
      "committee": "MIJENTE PAC",
@@ -17587,6 +18692,12 @@
      "committeeId": "C00504530",
      "count": 13,
      "total": 3142538.1
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 1846930.12
     },
     {
      "committee": "AMERICA PAC",
@@ -17673,6 +18784,12 @@
   "H6TX15246": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 20,
+     "total": 4380207.11
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 6,
@@ -17739,6 +18856,12 @@
      "committeeId": "C00951376",
      "count": 2,
      "total": 5661.25
+    },
+    {
+     "committee": "BLUE FIGHT PAC",
+     "committeeId": "C00957423",
+     "count": 1,
+     "total": 4227.24
     },
     {
      "committee": "MAJORITY BLUE PAC",
@@ -17994,6 +19117,12 @@
   "H6TX23273": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 15,
+     "total": 254868.4
+    },
+    {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
      "count": 2,
@@ -18024,6 +19153,12 @@
      "total": 471765.87
     },
     {
+     "committee": "BOLD AMERICA",
+     "committeeId": "C00854299",
+     "count": 2,
+     "total": 181200.4
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -18031,6 +19166,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 8,
+     "total": 100876.97
+    },
     {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
@@ -18123,6 +19264,12 @@
      "total": 2628269.51
     },
     {
+     "committee": "BOLD AMERICA",
+     "committeeId": "C00854299",
+     "count": 2,
+     "total": 675514.02
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -18130,6 +19277,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 5,
+     "total": 746795.72
+    },
     {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
@@ -18155,16 +19308,16 @@
      "total": 135000.0
     },
     {
+     "committee": "SPECIAL OPERATIONS FOR AMERICA",
+     "committeeId": "C00523241",
+     "count": 4,
+     "total": 40400.0
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 3,
      "total": 27195.44
-    },
-    {
-     "committee": "SPECIAL OPERATIONS FOR AMERICA",
-     "committeeId": "C00523241",
-     "count": 1,
-     "total": 20000.0
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -18250,6 +19403,12 @@
      "total": 1492321.36
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 8,
+     "total": 1222554.92
+    },
+    {
      "committee": "DEFEND AMERICAN JOBS",
      "committeeId": "C00836221",
      "count": 5,
@@ -18271,6 +19430,12 @@
   },
   "H6TX35095": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 17,
+     "total": 3694788.29
+    },
     {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
@@ -18422,8 +19587,25 @@
    ],
    "support": []
   },
+  "H6VA01117": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
+  },
   "H6VA01299": {
    "oppose": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 4,
+     "total": 152179.0
+    },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
@@ -18473,6 +19655,12 @@
   "H6VA02198": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 15,
+     "total": 1928925.93
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 9,
@@ -18481,8 +19669,8 @@
     {
      "committee": "THE GOVERNING MAJORITY FUND",
      "committeeId": "C00737411",
-     "count": 2,
-     "total": 34466.2
+     "count": 4,
+     "total": 68494.68
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -18686,6 +19874,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 6,
+     "total": 509463.7
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 8,
@@ -18694,8 +19888,8 @@
     {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
-     "count": 1,
-     "total": 20000.0
+     "count": 4,
+     "total": 40400.0
     }
    ]
   },
@@ -18711,7 +19905,14 @@
    ]
   },
   "H6WA04216": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "RED STATE BLUE RESOURCES",
+     "committeeId": "C00855775",
+     "count": 61,
+     "total": 17168.78
+    }
+   ],
    "support": [
     {
      "committee": "AMERICAN MISSION",
@@ -18748,6 +19949,12 @@
      "committeeId": "C00923516",
      "count": 1,
      "total": 20891.77
+    },
+    {
+     "committee": "RED STATE BLUE RESOURCES",
+     "committeeId": "C00855775",
+     "count": 1,
+     "total": 11.64
     }
    ]
   },
@@ -18829,8 +20036,14 @@
     {
      "committee": "WISCONSIN WORKING PAC",
      "committeeId": "C00890343",
-     "count": 3,
-     "total": 525456.0
+     "count": 5,
+     "total": 629755.1
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 14,
+     "total": 294468.95
     },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
@@ -18908,6 +20121,23 @@
      "committeeId": "C00626036",
      "count": 1,
      "total": 18.89
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
+    }
+   ]
+  },
+  "H6WI07207": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -18930,8 +20160,8 @@
     {
      "committee": "AMERICANS 4 SECURITY PAC",
      "committeeId": "C00733352",
-     "count": 4,
-     "total": 73011.0
+     "count": 5,
+     "total": 78011.0
     },
     {
      "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
@@ -19007,6 +20237,12 @@
      "committeeId": "C00946624",
      "count": 46,
      "total": 1576430.68
+    },
+    {
+     "committee": "WY ACTION",
+     "committeeId": "C00963041",
+     "count": 3,
+     "total": 117390.64
     },
     {
      "committee": "MAKE LIBERTY WIN",
@@ -19134,6 +20370,12 @@
      "committeeId": "C00900993",
      "count": 48,
      "total": 2834146.4
+    },
+    {
+     "committee": "CALIFORNIA LEADERSHIP FUND",
+     "committeeId": "C00948018",
+     "count": 1,
+     "total": 33341.0
     }
    ],
    "support": [
@@ -19345,8 +20587,8 @@
     {
      "committee": "AMERICANS 4 SECURITY PAC",
      "committeeId": "C00733352",
-     "count": 36,
-     "total": 4874822.54
+     "count": 40,
+     "total": 5165522.91
     },
     {
      "committee": "CALIFORNIA CONSERVATIVES PAC",
@@ -19640,6 +20882,12 @@
      "committeeId": "C00798009",
      "count": 8,
      "total": 49300.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 46006.54
     },
     {
      "committee": "AMERICA PAC",
@@ -19936,8 +21184,8 @@
     {
      "committee": "UNITY & JUSTICE FUND",
      "committeeId": "C00881011",
-     "count": 5,
-     "total": 11683.84
+     "count": 7,
+     "total": 12252.21
     },
     {
      "committee": "NEO PHILANTHROPY ACTION FUND INC.",
@@ -19978,8 +21226,8 @@
     {
      "committee": "SERVANT-LEADER FUND, INC.",
      "committeeId": "C00899427",
-     "count": 12,
-     "total": 1040248.81
+     "count": 13,
+     "total": 1090248.81
     },
     {
      "committee": "FUTURE PROGRESS",
@@ -20334,6 +21582,12 @@
      "total": 556259.93
     },
     {
+     "committee": "REPRODUCTIVE FREEDOM FOR ALL FREEDOM FUND",
+     "committeeId": "C00738674",
+     "count": 3,
+     "total": 64620.01
+    },
+    {
      "committee": "END CITIZENS UNITED",
      "committeeId": "C00573261",
      "count": 2,
@@ -20364,6 +21618,12 @@
      "total": 5779.12
     },
     {
+     "committee": "RURAL FREEDOM NETWORK",
+     "committeeId": "C00647966",
+     "count": 4,
+     "total": 5097.75
+    },
+    {
      "committee": "INDIGO PAC",
      "committeeId": "C00909465",
      "count": 10,
@@ -20376,28 +21636,22 @@
      "total": 1702.29
     },
     {
-     "committee": "RURAL FREEDOM NETWORK",
-     "committeeId": "C00647966",
-     "count": 1,
-     "total": 1517.06
-    },
-    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
      "count": 2,
      "total": 1096.69
     },
     {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 5,
+     "total": 342.9
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
      "total": 262.73
-    },
-    {
-     "committee": "PLANNED PARENTHOOD VOTES",
-     "committeeId": "C00489799",
-     "count": 3,
-     "total": 197.19
     }
    ],
    "support": [
@@ -20416,8 +21670,8 @@
     {
      "committee": "DRIVING FORCE ACTION",
      "committeeId": "C00879965",
-     "count": 2,
-     "total": 10645.0
+     "count": 3,
+     "total": 31936.0
     },
     {
      "committee": "EARLY VOTE ACTION PAC",
@@ -20438,8 +21692,8 @@
     {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
-     "count": 4,
-     "total": 741.71
+     "count": 5,
+     "total": 1255.24
     }
    ],
    "support": [
@@ -20546,6 +21800,17 @@
      "committeeId": "C00754218",
      "count": 5,
      "total": 53.71
+    }
+   ]
+  },
+  "H8TX07140": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -20693,6 +21958,12 @@
    ],
    "support": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 149191.28
+    },
+    {
      "committee": "CIVIC RENEWAL FUND INC.",
      "committeeId": "C00953588",
      "count": 3,
@@ -20807,6 +22078,12 @@
      "committeeId": "C00906701",
      "count": 3,
      "total": 529058.6
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 237640.57
     },
     {
      "committee": "CIVIC RENEWAL FUND INC.",
@@ -20977,6 +22254,12 @@
      "total": 696128.75
     },
     {
+     "committee": "THE 1861 INITIATIVE",
+     "committeeId": "C00945733",
+     "count": 1,
+     "total": 600000.0
+    },
+    {
      "committee": "UNITED FUTURES",
      "committeeId": "C00899096",
      "count": 1,
@@ -20989,6 +22272,12 @@
      "committeeId": "C00448696",
      "count": 144,
      "total": 233028.82
+    },
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 3,
+     "total": 209633.49
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -21332,6 +22621,12 @@
      "total": 2779734.01
     },
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 9,
+     "total": 2534964.73
+    },
+    {
      "committee": "RIGHT FOR ALASKA",
      "committeeId": "C00944611",
      "count": 18,
@@ -21375,6 +22670,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 3545559.98
+    },
     {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
@@ -21628,16 +22929,16 @@
   "S4MI00595": {
    "oppose": [
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 22,
+     "total": 13278894.84
+    },
+    {
      "committee": "DEFEND THE VOTE",
      "committeeId": "C00764233",
      "count": 4,
      "total": 4592975.88
-    },
-    {
-     "committee": "WINSENATE",
-     "committeeId": "C00865444",
-     "count": 4,
-     "total": 1892819.9
     },
     {
      "committee": "EDF ACTION VOTES",
@@ -21662,6 +22963,12 @@
      "committeeId": "C90011172",
      "count": 1,
      "total": 1000000.0
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 16,
+     "total": 997940.85
     },
     {
      "committee": "LOWER COSTS NOW",
@@ -21716,12 +23023,6 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 1252.54
-    },
-    {
-     "committee": "PLANNED PARENTHOOD VOTES",
-     "committeeId": "C00489799",
-     "count": 2,
-     "total": 564.84
     }
    ],
    "support": [
@@ -21736,6 +23037,12 @@
      "committeeId": "C00687103",
      "count": 41,
      "total": 6838539.33
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 5322481.46
     },
     {
      "committee": "THE SENTINEL ACTION FUND",
@@ -21768,16 +23075,16 @@
      "total": 257500.0
     },
     {
+     "committee": "DRIVING FORCE ACTION",
+     "committeeId": "C00879965",
+     "count": 3,
+     "total": 98005.0
+    },
+    {
      "committee": "RED SENATE",
      "committeeId": "C00747121",
      "count": 58,
      "total": 49197.09
-    },
-    {
-     "committee": "DRIVING FORCE ACTION",
-     "committeeId": "C00879965",
-     "count": 2,
-     "total": 33621.0
     },
     {
      "committee": "TFM",
@@ -22029,6 +23336,12 @@
      "total": 7054386.62
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 17,
+     "total": 5472737.11
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 14,
@@ -22097,6 +23410,12 @@
      "total": 123182.0
     },
     {
+     "committee": "BLUE FIGHT PAC",
+     "committeeId": "C00957423",
+     "count": 4,
+     "total": 13875.41
+    },
+    {
      "committee": "DEMOCRATS FIGHT BACK PAC",
      "committeeId": "C00951376",
      "count": 2,
@@ -22119,6 +23438,12 @@
      "committeeId": "C00948000",
      "count": 2,
      "total": 1976.35
+    },
+    {
+     "committee": "INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES FEDERAL SPEECH PAC",
+     "committeeId": "C00528455",
+     "count": 1,
+     "total": 1097.22
     },
     {
      "committee": "FORWARD BLUE",
@@ -22301,6 +23626,12 @@
      "committeeId": "C00920512",
      "count": 7,
      "total": 36025.0
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 1,
+     "total": 154.98
     }
    ],
    "support": [
@@ -22359,6 +23690,12 @@
    ],
    "support": [
     {
+     "committee": "BLACK VOTERS MATTER ACTION PAC",
+     "committeeId": "C00753277",
+     "count": 2,
+     "total": 52650.0
+    },
+    {
      "committee": "FLORIDA FREEDOM PAC",
      "committeeId": "C00521013",
      "count": 6,
@@ -22389,6 +23726,12 @@
      "total": 2106.51
     },
     {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 1,
+     "total": 1394.78
+    },
+    {
      "committee": "DREAM DEFENDERS FIGHT PAC",
      "committeeId": "C00728352",
      "count": 3,
@@ -22409,8 +23752,8 @@
     {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
-     "count": 1,
-     "total": 75.0
+     "count": 2,
+     "total": 150.0
     }
    ]
   },
@@ -22469,10 +23812,22 @@
      "total": 853400.86
     },
     {
+     "committee": "J STREET ACTION FUND",
+     "committeeId": "C00815753",
+     "count": 1,
+     "total": 470000.0
+    },
+    {
      "committee": "CEDAR KEY PROGRESS",
      "committeeId": "C00827030",
      "count": 1,
      "total": 13758.6
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 3,
+     "total": 3330.38
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -22482,6 +23837,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 1055540.14
+    },
     {
      "committee": "FELLOWSHIP PAC",
      "committeeId": "C00915181",
@@ -22559,6 +23920,12 @@
      "total": 1377266.4
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 823205.22
+    },
+    {
      "committee": "DIGITAL FREEDOM FUND",
      "committeeId": "C00911610",
      "count": 1,
@@ -22627,6 +23994,18 @@
      "total": 17199.25
     },
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 1,
+     "total": 10229.5
+    },
+    {
+     "committee": "BLUE FIGHT PAC",
+     "committeeId": "C00957423",
+     "count": 1,
+     "total": 9315.91
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
      "count": 13,
@@ -22687,6 +24066,12 @@
      "total": 1208.33
     },
     {
+     "committee": "INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES FEDERAL SPEECH PAC",
+     "committeeId": "C00528455",
+     "count": 1,
+     "total": 1097.21
+    },
+    {
      "committee": "VOTE FOR EQUALITY",
      "committeeId": "C00755363",
      "count": 17,
@@ -22715,6 +24100,12 @@
   "S6IA00314": {
    "oppose": [
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 32,
+     "total": 13269874.57
+    },
+    {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
      "count": 6,
@@ -22725,12 +24116,6 @@
      "committeeId": "C00492140",
      "count": 19,
      "total": 2053497.31
-    },
-    {
-     "committee": "WINSENATE",
-     "committeeId": "C00865444",
-     "count": 6,
-     "total": 1786416.82
     },
     {
      "committee": "LOWER COSTS NOW",
@@ -23111,8 +24496,8 @@
     {
      "committee": "NEW POWER PAC",
      "committeeId": "C00489252",
-     "count": 4,
-     "total": 3427.87
+     "count": 7,
+     "total": 3514.09
     }
    ]
   },
@@ -23214,6 +24599,12 @@
   "S6ME00159": {
    "oppose": [
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 18,
+     "total": 9713190.46
+    },
+    {
      "committee": "END CITIZENS UNITED ACTION FUND",
      "committeeId": "C90023607",
      "count": 2,
@@ -23222,8 +24613,8 @@
     {
      "committee": "PLANNED PARENTHOOD VOTES",
      "committeeId": "C00489799",
-     "count": 9,
-     "total": 753804.83
+     "count": 22,
+     "total": 760014.01
     },
     {
      "committee": "GOVERNMENT THAT WORKS PAC",
@@ -23234,8 +24625,8 @@
     {
      "committee": "REPRODUCTIVE FREEDOM FOR ALL FREEDOM FUND",
      "committeeId": "C00738674",
-     "count": 2,
-     "total": 169520.34
+     "count": 3,
+     "total": 251280.51
     },
     {
      "committee": "VOTEVETS",
@@ -23266,12 +24657,6 @@
      "committeeId": "C00179408",
      "count": 2,
      "total": 3400.0
-    },
-    {
-     "committee": "WINSENATE",
-     "committeeId": "C00865444",
-     "count": 1,
-     "total": 3026.1
     },
     {
      "committee": "NEIGHBOR VOICES PAC",
@@ -23411,6 +24796,12 @@
      "total": 1159802.5
     },
     {
+     "committee": "DEFENDING MAIN STREET SUPERPAC INC.",
+     "committeeId": "C00540203",
+     "count": 1,
+     "total": 946500.0
+    },
+    {
      "committee": "AMERICA PAC",
      "committeeId": "C00879510",
      "count": 16,
@@ -23436,6 +24827,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 12,
+     "total": 5270535.96
+    },
     {
      "committee": "GOVERNMENT THAT WORKS PAC",
      "committeeId": "C00915595",
@@ -23491,6 +24888,12 @@
      "total": 2567.6
     },
     {
+     "committee": "INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES FEDERAL SPEECH PAC",
+     "committeeId": "C00528455",
+     "count": 1,
+     "total": 1097.22
+    },
+    {
      "committee": "INDIVISIBLE PROJECT INC.",
      "committeeId": "C90017492",
      "count": 2,
@@ -23525,6 +24928,12 @@
      "committeeId": "C00878025",
      "count": 3,
      "total": 31.65
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -23552,6 +24961,12 @@
      "committeeId": "C00571703",
      "count": 40,
      "total": 27088595.5
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 16,
+     "total": 24463569.51
     },
     {
      "committee": "UNITED DEMOCRACY PROJECT ('UDP')",
@@ -23652,6 +25067,12 @@
    ],
    "support": [
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 8,
+     "total": 2616002.0
+    },
+    {
      "committee": "FIGHTING FOR MICHIGAN PAC",
      "committeeId": "C00919373",
      "count": 22,
@@ -23680,6 +25101,12 @@
      "committeeId": "C00961276",
      "count": 3,
      "total": 242543.71
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 8,
+     "total": 224569.89
     },
     {
      "committee": "WORKING FAMILIES PARTY PAC",
@@ -23738,8 +25165,8 @@
     {
      "committee": "UNITY & JUSTICE FUND",
      "committeeId": "C00881011",
-     "count": 28,
-     "total": 27881.25
+     "count": 42,
+     "total": 33910.8
     },
     {
      "committee": "MILLIONS OF MICHIGANIANS",
@@ -23808,6 +25235,12 @@
      "total": 1653.26
     },
     {
+     "committee": "INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES FEDERAL SPEECH PAC",
+     "committeeId": "C00528455",
+     "count": 1,
+     "total": 1097.22
+    },
+    {
      "committee": "DISRUPT",
      "committeeId": "C00895011",
      "count": 1,
@@ -23826,16 +25259,16 @@
      "total": 689.74
     },
     {
+     "committee": "THE PEOPLE UNITED PAC",
+     "committeeId": "C00776419",
+     "count": 10,
+     "total": 624.0
+    },
+    {
      "committee": "NEO PHILANTHROPY ACTION FUND INC.",
      "committeeId": "C90023367",
      "count": 3,
      "total": 596.68
-    },
-    {
-     "committee": "THE PEOPLE UNITED PAC",
-     "committeeId": "C00776419",
-     "count": 8,
-     "total": 512.0
     },
     {
      "committee": "INDIVISIBLE PROJECT INC.",
@@ -24000,8 +25433,8 @@
     {
      "committee": "MINNESOTA FORWARD",
      "committeeId": "C00935999",
-     "count": 8,
-     "total": 398849.38
+     "count": 11,
+     "total": 787566.69
     }
    ],
    "support": [
@@ -24090,6 +25523,12 @@
      "total": 352.82
     },
     {
+     "committee": "EVERYTOWN FOR GUN SAFETY VICTORY FUND (EVERYTOWN VICTORY FUND)",
+     "committeeId": "C00688655",
+     "count": 2,
+     "total": 324.96
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 2,
@@ -24159,6 +25598,12 @@
      "committeeId": "C00897363",
      "count": 4,
      "total": 25426.5
+    },
+    {
+     "committee": "BLUE FIGHT PAC",
+     "committeeId": "C00957423",
+     "count": 3,
+     "total": 24585.44
     },
     {
      "committee": "DEMOCRATS FIGHT BACK PAC",
@@ -24452,6 +25897,12 @@
      "total": 30232037.15
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 16,
+     "total": 8826199.67
+    },
+    {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
      "count": 20,
@@ -24524,6 +25975,12 @@
      "committeeId": "C00835041",
      "count": 4,
      "total": 34086.6
+    },
+    {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 1,
+     "total": 31147.5
     },
     {
      "committee": "COMMUNITY CHANGE VOTERS",
@@ -24610,6 +26067,12 @@
      "total": 1449.5
     },
     {
+     "committee": "INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES FEDERAL SPEECH PAC",
+     "committeeId": "C00528455",
+     "count": 1,
+     "total": 1097.23
+    },
+    {
      "committee": "INDIGO PAC",
      "committeeId": "C00909465",
      "count": 3,
@@ -24646,8 +26109,8 @@
     {
      "committee": "WINSENATE",
      "committeeId": "C00865444",
-     "count": 20,
-     "total": 8776152.75
+     "count": 32,
+     "total": 21604169.52
     },
     {
      "committee": "PROGRESS NORTH CAROLINA ACTION",
@@ -24680,6 +26143,12 @@
      "committeeId": "C00687103",
      "count": 44,
      "total": 4367543.22
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 1111052.41
     },
     {
      "committee": "SLF PAC",
@@ -24804,6 +26273,12 @@
   "S6NH00141": {
    "oppose": [
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 18,
+     "total": 9596636.96
+    },
+    {
      "committee": "SLF PAC",
      "committeeId": "C00571703",
      "count": 16,
@@ -24854,6 +26329,12 @@
      "total": 361394.0
     },
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 3,
+     "total": 318963.0
+    },
+    {
      "committee": "EQUALITY PAC",
      "committeeId": "C00550970",
      "count": 3,
@@ -24872,6 +26353,12 @@
      "total": 1639.44
     },
     {
+     "committee": "INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES FEDERAL SPEECH PAC",
+     "committeeId": "C00528455",
+     "count": 1,
+     "total": 1097.22
+    },
+    {
      "committee": "DMFI PAC",
      "committeeId": "C00710848",
      "count": 3,
@@ -24882,6 +26369,12 @@
      "committeeId": "C00802389",
      "count": 5,
      "total": 250.73
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -24911,6 +26404,12 @@
   },
   "S6NH00208": {
    "oppose": [
+    {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 16,
+     "total": 8971562.65
+    },
     {
      "committee": "STRONG AS GRANITE PAC",
      "committeeId": "C00909135",
@@ -24944,10 +26443,16 @@
      "total": 2881618.81
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 11,
+     "total": 2225015.17
+    },
+    {
      "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
      "committeeId": "C00657866",
-     "count": 1,
-     "total": 229500.0
+     "count": 6,
+     "total": 664762.35
     },
     {
      "committee": "AMERICA PAC",
@@ -24987,6 +26492,12 @@
      "committeeId": "C00571703",
      "count": 31,
      "total": 41942272.0
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 7,
+     "total": 20152571.25
     },
     {
      "committee": "OHIO FLYER PAC",
@@ -25093,6 +26604,12 @@
      "total": 18225.5
     },
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 1,
+     "total": 16397.5
+    },
+    {
      "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
      "committeeId": "C00490375",
      "count": 1,
@@ -25173,13 +26690,25 @@
     {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
+     "count": 2,
+     "total": 125.0
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
      "count": 1,
-     "total": 75.0
+     "total": 10.0
     }
    ]
   },
   "S6OH00304": {
    "oppose": [
+    {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 21,
+     "total": 26706857.78
+    },
     {
      "committee": "LOWER COSTS NOW",
      "committeeId": "C00961276",
@@ -25229,12 +26758,6 @@
      "total": 6842.26
     },
     {
-     "committee": "WINSENATE",
-     "committeeId": "C00865444",
-     "count": 1,
-     "total": 5625.0
-    },
-    {
      "committee": "FORWARD BLUE",
      "committeeId": "C00835041",
      "count": 1,
@@ -25260,6 +26783,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 7617467.5
+    },
     {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
@@ -25289,6 +26818,12 @@
      "committeeId": "C00811166",
      "count": 12,
      "total": 1273184.35
+    },
+    {
+     "committee": "DEFENDING MAIN STREET SUPERPAC INC.",
+     "committeeId": "C00540203",
+     "count": 1,
+     "total": 1000000.0
     },
     {
      "committee": "SLF PAC",
@@ -25765,6 +27300,12 @@
      "total": 68820323.8
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 2807965.44
+    },
+    {
      "committee": "LONE STAR LIBERTY PAC",
      "committeeId": "C00901223",
      "count": 7,
@@ -25781,6 +27322,12 @@
      "committeeId": "C00915181",
      "count": 1,
      "total": 500000.0
+    },
+    {
+     "committee": "CONSTITUTIONAL VANGUARD SUPER PAC",
+     "committeeId": "C00960930",
+     "count": 1,
+     "total": 199100.0
     },
     {
      "committee": "RED SENATE",
@@ -25825,6 +27372,12 @@
      "total": 1292.34
     },
     {
+     "committee": "TEXAS PATRIOTS PAC",
+     "committeeId": "C00488403",
+     "count": 6,
+     "total": 855.75
+    },
+    {
      "committee": "EARLY VOTE ACTION PAC",
      "committeeId": "C00829721",
      "count": 5,
@@ -25835,12 +27388,6 @@
      "committeeId": "C00939793",
      "count": 3,
      "total": 738.68
-    },
-    {
-     "committee": "TEXAS PATRIOTS PAC",
-     "committeeId": "C00488403",
-     "count": 5,
-     "total": 674.46
     },
     {
      "committee": "PATRIOT PARTNERS",
@@ -25875,6 +27422,12 @@
      "committeeId": "C00634261",
      "count": 3,
      "total": 5615930.88
+    },
+    {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 3,
+     "total": 2807965.44
     },
     {
      "committee": "TRUTH AND COURAGE PAC",
@@ -26029,6 +27582,18 @@
      "total": 15988.27
     },
     {
+     "committee": "WINSENATE",
+     "committeeId": "C00865444",
+     "count": 1,
+     "total": 12500.0
+    },
+    {
+     "committee": "INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES FEDERAL SPEECH PAC",
+     "committeeId": "C00528455",
+     "count": 2,
+     "total": 10972.23
+    },
+    {
      "committee": "EVERY STATE",
      "committeeId": "C00812792",
      "count": 4,
@@ -26105,6 +27670,12 @@
      "committeeId": "C00740514",
      "count": 1,
      "total": 475.03
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   },
@@ -26292,6 +27863,12 @@
      "total": 9850692.26
     },
     {
+     "committee": "NO GOING BACK PAC INC.",
+     "committeeId": "C00960435",
+     "count": 13,
+     "total": 4104642.9
+    },
+    {
      "committee": "NATIONAL RIGHT TO LIFE VICTORY FUND",
      "committeeId": "C00509893",
      "count": 3,
@@ -26384,6 +27961,12 @@
      "total": 12719.0
     },
     {
+     "committee": "INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES FEDERAL SPEECH PAC",
+     "committeeId": "C00528455",
+     "count": 2,
+     "total": 10972.22
+    },
+    {
      "committee": "WORKING AMERICA",
      "committeeId": "C90011156",
      "count": 5,
@@ -26418,6 +28001,12 @@
      "committeeId": "C00802389",
      "count": 33,
      "total": 1907.64
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES",
+     "committeeId": "C00489799",
+     "count": 3,
+     "total": 1421.78
     },
     {
      "committee": "FF PAC",
@@ -26535,10 +28124,16 @@
      "committeeId": "C00802389",
      "count": 2,
      "total": 120.0
+    },
+    {
+     "committee": "SIERRA CLUB INDEPENDENT ACTION",
+     "committeeId": "C00483693",
+     "count": 1,
+     "total": 10.0
     }
    ]
   }
  },
  "cycle": 2026,
- "read": "2026-11-12"
+ "read": "2026-11-13"
 }

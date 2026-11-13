@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-12",
+ "asOf": "2026-11-13",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -10,7 +10,7 @@
  "certified": {
   "AK": {
    "complete": true,
-   "fetched": "2026-11-12",
+   "fetched": "2026-11-13",
    "races": {
     "H-AK-00-2026": [
      {
@@ -77,7 +77,7 @@
   },
   "AS": {
    "complete": true,
-   "fetched": "2026-11-12",
+   "fetched": "2026-11-13",
    "races": {
     "H-AS-00-2026": [
      {
@@ -112,7 +112,7 @@
   },
   "CO": {
    "complete": true,
-   "fetched": "2026-11-12",
+   "fetched": "2026-11-13",
    "races": {
     "H-CO-01-2026": [
      {
@@ -373,7 +373,7 @@
   },
   "FL": {
    "complete": true,
-   "fetched": "2026-11-12",
+   "fetched": "2026-11-13",
    "races": {
     "H-FL-01-2026": [
      {
@@ -1595,7 +1595,7 @@
   },
   "TX": {
    "complete": true,
-   "fetched": "2026-11-12",
+   "fetched": "2026-11-13",
    "races": {
     "H-TX-01-2026": [
      {
@@ -2515,9 +2515,9 @@
  "fetchFailed": [],
  "missingPages": [],
  "national": {
-  "revid": 1385271300,
+  "revid": 1385492023,
   "title": "2026 United States House of Representatives elections",
-  "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300"
+  "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023"
  },
  "nationalDropped": {},
  "nationalRefused": {
@@ -2540,10 +2540,6 @@
   "H-NC-10-2026": {
    "name": null,
    "why": "the row marks nobody"
-  },
-  "H-NJ-07-2026": {
-   "name": "Rebecca Bennett",
-   "why": "the state's page marks or declares Rebecca Bennett: its own route decides"
   },
   "H-TX-18-2026": {
    "name": "Christian Menefee",
@@ -2570,7 +2566,7 @@
  "pending": [],
  "qualified": {
   "election": "11/03/2026",
-  "fetched": "2026-11-12",
+  "fetched": "2026-11-13",
   "races": [
    "H-LA-01-2026",
    "H-LA-02-2026",
@@ -2592,7 +2588,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Alaska Division of Elections, 2026 General Election candidate list",
     "url": "https://www.elections.alaska.gov/candidates/?election=26genr"
    },
@@ -3164,9 +3160,9 @@
     "pageMargin": 0.3099,
     "pageReporting": 99.0,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -3202,7 +3198,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "American Samoa Election Office, Candidates for the 2026 Midterm Election",
     "url": "https://www.aselectionoffice.gov/candidates-information/candidates-for-the-2026-midterm-election"
    },
@@ -4033,9 +4029,9 @@
     "pageMargin": 0.1167,
     "pageReporting": 70.0,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -6123,7 +6119,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6206,7 +6202,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6267,7 +6263,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6338,7 +6334,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6409,7 +6405,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6488,7 +6484,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6562,7 +6558,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6635,7 +6631,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6713,15 +6709,16 @@
     "H6CT01222": "Jillian Gilchrest",
     "H8CT01046": "John B. Larson"
    },
-   "calledBy": "national",
+   "calledBy": "table",
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic"
     ]
    },
    "label": {},
    "names": {
+    "H2CT01239": "Mary L. Sanders",
     "H2CT03102": "Amy Chai",
     "H6CT01180": "Ruth Fortune",
     "H6CT01198": "Jack Perry",
@@ -6729,26 +6726,9 @@
     "H6CT01222": "Jillian Gilchrest",
     "H8CT01046": "John Larson"
    },
-   "national": {
-    "ayes": 1,
-    "name": "Luke Bronin",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "lost renomination"
-     ],
-     [
-      "hold",
-      "Democratic"
-     ]
-    ]
-   },
    "page": "2026 United States House of Representatives elections in Connecticut",
    "party": {
+    "H2CT01239": "green",
     "H2CT03102": "republican",
     "H6CT01180": "democratic",
     "H6CT01206": "democratic",
@@ -6757,6 +6737,7 @@
    },
    "site": {},
    "status": {
+    "H2CT01239": "defeated",
     "H2CT03102": "defeated",
     "H6CT01180": "eliminated",
     "H6CT01198": "withdrawn",
@@ -6778,35 +6759,25 @@
     "H2CT02112": "Joe Courtney (politician)",
     "H2CT02161": "Mike France (politician)"
    },
-   "calledBy": "national",
+   "calledBy": "table",
    "decided": {
-    "general": false,
+    "general": true,
     "parties": []
    },
-   "label": {},
+   "label": {
+    "H6CT02188": "Write-in",
+    "H6CT02196": "Total"
+   },
    "names": {
     "H2CT02112": "Joe Courtney",
     "H2CT02161": "Mike France",
     "H6CT02188": "Kyle Gauck",
     "H6CT02196": "George Austin"
    },
-   "national": {
-    "ayes": 1,
-    "name": "Joe Courtney",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
-   },
    "page": "2026 United States House of Representatives elections in Connecticut",
    "party": {
     "H2CT02112": "democratic",
+    "H6CT02188": "write-in",
     "H6CT02196": "republican"
    },
    "site": {},
@@ -6829,12 +6800,14 @@
    "article": {
     "H0CT03072": "Rosa DeLauro"
    },
-   "calledBy": "national",
+   "calledBy": "table",
    "decided": {
-    "general": false,
+    "general": true,
     "parties": []
    },
-   "label": {},
+   "label": {
+    "H6CT03194": "Write-in"
+   },
    "names": {
     "H0CT03072": "Rosa DeLauro",
     "H4CT03108": "Rafael Irizarry",
@@ -6842,24 +6815,11 @@
     "H6CT03186": "Damjan DeNoble",
     "H6CT03194": "Andrew Rice"
    },
-   "national": {
-    "ayes": 1,
-    "name": "Rosa DeLauro",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
-   },
    "page": "2026 United States House of Representatives elections in Connecticut",
    "party": {
     "H0CT03072": "democratic",
-    "H6CT03178": "republican"
+    "H6CT03178": "republican",
+    "H6CT03194": "write-in"
    },
    "site": {},
    "status": {
@@ -6869,8 +6829,12 @@
     "H6CT03186": "withdrawn",
     "H6CT03194": "eliminated"
    },
-   "unmatched": {},
-   "unmatchedParty": {},
+   "unmatched": {
+    "Thomas Egan": "defeated"
+   },
+   "unmatchedParty": {
+    "Thomas Egan": "Independent"
+   },
    "unsure": []
   },
   "H-CT-04-2026": {
@@ -6884,9 +6848,9 @@
    "article": {
     "H8CT04172": "Jim Himes"
    },
-   "calledBy": "national",
+   "calledBy": "table",
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "republican"
     ]
@@ -6896,20 +6860,6 @@
     "H6CT04127": "Joseph Perez-Caputo",
     "H6CT04143": "Michael Goldstein",
     "H8CT04172": "Jim Himes"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Jim Himes",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in Connecticut",
    "party": {
@@ -6923,9 +6873,11 @@
     "H8CT04172": "elected"
    },
    "unmatched": {
+    "Benjamin Wesley": "defeated",
     "Daniel Miressi": "eliminated"
    },
    "unmatchedParty": {
+    "Benjamin Wesley": "Independent",
     "Daniel Miressi": "Republican"
    },
    "unsure": [
@@ -6942,14 +6894,17 @@
    "article": {
     "H8CT05245": "Jahana Hayes"
    },
-   "calledBy": "national",
+   "calledBy": "table",
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "H6CT05223": "Write-in",
+    "H8CT05245": "Working Families Party"
+   },
    "names": {
     "H2CT05230": "Michele Botelho",
     "H6CT05207": "Winter Solomita",
@@ -6957,23 +6912,9 @@
     "H6CT05231": "Chris Shea",
     "H8CT05245": "Jahana Hayes"
    },
-   "national": {
-    "ayes": 1,
-    "name": "Jahana Hayes",
-    "pageCounts": false,
-    "party": "Democratic/WFP",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
-   },
    "page": "2026 United States House of Representatives elections in Connecticut",
    "party": {
-    "H6CT05223": "republican",
+    "H6CT05223": "write-in",
     "H6CT05231": "republican",
     "H8CT05245": "democratic"
    },
@@ -7131,7 +7072,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7198,7 +7139,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7293,7 +7234,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7366,7 +7307,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7439,7 +7380,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7511,7 +7452,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7608,7 +7549,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7657,9 +7598,9 @@
     "pageMargin": 0.0051,
     "pageReporting": 99.0,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "lost renomination"
@@ -7709,7 +7650,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7762,7 +7703,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7809,9 +7750,9 @@
     "pageMargin": 0.0053,
     "pageReporting": 99.0,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -7856,7 +7797,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7907,7 +7848,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7994,7 +7935,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8058,7 +7999,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8136,7 +8077,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8229,7 +8170,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8290,7 +8231,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8375,7 +8316,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8436,7 +8377,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8493,7 +8434,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8607,7 +8548,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8704,7 +8645,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8768,7 +8709,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8856,7 +8797,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8932,7 +8873,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -9022,7 +8963,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -9104,7 +9045,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -9160,7 +9101,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -9227,7 +9168,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -10038,9 +9979,9 @@
     "name": "Ed Case",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -10102,9 +10043,9 @@
     "name": "Jill Tokuda",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -10429,7 +10370,7 @@
    "article": {
     "H8ID01124": "Russ Fulcher"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -10448,20 +10389,6 @@
     "H6ID01326": "Andy Briner",
     "H6ID01334": "Joseph Morrison",
     "H8ID01124": "Russ Fulcher"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Russ Fulcher",
-    "pageCounts": false,
-    "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in Idaho",
    "party": {
@@ -10499,7 +10426,7 @@
    "article": {
     "H8ID02064": "Mike Simpson"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -10516,20 +10443,6 @@
     "H6ID02282": "Emre Houser",
     "H6ID02290": "Will Johanson",
     "H8ID02064": "Mike Simpson"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Mike Simpson",
-    "pageCounts": false,
-    "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in Idaho",
    "party": {
@@ -10594,9 +10507,9 @@
     "name": "Jonathan Jackson",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -10658,9 +10571,9 @@
     "name": "Donna Miller",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -10731,9 +10644,9 @@
     "name": "Delia Ramirez",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -10763,9 +10676,10 @@
    },
    "ambiguous": [],
    "article": {
-    "G000586": "Chuy García"
+    "G000586": "Chuy García",
+    "H6IL04153": "Patty Garcia"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -10783,21 +10697,6 @@
     "H6IL04153": "Patty Garcia",
     "H6IL04187": "Lindsay Church",
     "H6IL04195": "Chris Getty"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Patty García",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "hold",
-      "Democratic"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in Illinois",
    "party": {
@@ -10850,9 +10749,9 @@
     "name": "Mike Quigley",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -10918,9 +10817,9 @@
     "name": "Sean Casten",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -10990,9 +10889,9 @@
     "name": "La Shawn Ford",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -11079,9 +10978,9 @@
     "name": "Melissa Bean",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -11175,9 +11074,9 @@
     "name": "Daniel Biss",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -11270,9 +11169,9 @@
     "name": "Brad Schneider",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -11327,9 +11226,9 @@
     "name": "Bill Foster",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -11383,9 +11282,9 @@
     "name": "Mike Bost",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -11435,9 +11334,9 @@
     "name": "Nikki Budzinski",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -11490,9 +11389,9 @@
     "name": "Lauren Underwood",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -11545,9 +11444,9 @@
     "name": "Mary Miller",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -11607,9 +11506,9 @@
     "name": "Darin LaHood",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -11658,9 +11557,9 @@
     "name": "Eric Sorensen",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -12168,9 +12067,9 @@
     "name": "Tracey Mann",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -12226,9 +12125,9 @@
     "name": "Derek Schmidt",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -12285,9 +12184,9 @@
     "name": "Sharice Davids",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -12355,9 +12254,9 @@
     "name": "Ron Estes",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -12970,9 +12869,9 @@
     "name": "Richard Neal",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -13053,9 +12952,9 @@
     "name": "Lori Trahan",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -13106,9 +13005,9 @@
     "name": "Jake Auchincloss",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -13207,9 +13106,9 @@
     "name": "Dan Koh",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -13305,9 +13204,9 @@
     "name": "Stephen Lynch",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -13360,9 +13259,9 @@
     "name": "Bill Keating",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -15609,9 +15508,9 @@
     "name": "Trent Kelly",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -15664,9 +15563,9 @@
     "name": "Bennie Thompson",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -15722,9 +15621,9 @@
     "name": "Michael Guest",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -15778,9 +15677,9 @@
     "name": "Mike Ezell",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -15925,7 +15824,7 @@
     "H6MT02143": "eliminated",
     "H6MT02150": "defeated",
     "H6MT02168": "defeated",
-    "H6MT02176": "withdrawn",
+    "H6MT02176": "defeated",
     "H6MT02226": "eliminated"
    },
    "unmatched": {},
@@ -16943,9 +16842,9 @@
     "name": "Stefany Shaheen",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -17027,9 +16926,9 @@
     "name": "Maggie Goodlander",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -17072,7 +16971,7 @@
    "article": {
     "H4NJ01084": "Donald Norcross"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17085,20 +16984,6 @@
     "H2NJ01187": "Damon Galdo",
     "H4NJ01084": "Donald Norcross",
     "H6NJ01238": "Lonnie Affrime"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Donald Norcross",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17127,7 +17012,7 @@
     "H6NJ02251": "Zack Mullock",
     "H8NJ02166": "Jeff Van Drew"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17144,28 +17029,6 @@
     "H6NJ02251": "Zack Mullock",
     "H6NJ02269": "Ramon Mora Jr.",
     "H8NJ02166": "Jeff Van Drew"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Zack Mullock",
-    "pageCounts": true,
-    "pageLead": 7368,
-    "pageLeader": "Zack Mullock",
-    "pageMargin": 0.0271,
-    "pageReporting": null,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "lost re-election"
-     ],
-     [
-      "gain",
-      "Democratic"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17200,7 +17063,7 @@
    "article": {
     "H4NJ03080": "Herb Conaway"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17219,20 +17082,6 @@
     "H6NJ03176": "Jason Cullen",
     "H6NJ03184": "Michael McGuire",
     "H6NJ03192": "Ryan Michael Kelly"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Herb Conaway",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17268,7 +17117,7 @@
    "article": {
     "H8NJ04014": "Chris Smith (New Jersey politician)"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17284,20 +17133,6 @@
     "H6NJ04257": "Rachel Peace",
     "H6NJ04265": "Bob English",
     "H8NJ04014": "Chris Smith"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Chris Smith",
-    "pageCounts": false,
-    "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17332,7 +17167,7 @@
    "article": {
     "H6NJ05171": "Josh Gottheimer"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17348,20 +17183,6 @@
     "H6NJ05171": "Josh Gottheimer",
     "H6NJ05221": "Sean Kirrane",
     "H6NJ05247": "Adam Rueda"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Josh Gottheimer",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17395,7 +17216,7 @@
    "article": {
     "H8NJ03073": "Frank Pallone"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17410,20 +17231,6 @@
     "H6NJ06278": "Hillary Herzig",
     "H6NJ06286": "Hillary Herzig",
     "H8NJ03073": "Frank Pallone"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Frank Pallone",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17458,6 +17265,7 @@
     "H6NJ07201": "Rebecca Bennett (politician)",
     "H6NJ07300": "Randall Terry"
    },
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17490,10 +17298,10 @@
    },
    "site": {},
    "status": {
-    "H0NJ07261": "nominee",
+    "H0NJ07261": "defeated",
     "H2NJ08265": "eliminated",
     "H4NJ07131": "withdrawn",
-    "H6NJ07201": "nominee",
+    "H6NJ07201": "elected",
     "H6NJ07235": "eliminated",
     "H6NJ07243": "withdrawn",
     "H6NJ07250": "eliminated",
@@ -17503,7 +17311,7 @@
     "H6NJ07300": "withdrawn"
    },
    "unmatched": {
-    "Seamus Patrick O'Toole": "nominee"
+    "Seamus Patrick O'Toole": "defeated"
    },
    "unmatchedParty": {
     "Seamus Patrick O'Toole": "Stop Israel's Genocide"
@@ -17519,7 +17327,7 @@
     "H2NJ08232": "Rob Menendez",
     "H6NJ08209": "Mussab Ali"
    },
-   "calledBy": "infobox",
+   "calledBy": "table",
    "decided": {
     "general": true,
     "parties": [
@@ -17568,7 +17376,7 @@
     "H4NJ09194": "Nellie Pou",
     "H6NJ09306": "Terrisa Bukovinac"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17584,20 +17392,6 @@
     "H6NJ09264": "Rosie Pino",
     "H6NJ09280": "Tiffany Burress",
     "H6NJ09306": "Terrisa Bukovinac"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Nellie Pou",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17629,7 +17423,7 @@
    "article": {
     "H4NJ10176": "LaMonica McIver"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17641,20 +17435,6 @@
    "names": {
     "H4NJ10135": "Carmen Bucco",
     "H4NJ10176": "LaMonica McIver"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "LaMonica McIver",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17684,7 +17464,7 @@
     "H6NJ11286": "Analilia Mejia",
     "H6NJ11344": "Donald Cresitello"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17702,20 +17482,6 @@
     "H6NJ11302": "Joseph Lewis",
     "H6NJ11328": "Alan B. Bond",
     "H6NJ11344": "Donald Cresitello"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Analilia Mejia",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17751,7 +17517,7 @@
     "H6NJ12417": "Adam Hamawy",
     "W000822": "Bonnie Watson Coleman"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -17782,21 +17548,6 @@
     "H6NJ12433": "Sue Altman",
     "H6NJ12441": "Andres Jinete",
     "W000822": "Bonnie Watson Coleman"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Adam Hamawy",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "hold",
-      "Democratic"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in New Jersey",
    "party": {
@@ -17878,9 +17629,9 @@
     "name": "Melanie Stansbury",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -17931,9 +17682,9 @@
     "name": "Gabe Vasquez",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -17984,9 +17735,9 @@
     "name": "Teresa Leger Fernández",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -20557,9 +20308,9 @@
     "name": "Suzanne Bonamici",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -20620,9 +20371,9 @@
     "name": "Cliff Bentz",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -20687,9 +20438,9 @@
     "name": "Maxine Dexter",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -20746,9 +20497,9 @@
     "name": "Val Hoyle",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -20811,9 +20562,9 @@
     "name": "Janelle Bynum",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -20867,9 +20618,9 @@
     "name": "Andrea Salinas",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -20960,9 +20711,9 @@
     "name": "Brendan Boyle",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -20995,7 +20746,7 @@
     "H6PA03229": "Morgan Cephas",
     "H6PA03245": "Ala Stanford"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -21013,21 +20764,6 @@
     "H6PA03260": "Pablo McConnie-Saad",
     "H6PA03302": "NaDerah Griffin",
     "H6PA03369": "Dennis Mahoney"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Chris Rabb",
-    "pageCounts": false,
-    "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "hold",
-      "Democratic"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in Pennsylvania",
    "party": {
@@ -21083,9 +20819,9 @@
     "name": "Madeleine Dean",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21133,9 +20869,9 @@
     "name": "Mary Gay Scanlon",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21183,9 +20919,9 @@
     "name": "Chrissy Houlahan",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21323,9 +21059,9 @@
     "name": "Dan Meuser",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21415,9 +21151,9 @@
     "name": "Lloyd Smucker",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21467,9 +21203,9 @@
     "name": "Summer Lee",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21520,9 +21256,9 @@
     "name": "John Joyce",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21570,9 +21306,9 @@
     "name": "Guy Reschenthaler",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21620,9 +21356,9 @@
     "name": "Glenn Thompson",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21670,9 +21406,9 @@
     "name": "Mike Kelly",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21721,9 +21457,9 @@
     "name": "Chris Deluzio",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21778,9 +21514,9 @@
     "name": "Gabe Amo",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -21829,9 +21565,9 @@
     "name": "Seth Magaziner",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -22286,9 +22022,9 @@
     "name": "Diana Harshbarger",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -22379,9 +22115,9 @@
     "name": "Chuck Fleischmann",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -22494,9 +22230,9 @@
     "name": "Charlie Hatcher",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "lost renomination"
@@ -22569,9 +22305,9 @@
     "name": "Johnny Garrett",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -22641,9 +22377,9 @@
     "name": "Matt Van Epps",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -22700,9 +22436,9 @@
     "name": "David Kustoff",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -22804,7 +22540,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22872,7 +22608,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22937,7 +22673,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22994,7 +22730,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23052,7 +22788,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23112,7 +22848,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23171,7 +22907,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23237,7 +22973,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23310,7 +23046,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23405,7 +23141,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23501,7 +23237,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23556,7 +23292,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23611,7 +23347,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23666,7 +23402,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23731,7 +23467,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23786,7 +23522,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23822,9 +23558,9 @@
     "name": "Veronica Escobar",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -23870,7 +23606,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23902,9 +23638,9 @@
     "name": "Pete Sessions",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -23945,7 +23681,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24008,7 +23744,7 @@
    "article": {},
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24082,7 +23818,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24115,9 +23851,9 @@
     "name": "Joaquin Castro",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -24154,7 +23890,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24246,7 +23982,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24317,7 +24053,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24397,7 +24133,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24429,9 +24165,9 @@
     "name": "Beth Van Duyne",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -24470,7 +24206,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24502,9 +24238,9 @@
     "name": "Roger Williams",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -24539,7 +24275,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24575,9 +24311,9 @@
     "name": "Brandon Gill",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -24618,7 +24354,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24655,9 +24391,9 @@
     "name": "Michael Cloud",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -24700,7 +24436,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24738,9 +24474,9 @@
     "name": "Henry Cuellar",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -24786,7 +24522,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24819,9 +24555,9 @@
     "name": "Sylvia Garcia",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -24859,7 +24595,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24932,7 +24668,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -24975,9 +24711,9 @@
     "name": "John Carter",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -25035,7 +24771,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -25078,9 +24814,9 @@
     "name": "Jace Yarbrough",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "new member"
@@ -25139,7 +24875,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -25177,9 +24913,9 @@
     "name": "Colin Allred",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -25230,7 +24966,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -25274,9 +25010,9 @@
     "name": "Vicente Gonzalez",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -25330,7 +25066,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -25421,7 +25157,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -25454,9 +25190,9 @@
     "name": "Brian Babin",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -25493,7 +25229,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -25558,7 +25294,7 @@
    "calledBy": "national",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -25604,9 +25340,9 @@
     "name": "Jon Bonck",
     "pageCounts": false,
     "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "hold",
@@ -26062,9 +25798,9 @@
     "pageMargin": 0.5025,
     "pageReporting": null,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -26674,9 +26410,9 @@
     "name": "Suzan DelBene",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -26735,9 +26471,9 @@
     "name": "Rick Larsen",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -26822,9 +26558,10 @@
    "ambiguous": [],
    "article": {
     "H6WA04208": "Cascade Party of Washington",
+    "H6WA04216": "Amanda McKinney",
     "H6WA04224": "Matt Boehnke"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -26842,21 +26579,6 @@
     "H6WA04240": "Carmen Black",
     "H6WA04257": "Favian Valencia",
     "H6WA04265": "Elpidia Saavedra"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Amanda McKinney",
-    "pageCounts": false,
-    "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "hold",
-      "Republican"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in Washington",
    "party": {
@@ -26901,7 +26623,7 @@
     "H4WA05168": "Carmela Conroy",
     "H4WA05234": "Michael Baumgartner"
    },
-   "calledBy": "national",
+   "calledBy": "infobox",
    "decided": {
     "general": true,
     "parties": [
@@ -26923,20 +26645,6 @@
     "H6WA05270": "Andrew Bartleson",
     "H6WA05288": "Richard Freudenberg",
     "H6WA05296": "Matthew Hayes"
-   },
-   "national": {
-    "ayes": 1,
-    "name": "Michael Baumgartner",
-    "pageCounts": false,
-    "party": "Republican",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
-    "words": [
-     [
-      "re-elected"
-     ]
-    ]
    },
    "page": "2026 United States House of Representatives elections in Washington",
    "party": {
@@ -27002,9 +26710,9 @@
     "name": "Emily Randall",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -27057,9 +26765,9 @@
     "name": "Pramila Jayapal",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -27110,9 +26818,9 @@
     "name": "Kim Schrier",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -27169,9 +26877,9 @@
     "name": "Adam Smith",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -27223,9 +26931,9 @@
     "name": "Marilyn Strickland",
     "pageCounts": false,
     "party": "Democratic",
-    "read": "2026-11-12",
-    "revid": 1385271300,
-    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385271300",
+    "read": "2026-11-13",
+    "revid": 1385492023,
+    "url": "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1385492023",
     "words": [
      [
       "re-elected"
@@ -27795,7 +27503,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Alaska Division of Elections, 2026 General Election candidate list",
     "url": "https://www.elections.alaska.gov/candidates/?election=26genr"
    },
@@ -28037,7 +27745,7 @@
    "calledBy": "table",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -28205,7 +27913,7 @@
    "calledBy": "infobox",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -30216,7 +29924,7 @@
    "calledBy": "table",
    "certified": {
     "complete": true,
-    "fetched": "2026-11-12",
+    "fetched": "2026-11-13",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -30520,18 +30228,18 @@
   }
  },
  "refusedMarks": {
+  "H-ME-02-2026": [
+   {
+    "calledBy": "infobox",
+    "name": "Paul LePage",
+    "why": "the infobox declares them and gives no two counts above zero"
+   }
+  ],
   "H-TN-04-2026": [
    {
     "calledBy": "infobox",
     "name": "Victoria Broderick",
     "why": "their lead of 280 votes (0.15 points) is under 0.5 points of the count, and a declaration with no mark does not call so close a race"
-   }
-  ],
-  "H-UT-04-2026": [
-   {
-    "calledBy": "infobox",
-    "name": "Mike Kennedy",
-    "why": "the infobox declares them and gives no two counts above zero"
    }
   ]
  },

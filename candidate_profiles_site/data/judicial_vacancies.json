@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-12",
+ "asOf": "2026-11-13",
  "current": [
   {
    "code": "01 - MA",
@@ -387,7 +387,7 @@
   }
  ],
  "emergenciesUnmatched": [],
- "fetched": "2026-11-12T17:01:18+00:00",
+ "fetched": "2026-11-13T16:27:48+00:00",
  "future": [
   {
    "announced": "2026-07-15",
@@ -512,26 +512,13 @@
    }
   },
   {
-   "announced": "2026-09-14",
-   "code": "08 - AR-E",
-   "court": "ar-e",
-   "nominated": null,
-   "nominee": null,
-   "reason": "Elevated",
-   "vacancyDate": null,
-   "vacatedBy": {
-    "listedAs": "Rudofsky,Lee P.",
-    "name": "Lee P. Rudofsky"
-   }
-  },
-  {
    "announced": "2026-07-20",
    "code": "08 - CCA",
    "court": "ca8",
-   "nominated": "2026-09-14",
+   "nominated": "2026-11-10",
    "nominee": {
-    "listedAs": "Rudofsky,Lee Philip",
-    "name": "Lee Philip Rudofsky"
+    "listedAs": "Hiland,James Cody",
+    "name": "James Cody Hiland"
    },
    "reason": "Senior",
    "vacancyDate": null,
@@ -615,7 +602,7 @@
    }
   }
  ],
- "read": "2026-11-12",
+ "read": "2026-11-13",
  "sources": {
   "current": "https://www.uscourts.gov/data-news/judicial-vacancies/current-judicial-vacancies",
   "emergencies": "https://www.uscourts.gov/data-news/judicial-vacancies/judicial-emergencies",
