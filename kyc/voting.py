@@ -457,9 +457,18 @@ TERRITORY_LINKS = {
 
 # Each territory's election office, by the name its own site gives it
 # (checked 2026-10-17), so the page names the office it credits (rule 75).
+# One body has one name wherever this site names it: the Virgin Islands'
+# stood here as the "Election System of the Virgin Islands" while the
+# ballot questions' and the candidates' records (data/ballot_measures.json,
+# data/statewide_candidates.json: `by`) said "Elections System", and its
+# page printed both. The office writes "Elections": "may register in person
+# at the Elections System offices" (vivote.gov, quoted in
+# data/voting_dates.json under registration.inPerson.note), and its own
+# pages' addresses say "elections-system-...". tests/test_voting.py holds
+# every territory's name here to those records'.
 TERRITORY_SOURCES = {
     "GU": ("https://gec.guam.gov/", "Guam Election Commission"),
-    "VI": ("https://vivote.gov/", "Election System of the Virgin Islands"),
+    "VI": ("https://vivote.gov/", "Elections System of the Virgin Islands"),
     "MP": ("https://www.votecnmi.gov.mp/", "Commonwealth Election Commission"),
     "AS": ("https://www.aselectionoffice.gov/", "American Samoa Election Office"),
     "PR": ("https://ww2.ceepur.org/", "Comisi\u00f3n Estatal de Elecciones"),

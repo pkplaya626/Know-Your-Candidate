@@ -396,10 +396,8 @@ def read_members(lists, snapshot, measure=None, pause=1.0):
 def race_titles(code, office):
     """The race's own article titles, built from the race (as
     ``results.page_titles`` builds a House race's), never from a person."""
-    from .pages import short_name
-    place = short_name(code)             # a source's title, from the name sources write
-    if code == "VI":
-        place = "United States Virgin Islands"
+    from .results import title_name
+    place = title_name(code)             # the name a title gives the place: one helper (rule 12)
     if office == "governor":
         return [f"2026 {place} gubernatorial election"]
     if office == "lt":

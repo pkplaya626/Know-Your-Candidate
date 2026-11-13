@@ -690,8 +690,7 @@
   /** "Statewide" is a state's word: the District's and a territory's are
    *  their own (rule 75). */
   function questionScope(code) {
-    if (code === "DC") return "District-wide";
-    return stateInfo(code).territory ? "Territory-wide" : "Statewide";
+    return KYC.questionScope(code);    // one table, in kyc.js (rule 12)
   }
 
   /** The section's name, for its heading and its jump chip alike (rule 75). */

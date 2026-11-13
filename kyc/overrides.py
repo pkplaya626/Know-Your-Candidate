@@ -301,7 +301,7 @@ OTHER_OFFICE_NOMINEES = {
     # Republican primary results, August 11: Tiffany 95.32%.
     "T000165": ("Republican nominee for Governor of Wisconsin",
                 _GOV.format("Wisconsin"), "2026-10-17"),
-    # Democratic primary results, August 1 (the Election System of the
+    # Democratic primary results, August 1 (the Elections System of the
     # Virgin Islands' territorial summary): Plaskett and Potter 46.99%.
     "P000610": ("Democratic nominee for Governor of the U.S. Virgin Islands",
                 _GOV.format("United_States_Virgin_Islands"), "2026-10-17"),

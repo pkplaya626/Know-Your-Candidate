@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3239 tests, no dependencies
-npm install && npm test                       # 4833 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3250 tests, no dependencies
+npm install && npm test                       # 4881 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -892,6 +892,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     through `KYC.odds.render`, the list's parties beside the race for the
     party-only note, rule 79), and a race the cache holds nothing for
     says so of the cache (rule 19).
+    The race's own article is asked for by one name, whoever asks
+    (`results.title_name`, rule 12): the polls' reader built "2026 Virgin
+    Islands gubernatorial election" from the roster's name while the
+    photographs' reader (rule 91) asked, by a special case of its own, for
+    "2026 United States Virgin Islands gubernatorial election", the title
+    the article has and `data/statewide_photos.json` records. The House
+    races' titles take the same helper, and
+    `TestOneTitleForAGovernorsRace` holds the two readers to each other and
+    to the article the photographs' reader read. Only the network reader
+    asks for a title, so no odds file changes with it (rule 41).
 
 41. **A file that publishes on its own may change only itself.**
     `.github/workflows/odds.yml` commits to `main` every twelve hours
@@ -960,6 +970,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     stay in reach (the dialog's close button) is sticky inside what scrolls.
     Every field and menu is 16px there, or iOS zooms the page when one is
     tapped and leaves it zoomed.
+    A word wider than a phone wraps inside its line. A badge is one line
+    unless a rule says otherwise, and one that names another office ("Was
+    the Democratic nominee for Governor of the U.S. Virgin Islands") ran
+    415px across a 320px screen in a race's "Held by" line and was cut at
+    both ends in the profile dialog's centred status line; a leadership
+    post's ("Senate Democratic Steering Committee Chair") ran 40px past the
+    dialog's edge. In a card, a race's "Held by" line, a dialog's status
+    line and the leadership posts a badge wraps, no wider than its line
+    (`testLongBadgesWrap` reads the stylesheet for every place the page
+    code draws one; measured in headless Chrome at 320, 360 and 390px on
+    both clocks, with no badge changed at 1280px).
 
 45. **Time it on a throttled phone, not on this machine.** A mid-range
     Android phone runs a page about 4x slower than a desktop. Texas's
@@ -1801,6 +1822,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     profile then says "No House filing" and shows that campaign's totals
     under its own office and FEC id, linked to its profile - never "No
     filing this cycle" for someone who raised millions for another seat.
+    The rehearsal reads each step's output in the encoding the step writes
+    it in (`rehearse_changeover.step_io`): on Windows under `python -X
+    utf8` it read as UTF-8 what its steps wrote in the console's code page,
+    the reader died on the first accented name ("can't decode byte 0xf3")
+    and the run stopped on `None + str` before any step was judged. A step
+    is handed the parent's choice (`PYTHONUTF8`), a byte that will not
+    decode is replaced, and Linux and CI read as they did.
 
 69. **An office held is shown where two sources agree on it.** Wikidata's
     "position held" is the only free record of state and local offices,
@@ -2035,6 +2063,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     cannot work, a place is joined to a government only through the
     listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
     the government `county_areas` names, never to a town it replaced.
+    One body has one name wherever this site names it: the Virgin Islands'
+    election office was the "Election System of the Virgin Islands" under
+    its voting links (`voting.TERRITORY_SOURCES`) and the "Elections System
+    of the Virgin Islands" over its ballot questions and its candidates,
+    on one page. The office writes "Elections" ("may register in person at
+    the Elections System offices", quoted in `data/voting_dates.json`), and
+    `TestOneNameForAnElectionOffice` holds every territory's name under its
+    voting links to the records' `by`. What the search says of a territory
+    or the District is under rule 97.
 
 76. **A page and the code it runs are one version.** GitHub Pages serves
     every file for ten minutes, and a reload refetches the page but keeps
@@ -2328,6 +2365,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (`kyc/territorial_courts.py`, rule 57). And a count of judges by
     appointing President is a count of Presidents, in `--cat-*` colours,
     never a party's.
+    A court the directory does not hold has no count of the directory's to
+    give: its record carries `active: 0`, which says the directory was not
+    the place to look, never that nobody sits (rule 19). The search printed
+    it - "District Court of the Virgin Islands — 0 active judges", over a
+    court whose own page lists two, and the same of Guam's and the Northern
+    Mariana Islands'. The search's row and the federal page's table say one
+    sentence from one helper (`KYC.unlistedJudges`, rule 12): "2 of 2
+    Article IV judgeships filled, by the court’s list", or "Article IV
+    judges: not in the directory" where no list of the court's own was
+    read; no other page prints a count for such a court.
 
 84. **A date a reader acts on is the office's own, and is said passed on
     the reader's day.** Seventeen days before the election every state page
@@ -3244,6 +3291,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     election, or taken off by a court, is not listed. "Statewide" is a
     state's word (rule 75): the District's are District-wide, a
     territory's Territory-wide, and neither is told of a county's questions.
+    The word is one table for the pages and the search
+    (`KYC.questionScope`, rule 12): the search's answers said "No statewide
+    question is on the Nov 3, 2026 ballot" of the U.S. Virgin Islands and
+    "1 statewide question" of the District, beside pages that said
+    territory-wide and District-wide. A sentence about every list read
+    says each scope among them ("No statewide, district-wide or
+    territory-wide question on a Nov 3, 2026 ballot is called ..."), and a
+    question links to "its state’s, its territory’s or the District’s
+    page", never the District's to "its state’s page".
     From the day after Election Day the heading and lead are in the past
     tense beside the state's results page - "that were on the ballot" only
     over a list, never over "none" or "not found" - and this site reads no
@@ -3432,6 +3488,36 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     count the ballot are in the past tense from the day after the election.
     Measured on a 4x and 6x throttled phone, a keystroke costs what it did
     before (rule 45).
+
+    The readers of PR #246 found more on main beside it, each asked now of
+    every place the data holds and of a state the check makes
+    (`testTerritoryFollowups`). A territorial court was answered with the
+    directory's zeros (rule 82), and the District's and the territories'
+    questions were "statewide" (rule 95). A territory was told of "A
+    state’s own circuit courts" under its court of appeals, and that its
+    "own highest court is on its state page", over a page that names no
+    court: that is said only where the page holds one, and otherwise "This
+    site names no members of Guam’s own highest court". "Virgin Islands
+    counties" was answered "each state’s counties"; it says this site has
+    no county page for the place. "Virgin Islands tribes" and "Ohio tribes"
+    were offered "Tribal governments listed in" a place the BIA's directory
+    lists none in, "each with its leader": the answer says the directory
+    lists no tribal government with its office there, and only where the
+    index holds the directory at all (rule 19). And "Guam delegate",
+    "Virgin Islands delegate" and "Puerto Rico resident commissioner" found
+    nobody, while "delegate" alone listed all six: a place whose one seat
+    in the House has a title of its own (`delegateTitle`), beside that
+    title's word or "delegate", is its sitting member alone
+    (`SEAT_OWN_TITLE` in kyc.js; rule 27), and the line says whose seat in
+    the place's own word, "Puerto Rico’s Resident Commissioner in the U.S.
+    House". "Virginia delegate", "Maryland delegates" and "West Virginia
+    delegate" are still those states' Houses of Delegates, "delegate" alone
+    the answers' list, "Delegate Plaskett" a name, and "Guam resident
+    commissioner" nobody's seat. Left as written, being true of every
+    place: "Each state’s highest court is on its state’s page", "Each state
+    elects two U.S. senators", "Each state’s House members are elected by
+    district", "Every state legislature", the tribal page's "by state", and
+    "Each state’s county page", which no place without one is sent to.
 
 99. **On a phone a big state's races are rows, and a row says what its race
     says.** California's page was 92 screens once drawn, its district

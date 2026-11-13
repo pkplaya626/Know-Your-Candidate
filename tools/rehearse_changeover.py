@@ -339,6 +339,28 @@ def january(root=REPO):
 
 # ------------------------------------------------------------------ run
 
+def step_io(flags=None, environ=None):
+    """How a step's output is read, as keyword arguments for
+    ``subprocess.run``: in the encoding the step writes it in.
+
+    A step is this same Python run again, and it does not inherit ``-X
+    utf8``: on Windows the parent, in UTF-8 mode, read as UTF-8 what the
+    child wrote in the console's code page, the reader thread died on the
+    first accented name ("can't decode byte 0xf3") and left the output
+    ``None``, and the rehearsal stopped on ``None + str`` before any step
+    was judged. So the child is handed the parent's choice: where the
+    parent runs in UTF-8 mode the child does too (``PYTHONUTF8``) and is
+    read as UTF-8; otherwise both use the locale's encoding, as before.
+    Either way a byte that will not decode is replaced, never fatal: the
+    output is a log's tail, and the step's exit code is what is judged."""
+    flags = sys.flags if flags is None else flags
+    environ = os.environ if environ is None else environ
+    if getattr(flags, "utf8_mode", 0):
+        return {"text": True, "encoding": "utf-8", "errors": "replace",
+                "env": dict(environ, PYTHONUTF8="1")}
+    return {"text": True, "errors": "replace"}
+
+
 def run(scenario, out):
     """Write the scenario's copy and run the refresh's steps on it."""
     made = january() if scenario == "january" else december(scenario)
@@ -367,8 +389,8 @@ def run(scenario, out):
     for step in steps:
         cmd = [sys.executable, "build_profile_site.py", *step]
         print(f"[{scenario}] {' '.join(step) or 'build'}", flush=True)
-        done = subprocess.run(cmd, cwd=dest, capture_output=True, text=True)
-        tail = (done.stdout + done.stderr).strip().splitlines()[-12:]
+        done = subprocess.run(cmd, cwd=dest, capture_output=True, **step_io())
+        tail = ((done.stdout or "") + (done.stderr or "")).strip().splitlines()[-12:]
         if done.returncode != 0:
             print("\n".join(tail))
             print(f"[error] {scenario}: '{' '.join(step) or 'build'}' exited {done.returncode}")

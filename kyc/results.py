@@ -315,7 +315,7 @@ def page_titles(state, office, cycle=CYCLE):
         # Columbia", "... in the United States Virgin Islands" and "... in the
         # Northern Mariana Islands". Asking only for the bare name read no
         # outcome for Norton or Plaskett at all.
-        names = [name] + [f"the {n}" for n in (TITLE_NAMES.get(state, name),)]
+        names = [name, f"the {title_name(state)}"]
         titles = []
         for n in names:
             titles += [
@@ -332,6 +332,20 @@ def page_titles(state, office, cycle=CYCLE):
 # The name a territory goes by in an article title, where it is not the
 # roster's. "Virgin Islands" alone is the British territory too.
 TITLE_NAMES = {"VI": "United States Virgin Islands"}
+
+
+def title_name(code):
+    """The name a Wikipedia article's title gives a place: the roster's
+    ("Texas", "Northern Mariana Islands"), or ``TITLE_NAMES``'s where the
+    title takes a longer one. One helper for every reader that builds a
+    title from a place (rule 12): the House races' here, the governors'
+    race's for the polls (``odds.governor_page_title``) and for the
+    photographs (``statewide_photos.race_titles``). Each built its own:
+    the polls' reader asked for "2026 Virgin Islands gubernatorial
+    election" while the photographs' asked, by a special case of its own,
+    for "2026 United States Virgin Islands gubernatorial election", the
+    title data/statewide_photos.json records as the article's."""
+    return TITLE_NAMES.get(code) or state_name(code)
 
 
 class PageMissing(Exception):
