@@ -202,12 +202,9 @@ class TestAPlaceInASentenceWhereverItIsWritten(unittest.TestCase):
         bare = re.compile(r"(?<!U\.S\. )(?<!United States )Virgin Islands")
         body = re.compile(r"(?:Court|Legislature|System|Government|Governor|Constitution|Code|Act|Board|University) "
                           r"of the Virgin Islands")
-        # Reserved for the owner's own read (the November 17 runoff's
-        # paragraph and its source label), and the editor's note that says
-        # so: take each out of this list as it is read.
-        reserved = ("The Delegates from Guam and the Virgin Islands are elected by a majority",
-                    "48 U.S.C. 1712 (the Delegates from Guam and the Virgin Islands)",
-                    "its paragraph's second read is the owner's")
+        # Nothing is reserved: the November 17 runoff's paragraph, held back
+        # for a second read, had it on 2026-11-13 and names the territory as
+        # the rest of the guide does.
         found, looked = set(), 0
         for name in dir(government_text):
             value = getattr(government_text, name)
@@ -215,8 +212,6 @@ class TestAPlaceInASentenceWhereverItIsWritten(unittest.TestCase):
                 continue
             for text in strings(value):
                 looked += "Virgin Islands" in text
-                if any(words in text for words in reserved):
-                    continue
                 plain = re.sub(r"“[^”]*”", "", body.sub("", text))
                 if bare.search(plain):
                     found.add(text[:160])
