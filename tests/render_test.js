@@ -13556,10 +13556,19 @@ async function testTerritoryFollowups() {
       placeSaid[code + "|" + what] = text();
     }
   }
-  // Made here: a territory whose page holds a highest court.
-  window.kycStateGov.states[territory].court = { name: "Supreme Court of Example", members: [{ name: "Pat Example" }], seats: 1 };
-  await ask(KYC.stateName(territory) + " federal courts");
-  const withCourt = text();
+  // Made here: a territory whose page holds a highest court. One with a
+  // federal court of its own, or "<place> federal courts" answers nothing
+  // to read: the January rehearsal's first territory was American Samoa,
+  // which has none.
+  const courtTerritory = notStates.find((c) => c !== "DC" && (window.kycFederal.courts || []).some((ct) =>
+    ct.kind !== "appeals" && (ct.states || []).indexOf(c) !== -1));
+  const territoryGov = window.kycStateGov.states;
+  if (courtTerritory) {
+    territoryGov[courtTerritory] = territoryGov[courtTerritory] || {};
+    territoryGov[courtTerritory].court = { name: "Supreme Court of Example", members: [{ name: "Pat Example" }], seats: 1 };
+    await ask(KYC.stateName(courtTerritory) + " federal courts");
+  }
+  const withCourt = courtTerritory ? text() : "";
   reload("stategov.js");
   const tribes = window.kycSearch.tribes || {};
   const noTribes = Object.keys(meta).filter((c) => !tribes[c]);
@@ -13599,7 +13608,8 @@ async function testTerritoryFollowups() {
     check("a state's is on 'its state page'", /Texas’s own highest court is on its state page\./.test(said(aState, "federal courts")),
       said(aState, "federal courts").slice(0, 200));
     check("made here: a territory whose page holds a court is told 'on its page', never 'its state page'",
-      withCourt.indexOf(KYC.possessive(KYC.placeStart(territory), "’") + " own highest court is on its page.") !== -1, withCourt.slice(0, 220));
+      !!courtTerritory && withCourt.indexOf(KYC.possessive(KYC.placeStart(courtTerritory), "’") + " own highest court is on its page.") !== -1 &&
+        !/its state page/.test(withCourt), (courtTerritory || "no territory with a federal court") + ": " + withCourt.slice(0, 220));
     check("'<place> counties' says this site has no county page for it",
       notStates.every((c) => said(c, "counties").indexOf("This site has no county page for " + KYC.placeWords(c) +
         ": its county pages cover the 50 states.") !== -1), notStates.map((c) => said(c, "counties")).join(" | "));
@@ -13758,9 +13768,15 @@ async function testLongBadgesWrap() {
   }
   suite("kyc.css — a badge that names an office wraps inside its line on a phone", () => {
     check("a badge is one line unless a rule says otherwise", !!base && base.ws === "nowrap", JSON.stringify(base));
-    check("the data holds members with such a badge, drawn in a race's head, a card and the dialog",
-      carriers.length > 0 && ["held-by", "card", "dialog"].every((at) => found.some((f) => f.at === at)),
-      carriers.length + " members; " + [...new Set(found.map((f) => f.at))].join(" "));
+    // A race's head and a card draw it while its member sits: in January
+    // the members who ran for another office have left, and only their
+    // dialog says so (the January rehearsal drew it there alone).
+    const sits = carriers.slice(0, 3).some((p) => index.window.KYC.seated(p));
+    check("the data holds members with such a badge, drawn in the dialog, and in a race's head and a card while one sits",
+      carriers.length > 0 && found.some((f) => f.at === "dialog") &&
+        (!sits || ["held-by", "card"].every((at) => found.some((f) => f.at === at))),
+      carriers.length + " members" + (sits ? ", one sitting" : ", none sitting") + "; " +
+        [...new Set(found.map((f) => f.at))].join(" "));
     const stuck = found.filter((f) => !wraps(f.el));
     check("wherever one is drawn, a rule lets it wrap, no wider than its line",
       found.length > 0 && stuck.length === 0 && !found.some((f) => f.at === "other"),
