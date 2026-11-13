@@ -403,8 +403,6 @@ def second_tie(profile, rows):
     (P856) that is their campaign's site, or an English article that is the
     one their ballot page links (rule 33) - or ``None`` and why not. A year
     that disagrees is a refusal whatever else the item says."""
-    from .pages import state_name
-
     births = {(r.get("birth") or "")[:4] for r in rows if r.get("birth")}
     born = str(profile.get("birthdate") or "")[:4]
     if births and born.isdigit():
@@ -537,7 +535,7 @@ def held_seats(profile, history):
     """``{(state, chamber)}`` the person's corroborated record of offices
     (``history``, rule 69) says they hold now in their own state's
     legislature."""
-    from .pages import state_name
+    from .pages import short_name
 
     entry = ((history or {}).get("people") or {}).get(profile.get("id")) or {}
     linked = entry.get("asked") or entry.get("wikipedia")
@@ -547,7 +545,7 @@ def held_seats(profile, history):
     out = set()
     for office in entry.get("offices") or []:
         label = office.get("office") or ""
-        if (office.get("open") and office.get("where") == state_name(state)
+        if (office.get("open") and office.get("where") == short_name(state)
                 and office.get("agree") in ("exact", "year-off")
                 and re.search(r"legislat|senate|house|assembly|delegates", label, re.I)
                 and "United States" not in label):

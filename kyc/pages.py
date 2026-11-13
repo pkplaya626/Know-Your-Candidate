@@ -1607,8 +1607,11 @@ def render_counties_index(host, census=None, dates=None):
     )
 
 
-def _possessive(name):
-    return name + ("'" if name.endswith("Islands") else "'s")
+def _possessive(name, mark="'"):
+    """*name*'s, with the apostrophe its sentence uses (*mark*: page text
+    takes "’") and no second s after "Islands" (rule 75). One rule for
+    every writer; ``KYC.possessive`` is the page code's."""
+    return name + (mark if name.endswith("Islands") else mark + "s")
 
 
 def sentence_place(code):

@@ -1032,7 +1032,7 @@
           '<a class="state-jump" href="#state-government">Territorial government</a>' +
           listsWords(list, named) + "). " +
           governorWhere(code, "The candidates for governor are under ")
-        : list === "" ? KYC.escapeHtml(name) + (past ? " did not elect" : " does not elect") +
+        : list === "" ? KYC.escapeHtml(KYC.placeStart(code, name)) + (past ? " did not elect" : " does not elect") +
           " its governor in 2026. " : "") +
         KYC.escapeHtml(KYC.ballot.territoryUnlisted.replace("may also hold", hold));
     }

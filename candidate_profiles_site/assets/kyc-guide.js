@@ -366,7 +366,11 @@
     Array.prototype.forEach.call(doc.querySelectorAll("a[data-voting-link]"), function (a) {
       if (known) {
         a.href = votingUrl(code);
-        a.title = known.textContent.replace(/\s*\([A-Z]{2}\)$/, "") + "'s official voting pages";
+        // The place as a sentence names it (rule 75): "The U.S. Virgin
+        // Islands' official voting pages", never "Islands's". This page holds
+        // no build figures, so the option's own text is the name.
+        a.title = KYC.possessive(KYC.placeStart(code, known.textContent.replace(/\s*\([A-Z]{2}\)$/, ""))) +
+          " official voting pages";
       }
     });
     var form = doc.querySelector("form[data-voting-picker]");

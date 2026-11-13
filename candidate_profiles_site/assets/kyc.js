@@ -2916,7 +2916,7 @@
     var names = [item.name].concat(item.aliases || []).filter(Boolean).map(String);
     var office = [];
     OFFICE_FIELDS.forEach(function (field) { if (item[field]) office.push(String(item[field])); });
-    if (item.state && item.state !== "N/A") office.push(stateName(item.state));
+    if (item.state && item.state !== "N/A") office.push(matchName(item.state));
     // The party's name as the chip says it: "Democratic" found 26 people
     // and the Democratic chip 541, because the FEC's word is "Democrat".
     if (item.party === "Democrat") office.push("Democratic");
@@ -3564,6 +3564,17 @@
     // ballot and the lookup name a state from the lookup's index).
     return PLACE_WORDS[code] || name || stateName(code);
   }
+  /* The name a typed word is matched against: what readers type and
+   * sources write, without the page's "U.S." (rule 5). In a profile's
+   * text "U.S." folds to the words "u" and "s", and put every Virgin
+   * Islands profile in the first tier for "U.S. House", two of them
+   * people the query did not match at all before the page took that name
+   * (the second read of PR #246). The name typed whole, "USVI" and the
+   * rest are read as the place itself (stateNamed). */
+  function matchName(code) {
+    return stateName(code).replace(/^U\.S\. /, "");
+  }
+
   /** The same where it opens a sentence: "The District of Columbia". */
   function placeStart(code, name) {
     var words = placeWords(code, name);
@@ -4526,6 +4537,7 @@
     stateName: stateName,
     placeWords: placeWords,
     placeStart: placeStart,
+    matchName: matchName,
     senateBases: senateBases,
     seatUpYear: seatUpYear,
     stateUrl: stateUrl,

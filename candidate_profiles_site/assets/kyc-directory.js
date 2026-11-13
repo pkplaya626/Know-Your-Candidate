@@ -1059,7 +1059,7 @@
   function governorText(query, code, words) {
     if (!query) return true;
     if (query.terms === undefined) return query.state === code;
-    var text = " " + KYC.searchFold([KYC.stateName(code), "governor"].concat(words).join(" · "));
+    var text = " " + KYC.searchFold([KYC.matchName(code), "governor"].concat(words).join(" · "));
     return query.terms.every(function (t) { return t.test(text); });
   }
 
@@ -1381,13 +1381,11 @@
 
   /* The seat in the words the place gives it (rule 75): Puerto Rico's
    * Resident Commissioner, a delegate, never a territory's "Representative". */
-  var WITH_THE = { DC: true, MP: true, VI: true };
-
   function seatWords(row) {
-    var name = KYC.stateName(row.state);
-    if (row.chamber === "Senate") return "U.S. Senator from " + name;
+    if (row.chamber === "Senate") return "U.S. Senator from " + KYC.stateName(row.state);
     var title = ((KYC.meta().states || {})[row.state] || {}).delegateTitle;
-    if (title) return title + " from " + (WITH_THE[row.state] ? "the " : "") + name;
+    // The place as a sentence names it: one table, kyc.js's (rule 12).
+    if (title) return title + " from " + KYC.placeWords(row.state);
     return "U.S. Representative, " + row.state + "-" + (row.district ? row.district : "AL");
   }
 

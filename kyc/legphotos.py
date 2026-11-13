@@ -217,7 +217,6 @@ def names_in_full(text, name):
 def legislature_name(code):
     """"Montana Legislature", "Connecticut General Assembly" (rule 75)."""
     from .government_maps import LEGISLATURE_NAME
-    from .pages import state_name
     from .pages import short_name
     return f"{short_name(code)} {LEGISLATURE_NAME.get(code, 'Legislature')}"   # the body's own name
 

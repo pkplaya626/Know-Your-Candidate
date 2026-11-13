@@ -446,7 +446,6 @@ def names_holder(name, text, office="ag", code=None):
     first name is not a match: that is a person to look at, and NAME_FORMS
     to fill in. An 80-character window confirmed predecessors and governors
     standing beside the attorney general."""
-    from .pages import state_name
     words = [w for w in _fold(re.sub(r'"[^"]*"', " ", name)).split() if w not in _SUFFIX]
     if len(words) < 2:
         return False
@@ -774,8 +773,6 @@ def likeness_candidates(name, code, pages):
     first name before the surname (rule 56): "Solicitor General Jessica
     Ford headshot" is not the attorney general's face. An evidenced
     ``NAME_FORMS`` short form counts as the holder's first name."""
-    from .pages import state_name
-
     words = [w for w in _fold(name).split() if w not in _SUFFIX]
     if len(words) < 2:
         return []
@@ -1248,7 +1245,6 @@ def fetch_attorneys_general(pause=0.5, previous=None, previous_day=None):
     concludes nothing keeps: :func:`kept_confirmation`; *previous_day* is
     that cache's ``fetched`` day)."""
     from .government_maps import STATES
-    from .pages import state_name
     raga, daga = parse_raga(_get(RAGA_URL)), parse_daga(_get(DAGA_URL))
     texts, read = {}, {}
     for code in STATES:

@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3226 tests, no dependencies
-npm install && npm test                       # 4774 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3239 tests, no dependencies
+npm install && npm test                       # 4828 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2008,7 +2008,25 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `KYC.placeWords` (`placeStart` where they open a sentence), and a
     possessive is `pages._possessive` or `KYC.possessive`, which take the
     sentence's own apostrophe and give "Islands" no second s. A title a
-    source gives in quotation marks is the source's. Where a city's name join
+    source gives in quotation marks is the source's. Its second read found
+    the sweep unfinished and unheld: five of the search's answers, a race's
+    loading line, a link's title, a map's hover and three of the lookup's
+    sentences still said "Islands’s" or the bare name ("The federal court of
+    appeals for U.S. Virgin Islands", "District of Columbia has no district
+    of that name"); thirteen more could go back with every check passing,
+    since the suite asked nine queries and read no title or label; and two
+    more copies of the article's table and two of the possessive's rule
+    stood beside the ones named here. There is one of each now
+    (`voting_dates.PLACES` through `sentence_place`, `PLACE_WORDS` in
+    kyc.js), and the checks ask every such place of the data, in every
+    answer, hover and label (`testPlaceSentences`). "The state legislature’s
+    chamber" is said only where this site holds the legislature. A word
+    typed in the search is matched against the name sources write
+    (`KYC.matchName`): in a profile's text the page's "U.S." folds to the
+    words "u" and "s", and put every Virgin Islands profile in the first
+    tier for "U.S. House" (rule 5). And a reader of sources never asks for
+    the page's name: each of the six call sites could go back to it with
+    both suites passing (`TestSourcesAreReadByTheNameSourcesWrite`). Where a city's name join
     cannot work, a place is joined to a government only through the
     listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
     the government `county_areas` names, never to a town it replaced.

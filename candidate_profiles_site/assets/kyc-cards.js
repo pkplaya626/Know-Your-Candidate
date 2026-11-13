@@ -1379,7 +1379,7 @@
       return;
     }
     target.innerHTML = '<p class="race-note" role="status">Loading ' +
-      KYC.escapeHtml(KYC.stateName(entry.state)) + "&rsquo;s campaigns&hellip;</p>";
+      KYC.escapeHtml(KYC.possessive(KYC.placeWords(entry.state), "’")) + " campaigns&hellip;</p>";
     KYC.loadPeople(entry.state).then(function (ok) {
       if (ok) {
         target.innerHTML = entry.body();

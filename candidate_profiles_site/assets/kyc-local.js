@@ -388,10 +388,10 @@
     // election office's pages.
     var where = LM.sampleLine(code) || ("Its election office's pages are under " + '<a href="' +
       KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' +
-      KYC.escapeHtml(KYC.findRep ? KYC.findRep.nameOf(code) : code) + "</a>.");
+      KYC.escapeHtml(KYC.findRep ? KYC.findRep.placeWords(code) : KYC.placeWords(code)) + "</a>.");
     var body = !LM.index() ? LM.missingLine()
       : LM.covered(fips) ? LM.countyBody(fips, { level: 4 })
-      : LM.uncoveredLine(name, where);
+      : LM.uncoveredLine(name, where, code);
     return '<section class="local-questions" id="local-questions">' +
       '<h3 class="local-group">Local questions, Nov 3, 2026 ballot</h3>' + body + "</section>";
   }

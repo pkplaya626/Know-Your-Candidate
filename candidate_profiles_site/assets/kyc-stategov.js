@@ -227,7 +227,7 @@
    *  panel and the overlay said "does not elect" beside "did not elect"
    *  (the review of PR #229). One sentence for both (rule 12). */
   function noGovernorRace(code) {
-    return KYC.stateName(code) + (after() ? " did not elect" : " does not elect") +
+    return KYC.placeStart(code) + (after() ? " did not elect" : " does not elect") +
       " its governor in 2026.";
   }
 
@@ -945,7 +945,8 @@
       if (off.notMember) {
         return { fill: FILL.vacant, text: name + ": the " + word + " is not confirmed (NASS's listing only)" };
       }
-      if (off.none) return { fill: FILL.absent, text: name + " has no " + word };
+      // A sentence, where its neighbours are labels (rule 75).
+      if (off.none) return { fill: FILL.absent, text: KYC.placeStart(code) + " has no " + word };
       return { fill: FILL[off.partyKey] || FILL.I,
                text: name + ": " + off.title + " " + off.name + " (" + partyName(off.party) + ")" };
     }

@@ -445,7 +445,8 @@
    *  members of Congress", the ballot page's "The races and candidates"). */
   function peopleFailed(failed, what) {
     return '<p class="findrep-note">' + KYC.escapeHtml(KYC.peopleProblem() ||
-      (what || "The members of Congress") + " for " + failed.map(nameOf).join(" and ") +
+      (what || "The members of Congress") + " for " +
+      failed.map(function (code) { return placeWords(code); }).join(" and ") +
       " did not load. Check your connection and try again.") + "</p>";
   }
 

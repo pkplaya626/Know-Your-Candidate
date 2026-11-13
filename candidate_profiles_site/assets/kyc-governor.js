@@ -633,8 +633,7 @@
     return KYC.placeWords(code);       // one table, in kyc.js (rule 12)
   }
   function placeOwn(code) {
-    var w = placeWords(code);
-    return w + (/Islands$/.test(w) ? "’" : "’s");
+    return KYC.possessive(placeWords(code), "’");     // one rule, in kyc.js (rule 12)
   }
 
   function renderElsewhere(id, other) {

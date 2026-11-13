@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (4774 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (4828 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2930,8 +2930,8 @@ per court show them (below).
 | Every judge's service on every court: appointed by, nominated, confirmed (and the vote), commissioned, senior status, chief judge | The Federal Judicial Center's Biographical Directory of Article III Federal Judges, exported nightly | The FJC is the judiciary's own research agency (28 U.S.C. 620); its `nid` is each judge's id and builds the link to their FJC page |
 | Birth, education, career | The same directory | The career is the FJC's own words, quoted, never paraphrased |
 | Who sits on the Supreme Court | supremecourt.gov's list of the justices (rule 57) | The directory's open Supreme Court rows include two retired justices, who are not members: read naively it seats eleven |
-| The courts, and the circuits | `kyc/federal_courts.py`, from 28 U.S.C. 41 and the directory's court names | 13 courts of appeals, 91 Article III district courts, the Court of International Trade; Guam's, the Northern Mariana Islands' and the Virgin Islands' courts are Article IV courts the directory does not cover |
-| The territorial courts' judges | Each court's own website (`kyc/territorial_courts.py`): Guam's "Judicial Officers" page, the Northern Mariana Islands' banner, each Virgin Islands judge's own page | A recipe per court, as for the state high courts (rule 57): district judges only, never more than the statute's seats (48 U.S.C. 1424b, 1614, 1821), at most one chief; a page not read keeps the last roster, and one never read says so - never "none". Shown by name and title, with nothing to open |
+| The courts, and the circuits | `kyc/federal_courts.py`, from 28 U.S.C. 41 and the directory's court names | 13 courts of appeals, 91 Article III district courts, the Court of International Trade; Guam's, the Northern Mariana Islands' and the U.S. Virgin Islands' courts are Article IV courts the directory does not cover |
+| The territorial courts' judges | Each court's own website (`kyc/territorial_courts.py`): Guam's "Judicial Officers" page, the Northern Mariana Islands' banner, each U.S. Virgin Islands judge's own page | A recipe per court, as for the state high courts (rule 57): district judges only, never more than the statute's seats (48 U.S.C. 1424b, 1614, 1821), at most one chief; a page not read keeps the last roster, and one never read says so - never "none". Shown by name and title, with nothing to open |
 | A judge's Wikipedia article, Wikidata item and portrait | The FJC's own page for the judge's `nid`, whose canonical address is the judge's slug; the Wikidata item carrying that slug as P2736 (`kyc/judge_links.py`) | Two ids, never a name. Two items for one slug, a label or article title without the surname, an item whose year of birth is not the directory's (or that gives none), two images or two articles: nothing. A portrait is a JPEG, PNG or WebP no more than a fifth wider than tall, not in `overrides.NOT_A_PORTRAIT`, drawn from Wikimedia's sizes of that one file (rule 42) and credited under the judge's name with its author and licence as the file's Commons page records them (`by`, `licence`, `licenceUrl`, read with the file's size); a file with no recorded licence, or a non-free one, is not shown, and the build fails a Commons portrait without a licence (`judge-portrait-licence-missing`). Read by `judiciary`; a failure keeps the last links |
 | Each court's website | uscourts.gov's list of court websites (`kyc/court_info.py`) | Joined to the court ids by the circuit, state and district the list names, never by host name (`ca-n` is `cand.uscourts.gov`); every host the judiciary's own; each address fetched once |
 | Which district court, and which division, covers each county | 28 U.S.C. 81-131 as govinfo publishes it (`tools/fetch_court_districts.py`, `kyc/court_districts.py`) into `data/court_districts.json`, with the amendments since the edition | The statute's names joined to the Census counties by name within the state; every county of a state of several districts placed exactly once or the build fails; a Code spelling or typo is an evidenced alias; Virginia's independent cities placed by their neighbours only where all agree |
@@ -3197,7 +3197,7 @@ says changes; `verify` names a stale one. An official is never a profile:
 ids are `x-<name>` for an executive officer and `fjc-<nid>` for a judge, and
 nobody on these pages is counted among the members of Congress. The FJC's
 directory lists judges, not judgeships, so no vacancy is ever counted from
-it. Guam's, the Northern Mariana Islands' and the Virgin Islands' courts say
+it. Guam's, the Northern Mariana Islands' and the U.S. Virgin Islands' courts say
 why the directory does not list their judges, and name them as each court's
 own site does.
 
@@ -3904,7 +3904,7 @@ the sidebar counts moved into the build metadata.
 - **Primary results depend on Wikipedia's state pages.** They are the only
   free, structured, current source; the resolver reads only the results
   tables and infobox and treats an unmarked table as undecided. Pages for the
-  District of Columbia and the Virgin Islands delegate races do not exist, so
+  District of Columbia and the U.S. Virgin Islands delegate races do not exist, so
   those two races are never settled. The FEC field also lacks a handful of
   incumbents who have not amended their statement of candidacy for 2026;
   those members are matched through their roster name instead.

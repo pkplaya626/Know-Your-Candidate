@@ -1388,7 +1388,7 @@
       return '<section class="local-county-block" data-county="' + KYC.escapeAttr(fips) + '">' +
         '<h5 class="local-county-name">' + esc(name) + esc(share) + "</h5>" +
         (LM.covered(fips) ? LM.countyBody(fips, { level: 6, skipPlaces: drawn })
-          : LM.uncoveredLine(name, where)) +
+          : LM.uncoveredLine(name, where, code)) +
         "</section>";
     }).join("");
     return {

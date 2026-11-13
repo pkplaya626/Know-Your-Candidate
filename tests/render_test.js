@@ -10978,7 +10978,9 @@ async function testCertifiedBallots() {
   });
   const vi = await buildPage("states/vi.html");
   suite("states/vi.html — a plural name's possessive", () => {
-    check("never Virgin Islands's", !/Islands[’']s/.test(vi.D.body.textContent));
+    // In what a reader sees and hears: a title or an aria-label too (the
+    // glance's label read "U.S. Virgin Islands’s government at a glance").
+    check("never Virgin Islands's", !/Islands[’']s/.test(wordsOf(vi.D.body)));
   });
   // A sentence names these places with "the" (rule 75): the races heading
   // read "2026 races for Congress in Virgin Islands", in D.C. "in District of
@@ -10989,11 +10991,11 @@ async function testCertifiedBallots() {
       const h = page.D.querySelector("#races .state-heading");
       return h ? h.textContent.replace(/\s+/g, " ") : "";
     };
-    check("the U.S. Virgin Islands", !heading(vi) || /in the U\.S\. Virgin Islands$/.test(heading(vi)), heading(vi));
-    check("the Northern Mariana Islands", !heading(mp) || /in the Northern Mariana Islands$/.test(heading(mp)), heading(mp));
-    check("the District of Columbia", !heading(dcPage) || /in the District of Columbia$/.test(heading(dcPage)),
-      heading(dcPage));
-    check("at least one of them has races to head", !!(heading(vi) || heading(mp) || heading(dcPage)));
+    // Each has a delegate's race in every cycle, so each has the heading:
+    // a page that lost it fails here, never passes on nothing.
+    check("the U.S. Virgin Islands", /in the U\.S\. Virgin Islands$/.test(heading(vi)), heading(vi));
+    check("the Northern Mariana Islands", /in the Northern Mariana Islands$/.test(heading(mp)), heading(mp));
+    check("the District of Columbia", /in the District of Columbia$/.test(heading(dcPage)), heading(dcPage));
     // A title in quotation marks is a source's own, not this site's sentence.
     // What a reader sees: a data file a page loads is a script in its body.
     const seen = (page) => {
@@ -12995,6 +12997,275 @@ function loadAnswers(window) {
   });
 }
 
+/* The places a sentence names with "the", and a place whose name ends
+ * "Islands": asked of the data, never typed. */
+function articlePlaces(KYC) {
+  return Object.keys(KYC.meta().states || {}).filter((c) => KYC.placeWords(c) !== KYC.stateName(c));
+}
+
+/* What a reader sees or hears of a page: its text, and every title and
+ * aria-label, with the data files left out, and a source's own words: a
+ * quoted title, a question's official text. */
+function wordsOf(root) {
+  const copy = root.cloneNode(true);
+  copy.querySelectorAll("script, style, template, blockquote, q").forEach((node) => node.remove());
+  const said = [copy.textContent];
+  copy.querySelectorAll("[title], [aria-label]").forEach((node) => {
+    said.push(node.getAttribute("title") || "", node.getAttribute("aria-label") || "");
+  });
+  return said.join(" \n ").replace(/[ \t]+/g, " ").replace(/“[^”]*”/g, "“”");
+}
+
+/* Every way a sentence can name such a place wrongly: bare after a
+ * preposition or a conjunction, bare before a verb where it opens a
+ * sentence, and a second s after "Islands". The name of a body ("District
+ * Court of the Virgin Islands", "Council of the District of Columbia") is
+ * that body's. */
+function badPlaceWords(KYC, text, whose) {
+  const names = articlePlaces(KYC).map((c) => KYC.stateName(c).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (!names.length) return ["no place takes an article: nothing was checked"];
+  const any = "(?:" + names.join("|") + ")";
+  const found = [];
+  const add = (re) => { (text.match(re) || []).forEach((m) => found.push(m.trim())); };
+  add(/.{0,30}Islands[’']s.{0,20}/g);
+  add(new RegExp(".{0,30}\\b(?:in|of|for|from|on|about|and|or) " + any + "\\b.{0,20}", "g"));
+  add(new RegExp("(?<![Tt]he )" + any + " (?:has|is|does|did|elects|holds|was)\\b.{0,30}", "g"));
+  // *whose*: where every possessive is a sentence's (the search's answers;
+  // a page's own headline keeps its name: "U.S. Virgin Islands' seat").
+  if (whose) add(new RegExp(".{0,12}(?<![Tt]he )" + any + "[’']s?(?= [a-z]).{0,24}", "g"));
+  return found;
+}
+
+/* A place a sentence names with "the" (rule 75), wherever the page code
+ * builds the sentence. The second read of PR #246 found the sweep had left
+ * five of the search's answers, a loading line, a link's title, a map's
+ * hover and three of the lookup's sentences ("Islands’s", "for U.S. Virgin
+ * Islands", "District of Columbia has no district of that name"), and that
+ * thirteen more could go back with every check passing: the suite asked
+ * nine queries and read no title or label. Every such place is asked, from
+ * the data. */
+async function testPlaceSentences() {
+  // ---- the search's answers and the grid's line, for every such place
+  const { window, D } = await buildPage("index.html");
+  await settle(50);
+  const KYC = window.KYC;
+  loadAnswers(window);
+  const box = () => D.getElementById("searchAnswers");
+  const label = () => D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+  const ask = async (q) => { typeInto(window, D, q); await settle(200); };
+  const places = articlePlaces(KYC);
+  const dotted = (words) => words.replace(/[.]/g, "\\.");
+  const said = {};
+  for (const code of places) {
+    const name = KYC.stateName(code);
+    for (const q of [name + " delegation", name + " attorney general", name + " governor",
+      name + " legislature", name + " counties", "Kent County, " + name, name + " courts",
+      name + " federal courts", name + " supreme court", "Eastern District of " + name,
+      name + " question 1", name + " proposition 99", name + " ballot measures", name + " mayor",
+      name + " circuit court", name + " court of appeals", "Southern District of the " + name,
+      name + " senate", name + " house", name + " tribes",
+      code + "-3", name + " 3rd district"]) {
+      await ask(q);
+      said[q] = label().replace(/“[^”]*”/g, "“”") + " \n " + wordsOf(box());
+    }
+  }
+  await ask("Texas House");
+  const texasHouse = wordsOf(box());
+  suite("search — every answer about a place a sentence names with 'the' (rule 75)", () => {
+    check("there are such places, and the checks know them from the data",
+      places.indexOf("DC") !== -1 && places.some((c) => /Islands$/.test(KYC.stateName(c))), places.join(" "));
+    const wrong = Object.keys(said).map((q) => [q, badPlaceWords(KYC, said[q], true)]).filter((pair) => pair[1].length);
+    check("no answer, label, hover or note names one bare in a sentence, or writes 'Islands’s'",
+      wrong.length === 0, wrong.map((pair) => pair[0] + ": " + pair[1].join(" / ")).join(" || "));
+    // The sentences this is about are drawn: a check of answers that never
+    // appear checks nothing.
+    const drawn = (q, re) => re.test(said[q] || "");
+    check("the seat note opens with the place as a sentence does",
+      places.every((c) => drawn(c + "-3", new RegExp("\\b" + dotted(KYC.placeStart(c)) +
+        " has one House seat, elected at large"))), places.map((c) => c + ": " + (said[c + "-3"] || "").slice(0, 160)).join(" | "));
+    check("the federal courts' block is headed for the place",
+      places.every((c) => drawn(KYC.stateName(c) + " federal courts",
+        new RegExp("Federal courts for " + dotted(KYC.placeWords(c))))),
+      places.map((c) => c + ": " + (said[KYC.stateName(c) + " federal courts"] || "").slice(0, 200)).join(" | "));
+    // Where the note is drawn: "District of Columbia circuit court" is the
+    // D.C. Circuit itself, and gets its court's row instead.
+    const appeals = places.filter((c) => drawn(KYC.stateName(c) + " circuit court", /The federal court of appeals for /));
+    check("its court of appeals is 'for the ...'",
+      appeals.length > 0 && appeals.every((c) => drawn(KYC.stateName(c) + " circuit court",
+        new RegExp("The federal court of appeals for " + dotted(KYC.placeWords(c)) + "\\."))),
+      places.map((c) => c + ": " + (said[KYC.stateName(c) + " circuit court"] || "").slice(0, 200)).join(" | "));
+    check("a district it has not opens the sentence with its article",
+      places.every((c) => drawn("Southern District of the " + KYC.stateName(c),
+        new RegExp(dotted(KYC.placeStart(c)) + " has no (?:district of that name|federal district)"))),
+      places.map((c) => c + ": " + (said["Southern District of the " + KYC.stateName(c)] || "").slice(0, 200)).join(" | "));
+    check("its ballot questions are its own, with no second s",
+      places.every((c) => drawn(KYC.stateName(c) + " ballot measures",
+        new RegExp(dotted(KYC.possessive(KYC.placeStart(c), "’")) + " ballot questions"))),
+      places.map((c) => c + ": " + (said[KYC.stateName(c) + " ballot measures"] || "").slice(0, 200)).join(" | "));
+    // "The state legislature’s chamber" is said where this site holds the
+    // state's legislature, never over "has no page for ... legislature".
+    const legs = window.kycSearch.legislatures || {};
+    check("'<place> senate' is told of a state legislature's chamber only where the site holds one",
+      places.every((c) => !!legs[c] || !/state legislature’s chamber/.test(said[KYC.stateName(c) + " senate"] +
+        said[KYC.stateName(c) + " house"])),
+      places.map((c) => c + ": " + (said[KYC.stateName(c) + " senate"] || "").slice(0, 200)).join(" | "));
+    check("and Texas is: 'Texas’s seats in the U.S. House are the cards below'",
+      /The state legislature’s chamber\. Texas’s seats in the U\.S\. House are the cards below\./.test(texasHouse),
+      texasHouse.slice(0, 300));
+  });
+
+  // ---- a typed word is matched against the name sources write (rule 5)
+  suite("search — the page's 'U.S.' is no word of a profile's text", () => {
+    const someone = (state) => ({ id: "ZZ1", name: "Pat Example", state, chamber: "House",
+      officeLabel: "House • " + state + "-AL", party: "Democrat" });
+    check("the name a word is matched against has no 'U.S.'", places.concat(["TX"]).every((c) =>
+      !/^U\.S\./.test(KYC.matchName(c)) && KYC.stateName(c).slice(-KYC.matchName(c).length) === KYC.matchName(c)),
+    places.map((c) => KYC.matchName(c)).join(" | "));
+    const withUS = places.filter((c) => KYC.matchName(c) !== KYC.stateName(c));
+    check("so 'U.S.' typed finds nobody by their place's name alone",
+      withUS.length > 0 && withUS.every((c) => KYC.queryScore(someone(c), "U.S.") === -1 &&
+        KYC.queryScore(someone(c), "U.S. House") === KYC.queryScore(someone("GU"), "U.S. House")),
+      withUS.map((c) => c + "=" + KYC.queryScore(someone(c), "U.S.") + "/" + KYC.queryScore(someone(c), "U.S. House")).join(" "));
+    check("and the place's words still find its people",
+      withUS.every((c) => KYC.queryScore(someone(c), KYC.matchName(c) + " example") === 2),
+      withUS.map((c) => c + "=" + KYC.queryScore(someone(c), KYC.matchName(c) + " example")).join(" "));
+  });
+
+  // ---- the map's state views: a hover that is a sentence
+  suite("the map's state views — a hover that is a sentence names the place as one does (rule 75)", () => {
+    const texts = [];
+    const wrong = [];
+    places.forEach((c) => KYC.stategov.modes.forEach((mode) => {
+      const text = KYC.stategov.look(c, mode).text;
+      texts.push(text);
+      badPlaceWords(KYC, text).forEach((m) => wrong.push(c + " " + mode + ": " + m));
+    }));
+    check("every view of each such place has its words", texts.length === places.length * KYC.stategov.modes.length &&
+      texts.every(Boolean), String(texts.length));
+    check("none names it bare before a verb or after a preposition", wrong.length === 0, wrong.join(" | "));
+  });
+
+  // ---- the Governors view's line
+  for (const code of places) {
+    const gov = await buildPage("index.html", { hash: "#/?chamber=governors&state=" + code });
+    await settle(300);
+    const line = gov.D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+    const typed = await buildPage("index.html", { hash: "#/?chamber=governors&q=" + encodeURIComponent(KYC.stateName(code)) });
+    await settle(300);
+    const typedLine = typed.D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+    suite("the grid — the Governors view names " + code + " as a sentence does (rule 75)", () => {
+      check("under the state filter", line.indexOf(" in " + KYC.placeWords(code)) !== -1 &&
+        badPlaceWords(gov.window.KYC, line).length === 0, line);
+      check("and for a typed place", typedLine.indexOf(" in " + KYC.placeWords(code)) !== -1 &&
+        badPlaceWords(typed.window.KYC, typedLine).length === 0, typedLine);
+    });
+  }
+
+  // ---- a race block's and a profile's link to the place's page
+  for (const code of places) {
+    const page = await buildPage("index.html", { hash: "#/?view=race&state=" + code });
+    await settle(300);
+    const K = page.window.KYC;
+    const links = [...page.D.querySelectorAll(".race-state-link")];
+    const person = [...page.D.querySelectorAll("#results .card[data-id]")][0];
+    if (person) K.profile.open(person.getAttribute("data-id"));
+    await until(() => !page.D.getElementById("profileModalStateLink").hidden, 4000);
+    const own = page.D.getElementById("profileModalStateLink");
+    suite("the grid — links to " + code + "'s page say what they open in a sentence's words (rule 75)", () => {
+      check("a race's link", links.length > 0 && links.every((a) =>
+        a.getAttribute("title") === "Everything about " + K.placeWords(code)),
+      links.map((a) => a.getAttribute("title")).join(" | "));
+      check("a profile's link", !!person && !own.hidden &&
+        own.getAttribute("title").indexOf("Everything about " + K.placeWords(code) + ":") === 0,
+      own.getAttribute("title"));
+    });
+  }
+
+  // ---- a race's money while the place's file loads
+  const loadingLines = {};
+  for (const code of places) {
+    const slim = await buildPage("index.html", { people: "index", hash: "#/?state=" + code + "&view=race" });
+    await settle(200);
+    const money = slim.D.querySelector("#results .race-money[data-fold]");
+    if (!money) continue;
+    openFold(slim.window, money);
+    loadingLines[code] = money.querySelector(".fold-body").textContent;
+  }
+  suite("the grid — a race's money says whose campaigns it is loading (rule 75)", () => {
+    check("at least one such place has a race's money to load", Object.keys(loadingLines).length > 0);
+    Object.keys(loadingLines).forEach((code) => {
+      const want = "Loading " + KYC.possessive(KYC.placeWords(code), "’") + " campaigns";
+      check("'" + want + "…'", loadingLines[code].indexOf(want) === 0, loadingLines[code]);
+    });
+  });
+
+  // ---- the state pages: the glance's label, and every sentence, hover and label
+  for (const code of places) {
+    const page = await buildPage("states/" + code.toLowerCase() + ".html");
+    const K = page.window.KYC;
+    const glance = page.D.querySelector(".state-glance");
+    suite("states/" + code.toLowerCase() + ".html — its own name in every sentence, hover and label (rule 75)", () => {
+      check("the glance's label takes no second s after 'Islands'",
+        !glance || glance.getAttribute("aria-label") === K.possessive(K.stateName(code), "’") + " government at a glance",
+        glance && glance.getAttribute("aria-label"));
+      const wrong = badPlaceWords(K, wordsOf(page.D.body));
+      check("nothing a reader sees or hears names it bare in a sentence", wrong.length === 0, wrong.join(" | "));
+    });
+  }
+
+  // ---- the guide's link to the reader's own voting pages
+  for (const code of places) {
+    const guide = await buildPage("government/elections.html", {
+      setup: (w) => w.localStorage.setItem("kycState", code) });
+    const link = guide.D.querySelector("a[data-voting-link]");
+    const title = (link && link.getAttribute("title")) || "";
+    suite("government/elections.html — the voting link's title for " + code + " (rule 75)", () => {
+      check("opens with the place as a sentence does, with no second s",
+        title === KYC.possessive(KYC.placeStart(code)) + " official voting pages", title);
+    });
+  }
+
+  // ---- Your ballot: the questions or the people did not load; a county that is the place
+  const zips = { DC: "20001", MP: "96950", VI: "00802" };
+  for (const code of places.filter((c) => zips[c])) {
+    const page = await ballotFor("#/?zip=" + zips[code], { block: ["data/measures.js"] });
+    await settle(100);
+    const K = page.window.KYC;
+    const failed = page.out.querySelector(".measures-failed");
+    const nobody = await ballotFor("#/?zip=" + zips[code], {
+      refuse: new RegExp("/data/people/" + code.toLowerCase() + "\\.js$") });
+    const uncovered = [...page.out.querySelectorAll(".local-uncovered")].map((p) => p.textContent.replace(/\s+/g, " "));
+    suite("Your ballot: " + zips[code] + " — what did not load, and the page, are named as a sentence names them (rule 75)", () => {
+      check("the questions' line is drawn", !!failed, page.text.slice(0, 200));
+      check("'see " + K.possessive(K.placeWords(code)) + " page'",
+        !!failed && failed.textContent.replace(/\s+/g, " ").indexOf(" see " + K.possessive(K.placeWords(code)) + " page") !== -1,
+        failed && failed.textContent.replace(/\s+/g, " "));
+      check("'The races and candidates for " + K.placeWords(code) + " did not load'",
+        nobody.text.replace(/\s+/g, " ").indexOf("The races and candidates for " + K.placeWords(code) + " did not load") !== -1,
+        nobody.text.slice(0, 200));
+      check("a county area that is the place itself opens its sentence with the article",
+        uncovered.every((line) => badPlaceWords(K, line).length === 0), uncovered.join(" | "));
+    });
+  }
+
+  // ---- the name where a page holds no build figures
+  suite("KYC.placeWords — the name a page hands it, where no build figures are loaded", () => {
+    check("a place with no article is the name given", KYC.placeWords("ZZ", "Zedland") === "Zedland" &&
+      KYC.placeStart("ZZ", "zedland") === "Zedland", KYC.placeWords("ZZ", "Zedland"));
+    check("and the table still wins", KYC.placeWords("DC", "Zedland") === "the District of Columbia");
+  });
+
+  // ---- the federal page's own sentence
+  const federal = await buildPage("federal/index.html");
+  suite("federal/index.html — the territorial courts' sentence names the territory as its page does", () => {
+    const text = federal.D.body.textContent.replace(/\s+/g, " ");
+    const at = text.indexOf("The three territorial district courts (");
+    const sentence = at === -1 ? "" : text.slice(at, at + 120);
+    check("'Guam, the Northern Mariana Islands and the U.S. Virgin Islands'",
+      /\(Guam, the Northern Mariana Islands and the U\.S\. Virgin Islands\)/.test(sentence), sentence);
+  });
+}
+
 async function testSearchAnswers() {
   const { window, D, errors } = await buildPage("index.html");
   await settle(50);
@@ -13542,7 +13813,7 @@ async function testSearchAnswers() {
         ["Virgin Islands", "USVI", "U.S.V.I.", "British Virgin Islands"].map((q) => q + "=" + KYC.stateNamed(q)).join(" "));
       check("in a sentence it is 'the U.S. Virgin Islands', from the one table (rule 12)",
         KYC.placeWords("VI") === "the U.S. Virgin Islands" &&
-          KYC.placeWords("TX", "Texas") === "Texas" && KYC.placeWords("DC", "x") === "the District of Columbia" &&
+          KYC.placeWords("ZZ", "Zedland") === "Zedland" && KYC.placeWords("DC", "x") === "the District of Columbia" &&
           KYC.possessive(KYC.placeWords("VI")) === "the U.S. Virgin Islands'",
         KYC.placeWords("VI"));
       check("a possessive takes its sentence's apostrophe, and 'Islands' no second s",
@@ -13583,7 +13854,8 @@ async function testSearchAnswers() {
         const text = asked[q].label + " " + asked[q].answers;
         return /Islands[’']s/.test(text) ||
           /\b(?:in|of|for|from|on|about|and) (?:U\.S\. Virgin Islands|Northern Mariana Islands|District of Columbia)/
-            .test(text.replace(/(?:Court|Circuit|Attorney|Council|Mayor|Legislature|Senate|House|Government) (?:of|for) (?:the )?[A-Z]/g, "#"));
+            // A body's name is excused only as a body writes it, with its article.
+            .test(text.replace(/(?:Court|Circuit|Attorney|Council|Mayor|Legislature|Senate|House|Government) (?:of|for) the [A-Z]/g, "#"));
       });
       check("no answer or label says 'Islands’s', or names such a place bare after a preposition",
         wrong.length === 0, wrong.map((q) => q + ": " + asked[q].label + " | " + asked[q].answers.slice(0, 400)).join(" || "));
@@ -13591,6 +13863,8 @@ async function testSearchAnswers() {
         Object.keys(asked).every((q) => !/Virgin Islands’s? page/.test(asked[q].answers) ||
           /The U\.S\. Virgin Islands’ page/.test(asked[q].answers)),
         asked["Virgin Islands attorney general"].answers.slice(0, 300));
+      check("and at least one answer asked links it",
+        Object.keys(asked).some((q) => /Virgin Islands’s? page/.test(asked[q].answers)));
     });
   }
   if (missing) {
@@ -24224,6 +24498,7 @@ async function testTheJanuaryWords() {
   if (!only || only === "index.html") await testBootSurvivesAFailure();
   if (!only || only === "index.html" || only === "search") await testSearchAndFilters();
   if (!only || only === "index.html" || only === "search") await testSearchAnswers();
+  if (!only || only === "search" || only === "states" || only === "places") await testPlaceSentences();
   if (!only || only === "federal" || only === "search") await testJudgeSearch();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();

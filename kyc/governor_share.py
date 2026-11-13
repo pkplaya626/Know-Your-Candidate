@@ -355,8 +355,9 @@ def _view(found, oid):
     # The page by the name a sentence gives its place (rule 75; one helper,
     # share.page_place): "the U.S. Virgin Islands’ page", never "U.S. Virgin
     # Islands’s page", which every territory's governor's page said.
-    place = share.page_place(code)
-    whose = place + ("’" if place.endswith("Islands") else "’s")
+    from .pages import _possessive
+
+    whose = _possessive(share.page_place(code), "’")
     if found["kind"] == "governor":
         return (f"{page}#/official/{oid}", f"Open the governor’s record on {whose} page",
                 f'<a href="{_e(page)}#governor">{_e(whose)} page</a> names the governor in plain text.')

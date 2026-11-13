@@ -343,7 +343,6 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
     from . import courts as court_module
     from .government_maps import HIGH_COURTS
     from .officers import says_nothing
-    from .pages import state_name
 
     get = get or court_module._get
     problems = []

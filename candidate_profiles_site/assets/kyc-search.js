@@ -778,9 +778,12 @@
       if (legislator && /legislators?|lawmakers?/.test(p)) chamber = null;
       var out = legislatureRows(ctx, chamber);
       // "Texas House" is also Texas's seats in the U.S. House: the cards.
-      if (chamber && !legislator && /^(?:house|senate|house of representatives)$/.test(p)) {
-        out[0].note = esc("The state legislature’s chamber. " + KYC.stateName(ctx.state) +
-          "’s seats in the U.S. " + (chamber === "upper" ? "Senate" : "House") + " are the cards below.");
+      // Only where this site holds the legislature: of a territory or the
+      // District the answer above says it has no page, and "The state
+      // legislature’s chamber" spoke of nothing there (rule 75).
+      if (chamber && !legislator && legs[ctx.state] && /^(?:house|senate|house of representatives)$/.test(p)) {
+        out[0].note = esc("The state legislature’s chamber. " + PlaceOwn(ctx.state) +
+          " seats in the U.S. " + (chamber === "upper" ? "Senate" : "House") + " are the cards below.");
       }
       return out;
     }
@@ -850,8 +853,8 @@
     if (counties.length === 1) {
       where = link(counties[0].href, counties[0].name.replace(/,.*$/, "") + "’s page");
     } else if (ctx.state && (index().counties || {})[ctx.state]) {
-      where = link(root() + "counties/" + ctx.state.toLowerCase() + ".html", KYC.stateName(ctx.state) +
-        "’s county page");
+      where = link(root() + "counties/" + ctx.state.toLowerCase() + ".html", PlaceOwn(ctx.state) +
+        " county page");
     } else {
       where = link(root() + "counties/index.html", "Each state’s county page");
     }
@@ -1062,7 +1065,7 @@
           esc("how tribal nations govern themselves, and each government’s leader, by state."))])];
       }
       return [block("places", "", [row(link(tribalHref(ctx.state), "Tribal governments listed in " +
-        KYC.stateName(ctx.state)), esc("each with its leader, as the BIA’s directory lists them."))])];
+        placeWords(ctx.state)), esc("each with its leader, as the BIA’s directory lists them."))])];
     }
     if (!have("search")) { ctx.wants.push("search"); return []; }
     var all = index().tribes || {};
@@ -1283,7 +1286,7 @@
           });
           if (mine.length) {
             out.push(block("courts", "", mine.map(courtRow), { note: esc("The federal court of appeals for " +
-              KYC.stateName(ctx.state) + ". A state’s own circuit courts, where it has them, are trial " +
+              placeWords(ctx.state) + ". A state’s own circuit courts, where it has them, are trial " +
               "courts this site does not cover.") }));
           }
           return out;
@@ -1314,12 +1317,12 @@
       district = districtCourt(trim(ws), ctx.raw);
       if (!district) return out;
       if (!district.list.length) {
-        out.push(block("courts", "", [], { note: esc(KYC.stateName(district.code) + " has no federal district " +
+        out.push(block("courts", "", [], { note: esc(PlaceWords(district.code) + " has no federal district " +
           "court of its own on this site’s list.") }));
         return out;
       }
       out.push(block("courts", district.list.length > 1 ? "Federal district courts in " + placeWords(district.code) : "",
-        district.list.map(courtRow), { note: district.missed ? esc(KYC.stateName(district.code) +
+        district.list.map(courtRow), { note: district.missed ? esc(PlaceWords(district.code) +
           " has no district of that name; its federal district " + (district.list.length > 1 ? "courts are" : "court is") + ":") : "" }));
       return out;
     }
@@ -1443,8 +1446,8 @@
       if (!ctx.state && !ballotWord && !strong) return [];
       if (qs.some(function (w) { return !MEASURE_KIND[w] && w !== "state" && w !== "constitutional"; })) return [];
       if (ctx.state) {
-        return [block("measures", "", [row(link(statePage(ctx.state, "measures"), KYC.stateName(ctx.state) +
-          "’s ballot questions"), esc(stateRec.has === true
+        return [block("measures", "", [row(link(statePage(ctx.state, "measures"), PlaceOwn(ctx.state) +
+          " ballot questions"), esc(stateRec.has === true
             ? plural((stateRec.measures || []).length, "statewide question", "statewide questions") +
               " on the Nov 3, 2026 ballot."
             : "No statewide question " + (was ? "was" : "is") + " on the Nov 3, 2026 ballot; its page " +
