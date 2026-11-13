@@ -44,7 +44,7 @@
    "height": 973,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Church,%20Josh%20J_Lt.%20Governor_Eng_v2.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "1271aa8fadf719586f7c3fe2cb3bdff40729b5adb0ca5f61c74784b3d902e52e",
    "type": "image/jpeg",
    "width": 807
@@ -59,7 +59,7 @@
    "height": 599,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=24",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "395297bde1fe2d67a664def420d3f6c5f69e7e6f3cf170df14f4744951f77001",
    "type": "image/jpeg",
    "width": 399
@@ -95,7 +95,7 @@
    "height": 1329,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/CANDI,%20ENGLISH_%20Lt%20Governor_%20Eng_v2.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "3f11f3a06ce1188320a5139cedf9b72362be9bf88f049ac348affc4074bd6105",
    "type": "image/jpeg",
    "width": 1113
@@ -110,7 +110,7 @@
    "height": 1080,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/JOHNSON,%20ZAC_Lt%20Gov_Eng_v2.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "51d58cb46701d600374bb6c1e0187c52e664c2069d746dce452385d078af79e2",
    "type": "image/jpeg",
    "width": 1048
@@ -126,7 +126,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=35",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "66ea811e6896720ac02bc62b9b5c3010c9f84783b2d484f24f5b97eb2d924964",
    "sourceSha256": "d122af6046b6eed47f96087ce2655a2a0cfbb0eade51b1fcfcee3ebe63740193",
    "type": "image/png",
@@ -143,7 +143,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=32",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "84307b6eaed61e0ed24d50dc543a3bd7348fdbb76c929ccf970682e5b0a501ea",
    "sourceSha256": "b2e4071d718473886045f92064729322e5dc73d3167fd4e837026b3efb1459f5",
    "type": "image/png",
@@ -159,7 +159,7 @@
    "height": 857,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen_Eng_v1.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "8990ce16abd8652da11d2e9aed7e5a33c559f9f2bd6c42bad3e146f19a3a0da7",
    "type": "image/jpeg",
    "width": 751
@@ -175,7 +175,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=34",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "8c34d6c5670d0ded7391a04d3ff7495b02c8ca2c37a190853f6dddb57305ee91",
    "sourceSha256": "1e241eeb55ad58da4c179ed0503de827562e16f28aa8698fc648e2bf217702cd",
    "type": "image/png",
@@ -212,7 +212,7 @@
    "height": 2705,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186950/1601895",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "8e7bfe692d6d6b8a2e3e844168e28de4171fc6fb91ef0ba57351c780e66169aa",
    "type": "image/jpeg",
    "width": 2254
@@ -227,7 +227,7 @@
    "height": 540,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=16",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "9484fc6ce5c2e8fc26297d2accbc392af1602dab9fc866771d8346116e1764b2",
    "type": "image/jpeg",
    "width": 434
@@ -243,7 +243,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book11_web.pdf#page=32",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "96b6ab3f3d932a2970abc41bca9190449abd06cc859298e1c3021e7b87aafdbc",
    "sourceSha256": "f8493c2c95b33d3dee1b6ea3c0d65ff1d045dd418c8e9da01ef7c906d9728cfb",
    "type": "image/png",
@@ -259,7 +259,7 @@
    "height": 433,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186955/1601905",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "9e5a0b550a37e2db2b2d53ee883a203138ae0f1368999ca294f5d7af23f499b7",
    "type": "image/jpeg",
    "width": 361
@@ -274,7 +274,7 @@
    "height": 944,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=11",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "ac1170898cbf3a54000465fe5c9e3dcefa5a451180e33a9e96c4be775c78aa92",
    "type": "image/jpeg",
    "width": 630
@@ -289,7 +289,7 @@
    "height": 906,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/WILSON,%20BERNADETTE_Gov_Eng_v2.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "b3b2f41ae57ccc6ccb0d2d034d600dde83abea1c5bf81267d3d8f990b02e81ec",
    "type": "image/jpeg",
    "width": 759
@@ -304,7 +304,7 @@
    "height": 1096,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SHOWER%20,%20MICHAEL%20K_%20Lt%20Governor_%20Eng_v1.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "b4d4590de7a799cc12bbcec150d5918546fb49bf1a2a820f15a237afb14d7aa6",
    "type": "image/jpeg",
    "width": 906
@@ -340,7 +340,7 @@
    "height": 1392,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=9",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "c05c0d9dc26b407606b77ff43b68a7b59edb5043a961d201dfe978a7c518574b",
    "type": "image/jpeg",
    "width": 928
@@ -355,7 +355,7 @@
    "height": 501,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186953/1601901",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "c8108e6fb86765427c8fc8d620ae31968c629bed6cd57bb797e327f70b409c30",
    "type": "image/jpeg",
    "width": 418
@@ -370,7 +370,7 @@
    "height": 584,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186952/1601899",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "ce93240400345f51e5750d61c39b3f3e1939c9f17f8940ff110dbfbee77e9e86",
    "type": "image/jpeg",
    "width": 486
@@ -385,7 +385,7 @@
    "height": 619,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/TAYLOR,%20TREG_Gov_Eng_v1.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "d57500fe4e8b2efaf26f7122a78a0bdf686a7cc67b57aa49ea8d9ad863276c41",
    "type": "image/jpeg",
    "width": 517
@@ -401,7 +401,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=36",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "d879b05c460beddb58ed25185a9c132c1933bef5a02b778c9f87a53526bb4a71",
    "sourceSha256": "4268d7b64f5798df27a236fd858a87408dd132d06719a2f87e9669edd2a26d43",
    "type": "image/png",
@@ -438,7 +438,7 @@
    "height": 1320,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Bronson,%20Dave_Governor_Eng_v3.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "d8f4574d09d969ecac7d69cdf1e2f053d3f08036ee95b4ba1c82d63722cd05e3",
    "type": "image/jpeg",
    "width": 1095
@@ -469,7 +469,7 @@
    "height": 907,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "sha256": "fd2a5042d813f41e237929037c4208150115606eec8e5e39f449961f84887ea9",
    "type": "image/jpeg",
    "width": 758
@@ -27013,13 +27013,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=1937": {
    "bytes": 37753,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/661f49f4-e075-491e-aad8-4dde65ecb6df"
    ],
@@ -27027,13 +27026,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=1943": {
    "bytes": 32412,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/2f4b4782-bc17-40fd-88b7-53840c68ee3a"
    ],
@@ -27041,13 +27039,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=1944": {
    "bytes": 35860,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/bfad4ef7-fad2-46e6-8f12-f8ea9feaa0cb"
    ],
@@ -27055,13 +27052,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2019": {
    "bytes": 39811,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/920c5b79-73a0-477b-a90d-1a290e48e014"
    ],
@@ -27069,13 +27065,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2020": {
    "bytes": 33534,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/fa6c1b05-02e8-4c6f-9a84-d1f58885ea04"
    ],
@@ -27083,13 +27078,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2051": {
    "bytes": 40439,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/fff43ce1-d209-4556-ba74-32f9ba46d3c0"
    ],
@@ -27097,13 +27091,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2052": {
    "bytes": 35022,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/841b8b5c-a701-43c0-bb81-8e9515e61ea0"
    ],
@@ -27111,13 +27104,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2057": {
    "bytes": 42347,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/6c3609dd-62d2-4030-9b24-7b5d49a16677"
    ],
@@ -27125,13 +27117,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2058": {
    "bytes": 35464,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/a9a55831-48ad-4f2e-b548-0b7652b2b681"
    ],
@@ -27139,13 +27130,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2060": {
    "bytes": 35881,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/c2ccbec5-9ad2-4210-9029-3c9968b72d2f"
    ],
@@ -27153,13 +27143,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2061": {
    "bytes": 31396,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/6ad9db86-5e30-4693-be71-41bacad5b843"
    ],
@@ -27167,13 +27156,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2062": {
    "bytes": 33312,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/28245e55-fddc-46db-85a7-ce9ca55da6d7"
    ],
@@ -27181,13 +27169,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2063": {
    "bytes": 32870,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/06e17e6f-a17c-4654-9ead-d0aa98a95110"
    ],
@@ -27195,13 +27182,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2065": {
    "bytes": 44876,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1a644e87-8691-4e86-af73-6a2af0f56c82"
    ],
@@ -27209,13 +27195,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2069": {
    "bytes": 34281,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/ace530aa-6fbb-40a0-b91e-94820a287b2e"
    ],
@@ -27223,13 +27208,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2071": {
    "bytes": 33469,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/100ec26e-d90f-4707-822c-db61c8f1b370"
    ],
@@ -27237,13 +27221,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2073": {
    "bytes": 34833,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/4cfed488-abe6-46e5-a3aa-55a73e2984ca"
    ],
@@ -27251,13 +27234,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2074": {
    "bytes": 34853,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/4d763e2a-ab08-46ea-8561-9b3b74b34971"
    ],
@@ -27265,13 +27247,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2075": {
    "bytes": 35150,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/419c30c0-b3f2-4d4b-a2f1-ee08050e845b"
    ],
@@ -27279,13 +27260,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2076": {
    "bytes": 37025,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/96d0d8da-dcff-4f59-b051-e0da15584b7b"
    ],
@@ -27293,13 +27273,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2078": {
    "bytes": 33441,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/fe941ee4-f34a-4685-873c-29adbb732b2c"
    ],
@@ -27307,13 +27286,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2081": {
    "bytes": 36866,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/9f6b3ff8-f439-44d0-bdf7-315451e52cb7"
    ],
@@ -27321,13 +27299,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2082": {
    "bytes": 31917,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/af64f0a2-f3ff-4c6d-b24f-62c3941d1da4"
    ],
@@ -27335,13 +27312,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2086": {
    "bytes": 32700,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/d6be1f75-f237-41ad-af36-a7d1c6e3a9c6"
    ],
@@ -27349,13 +27325,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2087": {
    "bytes": 30335,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/f436aa10-c006-4128-9748-050bf50c4e21"
    ],
@@ -27363,13 +27338,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2092": {
    "bytes": 37236,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/56f5920f-46d9-4991-b029-5984b80cd7ff"
    ],
@@ -27377,13 +27351,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2093": {
    "bytes": 42757,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/b7d28fcb-9563-420c-91bb-01d3202124fd"
    ],
@@ -27391,13 +27364,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2094": {
    "bytes": 38855,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/9a78c55e-0f06-4dd9-b86e-287db7332d98"
    ],
@@ -27405,13 +27377,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2095": {
    "bytes": 35007,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/616dd247-4438-44de-97b4-cd3a5a3e554d"
    ],
@@ -27419,13 +27390,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2096": {
    "bytes": 41856,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/bd63f6e7-ed53-4a4c-98b6-925588710b0b"
    ],
@@ -27433,13 +27403,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2097": {
    "bytes": 35945,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/3de9f0e2-7062-4363-91d0-c3f17084ced4"
    ],
@@ -27447,13 +27416,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2099": {
    "bytes": 33102,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/e0d1f714-8603-40c6-8c3e-04934648caa4"
    ],
@@ -27461,13 +27429,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2114": {
    "bytes": 36397,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1250ea3d-fe5c-46ea-bead-f7249d234e68"
    ],
@@ -27475,13 +27442,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2129": {
    "bytes": 34789,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/54f9145f-2529-448e-8238-b00d049a782c"
    ],
@@ -27489,13 +27455,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2133": {
    "bytes": 37122,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/24c9a1f1-0023-4733-aa18-80f252645723"
    ],
@@ -27503,13 +27468,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2134": {
    "bytes": 43521,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/7f91f845-d612-45d2-bc08-421c4e91357a"
    ],
@@ -27517,13 +27481,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2168": {
    "bytes": 34548,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/e2fb607f-9af9-4d80-b473-8ed33e3d942d"
    ],
@@ -27531,13 +27494,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2169": {
    "bytes": 37591,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/0fddc5af-b1f0-49ca-84d9-fc6458edf362"
    ],
@@ -27545,13 +27507,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2172": {
    "bytes": 35735,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/515b97f2-7c88-40e5-b127-04146435e50e"
    ],
@@ -27559,13 +27520,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2207": {
    "bytes": 36028,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/b1fb2c50-2091-4264-abed-e89079479bc0"
    ],
@@ -27573,13 +27533,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2209": {
    "bytes": 36166,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/e1a53185-3c84-4f82-87f0-09bd607cf2e7"
    ],
@@ -27587,13 +27546,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2210": {
    "bytes": 40959,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1ff1dec0-c449-4ff8-aa22-0830817c2070"
    ],
@@ -27601,13 +27559,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2211": {
    "bytes": 36653,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/d8594030-4826-48c5-af43-674470f1dd44"
    ],
@@ -27615,13 +27572,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2212": {
    "bytes": 33284,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/43f13a74-64cd-41b6-b03a-51af80dbfc10"
    ],
@@ -27629,13 +27585,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2213": {
    "bytes": 39350,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/618e91b0-663d-4095-9a38-eefab6304e5f"
    ],
@@ -27643,13 +27598,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2217": {
    "bytes": 36465,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/14c919a7-4443-4bc7-8221-34a59cc3bfef"
    ],
@@ -27657,13 +27611,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2218": {
    "bytes": 32246,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1ab01adf-962d-47ac-977c-2cf25712f583"
    ],
@@ -27671,13 +27624,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2219": {
    "bytes": 34747,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/da48983a-852b-4d3b-b635-285f37d8d012"
    ],
@@ -27685,13 +27637,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2220": {
    "bytes": 37113,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/dc271660-9483-4b46-8c96-4794078b130f"
    ],
@@ -27699,13 +27650,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2221": {
    "bytes": 33282,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/05c84580-b849-4320-9aa4-e34d8b977aca"
    ],
@@ -27713,13 +27663,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2222": {
    "bytes": 36709,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/d01a9b1a-a262-4d27-9de9-b7ad0ff8c7f0"
    ],
@@ -27727,13 +27676,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2224": {
    "bytes": 39489,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/0f113187-3958-449e-9c4e-3e81390c1dd4"
    ],
@@ -27741,13 +27689,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2225": {
    "bytes": 37690,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/24dc0503-f4cf-48b1-afdf-e57157bafec3"
    ],
@@ -27755,13 +27702,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2229": {
    "bytes": 37962,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/49c68d0e-cf5d-4b46-9890-c887a428929e"
    ],
@@ -27769,13 +27715,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2230": {
    "bytes": 36168,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/163f458d-ad80-4bad-9223-69e1f6fec4d2"
    ],
@@ -27783,13 +27728,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2231": {
    "bytes": 33285,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/d9dd5492-e605-4fc6-a18a-8772a7682a08"
    ],
@@ -27797,13 +27741,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2232": {
    "bytes": 35763,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/b11b5a8d-08e8-4cf3-802c-42a842102cfa"
    ],
@@ -27811,13 +27754,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2233": {
    "bytes": 35528,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/55b3b80d-f69c-4f9f-aaed-4d1e5cd2634d"
    ],
@@ -27825,13 +27767,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2235": {
    "bytes": 32104,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/9c485ac1-4ad5-4466-9392-a9014827ef56"
    ],
@@ -27839,13 +27780,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2237": {
    "bytes": 31259,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/87967de8-0f0d-45d5-9248-2767f9157d7b"
    ],
@@ -27853,13 +27793,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2240": {
    "bytes": 39184,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/83283f83-e8d3-4e03-949c-1bdfae4bfd7f"
    ],
@@ -27867,13 +27806,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2241": {
    "bytes": 40623,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/c5b24334-9dfa-4356-8aa2-8f91c2a3d692"
    ],
@@ -27881,13 +27819,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2242": {
    "bytes": 33111,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1da3a25b-64fa-48d4-8441-e1dca4526f7f"
    ],
@@ -27895,13 +27832,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2243": {
    "bytes": 36210,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/f3250139-5c42-40d9-b535-2e7137f83f1e"
    ],
@@ -27909,13 +27845,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2244": {
    "bytes": 33073,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/c53c50aa-49b2-415a-9a50-eb947daf3d7f"
    ],
@@ -27923,13 +27858,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2245": {
    "bytes": 33295,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/4209f53e-18f3-4c9e-8183-caa385c319ec"
    ],
@@ -27937,13 +27871,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2246": {
    "bytes": 35004,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/f7c7d32d-5d88-489a-9adf-76c9837b3272"
    ],
@@ -27951,13 +27884,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2247": {
    "bytes": 42458,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/47f4d77d-149c-410a-a324-067172efda3c"
    ],
@@ -27965,13 +27897,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2248": {
    "bytes": 38110,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/d29468e7-eb61-45e7-89ad-4dfb93a0baf2"
    ],
@@ -27979,13 +27910,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2253": {
    "bytes": 36219,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/6b7c5c9c-05ba-4a2e-8f23-117edbf2969b"
    ],
@@ -27993,13 +27923,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2255": {
    "bytes": 39793,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/8014964b-117f-40a4-a466-ac597dd70983"
    ],
@@ -28007,13 +27936,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2276": {
    "bytes": 40736,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/500e226f-ea79-4915-ab13-a11ab4d9e48e"
    ],
@@ -28021,13 +27949,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2277": {
    "bytes": 39367,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/6b417baa-36e5-4928-bb3d-b6b8f2cc95dd"
    ],
@@ -28035,13 +27962,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2290": {
    "bytes": 38874,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/c509449e-070c-462c-810e-f14315c9df42"
    ],
@@ -28049,13 +27975,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2354": {
    "bytes": 38801,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/633fd335-98a2-42a7-acac-cb78eeca9a12"
    ],
@@ -28063,13 +27988,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2355": {
    "bytes": 37763,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/709dba3b-3a48-4429-94e7-fada7faa0d90"
    ],
@@ -28077,13 +28001,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2357": {
    "bytes": 38554,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/49609474-e343-4c1d-8e6b-677f31c228b7"
    ],
@@ -28091,13 +28014,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2358": {
    "bytes": 40628,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/c140221e-dfad-45d7-9371-faf3cc12ff17"
    ],
@@ -28105,13 +28027,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2359": {
    "bytes": 41797,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/272db469-eb67-4752-8307-c46a95eaace0"
    ],
@@ -28119,13 +28040,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2360": {
    "bytes": 43775,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/b6ab609a-1abc-40ee-9ac1-889ccb08a9f0"
    ],
@@ -28133,13 +28053,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2361": {
    "bytes": 39814,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/6ee52a1a-7c1b-4ebb-ac4f-8602d03b2034"
    ],
@@ -28147,13 +28066,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2362": {
    "bytes": 38300,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1cd15a85-b074-4d67-8fcd-1cbccfc924f4"
    ],
@@ -28161,13 +28079,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2363": {
    "bytes": 41476,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/9adf60fd-19a0-429c-ab41-5cbc8e6391fc"
    ],
@@ -28175,13 +28092,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2364": {
    "bytes": 39408,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/f3eb420f-df97-4edf-b8c9-e0fa231c6860"
    ],
@@ -28189,13 +28105,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2367": {
    "bytes": 38371,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/76bc7488-cc9e-4b47-91da-4557fb577ff5"
    ],
@@ -28203,13 +28118,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2369": {
    "bytes": 37521,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/b2f744fa-f71d-4865-a704-afcd3d030ff7"
    ],
@@ -28217,13 +28131,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2370": {
    "bytes": 40673,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/0f4f5a2e-bc86-4c2a-9ab1-041d1c844283"
    ],
@@ -28231,13 +28144,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2371": {
    "bytes": 36815,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/4d403f59-65f6-484f-9aeb-fe05380d4bcf"
    ],
@@ -28245,13 +28157,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2373": {
    "bytes": 39457,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/350514c2-7875-44c4-8ef3-20da25540793"
    ],
@@ -28259,13 +28170,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2374": {
    "bytes": 38913,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/8f5928b4-5528-4506-8075-4e69c5864b42"
    ],
@@ -28273,13 +28183,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2377": {
    "bytes": 24582,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/7472aac6-4730-456b-8e2f-3b79e45da74c"
    ],
@@ -28287,13 +28196,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2378": {
    "bytes": 34745,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1d96c354-2527-4449-9b40-36bb78fe2cb7"
    ],
@@ -28301,13 +28209,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2379": {
    "bytes": 39055,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/e0e9f47c-af7c-45f3-9d7e-1a158a19b362"
    ],
@@ -28315,13 +28222,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2381": {
    "bytes": 44119,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/22e282f9-afbf-46b8-ac81-0780f5372d0d"
    ],
@@ -28329,13 +28235,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2382": {
    "bytes": 42606,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/4f9135f0-db97-4860-af00-182d0026feae"
    ],
@@ -28343,13 +28248,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2383": {
    "bytes": 39731,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/6db49039-f2b0-42ea-990d-92ffef2494c3"
    ],
@@ -28357,13 +28261,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2384": {
    "bytes": 40271,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/a5cc5083-e44a-4379-b4db-74c4a930821b"
    ],
@@ -28371,13 +28274,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2385": {
    "bytes": 40582,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/6f65a218-7bef-4fa3-b86c-907ed92296d8"
    ],
@@ -28385,13 +28287,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2386": {
    "bytes": 41420,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1235305e-980d-4eb8-8743-8d0d8a455c4e"
    ],
@@ -28399,13 +28300,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2388": {
    "bytes": 41330,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/c47d84db-02de-4687-bd5b-c6dbc71cc8c4"
    ],
@@ -28413,13 +28313,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2389": {
    "bytes": 36965,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1f082953-c9f5-4a72-a281-cdb9fe4bda5e"
    ],
@@ -28427,13 +28326,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2392": {
    "bytes": 34210,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/acd99a81-de49-4ab0-9bb5-bb4fa72c02c5"
    ],
@@ -28441,13 +28339,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2393": {
    "bytes": 39313,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/08f76b3a-4317-4d18-a44b-f2d6a673f1e3"
    ],
@@ -28455,13 +28352,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2394": {
    "bytes": 44178,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/ae8a2d25-fbb2-4254-976a-f9dcf0c92c6f"
    ],
@@ -28469,13 +28365,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2395": {
    "bytes": 37242,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/f2e657d5-999a-4d77-98e3-b06a7c3771f4"
    ],
@@ -28483,13 +28378,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2396": {
    "bytes": 42562,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/64a3bd7d-7dc8-4ce6-bd30-6101b2b7926e"
    ],
@@ -28497,13 +28391,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2397": {
    "bytes": 36262,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/9814247b-44fc-473f-b770-a44c77292d77"
    ],
@@ -28511,13 +28404,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2399": {
    "bytes": 42483,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/1df6dc2e-0d12-40d6-b368-4d0b3a19ef95"
    ],
@@ -28525,13 +28417,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2400": {
    "bytes": 37139,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/4a6e4da5-0cbd-4033-89a3-5bd749b37108"
    ],
@@ -28539,13 +28430,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2484": {
    "bytes": 35896,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/53e00142-c4a0-41e7-bef7-fedb8de2bcdc"
    ],
@@ -28553,13 +28443,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2485": {
    "bytes": 34179,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/9815268f-50dc-451b-9bb2-b36f3c556ac4"
    ],
@@ -28567,13 +28456,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2486": {
    "bytes": 42505,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/fb57ce9b-bd82-4f93-8774-2cfef191289a"
    ],
@@ -28581,13 +28469,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2487": {
    "bytes": 35406,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/7a66b805-a3a7-4440-b404-a562c1e00059"
    ],
@@ -28595,13 +28482,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2488": {
    "bytes": 40785,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/34df0cd7-f366-4d01-a1e7-d6241e34deec"
    ],
@@ -28609,13 +28495,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2490": {
    "bytes": 38149,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/ba1cff78-9a39-4e6e-a998-c8dc324d7b80"
    ],
@@ -28623,13 +28508,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2493": {
    "bytes": 37821,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/443938dd-c7a0-4061-890a-8bd4ec4a1924"
    ],
@@ -28637,13 +28521,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2494": {
    "bytes": 40126,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/18f02633-c607-4c80-9088-742b28a49122"
    ],
@@ -28651,13 +28534,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2501": {
    "bytes": 38154,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/56a68a64-7a44-4052-b5f2-e9f7c626e311"
    ],
@@ -28665,13 +28547,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2502": {
    "bytes": 39168,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/ef435f26-5456-4e1b-9d53-16d972983db0"
    ],
@@ -28679,13 +28560,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2507": {
    "bytes": 35630,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/92aabb0f-94de-4d54-b4d0-23f09035d8a0"
    ],
@@ -28693,13 +28573,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2516": {
    "bytes": 35830,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/720cb5cb-6d39-4cdf-be60-020493ac19d9"
    ],
@@ -28707,13 +28586,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2517": {
    "bytes": 40428,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/483aaa6b-d64a-48d0-8bc4-bca6c252f8dc"
    ],
@@ -28721,13 +28599,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2524": {
    "bytes": 35068,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/b3e74d72-fdba-4c02-b75c-1ba8cc5b44b2"
    ],
@@ -28735,13 +28612,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2528": {
    "bytes": 40287,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/31ee0443-77bc-415d-9774-d09dee750243"
    ],
@@ -28749,13 +28625,12 @@
   },
   "https://house.mo.gov/MemberPhoto.aspx?id=2529": {
    "bytes": 40519,
-   "error": "HTTP 403",
    "gone": 0,
    "height": 150,
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "legislator:MO:ocd-person/5f182358-80ec-4463-a8b0-2dd660ac97ab"
    ],
@@ -75817,7 +75692,6 @@
   },
   "https://www.capitol.hawaii.gov/memberfiles/repsenphotos/iwamoto.jpg": {
    "bytes": 55776,
-   "error": "HTTP 429",
    "etag": "\"85925dbb4e68db1:0\"",
    "gone": 0,
    "height": 384,
@@ -75825,7 +75699,7 @@
     "legislator"
    ],
    "lastModified": "Thu, 16 Jan 2025 19:42:09 GMT",
-   "read": "2026-11-04",
+   "read": "2026-11-13",
    "records": [
     "legislator:HI:ocd-person/824eca2b-d968-4807-a48b-7b3df400a904"
    ],
@@ -92171,7 +92045,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "records": [
     "legislator:GA:ocd-person/6f986b42-14f6-4147-9466-c49294331db9"
    ],
@@ -93498,7 +93372,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-12",
+   "read": "2026-11-13",
    "records": [
     "legislator:GA:ocd-person/4b162447-89a7-4ffc-acbf-617e1ad87e2a"
    ],
@@ -105149,7 +105023,6 @@
   },
   "https://www.naag.org/wp-content/uploads/2020/09/ag-WI-kaul-225x300.jpg": {
    "bytes": 8850,
-   "error": "HTTP 403",
    "etag": "\"68592c94-2292\"",
    "gone": 0,
    "height": 300,
@@ -105158,7 +105031,7 @@
     "officer"
    ],
    "lastModified": "Mon, 23 Jun 2025 10:29:40 GMT",
-   "read": "2026-11-02",
+   "read": "2026-11-13",
    "records": [
     "candidate:WI:ag:Josh Kaul",
     "officer:WI:ag:Josh Kaul"
@@ -105903,18 +105776,6 @@
     "officer:TX:sos:Robert Howden"
    ]
   },
-  "https://www.nass.org/sites/default/files/styles/secretary/public/2026-09/emehelu-official-portrait_0.jpg?itok=j4XIzYr_": {
-   "bytes": 11722,
-   "etag": "\"T1QDqh6nI4MQA/2Cd2vyHMQgdAY8llc+35xJhW+A1UM\"",
-   "gone": 0,
-   "kinds": [
-    "officer"
-   ],
-   "read": "2026-11-11",
-   "records": [
-    "officer:NJ:sos:Shirley Emehelu"
-   ]
-  },
   "https://www.nass.org/sites/default/files/styles/secretary/public/2026-11/MD-MLore.jpg?itok=IEQ8kH6C": {
    "bytes": 13529,
    "etag": "\"IXqNgzsATe6QgOhgYWKHEGC4J+5WcFaY6B95rpmN7qg\"",
@@ -105925,6 +105786,18 @@
    "read": "2026-11-10",
    "records": [
     "officer:MD:sos:Michael Lore"
+   ]
+  },
+  "https://www.nass.org/sites/default/files/styles/secretary/public/2026-11/lg-emehelu-official-portrait.jpg?itok=Zlz1PpD0": {
+   "bytes": 12770,
+   "etag": "\"fpHBGLYwrWxV2qrE+y5UMqD7JeTrRBjr3Mq/iejC7Jw\"",
+   "gone": 0,
+   "kinds": [
+    "officer"
+   ],
+   "read": "2026-11-13",
+   "records": [
+    "officer:NJ:sos:Shirley Emehelu"
    ]
   },
   "https://www.nassaucountyny.gov/ImageRepository/Document?documentID=9396": {
