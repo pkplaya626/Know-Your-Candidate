@@ -297,20 +297,25 @@ LEGISLATURE_NAME = {
 def legislature_title(code):
     """The legislature page's title, the body's own name (rule 75):
     "Virginia General Assembly", "Massachusetts General Court", "Nebraska
-    Legislature". The page and the search index both name it from here."""
-    from .pages import state_name
+    Legislature". The page and the search index both name it from here.
+    A body's name is built from the name sources write, as
+    ``legphotos.legislature_name`` builds it, never the page's."""
+    from .pages import short_name
     if code == "NE":
         return "Nebraska Legislature"
-    return f"{state_name(code)} {LEGISLATURE_NAME.get(code, 'Legislature')}"
+    return f"{short_name(code)} {LEGISLATURE_NAME.get(code, 'Legislature')}"
 
 
 NO_LINE_ITEM_VETO = ("IN", "NV", "NH", "NC", "RI", "VT")
 
 
 def _names():
-    """Names as a sentence uses them: "the District of Columbia"."""
-    from .pages import state_name
-    return lambda code: ("the " if code == "DC" else "") + state_name(code)
+    """Names as a sentence uses them: "the District of Columbia", "the
+    Northern Mariana Islands", "the U.S. Virgin Islands" (one table,
+    ``voting_dates.PLACES``; the circuits' sentences said "Guam, Hawaii and
+    Northern Mariana Islands")."""
+    from .pages import sentence_place
+    return sentence_place
 
 
 def _join(words):

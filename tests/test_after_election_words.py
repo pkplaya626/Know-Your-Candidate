@@ -9,6 +9,7 @@ testTheJanuaryPage).
 """
 
 import os
+import re
 import sys
 import unittest
 from unittest import mock
@@ -52,20 +53,302 @@ class TestAPlaceInASentence(unittest.TestCase):
 
     def test_a_link_to_a_state_page_names_it_as_the_page_names_itself(self):
         # Rule 75: one name in the navigation, the title and the links. The
-        # page is titled "Virgin Islands"; "the U.S. Virgin Islands’ page"
-        # named it otherwise (the review of PR #229).
+        # page is titled "U.S. Virgin Islands" (the owner's decision of
+        # 2026-11-13); while it was titled "Virgin Islands", "the U.S. Virgin
+        # Islands’ page" named it otherwise (the review of PR #229).
+        from kyc import pages
         person = {"id": "P000610", "name": "Pat Example", "party": "Democrat", "state": "VI",
                   "chamber": "House", "officeLabel": "House • VI-AL"}
         html = share.render_profile(person, "example.org", {"P000610": person}, {})
-        self.assertIn("the Virgin Islands&#x27; page</a>", html)
-        self.assertNotIn("U.S. Virgin Islands&#x27; page", html)
-        self.assertEqual(share.page_place("VI"), "the Virgin Islands")
+        self.assertIn("the U.S. Virgin Islands&#x27; page</a>", html)
+        self.assertNotIn("the Virgin Islands&#x27; page", html)
+        self.assertEqual(share.page_place("VI"), "the " + pages.state_name("VI"))
         self.assertEqual(share.page_place("TX"), "Texas")
+
+    def test_the_virgin_islands_have_one_name_and_sources_another(self):
+        # What a page shows, and what sources write: a roster's "Virgin
+        # Islands", a Wikidata label, an association's address are matched by
+        # the short name, never by the page's (kyc/pages.short_name).
+        from kyc import normalize, pages, voting_dates
+        self.assertEqual(pages.state_name("VI"), "U.S. Virgin Islands")
+        self.assertEqual(pages.short_name("VI"), "Virgin Islands")
+        self.assertEqual(normalize.US_STATES["VIRGIN ISLANDS"], "VI")
+        self.assertEqual(voting_dates.place("VI"), "the U.S. Virgin Islands")
+        # Every other place is shown by the name sources write.
+        for code in pages.STATE_NAMES:
+            if code != "VI":
+                self.assertEqual(pages.state_name(code), pages.short_name(code), code)
+        self.assertEqual(pages.short_name("ZZ"), "ZZ")
+        # The page's own headline, and a territory in a sentence (rule 75).
+        headline, intro = pages.district_page_text("VI", 1)
+        self.assertEqual(headline, "U.S. Virgin Islands' seat in the House")
+        self.assertTrue(intro.startswith("The U.S. Virgin Islands elects a non-voting delegate"), intro)
+        self.assertTrue(pages.district_page_text("DC", 1)[1].startswith("The District of Columbia elects"))
+        self.assertTrue(pages.district_page_text("GU", 1)[1].startswith("Guam elects"))
+        # Text is matched by the short name: a label naming the territory in
+        # either form is found, and never by a longer state's name.
+        from kyc import nominee_photos
+        self.assertIn("Virgin Islands", nominee_photos.states_named(
+            "Delegate to the U.S. House from the United States Virgin Islands"))
+
+    def test_a_sentence_names_a_place_with_its_article_and_islands_take_no_second_s(self):
+        # Rule 75, found on PR #246's own built pages: "Open their record on
+        # U.S. Virgin Islands’s page", "2026 races for Congress in U.S. Virgin
+        # Islands", "also hears appeals from New Jersey, Pennsylvania and U.S.
+        # Virgin Islands". Each predates the rename (main: "Northern Mariana
+        # Islands’s page", "in District of Columbia").
+        from kyc import government_maps, governor_share, pages, voting_dates
+        for code, words in voting_dates.PLACES.items():
+            self.assertEqual(pages.sentence_place(code), words)
+            self.assertTrue(words.startswith("the "), words)
+        self.assertEqual(pages.sentence_place("TX"), "Texas")
+        self.assertEqual(pages._opening(pages.sentence_place("DC")), "The District of Columbia")
+        # A governor's share page names the state page it opens.
+        for code, words in (("VI", "the U.S. Virgin Islands’ page"), ("MP", "the Northern Mariana Islands’ page"),
+                            ("GU", "Guam’s page"), ("GA", "Georgia’s page")):
+            for kind in ("governor", "candidate"):
+                _href, label, plain = governor_share._view({"code": code, "kind": kind}, "gov-" + code)
+                self.assertTrue(label.endswith(" on " + words), label)
+                self.assertIn(">" + words + "</a>", plain)
+                self.assertNotIn("Islands’s", label + plain)
+        # A district page: its headline is the page's name, its sentences the place's.
+        for code, opening in (("VI", "The U.S. Virgin Islands' "), ("MP", "The Northern Mariana Islands' "),
+                              ("DC", "The District of Columbia's "), ("GU", "Guam's "), ("TX", "Texas's ")):
+            html = pages.render_district_page(code, "example.org")
+            description = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+            self.assertTrue(description.replace("&#x27;", "'").startswith(opening + "House districts"), description)
+            self.assertNotIn("Islands&#x27;s", html)
+            self.assertNotIn("Islands's", html)
+        self.assertIn("the District of Columbia&#x27;s page</a> lists its",
+                      pages.render_district_page("DC", "example.org"))
+        # A state page's description, and its races' heading.
+        for code, opening in (("VI", "The U.S. Virgin Islands' delegate"), ("DC", "The District of Columbia's delegate"),
+                              ("GU", "Guam's delegate")):
+            html = pages.render_state(code, "example.org")
+            description = re.search(r'<meta name="description" content="([^"]*)"', html).group(1)
+            self.assertTrue(description.replace("&#x27;", "'").startswith(opening), description)
+        # The circuits' sentences on the guide's map.
+        facts = government_maps._circuits()["facts"]
+        self.assertTrue(facts["PA"].endswith("Delaware, New Jersey and the U.S. Virgin Islands."), facts["PA"])
+        self.assertIn("Hawaii and the Northern Mariana Islands.", facts["CA"])
+        for code, text in facts.items():
+            self.assertIsNone(re.search(
+                r"\b(?:from|and|,) (?:U\.S\. Virgin Islands|Northern Mariana Islands|District of Columbia)\b", text),
+                (code, text))
 
     def test_the_governor_overlays_never_call_a_territory_a_state(self):
         self.assertNotIn("state", governor_share.PAST)
         self.assertEqual(governor_share.PAST,
                          "This site does not read the election’s results and names no winner")
+
+
+class TestAPlaceInASentenceWhereverItIsWritten(unittest.TestCase):
+    """What the second read of PR #246 found the suites did not hold: the
+    plain races heading, the guide's typed sentences, and the one table and
+    one rule a sentence's place comes from."""
+
+    def test_the_plain_races_heading_names_the_place_as_a_sentence_does(self):
+        # pages.state_static, the heading a reader without scripts and a
+        # crawler see (rule 96): "2026 races for Congress in the District of
+        # Columbia". The check makes the race it needs; it asks no day's data.
+        from kyc import pages, voting_dates
+        for code in list(voting_dates.PLACES) + ["GU", "TX"]:
+            person = {"id": "Z1", "name": "Pat Example", "party": "Democrat", "state": code,
+                      "chamber": "House", "district": 0, "officeLabel": f"House • {code}-AL",
+                      "raceId": f"H-{code}-00-2026"}
+            race = {"id": f"H-{code}-00-2026", "state": code, "chamber": "House", "district": 0,
+                    "label": f"{code} at large", "incumbentIds": ["Z1"], "candidateIds": []}
+            html = pages.render_state(code, "example.org", profiles=[person], races=[race])
+            heading = re.search(r'<section class="state-section" id="races">\s*<h2[^>]*>([^<]*)</h2>', html)
+            self.assertIsNotNone(heading, code)
+            self.assertTrue(heading.group(1).endswith(" races for Congress in " + pages.sentence_place(code)),
+                            heading.group(1))
+
+    def test_one_table_names_a_place_in_a_sentence(self):
+        # share.page_place kept a list of its own beside voting_dates.PLACES.
+        from kyc import pages, voting_dates
+        for code in pages.STATE_NAMES:
+            self.assertEqual(share.page_place(code), pages.sentence_place(code), code)
+            self.assertEqual(voting_dates.place(code), pages.sentence_place(code), code)
+        self.assertFalse(hasattr(share, "_WITH_THE"))
+
+    def test_one_rule_writes_a_possessive_with_its_sentences_apostrophe(self):
+        # pages._possessive wrote the plain apostrophe alone, and the page
+        # text's "’" was a second copy of the Islands rule in governor_share.
+        from kyc import pages
+        self.assertEqual(pages._possessive("Texas"), "Texas's")
+        self.assertEqual(pages._possessive("Guam", "’"), "Guam’s")
+        self.assertEqual(pages._possessive("the U.S. Virgin Islands"), "the U.S. Virgin Islands'")
+        self.assertEqual(pages._possessive("the Northern Mariana Islands", "’"), "the Northern Mariana Islands’")
+        import inspect
+        self.assertNotIn('endswith("Islands")', inspect.getsource(governor_share))
+
+    def test_the_guide_names_the_territory_as_the_pages_do(self):
+        # government_text is typed prose: outside a quoted title and the name
+        # of a body ("District Court of the Virgin Islands", "Legislature of
+        # the Virgin Islands"), the territory is "the U.S. Virgin Islands".
+        from kyc import government_text
+
+        def strings(node):
+            if isinstance(node, str):
+                yield node
+            elif isinstance(node, dict):
+                for value in node.values():
+                    yield from strings(value)
+            elif isinstance(node, (list, tuple)):
+                for value in node:
+                    yield from strings(value)
+
+        bare = re.compile(r"(?<!U\.S\. )(?<!United States )Virgin Islands")
+        body = re.compile(r"(?:Court|Legislature|System|Government|Governor|Constitution|Code|Act|Board|University) "
+                          r"of the Virgin Islands")
+        # Reserved for the owner's own read (the November 17 runoff's
+        # paragraph and its source label), and the editor's note that says
+        # so: take each out of this list as it is read.
+        reserved = ("The Delegates from Guam and the Virgin Islands are elected by a majority",
+                    "48 U.S.C. 1712 (the Delegates from Guam and the Virgin Islands)",
+                    "its paragraph's second read is the owner's")
+        found, looked = set(), 0
+        for name in dir(government_text):
+            value = getattr(government_text, name)
+            if name.startswith("_") or not isinstance(value, (dict, list, tuple)):
+                continue
+            for text in strings(value):
+                looked += "Virgin Islands" in text
+                if any(words in text for words in reserved):
+                    continue
+                plain = re.sub(r"“[^”]*”", "", body.sub("", text))
+                if bare.search(plain):
+                    found.add(text[:160])
+        self.assertEqual(sorted(found), [])
+        self.assertGreater(looked, 0)        # the guide names the territory: something was read
+
+
+class TestSourcesAreReadByTheNameSourcesWrite(unittest.TestCase):
+    """Rule 75: what a page shows (pages.state_name) and what sources write
+    (pages.short_name) are two names. Each check gives a state the readers
+    do reach a page name no source writes, and asks the reader the same
+    question: a call site that went back to the page's name answers
+    otherwise, whichever place's names differ that day (the second read of
+    PR #246: nothing noticed any of the six call sites going back)."""
+
+    def shown(self, code):
+        from kyc import pages
+        return mock.patch.dict(pages.STATE_NAMES, {code: "Shown Only"})
+
+    def test_a_wikidata_label_ties_a_nominee_by_the_name_sources_write(self):
+        from kyc import nominee_photos
+        profile = {"state": "OH"}
+        with self.shown("OH"):
+            tie, why = nominee_photos.second_tie(
+                profile, [{"election": "2026 United States Senate election in Ohio"}])
+            self.assertIsNotNone(tie, why)
+            self.assertIn("P3602", tie)
+            tie, why = nominee_photos.second_tie(
+                profile, [{"office": "member of the Ohio House of Representatives", "district": ""}])
+            self.assertIsNotNone(tie, why)
+        # And for the one place whose two names differ today.
+        self.assertEqual(nominee_photos.second_tie(
+            {"state": "VI"}, [{"office": "Governor of Virgin Islands", "district": ""}])[1], "")
+
+    def test_a_seat_held_is_placed_by_the_name_sources_write(self):
+        # held_seats compared the history record's place, a source's label,
+        # with the page's name.
+        from kyc import nominee_photos
+        profile = {"id": "Z1", "state": "OH", "wikipedia": "Pat Example"}
+        history = {"people": {"Z1": {"asked": "Pat Example", "offices": [
+            {"office": "member of the Ohio Senate", "where": "Ohio", "open": True, "agree": "exact"}]}}}
+        self.assertEqual(nominee_photos.held_seats(profile, history), {("OH", "upper")})
+        with self.shown("OH"):
+            self.assertEqual(nominee_photos.held_seats(profile, history), {("OH", "upper")})
+
+    def test_an_office_page_names_its_holder_past_the_name_sources_write(self):
+        from kyc import officers
+        text = "Phil Weiser Colorado Attorney General"
+        self.assertTrue(officers.names_holder("Phil Weiser", text, "ag", "CO"))
+        with self.shown("CO"):
+            self.assertTrue(officers.names_holder("Phil Weiser", text, "ag", "CO"))
+        self.assertTrue(officers.names_holder(
+            "Pat Example", "Pat Example Virgin Islands Attorney General", "ag", "VI"))
+
+    def test_a_likeness_is_named_by_the_name_sources_write(self):
+        from kyc import officers
+        page = '<img src="/files/ag.jpg" alt="Colorado Attorney General Phil Weiser">'
+        pages_read = [("https://coag.gov/about/", page)]
+        self.assertEqual(len(officers.likeness_candidates("Phil Weiser", "CO", pages_read)), 1)
+        with self.shown("CO"):
+            self.assertEqual(len(officers.likeness_candidates("Phil Weiser", "CO", pages_read)), 1)
+
+    def test_the_roster_address_is_built_from_the_name_sources_write(self):
+        from kyc import government_maps, officers, pages
+
+        class Stop(Exception):
+            pass
+
+        asked = []
+
+        def get(url, *args, **kwargs):
+            asked.append(url)
+            if "usa.gov" in url:
+                raise Stop(url)
+            return ""
+
+        every = {code: "Shown Only " + code for code in pages.STATE_NAMES}
+        with mock.patch.dict(pages.STATE_NAMES, every), mock.patch.object(officers, "_get", get), \
+                mock.patch.object(officers, "parse_raga", lambda page: {}), \
+                mock.patch.object(officers, "parse_daga", lambda page: {}), \
+                mock.patch.object(officers.time, "sleep", lambda s: None):
+            with self.assertRaises(Stop):
+                officers.fetch_attorneys_general(pause=0)
+        first = next(iter(government_maps.STATES))
+        slug = re.sub(r"[^a-z]+", "-", pages.short_name(first).lower()).strip("-")
+        self.assertEqual(asked[-1], officers.USAGOV_URL.format(slug=slug))
+
+    def test_a_court_page_is_read_for_the_name_sources_write(self):
+        from kyc import court_photos, courts, pages
+        code = next(c for c, recipe in sorted(courts.COURTS.items())
+                    if len(c) == 2 and not recipe.get("browser") and recipe.get("format") != "pdf")
+        seen = []
+
+        def photo_for(name, members, read_pages, place, measure, passed_over=None):
+            seen.append(set(place))
+            return None, "none"
+
+        with self.shown(code), mock.patch.object(court_photos, "photo_for", photo_for), \
+                mock.patch.object(court_photos, "bio_pages", lambda *a, **k: {}):
+            court_photos.add_justice_photos({code: {"members": ["Pat Example"]}}, {code: "<html></html>"},
+                                            get=lambda url: "", pause=0)
+        self.assertEqual(len(seen), 1)
+        self.assertTrue(set(court_photos._split(pages.short_name(code))) <= seen[0], seen[0])
+        self.assertFalse(set(court_photos._split("Shown Only")) & seen[0], seen[0])
+
+    def test_a_legislature_is_named_by_its_own_name_on_its_page_and_its_credit(self):
+        # Two helpers claim the body's own name: the legislature page's title
+        # and the photograph's credit. Both build it from the same table.
+        from kyc import government_maps, legphotos
+        with self.shown("MT"):
+            self.assertEqual(legphotos.legislature_name("MT"), "Montana Legislature")
+            self.assertEqual(government_maps.legislature_title("MT"), "Montana Legislature")
+        for code in government_maps.STATES:
+            if code != "NE":
+                self.assertEqual(government_maps.legislature_title(code), legphotos.legislature_name(code), code)
+
+    def test_a_races_article_is_asked_for_by_the_name_sources_write(self):
+        # statewide_photos built Wikipedia's title from the page's name, and
+        # was right for the Virgin Islands only through its own special case.
+        from kyc import statewide_photos
+        with self.shown("OH"):
+            self.assertEqual(statewide_photos.race_titles("OH", "governor"), ["2026 Ohio gubernatorial election"])
+        self.assertEqual(statewide_photos.race_titles("VI", "governor"),
+                         ["2026 United States Virgin Islands gubernatorial election"])
+
+    def test_no_reader_of_sources_asks_for_the_page_name(self):
+        # As CI greps for onclick=: a reader that matches a source's words,
+        # or builds a source's address, calls short_name, never state_name.
+        import inspect
+        from kyc import court_photos, legphotos, nominee_photos, officers, statewide_photos
+        for module in (court_photos, legphotos, nominee_photos, officers, statewide_photos):
+            self.assertNotRegex(inspect.getsource(module), r"\bstate_name\b", module.__name__)
 
 
 class TestSeatUpInOneReading(unittest.TestCase):

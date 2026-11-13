@@ -524,7 +524,7 @@
       text += place ? " for “" + typed() + "” (" + place + ")"
         : " matching “" + typed() + "”";
     }
-    if (state.state !== "all") text += " in " + KYC.stateName(state.state);
+    if (state.state !== "all") text += " in " + KYC.placeWords(state.state);
     return text;
   }
 
@@ -1046,7 +1046,9 @@
     if (!state.q) return null;
     var place = KYC.queryPlace(state.q);
     if (place) return { state: place.any ? "" : place.state || "" };
-    var folded = KYC.searchFold(state.q);
+    // A place's page name among other words is read as the name the
+    // cards' text holds, as the grid reads it (KYC.matchWords).
+    var folded = KYC.matchWords(KYC.searchFold(state.q));
     return {
       terms: folded.split(" ").filter(Boolean).map(function (term) {
         return new RegExp("(?:^|[^a-z0-9])" + term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
@@ -1059,7 +1061,7 @@
   function governorText(query, code, words) {
     if (!query) return true;
     if (query.terms === undefined) return query.state === code;
-    var text = " " + KYC.searchFold([KYC.stateName(code), "governor"].concat(words).join(" · "));
+    var text = " " + KYC.searchFold([KYC.matchName(code), "governor"].concat(words).join(" · "));
     return query.terms.every(function (t) { return t.test(text); });
   }
 
@@ -1069,8 +1071,8 @@
     var text = "";
     if (query && query.terms !== undefined) text += " matching “" + typed() + "”";
     else if (query && !query.state) text += " for “" + typed() + "”";
-    else if (query && query.state !== state.state) text += " in " + KYC.stateName(query.state);
-    if (state.state !== "all") text += " in " + KYC.stateName(state.state);
+    else if (query && query.state !== state.state) text += " in " + KYC.placeWords(query.state);
+    if (state.state !== "all") text += " in " + KYC.placeWords(state.state);
     return text;
   }
 
@@ -1381,13 +1383,11 @@
 
   /* The seat in the words the place gives it (rule 75): Puerto Rico's
    * Resident Commissioner, a delegate, never a territory's "Representative". */
-  var WITH_THE = { DC: true, MP: true, VI: true };
-
   function seatWords(row) {
-    var name = KYC.stateName(row.state);
-    if (row.chamber === "Senate") return "U.S. Senator from " + name;
+    if (row.chamber === "Senate") return "U.S. Senator from " + KYC.stateName(row.state);
     var title = ((KYC.meta().states || {})[row.state] || {}).delegateTitle;
-    if (title) return title + " from " + (WITH_THE[row.state] ? "the " : "") + name;
+    // The place as a sentence names it: one table, kyc.js's (rule 12).
+    if (title) return title + " from " + KYC.placeWords(row.state);
     return "U.S. Representative, " + row.state + "-" + (row.district ? row.district : "AL");
   }
 

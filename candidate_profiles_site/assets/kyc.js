@@ -2207,9 +2207,12 @@
 
   /** A place's possessive, as kyc/pages.py writes it (rule 75): "Virgin
    *  Islands'", never "Virgin Islands's"; "Texas's". */
-  function possessive(name) {
+  function possessive(name, mark) {
+    // *mark*: the apostrophe the sentence around it is written with ("’" in
+    // the search's answers). A name ending "Islands" takes no second s.
     name = String(name || "");
-    return name + (/Islands$/.test(name) ? "'" : "'s");
+    mark = mark || "'";
+    return name + (/Islands$/.test(name) ? mark : mark + "s");
   }
 
   /** The election office's sample-ballot page in a sentence, said as the
@@ -2913,7 +2916,7 @@
     var names = [item.name].concat(item.aliases || []).filter(Boolean).map(String);
     var office = [];
     OFFICE_FIELDS.forEach(function (field) { if (item[field]) office.push(String(item[field])); });
-    if (item.state && item.state !== "N/A") office.push(stateName(item.state));
+    if (item.state && item.state !== "N/A") office.push(matchName(item.state));
     // The party's name as the chip says it: "Democratic" found 26 people
     // and the Democratic chip 541, because the FEC's word is "Democrat".
     if (item.party === "Democrat") office.push("Democratic");
@@ -3064,8 +3067,11 @@
         ["washington dc", "washington d c", "d c"].forEach(function (n) { stateByName[n] = "DC"; });
       }
       if (states.VI) {
+        // Its page is "U.S. Virgin Islands" (the owner's decision of
+        // 2026-11-13); a reader types any of these, each a whole name.
         stateByName["us virgin islands"] = stateByName["u s virgin islands"] = "VI";
-        stateByName["virgin islands"] = "VI";
+        stateByName["virgin islands"] = stateByName["united states virgin islands"] = "VI";
+        stateByName.usvi = stateByName["u s v i"] = "VI";
       }
       // "CNMI", the Commonwealth's own short form (its election commission is
       // votecnmi.gov.mp): "CNMI attorney general" answered nothing. A whole
@@ -3183,7 +3189,7 @@
     if (!place || place.district === undefined || place.any) return "";
     var seats = houseSeats(place.state);
     if (!seats) return "";
-    var name = stateName(place.state);
+    var name = placeStart(place.state);      // it opens the sentence
     if (seats === 1) {
       return place.district <= 1 ? "" : name + " has one House seat, elected at large (" +
         place.state + "-AL).";
@@ -3203,11 +3209,14 @@
       return place.any ? "district " + seat + " in every state" : place.state + "-" + seat;
     }
     var name = stateName(place.state);
+    // In a sentence the place is named as one names it (rule 75): "the U.S.
+    // Virgin Islands’ sitting House members", never "U.S. Virgin Islands’s".
+    var whose = possessive(placeWords(place.state), "’");
     if (place.seated) {
-      return name + "’s sitting " + (place.chamber === "House" ? "House members" : "members of Congress");
+      return whose + " sitting " + (place.chamber === "House" ? "House members" : "members of Congress");
     }
-    if (place.chamber === "Senate") return name + "’s Senate seats";
-    if (place.chamber === "House") return name + "’s House seats";
+    if (place.chamber === "Senate") return whose + " Senate seats";
+    if (place.chamber === "House") return whose + " House seats";
     return name;
   }
 
@@ -3215,11 +3224,34 @@
    * profile. */
   var compiled = { query: null };
 
+  /* A place's page name, or another form a reader types for it, among
+   * other words ("U.S. Virgin Islands democrat", "USVI governor"), read as
+   * the name a profile's text holds (matchName). With the page's "U.S."
+   * out of that text and the query left as typed, "U.S. Virgin Islands
+   * democrat" found two of the territory's four Democrats, by a "u" and an
+   * "s" elsewhere in their words, and the Governors view no governor for
+   * "U.S. Virgin Islands governor" (found before PR #246 merged). Only for
+   * a place whose two names differ, by the forms stateNames holds for it;
+   * the longest form first. */
+  function matchWords(q) {
+    var names = stateNames();
+    var forms = [];
+    Object.keys(names).forEach(function (form) {
+      var to = searchFold(matchName(names[form]));
+      if (to !== searchFold(stateName(names[form])) && form !== to && form.length > 2) forms.push([form, to]);
+    });
+    forms.sort(function (a, b) { return b[0].length - a[0].length; });
+    forms.forEach(function (pair) {
+      q = (" " + q + " ").split(" " + pair[0] + " ").join(" " + pair[1] + " ").trim();
+    });
+    return q;
+  }
+
   function compileQuery(query) {
     if (compiled.query === query) return compiled;
     var place = parsePlace(query);
     var q = searchFold(query);
-    var terms = q ? q.split(" ").map(wordStart) : [];
+    var terms = q ? matchWords(q).split(" ").map(wordStart) : [];
     var exact = q;
     // "Senator Warren": a sitting senator named Warren first (SEAT_TITLE).
     var titled = !place && SEAT_TITLE.exec(q);
@@ -3476,7 +3508,7 @@
       return loadPeople(person.state).then(function (whole) {
         var again = byId(id);
         if (!whole || !isFull(again)) {
-          throw new Error(KYC.stateName(person.state) + "'s profiles did not load");
+          throw new Error(possessive(placeStart(person.state)) + " profiles did not load");
         }
         return again;
       });
@@ -3550,8 +3582,26 @@
   var PLACE_WORDS = { DC: "the District of Columbia", MP: "the Northern Mariana Islands",
     VI: "the U.S. Virgin Islands" };
 
-  function placeWords(code) {
-    return PLACE_WORDS[code] || stateName(code);
+  function placeWords(code, name) {
+    // *name*: the place's name where this page holds no build figures (Your
+    // ballot and the lookup name a state from the lookup's index).
+    return PLACE_WORDS[code] || name || stateName(code);
+  }
+  /* The name a typed word is matched against: what readers type and
+   * sources write, without the page's "U.S." (rule 5). In a profile's
+   * text "U.S." folds to the words "u" and "s", and put every Virgin
+   * Islands profile in the first tier for "U.S. House", two of them
+   * people the query did not match at all before the page took that name
+   * (the second read of PR #246). The name typed whole, "USVI" and the
+   * rest are read as the place itself (stateNamed). */
+  function matchName(code) {
+    return stateName(code).replace(/^U\.S\. /, "");
+  }
+
+  /** The same where it opens a sentence: "The District of Columbia". */
+  function placeStart(code, name) {
+    var words = placeWords(code, name);
+    return words.charAt(0).toUpperCase() + words.slice(1);
   }
 
   /** Where the page for a state lives, relative to the current page. The
@@ -4509,6 +4559,9 @@
     // states
     stateName: stateName,
     placeWords: placeWords,
+    placeStart: placeStart,
+    matchName: matchName,
+    matchWords: matchWords,
     senateBases: senateBases,
     seatUpYear: seatUpYear,
     stateUrl: stateUrl,

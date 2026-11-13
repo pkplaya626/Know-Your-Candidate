@@ -322,11 +322,11 @@ def _article_title(url):
 def states_named(text):
     """The state names *text* carries, the longest first so "West Virginia"
     is never also Virginia (rule 5)."""
-    from .pages import STATE_NAMES
+    from .pages import SHORT_NAMES
 
     text = f" {text or ''} "
     found = set()
-    for name in sorted(STATE_NAMES.values(), key=len, reverse=True):
+    for name in sorted(SHORT_NAMES.values(), key=len, reverse=True):
         pattern = re.compile(r"(?<![A-Za-z])" + re.escape(name) + r"(?![A-Za-z])")
         if pattern.search(text):
             found.add(name)
@@ -403,15 +403,14 @@ def second_tie(profile, rows):
     (P856) that is their campaign's site, or an English article that is the
     one their ballot page links (rule 33) - or ``None`` and why not. A year
     that disagrees is a refusal whatever else the item says."""
-    from .pages import state_name
-
     births = {(r.get("birth") or "")[:4] for r in rows if r.get("birth")}
     born = str(profile.get("birthdate") or "")[:4]
     if births and born.isdigit():
         if born not in births:
             return None, f"the item's year of birth {sorted(births)} is not the profile's {born}"
         return f"its year of birth, {born}, is the profile's", ""
-    state = state_name(profile.get("state"))
+    from .pages import short_name
+    state = short_name(profile.get("state"))          # matched in a label's words
     for election in sorted({r.get("election") for r in rows if r.get("election")}):
         if candidacy_for(election, state):
             return f"its candidacy in election (P3602) is \"{election}\"", ""
@@ -536,7 +535,7 @@ def held_seats(profile, history):
     """``{(state, chamber)}`` the person's corroborated record of offices
     (``history``, rule 69) says they hold now in their own state's
     legislature."""
-    from .pages import state_name
+    from .pages import short_name
 
     entry = ((history or {}).get("people") or {}).get(profile.get("id")) or {}
     linked = entry.get("asked") or entry.get("wikipedia")
@@ -546,7 +545,7 @@ def held_seats(profile, history):
     out = set()
     for office in entry.get("offices") or []:
         label = office.get("office") or ""
-        if (office.get("open") and office.get("where") == state_name(state)
+        if (office.get("open") and office.get("where") == short_name(state)
                 and office.get("agree") in ("exact", "year-off")
                 and re.search(r"legislat|senate|house|assembly|delegates", label, re.I)
                 and "United States" not in label):

@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3224 tests, no dependencies
-npm install && npm test                       # 4757 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3239 tests, no dependencies
+npm install && npm test                       # 4833 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1986,7 +1986,52 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     navigation, its title and the links to it. The tag beside the site's
     name is the section's (`pages.brand_sub`, from the navigation's labels):
     "U.S. Congress" stood over 219 pages about counties, courts and the
-    guide, and only a page that loads the build's figures names the Congress. Where a city's name join
+    guide, and only a page that loads the build's figures names the Congress.
+    The Virgin Islands are "U.S. Virgin Islands" wherever a page names them,
+    "the U.S. Virgin Islands" in a sentence (the owner's decision of
+    2026-11-13): the title, navigation and links said "Virgin Islands" while
+    the sentences said the other. One table gives the name a page shows
+    (`normalize.DISPLAY_NAMES`, through `pages.state_name`), and another
+    function the name sources write (`pages.short_name`), for matching a
+    place in their text, building their addresses and naming another body
+    as it names itself ("District Court of the Virgin Islands"); a place in
+    a sentence is `KYC.placeWords`' on the page, the one table, of which
+    three modules kept copies. And a sentence takes the place as a sentence
+    names it, wherever the words are built: read on the branch's own built
+    pages, every territory's governor's share page said "Open their record
+    on Northern Mariana Islands’s page", the races' heading "2026 races for
+    Congress in District of Columbia", the guide's map "also hears appeals
+    from New Jersey, Pennsylvania and Virgin Islands", and some thirty of the
+    page code's sentences (the search's answers, the grid's filter line, a
+    card's hover) put the page's name after "in", "for" or "about" and "’s"
+    after "Islands". The words are `pages.sentence_place` and
+    `KYC.placeWords` (`placeStart` where they open a sentence), and a
+    possessive is `pages._possessive` or `KYC.possessive`, which take the
+    sentence's own apostrophe and give "Islands" no second s. A title a
+    source gives in quotation marks is the source's. Its second read found
+    the sweep unfinished and unheld: five of the search's answers, a race's
+    loading line, a link's title, a map's hover and three of the lookup's
+    sentences still said "Islands’s" or the bare name ("The federal court of
+    appeals for U.S. Virgin Islands", "District of Columbia has no district
+    of that name"); thirteen more could go back with every check passing,
+    since the suite asked nine queries and read no title or label; and two
+    more copies of the article's table and two of the possessive's rule
+    stood beside the ones named here. There is one of each now
+    (`voting_dates.PLACES` through `sentence_place`, `PLACE_WORDS` in
+    kyc.js), and the checks ask every such place of the data, in every
+    answer, hover and label (`testPlaceSentences`). "The state legislature’s
+    chamber" is said only where this site holds the legislature. A word
+    typed in the search is matched against the name sources write
+    (`KYC.matchName`): in a profile's text the page's "U.S." folds to the
+    words "u" and "s", and put every Virgin Islands profile in the first
+    tier for "U.S. House" (rule 5). The page's name typed among other words
+    is read as that name, in the grid and the Governors view alike
+    (`KYC.matchWords`): left as typed, "U.S. Virgin Islands democrat" found
+    two of the territory's four Democrats, by a "u" and an "s" elsewhere in
+    their words, and "U.S. Virgin Islands governor" no governor (found in
+    the fix's own check, before it merged). And a reader of sources never asks for
+    the page's name: each of the six call sites could go back to it with
+    both suites passing (`TestSourcesAreReadByTheNameSourcesWrite`). Where a city's name join
     cannot work, a place is joined to a government only through the
     listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
     the government `county_areas` names, never to a town it replaced.

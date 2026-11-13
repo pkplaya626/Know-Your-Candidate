@@ -841,7 +841,7 @@
       "appointed under Article III, from the " +
       source(d.sources.judiciary.directory, "Federal Judicial Center’s Biographical Directory") +
       " as of " + day(asOf.judiciary) + ". The three territorial district courts (Guam, the " +
-      "Northern Mariana Islands and the Virgin Islands) are not in the directory: their judges " +
+      "Northern Mariana Islands and the U.S. Virgin Islands) are not in the directory: their judges " +
       "serve ten-year terms under Article IV, and the directory lists Article III judges only, " +
       "so they are named as each court’s own website lists them. " +
       "Bankruptcy and magistrate judges are not in it" + otherCourts(d) + "</p>" +

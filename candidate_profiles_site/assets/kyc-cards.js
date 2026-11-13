@@ -1006,7 +1006,7 @@
     var title = opts.title || race.label;
     var link = opts.stateLink === false ? "" :
       ' <a class="race-state-link" href="' + KYC.escapeAttr(KYC.stateUrl(race.state)) +
-      '" title="' + KYC.escapeAttr("Everything about " + KYC.stateName(race.state)) + '">' +
+      '" title="' + KYC.escapeAttr("Everything about " + KYC.placeWords(race.state)) + '">' +
       KYC.escapeHtml(KYC.stateName(race.state)) + " &rsaquo;</a>";
     // The people first, then the markets: a reader came for who is running,
     // and 61% of House market blocks only show a 95-99% favourite. Beside
@@ -1379,7 +1379,7 @@
       return;
     }
     target.innerHTML = '<p class="race-note" role="status">Loading ' +
-      KYC.escapeHtml(KYC.stateName(entry.state)) + "&rsquo;s campaigns&hellip;</p>";
+      KYC.escapeHtml(KYC.possessive(KYC.placeWords(entry.state), "’")) + " campaigns&hellip;</p>";
     KYC.loadPeople(entry.state).then(function (ok) {
       if (ok) {
         target.innerHTML = entry.body();

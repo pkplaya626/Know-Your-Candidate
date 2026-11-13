@@ -788,7 +788,7 @@
             '-year term (<a href="https://www.law.cornell.edu/uscode/text/48/891" target="_blank" ' +
             'rel="noopener noreferrer">48 U.S.C. § 891</a>). The seat was last on the ballot in ' +
             info.houseTerm.last + " and is next in " + info.houseTerm.next + ", so no seat in Congress " +
-            "is on " + KYC.escapeHtml(KYC.possessive(name)) + " 2026 ballot.</p>"
+            "is on " + KYC.escapeHtml(KYC.possessive(KYC.placeWords(code, name))) + " 2026 ballot.</p>"
           : "",
         // Each empty seat: who left, when, and whether a special election
         // has been called (summary.py, overrides.SEAT_VACANCIES).
@@ -851,7 +851,10 @@
         '<section class="state-section" id="races">',
         // Congress only, and it says so: a list that looked like the whole
         // ballot left out the governor, the legislature and every local race.
-        '<h2 class="state-heading">2026 races for Congress in ' + KYC.escapeHtml(name) + "</h2>",
+        // The place as a sentence names it (rule 75): "in the District of
+        // Columbia", as the plain page says it (pages.state_static).
+        '<h2 class="state-heading">2026 races for Congress in ' +
+          KYC.escapeHtml(KYC.placeWords(code, name)) + "</h2>",
         '<p class="state-note">' + KYC.escapeHtml(racesLead()) + " " +
           alsoOnBallot(code, name, info.territory, keptMeasures) + "</p>",
         (senateRaces.length + houseRaces.length > 3 && jumps
@@ -1029,7 +1032,7 @@
           '<a class="state-jump" href="#state-government">Territorial government</a>' +
           listsWords(list, named) + "). " +
           governorWhere(code, "The candidates for governor are under ")
-        : list === "" ? KYC.escapeHtml(name) + (past ? " did not elect" : " does not elect") +
+        : list === "" ? KYC.escapeHtml(KYC.placeStart(code, name)) + (past ? " did not elect" : " does not elect") +
           " its governor in 2026. " : "") +
         KYC.escapeHtml(KYC.ballot.territoryUnlisted.replace("may also hold", hold));
     }
@@ -1037,7 +1040,8 @@
       return "Your ballot " + hold + " local contests, which this site does not list.";
     }
     if (!list) {
-      return "None of " + KYC.escapeHtml(KYC.possessive(name)) + " governor, lieutenant governor, attorney " +
+      return "None of " + KYC.escapeHtml(KYC.possessive(KYC.placeWords(code, name))) +
+        " governor, lieutenant governor, attorney " +
         "general, secretary of state or regular legislative seats " + (past ? "was" : "is") +
         " elected in 2026; the ballot may still " + (past ? "have held " : "hold ") + rest + ".";
     }

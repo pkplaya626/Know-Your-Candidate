@@ -251,8 +251,11 @@
 
   /** What a county this site does not cover is told, beside its state's
    *  own sample ballot or election pages (*where*, HTML). */
-  function uncoveredLine(name, where) {
-    return '<p class="measures-local local-uncovered">' + esc(name) + " is not among the " + TOTAL +
+  function uncoveredLine(name, where, code) {
+    // A county area that is the place itself opens the sentence as the
+    // place does (rule 75): "The District of Columbia is not among ...".
+    var opening = code && KYC.placeWords(code, "") === "the " + name ? "The " + name : name;
+    return '<p class="measures-local local-uncovered">' + esc(opening) + " is not among the " + TOTAL +
       " most populous counties this site lists local questions for, so its questions - the " +
       "county's, its cities' and its school and special districts' - are not listed here." +
       (where ? " " + where : "") + "</p>";

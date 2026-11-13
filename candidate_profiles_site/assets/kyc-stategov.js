@@ -227,7 +227,7 @@
    *  panel and the overlay said "does not elect" beside "did not elect"
    *  (the review of PR #229). One sentence for both (rule 12). */
   function noGovernorRace(code) {
-    return KYC.stateName(code) + (after() ? " did not elect" : " does not elect") +
+    return KYC.placeStart(code) + (after() ? " did not elect" : " does not elect") +
       " its governor in 2026.";
   }
 
@@ -391,7 +391,7 @@
     if (term) {
       var nlga = ((global.kycStateGov || {}).sources || {}).nlga || [];
       return { begun: true, successor: "",
-        text: "The term of " + KYC.stateName(code) + "’s first " + TERM_WORDS[key] +
+        text: "The term of " + KYC.possessive(KYC.placeWords(code), "’") + " first " + TERM_WORDS[key] +
           ", elected on Nov. 3, 2026, " + beganWords(term) + " (" + term.cite + "). The " +
           "National Lieutenant Governors Association’s roster" +
           (nlga[2] ? ", read " + KYC.dateWords(nlga[2]) + "," : "") + " does not list one yet." };
@@ -945,7 +945,8 @@
       if (off.notMember) {
         return { fill: FILL.vacant, text: name + ": the " + word + " is not confirmed (NASS's listing only)" };
       }
-      if (off.none) return { fill: FILL.absent, text: name + " has no " + word };
+      // A sentence, where its neighbours are labels (rule 75).
+      if (off.none) return { fill: FILL.absent, text: KYC.placeStart(code) + " has no " + word };
       return { fill: FILL[off.partyKey] || FILL.I,
                text: name + ": " + off.title + " " + off.name + " (" + partyName(off.party) + ")" };
     }
@@ -1284,7 +1285,7 @@
     if (!s) {
       return '<p class="faint">' + (code === "DC"
         ? "The District of Columbia has an elected mayor and a council of 13, not a governor and legislature."
-        : "No governor is listed for " + KYC.escapeHtml(KYC.stateName(code)) + ".") + "</p>";
+        : "No governor is listed for " + KYC.escapeHtml(KYC.placeWords(code)) + ".") + "</p>";
     }
     // The governor's card, and the race for governor as cards under it; on
     // the state page the race has a section of its own among the 2026
@@ -1657,7 +1658,8 @@
     var bench = '<div class="glance-box"><p class="glance-kind">' +
       (s.criminalCourt ? "Highest courts" : "Highest court") + "</p>" + courts + "</div>";
     return '<div class="state-glance" role="group" aria-label="' +
-      KYC.escapeAttr(KYC.stateName(code) + "’s government at a glance") + '">' + exec + leg + bench + "</div>";
+      KYC.escapeAttr(KYC.possessive(KYC.stateName(code), "’") + " government at a glance") + '">' +
+        exec + leg + bench + "</div>";
   }
 
   KYC.stategov = {

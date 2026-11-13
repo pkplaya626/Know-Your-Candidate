@@ -932,20 +932,16 @@ def _state_page(code):
     return f"../states/{str(code).lower()}.html"
 
 
-# The places a sentence names with "the" (voting_dates.PLACES' codes).
-_WITH_THE = ("DC", "MP", "VI")
-
-
 def page_place(code):
     """A state page named in a link's words as the page names itself (rule
     75: one name in the navigation, the title and the links to it), with
-    "the" where a sentence needs it: "the Virgin Islands", whose page is
-    titled "Virgin Islands" - "the U.S. Virgin Islands’ page" named it
-    otherwise (the review of PR #229)."""
-    from .pages import state_name
+    "the" where a sentence needs it: "the U.S. Virgin Islands", whose page is
+    titled "U.S. Virgin Islands" (the owner's decision of 2026-11-13; while
+    the title read "Virgin Islands" the links named it otherwise, the review
+    of PR #229)."""
+    from .pages import sentence_place
 
-    name = state_name(code)
-    return f"the {name}" if code in _WITH_THE else name
+    return sentence_place(code)       # one table, voting_dates.PLACES (rule 12)
 
 
 def _seat_parts(label):

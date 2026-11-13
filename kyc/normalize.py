@@ -28,6 +28,12 @@ US_STATES = {
 
 STATE_CODES = frozenset(US_STATES.values())
 
+# The name a place is shown by, where it is not the name above (rule 75; the
+# owner's decision of 2026-11-13: "U.S. Virgin Islands"). US_STATES is what
+# rosters and sources write and what text is matched against ("Virgin
+# Islands"); this is what a page's title, heading, navigation and links say.
+DISPLAY_NAMES = {"VI": "U.S. Virgin Islands"}
+
 # Territories send non-voting delegates; excluded from chamber balance counts.
 TERRITORIES = frozenset({"AS", "DC", "GU", "MP", "PR", "VI"})
 

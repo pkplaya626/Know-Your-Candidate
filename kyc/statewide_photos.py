@@ -343,7 +343,7 @@ def read_members(lists, snapshot, measure=None, pause=1.0):
     their congress.gov portrait, by bioguide id, where the list's name for
     that office is theirs."""
     from .overrides import OTHER_OFFICE_NOMINEES
-    from .pages import state_name
+    from .pages import short_name
     from .photos import HOST_CREDITS, member_photos
     measure = measure or official_photos.weigh
     by_id = {m.get("bioguide"): m for m in (snapshot or {}).get("legislators") or ()}
@@ -358,7 +358,7 @@ def read_members(lists, snapshot, measure=None, pause=1.0):
             continue
         office = titles[found.group(1)]
         code = member.get("state")
-        if _fold(state_name(code)).replace("u.s. ", "").replace("united states ", "") != \
+        if _fold(short_name(code)).replace("u.s. ", "").replace("united states ", "") != \
                 _fold(found.group(2)).replace("u.s. ", "").replace("united states ", ""):
             continue
         people = (lists.get(code) or {}).get(office) or []
@@ -396,8 +396,8 @@ def read_members(lists, snapshot, measure=None, pause=1.0):
 def race_titles(code, office):
     """The race's own article titles, built from the race (as
     ``results.page_titles`` builds a House race's), never from a person."""
-    from .pages import state_name
-    place = state_name(code)
+    from .pages import short_name
+    place = short_name(code)             # a source's title, from the name sources write
     if code == "VI":
         place = "United States Virgin Islands"
     if office == "governor":

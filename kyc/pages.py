@@ -18,17 +18,31 @@ import re
 import string
 
 from .courts import STALE_DAYS as COURT_STALE_DAYS
-from .normalize import TERRITORIES, US_STATES
+from .normalize import DISPLAY_NAMES, TERRITORIES, US_STATES
 
+# STATE_NAMES is the name a page shows; SHORT_NAMES the one sources write.
+# They differ for one place: the Virgin Islands are "U.S. Virgin Islands"
+# wherever this site names them (normalize.DISPLAY_NAMES), and "Virgin
+# Islands" in the text this site matches a place's name against.
+SHORT_NAMES = {}
 STATE_NAMES = {}
 for _name, _code in US_STATES.items():
     _words = [w.lower() if w.lower() == "of" else w.capitalize() for w in _name.split()]
-    STATE_NAMES[_code] = " ".join(_words)
+    SHORT_NAMES[_code] = " ".join(_words)
+    STATE_NAMES[_code] = DISPLAY_NAMES.get(_code, SHORT_NAMES[_code])
 
 
 def state_name(code):
-    """``"TX"`` -> ``"Texas"``."""
+    """``"TX"`` -> ``"Texas"``, ``"VI"`` -> ``"U.S. Virgin Islands"``: the
+    name a page shows."""
     return STATE_NAMES.get(code, code)
+
+
+def short_name(code):
+    """``"VI"`` -> ``"Virgin Islands"``: the name sources write, for matching
+    a place's name in their text, building a source's address from it, or
+    naming another body as that body does. Never for a page's own words."""
+    return SHORT_NAMES.get(code, code)
 
 
 def page_path(code):
@@ -728,7 +742,8 @@ def state_static(code, info, profiles, races, summary=None, measures=None, state
                         key=lambda r: r.get("district") or 0))
     if ordered:
         rows += [f'{pad}<section class="state-section" id="races">',
-                 f'{pad}    <h2 class="state-heading">{CYCLE} races for Congress in {_e(name)}</h2>']
+                 f'{pad}    <h2 class="state-heading">{CYCLE} races for Congress in '
+                 f'{_e(sentence_place(code))}</h2>']
         for race in ordered:
             rows += [f'{pad}    <h3 class="race-title" id="{_e("race-" + race["id"])}">'
                      f'<a href="../{_e(share.race_path(race["id"]))}">{_e(race.get("label") or race["id"])}'
@@ -1074,7 +1089,8 @@ def render_state(code, host, summary=None, profiles=None, races=None, measures=N
                        f"{info['houseTerm']['next']}, and who governs {name}.")
     elif code in TERRITORIES:
         what = "delegate to the U.S. House" if info.get("house", 0) <= 1 else "delegates"
-        description = (f"{name}'s {what}, the 2026 race for the seat, and every "
+        description = (f"{_opening(_possessive(sentence_place(code)))} {what}, the 2026 race "
+                       f"for the seat, and every "
                        f"candidate who has filed - who is on the ballot and who is out.")
     else:
         description = (
@@ -1591,8 +1607,24 @@ def render_counties_index(host, census=None, dates=None):
     )
 
 
-def _possessive(name):
-    return name + ("'" if name.endswith("Islands") else "'s")
+def _possessive(name, mark="'"):
+    """*name*'s, with the apostrophe its sentence uses (*mark*: page text
+    takes "’") and no second s after "Islands" (rule 75). One rule for
+    every writer; ``KYC.possessive`` is the page code's."""
+    return name + (mark if name.endswith("Islands") else mark + "s")
+
+
+def sentence_place(code):
+    """The place as a sentence names it (rule 75): "the District of
+    Columbia", "the U.S. Virgin Islands", "Texas". One table,
+    ``voting_dates.PLACES``; ``KYC.placeWords`` on the page."""
+    from .voting_dates import place
+    return place(code)
+
+
+def _opening(text):
+    """The same words where they open a sentence or a description."""
+    return text[:1].upper() + text[1:]
 
 
 # States whose map is unchanged but nearly was, where a reader may have read
@@ -1691,8 +1723,11 @@ def district_page_text(code, seats=None, post=False, seated=0, moved=None):
                 "Puerto Rico elects a non-voting resident commissioner to the House, at "
                 f"large, for a four-year term. The seat {was} not on the ballot in 2026.")
     if code in TERRITORIES:
+        # The place as a sentence names it: "The U.S. Virgin Islands elects",
+        # "The District of Columbia elects", "Guam elects".
         return (f"{_possessive(name)} seat in the House",
-                f"{name} elects a non-voting delegate to the House, at large.")
+                f"{_opening(sentence_place(code))} elects a non-voting delegate to the House, "
+                f"at large.")
     if seats == 1:
         return (f"{_possessive(name)} seat in the House",
                 f"{name} elects one member of the House, at large: the whole state is "
@@ -1727,11 +1762,13 @@ def render_district_page(code, host, summary=None):
     path = district_path(code)
     canonical = f"https://{host}/{path}" if host else path
     if code in REDRAWN:
-        description = (f"{name}'s House districts under the 2024 map and the map for 2026, "
+        description = (f"{_opening(_possessive(sentence_place(code)))} House districts under the "
+                       f"2024 map and the map for 2026, "
                        f"side by side: who holds each seat, who is running where, and how "
                        f"much of each new district came from each old one.")
     else:
-        description = (f"{name}'s House districts on a map: who holds each seat and who is "
+        description = (f"{_opening(_possessive(sentence_place(code)))} House districts on a map: "
+                       f"who holds each seat and who is "
                        f"on the November 2026 ballot.")
     main = "\n".join([
         '            <div id="districtsContent" class="state-page districts-page">',
@@ -1782,7 +1819,7 @@ def render_district_page(code, host, summary=None):
         # people are in plain text (PR #121 review).
         noscript=(f"The district map, and who sits for each district, need JavaScript, which "
                   f"this browser is not running. Without it, "
-                  f'<a href="../{_e(page_path(code))}">{_e(_possessive(name))} page</a> lists its '
+                  f'<a href="../{_e(page_path(code))}">{_e(_possessive(sentence_place(code)))} page</a> lists its '
                   "members of Congress and its races in plain text."),
     )
 
