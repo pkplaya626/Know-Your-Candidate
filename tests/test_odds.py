@@ -634,6 +634,87 @@ class TestGovernorRaces(unittest.TestCase):
         self.assertEqual((reach["polls"], reach["governorPolls"]), (1, 1))
 
 
+class TestOneTitleForAGovernorsRace(unittest.TestCase):
+    """The race's own article is asked for by one name, whoever asks: the
+    polls' reader (``odds.governor_page_title``) built "2026 Virgin Islands
+    gubernatorial election" from the roster's name while the photographs'
+    (``statewide_photos.race_titles``) built "2026 United States Virgin
+    Islands gubernatorial election" by a special case of its own - the
+    title the article has. One helper, ``results.title_name``."""
+
+    @staticmethod
+    def governed():
+        from kyc import ballot2026
+        return sorted(code for table in (ballot2026.STATES, ballot2026.TERRITORIES)
+                      for code, entry in table.items() if entry.get("governor"))
+
+    def test_the_polls_and_the_photographs_ask_for_the_same_article(self):
+        from kyc import statewide_photos
+        codes = self.governed()
+        self.assertGreater(len(codes), 50)
+        for code in codes:
+            self.assertEqual(odds.governor_page_title(code),
+                             statewide_photos.race_titles(code, "governor")[0], code)
+
+    def test_a_place_a_title_names_otherwise_is_named_so_by_every_reader(self):
+        # The state is made here: a place the roster names one way and an
+        # article's title another, whichever places that is true of today.
+        from kyc import results, statewide_photos
+        saved = dict(results.TITLE_NAMES)
+        results.TITLE_NAMES.clear()
+        results.TITLE_NAMES["GU"] = "Territory of Guam"
+        try:
+            want = "2026 Territory of Guam gubernatorial election"
+            self.assertEqual(odds.governor_page_title("GU"), want)
+            self.assertEqual(statewide_photos.race_titles("GU", "governor"), [want])
+            self.assertIn(want, statewide_photos.race_titles("GU", "lt"))
+            self.assertIn("2026 United States House of Representatives election in the "
+                          "Territory of Guam", results.page_titles("GU", "H"))
+            # And a place with no entry keeps the roster's name everywhere.
+            self.assertEqual(odds.governor_page_title("VI"), "2026 Virgin Islands gubernatorial election")
+            self.assertEqual(statewide_photos.race_titles("VI", "governor"),
+                             ["2026 Virgin Islands gubernatorial election"])
+        finally:
+            results.TITLE_NAMES.clear()
+            results.TITLE_NAMES.update(saved)
+
+    def test_the_article_the_photographs_read_is_the_one_the_polls_ask_for(self):
+        # The real record: every governor's race whose article the
+        # photographs' reader found (data/statewide_photos.json records the
+        # title it read) is asked for under that very title by the polls.
+        with open(os.path.join(ROOT, "candidate_profiles_site", "data", "statewide_photos.json"),
+                  encoding="utf-8") as handle:
+            articles = json.load(handle).get("articles") or {}
+        read = {}
+        for key, entry in articles.items():
+            code, office = key.split("|")[:2]
+            if office == "governor" and isinstance(entry, dict) and entry.get("page"):
+                read.setdefault(code, set()).add(entry["page"])
+        if not read:
+            self.skipTest("no governor's race's article is recorded")
+        for code, pages in sorted(read.items()):
+            self.assertEqual(pages, {odds.governor_page_title(code)}, code)
+
+    def test_only_the_polls_reader_asks_for_the_title(self):
+        # Rule 41: data/odds.js is a pure function of data/odds.json. The
+        # title is the network reader's alone (fetch_polls): nothing that
+        # writes the page file calls it, so changing the title changes no
+        # generated file, and the roster build still touches no odds file.
+        import inspect
+        self.assertIn("governor_page_title", inspect.getsource(odds.fetch_polls))
+        self.assertNotIn("governor_page_title", inspect.getsource(odds.payload))
+        callers = []
+        folder = os.path.join(ROOT, "kyc")
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".py"):
+                with open(os.path.join(folder, name), encoding="utf-8") as handle:
+                    if "governor_page_title(" in handle.read():
+                        callers.append(name)
+        self.assertEqual(callers, ["odds.py"])
+        same = {"fetched": "2026-10-03T05:00:00+00:00", "races": {}}
+        self.assertEqual(odds.payload(same), odds.payload(json.loads(json.dumps(same))))
+
+
 class TestThePageFile(unittest.TestCase):
     CACHE = {"fetched": "2026-10-03T05:00:00+00:00", "notes": ["x"], "races": {
         "S-TX-2026": {"markets": [{"source": "kalshi", "event": "SENATETX-26", "title": "T",

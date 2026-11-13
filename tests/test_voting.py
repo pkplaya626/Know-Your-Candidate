@@ -839,5 +839,57 @@ class TestSampleBallotRecords(unittest.TestCase):
         self.assertFalse(voting.official("https://drive.google.com/file/d/x/view", "GU"))
 
 
+class TestOneNameForAnElectionOffice(unittest.TestCase):
+    """A territory's page names its election office under its voting links
+    (``TERRITORY_SOURCES``), over its ballot questions and over its
+    candidates (the hand-edited records' ``by``). One body, one name: the
+    U.S. Virgin Islands' page printed the "Election System of the Virgin
+    Islands" and the "Elections System of the Virgin Islands"."""
+
+    @staticmethod
+    def _names(code):
+        import json
+        site = os.path.join(ROOT, "candidate_profiles_site", "data")
+        with open(os.path.join(site, "ballot_measures.json"), encoding="utf-8") as handle:
+            measures = json.load(handle)["jurisdictions"].get(code) or {}
+        with open(os.path.join(site, "statewide_candidates.json"), encoding="utf-8") as handle:
+            offices = (json.load(handle)["states"].get(code) or {}).get("offices") or {}
+        found = {"ballot_measures.json": {measures.get("by")} - {None}}
+        found["statewide_candidates.json"] = {
+            (office.get("list") or office).get("by") for office in offices.values()
+            if isinstance(office, dict)} - {None}
+        return found
+
+    def test_the_records_name_each_territory_s_office_as_the_voting_block_does(self):
+        seen = 0
+        for code, (_url, name) in voting.TERRITORY_SOURCES.items():
+            for record, names in self._names(code).items():
+                seen += len(names)
+                self.assertLessEqual(names, {name}, (code, record))
+        # The check read something: the records do name these offices.
+        self.assertGreater(seen, 0)
+
+    def test_a_second_spelling_is_caught(self):
+        # The state the check is for, made here: one letter's difference.
+        saved = voting.TERRITORY_SOURCES["VI"]
+        voting.TERRITORY_SOURCES["VI"] = (saved[0], "Election System of the Virgin Islands")
+        try:
+            names = self._names("VI")
+            self.assertTrue(any(found and found != {voting.TERRITORY_SOURCES["VI"][1]}
+                                for found in names.values()), names)
+        finally:
+            voting.TERRITORY_SOURCES["VI"] = saved
+
+    def test_the_office_s_own_quoted_words_spell_it_so(self):
+        # The evidence the spelling rests on is in the repository: the
+        # office's own sentence, quoted beside the page it was read on.
+        with open(os.path.join(ROOT, "candidate_profiles_site", "data", "voting_dates.json"),
+                  encoding="utf-8") as handle:
+            text = handle.read()
+        self.assertIn("at the Elections System offices", text)
+        self.assertIn("vivote.gov/elections-system-", text)
+        self.assertIn("Elections System", voting.TERRITORY_SOURCES["VI"][1])
+
+
 if __name__ == "__main__":
     unittest.main()

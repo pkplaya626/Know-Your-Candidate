@@ -1157,6 +1157,17 @@ a.badge-link {
   max-width: 100%;
   white-space: normal;
 }
+/* So does one in a race's "Held by" line and in a dialog's status line. A
+   badge that names another office ("Was the Democratic nominee for Governor
+   of the U.S. Virgin Islands") is wider than a phone: on one line it ran
+   415px across a 320px screen in the race's head, and in the profile
+   dialog's centred status line it was cut at both ends. Where the line has
+   room for it, it is one line as before. */
+.race-held .badge,
+.modal-meta .badge {
+  max-width: 100%;
+  white-space: normal;
+}
 .card-name {
   font-size: var(--t-md);
   font-weight: 700;
@@ -1706,6 +1717,13 @@ a.badge-link {
 
 .committee, .leadership-posts { align-items: flex-start; }
 .committee .badge, .leadership-posts .badge { margin-left: var(--s-2); vertical-align: middle; }
+/* A post's title can be wider than a phone's column: "Senate Democratic
+ * Steering Committee Chair" ran 40px past the dialog's edge at 320px. It
+ * wraps inside its line, as a card's badge does. */
+.leadership-posts .badge {
+  max-width: calc(100% - var(--s-2));
+  white-space: normal;
+}
 .committee-subs {
   display: block;
   margin-top: 2px;

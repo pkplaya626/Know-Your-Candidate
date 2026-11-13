@@ -3099,6 +3099,10 @@
     return /^[A-Z]{2}$/.test(code) && (meta().states || {})[code] ? code : null;
   }
 
+  /* The title of a place's one seat in the House, beside the place: "non-
+   * voting delegate", "delegates to Congress", "resident commissioner". */
+  var SEAT_OWN_TITLE = /^(?:(resident commissioners?)|(?:non ?voting )?delegates?)(?: (?:to|in) (?:the )?(?:us |u s )?(?:congress|house))?$/;
+
   var SEAT_REST = [
     // "9", "9th", "district 9", "cd 9", "9th district", "congressional district 9"
     [/^(?:(?:congressional )?(?:district|dist|cd) )?(\d{1,2})(?:st|nd|rd|th)?(?: (?:congressional )?district| cd)?$/,
@@ -3116,6 +3120,18 @@
     // "Ohio delegation", "Ohio members of Congress": both chambers' members.
     [/^(?:(?:us |u s )?congressional delegation|delegation|members of congress|congress)$/,
       function () { return { seated: true }; }],
+    // "Guam delegate", "Puerto Rico resident commissioner" (rule 97): who
+    // sits for a place whose one seat in the House has that title, by the
+    // build's own word for it (`delegateTitle`), never typed in. Asked of
+    // the place alone: Virginia, Maryland and West Virginia send no delegate
+    // to Congress - theirs sit in a House of Delegates, the answers'
+    // (kyc-search.js) - and a resident commissioner is Puerto Rico's only.
+    // Each found no one, while "delegate" alone listed all six.
+    [SEAT_OWN_TITLE, function (m, code) {
+      var title = ((meta().states || {})[code] || {}).delegateTitle;
+      if (!title || (m[1] && title !== "Resident Commissioner")) return null;
+      return { chamber: "House", seated: true, title: title };
+    }],
   ];
 
   /** *query* read as a place: `{state, chamber, district, any}` (any: a
@@ -3146,11 +3162,20 @@
       var two = /^([a-z]{2}) (.+)$/.exec(s);
       if (two && states[two[1].toUpperCase()]) { code = two[1].toUpperCase(); rest = two[2]; }
     }
+    if (!code) {
+      // "Resident Commissioner of Puerto Rico", "delegate from Guam": the
+      // seat's own title before its place, the whole of what follows.
+      var titled = /^((?:non ?voting )?delegates?|resident commissioners?) (?:of|from|for) (?:the )?(.+)$/.exec(s);
+      var where = titled ? stateNamed(titled[2]) : null;
+      if (where) { code = where; rest = titled[1]; }
+    }
     if (!code) return null;
     for (var i = 0; i < SEAT_REST.length; i++) {
       var m = SEAT_REST[i][0].exec(rest);
       if (m) {
-        var out = SEAT_REST[i][1](m);
+        var out = SEAT_REST[i][1](m, code);
+        // A title the place's seat does not have: words, as before.
+        if (!out) return null;
         out.state = code;
         if (out.district !== undefined) out.chamber = "House";
         return out;
@@ -3212,6 +3237,9 @@
     // In a sentence the place is named as one names it (rule 75): "the U.S.
     // Virgin Islands’ sitting House members", never "U.S. Virgin Islands’s".
     var whose = possessive(placeWords(place.state), "’");
+    // The seat in the place's own word for it (rule 75): "Puerto Rico’s
+    // Resident Commissioner", one person, never "sitting House members".
+    if (place.seated && place.title) return whose + " " + place.title + " in the U.S. House";
     if (place.seated) {
       return whose + " sitting " + (place.chamber === "House" ? "House members" : "members of Congress");
     }
@@ -3596,6 +3624,17 @@
    * rest are read as the place itself (stateNamed). */
   function matchName(code) {
     return stateName(code).replace(/^U\.S\. /, "");
+  }
+
+  /** "Statewide" is a state's word (rules 75 and 95): the District's
+   *  questions are District-wide and a territory's territory-wide. One
+   *  table for the pages' headings and sentences (KYC.ballot) and the
+   *  search's answers (kyc-search.js), which said "No statewide question is
+   *  on the Nov 3, 2026 ballot" of the U.S. Virgin Islands and "1 statewide
+   *  question" of the District beside pages that said otherwise. */
+  function questionScope(code) {
+    if (code === "DC") return "District-wide";
+    return ((meta().states || {})[code] || {}).territory ? "Territory-wide" : "Statewide";
   }
 
   /** The same where it opens a sentence: "The District of Columbia". */
@@ -4347,6 +4386,23 @@
              acting: !!(h.page || {}).acting };
   }
 
+  /** What is said of the judges of a court the FJC directory does not hold
+   *  (`listed` false: the three territorial district courts, whose judges
+   *  serve under Article IV), from the court's own site's list where one
+   *  was read (`courtListed`): one sentence for the federal page's table
+   *  and the search's answer (rule 12), and "" for a court the directory
+   *  holds. The directory's counts of such a court are zeros that mean it
+   *  was not looked in, never that nobody sits (rule 19): the search read
+   *  "District Court of the Virgin Islands — 0 active judges" over a court
+   *  whose own page lists two. */
+  function unlistedJudges(court) {
+    if (!court || court.listed) return "";
+    var own = court.courtListed;
+    return own ? own.judges + " of " + own.seats + " Article IV " +
+      (own.seats === 1 ? "judgeship" : "judgeships") + " filled, by the court’s list"
+      : "Article IV judges: not in the directory";
+  }
+
   /* --------------------------------------------------------- seat strip */
 
   /* A legislative chamber as one square per seat. An area map gives a
@@ -4424,6 +4480,7 @@
     officesHeld: officesHeld,
     officesHeldShort: officesHeldShort,
     holderRole: holderRole,
+    unlistedJudges: unlistedJudges,
     heldText: heldText,
     heldYears: heldYears,
     sourceBadge: sourceBadge,
@@ -4559,6 +4616,7 @@
     // states
     stateName: stateName,
     placeWords: placeWords,
+    questionScope: questionScope,
     placeStart: placeStart,
     matchName: matchName,
     matchWords: matchWords,

@@ -351,10 +351,9 @@
         cell("Chief judge", chiefCell(c, prefix)) +
         // A territorial court's judges serve under Article IV, and the
         // directory lists Article III judges only: the row says so itself.
+        // One sentence for this table and the search's answer (rule 12).
         cell("Judges", c.listed ? esc(counts(c)) : '<span class="faint" data-article-iv>' +
-          (c.courtListed ? esc(c.courtListed.judges + " of " + c.courtListed.seats) +
-            " Article IV " + (c.courtListed.seats === 1 ? "judgeship" : "judgeships") +
-            " filled, by the court’s list" : "Article IV judges: not in the directory") + "</span>") +
+          esc(KYC.unlistedJudges(c)) + "</span>") +
         cell("Vacancies", vacancyCount(c)) + "</tr>";
     });
   }

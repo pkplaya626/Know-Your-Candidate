@@ -909,10 +909,13 @@ def fetch_polls(races, people_of, log=print, fetch=None):
 
 
 def governor_page_title(code):
-    """The race's own article: "2026 Georgia gubernatorial election"."""
-    from .results import state_name
+    """The race's own article: "2026 Georgia gubernatorial election", "2026
+    United States Virgin Islands gubernatorial election" - the place by the
+    name an article's title gives it (``results.title_name``, one helper
+    with the photographs' reader)."""
+    from .results import title_name
 
-    return f"2026 {state_name(code)} gubernatorial election"
+    return f"2026 {title_name(code)} gubernatorial election"
 
 
 # ------------------------------------------------------------------ governors

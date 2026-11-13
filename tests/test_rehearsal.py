@@ -30,6 +30,54 @@ class TestWhereItWrites(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(ROOT, "rehearsal")))
 
 
+class TestAStepsOutputIsReadAsItIsWritten(unittest.TestCase):
+    """On Windows under ``python -X utf8`` the rehearsal read as UTF-8 what
+    its steps wrote in the console's code page, and stopped on ``None +
+    str`` before any step was judged. The step is handed the parent's
+    choice (``rehearsal.step_io``)."""
+
+    class Flags:
+        def __init__(self, utf8_mode):
+            self.utf8_mode = utf8_mode
+
+    def test_a_utf8_parent_makes_a_utf8_child_and_reads_it_as_utf8(self):
+        how = rehearsal.step_io(self.Flags(1), {"PATH": "x"})
+        self.assertEqual((how["encoding"], how["errors"], how["text"]), ("utf-8", "replace", True))
+        self.assertEqual(how["env"], {"PATH": "x", "PYTHONUTF8": "1"})
+
+    def test_any_other_parent_changes_nothing_for_the_child(self):
+        # Linux and CI as they were: the locale's encoding on both sides,
+        # and the child's environment untouched.
+        how = rehearsal.step_io(self.Flags(0), {"PATH": "x"})
+        self.assertNotIn("env", how)
+        self.assertNotIn("encoding", how)
+        self.assertTrue(how["text"])
+
+    def test_a_step_that_prints_an_accented_name_is_read_whole(self):
+        # The state is made here: a child, started as a step is started,
+        # that prints the name the January rehearsal stopped on, in whatever
+        # encoding this parent's mode gives it.
+        import subprocess
+        code = "print('Pablo Jos\u00e9 Hern\u00e1ndez Rivera'); print('done')"
+        done = subprocess.run([sys.executable, "-c", code], capture_output=True, **rehearsal.step_io())
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertIsNotNone(done.stdout)
+        self.assertIn("done", done.stdout)
+        self.assertIn("Pablo José Hernández Rivera", done.stdout)
+
+    def test_a_byte_that_will_not_decode_is_replaced_never_fatal(self):
+        import subprocess
+        # A byte of the console's code page where UTF-8 is expected: what
+        # the first read met at "José".
+        code = r"import sys; sys.stdout.buffer.write(b'Jos\xe9 ok\n')"
+        done = subprocess.run([sys.executable, "-c", code], capture_output=True,
+                              **rehearsal.step_io(self.Flags(1), dict(os.environ)))
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertIsNotNone(done.stdout)
+        self.assertIn("ok", done.stdout)
+        self.assertIn("Jos�", done.stdout)
+
+
 class TestTheFictionalMemberships(unittest.TestCase):
     def test_january_seats_one_person_in_every_record_seat(self):
         made = rehearsal.january()

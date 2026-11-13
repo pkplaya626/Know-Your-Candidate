@@ -3448,9 +3448,18 @@ async function testStates() {
     check("'the Northern Mariana Islands', never 'Northern Mariana Islands's'",
       /Voting in the Northern Mariana Islands/.test(mp) && !/Islands's/.test(mp) &&
         /the Commonwealth Election Commission's own page/.test(mp), mp);
-    check("'the U.S. Virgin Islands', and the Election System by name",
-      /Voting in the U\.S\. Virgin Islands/.test(vi) && /Election System of the Virgin Islands/.test(vi) &&
+    // By the one name the page gives the body: its voting block said the
+    // "Election System of the Virgin Islands" and its questions and
+    // candidates the "Elections System", and this check pinned the first.
+    const viOffice = (((viVote.window.KYC.meta().voting || {})._territories || {}).VI || {}).name || "";
+    const viNames = wordsOf(viVote.D.body).match(/Elections? System of the Virgin Islands/g) || [];
+    check("'the U.S. Virgin Islands', and its election office by name",
+      /Voting in the U\.S\. Virgin Islands/.test(vi) && !!viOffice && vi.indexOf(viOffice) !== -1 &&
         !/Islands's/.test(vi), vi);
+    check("and by that one name wherever the page names it, as its questions' record does",
+      viNames.length > 1 && viNames.every((name) => name === viOffice) &&
+        ((viVote.window.kycMeasures || {}).VI || {}).by === viOffice,
+      viOffice + " | " + [...new Set(viNames)].join(" / ") + " | " + (((viVote.window.kycMeasures || {}).VI || {}).by));
     check("NASS spelled as its name", /National Association of Secretaries of State lists no territory/.test(mp) &&
       !/national association/.test(mp), mp);
     const gu = guVote.D.getElementById("voting").textContent;
@@ -13318,6 +13327,456 @@ async function testPlaceSentences() {
   });
 }
 
+/* What five readers of PR #246 found on main beside it (2026-11-13), each
+ * asked of every place the data holds and of a state made here:
+ *  - a court the FJC directory does not hold was answered with the
+ *    directory's zeros ("District Court of the Virgin Islands — 0 active
+ *    judges", over a court whose own page lists two): rules 19 and 82;
+ *  - the District's and a territory's questions were "statewide" in the
+ *    answers, beside pages that say District-wide and territory-wide, and a
+ *    territory was told of "a state’s" courts and "its state page": rules
+ *    75 and 95;
+ *  - a place the BIA's directory lists no tribal government in was offered
+ *    "Tribal governments listed in" it, "each with its leader": rule 19;
+ *  - "Guam delegate" and "Puerto Rico resident commissioner" found nobody,
+ *    while "delegate" alone listed all six: rule 97. */
+async function testTerritoryFollowups() {
+  const { window, D } = await buildPage("index.html");
+  await settle(50);
+  const KYC = window.KYC;
+  loadAnswers(window);
+  const box = () => D.getElementById("searchAnswers");
+  const text = () => (box().hidden ? "" : box().textContent.replace(/\s+/g, " "));
+  const hrefs = () => (box().hidden ? [] : [...box().querySelectorAll("a")].map((a) => a.getAttribute("href")));
+  const label = () => D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+  const shown = () => [...D.querySelectorAll("#results .card[data-id]")].map((c) => c.getAttribute("data-id"));
+  const ask = async (q) => { typeInto(window, D, ""); typeInto(window, D, q); await settle(200); };
+  const meta = KYC.meta().states;
+  const reload = (file) => window.eval(fs.readFileSync(path.join(SITE, "data", file), "utf8"));
+  const notStates = Object.keys(meta).filter((c) => meta[c].territory || c === "DC");
+  const aState = "TX";
+  // The one implementation of each, asked for by name: a page without it
+  // fails the checks below rather than stopping them.
+  const judgesWords = (c) => (KYC.unlistedJudges ? KYC.unlistedJudges(c) : "(no KYC.unlistedJudges)");
+  const scopeOf = (code) => (KYC.questionScope ? KYC.questionScope(code) : "Statewide");
+
+  // ---- F1: a court outside the directory
+  const federalPage = await buildPage("federal/index.html");
+  const pageWords = (page, id) => {
+    const cell = [...page.D.querySelectorAll("[data-article-iv]")].find((span) =>
+      span.closest("tr").querySelector('a[href$="courts/' + id + '.html"]'));
+    return cell ? cell.textContent.replace(/\s+/g, " ").trim() : "";
+  };
+  const unlisted = window.kycFederal.courts.filter((c) => c.listed === false);
+  const courtSaid = {};
+  for (const c of unlisted) {
+    for (const code of c.states) {
+      for (const q of [KYC.stateName(code) + " district court", KYC.stateName(code) + " federal courts"]) {
+        await ask(q);
+        courtSaid[c.id + "|" + q] = text();
+      }
+    }
+  }
+  // What the helper says of each as the record stands, and of the courts
+  // the directory holds, before the record is changed below.
+  const helperSaid = {};
+  unlisted.forEach((c) => { helperSaid[c.id] = judgesWords(c); });
+  const helperOfListed = window.kycFederal.courts.filter((c) => c.listed).map((c) => judgesWords(c));
+  // The state made here: one such court with no list of its own read, one
+  // with a seat unfilled, and a court the directory holds with nobody
+  // active - whose zero is the directory's own word.
+  const madeCourts = (d) => {
+    const mine = d.courts.filter((c) => c.listed === false);
+    if (mine[0]) delete mine[0].courtListed;
+    if (mine[1]) mine[1].courtListed = Object.assign({}, mine[1].courtListed, { judges: 1, seats: 2 });
+    const held = d.courts.find((c) => c.kind === "district" && c.listed);
+    held.active = 0;
+    held.senior = 0;
+    return { none: mine[0], short: mine[1], held };
+  };
+  const made = madeCourts(window.kycFederal);
+  const madeSaid = {};
+  for (const c of [made.none, made.short, made.held].filter(Boolean)) {
+    await ask(c.name);
+    if (!hrefs().some((h) => h === "courts/" + c.id + ".html")) {
+      await ask(KYC.stateName(c.states[0]) + " federal courts");
+    }
+    const row = [...box().querySelectorAll(".answer-row")].find((li) =>
+      li.querySelector('a[href="courts/' + c.id + '.html"]'));
+    madeSaid[c.id] = row ? row.textContent.replace(/\s+/g, " ") : "";
+  }
+  const madeFederal = await buildPage("federal/index.html", { federal: madeCourts });
+  reload("federal.js");
+  suite("search answers — a court the FJC directory does not hold is never counted from it (rules 19, 82)", () => {
+    check("the data holds such courts, each with the directory's zeros", unlisted.length > 0 &&
+      unlisted.every((c) => c.active === 0 && c.kind === "territorial"), unlisted.map((c) => c.id).join(" "));
+    const rows = Object.keys(courtSaid);
+    check("no answer about one says '0 active judges', or any count of active judges for it",
+      rows.length >= unlisted.length * 2 && rows.every((k) => {
+        const c = unlisted.find((x) => x.id === k.split("|")[0]);
+        const at = courtSaid[k].indexOf(c.name + " — ");
+        const said = at === -1 ? "" : courtSaid[k].slice(at + c.name.length + 3, at + c.name.length + 70);
+        return at !== -1 && !/^\d+ active judge/.test(said) && !/\b0 active judges?/.test(courtSaid[k]);
+      }), rows.map((k) => k + ": " + courtSaid[k].slice(-110)).join(" || "));
+    check("each says what the federal page's table says of it, word for word (one implementation, rule 12)",
+      unlisted.every((c) => {
+        const want = pageWords(federalPage, c.id);
+        return !!want && want === helperSaid[c.id] &&
+          rows.filter((k) => k.split("|")[0] === c.id).every((k) => courtSaid[k].indexOf(c.name + " — " + want) !== -1);
+      }), unlisted.map((c) => c.id + ": page “" + pageWords(federalPage, c.id) + "” / helper “" +
+        helperSaid[c.id] + "”").join(" | "));
+    check("the helper speaks only of a court the directory does not hold",
+      helperOfListed.length > 90 && helperOfListed.every((said) => said === ""));
+    check("a court with no list of its own read: 'Article IV judges: not in the directory', in the answer and the table",
+      !!made.none && /— Article IV judges: not in the directory$/.test(madeSaid[made.none.id]) &&
+        pageWords(madeFederal, made.none.id) === "Article IV judges: not in the directory",
+      made.none && madeSaid[made.none.id] + " / " + pageWords(madeFederal, made.none.id));
+    check("a seat the court's list leaves unfilled: '1 of 2 Article IV judgeships filled, by the court’s list', in both",
+      !made.short || (/— 1 of 2 Article IV judgeships filled, by the court’s list$/.test(madeSaid[made.short.id]) &&
+        pageWords(madeFederal, made.short.id) === "1 of 2 Article IV judgeships filled, by the court’s list"),
+      made.short && madeSaid[made.short.id] + " / " + pageWords(madeFederal, made.short.id));
+    check("a court the directory holds with nobody active is the directory's zero, and said",
+      /— 0 active judges$/.test(madeSaid[made.held.id]), madeSaid[made.held.id]);
+  });
+
+  // ---- F3: "statewide" is a state's word
+  const scope = (code) => scopeOf(code).toLowerCase();
+  const measures = () => window.kycMeasures;
+  const questionSaid = {};
+  for (const code of notStates.concat([aState])) {
+    for (const q of [KYC.stateName(code) + " ballot measures", KYC.stateName(code) + " question 97"]) {
+      await ask(q);
+      questionSaid[code + "|" + q] = text();
+    }
+  }
+  // The pages' own word, from the page: the section's heading.
+  const headings = {};
+  for (const code of notStates.filter((c) => measures()[c]).slice(0, 3).concat([aState])) {
+    const page = await buildPage("states/" + code.toLowerCase() + ".html");
+    const h = page.D.querySelector("#measures h2");
+    if (h) headings[code] = h.textContent.replace(/\s+/g, " ");
+  }
+  // Made here: each kind of record for a territory and for the District,
+  // on both clocks; and one designation on a state's, the District's and a
+  // territory's ballots at once.
+  const madeQuestions = {};
+  const territory = notStates.find((c) => c !== "DC");
+  for (const now of [undefined, "2026-11-05T09:00:00"]) {
+    const page = now ? await buildPage("index.html", { now }) : { window, D };
+    if (now) { await settle(50); loadAnswers(page.window); }
+    const pageBox = page.D.getElementById("searchAnswers");
+    const pageAsk = async (q) => { typeInto(page.window, page.D, ""); typeInto(page.window, page.D, q); await settle(200); };
+    for (const code of [territory, "DC"]) {
+      for (const [kind, rec] of [["some", { has: true, measures: [{ designation: "Zeta 1", text: "x" }, { designation: "Zeta 2", text: "y" }] }],
+        ["none", { has: false }], ["unread", { has: null }]]) {
+        page.window.kycMeasures[code] = Object.assign({}, page.window.kycMeasures[code], { measures: [] }, rec);
+        for (const q of [page.window.KYC.stateName(code) + " ballot measures", page.window.KYC.stateName(code) + " question 97"]) {
+          await pageAsk(q);
+          madeQuestions[[now ? "after" : "campaign", code, kind, q].join("|")] = pageBox.hidden ? "" : pageBox.textContent.replace(/\s+/g, " ");
+        }
+      }
+    }
+    if (!now) {
+      const one = { designation: "Measure Omega 9", text: "x" };
+      [aState, "DC", territory].forEach((code) => {
+        window.kycMeasures[code] = Object.assign({}, window.kycMeasures[code], { has: true, measures: [one] });
+      });
+      await ask("Measure Omega 9");
+      madeQuestions.shared = text();
+      await ask(KYC.stateName(aState) + " Measure Omega 9");
+      madeQuestions.sharedState = text();
+      await ask("District of Columbia Measure Omega 9");
+      madeQuestions.sharedDistrict = text();
+      await ask("ballot measures");
+      madeQuestions.list = [...box().querySelectorAll(".answer-title")].map((h) => h.textContent).join(" | ");
+      await ask("Measure 44");
+      madeQuestions.kind = text();
+    }
+  }
+  reload("measures.js");
+  suite("search answers — 'statewide' is a state's word (rules 75, 95)", () => {
+    check("the data holds the District and territories, and the pages' word for each differs from a state's",
+      notStates.length >= 2 && notStates.every((c) => scope(c) !== "statewide") && scope(aState) === "statewide" &&
+        scope("DC") === "district-wide", notStates.map((c) => c + "=" + scope(c)).join(" "));
+    const keys = Object.keys(questionSaid);
+    const wrong = keys.filter((k) => k.split("|")[0] !== aState && /statewide/i.test(questionSaid[k]));
+    check("no answer about the District's or a territory's questions says 'statewide'", wrong.length === 0,
+      wrong.map((k) => k + ": " + questionSaid[k]).join(" || "));
+    check("each says the place's own scope word, and a state's says 'statewide'",
+      keys.every((k) => new RegExp("\\b" + scope(k.split("|")[0]) + " questions?\\b").test(questionSaid[k])),
+      keys.filter((k) => !new RegExp("\\b" + scope(k.split("|")[0]) + " questions?\\b").test(questionSaid[k]))
+        .map((k) => k + ": " + questionSaid[k]).join(" || "));
+    check("the word is the page's own heading's (one table, KYC.questionScope)",
+      Object.keys(headings).length > 1 && Object.keys(headings).every((c) =>
+        headings[c].indexOf(scopeOf(c) + " questions") === 0), JSON.stringify(headings));
+    const madeKeys = Object.keys(madeQuestions).filter((k) => k.split("|").length === 4);
+    check("made here: a list, a 'none' and no list read, for a territory and the District, on both clocks — never 'statewide'",
+      madeKeys.length === 24 && madeKeys.every((k) => !/statewide/i.test(madeQuestions[k]) &&
+        madeQuestions[k].indexOf(scope(k.split("|")[1]) + " question") !== -1),
+      madeKeys.filter((k) => /statewide/i.test(madeQuestions[k]) || madeQuestions[k].indexOf(scope(k.split("|")[1]) + " question") === -1)
+        .map((k) => k + ": " + madeQuestions[k]).join(" || "));
+    const of = (clock, code, kind, at) => madeQuestions[madeKeys.find((k) => k.indexOf([clock, code, kind].join("|")) === 0 &&
+      (at ? /question 97$/.test(k) : /measures$/.test(k)))] || "";
+    check("the District's two questions: '2 district-wide questions on the Nov 3, 2026 ballot.'",
+      / — 2 district-wide questions on the Nov 3, 2026 ballot\./.test(of("campaign", "DC", "some")), of("campaign", "DC", "some"));
+    check("a territory's 'none', before and after the election",
+      /No territory-wide question is on the Nov 3, 2026 ballot;/.test(of("campaign", territory, "none")) &&
+        /No territory-wide question was on the Nov 3, 2026 ballot;/.test(of("after", territory, "none")),
+      of("campaign", territory, "none") + " / " + of("after", territory, "none"));
+    check("no list read: 'an official list of ... territory-wide questions', and never that there is none",
+      /has not found an official list of .* territory-wide questions on the Nov 3, 2026 ballot, and does not say there are none/
+        .test(of("campaign", territory, "unread")) && !/No territory-wide question/.test(of("campaign", territory, "unread")) &&
+        /did not find an official list of .* district-wide questions/.test(of("after", "DC", "unread")),
+      of("campaign", territory, "unread") + " / " + of("after", "DC", "unread"));
+    check("a question named that the place's list does not hold: 'No district-wide question on a Nov 3, 2026 ballot in the District of Columbia'",
+      /No district-wide question on a Nov 3, 2026 ballot in the District of Columbia is called/.test(of("campaign", "DC", "some", true)),
+      of("campaign", "DC", "some", true));
+    check("one designation on a state's, the District's and a territory's ballots: each links to 'its state’s, its territory’s or the District’s page'",
+      /each links to its state’s, its territory’s or the District’s page, with its text and source\./.test(madeQuestions.shared),
+      madeQuestions.shared);
+    check("a state's alone links to 'its state’s page', the District's alone to 'the District’s page'",
+      /each links to its state’s page,/.test(madeQuestions.sharedState) &&
+        /each links to the District’s page,/.test(madeQuestions.sharedDistrict),
+      madeQuestions.sharedState + " / " + madeQuestions.sharedDistrict);
+    check("every place's list is headed by the scopes of its rows",
+      /^Statewide, district-wide and territory-wide questions on the Nov 3, 2026 ballot$/.test(madeQuestions.list), madeQuestions.list);
+    check("a question named nowhere speaks for every list read, and names each place as a sentence does",
+      /No statewide, district-wide or territory-wide question on a Nov 3, 2026 ballot is called/.test(madeQuestions.kind) &&
+        /Questions called a measure are on the ballot in [^.]*\bthe District of Columbia\b/.test(madeQuestions.kind) &&
+        badPlaceWords(KYC, madeQuestions.kind, true).length === 0, madeQuestions.kind);
+  });
+
+  // ---- F3: no other answer calls such a place a state
+  const gov = () => window.kycStateGov.states;
+  const placeSaid = {};
+  for (const code of notStates.concat([aState])) {
+    const name = KYC.stateName(code);
+    for (const what of ["circuit court", "federal courts", "counties", "tribes", "mayor"]) {
+      await ask(name + " " + what);
+      placeSaid[code + "|" + what] = text();
+    }
+  }
+  // Made here: a territory whose page holds a highest court.
+  window.kycStateGov.states[territory].court = { name: "Supreme Court of Example", members: [{ name: "Pat Example" }], seats: 1 };
+  await ask(KYC.stateName(territory) + " federal courts");
+  const withCourt = text();
+  reload("stategov.js");
+  const tribes = window.kycSearch.tribes || {};
+  const noTribes = Object.keys(meta).filter((c) => !tribes[c]);
+  const tribeSaid = {};
+  for (const code of noTribes.concat(Object.keys(tribes).slice(0, 3))) {
+    await ask(KYC.stateName(code) + " tribes");
+    tribeSaid[code] = [text(), hrefs().join(" ")];
+  }
+  // Made here: an index that holds no directory at all was not read.
+  const keptTribes = window.kycSearch.tribes;
+  window.kycSearch.tribes = {};
+  await ask(KYC.stateName(noTribes[0]) + " tribal governments");
+  const unreadTribes = text();
+  window.kycSearch.tribes = keptTribes;
+  suite("search answers — the District and a territory are never 'the state' (rule 75)", () => {
+    const said = (code, what) => placeSaid[code + "|" + what] || "";
+    const ofState = (t) => /\b[Aa] state’s own|\bits state page\b|\beach state’s (?:counties|county)/.test(t);
+    const wrong = notStates.filter((c) => ["circuit court", "federal courts", "counties", "tribes", "mayor"]
+      .some((what) => ofState(said(c, what))));
+    check("no answer about one speaks of 'a state’s own' courts, 'its state page' or 'each state’s counties'",
+      wrong.length === 0, wrong.map((c) => c + ": " + ["circuit court", "federal courts", "counties"].map((w) => said(c, w)).join(" / ")).join(" || "));
+    const appeals = notStates.filter((c) => /The federal court of appeals for /.test(said(c, "circuit court")));
+    check("a territory's court of appeals is named, with no word of a state's circuit courts",
+      appeals.length > 0 && appeals.every((c) => said(c, "circuit court").indexOf("The federal court of appeals for " +
+        KYC.placeWords(c) + ".U.S. Court of Appeals") !== -1), appeals.map((c) => said(c, "circuit court")).join(" | "));
+    check("and a state's still is, with them", /The federal court of appeals for Texas\. A state’s own circuit courts, where it has them, are trial courts this site does not cover\./
+      .test(said(aState, "circuit court")), said(aState, "circuit court"));
+    // What the note says of the place's own highest court is what its page holds.
+    check("a place's own highest court is 'on its page' only where its page holds one (rule 19)",
+      notStates.concat([aState]).filter((c) => said(c, "federal courts")).every((c) => {
+        const holds = !!((gov()[c] || {}).court || {}).name;
+        const t = said(c, "federal courts");
+        return holds ? /own highest court is on its (?:state )?page\./.test(t)
+          : t.indexOf("This site names no members of " + KYC.possessive(KYC.placeWords(c), "’") + " own highest court.") !== -1 &&
+            !/own highest court is on/.test(t);
+      }), notStates.map((c) => c + ": " + said(c, "federal courts").slice(0, 170)).join(" || "));
+    check("a state's is on 'its state page'", /Texas’s own highest court is on its state page\./.test(said(aState, "federal courts")),
+      said(aState, "federal courts").slice(0, 200));
+    check("made here: a territory whose page holds a court is told 'on its page', never 'its state page'",
+      withCourt.indexOf(KYC.possessive(KYC.placeStart(territory), "’") + " own highest court is on its page.") !== -1, withCourt.slice(0, 220));
+    check("'<place> counties' says this site has no county page for it",
+      notStates.every((c) => said(c, "counties").indexOf("This site has no county page for " + KYC.placeWords(c) +
+        ": its county pages cover the 50 states.") !== -1), notStates.map((c) => said(c, "counties")).join(" | "));
+    check("and a state's are its county page", /Texas’s counties and local governments/.test(said(aState, "counties")), said(aState, "counties"));
+  });
+  suite("search answers — a place the BIA's directory lists no tribal government in (rule 19)", () => {
+    check("the index holds the directory, and places it lists none in — every non-state among them",
+      Object.keys(tribes).length > 10 && notStates.every((c) => noTribes.indexOf(c) !== -1), noTribes.join(" "));
+    check("each is told the directory lists none with its office there, never offered a list 'each with its leader'",
+      noTribes.every((c) => tribeSaid[c][0].indexOf("the Bureau of Indian Affairs’ Tribal Leaders Directory lists no tribal " +
+        "government with its office in " + KYC.placeWords(c) + ".") !== -1 && !/each with its leader|listed in /.test(tribeSaid[c][0])),
+      noTribes.filter((c) => !/lists no tribal government/.test(tribeSaid[c][0])).map((c) => c + ": " + tribeSaid[c][0]).join(" || "));
+    check("linked to the map's own words for a state, and to the tribal page for a place the map does not draw",
+      noTribes.every((c) => tribeSaid[c][1] === (meta[c].territory || c === "DC" ? "government/tribal.html"
+        : "government/tribal.html#/?state=" + c + "&mode=tribes")), noTribes.map((c) => c + ": " + tribeSaid[c][1]).slice(0, 6).join(" | "));
+    check("a place it lists some in is still its list", Object.keys(tribes).slice(0, 3).every((c) =>
+      tribeSaid[c][0].indexOf("Tribal governments listed in " + KYC.placeWords(c)) !== -1 &&
+      tribeSaid[c][1] === "government/tribal.html#/?state=" + c + "&mode=tribes"));
+    check("made here: an index with no directory in it says nothing of 'none'", !/lists no tribal government/.test(unreadTribes) &&
+      /Tribal governments listed in /.test(unreadTribes), unreadTribes);
+  });
+
+  // ---- F4: a place's one seat, by its own title
+  const titled = Object.keys(meta).filter((c) => meta[c].delegateTitle);
+  const sitting = (code) => KYC.people().filter((p) => KYC.seated(p) && p.state === code &&
+    String(p.chamber).indexOf("House") !== -1).map((p) => p.id).sort().join(",");
+  const seatSaid = [];
+  for (const code of titled) {
+    const title = meta[code].delegateTitle;
+    const forms = [title.toLowerCase(), "delegate", "delegates"].filter((w, i, a) => a.indexOf(w) === i);
+    for (const form of forms) {
+      for (const q of [KYC.stateName(code) + " " + form, KYC.matchName(code) + " " + form]) {
+        await ask(q);
+        seatSaid.push({ code, q, cards: shown().sort().join(","), label: label(), answers: text() });
+      }
+    }
+    await ask(title + " of " + KYC.placeWords(code));
+    seatSaid.push({ code, q: title + " of " + KYC.placeWords(code), cards: shown().sort().join(","), label: label(), answers: text() });
+  }
+  const legs = window.kycSearch.legislatures || {};
+  const delegatesStates = Object.keys(legs).filter((c) => /Delegates/.test(legs[c][2] || ""));
+  const chamberSaid = [];
+  for (const code of delegatesStates) {
+    for (const form of ["delegate", "delegates"]) {
+      const q = KYC.stateName(code) + " " + form;
+      await ask(q);
+      chamberSaid.push({ code, q, place: KYC.queryPlace(q), hrefs: hrefs().join(" "), label: label() });
+    }
+  }
+  await ask("delegate");
+  const alone = { answers: text(), place: KYC.queryPlace("delegate"), cards: shown() };
+  await ask("Resident Commissioner");
+  const commissioner = { answers: text(), place: KYC.queryPlace("Resident Commissioner") };
+  const aDelegate = KYC.people().find((p) => KYC.seated(p) && titled.indexOf(p.state) !== -1 && meta[p.state].delegateTitle === "Delegate");
+  const surname = aDelegate ? aDelegate.name.split(" ").pop() : "";
+  await ask("Delegate " + surname);
+  const byTitle = { cards: shown(), place: KYC.queryPlace("Delegate " + surname), label: label() };
+  suite("search — a place's one seat in the House, by the place's own title for it (rule 97)", () => {
+    check("the data holds such places, a Resident Commissioner's among them, and members who sit for them", titled.length >= 2 &&
+      titled.some((c) => meta[c].delegateTitle === "Resident Commissioner") && titled.some((c) => sitting(c)),
+      titled.map((c) => c + "=" + meta[c].delegateTitle + ":" + sitting(c)).join(" "));
+    const wrong = seatSaid.filter((r) => r.cards !== sitting(r.code));
+    check("'<place> delegate', '<place> delegates' and its own title list its sitting member alone (rule 27)",
+      seatSaid.length >= titled.length * 3 && wrong.length === 0,
+      wrong.map((r) => r.q + ": [" + r.cards + "] want [" + sitting(r.code) + "] " + r.label.slice(0, 60)).join(" || "));
+    const mislabelled = seatSaid.filter((r) => r.label.indexOf("(" + KYC.possessive(KYC.placeWords(r.code), "’") + " " +
+      meta[r.code].delegateTitle + " in the U.S. House)") === -1);
+    check("and the line says whose seat, in the place's own title: '(Puerto Rico’s Resident Commissioner in the U.S. House)'",
+      mislabelled.length === 0, mislabelled.map((r) => r.q + ": " + r.label.slice(0, 120)).join(" || "));
+    // A title the place's seat does not have names nobody there.
+    check("'resident commissioner' beside a place whose seat is a Delegate's is not read as that place's seat",
+      titled.filter((c) => meta[c].delegateTitle !== "Resident Commissioner").every((c) =>
+        KYC.queryPlace(KYC.stateName(c) + " resident commissioner") === null));
+    // Rule 27, on people made here: only who sits, never who runs or has left.
+    const person = (extra) => Object.assign({ id: "ZZ9", name: "Pat Example", state: titled[0], chamber: "House",
+      officeLabel: "House • " + titled[0] + "-AL", party: "Democrat" }, extra);
+    const q = KYC.stateName(titled[0]) + " delegate";
+    check("made here: the sitting member matches; a challenger, a former member, a senator and another place's member do not",
+      KYC.queryScore(person({}), q) === 1 && KYC.queryScore(person({ isCandidate: true }), q) === -1 &&
+        KYC.queryScore(person({ formerMember: { left: "2026-12-01" } }), q) === -1 &&
+        KYC.queryScore(person({ chamber: "Senate" }), q) === -1 && KYC.queryScore(person({ state: aState }), q) === -1,
+      [person({}), person({ isCandidate: true }), person({ formerMember: { left: "2026-12-01" } }), person({ chamber: "Senate" }),
+        person({ state: aState })].map((p) => KYC.queryScore(p, q)).join(" "));
+    check("a state with a House of Delegates is untouched: no place is read, and the answer is its lower chamber",
+      delegatesStates.length >= 3 && chamberSaid.every((r) => r.place === null &&
+        r.hrefs.indexOf("legislature/" + r.code.toLowerCase() + ".html#/?chamber=lower") !== -1 && !/in the U\.S\. House\)/.test(r.label)),
+      chamberSaid.map((r) => r.q + ": " + JSON.stringify(r.place) + " " + r.hrefs).join(" || "));
+    check("'delegate' alone is still every such seat, in the answers", alone.place === null &&
+      /Delegates in the House/.test(alone.answers) && titled.every((c) => alone.answers.indexOf(meta[c].delegateTitle + ", " + KYC.stateName(c) + ":") !== -1),
+      alone.answers.slice(0, 200));
+    check("'Resident Commissioner' alone is still the answers' one row", commissioner.place === null &&
+      /The Resident Commissioner/.test(commissioner.answers), commissioner.answers.slice(0, 160));
+    check("a seat's title before a name is still a name ('Delegate " + surname + "')", !!aDelegate && byTitle.place === null &&
+      byTitle.cards[0] === aDelegate.id, byTitle.label + " " + byTitle.cards.slice(0, 3).join(","));
+  });
+}
+
+/* A badge that names an office is wider than a phone (F2 of the same
+ * read): "Was the Democratic nominee for Governor of the U.S. Virgin
+ * Islands" ran 415px across a 320px screen in a race's "Held by" line, and
+ * was cut at both ends in the profile dialog's status line; a leadership
+ * post's ("Senate Democratic Steering Committee Chair") ran 40px past the
+ * dialog's edge. jsdom lays nothing out, so the check reads the stylesheet:
+ * wherever the page code draws such a badge, a rule of kyc.css lets it wrap
+ * inside its line. Measured in headless Chrome at 320, 360 and 390px. */
+async function testLongBadgesWrap() {
+  const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  // Every rule that names a badge, with the white-space and max-width it sets.
+  const rules = [];
+  css.replace(/([^{}@]+)\{([^{}]*)\}/g, (all, selectors, body) => {
+    const ws = (/(?:^|;)\s*white-space:\s*([a-z-]+)/.exec(body) || [])[1];
+    const max = (/(?:^|;)\s*max-width:\s*([^;]+)/.exec(body) || [])[1];
+    selectors.split(",").map((s) => s.trim()).filter((s) => /\.badge\b/.test(s)).forEach((selector) => {
+      rules.push({ selector, ws, max: max && max.trim() });
+    });
+    return all;
+  });
+  const wraps = (el) => {
+    const mine = rules.filter((r) => { try { return el.matches(r.selector); } catch (e) { return false; } });
+    const specific = mine.filter((r) => r.selector !== ".badge");
+    return specific.some((r) => r.ws === "normal") && specific.some((r) => /^(?:100%|calc\(100% - )/.test(r.max || "")) &&
+      !specific.some((r) => r.ws === "nowrap");
+  };
+  const base = rules.find((r) => r.selector === ".badge");
+  // The members who carry such a badge, from the data; their own state's
+  // page, the grid's race view and their dialog, on both clocks.
+  const index = await buildPage("index.html");
+  await settle(50);
+  // House members first: a senator whose seat is not up has no race's head.
+  const carriers = index.window.KYC.people().filter((p) => index.window.KYC.otherOffice(p))
+    .sort((a, b) => (String(a.chamber).indexOf("House") === -1) - (String(b.chamber).indexOf("House") === -1));
+  const found = [];
+  for (const p of carriers.slice(0, 3)) {
+    for (const now of [undefined, "2026-11-13T12:00:00"]) {
+      const opts = now ? { now } : {};
+      const state = await buildPage("states/" + p.state.toLowerCase() + ".html", opts);
+      const grid = await buildPage("index.html", Object.assign({ hash: "#/?view=race&state=" + p.state }, opts));
+      await settle(300);
+      grid.window.KYC.profile.open(p.id);
+      await until(() => !grid.D.getElementById("profileModalStatus").hidden, 4000);
+      [["state page", state.D], ["grid", grid.D]].forEach(([where, doc]) => {
+        doc.querySelectorAll(".badge.other-office").forEach((el) => {
+          found.push({ who: p.name, where, now: now || "campaign", el,
+            at: el.closest("#profileModalStatus") ? "dialog" : el.closest(".race-held") ? "held-by" : el.closest(".card-body") ? "card" : "other" });
+        });
+      });
+    }
+  }
+  // A leadership post in the dialog, for a member who holds one.
+  const leader = index.window.KYC.people().find((p) => index.window.KYC.seated(p) && (p.leadership || []).length);
+  let post = null;
+  if (leader) {
+    index.window.KYC.profile.open(leader.id);
+    await until(() => !!index.D.querySelector(".leadership-posts .badge"), 4000);
+    post = index.D.querySelector(".leadership-posts .badge");
+  }
+  suite("kyc.css — a badge that names an office wraps inside its line on a phone", () => {
+    check("a badge is one line unless a rule says otherwise", !!base && base.ws === "nowrap", JSON.stringify(base));
+    check("the data holds members with such a badge, drawn in a race's head, a card and the dialog",
+      carriers.length > 0 && ["held-by", "card", "dialog"].every((at) => found.some((f) => f.at === at)),
+      carriers.length + " members; " + [...new Set(found.map((f) => f.at))].join(" "));
+    const stuck = found.filter((f) => !wraps(f.el));
+    check("wherever one is drawn, a rule lets it wrap, no wider than its line",
+      found.length > 0 && stuck.length === 0 && !found.some((f) => f.at === "other"),
+      stuck.concat(found.filter((f) => f.at === "other")).map((f) => f.who + " " + f.where + " " + f.now + " " + f.at +
+        ": " + (f.el.parentElement.className || f.el.parentElement.id)).join(" | "));
+    check("a leadership post's badge wraps too", !leader || (!!post && wraps(post)),
+      leader && leader.name + ": " + (post ? post.textContent : "no badge drawn"));
+    // The rule is the test's own: a badge nothing lets wrap is caught.
+    const loose = index.D.createElement("span");
+    loose.className = "badge badge-neutral other-office";
+    index.D.body.appendChild(loose);
+    check("made here: the same badge where no rule lets it wrap is caught", !wraps(loose));
+    loose.remove();
+  });
+}
+
 async function testSearchAnswers() {
   const { window, D, errors } = await buildPage("index.html");
   await settle(50);
@@ -13605,8 +14064,10 @@ async function testSearchAnswers() {
 
   await ask("Proposition 50");
   suite("search answers — 'Proposition 50' names no 2026 question", () => {
+    // Of every list read, a state's, the District's or a territory's: each
+    // by its own scope word (testTerritoryFollowups asks each of them).
     check("said so, under Ballot questions", /Ballot questions/.test(text()) &&
-      /No statewide question on a Nov 3, 2026 ballot/.test(text()), text());
+      /No statewide(?:, district-wide)?(?: or territory-wide| or district-wide)? question on a Nov 3, 2026 ballot is called/.test(text()), text());
     check("and never Proposition 5", !hrefs().some((h) => /#measure-/.test(h)), hrefs().join(" "));
   });
   const measures = window.kycMeasures;
@@ -13662,7 +14123,7 @@ async function testSearchAnswers() {
       suite(`search answers — '${q}': no official list was found`, () => {
         check("says so", /has not found an official list/.test(text()) && /does not say there are none/.test(text()),
           text().slice(0, 300));
-        check("and never that no question is called that", !/No statewide question/.test(text()), text().slice(0, 300));
+        check("and never that no question is called that", !/No (?:statewide|district-wide|territory-wide) question/.test(text()), text().slice(0, 300));
       });
     }
   }
@@ -24550,6 +25011,8 @@ async function testTheJanuaryWords() {
   if (!only || only === "index.html") await testBootSurvivesAFailure();
   if (!only || only === "index.html" || only === "search") await testSearchAndFilters();
   if (!only || only === "index.html" || only === "search") await testSearchAnswers();
+  if (!only || only === "index.html" || only === "search" || only === "followups") await testTerritoryFollowups();
+  if (!only || only === "index.html" || only === "states" || only === "followups") await testLongBadgesWrap();
   if (!only || only === "search" || only === "states" || only === "places") await testPlaceSentences();
   if (!only || only === "federal" || only === "search") await testJudgeSearch();
   if (!only || only === "index.html") await testReseatedSpecial();

@@ -257,6 +257,13 @@
     return !!(item && item.up);
   }
 
+  /** Whether *code* is one of the fifty states: the District and the
+   *  territories are never "the state" (rule 75), by the build's figures. */
+  function isState(code) {
+    var info = (KYC.meta().states || {})[code];
+    return !!info && !info.territory && code !== "DC";
+  }
+
   /** "Arizona", "The District of Columbia": a place opening a sentence. */
   function PlaceWords(code) {
     var w = placeWords(code);
@@ -483,7 +490,7 @@
           ? plural(codes.length,
             was ? "state or territory elected" : "state or territory elects",
             was ? "states and territories elected" : "states and territories elect") +
-            " this office on Nov 3, 2026, as each state’s own record says."
+            " this office on Nov 3, 2026, as each one’s own record says."
           : plural(others, "state or territory", "states and territories") + " and the District of " +
             "Columbia " + (was ? "elected" : "elect") + " this office on Nov 3, 2026, as each one’s own " +
             "record says.") + " Type a state with the office (") +
@@ -844,7 +851,11 @@
     var p = phrase(ctx.ws);
     if (!LOCAL.test(p)) return [];
     var where;
-    if (ctx.state && have("search") && !(index().counties || {})[ctx.state]) {
+    // Whether the place has a county page is the index's to say: asked
+    // before it had loaded, "Virgin Islands mayor" was sent to "Each
+    // state’s county page", which holds nothing of a territory.
+    if (ctx.state && !have("search")) { ctx.wants.push("search"); return []; }
+    if (ctx.state && !(index().counties || {})[ctx.state]) {
       // The District and the territories have no county page here.
       return [block("offices", "Local offices", [], { note: esc("This site names no local officials, " +
         "and has no county page for " + placeWords(ctx.state) + ". ") +
@@ -944,6 +955,14 @@
         return { found: [], blocks: [block("places", "", [row(link(root() + "counties/" + code.toLowerCase() + ".html",
           PlaceOwn(code) + " counties and local governments"), esc("every county on a map, and every " +
           "local government in each."))])] };
+      }
+      // A place named that has no county page (the District, a territory)
+      // is told so, as its local offices' answer tells it: "Virgin Islands
+      // counties" was answered "each state’s counties".
+      if (code && Object.keys(index().counties || {}).length) {
+        return { found: [], blocks: [block("places", "", [], { note: esc("This site has no county page for " +
+          placeWords(code) + ": its county pages cover the 50 states. ") + link(root() + "counties/index.html",
+          "Every state’s counties") + "." })] };
       }
       return { found: [], blocks: [block("places", "", [row(link(root() + "counties/index.html",
         "Counties and local governments"), esc("each state’s counties, and every local government in each."))])] };
@@ -1064,6 +1083,20 @@
         return [block("places", "", [row(link(root() + "government/tribal.html", "Tribal governments"),
           esc("how tribal nations govern themselves, and each government’s leader, by state."))])];
       }
+      // What the directory lists there is the index's to say (rule 19): of
+      // a place it lists none in - the District, every territory, some of
+      // the states - the answer offered "Tribal governments listed in the U.S.
+      // Virgin Islands, each with its leader", a list of nothing. Only an
+      // index that holds the directory says "none": an empty one was not
+      // read.
+      if (!have("search")) { ctx.wants.push("search"); return []; }
+      var held = index().tribes || {};
+      if (!held[ctx.state] && Object.keys(held).length) {
+        return [block("places", "", [row(link(isState(ctx.state) ? tribalHref(ctx.state)
+          : root() + "government/tribal.html", "Tribal governments"),
+          esc("the Bureau of Indian Affairs’ Tribal Leaders Directory lists no tribal government with " +
+            "its office in " + placeWords(ctx.state) + "."))])];
+      }
       return [block("places", "", [row(link(tribalHref(ctx.state), "Tribal governments listed in " +
         placeWords(ctx.state)), esc("each with its leader, as the BIA’s directory lists them."))])];
     }
@@ -1113,8 +1146,15 @@
     return out;
   }
 
+  /* A court the FJC directory does not hold (the territorial district
+   * courts: `listed` false) has no count of the directory's to give: its
+   * zeros mean the directory was not the place to look (rule 19), and the
+   * row says what the federal page's table says, in that table's words
+   * (KYC.unlistedJudges, rule 12). "Virgin Islands district court" read
+   * "0 active judges" over a court whose own page lists two. */
   function courtRow(c) {
     var detail = c.kind === "supreme" ? "the nine justices"
+      : !c.listed ? KYC.unlistedJudges(c)
       : (c.active !== undefined ? plural(c.active, "active judge", "active judges") +
         (c.senior ? ", " + plural(c.senior, "on senior status", "on senior status") : "") : "");
     return row(link(root() + "courts/" + c.id + ".html", c.name), esc(detail));
@@ -1285,9 +1325,12 @@
             return c.kind === "appeals" && (c.states || []).indexOf(ctx.state) !== -1;
           });
           if (mine.length) {
+            // "A state’s own circuit courts" is said of a state: under "The
+            // federal court of appeals for the U.S. Virgin Islands." it
+            // spoke of a territory as one (rule 75).
             out.push(block("courts", "", mine.map(courtRow), { note: esc("The federal court of appeals for " +
-              placeWords(ctx.state) + ". A state’s own circuit courts, where it has them, are trial " +
-              "courts this site does not cover.") }));
+              placeWords(ctx.state) + "." + (isState(ctx.state) ? " A state’s own circuit courts, where it " +
+              "has them, are trial courts this site does not cover." : "")) }));
           }
           return out;
         }
@@ -1331,14 +1374,23 @@
     if (ctx.state && /^(?:federal |us )?(?:courts?|judges?|judiciary|federal court system)$|^(?:federal|us) (?:courts?|judges?)$/.test(phrase(trim(ctx.rest))) &&
         /federal|us|judges?/.test(phrase(ctx.rest))) {
       if (needFed()) return out;
+      if (!have("stategov")) { ctx.wants.push("stategov"); return out; }
       var here = (fed().courts || []).filter(function (c) {
         return (c.kind === "appeals" && (c.states || []).indexOf(ctx.state) !== -1) ||
           districtsOf(ctx.state).indexOf(c) !== -1;
       });
       if (here.length) {
+        // The place's own highest court is on its page only where that
+        // page holds one (the fifty states' today): of Guam, the U.S.
+        // Virgin Islands and the District the note said "own highest court
+        // is on its state page" over a page that names no court, and
+        // called each a state (rules 19 and 75).
+        var own = (gov()[ctx.state] || {}).court;
         out.push(block("courts", "Federal courts for " + placeWords(ctx.state), here.map(courtRow), {
-          note: esc("Each court’s page lists its judges. " + PlaceOwn(ctx.state) + " own highest court is on ") +
-            link(statePage(ctx.state, "state-government"), "its state page") + "." }));
+          note: esc("Each court’s page lists its judges. ") + (own && own.name
+            ? esc(PlaceOwn(ctx.state) + " own highest court is on ") +
+              link(statePage(ctx.state, "state-government"), isState(ctx.state) ? "its state page" : "its page") + "."
+            : esc("This site names no members of " + placeOwn(ctx.state) + " own highest court.")) }));
       }
       return out;
     }
@@ -1404,6 +1456,40 @@
     return statePage(code, "measure-" + code + "-" + i);
   }
 
+  /* "Statewide" is a state's word (rules 75 and 95): the District's
+   * questions are District-wide, a territory's territory-wide, by the
+   * pages' own table (KYC.questionScope, rule 12). In a sentence, as the
+   * pages write it there: "district-wide", "territory-wide". */
+  function scopeWord(code) {
+    return KYC.questionScope(code).toLowerCase();
+  }
+
+  /** The scopes of *codes*' questions, for a sentence about several
+   *  places' at once, in the pages' sentence case: "statewide", "statewide
+   *  and district-wide" (*join* "and"), "statewide, district-wide or
+   *  territory-wide" (*join* "or"). */
+  function scopeWords(codes, join) {
+    var said = [];
+    ["Statewide", "District-wide", "Territory-wide"].forEach(function (scope) {
+      if (codes.some(function (c) { return KYC.questionScope(c) === scope; })) said.push(scope.toLowerCase());
+    });
+    if (!said.length) said = ["statewide"];
+    return said.length < 2 ? said[0] : said.slice(0, -1).join(", ") + " " + join + " " + said[said.length - 1];
+  }
+
+  /** Whose page a question links to, for the places among *codes*: "its
+   *  state’s", "the District’s", "its state’s or the District’s". A
+   *  question of the District's was said to link "to its state’s page". */
+  function pageOwners(codes) {
+    var kinds = [];
+    [["Statewide", "its state’s"], ["Territory-wide", "its territory’s"],
+      ["District-wide", "the District’s"]].forEach(function (pair) {
+      if (codes.some(function (c) { return KYC.questionScope(c) === pair[0]; })) kinds.push(pair[1]);
+    });
+    return kinds.length < 2 ? (kinds[0] || "its state’s")
+      : kinds.slice(0, -1).join(", ") + " or " + kinds[kinds.length - 1];
+  }
+
   function ballotQuestions(ctx) {
     var raw = ctx.state ? ctx.rest : ctx.ws;
     var qs = measureWords(phrase(raw));
@@ -1432,9 +1518,14 @@
     var unread = Object.keys(all).filter(function (c) { return all[c] && all[c].has !== true && all[c].has !== false; })
       .sort(function (a, b) { return KYC.stateName(a).localeCompare(KYC.stateName(b)); });
     var stateRec = ctx.state ? all[ctx.state] : null;
+    // The places whose list was read, with questions or with none: what a
+    // sentence about every ballot speaks for.
+    var readCodes = Object.keys(all).filter(function (c) {
+      return all[c] && (all[c].has === true || all[c].has === false);
+    });
     var noList = function (code) {
-      return esc("This site " + (was ? "did not find" : "has not found") + " an official list of " + placeOwn(code) + " statewide " +
-        "questions on the Nov 3, 2026 ballot, and does not say there " + (was ? "were" : "are") + " none. ") +
+      return esc("This site " + (was ? "did not find" : "has not found") + " an official list of " + placeOwn(code) + " " +
+        scopeWord(code) + " questions on the Nov 3, 2026 ballot, and does not say there " + (was ? "were" : "are") + " none. ") +
         link(statePage(code, "measures"), PlaceOwn(code) + " page") + esc(" links its election office.");
     };
     if (ctx.state && (!stateRec || (stateRec.has !== true && stateRec.has !== false))) {
@@ -1448,12 +1539,15 @@
       if (ctx.state) {
         return [block("measures", "", [row(link(statePage(ctx.state, "measures"), PlaceOwn(ctx.state) +
           " ballot questions"), esc(stateRec.has === true
-            ? plural((stateRec.measures || []).length, "statewide question", "statewide questions") +
-              " on the Nov 3, 2026 ballot."
-            : "No statewide question " + (was ? "was" : "is") + " on the Nov 3, 2026 ballot; its page " +
+            ? plural((stateRec.measures || []).length, scopeWord(ctx.state) + " question",
+              scopeWord(ctx.state) + " questions") + " on the Nov 3, 2026 ballot."
+            : "No " + scopeWord(ctx.state) + " question " + (was ? "was" : "is") + " on the Nov 3, 2026 ballot; its page " +
               "cites the election office for it."))])];
       }
-      return [block("measures", "Statewide questions on the Nov 3, 2026 ballot", listed.map(function (c) {
+      // The rows' own scopes head them: the District's question is no
+      // "statewide" one, nor a territory's.
+      var heading = scopeWords(listed, "and") + " questions on the Nov 3, 2026 ballot";
+      return [block("measures", heading.charAt(0).toUpperCase() + heading.slice(1), listed.map(function (c) {
         return row(link(statePage(c, "measures"), KYC.stateName(c)), esc(plural((all[c].measures || []).length, "question", "questions")));
       }), { compact: true, note: esc("As each election office lists them. Type a state with it (") +
         searchLink("Missouri Amendment 3") + esc(") for one question."),
@@ -1480,13 +1574,17 @@
         return (all[c].measures || []).some(function (m) { return measureWords(m.designation).indexOf(kindWord) !== -1; });
       });
       var verb = was ? "was" : "is";
-      return [block("measures", "", [], { note: esc("No statewide question on a Nov 3, 2026 ballot " +
+      return [block("measures", "", [], { note: esc("No " + (ctx.state ? scopeWord(ctx.state)
+        : scopeWords(readCodes, "or")) + " question on a Nov 3, 2026 ballot " +
         (ctx.state ? "in " + placeWords(ctx.state) + " " : "") + verb + " called “" +
         phrase(trim(ctx.state ? ctx.rest : ctx.ws)) + "”, as the election offices " + (was ? "listed" : "list") + " them.") + (ctx.state
           ? " " + link(statePage(ctx.state, "measures"), PlaceOwn(ctx.state) + " questions") + "."
-          : (withKind.length ? " " + esc("Questions called a " + kindWord + " " + (was ? "were" : "are") +
-              " on the ballot in ") +
-            andList(withKind.map(function (c) { return link(statePage(c, "measures"), KYC.stateName(c)); })) + "." : "") +
+          // Each place as a sentence names it (rule 75): "initiative 83"
+          // was told of questions "on the ballot in District of Columbia",
+          // "called a initiative".
+          : (withKind.length ? " " + esc("Questions called " + (/^[aeiou]/.test(kindWord) ? "an " : "a ") +
+              kindWord + " " + (was ? "were" : "are") + " on the ballot in ") +
+            andList(withKind.map(function (c) { return link(statePage(c, "measures"), placeWords(c)); })) + "." : "") +
             (unread.length ? " " + esc("This site " + (was ? "did not find" : "has not found") + " an official list for " +
               andList(unread.map(placeWords)) + ".") : "")) })];
     }
@@ -1497,7 +1595,8 @@
       return row(link(measureAnchor(h.code, h.i), h.m.designation + ", " + KYC.stateName(h.code)), esc(about));
     }), { note: esc((was ? "On the Nov 3, 2026 ballot, as each election office listed them" :
       "On the Nov 3, 2026 ballot, as each election office lists them") +
-      "; each links to its state’s page, with its text and source."),
+      "; each links to " + pageOwners(hits.slice(0, LIMIT).map(function (h) { return h.code; })) +
+      " page, with its text and source."),
       more: hits.length > LIMIT ? esc((hits.length - LIMIT) + " more: add a state to the search.") : "" })];
   }
 
