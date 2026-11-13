@@ -3224,11 +3224,34 @@
    * profile. */
   var compiled = { query: null };
 
+  /* A place's page name, or another form a reader types for it, among
+   * other words ("U.S. Virgin Islands democrat", "USVI governor"), read as
+   * the name a profile's text holds (matchName). With the page's "U.S."
+   * out of that text and the query left as typed, "U.S. Virgin Islands
+   * democrat" found two of the territory's four Democrats, by a "u" and an
+   * "s" elsewhere in their words, and the Governors view no governor for
+   * "U.S. Virgin Islands governor" (found before PR #246 merged). Only for
+   * a place whose two names differ, by the forms stateNames holds for it;
+   * the longest form first. */
+  function matchWords(q) {
+    var names = stateNames();
+    var forms = [];
+    Object.keys(names).forEach(function (form) {
+      var to = searchFold(matchName(names[form]));
+      if (to !== searchFold(stateName(names[form])) && form !== to && form.length > 2) forms.push([form, to]);
+    });
+    forms.sort(function (a, b) { return b[0].length - a[0].length; });
+    forms.forEach(function (pair) {
+      q = (" " + q + " ").split(" " + pair[0] + " ").join(" " + pair[1] + " ").trim();
+    });
+    return q;
+  }
+
   function compileQuery(query) {
     if (compiled.query === query) return compiled;
     var place = parsePlace(query);
     var q = searchFold(query);
-    var terms = q ? q.split(" ").map(wordStart) : [];
+    var terms = q ? matchWords(q).split(" ").map(wordStart) : [];
     var exact = q;
     // "Senator Warren": a sitting senator named Warren first (SEAT_TITLE).
     var titled = !place && SEAT_TITLE.exec(q);
@@ -4538,6 +4561,7 @@
     placeWords: placeWords,
     placeStart: placeStart,
     matchName: matchName,
+    matchWords: matchWords,
     senateBases: senateBases,
     seatUpYear: seatUpYear,
     stateUrl: stateUrl,

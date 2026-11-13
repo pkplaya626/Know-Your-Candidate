@@ -221,7 +221,7 @@ python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, 
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 3239 tests, no dependencies
-npm install && npm test                       # 4828 real-DOM checks (needs jsdom)
+npm install && npm test                       # 4833 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2024,7 +2024,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     typed in the search is matched against the name sources write
     (`KYC.matchName`): in a profile's text the page's "U.S." folds to the
     words "u" and "s", and put every Virgin Islands profile in the first
-    tier for "U.S. House" (rule 5). And a reader of sources never asks for
+    tier for "U.S. House" (rule 5). The page's name typed among other words
+    is read as that name, in the grid and the Governors view alike
+    (`KYC.matchWords`): left as typed, "U.S. Virgin Islands democrat" found
+    two of the territory's four Democrats, by a "u" and an "s" elsewhere in
+    their words, and "U.S. Virgin Islands governor" no governor (found in
+    the fix's own check, before it merged). And a reader of sources never asks for
     the page's name: each of the six call sites could go back to it with
     both suites passing (`TestSourcesAreReadByTheNameSourcesWrite`). Where a city's name join
     cannot work, a place is joined to a government only through the

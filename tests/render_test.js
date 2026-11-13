@@ -13071,6 +13071,20 @@ async function testPlaceSentences() {
   }
   await ask("Texas House");
   const texasHouse = wordsOf(box());
+  // The real grid, for a place whose page name is not the name its
+  // people's text holds: the same cards by either name beside a word.
+  const besideAWord = [];
+  for (const code of places.filter((c) => KYC.matchName(c) !== KYC.stateName(c))) {
+    const shown = async (q) => {
+      await ask(q);
+      return [...D.querySelectorAll("#results .card[data-id]")].map((c) => c.getAttribute("data-id")).sort().join(",") +
+        " | " + label().slice(0, 90);
+    };
+    for (const word of ["democrat", "house", "delegate"]) {
+      besideAWord.push([KYC.stateName(code) + " " + word, await shown(KYC.stateName(code) + " " + word),
+        await shown(KYC.matchName(code) + " " + word)]);
+    }
+  }
   suite("search — every answer about a place a sentence names with 'the' (rule 75)", () => {
     check("there are such places, and the checks know them from the data",
       places.indexOf("DC") !== -1 && places.some((c) => /Islands$/.test(KYC.stateName(c))), places.join(" "));
@@ -13129,6 +13143,26 @@ async function testPlaceSentences() {
     check("and the place's words still find its people",
       withUS.every((c) => KYC.queryScore(someone(c), KYC.matchName(c) + " example") === 2),
       withUS.map((c) => c + "=" + KYC.queryScore(someone(c), KYC.matchName(c) + " example")).join(" "));
+    // The page's own name among other words is read as that name: left as
+    // typed, "U.S. Virgin Islands democrat" found two of the territory's
+    // four Democrats, by a "u" and an "s" elsewhere in their words.
+    const around = (c, form) => [form + " example", "example " + form, form + " democrat"]
+      .map((q) => q + "=" + KYC.queryScore(someone(c), q) + "/" +
+        KYC.queryScore(someone(c), q.replace(form, KYC.matchName(c))));
+    check("the page's name among other words finds whom the shorter name finds, scored the same",
+      withUS.every((c) => around(c, KYC.stateName(c)).every((r) => /=(\d)\/\1$/.test(r))),
+      withUS.map((c) => around(c, KYC.stateName(c)).join(" ")).join(" | "));
+    check("so does each other form a reader types for the Virgin Islands",
+      !(KYC.meta().states || {}).VI || ["US Virgin Islands", "United States Virgin Islands", "USVI", "U.S.V.I."]
+        .every((form) => around("VI", form).every((r) => /=(\d)\/\1$/.test(r))),
+      ["US Virgin Islands", "USVI"].map((form) => around("VI", form).join(" ")).join(" | "));
+    check("on the grid itself, the same cards by the page's name as by the shorter one",
+      besideAWord.length > 0 && besideAWord.every((r) => r[1].split(" | ")[0] === r[2].split(" | ")[0]),
+      besideAWord.map((r) => r[0] + ": " + r[1] + " / " + r[2]).join(" || "));
+    check("a form is read whole, never inside another word",
+      KYC.matchWords("usvis example") === "usvis example" && KYC.matchWords("texas example") === "texas example" &&
+        (!withUS.length || KYC.matchWords(KYC.searchFold(KYC.stateName(withUS[0]) + " x")) ===
+          KYC.searchFold(KYC.matchName(withUS[0]) + " x")), KYC.matchWords("usvis example"));
   });
 
   // ---- the map's state views: a hover that is a sentence
@@ -13159,6 +13193,24 @@ async function testPlaceSentences() {
       check("and for a typed place", typedLine.indexOf(" in " + KYC.placeWords(code)) !== -1 &&
         badPlaceWords(typed.window.KYC, typedLine).length === 0, typedLine);
     });
+    // The page's name beside another word is read as the name the cards'
+    // text holds: "U.S. Virgin Islands governor" found no governor.
+    if (KYC.matchName(code) !== KYC.stateName(code)) {
+      const found = async (words) => {
+        const built = await buildPage("index.html", { hash: "#/?chamber=governors&q=" + encodeURIComponent(words) });
+        await settle(300);
+        const said = built.D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+        return (said.match(/Showing (\d+) governor/) || ["", "0"])[1] + ": " + said.slice(0, 80);
+      };
+      const byPage = await found(KYC.stateName(code) + " governor");
+      const byShort = await found(KYC.matchName(code) + " governor");
+      const holds = !!(((window.kycStateGov || {}).states || {})[code] || {}).governor;
+      suite("the grid — the Governors view reads " + code + "'s page name among other words (rule 5)", () => {
+        check("'" + KYC.stateName(code) + " governor' finds the governors '" + KYC.matchName(code) + " governor' finds",
+          byPage.split(":")[0] === byShort.split(":")[0] && (!holds || byPage.split(":")[0] !== "0"),
+          byPage + " | " + byShort);
+      });
+    }
   }
 
   // ---- a race block's and a profile's link to the place's page

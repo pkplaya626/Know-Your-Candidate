@@ -1046,7 +1046,9 @@
     if (!state.q) return null;
     var place = KYC.queryPlace(state.q);
     if (place) return { state: place.any ? "" : place.state || "" };
-    var folded = KYC.searchFold(state.q);
+    // A place's page name among other words is read as the name the
+    // cards' text holds, as the grid reads it (KYC.matchWords).
+    var folded = KYC.matchWords(KYC.searchFold(state.q));
     return {
       terms: folded.split(" ").filter(Boolean).map(function (term) {
         return new RegExp("(?:^|[^a-z0-9])" + term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
