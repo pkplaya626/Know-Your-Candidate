@@ -312,7 +312,12 @@
      "start": "2026-11-24",
      "end": "2026-11-30",
      "startsBy": null,
-     "note": "Early voting for the general runoff election is at the county clerk's office during regular office hours, from seven days before the runoff through the day before it, closing when the clerk's office regularly closes (Ark. Code 7-5-418(a)(2))."
+     "note": "Early voting for the general runoff election is at the county clerk's office during regular office hours, from seven days before the runoff through the day before it, closing when the clerk's office regularly closes (Ark. Code 7-5-418(a)(2)). Read again 2026-11-14, every request sending the project's User-Agent: (1) Thursday, November 26 is listed as not held: the State Board of Election Commissioners' 2026 CBEC Procedures Manual says 'Early voting shall not be held on state holidays' (A.C.A. 7-5-418(a)(1)(B)) beside its words for the December general runoff, its 2026 training slides put 'Excludes all STATE Holidays - NOT County Holidays' under 'All Other Elections: (7 Days) During Clerk's Office Regular Hours', and Act 92 of 2023 (arkleg.state.ar.us) amended 7-5-418(a)(1)(B) to 'Early voting shall not be available on state holidays': the Act prints 'or county' after 'state' struck through (a line drawn through those words in the PDF, which says 'Stricken language would be deleted from ... present law'), so the quote marks it '...'. The Secretary of State's calendar stars 'November 26, 2026 - Thursday*' and moves that day's deadline to Friday, November 27 as one 'falling on a Saturday, Sunday, or legal holiday', which it reads as 'an official state holiday and an official federal holiday'. The Arkansas Code itself is published for the state by LexisNexis (linked from arkleg.state.ar.us), off the state's domain and drawn by script: not read. (2) Saturday, November 28 is listed as not held: the Board's 2026 Election Coordinator Manual (server last-modified 2026-03-20, re-opened 2026-11-14) says, in its 2026 Filing & Election Period Calendar (page 7), 'Runoff & Special Election early hours are County Clerk office working hours, no Saturday': a bullet under that calendar's March 24 entry for the general primary runoff, in words about runoff and special elections as a class, with no hedge. On page 99 it says the same of 'other minor elections (such as school, runoffs, and special elections)', whose early voting is 'a one-week period': poll workers 'will be working the County Clerk regular office hours, which in most cases will be 8 a.m. to 4:30 p.m. Tuesday through Friday and Monday before Election Day and, no Saturday hours'. (3) No other day is listed. Sunday, November 29: no official words read close it. The law and every Secretary of State page give the days only as the clerk's 'regular office hours' (the voting page: 'During all other elections, early voting is available during your county clerk's regular office hours'), and the manual's 'Tuesday through Friday and Monday before Election Day' is what it says the hours will be 'in most cases', not every county's. So the page calls that day 'Under way, during those hours', the office's words ('hours') quoted on the line, and on a day early voting is not held it names no day it resumes, since the next day the offices have not excluded may still be one a clerk's office keeps no hours on (the Sunday after the Saturday). Friday, November 27: the governor closed state offices on the Friday after Thanksgiving by proclamation in 2023, 2024 and 2025; no 2026 proclamation was found on governor.arkansas.gov on 2026-11-14, and no source read says whether such a closing is a state holiday on which early voting is not held. The Board's slides say county holidays do not close it. Not yet re-opened by a second reader.",
+     "except": [
+      "2026-11-26",
+      "2026-11-28"
+     ],
+     "hours": "during your county clerk’s regular office hours"
     },
     "mail": {
      "requestDeadline": {
@@ -422,6 +427,62 @@
      "quote": "November 30, 2026 – Monday 1 DAY PRIOR TO THE GENERAL RUNOFF ELECTION Last day for voter to participate in early voting. Early voting closes the day before the Election Day at the time the county clerk’s office regularly closes. Ark. Code § 7-5-418(a)(2)",
      "pageUpdated": "Rev. July 2026 (server last-modified 2026-07-13)",
      "read": "2026-11-12"
+    },
+    {
+     "field": "runoff.earlyVoting.hours",
+     "url": "https://www.sos.arkansas.gov/elections/voter-information/voter-registration-information/voting-in-arkansas",
+     "quote": "Vote Early Depending on the type of election being conducted, you may early vote during the 7 or 15 days prior to Election Day. In most counties, early voting is conducted at the county clerk’s office. ... During all other elections, early voting is available during your county clerk’s regular office hours.",
+     "pageUpdated": null,
+     "read": "2026-11-14"
+    },
+    {
+     "field": "runoff.earlyVoting.except",
+     "url": "https://sbec.arkansas.gov/wp-content/uploads/2026-CBEC-Manual.pdf",
+     "quote": "Other Elections: For general primary (primary runoff) elections held in March, general runoff elections held in December and special elections, early voting begins seven (7) days before the election during regular county clerk office hours and ends on the day before the election at the time the county clerk’s office regularly closes. [A.C.A. § 7-5-418(a)(2)] ... Holidays: Early voting shall not be held on state holidays. [A.C.A. § 7-5-418(a)(1)(B)]",
+     "pageUpdated": "2026 CBEC Procedures Manual, page 44 (server last-modified 2025-10-15)",
+     "read": "2026-11-14"
+    },
+    {
+     "field": "runoff.earlyVoting.except",
+     "url": "https://sbec.arkansas.gov/wp-content/uploads/2026-CBEC-PowerPoint-10-22-25.pdf",
+     "quote": "Early Voting: DEFAULT: County Clerk conducts early voting ... Must be held for all Dates and Times Required by Law ... Primary & General: (15 Days) 8 am to 6 pm M-F / 10 am to 4 pm Sat. ... All Other Elections: (7 Days) During Clerk’s Office Regular Hours ... Excludes all STATE Holidays – NOT County Holidays",
+     "pageUpdated": "2026 CBEC Training Presentation, 10-22-25 (server last-modified 2025-11-19)",
+     "read": "2026-11-14"
+    },
+    {
+     "field": "runoff.earlyVoting.except",
+     "url": "https://arkleg.state.ar.us/Home/FTPDocument?path=%2FACTS%2F2023R%2FPublic%2FACT92.pdf",
+     "quote": "AN ACT TO AMEND THE LAW CONCERNING EARLY VOTING ON COUNTY HOLIDAYS ... SECTION 1. Arkansas Code § 7-5-418(a)(1)(B), concerning early voting, is amended to read as follows: (B) Early voting shall not be available on state ... holidays. ... APPROVED: 2/17/23",
+     "pageUpdated": "Act 92 of the 2023 Regular Session (HB 1198)",
+     "read": "2026-11-14"
+    },
+    {
+     "field": "runoff.earlyVoting.except",
+     "url": "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf",
+     "quote": "November 26, 2026 – Thursday* 5 DAYS PRIOR TO THE GENERAL RUNOFF ELECTION Deadline for second public notification by CBEC of information described in § 7-5-202(a)(1). ... [*Deadlines falling on a Saturday, Sunday, or legal holiday are extended to the following business day, per Ark. Code § 7-1-108. The actual deadlines will be Friday, November 27, 2026.] ... *Deadlines that fall on a Saturday, Sunday, or legal holiday will advance to the next business day, per Ark. Code § 7-1-108. For this publication, the Office of the Secretary of State has interpreted “legal holiday” as being an official state holiday and an official federal holiday in which the deadline is affected by the availability of mail services through the United States Postal Service.",
+     "pageUpdated": "Rev. July 2026 (server last-modified 2026-07-13)",
+     "read": "2026-11-14"
+    },
+    {
+     "field": "runoff.earlyVoting.except",
+     "url": "https://sbec.arkansas.gov/wp-content/uploads/2026-Election-Coordinator-Manual.pdf",
+     "quote": "March 24, 2026 Early Vote Begins for General Primary “Runoff” Election • Runoff & Special Election early hours are County Clerk office working hours, no Saturday",
+     "pageUpdated": "2026 Election Coordinator Manual, its 2026 Filing & Election Period Calendar, page 7 (server last-modified 2026-03-20)",
+     "read": "2026-11-14"
+    },
+    {
+     "field": "runoff.earlyVoting.note",
+     "url": "https://sbec.arkansas.gov/wp-content/uploads/2026-Election-Coordinator-Manual.pdf",
+     "quote": "For other minor elections (such as school, runoffs, and special elections) sites must be available for a one-week period. ... For minor elections, they will be working the County Clerk regular office hours, which in most cases will be 8 a.m. to 4:30 p.m. Tuesday through Friday and Monday before Election Day and, no Saturday hours.",
+     "pageUpdated": "2026 Election Coordinator Manual, page 99 (server last-modified 2026-03-20)",
+     "read": "2026-11-14"
+    },
+    {
+     "field": "runoff.earlyVoting.note",
+     "url": "https://governor.arkansas.gov/news_post/sanders-closes-state-offices-on-friday-november-28-in-celebration-of-thanksgiving/",
+     "quote": "Sanders Closes State Offices on Friday, November 28 in Celebration of Thanksgiving Nov 21, 2025 ... do hereby proclaim November 27, 2025, as “THANKSGIVING DAY” in the State of Arkansas, and in order that state employees may spend this holiday with their families giving thanks, I further declare the State Capitol and state offices will be closed on Friday, November 28, 2025, as well.",
+     "pageUpdated": "2025 proclamation; none for 2026 found on governor.arkansas.gov",
+     "read": "2026-11-14"
     },
     {
      "field": "runoff.mail.returnDeadline.date",
@@ -6636,7 +6697,8 @@
     "available": true,
     "start": "2026-09-18",
     "end": "2026-11-02",
-    "note": "South Dakota's early voting is in-person absentee voting: from September 18 a registered voter can vote absentee in person at the County Auditor's office (and any satellite site the county lists) with photo ID or a signed identification affidavit, until 5:00 p.m. local time on Monday, November 2 (or the end of regular office hours, if later)."
+    "note": "South Dakota's early voting is in-person absentee voting: from September 18 a registered voter can vote absentee in person at the County Auditor's office (and any satellite site the county lists) with photo ID or a signed identification affidavit, until 5:00 p.m. local time on Monday, November 2 (or the end of regular office hours, if later).",
+    "hours": "during regular office hours"
    },
    "mail": {
     "noExcuse": true,

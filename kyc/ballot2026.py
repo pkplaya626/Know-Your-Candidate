@@ -18,12 +18,15 @@ must list exactly the offices this table puts on the ballot.
 
 Each office is ``(how it is filled, on the 2026 ballot, a note, source)``.
 Each chamber is ``(its name, seats, seats on the 2026 ballot, which, source)``;
-Nebraska's one chamber is its ``upper`` and its ``lower`` is None. Only
+Nebraska's one chamber is its ``upper`` and its ``lower`` is None. A term
+a note states whose source is a list that does not say it (South Dakota's
+candidate list) is cited to the provision that does, in ``TERMS``. Only
 regular elections are counted: a special election to fill an unexpired term
 (two Kansas Senate seats in 2026, for one) is not, and the page says
 "regular" wherever a count could be read as the whole ballot.
 """
 
+import re
 import urllib.parse
 
 from .government_maps import SEATS
@@ -841,18 +844,23 @@ STATES = {
             "all",
             "https://scvotes.gov/wp-content/uploads/2026/01/2026-Election-Calendar-Draft-scVOTES_.pdf"),
     },
+    # The Secretary of State's candidate list says who is on the 2026 ballot
+    # for each office and seat; the terms are the constitution's (TERMS).
+    # "last elected 2022" stood beside the governor's, attorney general's and
+    # secretary of state's on the list alone, which gives no year (read
+    # 2026-11-14), and is gone.
     "SD": {
         "governor": ("elected", True,
-            "4-year term; last elected 2022",
+            "4-year term",
             "https://vip.sdsos.gov/candidatelist.aspx?eid=774"),
         "lt": ("elected-jointly-with-governor", True,
             "listed as 'Governor and Lieutenant Governor' on the 2026 general candidate list; running mate nominated at party convention",
             "https://vip.sdsos.gov/candidatelist.aspx?eid=774"),
         "ag": ("elected", True,
-            "4-year term; last elected 2022; nominated at party convention",
+            "4-year term; nominated at party convention",
             "https://vip.sdsos.gov/candidatelist.aspx?eid=774"),
         "sos": ("elected", True,
-            "4-year term; last elected 2022",
+            "4-year term",
             "https://vip.sdsos.gov/candidatelist.aspx?eid=774"),
         "upper": ("Senate", 35, 35,
             "all (2-year terms)",
@@ -1239,6 +1247,163 @@ NEXT = {
     ("WV", "sos"): (2028, "https://sos.wv.gov/media/460/download?inline="),
 }
 
+# The provision that states the term an entry's words give, where the
+# entry's own source says who or what is on the 2026 ballot but not for how
+# long: South Dakota's offices and chambers cited the Secretary of State's
+# candidate list for "4-year term" and "all (2-year terms)", and the list
+# says neither (read 2026-11-14); the legislature page then said "Members
+# serve 2-year terms, as the state's record says" beside that list; so did
+# Vermont's, beside its candidates page.
+# {(state, office or chamber): (source, cite, the provision's words)}, each
+# the constitution, or a statute, as the state's own legislature publishes
+# it. The words must give the very term the entry states
+# (``_term_problems``), and the entry's own source still says which seats
+# and offices are on the ballot. The page names the provision on the ballot
+# marks, an office's and a chamber's alike (kyc-stategov.js citeTerm,
+# through ballotMark and upWords), and on the legislature panel's term line
+# (kyc-ballot.js chamberBallot, termCite). The governor overlay's "Term 4
+# years" (kyc-governor.js termLength) and the governor share pages' (kyc/
+# governor_share.py) do not name it yet.
+TERMS = {
+    ("SD", "governor"): ("https://sdlegislature.gov/api/Statutes/0N-4-2.html",
+        "S.D. Const. art. IV, s. 2",
+        "The Governor and lieutenant governor ... shall be jointly elected for a term of four years "
+        "at a general election held in a nonpresidential election year."),
+    ("SD", "ag"): ("https://sdlegislature.gov/api/Statutes/0N-4-7.html",
+        "S.D. Const. art. IV, s. 7",
+        "There shall be chosen by the qualified electors of the state at the general election of the "
+        "Governor and every four years thereafter the following constitutional officers: attorney "
+        "general, secretary of state, auditor, treasurer, and commissioner of school and public "
+        "lands, who shall severally hold their offices for a term of four years."),
+    ("SD", "sos"): ("https://sdlegislature.gov/api/Statutes/0N-4-7.html",
+        "S.D. Const. art. IV, s. 7",
+        "There shall be chosen by the qualified electors of the state at the general election of the "
+        "Governor and every four years thereafter the following constitutional officers: attorney "
+        "general, secretary of state, auditor, treasurer, and commissioner of school and public "
+        "lands, who shall severally hold their offices for a term of four years."),
+    ("SD", "upper"): ("https://sdlegislature.gov/api/Statutes/0N-3-6.html",
+        "S.D. Const. art. III, s. 6",
+        "The terms of office of the members of the Legislature shall be two years"),
+    ("SD", "lower"): ("https://sdlegislature.gov/api/Statutes/0N-3-6.html",
+        "S.D. Const. art. III, s. 6",
+        "The terms of office of the members of the Legislature shall be two years"),
+    # Vermont's cited the Secretary of State's candidates page, which names
+    # no term either (read 2026-11-14). The constitution names the
+    # governor's, lieutenant governor's and members' terms; the attorney
+    # general's is a statute's, 3 V.S.A. s. 151, as the Legislature
+    # publishes it. The secretary of state is not here: the constitution
+    # elects the secretary "biennially" (ch. II, s. 43), which says how often
+    # and not for how long, s. 48 leaves the election to legislation, and the
+    # secretary's chapter of the statutes, 3 V.S.A. ch. 5, names no term
+    # (its s. 101, "Commission; office", read 2026-11-14). No provision read
+    # gives it, so that mark states its term with none named.
+    ("VT", "governor"): ("https://legislature.vermont.gov/statutes/constitution-of-the-state-of-vermont/",
+        "Vt. Const. ch. II, s. 49",
+        "The term of office of the Governor, Lieutenant-Governor and Treasurer of the State, "
+        "respectively, shall commence when they shall be chosen and qualified, and shall continue for "
+        "the term of two years"),
+    ("VT", "lt"): ("https://legislature.vermont.gov/statutes/constitution-of-the-state-of-vermont/",
+        "Vt. Const. ch. II, s. 49",
+        "The term of office of the Governor, Lieutenant-Governor and Treasurer of the State, "
+        "respectively, shall commence when they shall be chosen and qualified, and shall continue for "
+        "the term of two years"),
+    ("VT", "ag"): ("https://legislature.vermont.gov/statutes/section/03/007/00151",
+        "3 V.S.A. s. 151",
+        "An Attorney General shall be elected at the same time and in the same manner as provided for "
+        "the election of other State officers. ... His or her term of office shall commence when his or "
+        "her election is declared by the committee appointed by the Senate and House of Representatives "
+        "to canvass the votes ... and continue for a term of two years."),
+    ("VT", "upper"): ("https://legislature.vermont.gov/statutes/constitution-of-the-state-of-vermont/",
+        "Vt. Const. ch. II, s. 46",
+        "The term of office of Senators and Representatives shall be two years"),
+    ("VT", "lower"): ("https://legislature.vermont.gov/statutes/constitution-of-the-state-of-vermont/",
+        "Vt. Const. ch. II, s. 46",
+        "The term of office of Senators and Representatives shall be two years"),
+}
+# Sources read and found to name no term's length and no year an office was
+# last elected (a candidate list; read 2026-11-14): an entry citing one
+# whose words give a term needs the provision that does (TERMS), and one
+# whose words give a last-elected year says it nowhere (``_term_problems``).
+# A source joins this list only once every entry citing it is held to it;
+# none of the other lists and calendars this file cites has been read for
+# this yet, and each waits for a person to read it.
+NO_TERM_STATED = frozenset({
+    "https://vip.sdsos.gov/candidatelist.aspx?eid=774",
+})
+_NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "eight": 8}
+
+
+def stated_terms(words):
+    """The term lengths, in years, an entry's note or basis gives: "4-year
+    term", "all (2-year terms)", "4-year staggered terms"."""
+    return {int(n) for n in re.findall(r"\b(\d)-year\b", str(words or ""))}
+
+
+# A length in years, as a provision writes it: "four", "four (4)", "4".
+_YEARS = r"(\d|" + "|".join(_NUMBER_WORDS) + r")(?:\s+\(\d\))?[- ]years?\b"
+# Only the forms that say how long a term of office is: "for a term of four
+# years", "the term of two years", "The terms of office of the members of
+# the Legislature shall be two years", "a 2-year term". A clause that says
+# how often an election is held ("every four years thereafter", S.D. Const.
+# art. IV, s. 7) or when ("biennially") is no term's length.
+_TERM_FORMS = (
+    re.compile(r"\bterms?\s+of\s+" + _YEARS, re.I),
+    re.compile(r"\bterms?\s+of\s+office\b[^.;]{0,120}?\bshall\s+be\s+" + _YEARS, re.I),
+    re.compile(r"\b" + _YEARS + r"(?:\s+[a-z]+)?\s+terms?\b", re.I),
+)
+
+
+def provision_terms(words):
+    """The term lengths, in years, a provision's words give as a term of
+    office's (``_TERM_FORMS``): "for a term of four years", "The terms of
+    office of the members of the Legislature shall be two years", "a 2-year
+    term"; never an election's frequency ("every four years thereafter")."""
+    out = set()
+    for form in _TERM_FORMS:
+        for n in form.findall(str(words or "")):
+            out.add(int(n) if n.isdigit() else _NUMBER_WORDS[n.lower()])
+    return out
+
+
+def _term_problems(terms, every):
+    """TERMS' provisions give the very term each entry states, and an entry
+    citing a source that names no term (``NO_TERM_STATED``) states none
+    without one, nor a last-elected year at all."""
+    problems = []
+    for (code, key), value in sorted(terms.items()):
+        item = _item(every.get(code), key)
+        if item is None:
+            problems.append(f"term {code} {key}: no such office or chamber")
+            continue
+        source, cite, words = value
+        stated = stated_terms(item[2] if key in OFFICES else item[3])
+        given = provision_terms(words)
+        if not stated:
+            problems.append(f"term {code} {key}: the entry states no term for {cite} to give")
+        elif not stated <= given:
+            problems.append(f"term {code} {key}: the entry states "
+                            f"{', '.join(f'{n}-year' for n in sorted(stated))} terms, and {cite}'s words "
+                            f"give {', '.join(f'{n}-year' for n in sorted(given)) or 'none'}")
+        if not cite or not words:
+            problems.append(f"term {code} {key}: no citation or no words")
+        problems.extend(_source_problems(code, f"term {key}", source))
+    for code, entry in sorted(every.items()):
+        for key in OFFICES + ("upper", "lower"):
+            item = _item(entry, key)
+            if item is None:
+                continue
+            words, source = (item[2], item[3]) if key in OFFICES else (item[3], item[4])
+            if source not in NO_TERM_STATED:
+                continue
+            if stated_terms(words) and (code, key) not in terms:
+                problems.append(f"{code} {key}: states a term its source, which names none, does not "
+                                f"say, and TERMS gives no provision that does")
+            if re.search(r"\blast elected\b|\(last \d{4}\)", words):
+                problems.append(f"{code} {key}: states the year it was last elected, which its source "
+                                f"does not say")
+    return problems
+
+
 # Offices on the ballot whose holder cannot run for them again, where the
 # constitution or the organic act says so (audit 2026-10-17, STATEGOV-01):
 # the term limit, read with the NGA's count of the governor's terms. Never
@@ -1288,13 +1453,14 @@ class Ballot2026Error(ValueError):
     pass
 
 
-def check(states=None, territories=None, next_=None, open_seats=None, district=None):
+def check(states=None, territories=None, next_=None, open_seats=None, district=None, terms=None):
     """Every rule the tables must keep; raises with every breach at once."""
     states = STATES if states is None else states
     territories = TERRITORIES if territories is None else territories
     district = DISTRICT if district is None else district
     next_ = NEXT if next_ is None else next_
     open_seats = OPEN_SEATS if open_seats is None else open_seats
+    terms = TERMS if terms is None else terms
     problems = []
     if sorted(district) != sorted(DISTRICT_CODES):
         problems.append(f"district: {', '.join(sorted(district))}, not {', '.join(DISTRICT_CODES)}")
@@ -1329,6 +1495,7 @@ def check(states=None, territories=None, next_=None, open_seats=None, district=N
                                 f"its governor's only where it is elected")
         problems.extend(_office_problems(code, entry))
     every = dict(states, **territories, **district)
+    problems.extend(_term_problems(terms, every))
     for (code, key), value in sorted(next_.items()):
         item = _item(every.get(code), key)
         year, source, *rest = value
@@ -1500,6 +1667,14 @@ def for_state(code):
         name, total, up, basis, source = chamber
         out["chambers"][which] = {"name": name, "seats": total, "up": up, "basis": basis,
                                   "source": source}
+    # The provision that states a term the entry's own source does not
+    # (TERMS), for the page to name where it says the term.
+    for (state, key), (source, cite, _words) in TERMS.items():
+        if state != code:
+            continue
+        target = out["offices"].get(key) or out["chambers"].get(key)
+        if target is not None:
+            target["termSource"] = {"url": source, "cite": cite}
     for (state, key), (year, source, *month) in NEXT.items():
         if state != code:
             continue

@@ -178,8 +178,23 @@
     if (!item) return "";
     return '<a class="gov-ballot-mark' + (item.up ? " up" : "") + '" href="' +
       KYC.escapeAttr(item.source) + '" target="_blank" rel="noopener noreferrer" title="' +
-      KYC.escapeAttr((item.up && item.note ? upWords(item) : item.note || item.basis || "") +
+      KYC.escapeAttr((item.up && item.note ? upWords(item) : citeTerm(item.note || item.basis || "", item)) +
         (more || "")) + '">' + KYC.escapeHtml(text) + "</a>";
+  }
+
+  /** *text*'s term length with the provision that states it, where the
+   *  mark's own link is a list that does not (ballot2026.TERMS, the item's
+   *  termSource): "4-year term (S.D. Const. art. IV, s. 2)", "all (2-year
+   *  terms; S.D. Const. art. III, s. 6)". One reading for an office's hover
+   *  (upWords) and a chamber's (rule 12): South Dakota's and Vermont's
+   *  chambers hovered "all (2-year terms)" beside a candidate list that
+   *  names no term, while their offices named the constitution. */
+  function citeTerm(text, item) {
+    var cite = item && item.termSource && item.termSource.cite;
+    if (!cite) return text;
+    return String(text).replace(/\b\d+-year(?:\s+[a-z]+)?\s+terms?\b(\))?/g, function (words, close) {
+      return close ? words.slice(0, -1) + "; " + cite + ")" : words + " (" + cite + ")";
+    });
   }
 
   /* An office on the ballot's hover: the term's length its note opens
@@ -196,7 +211,9 @@
     var years = termYears(item);
     var parts = [];
     if (after()) parts.push("On the Nov 3, 2026 ballot");
-    if (years) parts.push(years + "-year term");
+    // The provision that says the term, where the mark's own link is a list
+    // that does not (ballot2026.TERMS: South Dakota's candidate list).
+    if (years) parts.push(citeTerm(years + "-year term", item));
     return parts.join("; ");
   }
 
