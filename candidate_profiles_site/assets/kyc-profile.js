@@ -1486,8 +1486,9 @@
     // Nor is someone the results elected still "Running for" it, beside a
     // term "if elected" (results night, 2026-11-04: Guam's new delegate).
     var won = settled === "elected";
+    // The day in words, as the term beside it is (KYC.dateWords).
     el("profileModalRegionLabel").textContent = item.formerMember
-      ? "Represented (until " + item.formerMember.left + ")"
+      ? "Represented (until " + KYC.dateWords(item.formerMember.left) + ")"
       : !item.isCandidate ? "Represents"
       : settled === "unlisted" ? "Filed for"
       : won ? "Elected to"

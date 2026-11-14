@@ -5788,6 +5788,263 @@ async function testOtherSeatWords() {
   });
 }
 
+/* The seat a member holds or held, and a day, in a sentence's words (rules
+ * 4, 75, 96). PR #250 put the seat a member ran for in words and left the
+ * seat held a card's label: the run's hover read "; holds House • CA-3 until
+ * 2027-01-03" and "; not seeking re-election to House • IA-2, whose term
+ * ends 2027-01-03"; the dialog's status line "Elected in November for Senate
+ * • KY", its cross-link "Elected in 2026 to Senate • KY; holds House • KY-6"
+ * and "Held until 2027-01-03 House • CA-3", a filing's record line "as the
+ * member for House • KY-6", a former member's "Left office 2026-12-08" and an
+ * other office's "(read 2026-10-17)". On every clock the data reaches, over
+ * every profile the data holds and over made-up members of every kind (a
+ * House member running for the Senate, a senator running for the House or
+ * for governor, a renumbered member, a delegate, a former member, an
+ * appointee), in every status: no hover, status line or share description
+ * runs a card's label (" • ") or an ISO day into its words, and a run's hover
+ * and the cross-link name the seat held as KYC.heldSeatInWords says it. A
+ * label standing alone (a card's office line, the dialog's region line, a
+ * badge's own words) stays a label. */
+async function testHeldSeatWords() {
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  const january = (meta.election || {}).phase === "record";
+  const clocks = january ? [["January", JANUARY_NOW]]
+    : [["the campaign", undefined], ["after Election Day", "2026-11-13T12:00:00"]];
+  const LABEL = /•/;
+  const ISO = /\b\d{4}-\d{2}-\d{2}\b/;
+  const wrongIn = (s) => LABEL.test(s) ? "a card's label" : ISO.test(s) ? "an ISO day" : "";
+  const STATUSES = ["", "nominee", "qualified", "elected", "defeated", "eliminated", "withdrawn", "unlisted",
+    "runoff"];
+  for (const [name, now] of clocks) {
+    const built = await buildPage("index.html", now ? { now } : {});
+    await settle(50);
+    const { window, D, errors } = built;
+    const KYC = window.KYC;
+    const day = now ? new window.Date(now) : new window.Date(2026, 9, 1, 12);
+    const people = window.legislatorsData;
+    const badgesOf = (html) => {
+      const box = D.createElement("div");
+      box.innerHTML = html;
+      return [...box.querySelectorAll(".badge")].map((b) => ({ text: b.textContent, title: b.title || "" }));
+    };
+    // Everything a reader is told in words about *p* outside the dialog: the
+    // card's badges and their hovers, the run's clause and hover, the status
+    // words and the other office's.
+    const saidOf = (p, opts) => {
+      const out = [];
+      badgesOf(KYC.cards.statusBadge(p)).forEach((b) => out.push(["badge", b.text], ["badge's hover", b.title]));
+      const line = KYC.contestLine(p, opts);
+      if (line) out.push(["run's clause", line.clause], ["run's hover", line.title]);
+      const spec = KYC.standing(p, "long");
+      if (spec) out.push(["status", spec.label], ["status's hover", spec.title || ""]);
+      const other = KYC.otherOffice(p, opts && opts.now);
+      if (other) out.push(["other office", other.text], ["other office's hover", other.title]);
+      return out;
+    };
+    // The dialog, as a reader opens it: its status line and every hover in
+    // it, the cross-link, the region line's label and the record's credit.
+    const dialogOf = (p) => {
+      KYC.profile.open(p.id, { fromRoute: true });
+      const out = [];
+      const status = D.getElementById("profileModalStatus");
+      out.push(["status line", status.textContent]);
+      [...status.querySelectorAll("[title]")].forEach((e) => out.push(["status line's hover", e.title]));
+      const cross = D.getElementById("profileModalCrossLink");
+      if (!cross.hidden) out.push(["cross-link", cross.textContent.replace(/\s+/g, " ").trim()]);
+      out.push(["region line", D.getElementById("profileModalRegionLabel").textContent]);
+      [...D.querySelectorAll("#profileModal .field-credit")].forEach((c) => {
+        if (/record as the member/.test(c.textContent)) out.push(["record's credit", c.textContent]);
+      });
+      KYC.profile.close();
+      return out;
+    };
+    const held = (p) => KYC.heldSeatInWords(p.officeLabel);
+
+    suite(`the seat a member holds or held, in words — ${name} (rules 4, 75, 96)`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      // A: every profile the data holds, outside the dialog.
+      const off = [];
+      people.forEach((p) => saidOf(p).forEach(([what, s]) => {
+        // A badge's own words are a label ("Elected to Senate KY"), never a
+        // day; its hover and every other part are sentences.
+        const why = what === "badge" ? (ISO.test(s) ? "an ISO day" : "") : wrongIn(s);
+        if (why) off.push(`${p.name} (${p.id}), ${what}: ${why}: ${s.slice(0, 140)}`);
+      }));
+      check("no card, hover or status word of any profile runs a label or an ISO day into its words",
+        off.length === 0, off.slice(0, 5).join(" | ") || `${people.length} profiles`);
+      // B: every run's hover names the seat held in its words, and its day.
+      const movers = people.filter((p) => !p.isCandidate && p.contestLabel);
+      const named = movers.filter((p) => {
+        const t = KYC.contestLine(p).title;
+        const end = String(p.term_start || "").split(" - ")[1] || "";
+        const left = p.formerMember && p.formerMember.left;
+        return t.indexOf(" " + held(p)) === -1 ||
+          (left && t.indexOf("until " + KYC.dateWords(left)) === -1) ||
+          (!left && /whose term ends|until [A-Z]/.test(t) && t.indexOf(KYC.dateWords(end)) === -1);
+      });
+      check("every run's hover names the seat held as KYC.heldSeatInWords says it, and its day in words",
+        movers.length > 0 && named.length === 0,
+        named.slice(0, 4).map((p) => `${p.name}: ${KYC.contestLine(p).title}`).join(" | ") ||
+          `${movers.length} members; ${movers.length ? KYC.contestLine(movers[0]).title : ""}`);
+      // C: the dialog, for everyone it says a seat or a day for: the movers
+      // and their filings, every filing a sitting member made for another
+      // seat, former members, members bound for another office, the
+      // District's and the territories' members, appointees.
+      const asked = people.filter((p) => (!p.isCandidate && (p.contestLabel || p.formerMember || p.otherOffice ||
+          p.appointed || /^House • (?:AS|DC|GU|MP|PR|VI)-AL$/.test(p.officeLabel || ""))) ||
+        (p.isCandidate && p.incumbentId && p.incumbentId !== p.id));
+      const dialogOff = [];
+      asked.forEach((p) => dialogOf(p).forEach(([what, s]) => {
+        // The region line is a label ("Represents", "Represented (until
+        // Dec. 8, 2026)"), with a day only in words.
+        const why = what === "region line" ? (ISO.test(s) ? "an ISO day" : "") : wrongIn(s);
+        if (why) dialogOff.push(`${p.name} (${p.id}), ${what}: ${why}: ${s.slice(0, 140)}`);
+      }));
+      check("no dialog's status line, cross-link, region line or record's credit runs a label or an ISO day " +
+        "into its words", asked.length > 0 && dialogOff.length === 0,
+        dialogOff.slice(0, 5).join(" | ") || `${asked.length} dialogs`);
+      // The cross-link names both seats in words: the run's (seatInWords)
+      // and, for a run elsewhere, the seat held.
+      // A member with a filing of their own for that seat links it ("Also
+      // running for the U.S. Senate in Kentucky"); one without says both
+      // ("Running in 2026 for ... instead of KY-6"); the filing links the
+      // member's seat ("Currently holds KY-6", "Held CA-3 until ...").
+      const crossOf = (p) => dialogOf(p).filter(([what]) => what === "cross-link").map(([, s]) => s).join(" ");
+      const filings = people.filter((p) => p.isCandidate && p.incumbentId && p.incumbentSeat &&
+        p.incumbentId !== p.id);
+      const crossOff = movers.concat(filings).filter((p) => {
+        const said = crossOf(p);
+        if (p.isCandidate) return said.indexOf(KYC.heldSeatInWords(p.incumbentSeat)) === -1;
+        if (p.alsoRunningId && p.alsoRunningSeat) return said.indexOf(KYC.seatInWords(p.alsoRunningSeat)) === -1;
+        return said.indexOf(KYC.seatInWords(p.contestLabel)) === -1 ||
+          (!KYC.contestLine(p).renumbered && said.indexOf(held(p)) === -1);
+      });
+      check("the cross-link names the seat run for and the seat held in words",
+        movers.length > 0 && filings.length > 0 && crossOff.length === 0,
+        crossOff.slice(0, 3).map((p) => `${p.name}: ${crossOf(p)}`).join(" | ") ||
+          `${movers.length} members, ${filings.length} filings; ` +
+          [movers.find((p) => !p.alsoRunningId), filings[0]].filter(Boolean).map(crossOf).join(" | "));
+
+      // D: made-up members of every kind, in every status, sitting and
+      // former: a real member's profile borrowed, given the fields, and put
+      // back exactly as it was (KYC.byId indexes the profiles once).
+      const seat = people.find((p) => KYC.seated(p) && !p.contestLabel && !p.otherOffice && !p.appointed &&
+        p.chamber === "House" && p.state === "KY");
+      const senator = people.find((p) => KYC.seated(p) && !p.contestLabel && !p.otherOffice && !p.appointed &&
+        /Senate/.test(p.chamber) && p.state === "KY");
+      const KINDS = [
+        ["a House member running for the Senate", seat, { officeLabel: "House • KY-6", contestLabel: "Senate • KY",
+          contestRaceId: "S-KY-2026", raceStatusRace: "S-KY-2026" }],
+        ["a renumbered member", seat, { officeLabel: "House • KY-6", contestLabel: "House • KY-5",
+          contestRaceId: "H-KY-05-2026", raceStatusRace: "H-KY-05-2026", renumbered: true }],
+        ["a senator running for the House", senator, { officeLabel: "Senate • KY", contestLabel: "House • KY-6",
+          contestRaceId: "H-KY-06-2026", raceStatusRace: "H-KY-06-2026", raceId: "S-KY-2026" }],
+        ["the District's delegate running for a seat", seat, { officeLabel: "House • DC-AL", state: "DC",
+          district: "At-Large", raceId: "H-DC-00-2026", contestLabel: "House • MD-4",
+          contestRaceId: "H-MD-04-2026", raceStatusRace: "H-MD-04-2026" }],
+        ["an appointee running for the House", senator, { officeLabel: "Senate • KY", appointed: true,
+          contestLabel: "House • KY-6", contestRaceId: "H-KY-06-2026", raceStatusRace: "H-KY-06-2026",
+          raceId: "S-KY-2026" }],
+      ];
+      const OTHER = { text: "Democratic nominee for Governor of Kentucky",
+        source: "https://en.wikipedia.org/wiki/2026_Kentucky_gubernatorial_election", checked: "2026-10-17" };
+      const LEFT = { left: "2026-12-08", via: "legislators-historical", congress: 119 };
+      const borrow = (p, fields, fn) => {
+        const keys = Object.keys(fields).concat(["alsoRunningId", "alsoRunningSeat", "raceStatusDecided",
+          "raceStatusUnconfirmed", "formerMember", "otherOffice", "appointed", "renumbered", "contestLabel",
+          "contestRaceId", "raceStatusRace", "raceStatus"]);
+        const saved = {};
+        keys.forEach((k) => { saved[k] = Object.prototype.hasOwnProperty.call(p, k) ? [p[k]] : null; });
+        keys.forEach((k) => { if (!(k in fields)) delete p[k]; });
+        Object.assign(p, fields);
+        try { return fn(p); } finally {
+          keys.forEach((k) => { if (saved[k]) p[k] = saved[k][0]; else delete p[k]; });
+        }
+      };
+      const fakeOff = [];
+      let asks = 0;
+      const ask = (kind, p, fields) => borrow(p, fields, (item) => {
+        asks += 1;
+        const tag = `${kind}, ${item.raceStatus || "(no status)"}${item.formerMember ? ", former" : ""}`;
+        saidOf(item, { now: day }).concat(dialogOf(item)).forEach(([what, s]) => {
+          const why = what === "badge" || what === "region line" ? (ISO.test(s) ? "an ISO day" : "") : wrongIn(s);
+          if (why) fakeOff.push(`${tag}, ${what}: ${why}: ${s.slice(0, 160)}`);
+        });
+        const line = KYC.contestLine(item, { now: day });
+        if (line) {
+          const words = KYC.heldSeatInWords(item.officeLabel);
+          const verbs = item.formerMember ? ["held " + words + " until " + KYC.dateWords(LEFT.left)]
+            : ["holds " + words, "re-election to " + words];
+          if (!verbs.some((v) => line.title.indexOf(v) !== -1)) fakeOff.push(`${tag}, run's hover: ${line.title}`);
+        }
+      });
+      if (seat && senator) {
+        KINDS.forEach(([kind, p, fields]) => STATUSES.forEach((status) => [0, 1].forEach((former) => {
+          ask(kind, p, Object.assign({}, fields, { raceStatus: status }, former ? { formerMember: LEFT } : {}));
+        })));
+        // A senator bound for another office, with no run for Congress: their
+        // status line and its hovers, sitting and former.
+        [0, 1].forEach((former) => ask("a senator running for governor", senator,
+          Object.assign({ otherOffice: OTHER, raceStatus: "" }, former ? { formerMember: LEFT } : {})));
+        // An appointee who is not running: "Not running in 2026".
+        [0, 1].forEach((former) => ask("an appointee not running", senator,
+          Object.assign({ appointed: true, raceStatus: "unlisted", raceId: "S-KY-2026" },
+            former ? { formerMember: LEFT } : {})));
+      }
+      check("and so for made-up members of every kind, in every status, sitting and former",
+        !!seat && !!senator && asks >= 90 && fakeOff.length === 0,
+        fakeOff.slice(0, 5).join(" | ") || `${asks} made-up members`);
+      // The words themselves, made here: the forms a reader is given.
+      const sample = (fields) => borrow(seat, Object.assign({ raceStatus: "" }, fields),
+        (item) => KYC.contestLine(item, { now: day }).title);
+      const fromIA = sample({ officeLabel: "House • IA-2", contestLabel: "Senate • IA", contestRaceId: "S-IA-2026",
+        raceStatusRace: "S-IA-2026", term_start: "2025-01-03 - 2027-01-03" });
+      const fromDC = sample({ officeLabel: "House • DC-AL", state: "DC", contestLabel: "House • MD-4",
+        contestRaceId: "H-MD-04-2026", raceStatusRace: "H-MD-04-2026" });
+      const fromKY = sample({ officeLabel: "Senate • KY", contestLabel: "House • KY-6",
+        contestRaceId: "H-KY-06-2026", raceStatusRace: "H-KY-06-2026" });
+      const counted = KYC.electionStatus(2026, day).phase === "post-election";
+      check("made here: the hover's words for a district, the District's seat and a Senate seat",
+        (counted ? /; not seeking re-election to IA-2, whose term ends Jan\. 3, 2027\.$/
+          : /; not seeking re-election to IA-2\.$/).test(fromIA) &&
+          /re-election to the District of Columbia’s seat in the U\.S\. House/.test(fromDC) &&
+          /re-election to a U\.S\. Senate seat from Kentucky/.test(fromKY),
+        [fromIA, fromDC, fromKY].join(" | "));
+    });
+    window.close();
+  }
+
+  // E: every profile's and race's share page, as written: its description,
+  // its status line and the other office's credit; and every state page's
+  // plain lists' standings.
+  const pageOff = [];
+  let pages = 0;
+  const grab = (re, html) => [...html.matchAll(re)].map((m) => unescapeHtml(m[1]));
+  ["p", "r"].forEach((dir) => fs.readdirSync(path.join(SITE, dir)).forEach((f) => {
+    const html = fs.readFileSync(path.join(SITE, dir, f), "utf8");
+    pages += 1;
+    grab(/<meta name="description" content="([^"]*)">/g, html)
+      .concat(grab(/<p class="share-status"><strong>(.*?)<\/strong>/g, html))
+      .concat(grab(/<p class="share-other">(.*?)<\/p>/g, html).map((s) => s.replace(/<[^>]+>/g, "")))
+      .concat(grab(/<span class="share-standing">(.*?)<\/span>/g, html))
+      .forEach((s) => {
+        const why = wrongIn(s);
+        if (why) pageOff.push(`${dir}/${f}: ${why}: ${s.slice(0, 140)}`);
+      });
+  }));
+  fs.readdirSync(path.join(SITE, "states")).filter((f) => /\.html$/.test(f)).forEach((f) => {
+    const html = fs.readFileSync(path.join(SITE, "states", f), "utf8");
+    grab(/<span class="share-standing">(.*?)<\/span>/g, html).forEach((s) => {
+      const why = wrongIn(s);
+      if (why) pageOff.push(`states/${f}: ${why}: ${s.slice(0, 140)}`);
+    });
+  });
+  suite("share pages and the state pages' plain lists — the seat and the day in words (rule 96)", () => {
+    check("no share description, status line or standing runs a label or an ISO day into its words",
+      pages > 1000 && pageOff.length === 0, pageOff.slice(0, 5).join(" | ") || `${pages} pages`);
+  });
+}
+
 async function testRunningElsewhere() {
   const { window, D } = await buildPage("index.html");
   const KYC = window.KYC;
@@ -5858,16 +6115,17 @@ async function testRunningElsewhere() {
 
     const badProfiles = decided.filter((p) => {
       const t = profileStatus(p);
+      // The seat they ran for in words (KYC.seatInWords), never the label.
       return /not seeking re-election|Not running for (this seat|re-election)|Renominated/i.test(t) ||
-        !t.includes(p.contestLabel);
+        !t.includes(KYC.seatInWords(p.contestLabel)) || t.includes(p.contestLabel);
     });
     check("no profile calls them off the ballot or renominated", badProfiles.length === 0,
       badProfiles.map((p) => p.name + ": " + profileStatus(p)).join(" | "));
     check("a nominee's profile says which November ballot",
-      nominees.every((p) => profileStatus(p).includes("On the November ballot for " + p.contestLabel)),
+      nominees.every((p) => profileStatus(p).includes("On the November ballot for " + KYC.seatInWords(p.contestLabel))),
       nominees.length ? profileStatus(nominees[0]) : "");
     check("a loser's profile says which primary",
-      losers.every((p) => profileStatus(p).includes("Lost the 2026 primary for " + p.contestLabel)),
+      losers.every((p) => profileStatus(p).includes("Lost the 2026 primary for " + KYC.seatInWords(p.contestLabel))),
       losers.length ? profileStatus(losers[0]) : "none in the data");
 
     // The card carries the filing's result inside the run's one badge
@@ -14645,6 +14903,19 @@ async function testLongBadgesWrap() {
   await settle(100);
   const rowBadges = [...folded.D.querySelectorAll(".race-row-badges .badge")];
   const rowCss = /\.race-row-main\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/.test(css);
+  // The status line of a member who ran for another seat, the seat in words
+  // ("Elected in November for the U.S. Senate in Kentucky", rule 96): longer
+  // than the label it replaced, and centred in the dialog.
+  const mover = index.window.KYC.people().find((p) => !p.isCandidate && /^Senate/.test(p.contestLabel || "") &&
+    index.window.KYC.standing(p, "long"));
+  let moverBadge = null;
+  if (mover) {
+    index.window.KYC.profile.open(mover.id);
+    await until(() => !index.D.getElementById("profileModalStatus").hidden, 4000);
+    moverBadge = [...index.D.querySelectorAll("#profileModalStatus .badge")]
+      .find((b) => b.textContent.indexOf(index.window.KYC.seatInWords(mover.contestLabel)) !== -1) || null;
+    index.window.KYC.profile.close();
+  }
   // A leadership post in the dialog, for a member who holds one.
   const leader = index.window.KYC.people().find((p) => index.window.KYC.seated(p) && (p.leadership || []).length);
   let post = null;
@@ -14671,6 +14942,9 @@ async function testLongBadgesWrap() {
         ": " + (f.el.parentElement.className || f.el.parentElement.id)).join(" | "));
     check("a leadership post's badge wraps too", !leader || (!!post && wraps(post)),
       leader && leader.name + ": " + (post ? post.textContent : "no badge drawn"));
+    check("and the status line of a member who ran for another seat, the seat in words",
+      !mover || (!!moverBadge && wraps(moverBadge)),
+      mover ? mover.name + ": " + (moverBadge ? moverBadge.textContent : "no badge drawn") : "no such member");
     check("a folded race row's badges wrap, in a text column no wider than the row",
       rowBadges.length > 0 && rowBadges.every(wraps) && rowCss,
       rowBadges.length + " badges on Florida's rows" + (rowCss ? "" : "; .race-row-main sets no minmax(0, 1fr) column") +
@@ -15711,11 +15985,14 @@ async function testFormerIncumbent() {
     check("the Senate is still 100", ids.length === 100, `${ids.length}`);
     KYC.profile.open(holder.id);
     const meta = D.querySelector("#profileModal .modal-meta").textContent;
+    // The day in words, as the page writes a day ("Left office 2026-12-08"
+    // stood on her status line).
     check("her dialog says she represented the state until she left",
-      /Represented \(until 2026-12-08\)/.test(meta) && !/Represents/.test(meta),
+      /Represented \(until Dec\. 8, 2026\)/.test(meta) && !/Represents/.test(meta),
       meta.replace(/\s+/g, " "));
     check("and says she left office",
-      /Left office 2026-12-08/.test(D.getElementById("profileModalStatus").textContent));
+      /Left office Dec\. 8, 2026/.test(D.getElementById("profileModalStatus").textContent),
+      D.getElementById("profileModalStatus").textContent);
     KYC.profile.close();
     KYC.profile.open(race.winnerId);
     const status = D.getElementById("profileModalStatus").textContent;
@@ -17697,7 +17974,9 @@ async function testSharePages() {
     const spec = KYC.standing(p, "long", asWritten);
     if (!spec) return null;
     const line = KYC.ballotLine(p);
-    return spec.label + (!p.isCandidate && p.contestLabel ? " for " + p.contestLabel : "") +
+    // The seat run for in words, as the dialog's status line says it
+    // ("for the U.S. Senate in Kentucky", never "for Senate \u2022 KY").
+    return spec.label + (!p.isCandidate && p.contestLabel ? " for " + KYC.seatInWords(p.contestLabel) : "") +
       (line ? " \u2013 " + line + " line" : "");
   };
   // The source a status's long title credits: its words after "Source:".
@@ -18058,7 +18337,9 @@ async function testSharePages() {
     // same, and the hover says they held the seat, until the day they left -
     // never "holds" it or "not seeking re-election" to it. Kevin Kiley's, in
     // Ami Bera's January dialog, read "Held this seat. ...; holds House •
-    // CA-3 until 2027-01-03" (PR #225 review).
+    // CA-3 until 2027-01-03" (PR #225 review). The seat held and the day are
+    // in words (KYC.heldSeatInWords, dateWords): "held AL-2 until Dec. 1,
+    // 2026", never "held House • AL-2 until 2026-12-01".
     const gone = table.contest.filter(([status, renumbered, post, decided, unconfirmed, clause]) => {
       const item = { id: "FAKE", isCandidate: false, name: "A Member",
         party: "Republican", officeLabel: "House • AL-2", raceId: "H-AL-02-2026",
@@ -18070,7 +18351,7 @@ async function testSharePages() {
         formerMember: { left: "2026-12-01" } };
       const line = KYC.contestLine(item, { now: post ? AFTER_DAY : CAMPAIGN_DAY });
       return !line || line.clause !== clause || /holds |re-election to |whose term ends/.test(line.title) ||
-        !/; held House • AL-2 until 2026-12-01\.$/.test(line.title);
+        !/; held AL-2 until Dec\. 1, 2026\.$/.test(line.title);
     });
     check("and a member who has left held the seat, in every status", gone.length === 0,
       gone.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${table.contest.length} cases`);
@@ -18110,6 +18391,22 @@ async function testSharePages() {
       return !line || line.clause !== clause;
     });
     const wordsOff = (table.seatWords || []).filter(([label, words]) => KYC.seatInWords(label) !== words);
+    // The seat a member holds or held, in a sentence's words, alike on both
+    // sides (KYC.heldSeatInWords, share.held_seat_in_words): every state's
+    // Senate seat as one of its two, and the District's and each territory's
+    // one House seat in the place's own words (rule 75). The hovers read
+    // "; holds House • CA-3 until 2027-01-03".
+    const heldRows = table.heldSeatWords || [];
+    const heldOff = heldRows.filter(([label, words]) => KYC.heldSeatInWords(label) !== words);
+    check("and the seat a member holds or held in a sentence's words, on both sides",
+      heldRows.length >= 55 && heldOff.length === 0 &&
+        heldRows.some((r) => r[1] === "a U.S. Senate seat from Kentucky") &&
+        heldRows.some((r) => r[1] === "the District of Columbia’s seat in the U.S. House") &&
+        heldRows.some((r) => r[1] === "the U.S. Virgin Islands’ seat in the U.S. House") &&
+        heldRows.some((r) => r[1] === "KY-6") &&
+        !heldRows.some(([label, words]) => label !== "Governor" && /•/.test(words)),
+      heldOff.slice(0, 4).map((r) => JSON.stringify(r) + " page: " + KYC.heldSeatInWords(r[0])).join(" | ") ||
+        `${heldRows.length} cases`);
     const asLabel = /\b(?:Senate|House) [A-Z]{2}\b|•/;
     const allClauses = [].concat(table.contest, table.contestRounds, table.contestSeats || [], table.moved)
       .map((row) => row[row.length - 1]);
@@ -18786,9 +19083,12 @@ async function testVotes() {
       (house.members[p.incumbentId] || senate.members[p.incumbentId]));
     if (filing) {
       KYC.profile.open(filing.id);
-      const seat = KYC.byId(filing.incumbentId).officeLabel;
+      // The seat in a sentence's words (KYC.heldSeatInWords): "as the
+      // member for KY-6", never "for House • KY-6".
+      const seat = KYC.heldSeatInWords(KYC.byId(filing.incumbentId).officeLabel);
       check("a member's filing for another seat says which seat its votes were cast in",
         text("profileModalVotes").indexOf("record as the member for " + seat) !== -1 &&
+          ![...D.querySelectorAll("#profileModalVotes .field-credit")].some((c) => /•/.test(c.textContent)) &&
           D.querySelectorAll("#profileModalVoteList .vote-row").length > 0, text("profileModalVotes").slice(-160));
       KYC.profile.close();
     }
@@ -25021,8 +25321,11 @@ async function testTheJanuaryPage() {
   const presentOfFormer = (titles, people) => {
     const found = [];
     people.filter((p) => p.formerMember && !p.isCandidate && p.officeLabel).forEach((p) => {
-      // "House • GA-1", never the start of "House • GA-10".
-      const seat = p.officeLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?!\\d)";
+      // "House • GA-1", never the start of "House • GA-10"; and the seat in
+      // the words a hover now names it in (KYC.heldSeatInWords: "GA-1").
+      const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?!\\d)";
+      const seat = "(?:" + escape(p.officeLabel) + "|" +
+        escape(grid.window.KYC.heldSeatInWords(p.officeLabel)) + ")";
       const words = new RegExp("(?:holds|re-election to) " + seat);
       titles.forEach((t) => {
         const hit = words.exec(t);
@@ -25998,6 +26301,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();
   if (!only || only === "links" || only === "otherseat" || only === "january") await testOtherSeatWords();
+  if (!only || only === "links" || only === "otherseat" || only === "january" || only === "heldseat") await testHeldSeatWords();
   if (!only || only === "links") await testOtherRunWalk();
   if (!only || only === "links") await testDecidedRaceWords();
   if (!only || only === "links") await testHolderOffTheBallot();

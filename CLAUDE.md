@@ -3477,11 +3477,39 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     district map", an at-large one "WY-AL" as the badges write it), from one
     helper a side (`share.seat_in_words`, `KYC.seatInWords`), held together
     for every state by the status table's `seatWords` and `contestSeats`
-    rows; a badge keeps its label ("Elected to Senate KY"). The seat a
-    member holds or held keeps its label in those hovers ("not seeking
-    re-election to House • IA-2") and in the dialog's status line ("Elected
-    in November for Senate • KY"), as on every other profile: "holds" a
-    Senate seat would need words of its own. The longer clause leaves less
+    rows; a badge keeps its label ("Elected to Senate KY"). The first
+    version left the seat a member holds or held a label in those hovers
+    ("; holds House • CA-3 until 2027-01-03", "; not seeking re-election to
+    House • IA-2, whose term ends 2027-01-03"), and the seat run for a label
+    in the dialog's status line ("Elected in November for Senate • KY") and
+    its cross-link ("Elected in 2026 to Senate • KY; holds House • KY-6",
+    "Held until 2027-01-03 House • CA-3"), as on the share pages' status
+    lines and the state pages' plain lists, which say the dialog's words.
+    The seat run for is now `seatInWords` there too ("Elected in November
+    for the U.S. Senate in Kentucky", "Lost the 2026 primary for TX-18"),
+    and the seat held has words of its own, from one helper a side
+    (`KYC.heldSeatInWords`, `share.held_seat_in_words`), since "holds the
+    U.S. Senate in Kentucky" is false: a district its code ("holds KY-6",
+    "WY-AL"), a Senate seat one of the state's two ("a U.S. Senate seat from
+    Kentucky"), and the one House seat of the District or a territory in the
+    place's own words (rule 75: "the District of Columbia’s seat in the U.S.
+    House", "the U.S. Virgin Islands’ seat in the U.S. House"), held
+    together by the status table's `heldSeatWords` rows - in the hovers, the
+    cross-link ("Currently holds GA-10", "Held CA-3 until Jan. 3, 2027") and
+    a filing's record line ("as the member for KY-6"). A day in those
+    sentences is `KYC.dateWords`' ("whose term ends Jan. 3, 2027"), and so
+    is every day the same check found in a profile's words: a former
+    member's "Left office Dec. 8, 2026" and "Represented (until ...)", the
+    other office's "(read Oct. 17, 2026)" (on its share page too), and "the
+    results this site last read, on Nov. 13, 2026," in every awaited
+    result's hover (`resultsReadOn`). `testHeldSeatWords` asks it of every
+    profile's card, hovers and status words, of the dialogs that name a seat
+    or a day, of every share page and plain list, and of made-up members
+    of every kind (a House member running for the Senate, a senator running
+    for the House or for governor, a renumbered member, the District's
+    delegate, an appointee) in every status, sitting and former, on each
+    clock the data reaches; a label standing alone - a card's office line,
+    the dialog's region line, a badge's own words - stays a label. The longer clause leaves less
     of a race description's length for its list: KY-6's now names its
     winner and "and 2 more". A race's description credits its source before its list and
     stops at `share.DESCRIPTION_MAX` characters with how many more (an

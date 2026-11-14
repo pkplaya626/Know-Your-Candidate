@@ -336,8 +336,16 @@ page, so it is written by one set of helpers in `kyc/pages.py`, and
   otherwise the share card), the facts in plain text, and a link to the view
   that `assets/kyc-share.js` follows for a reader with scripts. Each status
   names the source the profile dialog credits; the description writes the
-  seat in words ("member of the U.S. House for AL-4"); a race page marks the
-  seat's holder. A page shared under an id its profile no longer has (a
+  seat in words ("member of the U.S. House for AL-4"), and so do a status
+  line, a list's standing and every hover that names a seat a member ran
+  for or holds: the seat run for as `KYC.seatInWords` /
+  `share.seat_in_words` says it ("Elected in November for the U.S. Senate
+  in Kentucky"), the seat held as `KYC.heldSeatInWords` /
+  `share.held_seat_in_words` does ("not seeking re-election to IA-2, whose
+  term ends Jan. 3, 2027", "a U.S. Senate seat from Kentucky", "the
+  District of Columbia’s seat in the U.S. House"), and a day in words,
+  never a card's "House • IA-2" or "2027-01-03" in a sentence; a race page
+  marks the seat's holder. A page shared under an id its profile no longer has (a
   folded filing, a filer since seated) is kept as that profile's, never
   deleted. "Copy link" in the profile dialog and on every race section gives
   this address, by a phone's share sheet, the clipboard, or a selected field
@@ -1947,7 +1955,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `seatUp2026` | This seat is on the 2026 ballot |
 | `seekingReelection2026` | Seat is up **and** the incumbent is on the ballot for it |
 | `raceId` | For a member, the seat they hold; for a challenger, the seat they filed for |
-| `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber. Never set for a winner seated since in the seat they won (`raceRole`); their held seat is `heldRaceId` |
+| `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber. Never set for a winner seated since in the seat they won (`raceRole`); their held seat is `heldRaceId`. `contestLabel` is a label ("Senate • KY"), for a badge; a sentence says it with `KYC.seatInWords` and the seat held (`officeLabel`) with `KYC.heldSeatInWords` (rule 96) |
 | `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy, matched first by any FEC id Congress's record lists for the member, then by name and state. The member's profile links that campaign's totals, labelled with its office and FEC id; they are never folded into the member's own (rule 68) |
 | `otherOffice` | Sitting members only: `{text, source, checked}` when they are another office's November nominee ("Republican nominee for Governor of Florida"), from `overrides.OTHER_OFFICE_NOMINEES`, each the winner the election's results page marks, read on `checked`. From the day after Election Day the page says it in the past tense ("Was the ..."), since this site does not read that race's result. Dropped once the member starts a new term |
 | `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; a state's certified list of November candidates, where one was read, decides `nominee` and `unlisted` over the results page (`raceStatusSource: "certified"`, rule 77); after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff), with `raceStatusSource: "national"` or `"national-counts"` where the national summary called the race (rule 63); and the race it refers to |

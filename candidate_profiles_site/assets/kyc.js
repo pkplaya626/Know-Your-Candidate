@@ -620,6 +620,15 @@
     card: "Awaiting result", long: "On the November ballot: awaiting result",
     mate: "Awaiting result", short: "Awaiting result" };
 
+  /* ", on Nov. 13, 2026," - the day the results were last read, in words
+   * (dateWords), for the hovers that say a result was awaited when this
+   * site last looked; "" where the build holds no such day. Every one of
+   * them read ", on 2026-11-13,", an ISO day in a sentence. */
+  function resultsReadOn() {
+    var asOf = (meta().election || {}).resultsAsOf;
+    return asOf ? ", on " + dateWords(String(asOf).slice(0, 10)) + "," : "";
+  }
+
   /* Once the new Congress sits, a nominee Congress's record seats for the
    * term their race decided, where the results this site last read marked
    * no winner (a refused or close mark, a majority not yet counted, a
@@ -631,12 +640,11 @@
   var SEATED_SOURCE = " Source: Congress's record of its members, from the congress-legislators project.";
 
   function seatedWords(term) {
-    var asOf = (meta().election || {}).resultsAsOf;
     return { cls: "badge-neutral", rank: 0,
       card: "Seated for the new term", long: "Seated for the " + term + " term",
       mate: "Seated", short: "Seated",
       title: "Seated for the " + term + " term, per Congress's record; the results this site " +
-        "last read" + (asOf ? ", on " + asOf + "," : "") + " had not marked a winner." };
+        "last read" + resultsReadOn() + " had not marked a winner." };
   }
 
   /* The others on that race's ballot, once the record seats someone for its
@@ -644,12 +652,11 @@
    * people on LA-4's ballot (the review of PR #227). They were on the
    * ballot, and nothing this site read says they lost: only who sits. */
   function seatedOtherWords(other) {
-    var asOf = (meta().election || {}).resultsAsOf;
     return { cls: "badge-neutral", rank: 0,
       card: "Was on the ballot", long: "Was on the November ballot",
       mate: "Was on the ballot", short: "Was on the ballot",
       title: "On the November ballot. The results this site last read" +
-        (asOf ? ", on " + asOf + "," : "") + " had not marked a winner; Congress's record seats " +
+        resultsReadOn() + " had not marked a winner; Congress's record seats " +
         other.name + " for the " + other.term + " term." };
   }
 
@@ -685,8 +692,7 @@
         raceTitle: "No candidate won a majority in the open primary. In the " + day +
           " general election, per the published results: " };
     }
-    var asOf = (meta().election || {}).resultsAsOf;
-    var waiting = "The results this site last read" + (asOf ? ", on " + asOf + "," : "") +
+    var waiting = "The results this site last read" + resultsReadOn() +
       " had not marked a winner.";
     return { cls: "badge-neutral", rank: 1,
       card: "Awaiting the " + short + " result", long: "Ran in the " + day + " general election: " +
@@ -712,8 +718,7 @@
     if (!m) return null;
     var day = ROUND_MONTHS[+m[1] - 1] + " " + (+m[2]);
     var short = ROUND_MONTHS[+m[1] - 1].slice(0, 3) + " " + (+m[2]);
-    var asOf = (meta().election || {}).resultsAsOf;
-    var waiting = "The results this site last read" + (asOf ? ", on " + asOf + "," : "") +
+    var waiting = "The results this site last read" + resultsReadOn() +
       " had not marked a winner.";
     return { cls: "badge-neutral", rank: 1,
       card: "Awaiting the " + short + " runoff result",
@@ -930,11 +935,10 @@
     }
     if ((status === "nominee" || status === "qualified") &&
         electionStatus(undefined, opts.now).phase === "post-election") {
-      var asOf = (meta().election || {}).resultsAsOf;
       spec = AWAITING;
       own = {};
       title = "On the November ballot. The results this site last read" +
-        (asOf ? ", on " + asOf + "," : "") + " had not marked a winner.";
+        resultsReadOn() + " had not marked a winner.";
       if (opts.seatedTerm) {
         spec = seatedWords(opts.seatedTerm);
         title = spec.title;
