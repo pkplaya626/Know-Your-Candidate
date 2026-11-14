@@ -24427,9 +24427,15 @@ async function testGovernorOverlays() {
       }
       if (made) delete made.termSource;
       window.kycStateGov = ownPart;
-      if (!/\.modal-meta \.gov-term-text\s*\{[^}]*display:\s*block/.test(
-        fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8"))) {
+      // Measured in headless Chrome at 280 and 320px: as one block the line
+      // fits, and the provision kept whole ("S.D. Const. art. IV, s." stood
+      // on one line and "2)" on the next).
+      const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+      if (!/\.modal-meta \.gov-term-text\s*\{[^}]*display:\s*block/.test(css)) {
         bad.push("kyc.css does not make the term's words one block");
+      }
+      if (!/\.modal-meta \.gov-term-text a\s*\{[^}]*white-space:\s*nowrap/.test(css)) {
+        bad.push("kyc.css lets the provision break inside itself");
       }
       window.KYC.governor.close();
       await until(() => !open(), 2000);

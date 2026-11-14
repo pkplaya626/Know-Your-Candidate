@@ -2106,7 +2106,9 @@ credit with it), the party under it (a candidate's fusion line in ink, rule
 list's own form under it, "Governor of Georgia" or "Running for Governor •
 GA" with the term's length from the ballot table's note ("Term 4 years
 (if elected)", from "4-year term"; nothing where the note opens with no length - the rest of a
-note is why the office is on the ballot), the office's ballot mark and holder line (rule 79)
+note is why the office is on the ballot), with the provision that states it, linked, where
+the note's own source does not ("Term 4 years (if elected; S.D. Const. art. IV, s. 2)":
+`ballot2026.TERMS`), the office's ballot mark and holder line (rule 79)
 or the candidate's badge ("On the Nov 3, 2026 ballot"; a write-in said; from
 the day after Election Day "Was on the Nov 3, 2026 ballot", naming no
 winner).
@@ -2601,10 +2603,18 @@ Three more tables, each checked by `ballot2026.check()`:
   `cite`) in `data/stategov.js` and `data/legislature/*.js`, and the page
   names it on the ballot marks, an office's and a chamber's alike, through
   one helper (`citeTerm` in kyc-stategov.js: "4-year term (S.D. Const.
-  art. IV, s. 2)", "all (2-year terms; S.D. Const. art. III, s. 6)"), and
-  on the legislature panel's term line ("Members serve 2-year terms, as
-  S.D. Const. art. III, s. 6 says."). The governor overlay's "Term 4
-  years" and the governor share pages' do not name it yet. Vermont's
+  art. IV, s. 2)", "all (2-year terms; S.D. Const. art. III, s. 6)"), on
+  the legislature panel's term line ("Members serve 2-year terms, as
+  S.D. Const. art. III, s. 6 says."), and on the governor overlay's and
+  the governor share pages' term line, linked to the provision: "Term 4
+  years (if elected; S.D. Const. art. IV, s. 2)", and from the day after
+  Election Day "Term 4 years (S.D. Const. art. IV, s. 2)". The marks and
+  the term lines take one form, a side (`withTermCite` in
+  kyc-stategov.js, `ballot2026.with_term_cite`): the provision joins the
+  parenthesis the words close with, else one of its own, and nothing
+  changes where an entry cites none; the governors' words table
+  (`tests/fixtures/governor_share_words.json`) holds a term with a
+  provision and without on both clocks, asked of the page code. Vermont's
   secretary of state has no entry: the constitution elects the secretary
   "biennially" (ch. II, s. 43) and no provision read gives a term, so that
   mark states its term with no provision named.

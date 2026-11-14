@@ -2341,8 +2341,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     named on the ballot marks, every office's and chamber's through one
     helper (`citeTerm` in kyc-stategov.js: the chambers' marks hovered "all
     (2-year terms)" uncited beside offices that named the constitution),
-    and on the legislature panel's term line. The governor overlay's and
-    the governor share pages' "Term 4 years" do not name it yet. Vermont's
+    on the legislature panel's term line, and on the governor overlay's
+    and the governor share pages' "Term" line, which said "Term 4 years"
+    beside a mark naming the constitution: "Term 4 years (if elected; S.D.
+    Const. art. IV, s. 2)", "Term 4 years (S.D. Const. art. IV, s. 2)"
+    from the day after Election Day, linked, the marks and the term lines
+    in one form (`withTermCite` in kyc-stategov.js, `with_term_cite` in
+    ballot2026.py, held together by the governors' words table), and
+    nothing more where an entry cites none. Vermont's
     secretary of state has none: the constitution elects the secretary
     "biennially" (ch. II, s. 43), which is how often and not how long, and
     no statute read gives a term. A source read and found to name no term
@@ -3252,7 +3258,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     note's leading term length alone, as a length ("Term 4 years", "if
     elected" beside it; "Term 4-year term" repeated the label): the rest of a note is why the office is on the ballot, and printed
     whole it read "Term Elected with the lieutenant governor ... (if
-    elected)" under Guam's candidates. No rule number is printed to a
+    elected)" under Guam's candidates; with the provision that states it
+    where the entry's own source does not (rule 79). No rule number is printed to a
     reader. The race panel lists the list's other candidates with the
     cards' badge (`KYC.stategov.candidateBadge`, one for the rows and the
     map's cards), write-ins in a fold, the list cited, and the markets and
