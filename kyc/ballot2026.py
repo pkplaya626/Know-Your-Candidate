@@ -1266,10 +1266,12 @@ NEXT = {
 # (``_term_problems``), and the entry's own source still says which seats
 # and offices are on the ballot. The page names the provision on the ballot
 # marks, an office's and a chamber's alike (kyc-stategov.js citeTerm,
-# through ballotMark and upWords), and on the legislature panel's term line
-# (kyc-ballot.js chamberBallot, termCite). The governor overlay's "Term 4
-# years" (kyc-governor.js termLength) and the governor share pages' (kyc/
-# governor_share.py) do not name it yet.
+# through ballotMark and upWords), on the legislature panel's term line
+# (kyc-ballot.js chamberBallot, termCite), and on the governor overlay's
+# and the governor share pages' "Term 4 years (S.D. Const. art. IV, s. 2)",
+# linked (kyc-governor.js shareWords and termLine, kyc/governor_share.py
+# term_words), the marks and the term lines in one form (with_term_cite
+# here, kyc-stategov.js withTermCite).
 TERMS = {
     ("SD", "governor"): ("https://sdlegislature.gov/api/Statutes/0N-4-2.html",
         "S.D. Const. art. IV, s. 2",
@@ -1337,6 +1339,23 @@ NO_TERM_STATED = frozenset({
     "https://vip.sdsos.gov/candidatelist.aspx?eid=774",
 })
 _NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "eight": 8}
+
+
+def with_term_cite(words, item):
+    """*words* that state *item*'s term, with the provision that states it
+    (its ``termSource``'s cite, from :data:`TERMS`) at their end: inside the
+    parenthesis they close with ("4 years (if elected)" -> "4 years (if
+    elected; S.D. Const. art. IV, s. 2)"), else in one of its own ("4 years
+    (S.D. Const. art. IV, s. 2)"); unchanged where the item cites none.
+    ``KYC.stategov.withTermCite``, word for word: the one form the ballot
+    marks, the governor overlay and its share pages give a term's
+    provision (rule 12), held together by
+    tests/fixtures/governor_share_words.json."""
+    cite = ((item or {}).get("termSource") or {}).get("cite")
+    words = str(words)
+    if not cite:
+        return words
+    return words[:-1] + f"; {cite})" if words.endswith(")") else f"{words} ({cite})"
 
 
 def stated_terms(words):
