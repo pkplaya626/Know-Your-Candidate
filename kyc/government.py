@@ -855,11 +855,57 @@ def _map_main(page, modes, footer):
 def _sources_line(section, here, pad):
     """A section's sources, and the day they were read when it is not the
     page's: a section re-read alone (VISUALS-31's bill flow) carries its own
-    ``reviewed``, so the page's date never claims the rest was read again."""
+    ``reviewed``, so the page's date never claims the rest was read again.
+
+    A source that day's read could not open (``notOpened``: a challenge page
+    or a refusal, which concludes nothing, rule 8) is listed after the rest,
+    apart from the day: "checked on Nov. 14, 2026" stood over four pages
+    that had answered this project's reader HTTP 403 that day."""
     own = section.get("reviewed")
+    unopened = section.get("notOpened") or {}
     label = (f"Sources, checked on {pages.time_html(own)}:" if own else "Sources:")
-    return (f'{pad}<p class="guide-sources"><span>{label}</span> '
-            f'{_sources(section["sources"], here)}</p>')
+    read = [key for key in section["sources"] if key not in unopened]
+    line = f'{pad}<p class="guide-sources"><span>{label}</span> {_sources(read, here)}'
+    rest = [key for key in section["sources"] if key in unopened]
+    if rest:
+        line += (f". <span>{html.escape(NOT_OPENED_LABEL, quote=False)}</span> "
+                 f"{_sources(rest, here)}")
+    return line + "</p>"
+
+
+# The words over the sources a section's day could not open: this site's
+# reader asked and was answered with a challenge or a refusal, which says
+# nothing of the page (rules 8 and 19), so the words say what this site did,
+# never what the page's host does.
+NOT_OPENED_LABEL = "Not checked that day, when this site's reader could not open them:"
+
+
+def not_opened_problems(pages_):
+    """Problems with the sections' ``notOpened`` lists: each names a source
+    the section cites, says why it was not opened, and stands beside the
+    section's own day (the day it was not opened on); and a section whose
+    every source is unopened has no day of its own to give."""
+    problems = []
+    for page in pages_:
+        for section in page.get("sections", ()):
+            unopened = section.get("notOpened")
+            if not unopened:
+                continue
+            where = f"{page.get('slug')}#{section.get('id')}"
+            sources = section.get("sources") or ()
+            if not section.get("reviewed"):
+                problems.append(f"{where}: notOpened names sources not opened on the section's "
+                                f"own day, and the section gives no day")
+            for key, why in unopened.items():
+                if key not in sources:
+                    problems.append(f"{where}: notOpened names {key!r}, which the section does "
+                                    f"not cite")
+                if not str(why or "").strip():
+                    problems.append(f"{where}: notOpened names {key!r} with no reason")
+            if sources and all(key in unopened for key in sources):
+                problems.append(f"{where}: none of its sources was opened on its day: drop the "
+                                f"day, or open them")
+    return problems
 
 
 def _footer(page):
@@ -996,6 +1042,132 @@ def _plain_words(value):
     return ""
 
 
+def unsourced_words(slug, sid, pages_=None):
+    """The words an ``UNSOURCED`` entry's (page, section) holds, whitespace
+    folded: a section's blocks, or the page's lede for the section "lede" (a
+    lede cites no source of its own). Empty when there is no such place."""
+    page = next((p for p in (pages_ or PAGES) if p.get("slug") == slug), None)
+    if page is None:
+        return ""
+    if sid == "lede":
+        return " ".join(_plain_words(page.get("lede") or "").split())
+    section = next((s for s in page.get("sections", ()) if s.get("id") == sid), None)
+    return " ".join(_plain_words(section["blocks"]).split()) if section else ""
+
+
+def shared_addresses(sources):
+    """``[(url, [keys])]``: each address more than one source key holds. One
+    page under two keys is linked twice under two names, as the Florida
+    constitution was on the states page until 2026-11-14 ("Florida
+    Constitution, Article IV" and "Florida Constitution", one URL)."""
+    keys = {}
+    for key, (_title, url) in sources.items():
+        keys.setdefault(url, []).append(key)
+    return [(url, sorted(held)) for url, held in keys.items() if len(held) > 1]
+
+
+# A president's own instrument, by its title. Each stands only while a
+# president keeps it, and a new president may revoke or replace it on the
+# first day of a term (the guide's executive page cites six orders and a
+# memorandum of 2025 and earlier). The first version knew executive orders
+# and National Security memoranda alone, so a source titled "Memorandum of
+# July 15, 2025", "Presidential Policy Directive 6" or "Proclamation 10886"
+# would have been cited with no revisit and nothing failing (the review of
+# 2026-11-14). The words are matched as a title capitalises them, so
+# "presidential succession" and "The White House: Presidential Departments"
+# name no instrument, nor does an agency's memorandum ("OMB Memorandum
+# M-25-21").
+_EXECUTIVE_ORDER = re.compile(r"\bExecutive Order (?:No\. )?(\d+)\b")
+_SECURITY_MEMO = re.compile(r"\bNational Security (Presidential )?Memorandum[- ](?:No\. )?(\d+)\b")
+# A directive by its name ("Presidential Policy Directive 6", "Homeland
+# Security Presidential Directive 12", "National Security Decision Directive
+# 38") or its letters ("PPD-6", "HSPD-12"); either is named by its letters.
+_DIRECTIVE_WORDS = ("National", "Homeland", "Security", "Presidential", "Policy", "Decision",
+                    "Review", "Study")
+_DIRECTIVE = re.compile(r"\b((?:(?:%s) )+)Directive[- ](?:No\. )?(\d+)\b"
+                        % "|".join(_DIRECTIVE_WORDS))
+_DIRECTIVE_LETTERS = re.compile(r"\b(PPD|PDD|PRD|PSD|NSPD|HSPD|NSDD|NSSD|NSD|NSPM|NSM)-(\d+)\b")
+# A proclamation by its number ("Proclamation 10886"); a presidential
+# memorandum by its date, as the Federal Register titles one ("Memorandum of
+# July 15, 2025") or as the White House does ("Presidential Memorandum ...
+# (Jan. 20, 2025)"), else by its whole title.
+_PROCLAMATION = re.compile(r"\b(?:Presidential )?Proclamation (?:No\. )?(\d+)\b")
+_TITLE_MONTH = (r"(?:Jan(?:uary|\.)|Feb(?:ruary|\.)|Mar(?:ch|\.)|Apr(?:il|\.)|May|June?|July?|"
+                r"Aug(?:ust|\.)|Sept(?:ember|\.)|Oct(?:ober|\.)|Nov(?:ember|\.)|Dec(?:ember|\.))")
+_TITLE_DATE = re.compile(rf"\b{_TITLE_MONTH} \d{{1,2}}, \d{{4}}\b")
+_MEMORANDUM = re.compile(rf"\bMemorandum of (?={_TITLE_MONTH} )|\bPresidential Memorandum\b")
+
+
+def presidential_instrument(title):
+    """The words a revisit names a president's instrument by, from a source's
+    *title*, or None for any other source: "14158" for an executive order;
+    "NSPM-1" or "NSM-2" for a National Security (Presidential) Memorandum;
+    a directive's letters ("PPD-6", "HSPD-12"); "Proclamation 10886"; and a
+    presidential memorandum by its date ("memorandum of July 15, 2025"), or
+    by its whole title where the title gives no date. Where a title names
+    two (a memorandum revoking a directive), the one it opens with is its
+    own."""
+    title = " ".join((title or "").split())
+    found = []
+    for match in _EXECUTIVE_ORDER.finditer(title):
+        found.append((match.start(), match.group(1)))
+    for match in _SECURITY_MEMO.finditer(title):
+        found.append((match.start(), ("NSPM-" if match.group(1) else "NSM-") + match.group(2)))
+    for match in _DIRECTIVE.finditer(title):
+        words = match.group(1).split()
+        if "Presidential" in words or words[:2] == ["National", "Security"]:
+            found.append((match.start(), "".join(w[0] for w in words) + "D-" + match.group(2)))
+    for match in _DIRECTIVE_LETTERS.finditer(title):
+        found.append((match.start(), f"{match.group(1)}-{match.group(2)}"))
+    for match in _PROCLAMATION.finditer(title):
+        found.append((match.start(), f"Proclamation {match.group(1)}"))
+    for match in _MEMORANDUM.finditer(title):
+        date = _TITLE_DATE.search(title, match.start())
+        found.append((match.start(), f"memorandum of {date.group(0)}" if date else title))
+    return min(found)[1] if found else None
+
+
+def next_inauguration(day):
+    """The first January 20 after *day* (``YYYY-MM-DD``) on which a
+    presidential term begins: the year after a presidential election
+    (Twentieth Amendment; 2029-01-20 after 2026-11-14)."""
+    year = int(day[:4])
+    while True:
+        candidate = f"{year}-01-20"
+        if year % 4 == 1 and candidate > day:
+            return candidate
+        year += 1
+
+
+def presidential_revisit_problems(pages_, sources):
+    """Problems with the revisits of pages that cite a president's executive
+    order, memorandum, directive or proclamation: each such section's page
+    must hold a revisit dated after the section was read and no later than
+    the next inauguration day, naming the instrument as
+    ``presidential_instrument`` names it (any capitals). The executive
+    page's revisit was the only guard on three orders and a memorandum of 2025,
+    and deleting it failed nothing (the review of 2026-11-14)."""
+    problems = []
+    for page in pages_:
+        revisits_ = [(str(day), str(what)) for day, what in page.get("revisit") or ()]
+        for section in page.get("sections", ()):
+            read = section.get("reviewed") or page.get("reviewed") or REVIEWED
+            due = next_inauguration(read)
+            for key in section.get("sources") or ():
+                named = presidential_instrument(sources.get(key, ("", ""))[0])
+                if not named:
+                    continue
+                pattern = re.compile(rf"(?<![\w-]){re.escape(named)}(?![\w-])", re.I)
+                if not any(read < day <= due and pattern.search(what)
+                           for day, what in revisits_):
+                    problems.append(
+                        f"{page.get('slug')}#{section.get('id')} cites {key} ({named}), which a "
+                        f"president may revoke or replace: give the page a revisit dated after "
+                        f"{read} and no later than {due}, the next inauguration day, that names "
+                        f"{named}")
+    return problems
+
+
 def check():
     """Problems with the guide's text, as strings. Empty when it is sound.
 
@@ -1051,12 +1223,19 @@ def check():
     # says, or the list (and README after it) names words the page no longer
     # shows.
     for slug, sid, said, _why in UNSOURCED:
-        section = next((s for p in PAGES if p.get("slug") == slug
-                        for s in p.get("sections", ()) if s.get("id") == sid), None)
-        text = " ".join(_plain_words(section["blocks"]).split()) if section else ""
-        if " ".join(said.split()) not in text:
+        if " ".join(said.split()) not in unsourced_words(slug, sid):
             problems.append(f"UNSOURCED names {slug}#{sid}'s {said!r}, which the section no "
                             f"longer says: read its sources again and remove the entry")
+    # One address, one key and one title: the states page linked the Florida
+    # constitution twice under two names.
+    for url, keys in shared_addresses(SOURCES):
+        problems.append(f"sources {', '.join(keys)} all name {url}: keep one key and one title")
+    # A section citing a president's order, memorandum, directive or
+    # proclamation is read again by the next inauguration day, and its
+    # page's revisit says so.
+    problems.extend(presidential_revisit_problems(PAGES, SOURCES))
+    # A source a section's day did not open is listed apart, and says why.
+    problems.extend(not_opened_problems(PAGES))
     if slugs()[0] != "index":
         problems.append("the guide's first page must be its index")
     # Every "see it" and "who holds it" entry belongs to a section there is.
