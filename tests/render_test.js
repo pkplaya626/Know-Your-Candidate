@@ -5584,7 +5584,8 @@ async function testOtherSeatWords() {
       // The same for a made-up member in every status, sitting or former,
       // renumbered or not: the state the data may not hold today.
       const fakeOff = [];
-      ["", "nominee", "elected", "defeated", "eliminated", "withdrawn", "unlisted", "runoff"].forEach((status) => {
+      ["", "nominee", "qualified", "advanced", "elected", "defeated", "eliminated", "withdrawn", "unlisted",
+        "runoff"].forEach((status) => {
         [0, 1].forEach((renumbered) => [0, 1].forEach((former) => {
           const item = { id: "FAKE", isCandidate: false, name: "A Member", party: "Republican",
             chamber: "House", state: "AL", officeLabel: "House • AL-2", raceId: "H-AL-02-2026",
@@ -5611,6 +5612,15 @@ async function testOtherSeatWords() {
       });
       check("and so for a member in every status, sitting or former, renumbered or not",
         fakeOff.length === 0, fakeOff.slice(0, 4).join(" | "));
+      // A nominee on another party's line says so after the result, inside
+      // the run's badge (KYC.ballotLineSuffix), as their own card would.
+      const lined = { id: "FAKE", isCandidate: false, name: "A Member", party: "Republican", chamber: "House",
+        state: "AL", officeLabel: "House • AL-2", raceId: "H-AL-02-2026", contestLabel: "Senate • AL",
+        contestRaceId: "S-AL-2026", raceStatusRace: "S-AL-2026", raceStatus: "nominee", ballotLine: "Working Families" };
+      const linedRun = badgesOf(KYC.cards.statusBadge(lined));
+      check("made here: a ballot line follows the result inside the run's one badge",
+        linedRun.length === 1 && linedRun[0].text === runBadge(lined, { now: day }) &&
+          / · .+ – Working Families line$/.test(linedRun[0].text), linedRun.map((b) => b.text).join(" + "));
       // Made here, as no record holds either today: an open seat whose
       // holder runs elsewhere by a filing alone (alsoRunningSeat), and a
       // race whose holder moved with no profile here (holderMoved).
@@ -5622,13 +5632,24 @@ async function testOtherSeatWords() {
       const open = KYC.cards.raceBadges({ id: lent.raceId, label: lent.officeLabel, openSeat: true,
         incumbentIds: [lent.id], candidateIds: [], incumbent: { name: lent.name } });
       Object.assign(lent, kept);
+      // And, as in January, a holder seated since in the seat they won
+      // elsewhere (raceRole "winner"): "won the race for Senate KY" stood in
+      // KY-6's open-seat hover.
+      const seatedKept = { raceRole: lent.raceRole, raceId: lent.raceId, officeLabel: lent.officeLabel };
+      const heldId = lent.raceId;
+      Object.assign(lent, { raceRole: "winner", raceId: "S-" + lent.state + "-2026", officeLabel: "Senate • " + lent.state });
+      const wonElsewhere = KYC.cards.raceBadges({ id: heldId, label: seatedKept.officeLabel, openSeat: true,
+        incumbentIds: [lent.id], candidateIds: [], incumbent: { name: lent.name } });
+      Object.assign(lent, seatedKept);
       const away = KYC.cards.raceBadges({ id: "H-AL-02-2026", label: "AL-2", incumbentIds: [],
         candidateIds: [], holderMoved: { name: "A Member", to: "House • AL-1" } });
       const titles = (html) => badgesOf(html).map((b) => b.title).join(" ");
       check("made here: an open seat's hover and a moved holder's words name the seat in words",
         titles(open).indexOf("is running for the U.S. Senate in " + KYC.placeWords(lent.state)) !== -1 &&
           titles(away).indexOf("is running for AL-1 under") !== -1 &&
-          !LABEL.test(titles(open) + " " + titles(away)), titles(open) + " / " + titles(away));
+          titles(wonElsewhere).indexOf(" won the race for the U.S. Senate in " + KYC.placeWords(lent.state)) !== -1 &&
+          !LABEL.test(titles(open) + " " + titles(away) + " " + titles(wonElsewhere)),
+        titles(open) + " / " + titles(away) + " / " + titles(wonElsewhere));
     });
     window.close();
 
@@ -5685,8 +5706,30 @@ async function testOtherSeatWords() {
       Object.assign(sen, kept);
       map.D.querySelector('[data-mode="house"]').click();
     }
+    // Made here: a ballot line on a mover whose result can carry one.
+    let linedRow = null;
+    const linedMover = movers.map((p) => MK.byId(p.id)).find((p) => p && !p.renumbered &&
+      ["nominee", "defeated", "runoff", "qualified"].indexOf(MK.contestStatus(p)) !== -1);
+    if (linedMover) {
+      const filing = linedMover.alsoRunningId ? MK.byId(linedMover.alsoRunningId) : null;
+      const keptLines = [linedMover.ballotLine, filing && filing.ballotLine];
+      linedMover.ballotLine = "Working Families";
+      if (filing) filing.ballotLine = "Working Families";
+      const other = movers.find((p) => p.state !== linedMover.state);
+      picker.value = other ? other.state : "AK";
+      picker.dispatchEvent(new map.window.Event("change"));
+      picker.value = linedMover.state;
+      picker.dispatchEvent(new map.window.Event("change"));
+      const row = map.D.querySelector(`.person-row[data-id="${linedMover.id}"] .contest`);
+      linedRow = row ? row.textContent : "(no row)";
+      linedMover.ballotLine = keptLines[0];
+      if (filing) filing.ballotLine = keptLines[1];
+    }
     suite(`map.html — a member's run for another seat, ${name}`, () => {
       check("no page errors", map.errors.length === 0, map.errors.join(" | "));
+      check("made here: a ballot line follows the result inside the seat's badge on the row",
+        (!linedMover && january) || (!!linedRow && / · .+ – Working Families line$/.test(linedRow)),
+        linedMover ? linedMover.name + ": " + linedRow : "no mover on a ballot today");
       check("made here: the 2026 Senate map's hover names a defender's other seat in words",
         hovers.length === 2 && hovers.every((h) => !/•/.test(h) && /-1\)/.test(h)), hovers.join(" | "));
       check("each row says the run in one badge, its result and source in it, and no bare status " +
