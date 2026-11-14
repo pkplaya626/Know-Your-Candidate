@@ -323,7 +323,7 @@
         " as the National Association of Secretaries of State’s " +
         outLink(all._source || "https://www.nass.org/can-I-vote", "Can I Vote") +
         (all._listed ? " listed " + (nass.length === 1 ? "it" : "them") + " on " +
-          KYC.escapeHtml(all._listed) : " lists " + (nass.length === 1 ? "it" : "them")) + ".");
+          KYC.escapeHtml(KYC.dateWords(all._listed)) : " lists " + (nass.length === 1 ? "it" : "them")) + ".");
     }
     if (own.length && office) {
       out.push(quoted(own, labels) + (own.length === 1 ? " is " : " are ") +
@@ -377,7 +377,7 @@
         return false;
       });
       var opened = Object.keys(byDay).sort().map(function (day) {
-        return quoted(byDay[day], labels) + " opened by hand " + KYC.escapeHtml(day);
+        return quoted(byDay[day], labels) + " opened by hand " + KYC.escapeHtml(KYC.dateWords(day));
       });
       // A link added since the check last ran was never looked at: "not
       // yet opened", never "could not be confirmed", which says it looked
@@ -390,16 +390,16 @@
           " added since and not yet opened by this site's automated check");
       }
       if (!missed.length && !human.length && !opened.length) {
-        out.push("Each link opened " + KYC.escapeHtml(all._opened) + ".");
+        out.push("Each link opened " + KYC.escapeHtml(KYC.dateWords(all._opened)) + ".");
       } else if (!missed.length && !human.length) {
         // "Each link opened <the check's day>" would claim the check opened
         // the links only a person did (rule 79): name what the check opened.
         var unreached = (all._unreached || {})[code] || [];
         var live = shown.filter(function (k) { return unreached.indexOf(k) === -1; });
-        out.push((live.length ? quoted(live, labels) + " opened " + KYC.escapeHtml(all._opened) + "; " : "") +
+        out.push((live.length ? quoted(live, labels) + " opened " + KYC.escapeHtml(KYC.dateWords(all._opened)) + "; " : "") +
           opened.join("; ") + ".");
       } else {
-        out.push("Links checked " + KYC.escapeHtml(all._opened) +
+        out.push("Links checked " + KYC.escapeHtml(KYC.dateWords(all._opened)) +
           (opened.length ? "; " + opened.join("; ") : "") +
           (missed.length ? "; " + quoted(missed, labels) +
             " could not be confirmed by this site's automated check that day" : "") + ".");
@@ -506,12 +506,12 @@
     // fourteenth day" after it), the date is that rule counted on the 2026
     // calendar, and the page says so (PR #102 review).
     return "Each date is from the election office's own page or the law, linked beside it" +
-      (d.read ? ", read on " + KYC.escapeHtml(d.read) : "") +
-      (d.checked ? " and checked again on " + KYC.escapeHtml(d.checked) : "") +
+      (d.read ? ", read on " + KYC.escapeHtml(KYC.dateWords(d.read)) : "") +
+      (d.checked ? " and checked again on " + KYC.escapeHtml(KYC.dateWords(d.checked)) : "") +
       // A source read later than the record (Nevada's Secretary of State's
       // page, read by hand) says its own day (PR #140 review).
       ((info.mine || {}).reread || []).map(function (r) {
-        return " (" + KYC.escapeHtml(r.labels.join(" and ")) + " read on " + KYC.escapeHtml(r.d) + ")";
+        return " (" + KYC.escapeHtml(r.labels.join(" and ")) + " read on " + KYC.escapeHtml(KYC.dateWords(r.d)) + ")";
       }).join("") +
       "; where the source gives a rule, such as “15 days before the election”, the date " +
       "is that rule counted on the 2026 calendar. Each date is a calendar day in " +

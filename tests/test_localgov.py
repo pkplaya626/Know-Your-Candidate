@@ -7,6 +7,7 @@ Census code, never a name.
 """
 
 import os
+import re
 import sys
 import unittest
 
@@ -457,6 +458,31 @@ class TestSiteCheck(unittest.TestCase):
         cache = localsites.load_cache(ROOT)
         kept = [u for u, e in cache["sites"].items() if "?" in e.get("final", "")]
         self.assertEqual(kept, [])
+
+    def test_no_committed_cache_carries_a_readers_address(self):
+        """A 'Bot Verification' page (recaptcha.cloud) wrote the reader's
+        own public address, plain, into its redirect's query ("ip="), and
+        local_sites.json kept it from the first full run (2026-10-17) to
+        2026-11-14; Radware's wall writes it base64 into "ssr=". No cache a
+        reader writes may hold an address in a query, or a parameter made to
+        carry one, whatever the reader (the IP is never printed here)."""
+        ipv4 = r"(?:\d{1,3}\.){3}\d{1,3}"
+        query = re.compile(r"[?&][^=&#\s\"]*=(?:" + ipv4 + r")(?![\d.])"
+                           r"|[?&](?:ip|real_ip|client_ip|remote_addr|ssr|visitor_ip)=", re.I)
+        folder = os.path.join(ROOT, "candidate_profiles_site", "data")
+        found = []
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".json"):
+                with open(os.path.join(folder, name), encoding="utf-8") as handle:
+                    hits = len(query.findall(handle.read()))
+                if hits:
+                    found.append(f"{name}: {hits}")
+        self.assertEqual(found, [])
+        # The test reads what it is meant to.
+        self.assertTrue(query.search("https://x.cloud/?template=a&server=192.0.2.1&ip=198.51.100.7"))
+        self.assertTrue(query.search("https://validate.perfdrive.com/?ssa=1&ssr=MTkyLjAuMi4x"))
+        self.assertFalse(query.search("http://192.0.2.1/schools/district"))
+        self.assertFalse(query.search("https://example.gov/page?id=12&v=1.2.3"))
 
     def gate(self):
         return localsites._Gate(interval=0, sleep=lambda s: None)

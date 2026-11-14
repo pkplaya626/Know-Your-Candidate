@@ -446,8 +446,10 @@ def off_site(final):
     """*final*, where a redirect to another site ended, as a cache keeps it:
     its scheme, host and path, never its query. A bot wall writes the
     reader's own address into its query - Radware's validate.perfdrive.com
-    wrote this machine's IP address, base64-encoded, into "ssr=" (found
-    2026-11-14) - and a marketplace's, a parking service's or a sign-in
+    wrote this machine's IP address, base64-encoded, into "ssr=", and a
+    "Bot Verification" page on a lapsed town domain wrote it plain into
+    "ip=", which the cache kept from 2026-10-17 to 2026-11-14 - and a
+    marketplace's, a parking service's or a sign-in
     page's carries the visit's tracking and session ids. None of it is the
     address's, and no page shows it. The rest is kept as written (no
     credentials)."""
