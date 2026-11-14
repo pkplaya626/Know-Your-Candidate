@@ -3499,12 +3499,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     a filing's record line ("as the member for KY-6"). A day in those
     sentences is `KYC.dateWords`' ("whose term ends Jan. 3, 2027"), and so
     is every day the same check found in a profile's words: a former
-    member's "Left office Dec. 8, 2026" and "Represented (until ...)", the
-    other office's "(read Oct. 17, 2026)" (on its share page too), and "the
-    results this site last read, on Nov. 13, 2026," in every awaited
-    result's hover (`resultsReadOn`). `testHeldSeatWords` asks it of every
-    profile's card, hovers and status words, of the dialogs that name a seat
-    or a day, of every share page and plain list, and of made-up members
+    member's "Left office Dec. 8, 2026" and "Represented (until ...)", an
+    appointee's term line ("until the winner of the Nov. 3, 2026 special
+    election is sworn in"), the other office's "(read Oct. 17, 2026)" (on
+    its share page too), and "the results this site last read, on Nov. 13,
+    2026," in every awaited result's hover, a person's and a race head's
+    (`KYC.resultsReadOn`). `testHeldSeatWords` (`node tests/render_test.js
+    heldseat` runs it with the other checks of these words) asks it of
+    every profile's card, hovers and status words, every race head's
+    hovers, the dialogs that name a seat or a day, every share page and
+    plain list, and of made-up members
     of every kind (a House member running for the Senate, a senator running
     for the House or for governor, a renumbered member, the District's
     delegate, an appointee) in every status, sitting and former, on each
