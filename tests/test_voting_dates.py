@@ -802,7 +802,12 @@ class TestMoreRunoffsOwnDates(unittest.TestCase):
             for line in self.own_lines(code):
                 self.assertTrue(line["s"].startswith(name), line["s"])
                 self.assertTrue(line["keep"])
-        self.assertEqual(self.linked("AR", self.own("AR")["runoff-early"]), [self.AR_CAL])
+        # The calendar gives the window; the Board's manual and Act 92 of
+        # 2023 close state holidays, the calendar names November 26 one; the
+        # voting page gives the clerk's hours (TestOfficeHoursAndHolidays).
+        self.assertEqual(self.linked("AR", self.own("AR")["runoff-early"]),
+                         [self.AR_CAL, TestOfficeHoursAndHolidays.MANUAL, TestOfficeHoursAndHolidays.ACT92,
+                          TestOfficeHoursAndHolidays.VOTING])
 
     def test_guams_commission_publishes_none_so_nothing_is_shown(self):
         rec = DATA["states"]["GU"]["runoff"]
@@ -1127,18 +1132,22 @@ class TestDaysEarlyVotingIsNotHeld(unittest.TestCase):
         self.assertEqual(urls, ["https://www.sos.la.gov/elections-voting/election-dates"])
 
     def test_no_day_is_inferred_from_a_weekday_the_office_does_not_close(self):
-        # Arkansas's runoff ("during regular office hours"), its general
-        # ("Monday through Friday ... Saturday"), Guam's "Tuesday - Saturday",
-        # Nevada's statute (the county clerk may include Sundays) and
-        # Colorado's minimum centers (counties may open more) name no day
-        # closed: no list, and nothing but "Under way" said of the window.
+        # Arkansas's general ("Monday through Friday ... Saturday"), Guam's
+        # "Tuesday - Saturday", Nevada's statute (the county clerk may include
+        # Sundays) and Colorado's minimum centers (counties may open more)
+        # name no day closed: no list, and nothing but "Under way" said of the
+        # window. Arkansas's runoff ("during regular office hours") lists only
+        # the state holiday its offices name, never its weekend
+        # (TestOfficeHoursAndHolidays).
         for code in ("AR", "GU", "NV", "CO", "OH", "TN", "GA"):
             rec = DATA["states"][code]
             self.assertIsNone(rec["earlyVoting"].get("except"), code)
-            self.assertIsNone((rec.get("runoff") or {}).get("earlyVoting", {}).get("except"), code)
+            if code != "AR":
+                self.assertIsNone((rec.get("runoff") or {}).get("earlyVoting", {}).get("except"), code)
             line, _ = self.early(DATA, code)
             self.assertNotIn("x", line, code)
             self.assertNotIn("excluding", line["t"], code)
+        self.assertEqual(DATA["states"]["AR"]["runoff"]["earlyVoting"]["except"], ["2026-11-26"])
         # A window with no closed days is said as it was: words that name
         # none, and no list (words that name one hold the record to it).
         rec = record("LA")
@@ -1223,6 +1232,143 @@ class TestDaysEarlyVotingIsNotHeld(unittest.TestCase):
         rec["earlyVoting"]["except"] = []
         self.assertProblem(with_state("SC", rec), "SC earlyVoting.except: a quote the window stands "
                                                   "on names 2026-10-25 closed, but no day is listed")
+
+
+class TestOfficeHoursAndHolidays(unittest.TestCase):
+    """Arkansas's December 1 runoff's early voting runs November 24 to 30
+    "during your county clerk’s regular office hours", and the page called it
+    "Under way" on every day of it: on Thanksgiving, which the law closes
+    ("Early voting shall not be held on state holidays", the State Board of
+    Election Commissioners' manual; Ark. Code 7-5-418(a)(1)(B), Act 92 of
+    2023), and on the weekend of November 28 and 29, which no source says any
+    clerk's office keeps hours on, and the Board's coordinators' manual says
+    "in most cases" none does. Thanksgiving is listed, on two of the offices'
+    quotes together (the rule, and the Secretary of State's calendar naming
+    the day a legal holiday); the rest of the window is "Under way, during
+    those hours", the office's words quoted on the line (read 2026-11-14)."""
+
+    CAL = "http://www.sos.arkansas.gov/uploads/elections/2026_Election_Calendar_Rev._7-2026_.pdf"
+    VOTING = ("https://www.sos.arkansas.gov/elections/voter-information/voter-registration-information/"
+              "voting-in-arkansas")
+    MANUAL = "https://sbec.arkansas.gov/wp-content/uploads/2026-CBEC-Manual.pdf"
+    ACT92 = "https://arkleg.state.ar.us/Home/FTPDocument?path=%2FACTS%2F2023R%2FPublic%2FACT92.pdf"
+    HOURS = "during your county clerk’s regular office hours"
+    RULE = "Holidays: Early voting shall not be held on state holidays. [A.C.A. § 7-5-418(a)(1)(B)]"
+    NAMED = ("November 26, 2026 – Thursday* 5 DAYS PRIOR TO THE GENERAL RUNOFF ELECTION ... [*Deadlines "
+             "falling on a Saturday, Sunday, or legal holiday are extended to the following business "
+             "day, per Ark. Code § 7-1-108. The actual deadlines will be Friday, November 27, 2026.]")
+
+    def line(self, data, code="AR", kind="runoff-early"):
+        entry = voting_dates.for_page(data)["states"][code]
+        (line,) = [l for l in entry["lines"] if l["k"] == kind]
+        return line, [entry["urls"][i] for i in line["src"]]
+
+    def problems(self, code, rec):
+        return [p for p in voting_dates.problems(with_state(code, rec)) if p.startswith(code + " ")]
+
+    def assertProblem(self, code, rec, text):
+        found = self.problems(code, rec)
+        self.assertTrue(any(text in p for p in found), found)
+
+    def test_arkansas_lists_thanksgiving_and_quotes_the_clerks_hours(self):
+        rec = DATA["states"]["AR"]["runoff"]["earlyVoting"]
+        self.assertEqual((rec["start"], rec["end"], rec["except"], rec["hours"]),
+                         ("2026-11-24", "2026-11-30", ["2026-11-26"], self.HOURS))
+        line, urls = self.line(DATA)
+        self.assertEqual(line["t"], "In-person early voting for a runoff, if one is held, excluding "
+                                    "Thursday, November 26; in the office’s words, “" + self.HOURS + "”")
+        self.assertEqual((line["x"], line["h"]), (["2026-11-26"], True))
+        # Each of the line's claims keeps its page (rule 84): the window, the
+        # rule that closes state holidays, the day named one, the hours.
+        self.assertEqual(urls, [self.CAL, self.MANUAL, self.ACT92, self.VOTING])
+        quotes = [s["quote"] for s in DATA["states"]["AR"]["sources"] if s["url"] in urls]
+        self.assertTrue(voting_dates.closes_as_holiday(quotes, "2026-11-26"))
+        self.assertTrue(any(self.HOURS in q for q in quotes))
+        # Nothing else is listed: no quote closes the weekend or the Friday.
+        for day in ("2026-11-27", "2026-11-28", "2026-11-29"):
+            self.assertFalse(any(voting_dates.closes(q, day) for q in quotes), day)
+            self.assertFalse(voting_dates.closes_as_holiday(quotes, day), day)
+
+    def test_a_holiday_is_named_by_two_quotes_together(self):
+        holiday = voting_dates.closes_as_holiday
+        self.assertTrue(holiday([self.RULE, self.NAMED], "2026-11-26"))
+        # The rule alone, or the day alone, closes nothing.
+        self.assertFalse(holiday([self.RULE], "2026-11-26"))
+        self.assertFalse(holiday([self.NAMED], "2026-11-26"))
+        # The day the deadline moves to is not the holiday, nor is a day the
+        # calendar names without its star.
+        self.assertFalse(holiday([self.RULE, self.NAMED], "2026-11-27"))
+        self.assertFalse(holiday([self.RULE, "November 26, 2026 – Thursday 5 DAYS PRIOR"], "2026-11-26"))
+        # A starred Sunday is a weekend, not a holiday.
+        sunday = ("October 4, 2026 - Sunday* 30 DAYS PRIOR TO THE GENERAL ELECTION ... [*Deadlines "
+                  "falling on a Saturday, Sunday, or legal holiday are extended to the following "
+                  "business day]")
+        self.assertFalse(voting_dates.names_holiday(sunday, "2026-10-04"))
+        # A day named a holiday in so many words.
+        self.assertTrue(voting_dates.names_holiday("Thursday, November 26 is a state holiday", "2026-11-26"))
+        self.assertFalse(voting_dates.names_holiday("Thursday, November 26: early voting", "2026-11-26"))
+        # The words that close state holidays, and words that do not.
+        closed = voting_dates.HOLIDAYS_CLOSED.search
+        self.assertTrue(closed("Early voting shall not be held on state holidays."))
+        self.assertTrue(closed("Excludes all STATE Holidays – NOT County Holidays"))
+        self.assertTrue(closed("(B) Early voting shall not be available on state ... holidays."))
+        self.assertFalse(closed("Sundays and federal holidays excepted"))
+        self.assertFalse(closed("These permanent polling places are to be open on holidays, Saturdays, "
+                                "and Sundays."))
+
+    def test_a_holiday_the_quotes_name_must_be_listed(self):
+        # The offices' words close Thanksgiving: a record without it would
+        # have the page call that day "Under way".
+        rec = record("AR")
+        del rec["runoff"]["earlyVoting"]["except"]
+        self.assertProblem("AR", rec, "AR runoff.earlyVoting.except: a quote the window stands on names "
+                                      "2026-11-26 closed, but no day is listed")
+        rec = record("AR")
+        rec["runoff"]["earlyVoting"]["except"] = []
+        self.assertProblem("AR", rec, "names 2026-11-26 closed, but no day is listed")
+
+    def test_a_listed_holiday_needs_the_rule_and_the_day(self):
+        for drop in (voting_dates.HOLIDAYS_CLOSED.search,
+                     lambda q: voting_dates.names_holiday(q, "2026-11-26")):
+            rec = record("AR")
+            rec["sources"] = [s for s in rec["sources"] if not drop(s["quote"])]
+            self.assertProblem("AR", rec, "AR runoff.earlyVoting.except: 2026-11-26, but no quote it "
+                                          "stands on names that day closed")
+        # Nor does a holiday the quotes name stand for a day they do not.
+        rec = record("AR")
+        rec["runoff"]["earlyVoting"]["except"] = ["2026-11-26", "2026-11-27"]
+        self.assertProblem("AR", rec, "2026-11-27, but no quote it stands on names that day closed")
+
+    def test_a_window_in_office_hours_says_so(self):
+        # Words that put the window in the office's regular hours hold the
+        # record to them, or every day of it is "Under way".
+        for code, path in (("AR", ["runoff", "earlyVoting"]), ("SD", ["earlyVoting"])):
+            rec = record(code)
+            part = rec
+            for key in path:
+                part = part[key]
+            del part["hours"]
+            self.assertProblem(code, rec, f"{code} {'.'.join(path)}.hours: a quote the window stands on "
+                                          "gives its days as 'regular")
+        line, _ = self.line(DATA, "SD", "early")
+        self.assertEqual((line["t"], line["h"]),
+                         ("In-person early voting; in the office’s words, “during regular office hours”", True))
+        # The hours are the office's words, office hours and nothing else.
+        rec = record("AR")
+        rec["runoff"]["earlyVoting"]["hours"] = "during the clerk's regular office hours"
+        self.assertProblem("AR", rec, "is not in the office's words quoted for the window")
+        rec = record("AR")
+        rec["runoff"]["earlyVoting"]["hours"] = "every day"
+        self.assertProblem("AR", rec, "is not the office's words for its regular hours")
+        rec = record("AR")
+        rec["runoff"]["earlyVoting"].update(start=None, end=None)
+        del rec["runoff"]["earlyVoting"]["except"]
+        self.assertProblem("AR", rec, "AR runoff.earlyVoting.hours: office hours, with no window")
+        # A window whose words name no office hours needs none, and says none.
+        rec = record("LA")
+        line, _ = self.line(with_state("LA", rec), "LA")
+        self.assertNotIn("h", line)
+        self.assertNotIn("office’s words", line["t"])
 
 
 class TestVoteGov(unittest.TestCase):

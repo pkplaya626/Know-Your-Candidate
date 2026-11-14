@@ -2484,8 +2484,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (read 2026-11-11). Its words name the offices 1 CMC 6509 holds a
     majority runoff for (6524(b) adds a tie in any office), never which
     race went to one or who is in it, which no Commission
-    page says (rule 91). The cycle's dates are reread each cycle, and
-    `check` refuses a date outside it.
+    page says (rule 91). A window held only in an office's regular hours
+    (Arkansas's December 1 runoff, "during your county clerk’s regular
+    office hours") quotes those words and is "Under way, during those
+    hours", never "Under way" alone, and a day it is not held names no day
+    it resumes (`hours`): the page called it "Under way" on Thanksgiving and
+    on the weekend of November 28 and 29, which no source says any clerk's
+    office keeps hours on. A state holiday is closed only by two of the
+    offices' own quotes together, one closing state holidays and one naming
+    the day one (`closes_as_holiday`: the State Board of Election
+    Commissioners' manual and Act 92 of 2023, and the Secretary of State's
+    calendar's starred "November 26, 2026 – Thursday*"), never from a general
+    calendar. The cycle's dates are reread each cycle, and `check` refuses a
+    date outside it.
 
 85. **A ZIP code is not a place, and a location is placed on lines fine
     enough to place it.** "Who represents me" had no answer outside a

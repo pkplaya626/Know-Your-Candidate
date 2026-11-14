@@ -139,18 +139,26 @@
    *  October 25, Louisiana's, Delaware's, South Carolina's and Hawaii's
    *  pages called early voting under way on a day each office had excluded.
    *  That day says there is none, and the next day of the window the office
-   *  has not excluded, which its own dates name (rule 84). */
+   *  has not excluded, which its own dates name (rule 84).
+   *  A window held only in an office's regular hours (the pipeline's "h":
+   *  Arkansas's December 1 runoff, "during your county clerk’s regular
+   *  office hours") is "Under way, during those hours", the line's quoted
+   *  words, never "Under way" alone: on Saturday, November 28 a clerk's
+   *  office with no Saturday hours holds none, and no source says which
+   *  offices keep which hours. A day it is not held there names no day it
+   *  resumes, for the same reason. */
   function when(line, today) {
     if (!line.d) return null;
     if (line.e) {
       if (today > line.e) return { cls: "is-past", word: "Ended" };
       if (offDay(line, today)) {
+        if (line.h) return { cls: "is-off", word: "No early voting today" };
         var next = nextDay(today);
         while (next <= line.e && line.x.indexOf(next) !== -1) next = nextDay(next);
         return { cls: "is-off", word: "No early voting today" +
           (next <= line.e ? "; resumes " + longDate(next).replace(/, \d{4}$/, "") : "") };
       }
-      if (today >= line.d) return { cls: "is-now", word: "Under way" };
+      if (today >= line.d) return { cls: "is-now", word: line.h ? "Under way, during those hours" : "Under way" };
       return null;
     }
     if (today > line.d) return { cls: "is-past", word: "Passed" };

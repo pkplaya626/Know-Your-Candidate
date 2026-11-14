@@ -12064,11 +12064,14 @@ async function testRunoffDatesElsewhere() {
     // Arkansas and Mississippi: runoffs for no federal office.
     const ar12 = voting("AR", "2026-11-12");
     check("AR, Nov 12: early voting November 24 to 30, ballots received by 7:30 pm on the day, from the calendar",
-      /^November 24 – November 30, 2026\. In-person early voting for a runoff, if one is held\./.test(text(ar12, "runoff-early")) &&
+      /^November 24 – November 30, 2026\. In-person early voting for a runoff, if one is held, excluding Thursday, November 26; in the office’s words, “during your county clerk’s regular office hours”\./.test(text(ar12, "runoff-early")) &&
         /^December 1, 2026\. Mail ballots for a runoff, if one is held, must arrive at the election office by 7:30 pm on this day\./
-          .test(text(ar12, "runoff-return")) && href(ar12, "runoff-early") === AR_CAL && href(ar12, "runoff-return") === AR_CAL,
+          .test(text(ar12, "runoff-return")) && href(ar12, "runoff-early").split(" ")[0] === AR_CAL &&
+        href(ar12, "runoff-return") === AR_CAL,
       text(ar12, "runoff-early") + " || " + text(ar12, "runoff-return"));
-    check("AR, Nov 24: under way", /Under way/.test(text(voting("AR", "2026-11-24"), "runoff-early")) &&
+    // Held in the clerk's regular hours: "Under way, during those hours"
+    // (testRunoffRegistration has the holiday and the weekend).
+    check("AR, Nov 24: under way, during those hours", /Under way, during those hours/.test(text(voting("AR", "2026-11-24"), "runoff-early")) &&
       status(cell(voting("AR", "2026-11-24"), "Nov 24–30Local runoff early voting, if needed")) === "now",
       cells(voting("AR", "2026-11-24")).join(" | "));
     check("AR, Dec 1: the ballots are due today", /Today/.test(text(voting("AR", "2026-12-01"), "runoff-return")),
@@ -12323,6 +12326,51 @@ async function testRunoffRegistration() {
     const dates = arBallot.out.querySelector(".ballot-dates");
     check("Your ballot (72201) on Nov 2 says the same", !!dates &&
       text(dates, "runoff-register") === text(a, "runoff-register"), dates && text(dates, "runoff-register"));
+  });
+
+  // Arkansas's December 1 runoff: early voting November 24 to 30 "during
+  // your county clerk’s regular office hours" (the Secretary of State's
+  // voting page), never on a state holiday (the State Board of Election
+  // Commissioners' manual; Act 92 of 2023), and Thanksgiving, November 26,
+  // a legal holiday on the Secretary of State's calendar (read 2026-11-14).
+  // The page called every day of it "Under way": Thanksgiving, and the
+  // weekend no source says any clerk's office keeps hours on.
+  const AR_EARLY = /^November 24 – November 30, 2026\. In-person early voting for a runoff, if one is held, excluding Thursday, November 26; in the office’s words, “during your county clerk’s regular office hours”\./;
+  const AR_DAYS = ["2026-11-24", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29", "2026-11-30"];
+  const arDay = {};
+  for (const day of AR_DAYS) arDay[day] = await buildPage("states/ar.html", { now: day + "T09:00:00" });
+  const arBallots = {};
+  for (const day of ["2026-11-26", "2026-11-28"]) arBallots[day] = await ballotFor("#/?zip=72201", { now: day + "T09:00:00" });
+  suite("states/ar.html and Your ballot (72201) — the runoff's early voting on Thanksgiving and the weekend", () => {
+    const all = Object.values(arDay).concat(Object.values(arBallots));
+    check("no page errors", all.every((p) => !p.errors.length), all.map((p) => p.errors.join(" | ")).filter(Boolean).join(" / "));
+    const ar = (day) => arDay[day].D.getElementById("voting");
+    const EARLY_CELL = "Nov 24–30Local runoff early voting, if needed";
+    check("every day, the line says the excluded Thursday and quotes the clerk's hours",
+      AR_DAYS.every((day) => AR_EARLY.test(text(ar(day), "runoff-early"))),
+      AR_DAYS.map((day) => day + ": " + text(ar(day), "runoff-early")).join(" || "));
+    check("Nov 26: no early voting today, naming no day it resumes, never 'Under way'",
+      /No early voting today(?![;,])/.test(text(ar("2026-11-26"), "runoff-early")) &&
+        !/Under way|resumes/.test(text(ar("2026-11-26"), "runoff-early")) &&
+        status(cell(ar("2026-11-26"), EARLY_CELL)) === "ahead",
+      text(ar("2026-11-26"), "runoff-early"));
+    for (const day of ["2026-11-24", "2026-11-27", "2026-11-28", "2026-11-29", "2026-11-30"]) {
+      check("AR, " + day + ": under way, during those hours, never 'Under way' alone",
+        /Under way, during those hours/.test(text(ar(day), "runoff-early")) &&
+          !/No early voting today/.test(text(ar(day), "runoff-early")) && status(cell(ar(day), EARLY_CELL)) === "now",
+        text(ar(day), "runoff-early"));
+    }
+    check("the line links the calendar, the Board's manual, the Act and the voting page",
+      JSON.stringify(hrefs(items(ar("2026-11-24"), "runoff-early")[0])) === JSON.stringify([AR_CAL,
+        "https://sbec.arkansas.gov/wp-content/uploads/2026-CBEC-Manual.pdf",
+        "https://arkleg.state.ar.us/Home/FTPDocument?path=%2FACTS%2F2023R%2FPublic%2FACT92.pdf",
+        "https://www.sos.arkansas.gov/elections/voter-information/voter-registration-information/voting-in-arkansas"]),
+      hrefs(items(ar("2026-11-24"), "runoff-early")[0]).join(" "));
+    const differ = Object.keys(arBallots).map((day) => {
+      const b = arBallots[day].out.querySelector(".ballot-dates");
+      return b && text(b, "runoff-early") === text(ar(day), "runoff-early") ? "" : day + ": " + (b ? text(b, "runoff-early") : "no dates");
+    }).filter(Boolean);
+    check("Your ballot says what the state page says, on Thanksgiving and the Saturday", differ.length === 0, differ.join(" || "));
   });
 }
 
