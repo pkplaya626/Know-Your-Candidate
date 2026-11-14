@@ -36,6 +36,7 @@ import re
 import urllib.parse
 
 from . import ballot2026
+from .government_text import compiled_law
 
 READ = "2026-11-11"
 WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -814,8 +815,9 @@ def _source_problems(code, offices, source):
     parts = urllib.parse.urlsplit(source or "")
     if parts.scheme != "https" or not parts.netloc:
         return [f"{code} {offices}: source is not an https link: {source!r}"]
-    if any(parts.netloc.endswith(host) for host in ballot2026.NOT_A_SOURCE + (
-            "justia.com", "findlaw.com", "cornell.edu", "counselstack.com")):
+    # The compiled copies of the law are the guide's one list (rule 12).
+    if (any(parts.netloc.endswith(host) for host in ballot2026.NOT_A_SOURCE)
+            or compiled_law(source)):
         return [f"{code} {offices}: {parts.netloc} is not an official host"]
     return []
 

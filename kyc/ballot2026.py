@@ -28,6 +28,7 @@ import urllib.parse
 
 from .government_maps import SEATS
 from .government_maps import STATES as STATE_CODES
+from .government_text import compiled_law
 
 ELECTION = "2026-11-03"
 REVIEWED = "2026-10-14"
@@ -1075,10 +1076,10 @@ TERRITORIES = {
         "governor": ("elected", True,
             "Elected with the lieutenant governor on one ticket at the general election "
             "every four years from 1974 (48 U.S.C. 1422); a runoff if no ticket wins a majority",
-            "https://www.law.cornell.edu/uscode/text/48/1422"),
+            "https://uscode.house.gov/us/usc/t48/s1422/"),
         "lt": ("elected-jointly-with-governor", True,
             "Elected on one ticket with the governor (48 U.S.C. 1422)",
-            "https://www.law.cornell.edu/uscode/text/48/1422"),
+            "https://uscode.house.gov/us/usc/t48/s1422/"),
         # 5 GCA s.30101 (the Compiler of Laws' Title 5, ch. 30, COL
         # 2026-10-26, read 2026-11-11): "the Attorney General of Guam, who
         # shall be elected by the people of Guam for a term of four (4)
@@ -1097,10 +1098,10 @@ TERRITORIES = {
             "Elected with the lieutenant governor on one ticket at the general election "
             "every four years from 1974 (48 U.S.C. 1591); the Elections System's 2026 "
             "candidate listing names the tickets",
-            "https://www.law.cornell.edu/uscode/text/48/1591"),
+            "https://uscode.house.gov/us/usc/t48/s1591/"),
         "lt": ("elected-jointly-with-governor", True,
             "Elected on one ticket with the governor (48 U.S.C. 1591)",
-            "https://www.law.cornell.edu/uscode/text/48/1591"),
+            "https://uscode.house.gov/us/usc/t48/s1591/"),
     },
     "MP": {
         "governor": ("elected", True,
@@ -1275,10 +1276,10 @@ OPEN_SEATS = {
         "https://www.scstatehouse.gov/scconstitution/A04.pdf",
         "S.C. Const. art. IV, s.3: no one elected for more than two successive terms"),
     ("GU", "governor"): ("Lou Leon Guerrero", "term-limit", 2,
-        "https://www.law.cornell.edu/uscode/text/48/1422",
+        "https://uscode.house.gov/us/usc/t48/s1422/",
         "48 U.S.C. 1422: no one elected for two full successive terms"),
     ("VI", "governor"): ("Albert Bryan", "term-limit", 2,
-        "https://www.law.cornell.edu/uscode/text/48/1591",
+        "https://uscode.house.gov/us/usc/t48/s1591/",
         "48 U.S.C. 1591: no one elected for two full successive terms"),
 }
 OPEN_REASONS = ("term-limit", "not-listed", "listed")
@@ -1470,6 +1471,11 @@ def _source_problems(code, field, source):
         return [f"{code} {field}: source is not a link: {source!r}"]
     if any(parts.netloc.endswith(host) for host in NOT_A_SOURCE):
         return [f"{code} {field}: {parts.netloc} is a compiled table, not a source"]
+    # A statute is cited from its publisher, never a compiled copy of it: the
+    # territories' Organic Acts were Cornell's copies until 2026-11-14.
+    if compiled_law(source):
+        return [f"{code} {field}: {parts.netloc} is a compiled copy of the law, not its "
+                f"official publication"]
     return []
 
 

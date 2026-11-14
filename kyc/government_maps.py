@@ -23,7 +23,7 @@ and purple already mean a party on this site, and grey means "none".
 
 from . import geo
 from .government_text import SOURCES as TEXT_SOURCES
-from .government_text import Tense
+from .government_text import Tense, compiled_law_problems
 from .normalize import TERRITORIES, US_STATES
 
 STATES = sorted(code for code in set(US_STATES.values()) if code not in TERRITORIES)
@@ -33,7 +33,7 @@ OUTSIDE = sorted(TERRITORIES)          # D.C. and the five territories
 SOURCES = dict(TEXT_SOURCES)
 SOURCES.update({
     "usc-48-1824": ("48 U.S.C. 1824 (District Court for the Northern Mariana Islands)",
-                    "https://www.law.cornell.edu/uscode/text/48/1824"),
+                    "https://uscode.house.gov/us/usc/t48/s1824/"),
     "ncsl-legislators": ("NCSL: Number of Legislators and Length of Terms in Years",
                          "https://www.ncsl.org/resources/details/number-of-legislators-and-length-of-terms-in-years"),
     "bots-4-14": ("Council of State Governments, Book of the States 2022, Table 4.14: "
@@ -994,6 +994,11 @@ def check():
                 if token not in ("cat-1", "cat-2", "cat-3", "cat-4", "cat-5", "none",
                                  "scale-1", "scale-2", "scale-3", "scale-4", "scale-5"):
                     problems.append(f"{where}: colour {token!r} is not a category colour")
+    # The maps' own sources are held to the text's rule: never a compiled copy
+    # of the law (the guide's check asks the same of the text's, which these
+    # include).
+    problems += [f"maps: {p}" for p in compiled_law_problems(
+        {k: v for k, v in SOURCES.items() if TEXT_SOURCES.get(k) != v})]
     if sum(s + h for s, h in SEATS.values()) != NATIONAL_SEATS:
         problems.append(f"legislature seats add up to {sum(s + h for s, h in SEATS.values())}, "
                         f"not NCSL's {NATIONAL_SEATS}")

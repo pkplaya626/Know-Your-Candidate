@@ -23,7 +23,8 @@ import re
 from collections import namedtuple
 
 from . import pages
-from .government_text import HOLDERS, PAGES, REVIEWED, SEE, SOURCES, Tense
+from .government_text import (HOLDERS, PAGES, REVIEWED, SEE, SOURCES, Tense, compiled_law,
+                              compiled_law_problems)
 
 FOLDER = "government"
 # The site's own pages, which a "site:" link must name.
@@ -294,6 +295,9 @@ def href(target, here):
     if target == VOTING:
         return "../states/index.html", False
     if target.startswith("https://"):
+        if compiled_law(target):
+            raise ValueError(f"{here}: {target} is on {compiled_law(target)}, a compiled copy "
+                             f"of the law, not its official publication")
         return target, True
     if target.startswith("#"):
         if target[1:] not in _section_ids(here):
@@ -1019,6 +1023,9 @@ def check():
             problems.append(f"source {key!r} is listed but no section cites it")
         if not url.startswith("https://"):
             problems.append(f"source {key!r} is not an https URL: {url}")
+    # A compiled copy of the law is not its publication (rule 48): Cornell's
+    # copies stood behind 78 of these sources until 2026-11-14.
+    problems.extend(compiled_law_problems(SOURCES))
     if slugs()[0] != "index":
         problems.append("the guide's first page must be its index")
     # Every "see it" and "who holds it" entry belongs to a section there is.

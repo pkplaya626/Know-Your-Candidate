@@ -73,6 +73,30 @@ class TestCheck(unittest.TestCase):
             states["OH"]["ag"] = (sel, up, note, "https://www.ncsl.org/elections")
         self.assertIn("compiled table", self.broken(cite))
 
+    def test_a_compiled_copy_of_the_law_is_not_a_source(self):
+        # Guam's and the Virgin Islands' Organic Acts were cited from Cornell's
+        # copies until 2026-11-14; the Law Revision Counsel publishes the Code.
+        self.assertEqual(ballot2026.check(), True)
+        territories = copy.deepcopy(ballot2026.TERRITORIES)
+        sel, up, note, _src = territories["GU"]["governor"]
+        territories["GU"]["governor"] = (sel, up, note,
+                                         "https://www.law.cornell.edu/uscode/text/48/1422")
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(territories=territories)
+        self.assertIn("compiled copy of the law", str(caught.exception))
+        seats = dict(ballot2026.OPEN_SEATS)
+        holder, why, terms, _source, cite = seats[("VI", "governor")]
+        seats[("VI", "governor")] = (holder, why, terms,
+                                     "https://law.justia.com/codes/us/title-48/1591/", cite)
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(open_seats=seats)
+        self.assertIn("compiled copy of the law", str(caught.exception))
+        # Every source the table holds is on the official host now.
+        for entry in list(ballot2026.TERRITORIES.values()) + list(ballot2026.STATES.values()):
+            for value in entry.values():
+                if value:  # Nebraska has no lower chamber
+                    self.assertIsNone(ballot2026.compiled_law(value[-1]), value)
+
     def test_a_chamber_size_that_disagrees_fails(self):
         def grow(states):
             name, total, up, basis, src = states["OH"]["upper"]

@@ -32,6 +32,8 @@ Never name a person who holds an office here: who holds one comes from the
 data, on the page (``assets/kyc-guide.js``), so it cannot go stale.
 """
 
+import urllib.parse
+
 REVIEWED = "2026-10-18"
 
 
@@ -56,7 +58,59 @@ class Tense(tuple):
             raise ValueError("a Tense opens with its campaign words")
         return super().__new__(cls, forms)
 
-# key -> (title, URL). Primary sources wherever one exists.
+# Hosts that publish a compiled copy of the law, not the law: Cornell's Legal
+# Information Institute, Justia, FindLaw, Casetext and CounselStack. A copy
+# reads like the law and links like it, and is one more hand between the law
+# and the page; its encyclopedia (Cornell's Wex) is a secondary source. So a
+# U.S. Code section is cited from the Office of the Law Revision Counsel
+# (uscode.house.gov), an opinion from the Court's own publication
+# (supremecourt.gov) or the bound U.S. Reports as the Library of Congress
+# publishes it, a state's law from the state (rules 48 and 50). Until
+# 2026-11-14 the guide cited Cornell's copies 78 times, the guide's maps once
+# and the 2026 ballot table six times; each was replaced by the official
+# text, opened that day and read for the words it is cited for, and the
+# guide's, the maps' and the ballot table's checks refuse any source on one of
+# these hosts (``compiled_law``).
+COMPILED_LAW = ("law.cornell.edu", "justia.com", "findlaw.com", "casetext.com",
+                "counselstack.com")
+# A source still on one of those hosts, and why it has not been replaced: an
+# entry is allowed there only while it names what refused, and one whose
+# source has left the host is stale and fails the check too.
+COMPILED_LAW_PENDING = {
+    "nh-const": ("New Hampshire's own copies of its constitution - the State's page "
+                 "(www.nh.gov/glance/state-constitution/executive-power-governor) and the "
+                 "Secretary of State's PDF (mm.nh.gov/files/uploads/sos/docs/nh-constitution.pdf) "
+                 "- answered this project's reader \"Access Denied\" (HTTP 403) on 2026-11-14; "
+                 "a person can read Part Second, Articles 46, 52 and 56 there and cite it"),
+}
+
+
+def compiled_law(url):
+    """The compiled-law host *url* is on (``COMPILED_LAW``), or None."""
+    host = urllib.parse.urlsplit(url or "").netloc.lower()
+    return next((h for h in COMPILED_LAW if host == h or host.endswith("." + h)), None)
+
+
+def compiled_law_problems(sources, pending=None):
+    """Problems, as strings, with a ``{key: (title, url)}`` table's sources on
+    a compiled copy of the law: any but a pending entry, and a pending entry
+    that is no longer on one."""
+    pending = COMPILED_LAW_PENDING if pending is None else pending
+    found = []
+    for key, (_title, url) in sources.items():
+        host = compiled_law(url)
+        if host and key not in pending:
+            found.append(f"source {key!r} is on {host}, a compiled copy of the law, not its "
+                         f"official publication: {url}")
+    for key in pending:
+        if key in sources and not compiled_law(sources[key][1]):
+            found.append(f"COMPILED_LAW_PENDING names {key!r}, which is no longer on a "
+                         f"compiled copy of the law: remove the entry")
+    return found
+
+
+# key -> (title, URL). Primary sources wherever one exists: never a compiled
+# copy of the law (``COMPILED_LAW``).
 SOURCES = {
     # The Constitution
     "const-art1": ("U.S. Constitution, Article I",
@@ -80,151 +134,188 @@ SOURCES = {
 
     # Federal statutes
     "usc-2-8": ("2 U.S.C. 8 (when a House vacancy is filled)",
-                "https://www.law.cornell.edu/uscode/text/2/8"),
+                "https://uscode.house.gov/us/usc/t2/s8/"),
     "usc-3-19": ("3 U.S.C. 19 (presidential succession)",
-                 "https://www.law.cornell.edu/uscode/text/3/19"),
+                 "https://uscode.house.gov/us/usc/t3/s19/"),
     "usc-5-101": ("5 U.S.C. 101 (the executive departments)",
-                  "https://www.law.cornell.edu/uscode/text/5/101"),
+                  "https://uscode.house.gov/us/usc/t5/s101/"),
     "usc-5-3105": ("5 U.S.C. 3105 (administrative law judges)",
-                   "https://www.law.cornell.edu/uscode/text/5/3105"),
+                   "https://uscode.house.gov/us/usc/t5/s3105/"),
     "usc-10-111": ("10 U.S.C. 111 (the Department of Defense)",
-                   "https://www.law.cornell.edu/uscode/text/10/111"),
+                   "https://uscode.house.gov/us/usc/t10/s111/"),
     "usc-10-942": ("10 U.S.C. 942 (Court of Appeals for the Armed Forces)",
-                   "https://www.law.cornell.edu/uscode/text/10/942"),
+                   "https://uscode.house.gov/us/usc/t10/s942/"),
     "usc-12-242": ("12 U.S.C. 242 (Federal Reserve Board)",
-                   "https://www.law.cornell.edu/uscode/text/12/242"),
+                   "https://uscode.house.gov/us/usc/t12/s242/"),
     "usc-15-41": ("15 U.S.C. 41 (Federal Trade Commission)",
-                  "https://www.law.cornell.edu/uscode/text/15/41"),
+                  "https://uscode.house.gov/us/usc/t15/s41/"),
     "usc-20-3411": ("20 U.S.C. 3411 (Department of Education)",
-                    "https://www.law.cornell.edu/uscode/text/20/3411"),
+                    "https://uscode.house.gov/us/usc/t20/s3411/"),
     "usc-26-7443": ("26 U.S.C. 7443 (Tax Court)",
-                    "https://www.law.cornell.edu/uscode/text/26/7443"),
+                    "https://uscode.house.gov/us/usc/t26/s7443/"),
     "usc-28-1": ("28 U.S.C. 1 (the Supreme Court)",
-                 "https://www.law.cornell.edu/uscode/text/28/1"),
+                 "https://uscode.house.gov/us/usc/t28/s1/"),
     "usc-28-41": ("28 U.S.C. 41 (the circuits)",
-                  "https://www.law.cornell.edu/uscode/text/28/41"),
+                  "https://uscode.house.gov/us/usc/t28/s41/"),
     "usc-28-45": ("28 U.S.C. 45 (chief judges of the circuits)",
-                  "https://www.law.cornell.edu/uscode/text/28/45"),
+                  "https://uscode.house.gov/us/usc/t28/s45/"),
     "usc-28-151": ("28 U.S.C. 151 (bankruptcy courts)",
-                   "https://www.law.cornell.edu/uscode/text/28/151"),
+                   "https://uscode.house.gov/us/usc/t28/s151/"),
     "usc-28-152": ("28 U.S.C. 152 (bankruptcy judges)",
-                   "https://www.law.cornell.edu/uscode/text/28/152"),
+                   "https://uscode.house.gov/us/usc/t28/s152/"),
     "usc-28-171": ("28 U.S.C. 171 (Court of Federal Claims)",
-                   "https://www.law.cornell.edu/uscode/text/28/171"),
+                   "https://uscode.house.gov/us/usc/t28/s171/"),
     "usc-28-251": ("28 U.S.C. 251 (Court of International Trade)",
-                   "https://www.law.cornell.edu/uscode/text/28/251"),
+                   "https://uscode.house.gov/us/usc/t28/s251/"),
     "usc-28-331": ("28 U.S.C. 331 (Judicial Conference)",
-                   "https://www.law.cornell.edu/uscode/text/28/331"),
+                   "https://uscode.house.gov/us/usc/t28/s331/"),
     "usc-28-371": ("28 U.S.C. 371 (senior status)",
-                   "https://www.law.cornell.edu/uscode/text/28/371"),
+                   "https://uscode.house.gov/us/usc/t28/s371/"),
     "usc-28-621": ("28 U.S.C. 621 (Federal Judicial Center)",
-                   "https://www.law.cornell.edu/uscode/text/28/621"),
+                   "https://uscode.house.gov/us/usc/t28/s621/"),
     "usc-28-631": ("28 U.S.C. 631 (magistrate judges)",
-                   "https://www.law.cornell.edu/uscode/text/28/631"),
+                   "https://uscode.house.gov/us/usc/t28/s631/"),
     "usc-28-636": ("28 U.S.C. 636 (magistrate judges: jurisdiction)",
-                   "https://www.law.cornell.edu/uscode/text/28/636"),
+                   "https://uscode.house.gov/us/usc/t28/s636/"),
     "usc-18-3401": ("18 U.S.C. 3401 (misdemeanors tried by magistrate judges)",
-                    "https://www.law.cornell.edu/uscode/text/18/3401"),
+                    "https://uscode.house.gov/us/usc/t18/s3401/"),
     "usc-28-1295": ("28 U.S.C. 1295 (Federal Circuit)",
-                    "https://www.law.cornell.edu/uscode/text/28/1295"),
+                    "https://uscode.house.gov/us/usc/t28/s1295/"),
     "usc-28-1441": ("28 U.S.C. 1441 (removal of civil actions)",
-                    "https://www.law.cornell.edu/uscode/text/28/1441"),
+                    "https://uscode.house.gov/us/usc/t28/s1441/"),
     "usc-28-1442": ("28 U.S.C. 1442 (removal: federal officers)",
-                    "https://www.law.cornell.edu/uscode/text/28/1442"),
+                    "https://uscode.house.gov/us/usc/t28/s1442/"),
     "usc-31-502": ("31 U.S.C. 502 (Office of Management and Budget)",
-                   "https://www.law.cornell.edu/uscode/text/31/502"),
+                   "https://uscode.house.gov/us/usc/t31/s502/"),
     "usc-31-703": ("31 U.S.C. 703 (Comptroller General)",
-                   "https://www.law.cornell.edu/uscode/text/31/703"),
+                   "https://uscode.house.gov/us/usc/t31/s703/"),
     "usc-38-7253": ("38 U.S.C. 7253 (Court of Appeals for Veterans Claims)",
-                    "https://www.law.cornell.edu/uscode/text/38/7253"),
+                    "https://uscode.house.gov/us/usc/t38/s7253/"),
     "usc-39-201": ("39 U.S.C. 201 (Postal Service)",
-                   "https://www.law.cornell.edu/uscode/text/39/201"),
+                   "https://uscode.house.gov/us/usc/t39/s201/"),
     "usc-49-24301": ("49 U.S.C. 24301 (Amtrak)",
-                     "https://www.law.cornell.edu/uscode/text/49/24301"),
+                     "https://uscode.house.gov/us/usc/t49/s24301/"),
     "usc-50-1803": ("50 U.S.C. 1803 (Foreign Intelligence Surveillance Court)",
-                    "https://www.law.cornell.edu/uscode/text/50/1803"),
+                    "https://uscode.house.gov/us/usc/t50/s1803/"),
     "usc-18-1151": ("18 U.S.C. 1151 (Indian country defined)",
-                    "https://www.law.cornell.edu/uscode/text/18/1151"),
+                    "https://uscode.house.gov/us/usc/t18/s1151/"),
     "usc-18-1152": ("18 U.S.C. 1152 (General Crimes Act)",
-                    "https://www.law.cornell.edu/uscode/text/18/1152"),
+                    "https://uscode.house.gov/us/usc/t18/s1152/"),
     "usc-18-19": ("18 U.S.C. 19 (petty offense defined)",
-                  "https://www.law.cornell.edu/uscode/text/18/19"),
+                  "https://uscode.house.gov/us/usc/t18/s19/"),
     "usc-2-2a": ("2 U.S.C. 2a (apportionment of representatives)",
-                 "https://www.law.cornell.edu/uscode/text/2/2a"),
+                 "https://uscode.house.gov/us/usc/t2/s2a/"),
     "usc-2-2c": ("2 U.S.C. 2c (single-member districts)",
-                 "https://www.law.cornell.edu/uscode/text/2/2c"),
+                 "https://uscode.house.gov/us/usc/t2/s2c/"),
     "usc-2-641": ("2 U.S.C. 641 (budget reconciliation)",
-                  "https://www.law.cornell.edu/uscode/text/2/641"),
+                  "https://uscode.house.gov/us/usc/t2/s641/"),
     "usc-5-551": ("5 U.S.C. 551 (agency defined)",
-                  "https://www.law.cornell.edu/uscode/text/5/551"),
+                  "https://uscode.house.gov/us/usc/t5/s551/"),
     "usc-5-552": ("5 U.S.C. 552 (Freedom of Information Act)",
-                  "https://www.law.cornell.edu/uscode/text/5/552"),
+                  "https://uscode.house.gov/us/usc/t5/s552/"),
     "usc-5-552a": ("5 U.S.C. 552a (Privacy Act)",
-                   "https://www.law.cornell.edu/uscode/text/5/552a"),
+                   "https://uscode.house.gov/us/usc/t5/s552a/"),
     "usc-5-553": ("5 U.S.C. 553 (rulemaking)",
-                  "https://www.law.cornell.edu/uscode/text/5/553"),
+                  "https://uscode.house.gov/us/usc/t5/s553/"),
     "usc-52-10301": ("52 U.S.C. 10301 (Voting Rights Act, section 2)",
-                     "https://www.law.cornell.edu/uscode/text/52/10301"),
+                     "https://uscode.house.gov/us/usc/t52/s10301/"),
     "usc-52-30101": ("52 U.S.C. 30101 (candidate, federal office and independent expenditure "
-                     "defined)", "https://www.law.cornell.edu/uscode/text/52/30101"),
+                     "defined)", "https://uscode.house.gov/us/usc/t52/s30101/"),
     "usc-18-1153": ("18 U.S.C. 1153 (Major Crimes Act)",
-                    "https://www.law.cornell.edu/uscode/text/18/1153"),
+                    "https://uscode.house.gov/us/usc/t18/s1153/"),
     "usc-18-1162": ("18 U.S.C. 1162 (Public Law 280: criminal jurisdiction)",
-                    "https://www.law.cornell.edu/uscode/text/18/1162"),
+                    "https://uscode.house.gov/us/usc/t18/s1162/"),
     "usc-28-1360": ("28 U.S.C. 1360 (Public Law 280: civil actions)",
-                    "https://www.law.cornell.edu/uscode/text/28/1360"),
+                    "https://uscode.house.gov/us/usc/t28/s1360/"),
     "usc-25-1302": ("25 U.S.C. 1302 (Indian Civil Rights Act)",
-                    "https://www.law.cornell.edu/uscode/text/25/1302"),
+                    "https://uscode.house.gov/us/usc/t25/s1302/"),
     "usc-25-1304": ("25 U.S.C. 1304 (special Tribal criminal jurisdiction)",
-                    "https://www.law.cornell.edu/uscode/text/25/1304"),
+                    "https://uscode.house.gov/us/usc/t25/s1304/"),
     "usc-25-1911": ("25 U.S.C. 1911 (Indian Child Welfare Act)",
-                    "https://www.law.cornell.edu/uscode/text/25/1911"),
+                    "https://uscode.house.gov/us/usc/t25/s1911/"),
     "usc-25-3601": ("25 U.S.C. 3601 (Indian Tribal Justice Act)",
-                    "https://www.law.cornell.edu/uscode/text/25/3601"),
+                    "https://uscode.house.gov/us/usc/t25/s3601/"),
     "usc-25-5123": ("25 U.S.C. 5123 (tribal constitutions)",
-                    "https://www.law.cornell.edu/uscode/text/25/5123"),
+                    "https://uscode.house.gov/us/usc/t25/s5123/"),
     "usc-25-5301": ("25 U.S.C. 5301 (Indian Self-Determination Act)",
-                    "https://www.law.cornell.edu/uscode/text/25/5301"),
+                    "https://uscode.house.gov/us/usc/t25/s5301/"),
     "usc-25-5361": ("25 U.S.C. 5361 (Tribal Self-Governance)",
-                    "https://www.law.cornell.edu/uscode/text/25/5361"),
+                    "https://uscode.house.gov/us/usc/t25/s5361/"),
     "cfr-25-11": ("25 C.F.R. 11.201 (Courts of Indian Offenses: magistrates)",
                   "https://www.ecfr.gov/current/title-25/chapter-I/subchapter-B/part-11/subpart-B/section-11.201"),
 
-    # Court decisions
+    # Court decisions. The older cases in the bound U.S. Reports as the Library
+    # of Congress publishes them (the PDF its record names: www.loc.gov's item
+    # pages answer a script with a bot check, its JSON record and tile.loc.gov
+    # do not); the later ones in the Court's own copy, the file its own pages
+    # link (its U.S. Reports page for volume 567's bound volume, the term's
+    # opinion listing for the rest) at the case's first page. Each was opened
+    # on 2026-11-14 and holds the case, the citation and the year given here,
+    # and the words the sections cite it for (rule 48).
     "marbury": ("Marbury v. Madison, 5 U.S. 137 (1803)",
-                "https://www.law.cornell.edu/supremecourt/text/5/137"),
+                "https://tile.loc.gov/storage-services/service/ll/usrep/usrep005/"
+                "usrep005137/usrep005137.pdf"),
     "johnson": ("Johnson v. M'Intosh, 21 U.S. 543 (1823)",
-                "https://www.law.cornell.edu/supremecourt/text/21/543"),
+                "https://tile.loc.gov/storage-services/service/ll/usrep/usrep021/"
+                "usrep021543/usrep021543.pdf"),
     "cherokee": ("Cherokee Nation v. Georgia, 30 U.S. 1 (1831)",
-                 "https://www.law.cornell.edu/supremecourt/text/30/1"),
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep030/"
+                 "usrep030001/usrep030001.pdf"),
     "worcester": ("Worcester v. Georgia, 31 U.S. 515 (1832)",
-                  "https://www.law.cornell.edu/supremecourt/text/31/515"),
+                  "https://tile.loc.gov/storage-services/service/ll/usrep/usrep031/"
+                  "usrep031515/usrep031515.pdf"),
+    # Read 2026-11-14 for the states' police power (states#powers), at 197
+    # U.S. 24-25: "what is commonly called the police power - a power which
+    # the State did not surrender when becoming a member of the Union under
+    # the Constitution", embracing "such reasonable regulations established
+    # directly by legislative enactment as will protect the public health and
+    # the public safety", "subject ... to the condition that no rule prescribed
+    # by a State ... shall contravene the Constitution of the United States",
+    # and "must always yield in case of conflict with the exercise by the
+    # General Government of any power it possesses under the Constitution".
+    "jacobson": ("Jacobson v. Massachusetts, 197 U.S. 11 (1905)",
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep197/"
+                 "usrep197011/usrep197011.pdf"),
     "youngstown": ("Youngstown Sheet & Tube Co. v. Sawyer, 343 U.S. 579 (1952)",
-                   "https://www.law.cornell.edu/supremecourt/text/343/579"),
+                   "https://tile.loc.gov/storage-services/service/ll/usrep/usrep343/"
+                   "usrep343579/usrep343579.pdf"),
     "bryan": ("Bryan v. Itasca County, 426 U.S. 373 (1976)",
-              "https://www.law.cornell.edu/supremecourt/text/426/373"),
+              "https://tile.loc.gov/storage-services/service/ll/usrep/usrep426/"
+              "usrep426373/usrep426373.pdf"),
     "oliphant": ("Oliphant v. Suquamish Indian Tribe, 435 U.S. 191 (1978)",
-                 "https://www.law.cornell.edu/supremecourt/text/435/191"),
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep435/"
+                 "usrep435191/usrep435191.pdf"),
     "michigan-long": ("Michigan v. Long, 463 U.S. 1032 (1983)",
-                      "https://www.law.cornell.edu/supremecourt/text/463/1032"),
+                      "https://tile.loc.gov/storage-services/service/ll/usrep/usrep463/"
+                      "usrep4631032/usrep4631032.pdf"),
     "dole": ("South Dakota v. Dole, 483 U.S. 203 (1987)",
-             "https://www.law.cornell.edu/supremecourt/text/483/203"),
+             "https://tile.loc.gov/storage-services/service/ll/usrep/usrep483/"
+             "usrep483203/usrep483203.pdf"),
     "printz": ("Printz v. United States, 521 U.S. 898 (1997)",
-               "https://www.law.cornell.edu/supremecourt/text/521/898"),
+               "https://tile.loc.gov/storage-services/service/ll/usrep/usrep521/"
+               "usrep521898/usrep521898.pdf"),
+    # The bound volume's page 555 is 567 U.S. 519; Part II of the Chief
+    # Justice's opinion, the Court's, at 535-536 (read 2026-11-14 for
+    # states#powers): the States "perform many of the vital functions of
+    # modern government ... Our cases refer to this general power of
+    # governing, possessed by the States but not by the Federal Government,
+    # as the 'police power.'"
     "nfib": ("NFIB v. Sebelius, 567 U.S. 519 (2012)",
-             "https://www.law.cornell.edu/supremecourt/text/11-393"),
+             "https://www.supremecourt.gov/opinions/boundvolumes/567BV.pdf#page=555"),
     "wilcox": ("Trump v. Wilcox, No. 24A966 (order of May 22, 2025)",
                "https://www.supremecourt.gov/opinions/24pdf/24a966_1b8e.pdf"),
     "wesberry": ("Wesberry v. Sanders, 376 U.S. 1 (1964)",
-                 "https://www.law.cornell.edu/supremecourt/text/376/1"),
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep376/"
+                 "usrep376001/usrep376001.pdf"),
     "reynolds": ("Reynolds v. Sims, 377 U.S. 533 (1964)",
-                 "https://www.law.cornell.edu/supremecourt/text/377/533"),
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep377/"
+                 "usrep377533/usrep377533.pdf"),
     "rucho": ("Rucho v. Common Cause, 588 U.S. 684 (2019)",
-              "https://www.law.cornell.edu/supremecourt/text/18-422"),
+              "https://www.supremecourt.gov/opinions/preliminaryprint/588US2PP_final.pdf#page=346"),
     "mcgirt": ("McGirt v. Oklahoma, 591 U.S. 894 (2020)",
-               "https://www.law.cornell.edu/supremecourt/text/18-9526"),
+               "https://www.supremecourt.gov/opinions/preliminaryprint/591US2PP_web.pdf#page=453"),
     "castro-huerta": ("Oklahoma v. Castro-Huerta, 597 U.S. 629 (2022)",
-                      "https://www.law.cornell.edu/supremecourt/text/21-429"),
+                      "https://www.supremecourt.gov/opinions/21pdf/597us2r64_5436.pdf"),
     "callais": ("Louisiana v. Callais, 608 U.S. 85 (2026)",
                 "https://www.supremecourt.gov/opinions/25pdf/608us1r29_n648.pdf"),
     "onder": ("People Not Politicians v. Onder, No. 26A388 (order of Sept. 25, 2026)",
@@ -258,7 +349,7 @@ SOURCES = {
     "gao": ("Government Accountability Office: About", "https://www.gao.gov/about"),
     "cbo": ("Congressional Budget Office: Overview", "https://www.cbo.gov/about/overview"),
     "crs": ("2 U.S.C. 166 (Congressional Research Service)",
-            "https://www.law.cornell.edu/uscode/text/2/166"),
+            "https://uscode.house.gov/us/usc/t2/s166/"),
     "aoc": ("Architect of the Capitol: About", "https://www.aoc.gov/about-us"),
     "house-legislative-process": ("U.S. House of Representatives: The Legislative Process",
                                   "https://www.house.gov/the-house-explained/the-legislative-process"),
@@ -279,7 +370,7 @@ SOURCES = {
     "eo-8248": ("Executive Order 8248 (1939), establishing the Executive Office of the President",
                 "https://www.archives.gov/federal-register/codification/executive-order/08248.html"),
     "usc-50-3021": ("50 U.S.C. 3021 (National Security Council)",
-                    "https://www.law.cornell.edu/uscode/text/50/3021"),
+                    "https://uscode.house.gov/us/usc/t50/s3021/"),
     "eo-14347": ("Executive Order 14347, 90 FR 43893 (Sept. 10, 2025)",
                  "https://www.govinfo.gov/content/pkg/FR-2025-09-10/pdf/2025-17508.pdf"),
     "senate-2026-07-14": ("U.S. Senate floor log, July 14, 2026",
@@ -316,8 +407,6 @@ SOURCES = {
                 "https://www.bia.gov/faqs/what-federally-recognized-tribe"),
 
     # States
-    "wex-police": ("Legal Information Institute: police powers",
-                   "https://www.law.cornell.edu/wex/police_powers"),
     "nebraska": ("Nebraska Legislature: History of the Unicameral",
                  "https://nebraskalegislature.gov/about/history_unicameral.php"),
     "nebraska-senators": ("Nebraska Legislature: Senators by district",
@@ -392,15 +481,19 @@ SOURCES = {
     "const-amdt20": ("U.S. Constitution, Twentieth Amendment",
                      "https://constitution.congress.gov/constitution/amendment-20/"),
     "usc-2-1": ("2 U.S.C. 1 (the election of senators)",
-                "https://www.law.cornell.edu/uscode/text/2/1"),
+                "https://uscode.house.gov/us/usc/t2/s1/"),
     "usc-2-7": ("2 U.S.C. 7 (the day of the House election)",
-                "https://www.law.cornell.edu/uscode/text/2/7"),
+                "https://uscode.house.gov/us/usc/t2/s7/"),
     "usc-48-1712": ("48 U.S.C. 1712 (the Delegates from Guam and the U.S. Virgin Islands)",
-                    "https://www.law.cornell.edu/uscode/text/48/1712"),
+                    "https://uscode.house.gov/us/usc/t48/s1712/"),
     "usc-52-21082": ("52 U.S.C. 21082 (provisional ballots)",
-                     "https://www.law.cornell.edu/uscode/text/52/21082"),
-    "watson-rnc": ("Watson v. Republican National Committee, No. 24-1260 (June 29, 2026)",
-                   "https://www.law.cornell.edu/supremecourt/text/24-1260"),
+                     "https://uscode.house.gov/us/usc/t52/s21082/"),
+    # The Court's preliminary print, 609 U.S. 672, read 2026-11-14: "Held: The
+    # federal election-day statutes do not prevent Mississippi from counting
+    # absentee ballots postmarked by election day but received up to five days
+    # thereafter".
+    "watson-rnc": ("Watson v. Republican National Committee, 609 U.S. 672 (2026)",
+                   "https://www.supremecourt.gov/opinions/25pdf/609us2r65_g314.pdf"),
     "eac-in-charge": ("U.S. Election Assistance Commission, Who is in charge of elections in "
                       "my state?", "https://www.eac.gov/who-is-in-charge-of-elections-in-my-state"),
     "eac-primaries": ("U.S. Election Assistance Commission, Primary election types",
@@ -1574,7 +1667,12 @@ STATES = {
                       "into far more detail than the federal one, on taxes, debt, education and "
                       "local government."),
             ],
-            "sources": ["const-amdt10", "wex-police"],
+            # Cited to Cornell's Wex, a legal encyclopedia, until 2026-11-14,
+            # and read that day against the Court's own words: Jacobson (the
+            # police power, public health and safety, within the Constitution
+            # and yielding to federal law) and NFIB (what the Court calls it).
+            "sources": ["const-amdt10", "jacobson", "nfib"],
+            "reviewed": "2026-11-14",
         },
         {
             "id": "legislatures",

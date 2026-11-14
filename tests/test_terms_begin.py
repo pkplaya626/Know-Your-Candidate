@@ -99,6 +99,14 @@ class TheTable(unittest.TestCase):
         ncsl = {"AK": (dict(terms_begin.TERMS["AK"][0], sources=(
             ("https://www.ncsl.org/terms", ("words",)),)),)}
         self.assertTrue(any("not an official host" in f for f in terms_begin.problems(ncsl, {})))
+        # A compiled copy of the law, by the guide's one list of them.
+        for copy_of_law in ("https://www.law.cornell.edu/uscode/text/2/7",
+                            "https://law.justia.com/constitution/alaska/",
+                            "https://codes.findlaw.com/ak/title-15/"):
+            made = {"AK": (dict(terms_begin.TERMS["AK"][0], sources=(
+                (copy_of_law, ("words",)),)),)}
+            self.assertTrue(any("not an official host" in f
+                                for f in terms_begin.problems(made, {})), copy_of_law)
         # An office not on the 2026 ballot (Virginia's governor) has no day.
         off = dict(terms_begin.TERMS, VA=(dict(terms_begin.TERMS["AK"][0]),))
         self.assertTrue(any("VA governor: not on the 2026 ballot" in f

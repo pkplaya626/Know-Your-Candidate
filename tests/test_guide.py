@@ -61,6 +61,97 @@ class TestGuideText(unittest.TestCase):
             self.assertNotIn(name, text)
 
 
+class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
+    """Rule 48: each section cites the primary sources it was checked against.
+    Until 2026-11-14 the guide cited Cornell's Legal Information Institute 78
+    times (its copies of the U.S. Code and of the Court's opinions, and its Wex
+    encyclopedia), the guide's maps once and the 2026 ballot table six times: a
+    compiled copy of the law, not its publication. Each check makes the state
+    it refuses and asks the real tables for the rest."""
+
+    CORNELL = "https://www.law.cornell.edu/uscode/text/2/8"
+
+    def test_no_source_is_on_a_compiled_copy_of_the_law(self):
+        from kyc import government_maps
+        from kyc.government_text import COMPILED_LAW_PENDING, compiled_law
+        for key, (_title, url) in government_maps.SOURCES.items():
+            if key in COMPILED_LAW_PENDING:
+                # Waiting for a person, with what refused this reader.
+                self.assertTrue(compiled_law(url), key)
+                self.assertTrue(COMPILED_LAW_PENDING[key].strip(), key)
+                continue
+            self.assertIsNone(compiled_law(url), (key, url))
+        # The U.S. Code is the Law Revision Counsel's, or the edition govinfo
+        # publishes, never a copy of it.
+        for key, (title, url) in SOURCES.items():
+            if re.match(r"\d+ U\.S\.C\. ", title):
+                self.assertTrue(url.startswith(("https://uscode.house.gov/us/usc/t",
+                                                "https://www.govinfo.gov/")), (key, url))
+
+    def test_the_guide_refuses_one_put_back(self):
+        original = SOURCES["usc-2-8"]
+        SOURCES["usc-2-8"] = (original[0], self.CORNELL)
+        try:
+            found = government.check()
+        finally:
+            SOURCES["usc-2-8"] = original
+        self.assertTrue(any("'usc-2-8' is on law.cornell.edu" in p for p in found), found)
+        self.assertEqual(government.check(), [])
+        # Its encyclopedia too, and a host's other names.
+        for url in ("https://www.law.cornell.edu/wex/police_powers",
+                    "https://law.cornell.edu/supremecourt/text/5/137",
+                    "https://supreme.justia.com/cases/federal/us/5/137/"):
+            from kyc.government_text import compiled_law_problems
+            self.assertTrue(compiled_law_problems({"k": ("t", url)}, pending={}), url)
+
+    def test_a_link_in_the_text_is_refused_there_too(self):
+        with self.assertRaises(ValueError):
+            government.href(self.CORNELL, "index")
+        with self.assertRaises(ValueError):
+            government.inline(f"See [the statute]({self.CORNELL}).", "index")
+
+    def test_the_maps_refuse_one_put_back(self):
+        from kyc import government_maps
+        original = government_maps.SOURCES["usc-48-1824"]
+        government_maps.SOURCES["usc-48-1824"] = (original[0],
+                                                  "https://www.law.cornell.edu/uscode/text/48/1824")
+        try:
+            found = government_maps.check()
+        finally:
+            government_maps.SOURCES["usc-48-1824"] = original
+        self.assertTrue(any("'usc-48-1824' is on law.cornell.edu" in p for p in found), found)
+
+    def test_a_pending_source_that_has_moved_is_stale(self):
+        from kyc.government_text import compiled_law_problems
+        moved = {"nh-const": ("New Hampshire Constitution",
+                              "https://www.nh.gov/glance/state-constitution/executive-power-governor")}
+        found = compiled_law_problems(moved)
+        self.assertTrue(any("no longer on a compiled copy" in p for p in found), found)
+
+    def test_the_build_reports_it(self):
+        from kyc import validate
+        original = SOURCES["usc-2-8"]
+        SOURCES["usc-2-8"] = (original[0], self.CORNELL)
+        try:
+            issues = validate.check_guide("2026-11-14")
+        finally:
+            SOURCES["usc-2-8"] = original
+        self.assertTrue(any(i.level == "error" and i.code == "guide" for i in issues), issues)
+
+    def test_the_page_code_links_no_compiled_copy_either(self):
+        # The federal hub's and the state pages' statute links (3 U.S.C. 19,
+        # 28 U.S.C. 1295, 48 U.S.C. 891) were Cornell's copies too.
+        from kyc.government_text import COMPILED_LAW
+        folder = os.path.join(SITE, "assets")
+        for name in sorted(os.listdir(folder)):
+            if not name.endswith(".js"):
+                continue
+            with open(os.path.join(folder, name), encoding="utf-8") as handle:
+                script = handle.read()
+            for host in COMPILED_LAW:
+                self.assertNotIn(host, script, f"assets/{name} links {host}")
+
+
 class TestNavigation(unittest.TestCase):
     """The sidebar, by level of government: one table (pages.nav_groups)."""
 

@@ -10762,7 +10762,7 @@ async function testStateGov() {
     check("the section is headed Resident Commissioner, and says why it has no race",
       /Resident Commissioner to the U\.S\. House/.test(delegation.querySelector(".state-heading").textContent) &&
       /last on the ballot in 2024 and is next in 2028/.test(delegation.textContent) &&
-      !!delegation.querySelector('a[href="https://www.law.cornell.edu/uscode/text/48/891"]'),
+      !!delegation.querySelector('a[href="https://uscode.house.gov/us/usc/t48/s891/"]'),
       delegation.textContent.slice(0, 300));
     const chips = [...pr.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
     check("its jump chip says Resident Commissioner", chips.indexOf("Resident Commissioner") !== -1, chips.join(" | "));
@@ -19880,7 +19880,7 @@ async function testCharts() {
       const fed = D.querySelector(".court-ladder .cl-note");
       check("the Federal Circuit's line names the district courts' patent appeals and cites the statute",
         !fed || (/patent cases from every district court/.test(fed.textContent) &&
-          /uscode\/text\/28\/1295$/.test(fed.querySelector("a").getAttribute("href"))));
+          /^https:\/\/uscode\.house\.gov\/us\/usc\/t28\/s1295\/$/.test(fed.querySelector("a").getAttribute("href"))));
     });
   }
 

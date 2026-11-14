@@ -2165,6 +2165,22 @@ here in a different way:
   replaced by what Article II says. The footer gives the date the text was
   last checked (`REVIEWED`), and a section read again on another day gives
   its own.
+- **A source is the law's own publication, never a copy of it.** A U.S. Code
+  section links the Office of the Law Revision Counsel's text
+  (`uscode.house.gov/us/usc/t<title>/s<section>/`), an opinion the Court's own
+  PDF or the bound U.S. Reports as the Library of Congress publishes it. Until
+  2026-11-14 the guide linked Cornell's Legal Information Institute 78 times
+  (its copies of the Code and of the opinions, and its Wex encyclopedia for
+  the states' police power, now *Jacobson v. Massachusetts* and *NFIB v.
+  Sebelius* in the Court's words), the maps once and the 2026 ballot table six
+  times; each was replaced by the official text, opened that day and read for
+  the words it is cited for. The guide's, the maps' and the ballot table's
+  checks fail on any source on a compiled copy of the law
+  (`government_text.COMPILED_LAW`: Cornell's, Justia, FindLaw, Casetext,
+  CounselStack), save an entry in `COMPILED_LAW_PENDING` that says what
+  refused the official copy (New Hampshire's constitution, whose state pages
+  answered this project's reader "Access Denied"); an entry whose source has
+  moved is stale and fails too.
 - **Its tense is the build's day.** Words about the election and what
   follows it are a `government_text.Tense`: a form for the campaign, one for
   after Election Day (the results read after it, as the pages tell), one for

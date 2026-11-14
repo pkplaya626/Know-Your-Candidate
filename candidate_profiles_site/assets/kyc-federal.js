@@ -272,7 +272,7 @@
             ? '<span class="cl-sub cl-note">No district courts of its own: it hears appeals by subject, ' +
               "among them patent cases from every district court, and appeals from the Court of " +
               "International Trade, the Court of Federal Claims and some federal agencies (" +
-              '<a href="https://www.law.cornell.edu/uscode/text/28/1295" target="_blank" ' +
+              '<a href="https://uscode.house.gov/us/usc/t28/s1295/" target="_blank" ' +
               'rel="noopener noreferrer">28 U.S.C. 1295</a>)</span>' : "") + "</li>";
     }).join("");
     var listedTrials = trials.filter(function (c) { return c.listed; });
@@ -587,7 +587,7 @@
       '<p class="guide-lede">Who would become or act as President, in order. First the Vice ' +
       "President (" + source("https://constitution.congress.gov/constitution/amendment-25/",
         "the 25th Amendment") + "); then, if the Presidency and the Vice Presidency are both " +
-      "empty, the officers " + source("https://www.law.cornell.edu/uscode/text/3/19", "3 U.S.C. 19") +
+      "empty, the officers " + source("https://uscode.house.gov/us/usc/t3/s19/", "3 U.S.C. 19") +
       " names, from the Speaker on. The Speaker and the President pro tempore are from " +
       source((d.sources.executive || {}).leadership ||
         "https://unitedstates.github.io/congress-legislators/legislators-current.json",
