@@ -220,7 +220,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3286 tests, no dependencies
+python -m unittest discover tests             # 3287 tests, no dependencies
 npm install && npm test                       # 4984 real-DOM checks (needs jsdom)
 ```
 
@@ -2536,7 +2536,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     no official words close, so it stays "Under way, during those hours". A
     weekday after "no" ("no Saturday", "no Saturday hours") closes that
     weekday as a class, as "Excluding Sundays" does (`CLOSED_CLASS`), and
-    every such day of the window must be listed. A state holiday is closed
+    every such day of the window must be listed. A run of them closes each
+    one it names, in every form ("no Saturday or Sunday voting", "Excluding
+    Saturdays and Sundays", "Saturdays and Sundays excepted"): read one
+    weekday at a time, each form closed only the first, and a window quoting
+    one would have needed no Sunday listed. The words between a run and what
+    closes it never cross a comma, or Tennessee's "open Saturdays in the
+    period, closed on holidays" closed its Saturdays. A state holiday is closed
     only by two of the offices' own quotes together, one closing state
     holidays and one naming the day one (`closes_as_holiday`: the Board's
     CBEC Procedures Manual and Act 92 of 2023, and the Secretary of State's
