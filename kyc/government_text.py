@@ -73,29 +73,73 @@ class Tense(tuple):
 # guide's maps once and the 2026 ballot table six times; each was replaced by
 # the official text, opened that day. Read again for the words each sentence
 # relies on, claims about the courts outside Article III, the trial courts,
-# the circuits map, the National Security Council and the states' police
-# power cited a source that holds only part of them (the Tax Court's 26
-# U.S.C. 7443 holds its judges, not the petition before paying, which is 26
-# U.S.C. 6213): their sections' sources add, the same day, the sources that
-# hold the rest, while a sentence's own parenthetical citation is as it was,
-# since changing it changes the text. The guide's, the maps' and the ballot
-# table's checks refuse any source on one of these hosts (``compiled_law``).
+# the circuits map, the Executive Office of the President and the states'
+# police power cited a source that holds only part of them (the Tax Court's
+# 26 U.S.C. 7443 holds its judges, not the petition before paying, which is
+# 26 U.S.C. 6213): their sections now also list each primary source found
+# that day for a part (``tests/test_guide.py``'s CLAIMS pairs each with its
+# words), while a sentence's own parenthetical citation is as it was, since
+# changing it changes the text. Not every part has one: the claims the guide
+# still holds with no primary source among its section's sources are
+# ``UNSOURCED``, by their words, until a source is found or a second reader
+# narrows them. The guide's and the maps' checks refuse any source on one of
+# these hosts (``compiled_law``) and pin a source titled as a Code section or
+# a case to its publisher (``OFFICIAL_HOSTS``); the ballot table's sources
+# carry no title for that pin to read, so its check refuses these hosts, and
+# its own list of compiled tables, by the address alone
+# (``ballot2026._source_problems``).
 COMPILED_LAW = ("law.cornell.edu", "justia.com", "findlaw.com", "casetext.com",
                 "counselstack.com", "courtlistener.com", "scholar.google.com", "leagle.com",
                 "casemine.com", "vlex.com", "openjurist.org")
 # A source titled as a section of the U.S. Code ("2 U.S.C. 8 (...)") is on the
 # Law Revision Counsel's host or govinfo's; one titled as a case of the
-# Supreme Court - "v." with a U.S. Reports citation ("Marbury v. Madison, 5
-# U.S. 137 (1803)"), or with the docket and the bare date the guide gives an
-# order or a slip opinion ("Trump v. Wilcox, No. 24A966 (order of May 22,
-# 2025)") - on the Court's own host or the Library of Congress's. A blocklist
-# of copies is never whole; a pin to the publisher is.
+# Supreme Court (``supreme_court_case``) on the Court's own host or the
+# Library of Congress's U.S. Reports (tile.loc.gov's files, www.loc.gov's
+# records), never another loc.gov host: blogs.loc.gov is the Library's blog,
+# not the U.S. Reports. A blocklist of copies is never whole; a pin to the
+# publisher is.
+_US_REPORTS = re.compile(r"\b\d+ U\.\s?S\. \d+\b")
+_COURT_DOCKET = re.compile(r"\bNo\. \d{2}A\d+\b"
+                           r"|\bNo\. \d{2}-\d+ \((?:order of )?[A-Z][a-z]+\.? \d{1,2}, \d{4}\)")
+# A citation's reporter ("5 U.S. 137", "123 F.3d 456", "384 N.C. 292"), and the
+# reporters of the Supreme Court's own cases.
+_REPORTER = re.compile(r"\b\d+ ((?:[A-Z][A-Za-z']*\.\s?)+(?:\d(?:d|th)\b)?)\s?\d+\b")
+_SUPREME_REPORTERS = ("U.S.", "S.Ct.", "L.Ed.", "L.Ed.2d")
+# The parentheses after a Supreme Court citation hold its year or its date
+# alone ("(1803)", "(order of May 22, 2025)", "(June 29, 2026)"); a lower
+# court's hold the court too ("(9th Cir. June 29, 2026)", "(D.D.C. 2025)").
+_COURT_DATE = re.compile(r"\((?:order of )?(?:[A-Z][a-z]+\.? \d{1,2}, )?\d{4}\)")
+
+
+def supreme_court_case(title):
+    """Whether a source's *title* names a case of the Supreme Court: "v." and
+    a U.S. Reports citation, however spaced ("5 U.S. 137", the Reports' own
+    "5 U. S. 137"), or the Court's docket and a bare date ("Trump v. Wilcox,
+    No. 24A966 (order of May 22, 2025)"); or "v." and no other court named,
+    by another court's reporter or by its name beside the year ("Marbury v.
+    Madison (1803)" is the Court's; "Doe v. Roe, 123 F.3d 456 (9th Cir. 1997)"
+    is not). The first pin keyed on "U.S." alone, so "5 U. S. 137" and a
+    title with no citation passed an opinion on oyez.org (the review of
+    2026-11-14)."""
+    title = title or ""
+    if " v. " not in title:
+        return False
+    if _US_REPORTS.search(title) or _COURT_DOCKET.search(title):
+        return True
+    for reporter in _REPORTER.findall(title):
+        if reporter.replace(" ", "") not in _SUPREME_REPORTERS:
+            return False
+    for parens in re.findall(r"\([^()]*\)", title):
+        if re.search(r"\b\d{4}\b", parens) and not _COURT_DATE.fullmatch(parens):
+            return False
+    return True
+
+
 OFFICIAL_HOSTS = (
-    (re.compile(r"\d+ U\.S\.C\. "), "a section of the U.S. Code",
+    (re.compile(r"\d+ U\.S\.C\. ").match, "a section of the U.S. Code",
      ("uscode.house.gov", "govinfo.gov")),
-    (re.compile(r".+ v\. .+(?:\b\d+ U\.S\. \d+\b|\bNo\. \d{2}A\d+\b"
-                r"|\bNo\. \d{2}-\d+ \((?:order of )?[A-Z][a-z]+\.? \d{1,2}, \d{4}\))"),
-     "a case of the Supreme Court", ("supremecourt.gov", "loc.gov")),
+    (supreme_court_case, "a case of the Supreme Court",
+     ("supremecourt.gov", "tile.loc.gov", "www.loc.gov")),
 )
 # A source still on one of those hosts, and why it has not been replaced: an
 # entry is allowed there only while it names what refused, and one whose
@@ -108,6 +152,34 @@ COMPILED_LAW_PENDING = {
                  "- answered this project's reader \"Access Denied\" (HTTP 403) on 2026-11-14; "
                  "a person can read Part Second, Articles 46, 52 and 56 there and cite it"),
 }
+# Claims the guide still holds with no primary source among its section's
+# sources: (page, section, the words, what was looked for and where). Each is
+# here until a source is found and cited or a second reader narrows the words
+# (rule 48), and README names them; ``government.check`` reports an entry
+# whose words its section no longer says, so the list cannot outlive them.
+UNSOURCED = (
+    ("executive", "eop",
+     "Runs the president's staff and schedule, and is often a principal negotiator with "
+     "Congress.",
+     "the White House chief of staff's work: on 2026-11-14 whitehouse.gov's search for "
+     "\"Chief of Staff\", its Administration page, its release naming the 33rd chief of "
+     "staff and its page of the White House's offices (Presidential Departments, which names "
+     "none of the chief of staff's) said nothing of the office's work, and no statute or "
+     "regulation describes it"),
+    ("executive", "eop",
+     "including nominations, pardons and requests from congressional investigators.",
+     "the matters the White House Counsel advises on: the White House's own page of its "
+     "offices says the Counsel \"advises the President, the Executive Office of the President, "
+     "and the White House staff on legal issues\" (wh-departments, cited) and names none of "
+     "them; on 2026-11-14 whitehouse.gov's search for \"White House Counsel\" found no other "
+     "page about the office, and no statute or regulation describes it"),
+    ("states", "powers",
+     "Each state constitution sets up a legislature, an executive and courts, and many go "
+     "into far more detail than the federal one, on taxes, debt, education and local "
+     "government.",
+     "what the state constitutions hold: each is its own state's document, and no one primary "
+     "source says what many of them hold; none of the section's four sources speaks of it"),
+)
 
 
 def host_of(url):
@@ -122,13 +194,15 @@ def host_of(url):
     return host.lower().rstrip(".")
 
 
-def _on(host, hosts):
+def on_host(host, hosts):
+    """The one of *hosts* that *host* is, or is a subdomain of, or None:
+    "notlaw.cornell.edu" is not Cornell's."""
     return next((h for h in hosts if host == h or host.endswith("." + h)), None)
 
 
 def compiled_law(url):
     """The compiled-law host *url* is on (``COMPILED_LAW``), or None."""
-    return _on(host_of(url), COMPILED_LAW)
+    return on_host(host_of(url), COMPILED_LAW)
 
 
 def compiled_law_problems(sources, pending=None):
@@ -143,8 +217,8 @@ def compiled_law_problems(sources, pending=None):
         if host and key not in pending:
             found.append(f"source {key!r} is on {host}, a compiled copy of the law, not its "
                          f"official publication: {url}")
-        for pattern, what, hosts in OFFICIAL_HOSTS:
-            if pattern.match(title or "") and not _on(host_of(url), hosts):
+        for titled, what, hosts in OFFICIAL_HOSTS:
+            if titled(title or "") and not on_host(host_of(url), hosts):
                 found.append(f"source {key!r} is titled as {what} ({title}) but is not on "
                              f"{' or '.join(hosts)}, its official publication: {url}")
     for key in pending:
@@ -186,6 +260,46 @@ SOURCES = {
                   "https://uscode.house.gov/us/usc/t5/s101/"),
     "usc-5-3105": ("5 U.S.C. 3105 (administrative law judges)",
                    "https://uscode.house.gov/us/usc/t5/s3105/"),
+    # The rest of the administrative law judges' entry (courts#other-courts),
+    # which 3105 (their appointment) does not say, read 2026-11-14. The
+    # appeals: 5 U.S.C. 557(b), the presiding employee's initial decision
+    # "becomes the decision of the agency without further proceedings unless
+    # there is an appeal to, or review on motion of, the agency", and "On
+    # appeal from or review of the initial decision, the agency has all the
+    # powers which it would have in making the initial decision"; 5 U.S.C.
+    # 704, "Agency action made reviewable by statute and final agency action
+    # for which there is no other adequate remedy in a court are subject to
+    # judicial review". The three agencies, each in its own rules as the
+    # Code of Federal Regulations' annual edition on govinfo prints them
+    # (eCFR's pages answer a script with a bot check; its versions API, the
+    # same day, dates each section's last change before its edition: 20 CFR
+    # 404.929 2024-11-23, 29 CFR 102.34 2017-03-03, 17 CFR 200.14
+    # 2021-02-16): the Social Security Administration's 404.929, "will
+    # appoint an administrative law judge to conduct the hearing" and "The
+    # administrative law judge will issue a decision"; the National Labor
+    # Relations Board's 102.34, "The hearing for the purpose of taking
+    # evidence upon a complaint will be conducted by an Administrative Law
+    # Judge"; the Securities and Exchange Commission's 200.14(a), "Under the
+    # Administrative Procedure Act (5 U.S.C. 551-559) and the federal
+    # securities laws, the Office of Administrative Law Judges conducts
+    # hearings in proceedings instituted by the Commission", and may "prepare
+    # an initial decision".
+    "usc-5-557": ("5 U.S.C. 557 (initial decisions; review by the agency)",
+                  "https://uscode.house.gov/us/usc/t5/s557/"),
+    "usc-5-704": ("5 U.S.C. 704 (actions reviewable in court)",
+                  "https://uscode.house.gov/us/usc/t5/s704/"),
+    "cfr-20-404-929": ("20 C.F.R. 404.929 (Social Security Administration: hearing before an "
+                       "administrative law judge)",
+                       "https://www.govinfo.gov/content/pkg/CFR-2025-title20-vol2/pdf/"
+                       "CFR-2025-title20-vol2-sec404-929.pdf"),
+    "cfr-29-102-34": ("29 C.F.R. 102.34 (National Labor Relations Board: who conducts the "
+                      "hearing)",
+                      "https://www.govinfo.gov/content/pkg/CFR-2025-title29-vol2/pdf/"
+                      "CFR-2025-title29-vol2-sec102-34.pdf"),
+    "cfr-17-200-14": ("17 C.F.R. 200.14 (Securities and Exchange Commission: Office of "
+                      "Administrative Law Judges)",
+                      "https://www.govinfo.gov/content/pkg/CFR-2025-title17-vol3/pdf/"
+                      "CFR-2025-title17-vol3-sec200-14.pdf"),
     "usc-10-111": ("10 U.S.C. 111 (the Department of Defense)",
                    "https://uscode.house.gov/us/usc/t10/s111/"),
     "usc-10-942": ("10 U.S.C. 942 (Court of Appeals for the Armed Forces)",
@@ -317,6 +431,16 @@ SOURCES = {
                      "https://uscode.house.gov/us/usc/t49/s24301/"),
     "usc-50-1803": ("50 U.S.C. 1803 (Foreign Intelligence Surveillance Court)",
                     "https://uscode.house.gov/us/usc/t50/s1803/"),
+    # The court's searches (courts#other-courts), which 1803 does not hold
+    # (its jurisdiction there is "electronic surveillance"), read 2026-11-14:
+    # 1822(c), "The Foreign Intelligence Surveillance Court shall have
+    # jurisdiction to hear applications for and grant orders approving a
+    # physical search for the purpose of obtaining foreign intelligence
+    # information", and (d), "The court of review established under section
+    # 1803(b) of this title shall have jurisdiction to review the denial of
+    # any application made under this subchapter".
+    "usc-50-1822": ("50 U.S.C. 1822 (Foreign Intelligence Surveillance Court: physical "
+                    "searches)", "https://uscode.house.gov/us/usc/t50/s1822/"),
     "usc-18-1151": ("18 U.S.C. 1151 (Indian country defined)",
                     "https://uscode.house.gov/us/usc/t18/s1151/"),
     "usc-18-1152": ("18 U.S.C. 1152 (General Crimes Act)",
@@ -510,23 +634,49 @@ SOURCES = {
     "usc-50-3021": ("50 U.S.C. 3021 (National Security Council)",
                     "https://uscode.house.gov/us/usc/t50/s3021/"),
     # Who runs the Council is the President's word, not the statute's
-    # (3021(e) puts its staff under "a civilian executive secretary"). Read
-    # 2026-11-14 on the White House's archived site: "The National Security
-    # Advisor, at the President's direction and in consultation with other
-    # members of the NSC, shall be responsible for determining the agenda,
-    # ensuring that necessary papers are prepared in advance, and recording
-    # and communicating NSC actions and Presidential decisions", and of the
-    # Principals Committee, "The National Security Advisor shall serve as
-    # Chair". It "shall supersede all other existing Presidential guidance on
-    # the organization of the National Security Council system", so not
-    # National Security Presidential Memorandum-4 (2017), which the Code
-    # prints under 3021 and which says the same. The Federal Register lists no
-    # later memorandum on the Council's organization (its search, the same
-    # day); whitehouse.gov's own search answered this reader 403.
-    "nsm-2": ("National Security Memorandum 2, Renewing the National Security Council System "
-              "(Feb. 4, 2021)",
-              "https://bidenwhitehouse.archives.gov/briefing-room/statements-releases/2021/02/04/"
-              "memorandum-renewing-the-national-security-council-system/"),
+    # (3021(e) puts its staff under "a civilian executive secretary"). The
+    # memorandum in force, read 2026-11-14 on whitehouse.gov (HTTP 200, headed
+    # "National Security Presidential Memorandum/NSPM-1", January 20, 2025):
+    # "This Memorandum prevails over any prior orders, directives, memoranda,
+    # or other Presidential guidance related to the organization of the
+    # National Security Council (NSC or Council)"; "The National Security
+    # Advisor shall be responsible, as appropriate and at the President's
+    # direction, for determining the agenda for the NSC, ensuring that the
+    # necessary papers are prepared, and recording and communicating Council
+    # actions and Presidential decisions in a timely manner"; and "The PC
+    # [Principals Committee] shall be convened and chaired by the National
+    # Security Advisor". So National Security Memorandum 2 (Feb. 4, 2021),
+    # which the guide cited for a day, and National Security Presidential
+    # Memorandum-4 (Apr. 4, 2017), which the Code prints under 3021, are
+    # superseded.
+    "nspm-1": ("National Security Presidential Memorandum 1, Organization of the National "
+               "Security Council and Subcommittees (Jan. 20, 2025)",
+               "https://www.whitehouse.gov/presidential-actions/2025/01/"
+               "organization-of-the-national-security-council-and-subcommittees/"),
+    # What OMB does with agencies' rules (executive#eop), which neither EO
+    # 8248 nor 31 U.S.C. 502 says: read 2026-11-14 in the Office of the
+    # Federal Register's copy of the order on archives.gov (HTTP 200,
+    # "Federal Register / Vol. 58, No. 190 / Monday, October 4, 1993",
+    # "[FR citation 58 FR 51735]"). Sec. 2(b): "Within OMB, the Office of
+    # Information and Regulatory Affairs (OIRA) is the repository of
+    # expertise concerning regulatory issues"; sec. 6(b)(1), "OIRA may review
+    # only actions identified by the agency or by OIRA as significant
+    # regulatory actions"; sec. 6(a)(3)(B), the agency "shall provide to OIRA
+    # ... The text of the draft regulatory action"; and sec. 8, an agency
+    # "shall not publish in the Federal Register or otherwise issue to the
+    # public any regulatory action that is subject to review under section 6
+    # ... until" OIRA has waived or completed its review or its time has run.
+    "eo-12866": ("Executive Order 12866, Regulatory Planning and Review, 58 FR 51735 "
+                 "(Oct. 4, 1993)",
+                 "https://www.archives.gov/files/federal-register/executive-orders/pdf/12866.pdf"),
+    # The White House Counsel's work as the White House describes its own
+    # offices (executive#eop), read 2026-11-14 (HTTP 200): "The Office of
+    # White House Counsel advises the President, the Executive Office of the
+    # President, and the White House staff on legal issues pertaining to the
+    # President and the White House." It names no office of the chief of
+    # staff, and nothing of nominations, pardons or investigators.
+    "wh-departments": ("The White House: Presidential Departments",
+                       "https://www.whitehouse.gov/internships/presidential-departments/"),
     "eo-14347": ("Executive Order 14347, 90 FR 43893 (Sept. 10, 2025)",
                  "https://www.govinfo.gov/content/pkg/FR-2025-09-10/pdf/2025-17508.pdf"),
     "senate-2026-07-14": ("U.S. Senate floor log, July 14, 2026",
@@ -1485,9 +1635,14 @@ EXECUTIVE = {
                 ]),
             ],
             # The National Security Council "run by the national security
-            # advisor" is the President's memorandum's, not the statute's;
-            # read with the rest on 2026-11-14.
-            "sources": ["eo-8248", "usc-31-502", "usc-50-3021", "nsm-2"],
+            # advisor" is the President's memorandum's, not the statute's, and
+            # OMB's review of regulations Executive Order 12866's, and the
+            # Counsel's advice the White House's own page's; every source here
+            # was read on 2026-11-14 for the words it is cited for. The chief
+            # of staff's entry, and the matters the Counsel's names, have no
+            # primary source among them (``UNSOURCED``).
+            "sources": ["eo-8248", "usc-31-502", "eo-12866", "usc-50-3021", "nspm-1",
+                        "wh-departments"],
             "reviewed": "2026-11-14",
         },
         {
@@ -1741,8 +1896,9 @@ COURTS = {
             # The Court of International Trade's cases are 28 U.S.C. 1581's,
             # and the petty offense's six months 18 U.S.C. 3559's, beside the
             # sections the sentences cite; the districts state by state are
-            # chapter 5's and the territorial judges' terms title 48's (read
-            # 2026-11-14).
+            # chapter 5's and the territorial judges' terms title 48's. Every
+            # source here was read on 2026-11-14 for the words it is cited for
+            # (the judgeships table's 2025 row: 673 district, 4 territorial).
             "sources": ["uscourts-structure", "uscourts-judgeships", "usc-28-81-131",
                         "usc-48-1424b", "usc-48-1614", "usc-48-1821", "usc-28-251",
                         "usc-28-1581", "usc-28-631", "usc-28-636", "usc-18-3401", "usc-18-19",
@@ -1794,13 +1950,26 @@ COURTS = {
             ],
             # Each court's sentence cites the section that sets up its bench;
             # what it hears, and the Court of Federal Claims' fifteen years,
-            # are in the sections beside each, and the territorial judges'
-            # ten-year terms in title 48's (read 2026-11-14).
+            # are in the sections beside each, the territorial judges'
+            # ten-year terms in title 48's, the surveillance court's searches
+            # in 50 U.S.C. 1822, and the administrative law judges' agencies
+            # and appeals in those agencies' rules and 5 U.S.C. 557 and 704.
+            # Every source here was read on 2026-11-14 for the words it is
+            # cited for: Article IV's "needful Rules and Regulations
+            # respecting the Territory" in the National Archives' transcription
+            # (archives.gov), since constitution.congress.gov answered this
+            # reader a challenge page ("Just a moment...", HTTP 403), which
+            # concludes nothing (rule 8); Slaughter at 609 U.S. 422, "the
+            # permissibility of tenure protections for the judges of 'non-
+            # Article III courts,' such as the Tax Court and the Court of
+            # Federal Claims, is not 'presented' or 'briefed' in this case ...
+            # We leave those questions for another day."
             "sources": ["usc-26-7443", "usc-26-6213", "usc-28-171", "usc-28-172", "usc-28-1491",
                         "usc-42-300aa-12", "usc-38-7253", "usc-38-7252", "usc-10-942",
-                        "usc-10-941", "usc-10-867", "usc-28-1259", "usc-50-1803", "const-art4",
-                        "usc-48-1424b", "usc-48-1614", "usc-48-1821", "usc-5-3105",
-                        "uscourts-structure", "slaughter"],
+                        "usc-10-941", "usc-10-867", "usc-28-1259", "usc-50-1803", "usc-50-1822",
+                        "const-art4", "usc-48-1424b", "usc-48-1614", "usc-48-1821", "usc-5-3105",
+                        "cfr-20-404-929", "cfr-29-102-34", "cfr-17-200-14", "usc-5-557",
+                        "usc-5-704", "uscourts-structure", "slaughter"],
             "reviewed": "2026-11-14",
         },
     ],
@@ -1848,7 +2017,11 @@ STATES = {
             # police power, public health and safety, within the Constitution
             # and yielding to federal law), NFIB (what the Court calls it) and
             # PruneYard (the state's own constitution, which may secure
-            # liberties beyond the federal one's).
+            # liberties beyond the federal one's); the Tenth Amendment's words
+            # in the National Archives' transcription, since
+            # constitution.congress.gov answered this reader a challenge page.
+            # The second sentence has no primary source among these
+            # (``UNSOURCED``).
             "sources": ["const-amdt10", "jacobson", "nfib", "pruneyard"],
             "reviewed": "2026-11-14",
         },

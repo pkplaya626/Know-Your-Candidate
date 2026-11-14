@@ -224,9 +224,9 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
         from kyc import government_maps
         from kyc.government_text import OFFICIAL_HOSTS, compiled_law_problems
         cases = [k for k, (t, _u) in government_maps.SOURCES.items()
-                 if OFFICIAL_HOSTS[1][0].match(t)]
+                 if OFFICIAL_HOSTS[1][0](t)]
         code = [k for k, (t, _u) in government_maps.SOURCES.items()
-                if OFFICIAL_HOSTS[0][0].match(t)]
+                if OFFICIAL_HOSTS[0][0](t)]
         # Every case the guide cites is read as one: its orders and its
         # U.S. Reports citations alike.
         for key in ("marbury", "watson-rnc", "wilcox", "onder", "pruneyard", "slaughter"):
@@ -273,6 +273,44 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
         self.assertTrue(any("'usc-28-1294' is titled as a section of the U.S. Code" in p
                             for p in found), found)
 
+    def test_a_case_is_known_however_its_citation_is_written(self):
+        # The pin keyed on "U.S." alone and on every loc.gov host: Marbury
+        # on oyez.org passed it written as the U.S. Reports print it ("5 U.
+        # S. 137") or with no citation at all, and on the Library's blog
+        # (blogs.loc.gov, not the U.S. Reports) as written here (the review
+        # of 2026-11-14).
+        from kyc.government_text import compiled_law_problems, supreme_court_case
+        for title, url in (
+                ("Marbury v. Madison, 5 U. S. 137 (1803)", "https://www.oyez.org/cases/1789-1850/5us137"),
+                ("Marbury v. Madison (1803)", "https://www.oyez.org/cases/1789-1850/5us137"),
+                ("Marbury v. Madison", "https://www.oyez.org/cases/1789-1850/5us137"),
+                ("Marbury v. Madison, 5 U.S. 137 (1803)", "https://blogs.loc.gov/law/2013/02/marbury/"),
+                ("Marbury v. Madison, 5 U.S. 137 (1803)", "https://loc.gov/item/usrep005137/"),
+                ("Trump v. Wilcox, No. 24A966 (order of May 22, 2025)", "https://www.oyez.org/x")):
+            found = compiled_law_problems({"k": (title, url)}, pending={})
+            self.assertTrue(found and "is titled as a case of the Supreme Court" in found[0],
+                            (title, url, found))
+        # The Court's own host and the Library's U.S. Reports stand.
+        for url in ("https://www.supremecourt.gov/opinions/x.pdf",
+                    "https://tile.loc.gov/storage-services/service/ll/usrep/usrep005/"
+                    "usrep005137/usrep005137.pdf",
+                    "https://www.loc.gov/item/usrep005137/"):
+            self.assertEqual(compiled_law_problems(
+                {"k": ("Marbury v. Madison, 5 U. S. 137 (1803)", url)}, pending={}), [], url)
+        # A case another court decided names that court, by its reporter or
+        # beside its year, and is not the Supreme Court's.
+        for title in ("Doe v. Roe, 123 F.3d 456 (9th Cir. 1997)",
+                      "Harper v. Hall, 384 N.C. 292 (2023)",
+                      "Doe v. Roe (D.D.C. 2025)",
+                      "Doe v. Roe, No. 24-1260 (9th Cir. June 29, 2026)",
+                      "2 U.S.C. 8 (when a House vacancy is filled)"):
+            self.assertFalse(supreme_court_case(title), title)
+        # Every case the guide and its maps cite is read as one.
+        from kyc import government_maps
+        for key, (title, _url) in government_maps.SOURCES.items():
+            if " v. " in title:
+                self.assertTrue(supreme_court_case(title), key)
+
     # (page, section, words the section says, the source that holds them).
     # Each claim cited a source that holds only part of it until 2026-11-14
     # (the review of the guide's primary sources): the Tax Court's sentence
@@ -297,8 +335,24 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
         ("courts", "district", "ten-year terms", "usc-48-1424b"),
         ("courts", "district", "ten-year terms", "usc-48-1614"),
         ("courts", "district", "ten-year terms", "usc-48-1821"),
-        ("executive", "eop", "run by the national security advisor", "nsm-2"),
+        # The memorandum in force, not the one it superseded: the first fix
+        # cited National Security Memorandum 2 (2021), which NSPM-1 of
+        # January 20, 2025 "prevails over" (the review of 2026-11-14).
+        ("executive", "eop", "run by the national security advisor", "nspm-1"),
+        ("executive", "eop", "reviews significant regulations before they are issued",
+         "eo-12866"),
+        ("executive", "eop", "Advises the president and the White House on legal questions",
+         "wh-departments"),
         ("states", "powers", "the state's own constitution", "pruneyard"),
+        # 50 U.S.C. 1803 gives the court "electronic surveillance"; the
+        # searches are 1822's.
+        ("courts", "other-courts", "applications for surveillance and searches", "usc-50-1822"),
+        # 5 U.S.C. 3105 names no agency and no appeal.
+        ("courts", "other-courts", "Social Security Administration", "cfr-20-404-929"),
+        ("courts", "other-courts", "National Labor Relations Board", "cfr-29-102-34"),
+        ("courts", "other-courts", "Securities and Exchange Commission", "cfr-17-200-14"),
+        ("courts", "other-courts", "appealed within the agency", "usc-5-557"),
+        ("courts", "other-courts", "and then to a court", "usc-5-704"),
     )
 
     @staticmethod
@@ -325,6 +379,45 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
             self.assertIn(key, section["sources"], f"{slug}#{sid}: {words!r} is {key}'s")
             # A section read again on the day its sources were added says so.
             self.assertGreaterEqual(section.get("reviewed", ""), "2026-11-14", f"{slug}#{sid}")
+
+    def test_a_claim_with_no_primary_source_is_named(self):
+        # README and the comment above COMPILED_LAW said the dated sections
+        # now listed "the sources that hold the rest", over a chief of staff,
+        # a White House Counsel and a sentence about state constitutions that
+        # no source they list holds (the review of 2026-11-14). Such a claim
+        # is in UNSOURCED, by its words, and README names each one.
+        from kyc.government_text import UNSOURCED
+        self.assertTrue(UNSOURCED)
+        with open(os.path.join(ROOT, "README.md"), encoding="utf-8") as handle:
+            readme = " ".join(handle.read().split())
+        for slug, sid, said, why in UNSOURCED:
+            section = next(s for p in PAGES if p["slug"] == slug for s in p["sections"]
+                           if s["id"] == sid)
+            self.assertIn(" ".join(said.split()), " ".join(self._words(section["blocks"]).split()),
+                          f"{slug}#{sid}")
+            self.assertTrue(why.strip(), f"{slug}#{sid}: say what was looked for")
+            self.assertIn(said, readme, f"README does not name {slug}#{sid}'s {said!r}")
+        # Nor do README or the comment say the sections hold "the rest".
+        self.assertNotIn("the sources that hold the rest", readme)
+        with open(os.path.join(ROOT, "kyc", "government_text.py"), encoding="utf-8") as handle:
+            self.assertNotIn("the sources that\n# hold the rest", handle.read())
+
+    def test_an_unsourced_entry_the_page_no_longer_says_is_reported(self):
+        # The list must not outlive its words: an entry whose sentence was
+        # changed names a claim the page no longer makes.
+        from kyc import government_text
+        original = government_text.UNSOURCED
+        changed = (("executive", "eop", "Runs the president's diary.", "a test"),) + original
+        government_text.UNSOURCED = changed
+        government.UNSOURCED = changed
+        try:
+            found = government.check()
+        finally:
+            government_text.UNSOURCED = original
+            government.UNSOURCED = original
+        self.assertIn("UNSOURCED names executive#eop's \"Runs the president's diary.\", which the "
+                      "section no longer says: read its sources again and remove the entry", found)
+        self.assertEqual(government.check(), [])
 
     def test_the_northern_mariana_islands_circuit_is_the_statutes(self):
         # The circuits map sent the Northern Mariana Islands' appeals to the

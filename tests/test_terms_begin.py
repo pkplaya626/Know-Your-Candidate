@@ -107,6 +107,20 @@ class TheTable(unittest.TestCase):
                 (copy_of_law, ("words",)),)),)}
             self.assertTrue(any("not an official host" in f
                                 for f in terms_begin.problems(made, {})), copy_of_law)
+        # Each host read as a browser reads it, by the ballot table's one test
+        # (the review of 2026-11-14: read from the network location, a port,
+        # a trailing dot or capitals took a compiled table past it), and an
+        # Ohio county's own domain is still no state's record.
+        for table in ("https://www.ncsl.org:443/terms", "https://www.ncsl.org./terms",
+                      "https://WWW.NCSL.ORG/terms", "https://BALLOTPEDIA.ORG./x",
+                      "https://www.law.cornell.edu:443/uscode/text/2/7",
+                      "https://vote.franklincountyohio.gov:443/x"):
+            made = {"AK": (dict(terms_begin.TERMS["AK"][0], sources=(
+                (table, ("words",)),)),)}
+            self.assertTrue(any("not an official host" in f
+                                for f in terms_begin.problems(made, {})), table)
+        self.assertEqual(terms_begin._source_problems("AK", ("governor",),
+                                                      "https://notncsl.org/x"), [])
         # An office not on the 2026 ballot (Virginia's governor) has no day.
         off = dict(terms_begin.TERMS, VA=(dict(terms_begin.TERMS["AK"][0]),))
         self.assertTrue(any("VA governor: not on the 2026 ballot" in f

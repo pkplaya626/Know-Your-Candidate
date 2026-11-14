@@ -28,7 +28,7 @@ import urllib.parse
 
 from .government_maps import SEATS
 from .government_maps import STATES as STATE_CODES
-from .government_text import compiled_law
+from .government_text import compiled_law, host_of, on_host
 
 ELECTION = "2026-11-03"
 REVIEWED = "2026-10-14"
@@ -38,10 +38,15 @@ SELECTIONS = ("elected", "elected-jointly-with-governor", "appointed",
 OFFICES = ("governor", "lt", "ag", "sos")
 TITLES = {"governor": "Governor", "lt": "Lieutenant governor", "ag": "Attorney general",
           "sos": "Secretary of state"}
-# Compiled tables are leads, never the cited source (rule 50); a county's
-# page is not the state's record of a statewide count.
-NOT_A_SOURCE = ("ncsl.org", "ballotpedia.org", "wikipedia.org", "270towin.com",
-                "countyohio.gov")
+# Compiled tables are leads, never the cited source (rule 50): a source on
+# one of these hosts, or a subdomain of one, is refused.
+NOT_A_SOURCE = ("ncsl.org", "ballotpedia.org", "wikipedia.org", "270towin.com")
+# A county's page is not the state's record of a statewide count. Ohio's
+# counties name their own domains "<county>countyohio.gov"
+# ("vote.franklincountyohio.gov"), so these are endings of the host's name,
+# not hosts: the one list held both until 2026-11-14, read as endings of the
+# network location, so "ballotpedia.org:443" passed.
+COUNTY_HOST_ENDINGS = ("countyohio.gov",)
 
 STATES = {
     "AK": {
@@ -1465,18 +1470,35 @@ def unchecked(holder):
             if holder else None)
 
 
-def _source_problems(code, field, source):
-    parts = urllib.parse.urlsplit(source or "")
-    if parts.scheme not in ("http", "https") or not parts.netloc:
-        return [f"{code} {field}: source is not a link: {source!r}"]
-    if any(parts.netloc.endswith(host) for host in NOT_A_SOURCE):
-        return [f"{code} {field}: {parts.netloc} is a compiled table, not a source"]
+def not_a_source(source):
+    """Why *source*'s host is no source for this table or the terms' table
+    (``terms_begin``), or None. The host is read as a browser reads it, never
+    the network location: read from netloc, "ballotpedia.org:443",
+    "ballotpedia.org." and its capitals all passed (the review of
+    2026-11-14), and "notballotpedia.org" would have been refused as
+    Ballotpedia."""
+    host = host_of(source)
+    table = on_host(host, NOT_A_SOURCE)
+    if table:
+        return f"{host} is a compiled table ({table}), not a source"
+    if host.endswith(COUNTY_HOST_ENDINGS):
+        return f"{host} is a county's page, not the state's record"
     # A statute is cited from its publisher, never a compiled copy of it: the
     # territories' Organic Acts were Cornell's copies until 2026-11-14.
     if compiled_law(source):
-        return [f"{code} {field}: {parts.netloc} is a compiled copy of the law, not its "
-                f"official publication"]
-    return []
+        return f"{host} is a compiled copy of the law, not its official publication"
+    return None
+
+
+def _source_problems(code, field, source):
+    try:
+        parts = urllib.parse.urlsplit(source or "")
+    except ValueError:
+        return [f"{code} {field}: source is not a link: {source!r}"]
+    if parts.scheme not in ("http", "https") or not host_of(source):
+        return [f"{code} {field}: source is not a link: {source!r}"]
+    why = not_a_source(source)
+    return [f"{code} {field}: {why}"] if why else []
 
 
 def for_state(code):

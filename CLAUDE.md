@@ -220,7 +220,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3268 tests, no dependencies
+python -m unittest discover tests             # 3272 tests, no dependencies
 npm install && npm test                       # 4957 real-DOM checks (needs jsdom)
 ```
 
@@ -1070,13 +1070,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     what can change (counts, decisions, agency names) and move `REVIEWED`;
     a page checked on another day carries its own `"reviewed"` date.
     A source is the law's own publication, never a compiled copy of it: the
-    guide's, its maps' and the ballot table's checks refuse a host in
+    guide's and its maps' checks refuse a host in
     `government_text.COMPILED_LAW` (Cornell's, Justia's, CourtListener's and
-    the like; Cornell's stood behind 78 sources until 2026-11-14) and a Code
-    section or Supreme Court case off its publisher's host
-    (`OFFICIAL_HOSTS`), save New Hampshire's constitution, pending in
-    `COMPILED_LAW_PENDING` because every state copy answered this project's
-    reader "Access Denied", until a person reads and cites the State's own.
+    the like; Cornell's stood behind 78 sources until 2026-11-14) and a
+    source titled as a Code section or a Supreme Court case off its
+    publisher's host (`OFFICIAL_HOSTS`), save New Hampshire's constitution,
+    pending in `COMPILED_LAW_PENDING` because every state copy answered this
+    project's reader "Access Denied", until a person reads and cites the
+    State's own. The ballot table's sources carry no title for that pin: its
+    check refuses `COMPILED_LAW`'s hosts and its own compiled tables by the
+    address alone (`ballot2026._source_problems`). A claim no source in its
+    section holds is listed by its words in `government_text.UNSOURCED`
+    (README names each): a section's date says when its sources were read,
+    never that they hold it.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title. The 2026-10-17 audit found

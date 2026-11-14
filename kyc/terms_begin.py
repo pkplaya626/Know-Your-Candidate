@@ -36,7 +36,7 @@ import re
 import urllib.parse
 
 from . import ballot2026
-from .government_text import compiled_law
+from .government_text import host_of
 
 READ = "2026-11-11"
 WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -812,13 +812,18 @@ def problems(terms=None, gaps=None):
 
 
 def _source_problems(code, offices, source):
-    parts = urllib.parse.urlsplit(source or "")
-    if parts.scheme != "https" or not parts.netloc:
+    try:
+        parts = urllib.parse.urlsplit(source or "")
+    except ValueError:
         return [f"{code} {offices}: source is not an https link: {source!r}"]
-    # The compiled copies of the law are the guide's one list (rule 12).
-    if (any(parts.netloc.endswith(host) for host in ballot2026.NOT_A_SOURCE)
-            or compiled_law(source)):
-        return [f"{code} {offices}: {parts.netloc} is not an official host"]
+    if parts.scheme != "https" or not host_of(source):
+        return [f"{code} {offices}: source is not an https link: {source!r}"]
+    # The ballot table's one test of a host (rule 12): its compiled tables,
+    # a county's domain and the guide's compiled copies of the law, each
+    # host read as a browser reads it, never the network location.
+    why = ballot2026.not_a_source(source)
+    if why:
+        return [f"{code} {offices}: {host_of(source)} is not an official host ({why})"]
     return []
 
 
