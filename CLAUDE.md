@@ -980,7 +980,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     line and the leadership posts a badge wraps, no wider than its line
     (`testLongBadgesWrap` reads the stylesheet for every place the page
     code draws one; measured in headless Chrome at 320, 360 and 390px on
-    both clocks, with no badge changed at 1280px).
+    both clocks, with no badge changed at 1280px). So does a folded race
+    row's (rule 99), in a text column the row's own width: from Election
+    Day "No challenger was on the ballot · 2 out" on one line widened the
+    row's implicit grid column, and Florida's, Massachusetts', New York's
+    and Wisconsin's whole pages scrolled sideways on a 320px phone (eight
+    more at 280px; measured on all 56 state pages at 280, 320, 360 and
+    390px, none does now).
 
 45. **Time it on a throttled phone, not on this machine.** A mid-range
     Android phone runs a page about 4x slower than a desktop. Texas's
