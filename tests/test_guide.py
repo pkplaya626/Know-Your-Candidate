@@ -341,9 +341,81 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
         ("executive", "eop", "run by the national security advisor", "nspm-1"),
         ("executive", "eop", "reviews significant regulations before they are issued",
          "eo-12866"),
-        ("executive", "eop", "Advises the president and the White House on legal questions",
+        # The three claims UNSOURCED listed on 2026-11-14, narrowed that day
+        # to what a primary source holds: the chief of staff's entry to the
+        # offices three executive orders have report to it, the Counsel's to
+        # the White House's own words, the schedule, Congress and nominations
+        # to the White House offices its page gives them to, and the states'
+        # constitutions to three read from their own legislatures' sites.
+        # The chief of staff's entry leads with what the National Security
+        # Council's memorandum makes of the office: its first narrowing named
+        # only offices three orders have report to it, which said nothing of
+        # what the office is (the review of 2026-11-14).
+        ("executive", "eop", "The president has made the chief of staff a member of the National "
+         "Security Council", "nspm-1"),
+        # Each step of the appeal in a sentence of its own, and the finality
+        # said of the decision on the appeal, whichever of the two makes it:
+        # "..., whose decision is final" read as the deputy's alone (the
+        # second review of 2026-11-14).
+        ("executive", "eop", "If a voting attendee of the Council's Principals or Deputies "
+         "Committee disputes how the committee recorded its conclusions or decisions, and the "
+         "dispute is not resolved, the attendee may appeal to the chief of staff.", "nspm-1"),
+        ("executive", "eop", "If the chief of staff so designates, the appeal goes to the deputy "
+         "chief of staff for policy instead.", "nspm-1"),
+        ("executive", "eop", "Either way, the decision on the appeal is final", "nspm-1"),
+        ("executive", "eop", "the National Design Studio's administrator (Executive Order 14338)",
+         "eo-14338"),
+        ("executive", "eop", "the functions of the National Energy Dominance Council (Executive "
+         "Order 14213)", "eo-14213"),
+        ("executive", "eop", "the administrator of the U.S. DOGE Service, formerly the U.S. "
+         "Digital Service (Executive Order 14158)", "eo-14158"),
+        ("executive", "eop", "on legal issues concerning the president and the White House",
          "wh-departments"),
+        # Not "Among them, the Office ...": the list it closes opens "Among
+        # them:" already.
+        ("executive", "eop", "The Office of Legislative Affairs advances the president's "
+         "legislative agenda in Congress", "wh-departments"),
+        ("executive", "eop", "presents candidates the president has approved to the Senate for "
+         "confirmation", "wh-departments"),
+        ("executive", "eop", "manages the president's meetings, public engagements and daily "
+         "activities", "wh-departments"),
         ("states", "powers", "the state's own constitution", "pruneyard"),
+        # No "for example" after the three: it pointed at the general claim
+        # the narrowing dropped.
+        ("states", "powers", "The constitutions of Florida, Ohio and Washington each set up a "
+         "legislature", "fl-constitution"),
+        ("states", "powers", "The constitutions of Florida, Ohio and Washington each set up a "
+         "legislature", "oh-constitution"),
+        ("states", "powers", "The constitutions of Florida, Ohio and Washington each set up a "
+         "legislature", "wa-constitution"),
+        # Claims a review named on the executive and states pages, read on
+        # 2026-11-14 against their sections' sources and found held by none
+        # until these were cited; the rest are UNSOURCED.
+        ("executive", "departments", "With the vice president they make up the cabinet",
+         "wh-cabinet"),
+        ("executive", "departments", "to which presidents also add other officials", "wh-cabinet"),
+        ("executive", "departments", "to which presidents also add other officials",
+         "wh-cabinet-2021"),
+        ("executive", "agencies", "each led by a single administrator who serves at the "
+         "president's pleasure", "reorg-plan-3-1970"),
+        ("executive", "agencies", "each led by a single administrator who serves at the "
+         "president's pleasure", "usc-51-20111"),
+        ("executive", "agencies", "each led by a single administrator who serves at the "
+         "president's pleasure", "usc-50-3036"),
+        ("executive", "agencies", "each led by a single administrator who serves at the "
+         "president's pleasure", "slaughter"),
+        ("executive", "agencies", "serving staggered terms, often with a limit on how many may "
+         "belong to one party", "usc-15-78d"),
+        ("executive", "agencies", "serving staggered terms, often with a limit on how many may "
+         "belong to one party", "usc-47-154"),
+        ("executive", "agencies", "serving staggered terms, often with a limit on how many may "
+         "belong to one party", "usc-15-41"),
+        ("executive", "agencies", "serving staggered terms, often with a limit on how many may "
+         "belong to one party", "usc-12-242"),
+        ("states", "courts", "State courts hear the great majority of the country's cases",
+         "ksd-courts"),
+        ("states", "courts", "State courts hear the great majority of the country's cases",
+         "uscourts-compare"),
         # 50 U.S.C. 1803 gives the court "electronic surveillance"; the
         # searches are 1822's.
         ("courts", "other-courts", "applications for surveillance and searches", "usc-50-1822"),
@@ -379,28 +451,132 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
             self.assertIn(key, section["sources"], f"{slug}#{sid}: {words!r} is {key}'s")
             # A section read again on the day its sources were added says so.
             self.assertGreaterEqual(section.get("reviewed", ""), "2026-11-14", f"{slug}#{sid}")
+            # And the source that holds the words was opened that day: one
+            # the day could not open checks nothing (rule 8).
+            self.assertNotIn(key, section.get("notOpened") or {},
+                             f"{slug}#{sid}: {words!r} rests on {key}, not opened on its day")
+
+    # README's list of the claims UNSOURCED holds ends its paragraph after
+    # these words: "none." while the list is empty, else each claim's words.
+    UNSOURCED_LISTED = "Unsourced claims listed now:"
+
+    @classmethod
+    def _readme_unsourced_problems(cls, readme, unsourced):
+        """What README's list of unsourced claims gets wrong against
+        *unsourced* (``UNSOURCED``'s entries), as strings, both ways: each
+        "- " item under the list's words carries the words of exactly one
+        entry, each entry is in exactly one item, and there are as many items
+        as entries. Checked one way only, an entry deleted from UNSOURCED
+        while README still named it failed nothing (the review of
+        2026-11-14)."""
+        if cls.UNSOURCED_LISTED not in readme:
+            return [f"README has no {cls.UNSOURCED_LISTED!r} list"]
+        raw = readme.split(cls.UNSOURCED_LISTED, 1)[1].split("\n\n", 1)[0]
+        block = " ".join(raw.split())
+        problems = []
+        if not unsourced and block != "none.":
+            problems.append(f"UNSOURCED is empty but README lists: {block!r}")
+        if unsourced and block.startswith("none"):
+            problems.append(f"README says none, over {len(unsourced)} unsourced claim(s)")
+        if block == "none.":
+            items = []
+        else:
+            head, *items = re.split(r"(?m)^[ \t]*- ", raw)
+            items = [" ".join(item.split()) for item in items]
+            if head.strip():
+                problems.append(f"README's list opens with words that are no item: "
+                                f"{' '.join(head.split())!r}")
+        words = [(f"{slug}#{sid}", " ".join(said.split())) for slug, sid, said, _why in unsourced]
+        for item in items:
+            held = [where for where, said in words if said in item]
+            if len(held) != 1:
+                problems.append(f"README's item {item[:70]!r} carries the words of "
+                                f"{len(held)} UNSOURCED entries, not one")
+        for (where, said), (slug, sid, raw_said, _why) in zip(words, unsourced):
+            count = sum(said in item for item in items)
+            if count == 0:
+                problems.append(f"README does not name {where}'s {raw_said!r}")
+            elif count > 1:
+                problems.append(f"README names {where}'s {raw_said!r} in {count} items")
+        if unsourced and items and len(items) != len(unsourced):
+            problems.append(f"README lists {len(items)} claims over UNSOURCED's {len(unsourced)}")
+        return problems
 
     def test_a_claim_with_no_primary_source_is_named(self):
         # README and the comment above COMPILED_LAW said the dated sections
         # now listed "the sources that hold the rest", over a chief of staff,
         # a White House Counsel and a sentence about state constitutions that
         # no source they list holds (the review of 2026-11-14). Such a claim
-        # is in UNSOURCED, by its words, and README names each one.
+        # is in UNSOURCED, by its words, and README names each one - and,
+        # once the list is settled, says it names none: README still named
+        # the three after they were narrowed, until the list said "none.".
         from kyc.government_text import UNSOURCED
-        self.assertTrue(UNSOURCED)
         with open(os.path.join(ROOT, "README.md"), encoding="utf-8") as handle:
-            readme = " ".join(handle.read().split())
+            raw = handle.read()
+        readme = " ".join(raw.split())
         for slug, sid, said, why in UNSOURCED:
-            section = next(s for p in PAGES if p["slug"] == slug for s in p["sections"]
-                           if s["id"] == sid)
-            self.assertIn(" ".join(said.split()), " ".join(self._words(section["blocks"]).split()),
+            self.assertIn(" ".join(said.split()), government.unsourced_words(slug, sid),
                           f"{slug}#{sid}")
             self.assertTrue(why.strip(), f"{slug}#{sid}: say what was looked for")
-            self.assertIn(said, readme, f"README does not name {slug}#{sid}'s {said!r}")
+        self.assertEqual(self._readme_unsourced_problems(raw, UNSOURCED), [])
+        # README said "none." over at least seven claims its own research had
+        # named on the same two pages (the review of 2026-11-14): they were
+        # read that day, and the list is not empty.
+        self.assertTrue(UNSOURCED)
         # Nor do README or the comment say the sections hold "the rest".
         self.assertNotIn("the sources that hold the rest", readme)
         with open(os.path.join(ROOT, "kyc", "government_text.py"), encoding="utf-8") as handle:
-            self.assertNotIn("the sources that\n# hold the rest", handle.read())
+            text = handle.read()
+        self.assertNotIn("the sources that\n# hold the rest", text)
+        # Nor does either say more of a source than it was read to hold: the
+        # 1982 memorandum speaks of the Counsel alone, and whether it governs
+        # now was not established; Ohio's commission publishes the Revised and
+        # Administrative Codes officially, not "its laws" (that review).
+        self.assertNotIn("in one administration, not now", readme)
+        self.assertIn("whether it governs now was not established", readme)
+        self.assertNotIn("official publisher of its laws", " ".join(text.replace("#", " ").split()))
+
+    def test_readmes_list_follows_unsourced_both_ways(self):
+        # The rule, made: a claim listed that README does not name, a README
+        # that names one the list no longer holds, and a "none." over a list
+        # that holds one are each reported.
+        claim = ("executive", "eop", "Runs the president's diary.", "a test")
+        none = f"Lead.\n{self.UNSOURCED_LISTED} none.\n\nNext paragraph."
+        named = (f"Lead.\n{self.UNSOURCED_LISTED}\n- executive#eop: \"Runs the "
+                 f"president's\n  diary.\"\n\nNext paragraph.")
+        self.assertEqual(self._readme_unsourced_problems(none, ()), [])
+        self.assertEqual(self._readme_unsourced_problems(named, (claim,)), [])
+        self.assertEqual(self._readme_unsourced_problems(none, (claim,)),
+                         ["README says none, over 1 unsourced claim(s)",
+                          "README does not name executive#eop's \"Runs the president's diary.\""])
+        self.assertTrue(self._readme_unsourced_problems(named, ()))
+        self.assertEqual(self._readme_unsourced_problems("Lead.", ()),
+                         [f"README has no {self.UNSOURCED_LISTED!r} list"])
+        # A README naming two claims over a list holding one: the review of
+        # 2026-11-14 deleted one entry from UNSOURCED, left README naming it,
+        # and every test passed.
+        other = ("states", "executive", "Governors keep a diary too.", "a test")
+        two = (f"Lead.\n{self.UNSOURCED_LISTED}\n- executive#eop: \"Runs the president's\n"
+               f"  diary.\";\n- states#executive: \"Governors keep a diary\n  too.\"\n\nNext.")
+        self.assertEqual(self._readme_unsourced_problems(two, (claim, other)), [])
+        self.assertEqual(self._readme_unsourced_problems(two, (claim,)),
+                         ["README's item 'states#executive: \"Governors keep a diary too.\"' "
+                          "carries the words of 0 UNSOURCED entries, not one",
+                          "README lists 2 claims over UNSOURCED's 1"])
+        # One item carrying two entries' words, one entry named twice, and
+        # words before the first item are each reported too.
+        merged = (f"Lead.\n{self.UNSOURCED_LISTED}\n- \"Runs the president's diary.\" and "
+                  f"\"Governors keep a diary too.\"\n\nNext.")
+        self.assertIn("README's item '\"Runs the president\\'s diary.\" and \"Governors keep a "
+                      "diary too.\"' carries the words of 2 UNSOURCED entries, not one",
+                      self._readme_unsourced_problems(merged, (claim, other)))
+        twice = (f"Lead.\n{self.UNSOURCED_LISTED}\n- \"Runs the president's diary.\"\n"
+                 f"- again: \"Runs the president's diary.\"\n\nNext.")
+        self.assertIn("README names executive#eop's \"Runs the president's diary.\" in 2 items",
+                      self._readme_unsourced_problems(twice, (claim,)))
+        stray = f"Lead.\n{self.UNSOURCED_LISTED} these:\n- \"Runs the president's diary.\"\n\nNext."
+        self.assertEqual(self._readme_unsourced_problems(stray, (claim,)),
+                         ["README's list opens with words that are no item: 'these:'"])
 
     def test_an_unsourced_entry_the_page_no_longer_says_is_reported(self):
         # The list must not outlive its words: an entry whose sentence was
@@ -418,6 +594,219 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
         self.assertIn("UNSOURCED names executive#eop's \"Runs the president's diary.\", which the "
                       "section no longer says: read its sources again and remove the entry", found)
         self.assertEqual(government.check(), [])
+
+    def test_an_unsourced_lede_is_held_to_the_lede(self):
+        # A page's lede cites no source of its own, so a claim in it is
+        # listed under the section "lede" and held to the lede's words; any
+        # other section id names a section, and a page there is not is empty.
+        made = [{"slug": "made", "lede": "Each place has its own court.",
+                 "sections": [{"id": "body", "blocks": [("p", "The court sits weekly.")]}]}]
+        self.assertEqual(government.unsourced_words("made", "lede", made),
+                         "Each place has its own court.")
+        self.assertEqual(government.unsourced_words("made", "body", made), "p The court sits weekly.")
+        self.assertEqual(government.unsourced_words("made", "nowhere", made), "")
+        self.assertEqual(government.unsourced_words("gone", "lede", made), "")
+        # And the real list's lede entry is checked: changed, it is reported.
+        from kyc import government_text
+        original = government_text.UNSOURCED
+        changed = (("states", "lede", "Each state has its own navy.", "a test"),) + original
+        government_text.UNSOURCED = changed
+        government.UNSOURCED = changed
+        try:
+            found = government.check()
+        finally:
+            government_text.UNSOURCED = original
+            government.UNSOURCED = original
+        self.assertIn("UNSOURCED names states#lede's 'Each state has its own navy.', which the "
+                      "section no longer says: read its sources again and remove the entry", found)
+        self.assertEqual(government.check(), [])
+
+    def test_one_address_is_one_source(self):
+        # The states page linked the Florida constitution twice, under "Florida
+        # Constitution, Article IV" and "Florida Constitution" (the review of
+        # 2026-11-14): one address holds one key and one title.
+        made = {"a": ("A", "https://example.gov/one"), "b": ("B", "https://example.gov/two"),
+                "c": ("C", "https://example.gov/one")}
+        self.assertEqual(government.shared_addresses(made), [("https://example.gov/one", ["a", "c"])])
+        self.assertEqual(government.shared_addresses(SOURCES), [])
+        self.assertNotIn("fl-const", SOURCES)
+
+    def test_a_presidents_order_is_read_again_by_the_next_inauguration(self):
+        # The executive page cites five executive orders and a memorandum a
+        # new president may revoke or replace, and nothing failed when its
+        # revisit was deleted (the review of 2026-11-14). A section citing one
+        # needs a revisit on its page dated after it was read and no later
+        # than the next inauguration day, naming each by its number.
+        self.assertEqual(government.next_inauguration("2026-11-14"), "2029-01-20")
+        self.assertEqual(government.next_inauguration("2029-01-20"), "2033-01-20")
+        self.assertEqual(government.next_inauguration("2028-12-31"), "2029-01-20")
+        self.assertEqual(government.presidential_instrument(
+            "Executive Order 14158, 90 FR 8441 (Jan. 29, 2025)"), "14158")
+        self.assertEqual(government.presidential_instrument(
+            "National Security Presidential Memorandum 1, Organization of the National Security "
+            "Council and Subcommittees (Jan. 20, 2025)"), "NSPM-1")
+        self.assertEqual(government.presidential_instrument(
+            "National Security Memorandum 2 (Feb. 4, 2021)"), "NSM-2")
+        self.assertIsNone(government.presidential_instrument("5 U.S.C. 101 (the departments)"))
+        sources = {"eo": ("Executive Order 14158, 90 FR 8441 (Jan. 29, 2025)", "https://x.gov/1"),
+                   "memo": ("National Security Presidential Memorandum 1, its subject",
+                            "https://x.gov/2"),
+                   "law": ("5 U.S.C. 101 (the departments)", "https://x.gov/3")}
+
+        def page(revisit, reviewed="2026-11-14", cites=("eo", "memo", "law")):
+            return [{"slug": "made", "revisit": revisit,
+                     "sections": [{"id": "s", "sources": list(cites), "reviewed": reviewed}]}]
+
+        both = [("2029-01-20", "Read again Executive Order 14158 and NSPM-1")]
+        self.assertEqual(government.presidential_revisit_problems(page(both), sources), [])
+        # No revisit, one after the next inauguration, one before the
+        # section was read, or one that does not name the order: each is
+        # reported, the order or the memorandum by name.
+        for revisit in ([], [("2033-01-20", "Read again Executive Order 14158 and NSPM-1")],
+                        [("2026-01-20", "Read again Executive Order 14158 and NSPM-1")]):
+            found = government.presidential_revisit_problems(page(revisit), sources)
+            self.assertEqual(len(found), 2, revisit)
+            self.assertIn("made#s cites eo (14158)", found[0])
+            self.assertIn("made#s cites memo (NSPM-1)", found[1])
+        found = government.presidential_revisit_problems(
+            page([("2029-01-20", "Read again Executive Order 141580 and NSPM-10")]), sources)
+        self.assertEqual(len(found), 2)
+        # A section citing no order needs no revisit.
+        self.assertEqual(government.presidential_revisit_problems(page([], cites=("law",)),
+                                                                  sources), [])
+        # The guide's own pages pass, and the executive page's revisit is what
+        # makes them: without it, each order it cites is reported.
+        self.assertEqual(government.presidential_revisit_problems(PAGES, SOURCES), [])
+        executive = next(p for p in PAGES if p["slug"] == "executive")
+        stripped = [dict(executive, revisit=[])]
+        found = government.presidential_revisit_problems(stripped, SOURCES)
+        for named in ("8248", "12866", "14158", "14213", "14338", "14347", "NSPM-1"):
+            self.assertTrue(any(f"({named})" in line for line in found), named)
+
+    def test_every_kind_of_presidential_instrument_is_read_again(self):
+        # The revisit check knew executive orders and National Security
+        # memoranda alone: a source titled "Memorandum of July 15, 2025",
+        # "Presidential Policy Directive 6" or "Proclamation 10886" would have
+        # been cited with no revisit and nothing failing (the review of
+        # 2026-11-14). Each kind is named, by its title.
+        named = government.presidential_instrument
+        for title, name in (
+                ("Memorandum of July 15, 2025, Revoking PPD-6 on U.S. Global Development Policy",
+                 "memorandum of July 15, 2025"),
+                ("Presidential Memorandum, Restoring Accountability (Jan. 20, 2025)",
+                 "memorandum of Jan. 20, 2025"),
+                ("Presidential Memorandum on Federal Hiring",
+                 "Presidential Memorandum on Federal Hiring"),
+                ("Presidential Policy Directive 6, U.S. Global Development Policy", "PPD-6"),
+                ("PPD-21, Critical Infrastructure Security and Resilience", "PPD-21"),
+                ("Homeland Security Presidential Directive 12", "HSPD-12"),
+                ("National Security Presidential Directive 1", "NSPD-1"),
+                ("National Security Decision Directive 38", "NSDD-38"),
+                ("Presidential Decision Directive 62", "PDD-62"),
+                ("Proclamation 10886, Declaring a National Emergency", "Proclamation 10886"),
+                ("Executive Order No. 9066", "9066"),
+                ("Reissuance of and Amendments to National Security Presidential Memorandum 5",
+                 "NSPM-5")):
+            self.assertEqual(named(title), name, title)
+        # Not a president's: the words in lower case, a page named for the
+        # presidency, an agency's memorandum or directive.
+        for title in ("3 U.S.C. 19 (presidential succession)",
+                      "The White House: Presidential Departments",
+                      "OMB Memorandum M-25-21", "Office of Legal Counsel memorandum",
+                      "Department of Homeland Security Management Directive 123",
+                      "Homeland Security Directive 1", "5 U.S.C. 101 (the departments)"):
+            self.assertIsNone(named(title), title)
+        # A page citing each needs a revisit naming each, in any capitals.
+        sources = {"memo": ("Memorandum of July 15, 2025, Revoking PPD-6", "https://x.gov/1"),
+                   "ppd": ("Presidential Policy Directive 21", "https://x.gov/2"),
+                   "proc": ("Proclamation 10886, Declaring a National Emergency",
+                            "https://x.gov/3")}
+        page = [{"slug": "made", "revisit": [],
+                 "sections": [{"id": "s", "sources": list(sources), "reviewed": "2026-11-14"}]}]
+        found = government.presidential_revisit_problems(page, sources)
+        self.assertEqual(len(found), 3, found)
+        for name in ("(memorandum of July 15, 2025)", "(PPD-21)", "(Proclamation 10886)"):
+            self.assertTrue(any(name in line for line in found), name)
+        page[0]["revisit"] = [("2029-01-20", "Read again the Memorandum of July 15, 2025, "
+                                             "PPD-21 and Proclamation 10886")]
+        self.assertEqual(government.presidential_revisit_problems(page, sources), [])
+        # PPD-2 is not PPD-21.
+        page[0]["revisit"] = [("2029-01-20", "Read again the memorandum of July 15, 2025, PPD-2 "
+                                             "and Proclamation 10886")]
+        self.assertEqual(len(government.presidential_revisit_problems(page, sources)), 1)
+
+    def test_a_source_its_day_did_not_open_is_listed_apart(self):
+        # executive#departments and states#courts said "Sources, checked on
+        # Nov. 14, 2026" over four pages and one that had answered this
+        # project's reader a challenge page that day (the review of
+        # 2026-11-14): a refusal concludes nothing (rule 8), so the page lists
+        # such a source apart from the day, and says why it was not checked.
+        made = {"id": "s", "sources": ["usc-5-101", "crs-in12704"], "reviewed": "2026-11-14",
+                "notOpened": {"crs-in12704": "a challenge page"}, "blocks": []}
+        line = government._sources_line(made, "executive", "")
+        self.assertIn(government.NOT_OPENED_LABEL, line)
+        read, rest = line.split(government.NOT_OPENED_LABEL)
+        self.assertIn("Sources, checked on", read)
+        self.assertIn("uscode.house.gov/us/usc/t5/s101/", read)
+        self.assertNotIn("IN12704", read)
+        self.assertIn("IN12704", rest)
+        self.assertEqual(government.not_opened_problems([{"slug": "made", "sections": [made]}]),
+                         [])
+        # A source the section does not cite, one with no reason, a list on a
+        # section with no day of its own, and a day none of whose sources was
+        # opened are each reported.
+        bad = [{"slug": "made", "sections": [
+            dict(made, notOpened={"usc-3-19": "a challenge page"}),
+            dict(made, id="t", notOpened={"crs-in12704": " "}),
+            {k: v for k, v in made.items() if k != "reviewed"} | {"id": "u"},
+            dict(made, id="v", notOpened={"usc-5-101": "x", "crs-in12704": "y"})]}]
+        found = government.not_opened_problems(bad)
+        self.assertEqual(found, [
+            "made#s: notOpened names 'usc-3-19', which the section does not cite",
+            "made#t: notOpened names 'crs-in12704' with no reason",
+            "made#u: notOpened names sources not opened on the section's own day, and the "
+            "section gives no day",
+            "made#v: none of its sources was opened on its day: drop the day, or open them"])
+        # The guide's own: the Department of Education's and the Research
+        # Service's pages, and New York's, stand apart from the day on the
+        # page as it is rendered.
+        expected = {("executive", "departments"): {"crs-in12704", "ed-2025-11", "ed-treasury",
+                                                   "ed-2026-06"},
+                    ("states", "courts"): {"nycourts"}}
+        for (slug, sid), keys in expected.items():
+            section = next(s for p in PAGES if p["slug"] == slug for s in p["sections"]
+                           if s["id"] == sid)
+            self.assertEqual(set(section.get("notOpened") or {}), keys, f"{slug}#{sid}")
+            html_ = government.render(slug, "candidates.example")
+            start = html_.index(f'id="{sid}"')
+            line = html_[html_.index('class="guide-sources"', start):]
+            line = line[:line.index("</p>")]
+            self.assertIn(government.NOT_OPENED_LABEL, line, f"{slug}#{sid}")
+            read, rest = line.split(government.NOT_OPENED_LABEL)
+            self.assertIn("checked on", read)
+            for key in keys:
+                url = government._e(SOURCES[key][1])
+                self.assertNotIn(url, read, f"{slug}#{sid}: {key} under the day")
+                self.assertIn(url, rest, f"{slug}#{sid}: {key}")
+        self.assertEqual(government.not_opened_problems(PAGES), [])
+
+    def test_the_chief_of_staffs_entry_is_plain(self):
+        # Its first narrowing put the Council seat, the dispute and the appeal
+        # in one sentence of 74 words, the finality in a relative clause
+        # that read as the deputy's alone (the review of 2026-11-14). Each
+        # step is a sentence of its own, none longer than its neighbours'
+        # entries, and the finality is said of the appeal's decision.
+        eop = next(s for p in PAGES if p["slug"] == "executive" for s in p["sections"]
+                   if s["id"] == "eop")
+        roles = dict(next(block[1] for block in eop["blocks"] if block[0] == "roles"))
+        entry = roles["White House chief of staff"]
+        sentences = [s for s in re.split(r"(?<!U\.S\.)(?<=[.)])\s+(?=[A-Z])", entry) if s]
+        longest = max(len(s.split()) for s in sentences)
+        neighbours = max(len(text.split()) for name, text in roles.items()
+                         if name != "White House chief of staff")
+        self.assertLessEqual(longest, neighbours, sentences)
+        self.assertNotIn("whose decision", entry)
+        self.assertIn("Either way, the decision on the appeal is final", entry)
 
     def test_the_northern_mariana_islands_circuit_is_the_statutes(self):
         # The circuits map sent the Northern Mariana Islands' appeals to the

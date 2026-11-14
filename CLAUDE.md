@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3356 tests, no dependencies
+python -m unittest discover tests             # 3363 tests, no dependencies
 npm install && npm test                       # 5011 real-DOM checks (needs jsdom)
 ```
 
@@ -1088,10 +1088,29 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     project's reader "Access Denied", until a person reads and cites the
     State's own. The ballot table's sources carry no title for that pin: its
     check refuses `COMPILED_LAW`'s hosts and its own compiled tables by the
-    address alone (`ballot2026._source_problems`). A claim no source in its
-    section holds is listed by its words in `government_text.UNSOURCED`
-    (README names each): a section's date says when its sources were read,
-    never that they hold it.
+    address alone (`ballot2026._source_problems`). A claim no primary source
+    in its section holds (NCSL's pages are an association's compilation; a
+    lede's claim is under the section "lede") is listed by its words in
+    `government_text.UNSOURCED` (README lists each, one item to an entry,
+    and "none" over a list that holds one fails): a section's date says when
+    its sources were read, never that they hold it, and only of those it
+    opened. A source that day's read could not open (a challenge page or a
+    refusal, which concludes nothing: rule 8) is in the section's
+    `notOpened` with why, and the page lists it apart from the day
+    (`government._sources_line`): the departments' and the state courts'
+    sections said "checked on Nov. 14, 2026" over five pages that had
+    answered this project's reader HTTP 403 that day. One address is one
+    source key, and a page citing a president's instrument carries a
+    revisit, dated by the next inauguration day, that names each
+    (`government.presidential_revisit_problems`): deleting the executive
+    page's failed nothing. An instrument is known by its title
+    (`government.presidential_instrument`, as a title capitalises it): an
+    executive order or a proclamation by its number, a National Security
+    (Presidential) Memorandum or a presidential directive by its letters
+    ("NSPM-1", "PPD-6", "HSPD-12"), and any other presidential memorandum
+    by the date its title gives ("Memorandum of July 15, 2025"), else by its
+    whole title; the first version knew orders and National Security
+    memoranda alone.
     A source cited is a source that opens, and only a read says so: no gate
     opened an external link, and some eighty sources are the Law Revision
     Counsel's `uscode.house.gov/us/usc/tN/sM/` pages, on a site that says it

@@ -2214,25 +2214,114 @@ here in a different way:
   of its offices) and the state's own constitution limiting its power
   (*PruneYard*). A sentence's
   own parenthetical citation is as it was: changing it changes the text,
-  which a second reader checks (rule 48). Not every part has a source. The
-  guide still holds these claims with no primary source among their
-  section's sources (`government_text.UNSOURCED`, which `government.check`
-  holds to the page's words), until a source is found or a second reader
-  narrows the words:
-  - executive#eop, the White House chief of staff: "Runs the president's
-    staff and schedule, and is often a principal negotiator with Congress."
-    (the White House's own pages say nothing of the office's work, and no
-    statute or regulation describes it);
-  - executive#eop, the matters the White House Counsel advises on:
-    "including nominations, pardons and requests from congressional
-    investigators." (the White House's page of its offices says the Counsel
-    advises on legal issues and names none of them, and no statute or
-    regulation describes the office);
-  - states#powers, its second sentence: "Each state constitution sets up a
-    legislature, an executive and courts, and many go into far more detail
-    than the federal one, on taxes, debt, education and local government."
-    (each constitution is its own state's, and none of the section's four
-    sources speaks of them).
+  which a second reader checks (rule 48). A claim with no primary source
+  among its section's sources is listed by its words in
+  `government_text.UNSOURCED`, which `government.check` holds to the page's
+  words, and named at the end of this paragraph, until a source is found or
+  a second reader narrows the words. A page's lede cites no source of its
+  own, and a claim in it is listed under the section "lede". The three
+  listed on the morning of 2026-11-14 were searched for again that day and
+  none had a primary source for its words, so each was narrowed to what one
+  holds. The White House chief of staff's entry ("Runs the president's staff
+  and schedule, and is often a principal negotiator with Congress.") now
+  says what National Security Presidential Memorandum 1 makes of the office
+  (a member of the National Security Council; a voting attendee of its
+  Principals or Deputies Committee who disputes how the committee recorded
+  its conclusions or decisions may, if the dispute is not resolved, appeal
+  to the chief of staff, or to the deputy chief of staff for policy if the
+  chief of staff so designates; and the decision on the appeal is final
+  either way), each step in a sentence of its own, then the offices three
+  executive orders have report to it (Executive Orders 14338, 14213 and
+  14158). Its first form put the seat and the appeal in one sentence of 74
+  words ending "whose decision is final", which read as the deputy's
+  decision alone; the memorandum's "whose decision shall be final" follows
+  both officials and names no step after the appeal. The White House
+  Counsel's ("..., including nominations,
+  pardons and requests from congressional investigators.") says what the
+  White House's own page of its offices says, and a new entry names the
+  offices that page gives the legislative agenda, the selection of
+  appointees and the president's schedule (Legislative Affairs, Presidential
+  Personnel, Presidential Scheduling). The states page's "Each state
+  constitution sets up a legislature, an executive and courts, and many go
+  into far more detail than the federal one, on taxes, debt, education and
+  local government." now names the constitutions of Florida, Ohio and
+  Washington, read from their own legislatures' sites, and says what each
+  holds (no one source speaks for every state's, or for "many"). Where each
+  was looked for, and what answered, is in `UNSOURCED`'s comment: the
+  Congressional Research Service's reports on congress.gov answered this
+  project's reader a challenge page, which concludes nothing; the National
+  Archives' George W. Bush Library describes that administration's chief of
+  staff and Counsel; and President Reagan's memorandum of November 4, 1982
+  has a department head consult the Counsel to the President on a
+  congressional request for information that raises a substantial question
+  of executive privilege, and says nothing of the chief of staff - whether
+  it governs now was not established, and a person could look by hand for a
+  current opinion of the Justice Department's Office of Legal Counsel that
+  says so. That afternoon the further claims a review named on the
+  executive and states pages were read against their sections' sources.
+  Four now cite a primary source that holds them: the cabinet, the vice
+  president and the fifteen heads with other officials each president adds
+  (the White House's page of it, and the same page of 2021-2025 as the
+  National Archives keeps it); the independent agencies' single heads
+  serving at the president's pleasure (the EPA's, NASA's and the CIA's
+  charters, with *Trump v. Slaughter*'s "the President may remove his
+  subordinates at will"); the commissions' staggered terms and party limits
+  (the SEC's 15 U.S.C. 78d and the FCC's 47 U.S.C. 154, beside the FTC's and
+  the Federal Reserve's statutes); and the state courts' share of the
+  country's cases (the federal judiciary's comparison of the federal and
+  state courts, and the District of Kansas's figures of about one million
+  federal cases a year and some 30 million state ones). The rest have none
+  among their sections' sources, and each is listed with what was looked
+  for. NCSL's pages, which the states page cites, are an association's
+  compilation, not a primary source (rule 50): where one holds a claim, the
+  entry says so. A section's own day says only that the sources it opened
+  were read that day: one this project's reader could not open is listed by
+  the section apart from the day, under "Not checked that day, when this
+  site's reader could not open them" (the section's `notOpened`, with why).
+  On 2026-11-14 that was the Congressional Research Service's Insight
+  IN12704 and the Department of Education's three pages on its transfers
+  (executive#departments), and New York's page of its courts
+  (states#courts): each answered a challenge page (HTTP 403), which
+  concludes nothing (rule 8), and none was read by hand. Every other source
+  of the sections dated that day was read that day, the Constitution's
+  words in the National Archives' transcription where
+  constitution.congress.gov answered a challenge page. Only the claims that
+  review named were read this way; the guide's other pages, and the other
+  claims on these two, have not been.
+  Unsourced claims listed now:
+  - executive#president, the line of succession: "roughly the order in
+    which their offices were first created" (3 U.S.C. 19 gives the order,
+    not when each office was created);
+  - executive#departments, the table's column "What it does, for example"
+    (5 U.S.C. 101 names the departments, not their work);
+  - states#lede: "Each state has its own constitution, legislature,
+    governor and courts." (a lede cites no source; the federal judiciary's
+    comparison holds that each state's constitution and laws establish its
+    courts);
+  - states#legislatures, the speaker: "who usually controls committee
+    assignments, the referral of bills and the floor calendar" (NCSL's page
+    has the speaker appoint committees and refer bills, and gives the
+    calendar to the majority leader);
+  - states#legislatures: "Nonpartisan staff support the legislators:
+    legislative counsel or revisors draft bills and keep the state's code of
+    laws; fiscal offices estimate what bills cost; auditors review state
+    agencies; and each chamber's clerk or secretary keeps its journal and
+    records its votes.";
+  - states#executive: "This is often called a plural executive.";
+  - states#executive, the governor: "commands its National Guard when the
+    Guard is not in federal service" (three constitutions say it of their
+    own states; the National Guard Bureau's page answered HTTP 403);
+  - states#executive: "Governors also issue executive orders, declare
+    emergencies, and grant pardons and other clemency, in many states
+    together with a board.";
+  - states#executive, the chart's governor: "appoints most agency heads";
+  - states#courts: "Most states have these levels:" (the federal
+    judiciary's comparison says "Some states also have an intermediate Court
+    of Appeals" and nothing of courts of limited jurisdiction);
+  - states#courts, the ways states choose judges: "partisan elections,
+    nonpartisan elections, appointment by the governor, election by the
+    legislature" (the same comparison names election, appointment and
+    combinations, not these).
 
   The guide's and the maps' checks fail on any source on a compiled copy of
   the law (`government_text.COMPILED_LAW`: Cornell's, Justia, FindLaw,

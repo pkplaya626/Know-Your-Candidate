@@ -79,10 +79,16 @@ class Tense(tuple):
 # 26 U.S.C. 6213): their sections now also list each primary source found
 # that day for a part (``tests/test_guide.py``'s CLAIMS pairs each with its
 # words), while a sentence's own parenthetical citation is as it was, since
-# changing it changes the text. Not every part has one: the claims the guide
-# still holds with no primary source among its section's sources are
-# ``UNSOURCED``, by their words, until a source is found or a second reader
-# narrows them. The guide's and the maps' checks refuse any source on one of
+# changing it changes the text. A claim the guide holds with no primary
+# source among its section's sources is ``UNSOURCED``, by its words, until a
+# source is found or a second reader narrows it: the three listed that day
+# (the chief of staff's work, the matters the White House Counsel advises
+# on, what each state constitution holds) were narrowed the same day to what
+# National Security Presidential Memorandum 1, three executive orders, the
+# White House's page and three states' own constitutions say, and the further
+# claims a review named on the executive and states pages were read against
+# their sections' sources: those a primary source was found for now cite it,
+# and the rest are listed. The guide's and the maps' checks refuse any source on one of
 # these hosts (``compiled_law``) and pin a source titled as a Code section or
 # a case to its publisher (``OFFICIAL_HOSTS``); the ballot table's sources
 # carry no title for that pin to read, so its check refuses these hosts, and
@@ -156,29 +162,158 @@ COMPILED_LAW_PENDING = {
 # sources: (page, section, the words, what was looked for and where). Each is
 # here until a source is found and cited or a second reader narrows the words
 # (rule 48), and README names them; ``government.check`` reports an entry
-# whose words its section no longer says, so the list cannot outlive them.
+# whose words its section no longer says, so the list cannot outlive them. A
+# page's lede cites no source, and an entry for its words names the section
+# "lede".
+#
+# The three listed on the morning of 2026-11-14 were searched for again the
+# same day and none had a primary source for its words, so each was narrowed
+# to what one holds (executive#eop and states#powers, whose comments quote
+# them):
+# - the chief of staff "Runs the president's staff and schedule, and is often
+#   a principal negotiator with Congress.": no statute, regulation, order or
+#   White House page says so. The White House's page of its offices gives the
+#   schedule to its Office of Presidential Scheduling and the legislative
+#   agenda to its Office of Legislative Affairs. The Federal Register's search
+#   of presidential documents published from January 20, 2025 finds 24 for the
+#   phrase "Chief of Staff" (read 2026-11-14, each document's text opened).
+#   Twelve name the White House chief of staff: three orders have offices
+#   report to the chief of staff or the chief of staff's office (14158, 14213,
+#   14338); five make the "Assistant to the President and Chief of Staff" a
+#   member or co-chair of a commission or task force (14313, 14328, 14379,
+#   14423, 14437); two let that office ask the Director of OMB to exempt
+#   regulations (14192, sec. 5) or be consulted (14409); and two memoranda
+#   are addressed to that official among others, the memorandum of July 15,
+#   2025 revoking Presidential Policy Directive 6 and the memorandum of June
+#   30, 2025 reissuing National Security Presidential Memorandum 5 (published
+#   July 31 and Aug. 12). The other twelve name someone else: ten a deputy
+#   chief of staff (14147, 14149, 14185, 14189, 14202, 14212, 14234, 14364,
+#   14370, 14376), one the Army's and the Air Force's chiefs of staff (14417)
+#   and one each agency head's chief of staff (14356). The legislative work
+#   two of them give is a deputy chief of staff's, not the chief's (Executive
+#   Order 14370: "shall work with the Congress to update the statutory
+#   definition"; 14376: "shall prepare a legislative recommendation"). The
+#   National Archives' George W. Bush Library (georgewbushlibrary.gov, "White
+#   House Offices Research Guide") describes that White House's chief of
+#   staff, in the past tense and from a historian's book it cites; the
+#   Congressional Research Service's reports, on congress.gov and
+#   crsreports.congress.gov, answered this project's reader a challenge page
+#   (HTTP 403), which concludes nothing (rule 8). The entry now leads with what
+#   National Security Presidential Memorandum 1, already cited, makes of the
+#   office.
+# - the Counsel advising "including nominations, pardons and requests from
+#   congressional investigators.": the White House's page says the Counsel
+#   "advises ... on legal issues pertaining to the President and the White
+#   House" and names none of them, and gives the selection of appointees to
+#   its Office of Presidential Personnel. The Bush Library's guide says that
+#   White House's Counsel's Office "vetted candidates for Presidential
+#   Appointments" and "reviewed applications for pardons" (2001-2009, from the
+#   same book). President Reagan's memorandum of November 4, 1982 (the Justice
+#   Department's copy, justice.gov/ola/page/file/1090526/dl, re-read
+#   2026-11-14) has a department head who believes a congressional request for
+#   information raises a substantial question of executive privilege "shall
+#   also promptly notify and consult with the Counsel to the President"; it
+#   says nothing of the chief of staff, and whether it governs now was not
+#   established (the Justice Department's search of its Office of Legal
+#   Counsel's opinions answered this project's reader HTTP 403 when a reviewer
+#   asked it that day, which concludes nothing; a person could look there by
+#   hand for a current opinion that says it remains in effect).
+# - "Each state constitution sets up a legislature, an executive and courts,
+#   and many go into far more detail than the federal one, on taxes, debt,
+#   education and local government.": no one primary source speaks for every
+#   state's, or for "many", and "far more detail" weighs fifty documents
+#   against one. The sentence now names three constitutions read from their
+#   own legislatures' sites, and says only what each holds.
+#
+# That afternoon the further claims a review named on the executive and
+# states pages were read against their sections' sources. A primary source
+# was found and cited for the cabinet (executive#departments: the White
+# House's page of the cabinet, and the same page of 2021-2025 as the National
+# Archives keeps it), the independent agencies' heads and the commissions'
+# terms and party limits (executive#agencies: each agency's charter, the SEC's
+# and the FCC's statutes, Trump v. Slaughter) and the state courts' share of
+# the country's cases (states#courts: the federal judiciary's own pages).
+# These are not, and are listed:
 UNSOURCED = (
-    ("executive", "eop",
-     "Runs the president's staff and schedule, and is often a principal negotiator with "
-     "Congress.",
-     "the White House chief of staff's work: on 2026-11-14 whitehouse.gov's search for "
-     "\"Chief of Staff\", its Administration page, its release naming the 33rd chief of "
-     "staff and its page of the White House's offices (Presidential Departments, which names "
-     "none of the chief of staff's) said nothing of the office's work, and no statute or "
-     "regulation describes it"),
-    ("executive", "eop",
-     "including nominations, pardons and requests from congressional investigators.",
-     "the matters the White House Counsel advises on: the White House's own page of its "
-     "offices says the Counsel \"advises the President, the Executive Office of the President, "
-     "and the White House staff on legal issues\" (wh-departments, cited) and names none of "
-     "them; on 2026-11-14 whitehouse.gov's search for \"White House Counsel\" found no other "
-     "page about the office, and no statute or regulation describes it"),
-    ("states", "powers",
-     "Each state constitution sets up a legislature, an executive and courts, and many go "
-     "into far more detail than the federal one, on taxes, debt, education and local "
-     "government.",
-     "what the state constitutions hold: each is its own state's document, and no one primary "
-     "source says what many of them hold; none of the section's four sources speaks of it"),
+    ("executive", "president", "roughly the order in which their offices were first created",
+     "when each office was first created: 3 U.S.C. 19 (cited) gives the order, and its "
+     "amendment notes, read 2026-11-14, give the year and the law that wrote in each department "
+     "added since 1965 (\"1965—Subsec. (d)(1). Pub. L. 89-174 inserted reference to Secretary "
+     "of Health, Education, and Welfare and Secretary of Housing and Urban Development\", "
+     "\"1966—Subsec. (d)(1). Pub. L. 89-670 inserted reference to Secretary of "
+     "Transportation\", and so on to Homeland Security in 2006), not when any department was "
+     "created, and no source in the section says when any office was created"),
+    ("executive", "departments", "What it does, for example",
+     "the table's examples of each department's work: 5 U.S.C. 101 (cited) names the "
+     "departments and nothing of their work; the U.S. Government Manual, the Office of the "
+     "Federal Register's handbook of the agencies (usgovernmentmanual.gov), describes each, but "
+     "the one entry opened, the State Department's, dates itself to 2020 (\"The above list of "
+     "key personnel was updated 6–2020\"), and neither the others nor each department's own "
+     "site was read row by row"),
+    ("states", "lede", "Each state has its own constitution, legislature, governor and courts.",
+     "a page's lede cites no source; of its words, the federal judiciary's comparison of the "
+     "federal and state courts (cited under states#courts) holds that \"The Constitution and "
+     "laws of each state establish the state courts\", and no source on the page says that every "
+     "state has a legislature and a governor, which each state's own constitution says only of "
+     "that state"),
+    ("states", "legislatures",
+     "who usually controls committee assignments, the referral of bills and the floor calendar",
+     "what a lower chamber's speaker controls: NCSL's page of leadership roles (cited; an "
+     "association's compilation, not a primary source) says the speaker \"typically will ... "
+     "Appoint committee chairs and members. Refer bills to committee.\", and gives the calendar "
+     "to the majority leader (\"Develops the calendar.\"); each chamber's own rules hold it for "
+     "that chamber, and no primary source speaks for lower chambers generally"),
+    ("states", "legislatures",
+     "Nonpartisan staff support the legislators: legislative counsel or revisors draft bills and "
+     "keep the state's code of laws; fiscal offices estimate what bills cost; auditors review "
+     "state agencies; and each chamber's clerk or secretary keeps its journal and records its "
+     "votes.",
+     "what legislatures' staff do: the section's sources are Nebraska's, Texas's (its "
+     "Legislative Budget Board's statute and page) and NCSL's page of leadership roles, none of "
+     "which speaks of legislatures' staff generally, and no primary source speaks for every "
+     "legislature's"),
+    ("states", "executive", "This is often called a plural executive.",
+     "a name for the arrangement, not a state's word for it: none of the section's sources uses "
+     "it, nor do Florida's and Washington's constitutions (read for states#powers), and a web "
+     "search on 2026-11-14 found it on college course pages and encyclopedias, not on an "
+     "official page"),
+    ("states", "executive",
+     "commands its National Guard when the Guard is not in federal service",
+     "every governor's command: no source in the section speaks of it. The three constitutions "
+     "states#powers cites each make their governor commander-in-chief of the state's forces "
+     "outside the service of the United States (Florida, Art. IV, s. 1(a): \"commander-in-chief "
+     "of all military forces of the state not in active service of the United States\"; Ohio, "
+     "Art. III, s. 10; Washington, Art. III, s. 8), each of one state; the National Guard "
+     "Bureau's page about the Guard (nationalguard.mil/About-the-Guard) answered this project's "
+     "reader HTTP 403, which concludes nothing (rule 8)"),
+    ("states", "executive",
+     "Governors also issue executive orders, declare emergencies, and grant pardons and other "
+     "clemency, in many states together with a board.",
+     "governors' powers in general, and how many states share clemency with a board: no source "
+     "in the section speaks of them (NCSL's page there is about vetoes); Washington's "
+     "constitution vests the pardoning power in the governor \"under such regulations and "
+     "restrictions as may be prescribed by law\" (Art. III, s. 9), one state's"),
+    ("states", "executive", "appoints most agency heads",
+     "the chart's words for the governor: no source in the section says which of a state's "
+     "agency heads its governor appoints, or counts them across the states"),
+    ("states", "courts", "Most states have these levels:",
+     "the table, state by state: the federal judiciary's comparison (cited) holds the court of "
+     "last resort (\"often known as a Supreme Court, is usually the highest court\"), the trial "
+     "courts below (\"Some are referred to as Circuit or District Courts\") and the specialized "
+     "courts (\"States also usually have courts that handle specific legal matters, e.g., "
+     "probate court (wills and estates); juvenile court; family court\"), but says \"Some states "
+     "also have an intermediate Court of Appeals\", not most, and nothing of courts of limited "
+     "jurisdiction; New York's, Texas's and Oklahoma's pages (cited) hold their own states' "
+     "courts"),
+    ("states", "courts",
+     "partisan elections, nonpartisan elections, appointment by the governor, election by the "
+     "legislature",
+     "the ways states choose judges: the federal judiciary's comparison (cited) says \"State "
+     "court judges are selected in a variety of ways, including election, appointment for a "
+     "given number of years, appointment for life, and combinations of these methods, e.g., "
+     "appointment followed by election\", and Missouri's page (cited) holds merit selection; "
+     "neither tells partisan from nonpartisan elections or names the governor as the one who "
+     "appoints, or election by the legislature, each some states' own law"),
 )
 
 
@@ -648,7 +783,18 @@ SOURCES = {
     # Security Advisor". So National Security Memorandum 2 (Feb. 4, 2021),
     # which the guide cited for a day, and National Security Presidential
     # Memorandum-4 (Apr. 4, 2017), which the Code prints under 3021, are
-    # superseded.
+    # superseded. The chief of staff's entry, read again 2026-11-14: among
+    # the Council's members, "additional members hereby designated by the
+    # President pursuant to section 101(c)(1) of the Act: The Attorney
+    # General; The Secretary of the Interior; Chief of Staff to the President
+    # (White House Chief of Staff); and The National Security Advisor"; and,
+    # for the Principals Committee and in the same words for the Deputies
+    # Committee, "If a PC voting attendee disputes that the conclusions or
+    # decisions of the PC were correctly minuted, this must be communicated in
+    # writing ... If resolution of the dispute cannot be achieved, ... the
+    # disputing attendee may appeal the matter to the White House Chief of
+    # Staff or, should that official so designate, to the White House Deputy
+    # Chief of Staff for Policy, whose decision shall be final."
     "nspm-1": ("National Security Presidential Memorandum 1, Organization of the National "
                "Security Council and Subcommittees (Jan. 20, 2025)",
                "https://www.whitehouse.gov/presidential-actions/2025/01/"
@@ -669,16 +815,120 @@ SOURCES = {
     "eo-12866": ("Executive Order 12866, Regulatory Planning and Review, 58 FR 51735 "
                  "(Oct. 4, 1993)",
                  "https://www.archives.gov/files/federal-register/executive-orders/pdf/12866.pdf"),
-    # The White House Counsel's work as the White House describes its own
-    # offices (executive#eop), read 2026-11-14 (HTTP 200): "The Office of
-    # White House Counsel advises the President, the Executive Office of the
-    # President, and the White House staff on legal issues pertaining to the
-    # President and the White House." It names no office of the chief of
-    # staff, and nothing of nominations, pardons or investigators.
+    # The White House's own offices as it describes them (executive#eop),
+    # read 2026-11-14 (HTTP 200): "The Office of White House Counsel advises
+    # the President, the Executive Office of the President, and the White
+    # House staff on legal issues pertaining to the President and the White
+    # House."; "The Office of Legislative Affairs is responsible for advancing
+    # the President's legislative agenda on Capitol Hill."; "The Office of
+    # Presidential Personnel oversees the selection process for presidential
+    # appointments ... Presidential Personnel staff present candidates to the
+    # Senate for confirmation after they have been approved by the President";
+    # and "The Office of President[ial] Scheduling is responsible for managing
+    # and coordinating the President's meetings, public engagements, and daily
+    # activities". It names no office of the chief of staff, and nothing of
+    # pardons or investigators.
     "wh-departments": ("The White House: Presidential Departments",
                        "https://www.whitehouse.gov/internships/presidential-departments/"),
+    # Offices that report to the chief of staff (executive#eop), each read
+    # 2026-11-14 in the Federal Register as govinfo publishes it (HTTP 200;
+    # govinfo answered a reviewer HTTP 522 the same day, which concludes
+    # nothing, and the PDFs opened again after it), and none revoked or amended there by a later
+    # presidential document (the Federal Register's search for each order's
+    # number, 2025 on). The entry gives them after what NSPM-1 makes of the
+    # office, each beside its own order. EO 14158,
+    # sec. 3(b): "There shall be a USDS Administrator established in the
+    # Executive Office of the President who shall report to the White House
+    # Chief of Staff" (sec. 3(a) renames the United States Digital Service
+    # "the United States DOGE Service (USDS)"). EO 14338, sec. 2(b): "there is
+    # established within the White House Office of the Executive Office of the
+    # President the National Design Studio (NDS) ... The NDS shall be led by an
+    # Administrator, who shall report to the Office of the White House Chief of
+    # Staff." EO 14213, sec. 2: "There is hereby established within the
+    # Executive Office of the President the National Energy Dominance Council",
+    # and sec. 4(c): "The functions of the Council shall report to the Office
+    # of the Chief of Staff."
+    "eo-14158": ("Executive Order 14158, 90 FR 8441 (Jan. 29, 2025)",
+                 "https://www.govinfo.gov/content/pkg/FR-2025-01-29/pdf/2025-02005.pdf"),
+    "eo-14338": ("Executive Order 14338, 90 FR 41759 (Aug. 26, 2025)",
+                 "https://www.govinfo.gov/content/pkg/FR-2025-08-26/pdf/2025-16396.pdf"),
+    "eo-14213": ("Executive Order 14213, 90 FR 9945 (Feb. 20, 2025)",
+                 "https://www.govinfo.gov/content/pkg/FR-2025-02-20/pdf/2025-02928.pdf"),
     "eo-14347": ("Executive Order 14347, 90 FR 43893 (Sept. 10, 2025)",
                  "https://www.govinfo.gov/content/pkg/FR-2025-09-10/pdf/2025-17508.pdf"),
+    # The cabinet (executive#departments), read 2026-11-14 (HTTP 200). The
+    # White House's page, in its own description of itself: "Established in
+    # Article II, Section 2 of the Constitution, the Cabinet's role is to
+    # advise the President on any subject he may require relating to the
+    # duties of each member's respective office. President [the President's
+    # name]'s Cabinet includes Vice President [the Vice President's name] and
+    # the heads of the 15 executive departments"; the page lists among the Cabinet, beside the
+    # department heads, the Director of National Intelligence, the United
+    # States Trade Representative, the Administrator of the Small Business
+    # Administration, the Director of the Central Intelligence Agency, the
+    # Director of the Office of Management and Budget and the Administrator of
+    # the Environmental Protection Agency. The same page of 2021-2025, as the
+    # National Archives keeps that White House's site: "President [name]'s
+    # Cabinet includes Vice President [name] and the heads of the 15 executive
+    # departments ... Additionally, the Cabinet includes the White
+    # House Chief of Staff, the US Ambassador to the United Nations, the
+    # Director of National Intelligence, and the US Trade Representative, as
+    # well as the heads of the Environmental Protection Agency, Office of
+    # Management and Budget, Council of Economic Advisers, Office of Science
+    # and Technology Policy, and Small Business Administration." Two
+    # presidents, each adding officials to the vice president and the fifteen.
+    "wh-cabinet": ("The White House: The Cabinet",
+                   "https://www.whitehouse.gov/administration/cabinet/"),
+    "wh-cabinet-2021": ("The White House of 2021-2025, as the National Archives keeps its site: "
+                        "The Cabinet",
+                        "https://bidenwhitehouse.archives.gov/administration/cabinet/"),
+    # Independent agencies each led by one head (executive#agencies), read
+    # 2026-11-14: the Environmental Protection Agency's charter, "There shall
+    # be at the head of the Agency the Administrator of the Environmental
+    # Protection Agency ... The Administrator shall be appointed by the
+    # President, by and with the advice and consent of the Senate"
+    # (Reorganization Plan No. 3 of 1970, sec. 1(b), as the 2024 U.S. Code's
+    # appendix to title 5 prints it on govinfo); NASA's, "The Administration
+    # shall be headed by an Administrator, who shall be appointed from
+    # civilian life by the President by and with the advice and consent of the
+    # Senate. Under the supervision and direction of the President, the
+    # Administrator shall be responsible ..." (51 U.S.C. 20111(a)); the CIA's,
+    # "There is a Director of the Central Intelligence Agency who shall be
+    # appointed by the President, by and with the advice and consent of the
+    # Senate" (50 U.S.C. 3036(a)). None gives a term or a limit on removal, and
+    # Trump v. Slaughter (cited) holds "What text, history, and structure
+    # settle, our precedent confirms--the President may remove his
+    # subordinates at will."
+    "reorg-plan-3-1970": ("Reorganization Plan No. 3 of 1970 (the Environmental Protection "
+                          "Agency), 5 U.S.C. App.",
+                          "https://www.govinfo.gov/content/pkg/USCODE-2024-title5/html/"
+                          "USCODE-2024-title5-app-reorganiz-other-dup92.htm"),
+    "usc-51-20111": ("51 U.S.C. 20111 (NASA and its Administrator)",
+                     "https://uscode.house.gov/us/usc/t51/s20111/"),
+    "usc-50-3036": ("50 U.S.C. 3036 (Director of the Central Intelligence Agency)",
+                    "https://uscode.house.gov/us/usc/t50/s3036/"),
+    # Commissions' terms and party limits (executive#agencies), beside the
+    # FTC's 15 U.S.C. 41 ("Not more than three of the Commissioners shall be
+    # members of the same political party"; first terms of "three, four, five,
+    # six, and seven years", successors "for terms of seven years") and the
+    # Federal Reserve's 12 U.S.C. 242 (terms of fourteen years, "the expiration
+    # of the term of not more than one member in any two-year period"; no party
+    # limit), read 2026-11-14: the SEC's 78d(a), "five commissioners ... Not
+    # more than three of such commissioners shall be members of the same
+    # political party", each "for a term of five years", the first expiring
+    # "one at the end of one year, one at the end of two years" and so on to
+    # five; the FCC's 154(b)(5), "The maximum number of commissioners who may
+    # be members of the same political party shall be a number equal to the
+    # least number of commissioners which constitutes a majority of the full
+    # membership of the Commission", and 154(c), "appointed for a term of 5
+    # years", one chosen to fill a vacancy "for the unexpired term of the
+    # commissioner that the person succeeds" (its notes record the first
+    # commissioners' terms "of one, two, three, four, five, six, and seven
+    # years, respectively").
+    "usc-15-78d": ("15 U.S.C. 78d (Securities and Exchange Commission)",
+                   "https://uscode.house.gov/us/usc/t15/s78d/"),
+    "usc-47-154": ("47 U.S.C. 154 (Federal Communications Commission)",
+                   "https://uscode.house.gov/us/usc/t47/s154/"),
     "senate-2026-07-14": ("U.S. Senate floor log, July 14, 2026",
                           "https://www.dailypress.senate.gov/tuesday-july-14-2026/"),
     "crs-in12704": ("Congressional Research Service, Insight IN12704",
@@ -699,6 +949,24 @@ SOURCES = {
                            "https://www.uscourts.gov/about-federal-courts/court-role-and-structure"),
     "uscourts-judgeships": ("U.S. Courts: Authorized Judgeships, 1789 to present",
                             "https://www.uscourts.gov/sites/default/files/2025-01/allauth.pdf"),
+    # The state courts' share of the country's cases (states#courts), read
+    # 2026-11-14 (HTTP 200). The federal judiciary's own comparison: the state
+    # court system hears "Most criminal cases, probate (involving wills and
+    # estates)" and "Most contract cases, tort cases (personal injuries),
+    # family law (marriages, divorces, adoptions), etc.", and "The Constitution
+    # and laws of each state establish the state courts" (its words on the
+    # courts' levels and on choosing judges are quoted in ``UNSOURCED``, which
+    # says what they do not hold). The District of Kansas's answer to "What is
+    # the difference between U.S. (federal) District Courts and state courts?":
+    # "Federal courts handle about one million cases per year" and "State
+    # courts handle approximately 30 million civil and criminal cases per
+    # year."
+    "uscourts-compare": ("U.S. Courts: Comparing Federal & State Courts",
+                         "https://www.uscourts.gov/about-federal-courts/court-role-and-structure/"
+                         "comparing-federal-state-courts"),
+    "ksd-courts": ("U.S. District Court for the District of Kansas: What is the difference between "
+                   "U.S. (federal) District Courts and state courts?",
+                   "https://ksd.uscourts.gov/node/203"),
 
     # Governments and their counts
     "cog-report": ("U.S. Census Bureau: Government Organization Summary Report, 2022 and 2025",
@@ -717,8 +985,65 @@ SOURCES = {
                  "https://nebraskalegislature.gov/about/history_unicameral.php"),
     "nebraska-senators": ("Nebraska Legislature: Senators by district",
                           "https://nebraskalegislature.gov/senators/senator_list.php"),
-    "fl-const": ("Florida Constitution, Article IV (Florida Senate)",
-                 "https://www.flsenate.gov/Laws/Constitution"),
+    # Three state constitutions, each as its own legislature publishes it,
+    # read 2026-11-14 (HTTP 200) for what states#powers says of them: a
+    # legislature, an executive and courts; articles on taxes, education and
+    # local government; and a limit on what the state may borrow. (California's
+    # Legislature and New York's Senate answered this project's reader a
+    # challenge page, HTTP 403, and Texas's host reset the connection, which
+    # conclude nothing: rule 8.)
+    # Florida, the whole constitution on one page (the Florida Senate): Art.
+    # III, s. 1, "The legislative power of the state shall be vested in a
+    # legislature of the State of Florida, consisting of a senate ... and a
+    # house of representatives"; Art. IV, s. 1(a), "The supreme executive power
+    # shall be vested in a governor"; Art. V, s. 1, "The judicial power shall
+    # be vested in a supreme court, district courts of appeal, circuit courts
+    # and county courts"; Article VII, "FINANCE AND TAXATION", whose s. 11(a)
+    # says "The total outstanding principal of state bonds issued pursuant to
+    # this subsection shall never exceed fifty percent of the total tax
+    # revenues of the state for the two preceding fiscal years"; Article VIII,
+    # "LOCAL GOVERNMENT"; Article IX, "EDUCATION". The same page is the
+    # Florida Cabinet's source (states#councils, Article IV, Sections 4 and 8),
+    # under this one key and title: until 2026-11-14 a second key gave the
+    # same address another title, and the states page linked it twice under
+    # two names (``government.check`` now refuses an address two keys hold).
+    "fl-constitution": ("Florida Constitution (Florida Senate)",
+                        "https://www.flsenate.gov/Laws/Constitution"),
+    # Ohio, its articles listed by the General Assembly's Legislative Service
+    # Commission, which publishes the Constitution on codes.ohio.gov and which
+    # the Uniform Electronic Legal Material Act "designates ... as official
+    # publisher of the Ohio Revised Code and the Ohio Administrative Code"
+    # (codes.ohio.gov/about, read 2026-11-14), each section on its own page
+    # there: Art. II, s. 1, "The legislative power of
+    # the state shall be vested in a general assembly consisting of a senate
+    # and house of representatives"; Art. III, s. 1, "The executive department
+    # shall consist of a governor, lieutenant governor, secretary of state,
+    # auditor of state, treasurer of state, and an attorney general"; Art. IV,
+    # s. 1, "The judicial power of the state is vested in a supreme court,
+    # courts of appeals, courts of common pleas ..."; Article VI, "Education";
+    # Article VIII, "Public Debt and Public Works", whose s. 1 says the
+    # aggregate of the debts the state may contract to supply casual deficits
+    # "shall never exceed seven hundred and fifty thousand dollars"; Article X,
+    # "County and Township Organizations"; Article XII, "Finance and
+    # Taxation"; Article XVIII, "Municipal Corporations".
+    "oh-constitution": ("Ohio Constitution (Ohio Legislative Service Commission)",
+                        "https://codes.ohio.gov/ohio-constitution"),
+    # Washington, its articles and sections listed by the Washington State
+    # Legislature, the text read with "?showall=true": Art. II, s. 1, "The
+    # legislative authority of the state of Washington shall be vested in the
+    # legislature, consisting of a senate and house of representatives"; Art.
+    # III, s. 1, "The executive department shall consist of a governor,
+    # lieutenant governor, secretary of state, treasurer, auditor, attorney
+    # general, superintendent of public instruction, and a commissioner of
+    # public lands"; Art. IV, s. 1, "The judicial power of the state shall be
+    # vested in a supreme court, superior courts, justices of the peace, and
+    # such inferior courts as the legislature may provide"; Article VII,
+    # "REVENUE AND TAXATION"; Article VIII, "STATE, COUNTY, AND MUNICIPAL
+    # INDEBTEDNESS", whose s. 1(b) says "The aggregate debt contracted by the
+    # state ... shall not exceed" a share of general state revenues; Article
+    # IX, "EDUCATION"; Article XI, "COUNTY, CITY, AND TOWNSHIP ORGANIZATION".
+    "wa-constitution": ("Washington State Constitution (Washington State Legislature)",
+                        "https://leg.wa.gov/state-laws-and-rules/washington-state-constitution/"),
     "tx-322": ("Texas Government Code, chapter 322 (Legislative Budget Board)",
                "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.322.htm"),
     "tx-lbb": ("Texas Legislative Budget Board: About", "https://www.lbb.texas.gov/About_LBB.aspx"),
@@ -1572,6 +1897,19 @@ CONGRESS = {
 
 EXECUTIVE = {
     "slug": "executive",
+    # An executive order or a presidential memorandum stands only while a
+    # president keeps it: the Executive Office's entries cite three orders of
+    # 2025 for the offices that report to the chief of staff (read
+    # 2026-11-14), NSPM-1 for the National Security Council and the chief of
+    # staff's place on it, and the departments' section the order on the
+    # Department of War's title. ``government.check`` holds a page citing one
+    # to a revisit, dated by the next inauguration day, that names each.
+    "revisit": [
+        ("2029-01-20", "A presidential term begins (Twentieth Amendment): read again the "
+                       "executive orders and the memorandum this page cites (Executive Orders "
+                       "8248, 12866, 14158, 14213, 14338 and 14347; NSPM-1), which a president "
+                       "may revoke or replace"),
+    ],
     "title": "How the executive branch works",
     "card": ("The presidency, the Executive Office, the 15 departments and the independent "
              "agencies, and how to comment on a rule or ask for records."),
@@ -1619,8 +1957,18 @@ EXECUTIVE = {
                       "President. Among them:"),
                 ("roles", [
                     ("White House chief of staff",
-                     "Runs the president's staff and schedule, and is often a principal "
-                     "negotiator with Congress."),
+                     "The president has made the chief of staff a member of the National "
+                     "Security Council. If a voting attendee of the Council's Principals or "
+                     "Deputies Committee disputes how the committee recorded its conclusions or "
+                     "decisions, and the dispute is not resolved, the attendee may appeal to the "
+                     "chief of staff. If the chief of staff so designates, the appeal goes to "
+                     "the deputy chief of staff for policy instead. Either way, the decision on "
+                     "the appeal is final (National Security Presidential Memorandum 1). By "
+                     "executive order, the National Design Studio's administrator (Executive "
+                     "Order 14338), the functions of the National Energy Dominance Council "
+                     "(Executive Order 14213) and the administrator of the U.S. DOGE Service, "
+                     "formerly the U.S. Digital Service (Executive Order 14158), report to the "
+                     "chief of staff or the chief of staff's office."),
                     ("Office of Management and Budget",
                      "Prepares the budget the president sends Congress, oversees how agencies "
                      "manage and spend, and through its Office of Information and Regulatory "
@@ -1630,19 +1978,49 @@ EXECUTIVE = {
                      "The president's forum for defense, intelligence and foreign policy, run "
                      "by the national security advisor."),
                     ("White House Counsel",
-                     "Advises the president and the White House on legal questions, including "
-                     "nominations, pardons and requests from congressional investigators."),
+                     "Advises the president, the Executive Office of the President and the "
+                     "White House staff on legal issues concerning the president and the White "
+                     "House."),
+                    ("Other White House offices",
+                     "The Office of Legislative Affairs advances the president's "
+                     "legislative agenda in Congress; the Office of Presidential Personnel "
+                     "oversees the selection of presidential appointees and presents candidates "
+                     "the president has approved to the Senate for confirmation; and the Office "
+                     "of Presidential Scheduling manages the president's meetings, public "
+                     "engagements and daily activities."),
                 ]),
             ],
             # The National Security Council "run by the national security
             # advisor" is the President's memorandum's, not the statute's, and
-            # OMB's review of regulations Executive Order 12866's, and the
-            # Counsel's advice the White House's own page's; every source here
-            # was read on 2026-11-14 for the words it is cited for. The chief
-            # of staff's entry, and the matters the Counsel's names, have no
-            # primary source among them (``UNSOURCED``).
+            # OMB's review of regulations Executive Order 12866's; the
+            # Counsel's advice and the other White House offices are the White
+            # House's own page's; the chief of staff's place on the Council and
+            # the appeal from its committees are the memorandum's, and the
+            # offices reporting to the chief of staff the three executive
+            # orders'. Every source here was read on 2026-11-14 for the words it
+            # is cited for. That day the chief of staff's entry ("Runs the
+            # president's staff and schedule, and is often a principal
+            # negotiator with Congress.") and the Counsel's ("..., including
+            # nominations, pardons and requests from congressional
+            # investigators.") were narrowed to these sources' words: no primary
+            # source found held the rest (``UNSOURCED``'s comment says where it
+            # was looked for), and the White House's page gives the schedule,
+            # the legislative agenda and the selection of appointees to the
+            # offices the last entry names. The chief of staff's entry first
+            # named only the three orders' offices, which say nothing of what
+            # the office does (the review that day); it now leads with NSPM-1.
+            # Its first form of that put the Council seat, the dispute and the
+            # appeal in one sentence of 74 words ending "whose decision is
+            # final", which read as the deputy's decision alone (that day's
+            # second review): the memorandum's own words are "the disputing
+            # attendee may appeal the matter to the White House Chief of
+            # Staff or, should that official so designate, to the White House
+            # Deputy Chief of Staff for Policy, whose decision shall be
+            # final", and it names no step after that appeal, so the entry
+            # says the decision on the appeal is final whichever of the two
+            # makes it ("Either way"), each step in a sentence of its own.
             "sources": ["eo-8248", "usc-31-502", "eo-12866", "usc-50-3021", "nspm-1",
-                        "wh-departments"],
+                        "wh-departments", "eo-14158", "eo-14338", "eo-14213"],
             "reviewed": "2026-11-14",
         },
         {
@@ -1719,8 +2097,38 @@ EXECUTIVE = {
                       "Treasury (March 2026); and, from June 2026, special education to Health "
                       "and Human Services and civil rights enforcement to Justice."),
             ],
+            # The cabinet is the White House's own word, read 2026-11-14 on its
+            # page and on the same page of 2021-2025 as the National Archives
+            # keeps it (``wh-cabinet``'s comment quotes both): the vice
+            # president and the fifteen heads, and the officials each
+            # president added. The table's examples of each department's work
+            # have no source here (``UNSOURCED``). The section's day is that
+            # read's, and holds for the sources it opened: the two cabinet
+            # pages, 5 U.S.C. 101, 3 U.S.C. 19, 10 U.S.C. 111 ("The Department
+            # of Defense is an executive department"), 20 U.S.C. 3411,
+            # Executive Order 14347 ("Department of War" as a "secondary
+            # title") and the Senate's floor log (the 50-46 vote), each HTTP
+            # 200 on 2026-11-14. It does not hold for the four that hold the
+            # Department of Education's transfers and the Research Service's
+            # account of them (``notOpened``): each answered this project's
+            # reader a challenge page that day, which concludes nothing (rule
+            # 8), so the day says nothing of them and the page lists them
+            # apart from it, until a person reads them or another official
+            # copy of their words.
             "sources": ["usc-5-101", "usc-3-19", "usc-10-111", "eo-14347", "senate-2026-07-14",
-                        "crs-in12704", "usc-20-3411", "ed-2025-11", "ed-treasury", "ed-2026-06"],
+                        "crs-in12704", "usc-20-3411", "ed-2025-11", "ed-treasury", "ed-2026-06",
+                        "wh-cabinet", "wh-cabinet-2021"],
+            "reviewed": "2026-11-14",
+            "notOpened": {
+                "crs-in12704": "congress.gov answered a challenge page, \"Just a moment...\" "
+                               "(HTTP 403), on 2026-11-14",
+                "ed-2025-11": "ed.gov answered a challenge page, \"Azure WAF\" (HTTP 403), on "
+                              "2026-11-14",
+                "ed-treasury": "ed.gov answered a challenge page, \"Azure WAF\" (HTTP 403), on "
+                               "2026-11-14",
+                "ed-2026-06": "ed.gov answered a challenge page, \"Azure WAF\" (HTTP 403), on "
+                              "2026-11-14",
+            },
         },
         {
             "id": "agencies",
@@ -1761,8 +2169,25 @@ EXECUTIVE = {
                       "while their cases went on, describing the Federal Reserve, in the "
                       "Court's words, as a “uniquely structured, quasi-private entity”."),
             ],
+            # Read again 2026-11-14 for the first two entries, which cited
+            # only the FTC's and the Federal Reserve's statutes: the three
+            # agencies' charters (their single head, appointed with no term or
+            # limit on removal) beside Slaughter's "the President may remove
+            # his subordinates at will", and the SEC's and the FCC's statutes
+            # (terms and party limits); their comments quote each. Every
+            # source here was read that day for the words it is cited for,
+            # the rest of the section's too: 39 U.S.C. 201 (the Postal
+            # Service "an independent establishment of the executive branch"),
+            # 49 U.S.C. 24301 (Amtrak "not a department, agency, or
+            # instrumentality of the United States Government"), 15 U.S.C. 41
+            # ("inefficiency, neglect of duty, or malfeasance in office"), 12
+            # U.S.C. 242, Slaughter, Cook (on the application for a stay,
+            # decided June 29, 2026) and Wilcox ("uniquely structured,
+            # quasi-private entity"), each HTTP 200.
             "sources": ["usc-15-41", "usc-12-242", "usc-39-201", "usc-49-24301", "slaughter",
-                        "cook", "wilcox"],
+                        "cook", "wilcox", "reorg-plan-3-1970", "usc-51-20111", "usc-50-3036",
+                        "usc-15-78d", "usc-47-154"],
+            "reviewed": "2026-11-14",
         },
         {
             "id": "taking-part",
@@ -2007,10 +2432,10 @@ STATES = {
             "blocks": [
                 ("p", "States hold what courts call the police power: broad authority to make "
                       "laws for public health, safety and welfare, limited by the U.S. "
-                      "Constitution, federal law and the state's own constitution. Each state "
-                      "constitution sets up a legislature, an executive and courts, and many go "
-                      "into far more detail than the federal one, on taxes, debt, education and "
-                      "local government."),
+                      "Constitution, federal law and the state's own constitution. The "
+                      "constitutions of Florida, Ohio and Washington each set up a legislature, "
+                      "an executive and courts, and each also has articles on taxes, education "
+                      "and local government and limits how much the state may borrow."),
             ],
             # Cited to Cornell's Wex, a legal encyclopedia, until 2026-11-14,
             # and read that day against the Court's own words: Jacobson (the
@@ -2020,9 +2445,21 @@ STATES = {
             # liberties beyond the federal one's); the Tenth Amendment's words
             # in the National Archives' transcription, since
             # constitution.congress.gov answered this reader a challenge page.
-            # The second sentence has no primary source among these
-            # (``UNSOURCED``).
-            "sources": ["const-amdt10", "jacobson", "nfib", "pruneyard"],
+            # The second sentence said until that day "Each state constitution
+            # sets up a legislature, an executive and courts, and many go into
+            # far more detail than the federal one, on taxes, debt, education
+            # and local government.", which no one primary source holds
+            # (``UNSOURCED``'s comment); it now names three constitutions,
+            # each read that day from its own legislature's site, and says
+            # what each holds (their sources' comments quote the articles). Its
+            # first narrowing added "for example" after the three, which
+            # pointed at the general claim it had dropped (the review that day).
+            # Every source here was read on 2026-11-14 for the words it is
+            # cited for, each HTTP 200 but the Tenth Amendment's page, whose
+            # words were read in the National Archives' transcription of the
+            # Bill of Rights as above.
+            "sources": ["const-amdt10", "jacobson", "nfib", "pruneyard", "fl-constitution",
+                        "oh-constitution", "wa-constitution"],
             "reviewed": "2026-11-14",
         },
         {
@@ -2175,7 +2612,7 @@ STATES = {
                 ]),
             ],
             "sources": ["nh-const", "nh-council", "ma-council", "nc-const-3", "nc-146-22",
-                        "nc-146-29", "nc-143c-4-4", "fl-const"],
+                        "nc-146-29", "nc-143c-4-4", "fl-constitution"],
         },
         {
             "id": "courts",
@@ -2218,7 +2655,34 @@ STATES = {
                       "stands in a retention election; Missouri adopted it in 1940, and it is "
                       "often called the Missouri Plan."),
             ],
-            "sources": ["nycourts", "tx-courts", "ok-occa", "ok-const-7", "mo-plan"],
+            # The state courts' share of the country's cases is the federal
+            # judiciary's word, read 2026-11-14 (``uscourts-compare``'s comment
+            # quotes it); the table's levels across the states and the ways of
+            # choosing judges are held only in part (``UNSOURCED``). The
+            # section's day is that read's, and holds for the sources it
+            # opened, each HTTP 200 on 2026-11-14: the two federal pages;
+            # Texas's page of its courts, through the chart it links ("Court
+            # Structure Chart - October 2026": the Supreme Court's "Final
+            # appellate jurisdiction in civil and juvenile cases", the Court of
+            # Criminal Appeals' "Final appellate jurisdiction in criminal
+            # cases"); Oklahoma's Rule 7.1 (an appeal "from: 1. an
+            # adjudication of juvenile delinquency") and its Constitution's
+            # Article VII ("in the event there is any conflict as to
+            # jurisdiction, the Supreme Court shall determine which court has
+            # jurisdiction"); and Missouri's page of its plan (adopted
+            # "in November 1940", "commonly called the Missouri Plan", a
+            # retention election after a year; it answered HTTP 500 with an
+            # empty body before it answered 200). It does not hold for New
+            # York's page (``notOpened``), which answered this project's
+            # reader a challenge page that day, which concludes nothing (rule
+            # 8): the day says nothing of it, and the page lists it apart.
+            "sources": ["nycourts", "tx-courts", "ok-occa", "ok-const-7", "mo-plan",
+                        "uscourts-compare", "ksd-courts"],
+            "reviewed": "2026-11-14",
+            "notOpened": {
+                "nycourts": "nycourts.gov answered a challenge page, \"Just a moment...\" "
+                            "(HTTP 403), on 2026-11-14",
+            },
         },
         {
             "id": "taking-part",
