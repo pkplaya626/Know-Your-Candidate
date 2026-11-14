@@ -146,17 +146,41 @@ def holder_html(item, post):
     return _holder_line(item.get("holderStatus"))
 
 
-def term_words(item, post):
-    """``termLength``: "Term 4 years (if elected)" where the ballot
-    table's note opens with a term's length ("4-year term"), else "": the
-    label and a value repeating it read "Term 4-year term"."""
+def term_length(item):
+    """``termOf``'s length: "4 years" where the ballot table's note for an
+    office on the ballot opens with a term's length ("4-year term"), else
+    "": the label and a value repeating it read "Term 4-year term"."""
     if not item or not item.get("up"):
         return ""
     match = re.match(r"^(\d+)-year term(?=[;,.]|$)", str(item.get("note") or ""))
     if not match:
         return ""
-    years = match.group(1) + (" year" if match.group(1) == "1" else " years")
-    return f"Term {years}" + ("" if post else " (if elected)")
+    return match.group(1) + (" year" if match.group(1) == "1" else " years")
+
+
+def term_words(item, post):
+    """``shareWords``' term: "Term 4 years (if elected)", with the provision
+    that states it where the entry's own source does not (``termSource``,
+    ballot2026.TERMS) in the ballot mark's form ("Term 4 years (if elected;
+    S.D. Const. art. IV, s. 2)", ballot2026.with_term_cite); "" where the
+    note opens with no length."""
+    from .ballot2026 import with_term_cite
+
+    years = term_length(item)
+    if not years:
+        return ""
+    return "Term " + with_term_cite(years + ("" if post else " (if elected)"), item)
+
+
+def term_html(item, post):
+    """The term line as markup, the provision linked to the page that
+    states it, as the overlay links it (kyc-governor.js ``termLine``)."""
+    words = term_words(item, post)
+    source = (item or {}).get("termSource") or {}
+    html = _e(words)
+    if words and source.get("cite") and _https(source.get("url")):
+        html = html.replace(_e(source["cite"]), _link(source["url"], source["cite"]), 1)
+    return html
 
 
 def badge_words(person, post):
@@ -393,9 +417,11 @@ def render_governor(oid, found, host, post=False, sources=None, results=None):
     if words["status"]:
         body.append(f'<p class="share-status"><strong>{_e(words["status"])}</strong></p>')
     for key, cls in (("printed", "share-printed"), ("ballotName", "share-ballot-name"),
-                     ("surnameOnly", "share-surname-only"), ("term", "share-term")):
+                     ("surnameOnly", "share-surname-only")):
         if words[key]:
             body.append(f'<p class="{cls}">{_e(words[key])}</p>')
+    if words["term"]:
+        body.append(f'<p class="share-term">{term_html(item, post)}</p>')
     if words["runningMate"]:
         body.append(f'<p class="share-mate">Running mate: {_e(words["runningMate"])}</p>')
     if words["record"]:
@@ -557,6 +583,41 @@ def words_table():
                           "https://results.example.gov/" if post else None))
             cases.append((post, "GA", "candidate", people[0], state, sources,
                           "https://results.example.gov/" if post else None))
+    # A term the entry's own source does not state, with the provision that
+    # does (ballot2026.TERMS, its termSource: South Dakota's and Vermont's
+    # governors): the term line names it in the ballot mark's form, "(if
+    # elected; Const. ...)" before the election and "(Const. ...)" after
+    # (rule 79), and the governor's own words are as they were. A note that
+    # opens with no length gives no term line to cite it in, and an office
+    # not on the ballot none either; the same entries without it are the
+    # rows above. Asked on the January clock too, beside the term the
+    # election chose: on the first two clocks alone, nothing held the cited
+    # words once the new term could have begun (the review of the term's
+    # provision).
+    cited = [
+        {"selection": "elected", "up": True, "note": "4-year term",
+         "source": "https://sos.example.gov/candidates", "holderStatus": status,
+         "termSource": {"url": "https://law.example.gov/const-4-2", "cite": "Const. art. IV, s. 2"}},
+        {"selection": "elected", "up": True, "note": "2-year term; last elected 2024",
+         "source": "https://sos.example.gov/candidates",
+         "holderStatus": dict(status, why="listed", text="A B is among the candidates for this office"),
+         "termSource": {"url": "https://law.example.gov/const", "cite": "Const. ch. II, s. 49"}},
+        {"selection": "elected", "up": True, "note": "open seat (term-limited)",
+         "source": "https://sos.example.gov/candidates", "holderStatus": status,
+         "termSource": {"url": "https://law.example.gov/const-4-2", "cite": "Const. art. IV, s. 2"}},
+        {"selection": "elected", "up": False, "source": "https://sos.example.gov/offices",
+         "next": {"year": 2028, "source": "https://law.example.gov/"},
+         "termSource": {"url": "https://law.example.gov/const-4-2", "cite": "Const. art. IV, s. 2"}},
+    ]
+    for post in (False, True, "2027-01-10"):
+        results = "https://results.example.gov/" if post else None
+        for item in cited:
+            state = {"governor": governor, "ballot2026": {"offices": {"governor": dict(
+                item, candidates=dict(listed, candidates=people)) if item.get("up") else item}}}
+            cases.append((post, "GA", "governor", governor, state, sources, results))
+            if item.get("up"):
+                for person in people[:2]:
+                    cases.append((post, "GA", "candidate", person, state, sources, results))
     out = []
     for post, code, kind, person, state, src, results in cases:
         found = {"kind": kind, "code": code, "person": person, "state": state}

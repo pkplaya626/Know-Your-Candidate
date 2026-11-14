@@ -84,6 +84,33 @@ class TestWordsTable(unittest.TestCase):
         self.assertEqual(statuses - {""}, {"On the Nov 3, 2026 ballot", "Was on the Nov 3, 2026 ballot",
                                            "Write-in candidate", "Was a write-in candidate"})
 
+    def test_it_holds_a_term_with_its_provision_and_without_on_every_clock(self):
+        # The render suite asks the page code every row, so the overlay's
+        # "Term" names the provision exactly as the share page does (rule 79),
+        # on each of the table's three clocks: the cited rows were on the
+        # first two alone (the review of the term's provision).
+        rows = governor_share.words_table()["cases"]
+        terms = {}
+        for post, _code, kind, _person, state, _src, _results, words in rows:
+            item = state.get("ballot2026", {}).get("offices", {}).get("governor") or {}
+            if kind == "candidate":
+                terms.setdefault((post, bool(item.get("termSource"))), set()).add(words["term"])
+            if kind == "governor":
+                self.assertEqual(words["term"], "", "a governor's own words carry no term")
+        self.assertIn("Term 4 years (if elected; Const. art. IV, s. 2)", terms[(False, True)])
+        self.assertIn("Term 2 years (Const. ch. II, s. 49)", terms[(True, True)])
+        self.assertIn("Term 4 years (Const. art. IV, s. 2)", terms[("2027-01-10", True)])
+        self.assertIn("Term 2 years (Const. ch. II, s. 49)", terms[("2027-01-10", True)])
+        self.assertIn("", terms[(False, True)], "a note with no length cites nothing")
+        self.assertIn("", terms[("2027-01-10", True)], "a note with no length cites nothing")
+        self.assertIn("Term 4 years (if elected)", terms[(False, False)])
+        self.assertIn("Term 4 years", terms[(True, False)])
+        self.assertIn("Term 4 years", terms[("2027-01-10", False)])
+        for (post, cited), said in terms.items():
+            for words in said - {""}:
+                self.assertEqual("Const." in words, cited, words)
+                self.assertEqual("if elected" in words, not post, words)
+
 
 class TestWords(unittest.TestCase):
 
@@ -108,6 +135,53 @@ class TestWords(unittest.TestCase):
         self.assertEqual(words["source"], "Source: the Secretary of State’s list (read Oct. 18, 2026).")
         # Never a party's money, a platform or a profile (rules 25, 27).
         self.assertEqual(words["record"], "")
+
+    def test_a_term_its_entrys_source_does_not_state_names_the_provision_that_does(self):
+        # South Dakota's and Vermont's governors cite a candidate list that
+        # names no term (ballot2026.TERMS): the ballot mark named the
+        # constitution while the overlay and this page said "Term 4 years"
+        # with none (rule 79).
+        data = payload()
+        item = data["states"]["GA"]["ballot2026"]["offices"]["governor"]
+        item["note"] = "4-year term"
+        item["termSource"] = {"url": "https://sdlegislature.gov/api/Statutes/0N-4-2.html",
+                              "cite": "S.D. Const. art. IV, s. 2"}
+        who = found("gov-GA-keisha-lance-bottoms", data)
+        self.assertEqual(governor_share.share_words(who, False, SOURCES)["term"],
+                         "Term 4 years (if elected; S.D. Const. art. IV, s. 2)")
+        self.assertEqual(governor_share.share_words(who, True, SOURCES)["term"],
+                         "Term 4 years (S.D. Const. art. IV, s. 2)")
+        # The share page links it, as the overlay does.
+        for post in (False, True):
+            page = governor_share.render_governor("gov-GA-keisha-lance-bottoms", who, HOST, post, SOURCES)
+            self.assertIn('<a href="https://sdlegislature.gov/api/Statutes/0N-4-2.html" target="_blank" '
+                          'rel="noopener noreferrer">S.D. Const. art. IV, s. 2</a>)</p>', page)
+        # The governor's own words carry no term, cited or not.
+        self.assertEqual(governor_share.share_words(found("gov-GA", data), False, SOURCES)["term"], "")
+        # A provision whose address is not https is named, never linked.
+        item["termSource"] = {"url": "http://law.example.gov/", "cite": "Const. art. IV, s. 2"}
+        page = governor_share.render_governor("gov-GA-keisha-lance-bottoms", who, HOST, False, SOURCES)
+        self.assertIn('<p class="share-term">Term 4 years (if elected; Const. art. IV, s. 2)</p>', page)
+        # Without one the words and the page are as they were.
+        del item["termSource"]
+        self.assertEqual(governor_share.share_words(who, False, SOURCES)["term"], "Term 4 years (if elected)")
+        page = governor_share.render_governor("gov-GA-keisha-lance-bottoms", who, HOST, False, SOURCES)
+        self.assertIn('<p class="share-term">Term 4 years (if elected)</p>', page)
+
+    def test_one_form_for_a_terms_provision(self):
+        # ballot2026.with_term_cite, KYC.stategov.withTermCite word for word:
+        # the cite joins the parenthesis the words close with, else one of
+        # its own, and nothing is added where the entry cites none.
+        from kyc.ballot2026 import with_term_cite
+
+        item = {"termSource": {"url": "https://law.example.gov/", "cite": "S.D. Const. art. IV, s. 2"}}
+        self.assertEqual(with_term_cite("4 years (if elected)", item),
+                         "4 years (if elected; S.D. Const. art. IV, s. 2)")
+        self.assertEqual(with_term_cite("4-year term", item), "4-year term (S.D. Const. art. IV, s. 2)")
+        self.assertEqual(with_term_cite("all (2-year terms)", item),
+                         "all (2-year terms; S.D. Const. art. IV, s. 2)")
+        for bare in ({}, None, {"termSource": {"url": "https://law.example.gov/"}}):
+            self.assertEqual(with_term_cite("4 years (if elected)", bare), "4 years (if elected)")
 
     def test_after_election_day_the_past_tense_the_results_and_no_winner(self):
         words = governor_share.share_words(found("gov-GA-keisha-lance-bottoms"), True, SOURCES,
