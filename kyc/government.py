@@ -996,6 +996,93 @@ def _plain_words(value):
     return ""
 
 
+def unsourced_words(slug, sid, pages_=None):
+    """The words an ``UNSOURCED`` entry's (page, section) holds, whitespace
+    folded: a section's blocks, or the page's lede for the section "lede" (a
+    lede cites no source of its own). Empty when there is no such place."""
+    page = next((p for p in (pages_ or PAGES) if p.get("slug") == slug), None)
+    if page is None:
+        return ""
+    if sid == "lede":
+        return " ".join(_plain_words(page.get("lede") or "").split())
+    section = next((s for s in page.get("sections", ()) if s.get("id") == sid), None)
+    return " ".join(_plain_words(section["blocks"]).split()) if section else ""
+
+
+def shared_addresses(sources):
+    """``[(url, [keys])]``: each address more than one source key holds. One
+    page under two keys is linked twice under two names, as the Florida
+    constitution was on the states page until 2026-11-14 ("Florida
+    Constitution, Article IV" and "Florida Constitution", one URL)."""
+    keys = {}
+    for key, (_title, url) in sources.items():
+        keys.setdefault(url, []).append(key)
+    return [(url, sorted(held)) for url, held in keys.items() if len(held) > 1]
+
+
+# A president's own instrument, by its title: an executive order's number, or
+# a National Security (Presidential) Memorandum's ("NSPM-1"). Each stands only
+# while a president keeps it, and a new president may revoke or replace it on
+# the first day of a term (the guide's executive page cites five orders and a
+# memorandum of 2025 and earlier).
+_EXECUTIVE_ORDER = re.compile(r"\bExecutive Order (\d+)\b")
+_SECURITY_MEMO = re.compile(r"\bNational Security (Presidential )?Memorandum[- ](\d+)\b")
+
+
+def presidential_instrument(title):
+    """The words a revisit names a president's instrument by - "14158" for an
+    executive order, "NSPM-1" for a National Security Presidential
+    Memorandum, "NSM-2" for a National Security Memorandum - from a source's
+    *title*, or None for any other source."""
+    match = _EXECUTIVE_ORDER.search(title or "")
+    if match:
+        return match.group(1)
+    match = _SECURITY_MEMO.search(title or "")
+    if match:
+        return ("NSPM-" if match.group(1) else "NSM-") + match.group(2)
+    return None
+
+
+def next_inauguration(day):
+    """The first January 20 after *day* (``YYYY-MM-DD``) on which a
+    presidential term begins: the year after a presidential election
+    (Twentieth Amendment; 2029-01-20 after 2026-11-14)."""
+    year = int(day[:4])
+    while True:
+        candidate = f"{year}-01-20"
+        if year % 4 == 1 and candidate > day:
+            return candidate
+        year += 1
+
+
+def presidential_revisit_problems(pages_, sources):
+    """Problems with the revisits of pages that cite a president's order or
+    memorandum: each such section's page must hold a revisit dated after the
+    section was read and no later than the next inauguration day, naming the
+    instrument by its number (``presidential_instrument``). The executive
+    page's revisit was the only guard on three orders and a memorandum of 2025,
+    and deleting it failed nothing (the review of 2026-11-14)."""
+    problems = []
+    for page in pages_:
+        revisits_ = [(str(day), str(what)) for day, what in page.get("revisit") or ()]
+        for section in page.get("sections", ()):
+            read = section.get("reviewed") or page.get("reviewed") or REVIEWED
+            due = next_inauguration(read)
+            for key in section.get("sources") or ():
+                named = presidential_instrument(sources.get(key, ("", ""))[0])
+                if not named:
+                    continue
+                pattern = re.compile(rf"(?<![\w-]){re.escape(named)}(?![\w-])")
+                if not any(read < day <= due and pattern.search(what)
+                           for day, what in revisits_):
+                    problems.append(
+                        f"{page.get('slug')}#{section.get('id')} cites {key} ({named}), which a "
+                        f"president may revoke or replace: give the page a revisit dated after "
+                        f"{read} and no later than {due}, the next inauguration day, that names "
+                        f"{named}")
+    return problems
+
+
 def check():
     """Problems with the guide's text, as strings. Empty when it is sound.
 
@@ -1051,12 +1138,16 @@ def check():
     # says, or the list (and README after it) names words the page no longer
     # shows.
     for slug, sid, said, _why in UNSOURCED:
-        section = next((s for p in PAGES if p.get("slug") == slug
-                        for s in p.get("sections", ()) if s.get("id") == sid), None)
-        text = " ".join(_plain_words(section["blocks"]).split()) if section else ""
-        if " ".join(said.split()) not in text:
+        if " ".join(said.split()) not in unsourced_words(slug, sid):
             problems.append(f"UNSOURCED names {slug}#{sid}'s {said!r}, which the section no "
                             f"longer says: read its sources again and remove the entry")
+    # One address, one key and one title: the states page linked the Florida
+    # constitution twice under two names.
+    for url, keys in shared_addresses(SOURCES):
+        problems.append(f"sources {', '.join(keys)} all name {url}: keep one key and one title")
+    # A section citing a president's order or memorandum is read again by the
+    # next inauguration day, and its page's revisit says so.
+    problems.extend(presidential_revisit_problems(PAGES, SOURCES))
     if slugs()[0] != "index":
         problems.append("the guide's first page must be its index")
     # Every "see it" and "who holds it" entry belongs to a section there is.
