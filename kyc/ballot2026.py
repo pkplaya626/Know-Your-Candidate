@@ -319,12 +319,20 @@ STATES = {
         "lt": ("elected-jointly-with-governor", True,
             "SBE lists the office as 'Governor and Lieutenant Governor'",
             "https://www.elections.il.gov/electionoperations/CandidateList.aspx?ElectionID=Z2J%2FvYpKX8w%3D&OfficeID=Rqf5Z%2FpnY7D53Pi5fA4orw%3D%3D"),
+        # The State Board's own list for the office in the 2026 general election
+        # (the one data/statewide_candidates.json reads its candidates from):
+        # CandidatesFiled.aspx, cited until 2026-11-14, answers "An error has
+        # occurred" with no query (the guide's source check, PR #263).
         "ag": ("elected", True,
             "4-year term; last elected 2022",
-            "https://www.elections.il.gov/ElectionOperations/CandidatesFiled.aspx"),
+            "https://www.elections.il.gov/ElectionOperations/CandidateList.aspx?ElectionID=sejIrI%2bQmw"
+            "w%3d&OfficeID=S4tkO4zuAdQbjHx5ooPHoQ%3d%3d&Status=P2wRQXkiFoo%3d&BallotGroup=4HJalchPb4g%3"
+            "d&QueryType=xF443FTCAJbIL3atac%2fUjEg7Y4yklgT1"),
         "sos": ("elected", True,
             "4-year term; last elected 2022",
-            "https://www.elections.il.gov/ElectionOperations/CandidatesFiled.aspx"),
+            "https://www.elections.il.gov/ElectionOperations/CandidateList.aspx?ElectionID=sejIrI%2bQmw"
+            "w%3d&OfficeID=b3l9OOoBLkjdUU%2f%2bj0m%2fWw%3d%3d&Status=P2wRQXkiFoo%3d&BallotGroup=4HJalch"
+            "Pb4g%3d&QueryType=xF443FTCAJbIL3atac%2fUjEg7Y4yklgT1"),
         "upper": ("Senate", 59, 39,
             "first group (4-year) and second group (2-year) under 10 ILCS 5/29C-10",
             "https://www.ilga.gov/Documents/legislation/ilcs/documents/001000050K29C-10.htm"),
