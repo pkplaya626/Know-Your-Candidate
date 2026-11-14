@@ -13,6 +13,7 @@ import re
 import os
 import sys
 import unittest
+import unittest.mock
 import zlib
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -806,6 +807,55 @@ class TestTheFirstFullRead(unittest.TestCase):
                  "| popular_vote1 = 178,416\n}}"}
         sections, page = sh.house_page_sections("DE", read=pages.get, year=2022)
         self.assertEqual(page, "2022 United States House of Representatives election in Delaware")
+
+
+class TestTheTitleQuotedIsTheArticles(unittest.TestCase):
+    """The seat fold quotes the article it checked against as "Wikipedia's
+    “...”" (rule 75): that is the article's own title, never the redirect
+    the reader asked for. On 2026-11-14 21 of the cache's 223 titles were
+    redirects: "... election in District of Columbia" for "... in the
+    District of Columbia", "2018 ... election in American Samoa" for "2018
+    American Samoan general election"."""
+
+    BOX = ("{{Infobox election\n| nominee1 = Eleanor Holmes Norton\n"
+           "| popular_vote1 = 251,540\n}}")
+    ASKED = "2024 United States House of Representatives election in District of Columbia"
+    REAL = "2024 United States House of Representatives election in the District of Columbia"
+
+    def test_the_house_page_is_named_by_the_article_it_led_to(self):
+        def read(title):
+            return (self.BOX, self.REAL) if title == self.ASKED else None
+        sections, page = sh.house_page_sections("DC", read=read, year=2024)
+        self.assertEqual(page, self.REAL)
+        self.assertIn(0, sections)
+
+    def test_so_is_the_senates(self):
+        asked = "2020 United States Senate election in Georgia"
+        real = "2020–21 United States Senate election in Georgia"
+        def read(title):
+            return ("text", real) if title == asked else None
+        self.assertEqual(sh.senate_page("GA", 2020, False, read), ("text", real))
+        self.assertEqual(sh.senate_page("GA", 2020, True, read)[0], None)
+
+    def test_a_reader_that_follows_no_redirect_keeps_the_asked_title(self):
+        self.assertEqual(sh._page("text", "Asked"), ("text", "Asked"))
+        self.assertEqual(sh._page(None, "Asked"), (None, "Asked"))
+        self.assertEqual(sh._page(("text", ""), "Asked"), ("text", "Asked"))
+
+    def test_the_network_reader_gives_the_title_the_redirects_end_at(self):
+        from kyc import results
+        payload = {"batchcomplete": True, "query": {
+            "redirects": [{"from": self.ASKED, "to": self.REAL}],
+            "pages": [{"pageid": 1, "ns": 0, "title": self.REAL, "revisions": [
+                {"slots": {"main": {"content": self.BOX}}}]}]}}
+        body = json.dumps(payload).encode("utf-8")
+        with unittest.mock.patch("kyc.portraits._get", return_value=body):
+            self.assertEqual(results.fetch_wikitext_titled(self.ASKED), (self.BOX, self.REAL))
+            self.assertEqual(results.fetch_wikitext(self.ASKED), self.BOX)
+            self.assertEqual(sh._wiki_page(self.ASKED), (self.BOX, self.REAL))
+        missing = json.dumps({"query": {"pages": [{"ns": 0, "title": "X", "missing": True}]}})
+        with unittest.mock.patch("kyc.portraits._get", return_value=missing.encode("utf-8")):
+            self.assertIsNone(sh._wiki_page("X"))
 
 
 def _text(path):

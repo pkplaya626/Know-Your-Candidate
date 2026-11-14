@@ -220,7 +220,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3251 tests, no dependencies
+python -m unittest discover tests             # 3255 tests, no dependencies
 npm install && npm test                       # 4957 real-DOM checks (needs jsdom)
 ```
 
@@ -2873,7 +2873,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     counts within 1% (MIT's Senate returns; for the House, whose MIT file
     sits behind a form asking for a name and an email, each state's 2024
     Wikipedia page) - a lead, rule 50 - and the page says what was
-    checked; the cache keeps every difference. A district in
+    checked; the cache keeps every difference. The page quotes that
+    article by its own title, the one its redirects end at
+    (`results.fetch_wikitext_titled`, `seat_history._page`): it quoted the
+    title the reader asked for, and 21 of the cache's 223 were redirects
+    (read 2026-11-14) - "... election in District of Columbia" for "...
+    in the District of Columbia", "2018 ... election in American Samoa" for
+    "2018 American Samoan general election", "2020 United States Senate
+    election in Georgia" for "2020–21 ..." (rule 75). A district in
     `districts.REDRAWN` shows no 2024 figure, and says only what is true of
     every redrawn district - the result was counted on the old lines - and
     links where its area came from: "fought by other voters" was false of
