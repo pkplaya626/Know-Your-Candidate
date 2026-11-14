@@ -1153,19 +1153,32 @@ def read_mit(fetch=_download):
 
 
 def _wiki_page(title):
-    from .results import fetch_wikitext, PageMissing
+    """``(source, title)`` of the article *title* leads to, its redirects
+    followed; None where Wikipedia has no such page."""
+    from .results import fetch_wikitext_titled, PageMissing
     try:
-        return fetch_wikitext(title)
+        return fetch_wikitext_titled(title)
     except PageMissing:
         return None
 
 
+def _page(got, asked):
+    """``(text, title)`` from what a reader gave for *asked*: the article's
+    source and its own title, or a source alone (a reader that follows no
+    redirect), which is then the asked title's. The title is what the seat
+    fold quotes as "Wikipedia's “...”" (rule 75), so it is the article's,
+    never the redirect the reader asked for."""
+    if isinstance(got, tuple):
+        return got[0], got[1] or asked
+    return got, asked
+
+
 def house_page_sections(state, read=_wiki_page, year=HOUSE_YEAR):
     """``{district: section}`` from a state's House results page(s) for
-    *year*."""
+    *year*, and the title of the article they were read from."""
     from .results import page_titles, house_sections, sub_articles
-    for title in page_titles(state, "H", cycle=year):
-        text = read(title)
+    for asked in page_titles(state, "H", cycle=year):
+        text, title = _page(read(asked), asked)
         if text is None:
             continue
         if not _WBOX.search(_BOX_SPACES.sub("{{Election box ", text)) and \
@@ -1177,9 +1190,20 @@ def house_page_sections(state, read=_wiki_page, year=HOUSE_YEAR):
         if set(sections) == {0} and sub_articles(text, title):
             sections = {}
         for sub in sub_articles(text, title):
-            sections.update(house_sections(read(sub) or ""))
+            sections.update(house_sections(_page(read(sub), sub)[0] or ""))
         return sections, title
     return {}, None
+
+
+def senate_page(state, year, special, read=_wiki_page):
+    """``(text, title)`` of the article on *state*'s Senate election of
+    *year* (its special election where *special*), and that article's own
+    title: "2020 United States Senate election in Georgia" is a redirect to
+    "2020–21 United States Senate election in Georgia"."""
+    from .results import page_titles
+    titles = page_titles(state, "S", cycle=year)
+    asked = titles[1] if special else titles[0]
+    return _page(read(asked), asked)
 
 
 def senate_class_of(term_ends):
@@ -1323,7 +1347,6 @@ def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=Non
     # term ends when its class's does (senate_last), and the strip holds
     # every election to that class from 2018, specials included.
     wanted = {(r["state"], r.get("senateClass")) for r in race_list if r["chamber"] == "Senate"}
-    from .results import page_titles
     for state, senate_class in sorted(wanted, key=lambda w: (w[0], w[1] or 0)):
         for year in YEARS:
             entry = clerk[year].get(state) or {}
@@ -1341,9 +1364,7 @@ def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=Non
                 verdict, differences = mit_check(result, mit, state, special, forms)
                 checked, page = {"by": "mit"}, None
                 if verdict is None:
-                    titles = page_titles(state, "S", cycle=year)
-                    page = titles[1] if special else titles[0]
-                    text = wiki(page)
+                    text, page = senate_page(state, year, special, wiki)
                     stage = "runoff" if result["kind"] == "runoff" else "general"
                     verdict, differences = (wiki_check(result, text, stage=stage, forms=forms)
                                             if text else (None, []))
