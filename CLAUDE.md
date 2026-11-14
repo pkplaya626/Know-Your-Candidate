@@ -984,7 +984,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     row's (rule 99), in a text column the row's own width: from Election
     Day "No challenger was on the ballot · 2 out" on one line widened the
     row's implicit grid column, and Florida's, Massachusetts', New York's
-    and Wisconsin's whole pages scrolled sideways on a 320px phone (eight
+    and Wisconsin's whole pages scrolled sideways on a 320px phone (seven
     more at 280px; measured on all 56 state pages at 280, 320, 360 and
     390px, none does now).
 
