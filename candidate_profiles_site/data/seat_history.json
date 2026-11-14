@@ -2442,7 +2442,7 @@
    ],
    "checked": {
     "by": "wikipedia",
-    "page": "2024 United States House of Representatives election in District of Columbia"
+    "page": "2024 United States House of Representatives election in the District of Columbia"
    },
    "date": "2024-11-05",
    "kind": "general",
@@ -12125,7 +12125,7 @@
    ],
    "checked": {
     "by": "wikipedia",
-    "page": "2024 United States House of Representatives elections in Vermont"
+    "page": "2024 United States House of Representatives election in Vermont"
    },
    "date": "2024-11-05",
    "kind": "general",
@@ -15219,7 +15219,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2018 United States House of Representatives election in District of Columbia"
+     "page": "2018 United States House of Representatives election in the District of Columbia"
     },
     "date": "2018-11-06",
     "kind": "general",
@@ -19422,7 +19422,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2018 United States House of Representatives elections in Montana"
+     "page": "2018 United States House of Representatives election in Montana"
     },
     "date": "2018-11-06",
     "kind": "general",
@@ -25622,7 +25622,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2020 United States House of Representatives elections in Alaska"
+     "page": "2020 United States House of Representatives election in Alaska"
     },
     "date": "2020-11-03",
     "kind": "general",
@@ -28074,7 +28074,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2020 United States House of Representatives election in District of Columbia"
+     "page": "2020 United States House of Representatives election in the District of Columbia"
     },
     "date": "2020-11-03",
     "kind": "general",
@@ -32233,7 +32233,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2020 United States House of Representatives elections in Montana"
+     "page": "2020 United States House of Representatives election in Montana"
     },
     "date": "2020-11-03",
     "kind": "general",
@@ -38487,7 +38487,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2022 United States House of Representatives elections in Alaska"
+     "page": "2022 United States House of Representatives election in Alaska"
     },
     "date": "2022-11-08",
     "kind": "general",
@@ -38818,7 +38818,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2022 United States House of Representatives election in American Samoa"
+     "page": "2022 American Samoan general election"
     },
     "date": "2022-11-08",
     "kind": "general",
@@ -40959,7 +40959,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2022 United States House of Representatives election in District of Columbia"
+     "page": "2022 United States House of Representatives election in the District of Columbia"
     },
     "date": "2022-11-08",
     "kind": "general",
@@ -45525,7 +45525,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2022 United States House of Representatives elections in North Dakota"
+     "page": "2022 United States House of Representatives election in North Dakota"
     },
     "date": "2022-11-08",
     "kind": "general",
@@ -48706,7 +48706,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2022 United States House of Representatives elections in South Dakota"
+     "page": "2022 United States House of Representatives election in South Dakota"
     },
     "date": "2022-11-08",
     "kind": "general",
@@ -50429,7 +50429,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2022 United States House of Representatives elections in Vermont"
+     "page": "2022 United States House of Representatives election in Vermont"
     },
     "date": "2022-11-08",
     "differences": [
@@ -51036,7 +51036,7 @@
     ],
     "checked": {
      "by": "wikipedia",
-     "page": "2022 United States House of Representatives elections in Wyoming"
+     "page": "2022 United States House of Representatives election in Wyoming"
     },
     "date": "2022-11-08",
     "kind": "general",
@@ -53457,7 +53457,7 @@
    ],
    "checked": {
     "by": "wikipedia",
-    "page": "2020 United States Senate election in Georgia"
+    "page": "2020–21 United States Senate election in Georgia"
    },
    "date": "2021-01-05",
    "kind": "runoff",
@@ -62576,7 +62576,7 @@
  },
  "withheld": [
   {
-   "page": "2018 United States House of Representatives election in American Samoa",
+   "page": "2018 American Samoan general election",
    "result": {
     "allCandidates": 3,
     "candidates": [
@@ -62636,7 +62636,7 @@
    "year": 2018
   },
   {
-   "page": "2018 United States House of Representatives election in the United States Virgin Islands",
+   "page": "2018 United States Virgin Islands general election",
    "result": {
     "allCandidates": 1,
     "candidates": [
@@ -62661,7 +62661,7 @@
    "year": 2018
   },
   {
-   "page": "2020 United States House of Representatives election in American Samoa",
+   "page": "2020 American Samoan general election",
    "result": {
     "allCandidates": 3,
     "candidates": [
@@ -62745,7 +62745,7 @@
    "year": 2020
   },
   {
-   "page": "2020 United States House of Representatives election in the United States Virgin Islands",
+   "page": "2020 United States Virgin Islands general election",
    "result": {
     "allCandidates": 2,
     "candidates": [
@@ -62855,7 +62855,7 @@
    "year": 2022
   },
   {
-   "page": "2022 United States House of Representatives election in the United States Virgin Islands",
+   "page": "2022 United States Virgin Islands legislative election",
    "result": {
     "allCandidates": 1,
     "candidates": [
@@ -62880,7 +62880,7 @@
    "year": 2022
   },
   {
-   "page": "2024 United States House of Representatives election in American Samoa",
+   "page": "2024 American Samoan general election",
    "result": {
     "allCandidates": 4,
     "candidates": [

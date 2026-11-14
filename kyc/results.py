@@ -361,6 +361,18 @@ def fetch_wikitext(title):
     returns 429 freely) is not evidence the page is absent, and treating it as
     such silently emptied results for 55 states on the first full run.
     """
+    return fetch_wikitext_titled(title)[0]
+
+
+def fetch_wikitext_titled(title):
+    """``(source, title)``: the article's source, following redirects, and
+    the title of the article the redirects end at - the one a page quoting
+    the article names (rule 75: a title a source gives in quotation marks
+    is the source's). "2024 United States House of Representatives election
+    in District of Columbia" is a redirect to "... in the District of
+    Columbia", and "2018 ... election in American Samoa" to "2018 American
+    Samoan general election": quoted as asked, the seat fold named 21
+    articles by titles they do not have. Raises as :func:`fetch_wikitext`."""
     from .portraits import _get  # the backoff that honours Retry-After
 
     params = {
@@ -373,7 +385,7 @@ def fetch_wikitext(title):
     page = (payload.get("query", {}).get("pages") or [{}])[0]
     if page.get("missing") or "revisions" not in page:
         raise PageMissing(title)
-    return page["revisions"][0]["slots"]["main"]["content"]
+    return page["revisions"][0]["slots"]["main"]["content"], page.get("title") or title
 
 
 # ------------------------------------------------------------------- parsing
