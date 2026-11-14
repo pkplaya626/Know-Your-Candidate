@@ -408,6 +408,56 @@ class TestSiteCheck(unittest.TestCase):
                                                       markup="<title>Home</title>" + "<p>School news</p>" * 40))
         self.assertEqual(verdict, localsites.OK)
 
+    def test_a_redirects_query_is_not_where_it_ended(self):
+        """A sign-in page's, a bot wall's or a forwarder's query names the
+        address the visitor came from, and read as the address it made
+        deleted Google Sites "ok" at Google's sign-in, and a hospital
+        authority's site "ok" at Radware's wall (found 2026-11-14)."""
+        site = "https://sites.google.com/site/townofexample/"
+        verdict, evidence, _f = localsites.assess(["Town of Example"], site, self.seen(
+            [site, "https://accounts.google.com/ServiceLogin?continue=" + site + "&followup=" + site],
+            markup="<title>Sign in - Google Accounts</title>" + "<p>Use your Google Account</p>" * 20))
+        self.assertEqual(verdict, localsites.UNREAD)
+        self.assertIn("sign in", evidence)
+        url = "http://www.examplehealth.org"
+        wall = ("https://validate.perfdrive.com/?ssa=1&ssc=http%3A%2F%2Fwww.examplehealth.org%2F"
+                "&ssr=MTkyLjAuMi4x&ssi=x")
+        for status in (200, 404):
+            verdict, evidence, _f = localsites.assess(["Example Hospital Authority"], url, self.seen(
+                [url, wall], status=status, markup="<title>Captcha</title>" + "<p>Please wait</p>" * 40))
+            self.assertEqual(verdict, localsites.UNREAD, status)
+            self.assertIn("bot wall", evidence)
+        forward = "https://forwarder.example/?domain=www.cityofexample.org"
+        verdict, _e, _f = localsites.assess(["City of Example"], "http://www.cityofexample.org",
+                                            self.seen(["http://www.cityofexample.org", forward],
+                                                      markup="<title>Fast forwarding</title>" +
+                                                      "<p>Forwarding services for your domains.</p>" * 20))
+        self.assertNotEqual(verdict, localsites.OK)
+
+    def test_a_redirects_query_is_never_kept(self):
+        """Radware's wall wrote the reader's own IP address, base64-encoded,
+        into its redirect's query ("ssr="), and the cache kept a wall's query
+        in "final" (http://www.geisinger.org, 2026-10-19)."""
+        url = "http://www.examplehealth.org"
+        wall = "https://validate.perfdrive.com/?ssa=1&ssc=x&ssr=MTkyLjAuMi4x"
+        market = "https://forsale.godaddy.com/forsale/example.org?utm_source=x&traffic_id=1"
+        for end in (wall, market):
+            def visit(u, gate, end=end):
+                return {"chain": [u, end], "status": 200, "markup": "<title>x</title>", "error": "",
+                        "dnsHost": "", "insecure": False}
+            entry = localsites.check_one(url, ["Example Hospital Authority"], self.gate(),
+                                         visit_fn=visit, sleep=lambda s: None, today="2026-11-14")
+            self.assertEqual(entry["final"], end.split("?")[0])
+            self.assertNotIn("?", str(entry))
+        self.assertEqual(localsites.off_site("https://user:pw@wall.example:8443/p/?ssr=x#f"),
+                         "https://wall.example:8443/p/")
+        self.assertEqual(localsites.off_site("https://www.DropCatch.com/domain/x.net"),
+                         "https://www.DropCatch.com/domain/x.net")
+        # The committed cache keeps no query in any address a redirect ended at.
+        cache = localsites.load_cache(ROOT)
+        kept = [u for u, e in cache["sites"].items() if "?" in e.get("final", "")]
+        self.assertEqual(kept, [])
+
     def gate(self):
         return localsites._Gate(interval=0, sleep=lambda s: None)
 

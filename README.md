@@ -3492,7 +3492,12 @@ the listing's Town of Greenfield) is the government's own site as often as
 not, and stays linked, marked "not confirmed". Everything else is linked and
 labelled "Website as listed by the Census in 2022, checked Oct 17, 2026"
 (its own day); a 403, a 429, a timeout or a bot wall concludes nothing, and
-a row whose link could not be confirmed says so in words. A person's own
+a row whose link could not be confirmed says so in words. Where a redirect
+ended is its host and path: a sign-in page's or a bot wall's query names the
+address the visitor came from, and read as the address it once made 41
+links "ok" over Google's sign-in and Radware's wall. The cache keeps no
+query of any address a redirect ended at, since a bot wall writes the
+reader's own address there. A person's own
 finding goes in `overrides.BLOCKED_LOCAL_HOSTS`. Gambling seen plainly - in
 a page's title, on a site a lapsed address now redirects to, or all over
 its text - is never cleared by a later check; seen once in a page's text it

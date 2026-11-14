@@ -2313,7 +2313,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     of 39,447 governments' links are withdrawn: 5,090 dead, 1,179 gone,
     351 for sale, 255 gambling, 254 parked, 208 elsewhere, 20 expired and
     9 a business's; 5,269 could not be confirmed and stay linked, marked
-    so.
+    so. Where a redirect ended is its host and path, never its query: a
+    sign-in page's, a bot wall's or a forwarder's query names the address
+    the visitor came from (Google's "continue=", Radware's), and read as
+    the address it made 41 listed websites "ok" over the page they ended on:
+    30 deleted or private Google Sites at Google's sign-in, Geisinger's at
+    Radware's validate.perfdrive.com, and others, each looked at again on
+    2026-11-14.
+    A redirect to a bot wall's host (`agent.WALL_HOSTS`) concludes nothing
+    whatever it answers, and the cache keeps no query of any address a
+    redirect ended at (`localsites.off_site`): Radware writes the reader's
+    own IP address, base64-encoded, into its query ("ssr="), and the one
+    wall address committed kept its query but not that, only because the
+    cache's 300-character cut fell first.
 
 79. **A mark about an office sits on the office, and "not running" is a
     source's word.** "On the Nov 3, 2026 ballot" sat under Brian Kemp,
