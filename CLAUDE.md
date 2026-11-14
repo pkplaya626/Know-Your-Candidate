@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3272 tests, no dependencies
-npm install && npm test                       # 4957 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3286 tests, no dependencies
+npm install && npm test                       # 4984 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2330,6 +2330,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     A next election year is a statute's or the state's record's
     (`ballot2026.NEXT`), never a term length's: Virginia's governor was
     elected in 2025 and is next elected in 2029, its legislature in 2027.
+    And a term the table states is a source's that says it: South Dakota's
+    "all (2-year terms)" and "4-year term; last elected 2022" cited the
+    Secretary of State's candidate list, which names neither, and the
+    legislature panel said "Members serve 2-year terms, as the state's
+    record says" beside it. The term is the provision's that says it
+    (`ballot2026.TERMS`: S.D. Const. art. III, s. 6 and art. IV, ss. 2 and
+    7; Vermont's governor, lieutenant governor and chambers, Vt. Const.
+    ch. II, ss. 46 and 49, and its attorney general, 3 V.S.A. s. 151),
+    named on the ballot marks, every office's and chamber's through one
+    helper (`citeTerm` in kyc-stategov.js: the chambers' marks hovered "all
+    (2-year terms)" uncited beside offices that named the constitution),
+    and on the legislature panel's term line. The governor overlay's and
+    the governor share pages' "Term 4 years" do not name it yet. Vermont's
+    secretary of state has none: the constitution elects the secretary
+    "biennially" (ch. II, s. 43), which is how often and not how long, and
+    no statute read gives a term. A source read and found to name no term
+    (`NO_TERM_STATED`) holds every entry citing it to such a provision and
+    to no last-elected year (read 2026-11-14), and a provision counts only
+    where its words give a term of office's length ("for a term of four
+    years"), never how often the office is elected ("every four years
+    thereafter").
     The same goes for a market: a party-only market over a ballot of two
     Democrats, or last prices that add up to 128%, is quoted with a note
     saying what it cannot tell, read page-side so `data/odds.js` stays the
@@ -2498,8 +2519,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (read 2026-11-11). Its words name the offices 1 CMC 6509 holds a
     majority runoff for (6524(b) adds a tie in any office), never which
     race went to one or who is in it, which no Commission
-    page says (rule 91). The cycle's dates are reread each cycle, and
-    `check` refuses a date outside it.
+    page says (rule 91). A window held only in an office's regular hours
+    (Arkansas's December 1 runoff, "during your county clerk’s regular
+    office hours") quotes those words and is "Under way, during those
+    hours", never "Under way" alone, and a day it is not held names no day
+    it resumes (`hours`), since the next day not excluded may be one a
+    clerk's office keeps no hours on: the page would have called it "Under
+    way" on every day from November 24 to 30. That is on Thanksgiving; on
+    Saturday, November 28, which the State Board of Election Commissioners'
+    2026 Election Coordinator Manual closes ("Runoff & Special Election
+    early hours are County Clerk office working hours, no Saturday", in its
+    calendar, and of "minor elections (such as school, runoffs, and special
+    elections)", "County Clerk regular office hours, which in most cases
+    will be 8 a.m. to 4:30 p.m. Tuesday through Friday and Monday before
+    Election Day and, no Saturday hours"); and on Sunday, November 29, which
+    no official words close, so it stays "Under way, during those hours". A
+    weekday after "no" ("no Saturday", "no Saturday hours") closes that
+    weekday as a class, as "Excluding Sundays" does (`CLOSED_CLASS`), and
+    every such day of the window must be listed. A state holiday is closed
+    only by two of the offices' own quotes together, one closing state
+    holidays and one naming the day one (`closes_as_holiday`: the Board's
+    CBEC Procedures Manual and Act 92 of 2023, and the Secretary of State's
+    calendar's starred "November 26, 2026 – Thursday*"), never from a general
+    calendar. The cycle's dates are reread each cycle, and `check` refuses a
+    date outside it.
 
 85. **A ZIP code is not a place, and a location is placed on lines fine
     enough to place it.** "Who represents me" had no answer outside a

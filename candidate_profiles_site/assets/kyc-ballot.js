@@ -139,18 +139,30 @@
    *  October 25, Louisiana's, Delaware's, South Carolina's and Hawaii's
    *  pages called early voting under way on a day each office had excluded.
    *  That day says there is none, and the next day of the window the office
-   *  has not excluded, which its own dates name (rule 84). */
+   *  has not excluded, which its own dates name (rule 84).
+   *  A window held only in an office's regular hours (the pipeline's "h":
+   *  Arkansas's December 1 runoff, "during your county clerk’s regular
+   *  office hours") is "Under way, during those hours", the line's quoted
+   *  words, never "Under way" alone: the offices' words close Thanksgiving
+   *  and Saturday, November 28 (listed, "x"), and of Sunday, November 29
+   *  say only that early voting is in the clerk's regular office hours,
+   *  which the State Board of Election Commissioners' manual says "in most
+   *  cases will be 8 a.m. to 4:30 p.m. Tuesday through Friday and Monday
+   *  before Election Day". A day it is not held there names no day it
+   *  resumes: the next day the office has not excluded may still be one a
+   *  clerk's office keeps no hours on (the Sunday after that Saturday). */
   function when(line, today) {
     if (!line.d) return null;
     if (line.e) {
       if (today > line.e) return { cls: "is-past", word: "Ended" };
       if (offDay(line, today)) {
+        if (line.h) return { cls: "is-off", word: "No early voting today" };
         var next = nextDay(today);
         while (next <= line.e && line.x.indexOf(next) !== -1) next = nextDay(next);
         return { cls: "is-off", word: "No early voting today" +
           (next <= line.e ? "; resumes " + longDate(next).replace(/, \d{4}$/, "") : "") };
       }
-      if (today >= line.d) return { cls: "is-now", word: "Under way" };
+      if (today >= line.d) return { cls: "is-now", word: line.h ? "Under way, during those hours" : "Under way" };
       return null;
     }
     if (today > line.d) return { cls: "is-past", word: "Passed" };
@@ -585,7 +597,16 @@
       (more ? ' <span class="faint">' + KYC.escapeHtml("The state's record: " + more) + "</span>" : "") +
       " " + link(b.source, "Source") + (!b.up ? nextLine(b) : "") + "</p>" +
       (c.termYears ? '<p class="leg-term">Members serve ' + KYC.escapeHtml(String(c.termYears)) +
-        "-year terms, as the state's record says.</p>" : "");
+        "-year terms, as " + termCite(b) + " says.</p>" : "");
+  }
+
+  /** Where the term the chamber's line states is said: the provision the
+   *  ballot table cites for it where the record's own source is a list that
+   *  does not say it (ballot2026.TERMS: "S.D. Const. art. III, s. 6"), else
+   *  the state's record the line links. South Dakota's line said "as the
+   *  state's record says" beside a candidate list that names no term. */
+  function termCite(b) {
+    return b.termSource ? link(b.termSource.url, b.termSource.cite) : "the state's record";
   }
 
   /** Whether district *id*'s seat in chamber *c* (a legislature file's) is

@@ -39,9 +39,25 @@ null: the state's own links stay beside it.
   (``earlyVoting.except``, ``runoff.earlyVoting.except``: Louisiana's
   "excluding Sunday, November 29") is named, closed, in a quote it stands
   on (``closes``), and every day of a weekday the office closes as a class
-  ("Excluding Sundays") is listed: on Sunday, October 25 the Louisiana,
-  Delaware, South Carolina and Hawaii pages called early voting "Under way"
-  on a day each office had excluded;
+  ("Excluding Sundays", "no Saturday") is listed: on Sunday, October 25 the
+  Louisiana, Delaware, South Carolina and Hawaii pages called early voting
+  "Under way" on a day each office had excluded. A day the law closes as a
+  state holiday is named so by two of the office's own quotes together
+  (``closes_as_holiday``): one that closes state holidays ("Early voting
+  shall not be held on state holidays", Arkansas's State Board of Election
+  Commissioners), one that names the day a holiday (its Secretary of
+  State's calendar moves Thursday, November 26's deadline to the Friday as
+  falling on a legal holiday);
+- a window held only in an office's regular hours ("during regular office
+  hours": Arkansas's December 1 runoff, South Dakota's in-person absentee
+  voting) says so in the office's words, quoted (``hours_problems``), and
+  the page then calls it "Under way, during those hours", never "Under
+  way" alone: the offices' words close some of its days and leave others
+  to each office's hours (the Board's 2026 Election Coordinator Manual says
+  "Runoff & Special Election early hours are County Clerk office working
+  hours, no Saturday", and of the clerks' hours only what they will be "in
+  most cases"), so a day not listed is not said to be one every office is
+  open;
 - a qualifier that is a claim of its own is said in a quote it stands on
   (``SAID``): a runoff's early voting that may begin before its first date
   ("as soon as possible, but no later than"), an application taken in
@@ -191,6 +207,10 @@ SHOWN = {
     # "October 20-27 (excluding Sunday, October 25)", South Carolina's
     # "Closed Sunday, October 25".
     "earlyVoting.except": ("earlyVoting.start", "earlyVoting.end"),
+    # The office's words where its window runs only in an office's regular
+    # hours, quoted (``hours_problems``): South Dakota's "during regular
+    # office hours".
+    "earlyVoting.hours": ("earlyVoting.start", "earlyVoting.end"),
     # Each local office sets its own days within the window (Wisconsin's
     # "possibly through November 1").
     "earlyVoting.setLocally": (),
@@ -217,6 +237,9 @@ SHOWN = {
     # Louisiana's December 12: "November 28-December 5 (excluding Sunday,
     # November 29)".
     "runoff.earlyVoting.except": ("runoff.earlyVoting.start", "runoff.earlyVoting.end"),
+    # Arkansas's December 1: "during your county clerk’s regular office
+    # hours" (the Secretary of State's voting page).
+    "runoff.earlyVoting.hours": ("runoff.earlyVoting.start", "runoff.earlyVoting.end"),
     # A runoff's own registration deadlines, kept as the general election's
     # are: Louisiana's dates page gives December 12's ("in person, by mail,
     # or at an OMV Office is November 12", online "November 21"), and with
@@ -272,9 +295,45 @@ RULES = ("registration.mail.rule", "mail.requestDeadline.rule", "mail.returnDead
 # South Carolina and Hawaii, each of which had excluded it, and would have on
 # Louisiana's Sunday, November 29; a day is never inferred from a weekday or
 # a holiday the office does not name (Arkansas's "during regular office
-# hours" names none).
+# hours" names none: its hours are ``HOURS``' words, and only the state
+# holiday its own calendar names, ``closes_as_holiday``, and the Saturday
+# its State Board of Election Commissioners' words close, "no Saturday",
+# are listed; its Sunday, which no official words close, is not).
 EXCEPT = {"earlyVoting.except": "earlyVoting",
           "runoff.earlyVoting.except": "runoff.earlyVoting"}
+# Where a window runs only in an office's regular hours, the office's words
+# that say so: {field: the window it is about}. Arkansas's December 1 runoff
+# is held "during your county clerk’s regular office hours" (the Secretary of
+# State's voting page; Ark. Code 7-5-418(a)(2)), and the page would have
+# called it "Under way" on every day of it, November 24 to 30: on
+# Thanksgiving, which the law closes, on Saturday, November 28, which the
+# State Board of Election Commissioners' 2026 Election Coordinator Manual
+# closes ("Runoff & Special Election early hours are County Clerk office
+# working hours, no Saturday"), and on Sunday, November 29, which no
+# official words close and the same manual leaves out of the hours it says
+# the clerks will keep "in most cases" ("8 a.m. to 4:30 p.m. Tuesday through
+# Friday and Monday before Election Day and, no Saturday hours").
+HOURS = {"earlyVoting.hours": "earlyVoting",
+         "runoff.earlyVoting.hours": "runoff.earlyVoting"}
+# Words that put a window's days in an office's regular hours: "during
+# regular office hours", "during regular county clerk office hours",
+# "normal business hours". A quote the window stands on that says so holds
+# the record to ``hours``, or the page calls every day of it "Under way".
+OFFICE_HOURS = re.compile(r"\b(?:regular|normal|usual)\b(?:\s+[\w’']+){0,3}?\s+"
+                          r"(?:office|business|working)\s+hours\b", re.I)
+# The words that close state holidays as a class: Arkansas's State Board of
+# Election Commissioners' "Early voting shall not be held on state holidays"
+# and "Excludes all STATE Holidays", Ark. Code 7-5-418(a)(1)(B)'s "shall not
+# be available on state ... holidays" (Act 92 of 2023 struck "or county").
+HOLIDAYS_CLOSED = re.compile(
+    r"\bnot be (?:available|held)\s+on\s+(?:all\s+)?state(?:\s+(?:or\s+county|\.\.\.|…))?\s+holidays\b"
+    r"|\bexclud(?:e|es|ed|ing)\s+all\s+state\s+holidays\b", re.I)
+# The form of a calendar that marks a deadline moved off a day that is no
+# business day: Arkansas's "November 26, 2026 – Thursday*" beside
+# "[*Deadlines falling on a Saturday, Sunday, or legal holiday are extended
+# to the following business day ...]". A weekday so marked is the holiday.
+_MOVED_OFF = re.compile(r"\*\s*Deadlines\s+(?:falling|that\s+fall)\s+on\s+a\s+Saturday,\s+Sunday,?\s+"
+                        r"or\s+(?:a\s+)?legal\s+holiday\s+(?:are\s+extended|will\s+advance)\b", re.I)
 _WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 # What says a day is not held: "excluding", "except", "closed", "no early
 # voting" (Delaware's "October 25, 2026 – NO EARLY VOTING").
@@ -286,10 +345,30 @@ _CLOSED = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early v
 _BEFORE = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early voting on)"
 _NOT_A_RANGE = r"(?![,\s\d]*[–—-]|[,\s\d]*(?:through|to)\b)"
 # A weekday the office closes as a class, beside the words that close it:
-# Hawaii's "(Excluding Sundays)", or "Sundays ... excepted".
+# Hawaii's "(Excluding Sundays)", or "Sundays ... excepted"; or a run of
+# weekdays after "no" that ends its phrase or names its hours or its voting
+# ("no Saturday", "no Saturday hours": Arkansas's State Board of Election
+# Commissioners, "Runoff & Special Election early hours are County Clerk
+# office working hours, no Saturday"; "no Saturday or Sunday voting", "no
+# Saturday and no Sunday hours", "no Saturday, Sunday or holiday voting",
+# each weekday it names). The whole run is a class or none of it is: never
+# a weekday a date follows ("no Saturday, November 28", "no Saturday, the
+# 28th"), never a run that ends on one ("no Saturday, Sunday, November
+# 29"), and never a "no" about something else ("no Saturday deadline",
+# "no Saturday or Sunday deadline"). Read one weekday at a time, "no
+# Saturday or Sunday voting" closed neither day and "no Saturday and no
+# Sunday hours" only the Sunday: the days left out would have needed no
+# listing, and the page would have called them "Under way".
+_MONTH_OR_DAY = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d)"
+_DAY_STEM = r"(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)"
+_A_DAY = _DAY_STEM + r"days?\b"
 CLOSED_CLASS = re.compile(
     r"\b" + _CLOSED + r"\s+(?:all\s+)?(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b"
-    r"|\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b[^.;()]{0,40}?\b(?:excluded|excepted|closed)\b",
+    r"|\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b[^.;()]{0,40}?\b(?:excluded|excepted|closed)\b"
+    r"|\bno\s+(" + _A_DAY + r"(?:(?:\s*,\s*(?:(?:or|and)\s+)?|\s+(?:or|and)\s+)(?:no\s+)?" + _A_DAY + r")*)"
+    r"(?:,?\s*(?:or|and)\s+(?:no\s+)?(?:legal\s+|state\s+)?holidays?\b)?"
+    r"(?=\s*(?:(?:early\s+)?(?:voting|hours)\b|[.;)\]]"
+    r"|,(?!\s*(?:" + _MONTH_OR_DAY + r"|the\s+\d|" + _DAY_STEM + r"day))|$))",
     re.I)
 # A qualifier that is a claim of its own is said in a quote it stands on, as
 # "postmarked" and "received" are: a start that is only the latest day early
@@ -519,6 +598,7 @@ def state_problems(code, record, runoffs):
             out.append(f"{code} {path}: shown, but no quote it stands on says so")
     out += where_problems(code, record)
     out += except_problems(code, record)
+    out += hours_problems(code, record)
     out += _date_problems(code, record)
     date = get(record, "runoff.date")
     if date and code not in RUNOFF_WORDS:
@@ -574,11 +654,13 @@ def _day_words(iso):
 
 
 def closed_weekdays(quote):
-    """The weekdays *quote* closes as a class ("Excluding Sundays"), by name."""
+    """The weekdays *quote* closes as a class ("Excluding Sundays", "no
+    Saturday", each of "no Saturday or Sunday voting"), by name."""
     out = set()
     for m in CLOSED_CLASS.finditer(str(quote or "")):
-        stem = (m.group(1) or m.group(2)).lower()
-        out |= {w for w in _WEEKDAYS if w[:-3].lower() == stem}
+        named = next(g for g in m.groups() if g)
+        for stem in re.findall(r"\b(" + _DAY_STEM + r")", named, re.I):
+            out |= {w for w in _WEEKDAYS if w[:-3].lower() == stem.lower()}
     return out
 
 
@@ -586,8 +668,9 @@ def closes(quote, iso):
     """Does *quote* say early voting is not held on the day *iso*: the day
     named beside the words that close it ("excluding Sunday, November 29",
     "Closed Sunday, October 25", "October 25, 2026 – NO EARLY VOTING"), or
-    its weekday closed as a class ("Excluding Sundays")? A day the words do
-    not name is not closed, whatever the calendar makes of it (rule 84)."""
+    its weekday closed as a class ("Excluding Sundays", "no Saturday")? A
+    day the words do not name is not closed, whatever the calendar makes of
+    it (rule 84)."""
     if closes_on_date(quote, iso):
         return True
     return _WEEKDAYS[datetime.date.fromisoformat(iso).weekday()] in closed_weekdays(str(quote or ""))
@@ -602,6 +685,44 @@ def closes_on_date(quote, iso):
     if re.search(r"\b" + _BEFORE + r"\W{0,3}(?:on\s+)?" + day + _NOT_A_RANGE, quote, re.I):
         return True
     return bool(re.search(day + r"\s*\W{0,3}\s*(?:no early voting|closed)\b", quote, re.I))
+
+
+def names_holiday(quote, iso):
+    """Does *quote* name the day *iso* a holiday: the day beside "state
+    holiday" or "legal holiday" in one sentence, or a weekday a calendar
+    stars as a day whose deadline moves to the next business day, beside
+    its own note that such a day is "a Saturday, Sunday, or legal holiday"
+    (Arkansas's "November 26, 2026 – Thursday*")? A Saturday or a Sunday so
+    starred is a weekend, not a holiday."""
+    quote = str(quote or "")
+    day = _day_words(iso)
+    holiday = r"\b(?:state|legal)\s+holiday\b"
+    if (re.search(day + r"[^.;\[\]]{0,40}?" + holiday, quote, re.I)
+            or re.search(holiday + r"[^.;\[\]]{0,40}?" + day, quote, re.I)):
+        return True
+    weekday = datetime.date.fromisoformat(iso).weekday()
+    if weekday >= 5:
+        return False
+    starred = re.search(day + r"\s*[–—-]?\s*(?:" + _WEEKDAYS[weekday] + r")?\s*\*", quote, re.I)
+    return bool(starred and _MOVED_OFF.search(quote))
+
+
+def closes_as_holiday(quotes, iso):
+    """Do *quotes*, together, close the day *iso* as a state holiday: one
+    that says early voting is not held on state holidays (``HOLIDAYS_CLOSED``)
+    and one that names this day a holiday (``names_holiday``)? Arkansas's
+    Thanksgiving, November 26, inside its December 1 runoff's early voting.
+    Never a holiday no quote names: a general calendar is not the office's
+    word (rule 84)."""
+    quotes = [str(q or "") for q in quotes]
+    return (any(HOLIDAYS_CLOSED.search(q) for q in quotes)
+            and any(names_holiday(q, iso) for q in quotes))
+
+
+def _closed_in(quotes, iso):
+    """Do *quotes* close the day *iso*, one of them naming it closed or two
+    of them closing it as a state holiday?"""
+    return any(closes(q, iso) for q in quotes) or closes_as_holiday(quotes, iso)
 
 
 def _window_days(start, end):
@@ -631,9 +752,12 @@ def except_problems(code, record):
                     and _DATE.match(end) and start <= end):
                 quotes = [s.get("quote") or "" for s in record.get("sources") or []
                           if s.get("field") in (path,) + SHOWN[path]]
+                # A state holiday two quotes close together is named as
+                # surely as one a quote closes alone (Arkansas's November 26).
                 named = [day.isoformat() for day in _window_days(start, end)
                          if start < day.isoformat() < end
-                         and any(closes_on_date(q, day.isoformat()) for q in quotes)]
+                         and (any(closes_on_date(q, day.isoformat()) for q in quotes)
+                              or closes_as_holiday(quotes, day.isoformat()))]
                 if named:
                     out.append(f"{code} {path}: a quote the window stands on names "
                                f"{', '.join(named)} closed, but no day is listed")
@@ -659,10 +783,11 @@ def except_problems(code, record):
         quotes = [s.get("quote") or "" for s in record.get("sources") or []
                   if s.get("field") in (path,) + SHOWN[path]]
         out += [f"{code} {path}: {value}, but no quote it stands on names that day closed"
-                for value in days if not any(closes(q, value) for q in quotes)]
+                for value in days if not _closed_in(quotes, value)]
         named = [day.isoformat() for day in _window_days(start, end)
                  if start < day.isoformat() < end and day.isoformat() not in days
-                 and any(closes_on_date(q, day.isoformat()) for q in quotes)]
+                 and (any(closes_on_date(q, day.isoformat()) for q in quotes)
+                      or closes_as_holiday(quotes, day.isoformat()))]
         if named:
             out.append(f"{code} {path}: a quote the window stands on names "
                        f"{', '.join(named)} closed, but it is not listed")
@@ -673,6 +798,41 @@ def except_problems(code, record):
             out.append(f"{code} {path}: the office closes "
                        f"{' and '.join(sorted(w + 's' for w in weekdays))}, but {', '.join(missing)} "
                        f"{'is' if len(missing) == 1 else 'are'} not listed")
+    return out
+
+
+def hours_problems(code, record):
+    """A window held only in an office's regular hours (``HOURS``) says so in
+    the office's words: ``hours`` is text, words of office hours
+    (``OFFICE_HOURS``), found in a quote of its own field or its window's,
+    and stands only beside a window. And a quote the window stands on that
+    puts its days in an office's regular hours holds the record to saying
+    so: otherwise the page would call every day of the window not listed
+    "Under way" alone, Sunday, November 29 before Arkansas's December 1
+    runoff included, which no official words close and the Board's manual
+    leaves out of the hours it says the clerks keep "in most cases"."""
+    out = []
+    for path, window in HOURS.items():
+        hours = get(record, path)
+        fields = (path, f"{window}.start", f"{window}.end", f"{window}.except")
+        quotes = [s.get("quote") or "" for s in record.get("sources") or []
+                  if s.get("field") in fields]
+        start, end = get(record, f"{window}.start"), get(record, f"{window}.end")
+        if hours in (None, ""):
+            if start and end:
+                said = [m.group(0) for q in quotes for m in [OFFICE_HOURS.search(q)] if m]
+                if said:
+                    out.append(f"{code} {path}: a quote the window stands on gives its days as "
+                               f"{said[0]!r}, but the record does not say so: the page would call "
+                               f"every day of it 'Under way'")
+            continue
+        if not isinstance(hours, str) or not OFFICE_HOURS.search(hours):
+            out.append(f"{code} {path}: {hours!r} is not the office's words for its regular hours")
+            continue
+        if not (start and end):
+            out.append(f"{code} {path}: office hours, with no window")
+        if not any(_plain(hours) in _plain(q) for q in quotes):
+            out.append(f"{code} {path}: {hours!r} is not in the office's words quoted for the window")
     return out
 
 
@@ -872,6 +1032,13 @@ def _excluding(days):
                              else ", ".join(named[:-1]) + " and " + named[-1])
 
 
+def _in_hours(hours):
+    """"; in the office’s words, “during your county clerk’s regular office
+    hours”": the hours a window is held in, quoted, never summed up (rule
+    84), or "" with none."""
+    return f"; in the office’s words, “{hours.rstrip('.')}”" if hours else ""
+
+
 def _window_sources(links, window, days):
     """The links of an early-voting line: the window's own (``window`` is
     ``earlyVoting`` or ``runoff.earlyVoting``) and, for each day it says the
@@ -880,22 +1047,46 @@ def _window_sources(links, window, days):
     their source as the dates do)."""
     fields = (f"{window}.start", f"{window}.end")
     linked = links.of(*fields)
+    every = (f"{window}.except",) + fields
     for day in days:
         urls = {links.urls[i] for i in linked}
-        if any(closes(s.get("quote"), day) for field in (f"{window}.except",) + fields
-               for s in _sources(links.record, field) if s["url"] in urls):
+        shown = [s.get("quote") for field in every for s in _sources(links.record, field)
+                 if s["url"] in urls]
+        if _closed_in(shown, day):
             continue
-        more = links.of(f"{window}.except", *fields,
-                        want=lambda s, day=day: closes(s.get("quote"), day))
+        more = links.of(*every, want=lambda s, day=day: closes(s.get("quote"), day))
+        if not more:
+            # A state holiday: the page whose words close state holidays and
+            # the page that names this day one, each linked (Arkansas's State
+            # Board of Election Commissioners' manual and the Secretary of
+            # State's calendar).
+            more = (links.of(*every, want=lambda s: bool(HOLIDAYS_CLOSED.search(s.get("quote") or "")))
+                    + links.of(*every, want=lambda s, day=day: names_holiday(s.get("quote"), day)))
         linked = linked + [i for i in more if i not in linked]
     return linked
+
+
+def _hours_words(record, window):
+    """The office's words for a window held in its regular hours
+    (``HOURS``), or None."""
+    hours = _shown(record, f"{window}.hours")
+    return hours if isinstance(hours, str) and OFFICE_HOURS.search(hours) else None
+
+
+def _hours_sources(links, window, hours):
+    """The links of a window's hours: a page whose quote holds the office's
+    words, its own field's first (rule 84: quoted words keep their source)."""
+    words = _plain(hours)
+    return links.of(f"{window}.hours", f"{window}.start", f"{window}.end", f"{window}.except",
+                    want=lambda s: words in _plain(s.get("quote")))
 
 
 def lines(code, record, place):
     """The page's lines for one record: ``(lines, register, links)``.
 
     Each line is ``{"k": kind, "d": date, "e"?: end of a window, "x"?: days
-    inside the window it is not held, "t": words,
+    inside the window it is not held, "h"?: true where the window is held in
+    an office's regular hours alone, "t": words,
     "p"?: words once the date has passed, "s": a short label for the
     calendar, "src": [link numbers], "keep"?: still shown after Election
     Day}``; a line with no date is a standing fact. ``register`` is when
@@ -997,13 +1188,20 @@ def lines(code, record, place):
         # offer, not days every clerk is open (PR #102 review).
         local = _shown(record, "earlyVoting.setLocally")
         closed = _shown(record, "earlyVoting.except") or []
+        hours = _hours_words(record, "earlyVoting")
         line = {"k": "early", "d": start, "e": end,
                 "t": "In-person early voting" + _excluding(closed) + (
                     ", on the days and hours each local election office sets: it may start "
-                    "later or end sooner than these dates" if local else ""),
+                    "later or end sooner than these dates" if local else "") + _in_hours(hours),
                 "s": "Early voting" + (" (local days)" if local else ""),
                 "src": _window_sources(links, "earlyVoting", closed)
                 + (links.of("earlyVoting.setLocally") if local else [])}
+        if hours:
+            line["src"] += [i for i in _hours_sources(links, "earlyVoting", hours)
+                            if i not in line["src"]]
+            # Held in the office's hours alone: never "Under way" alone
+            # (kyc-ballot.js when()).
+            line["h"] = True
         if closed:
             # The days the page never calls "Under way" (kyc-ballot.js when()).
             line["x"] = list(closed)
@@ -1161,12 +1359,17 @@ def runoff_lines(code, record, links):
     if start and end:
         sooner = _shown(record, "runoff.earlyVoting.startsBy")
         closed = _shown(record, "runoff.earlyVoting.except") or []
+        hours = _hours_words(record, "runoff.earlyVoting")
         line = {"k": "runoff-early", "d": start, "e": end, "keep": True,
                 "t": f"In-person early voting {of}" + _excluding(closed) + (
                     f"; it begins as soon as possible, and no later than {_long(start)}"
-                    if sooner else ""),
+                    if sooner else "") + _in_hours(hours),
                 "s": f"{name} early voting" + needed,
                 "src": _window_sources(links, "runoff.earlyVoting", closed)}
+        if hours:
+            line["src"] += [i for i in _hours_sources(links, "runoff.earlyVoting", hours)
+                            if i not in line["src"]]
+            line["h"] = True
         if closed:
             line["x"] = list(closed)
         out.append(line)

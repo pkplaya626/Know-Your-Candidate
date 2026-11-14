@@ -9555,6 +9555,98 @@ async function testLegislatures() {
     });
   }
   {
+    // South Dakota's chambers and offices cited the Secretary of State's
+    // candidate list for "2-year terms" and "4-year term", and the panel
+    // said "as the state's record says" beside it; the list names no term
+    // (read 2026-11-14). The term is the constitution's (ballot2026.TERMS),
+    // named and linked where the page says it; the list stays the line's
+    // source for which seats are on the ballot.
+    const LIST = "https://vip.sdsos.gov/candidatelist.aspx?eid=774";
+    const leg = await buildPage("legislature/sd.html");
+    const state = await buildPage("states/sd.html");
+    const ne = await buildPage("legislature/ne.html");
+    suite("legislature/sd.html and states/sd.html — a term is cited to the provision that says it", () => {
+      check("no page errors", !leg.errors.length && !state.errors.length && !ne.errors.length,
+        leg.errors.concat(state.errors, ne.errors).join(" | "));
+      const term = leg.D.querySelector("#legPanelBody .leg-term");
+      const a = term && term.querySelector("a");
+      check("the term line names S.D. Const. art. III, s. 6 and links it",
+        !!term && term.textContent === "Members serve 2-year terms, as S.D. Const. art. III, s. 6 says." &&
+          !!a && a.getAttribute("href") === "https://sdlegislature.gov/api/Statutes/0N-3-6.html",
+        term ? term.innerHTML : "no term line");
+      const source = [...leg.D.querySelectorAll("#legPanelBody .leg-ballot a")].map((x) => x.getAttribute("href"));
+      check("the seats' line still links the candidate list", source.includes(LIST), source.join(" "));
+      const neTerm = ne.D.querySelector("#legPanelBody .leg-term");
+      check("a record that states its own term still says so (Nebraska)",
+        !neTerm || /, as the state's record says\.$/.test(neTerm.textContent), neTerm && neTerm.textContent);
+      const marks = [...state.D.querySelectorAll(".gov-ballot-mark.up")].map((m) => m.getAttribute("title") || "");
+      check("the offices' marks name the constitution beside the term",
+        marks.some((t) => t.includes("4-year term (S.D. Const. art. IV, s. 2)")) &&
+          marks.some((t) => t.includes("4-year term (S.D. Const. art. IV, s. 7)")) &&
+          !marks.some((t) => /4-year term(?! \()/.test(t)),
+        marks.join(" | "));
+    });
+  }
+  {
+    // The chambers' marks hovered "all (2-year terms)" beside the candidate
+    // list on South Dakota's and Vermont's pages and the map's panel while
+    // the offices beside them named the constitution: every mark that
+    // states a term states it with the provision its entry cites (one
+    // helper, kyc-stategov.js citeTerm). Only an entry the table cites no
+    // provision for may state its term without one (Vermont's secretary of
+    // state's: the constitution elects the secretary "biennially" and gives
+    // no term, and TERMS holds none), counted from the data, never typed
+    // in. Vermont's attorney general's mark hovered a bare "2-year term"
+    // while 3 V.S.A. s. 151, which says it, was in hand.
+    const TERM = /\b\d+-year(?:\s+[a-z]+)?\s+terms?\b/g;
+    const states = (words) => (String(words).match(TERM) || []).length > 0;
+    const pages = [["states/sd.html", "SD", await buildPage("states/sd.html")],
+      ["states/vt.html", "VT", await buildPage("states/vt.html")],
+      ["map.html (South Dakota's panel)", "SD", await buildPage("map.html", { hash: "#/?state=SD&mode=legislature" })]];
+    suite("states/sd.html, states/vt.html and the map's panel — every ballot mark that states a term cites it", () => {
+      check("no page errors", pages.every(([, , p]) => !p.errors.length),
+        pages.map(([, , p]) => p.errors.join(" | ")).filter(Boolean).join(" / "));
+      for (const [name, code, p] of pages) {
+        const b = p.window.kycStateGov.states[code].ballot2026;
+        const items = Object.values(b.offices).concat(Object.values(b.chambers)).filter(Boolean);
+        const said = (item) => item.note || item.basis || "";
+        const cites = items.filter((item) => item.termSource).map((item) => item.termSource.cite);
+        // A term's words, and whether the provision follows them.
+        const uncited = (title) => [...title.matchAll(TERM)].filter((m) => {
+          const rest = title.slice(m.index + m[0].length);
+          return !cites.some((c) => rest.startsWith(" (" + c + ")") || rest.startsWith("; " + c + ")"));
+        }).map((m) => m[0]);
+        const root = name.startsWith("map") ? p.D.getElementById("delegation") : p.D;
+        const titles = [...root.querySelectorAll(".gov-ballot-mark")].map((m) => m.getAttribute("title") || "");
+        const chambers = [...root.querySelectorAll(".gov-chamber-ballot .gov-ballot-mark")]
+          .map((m) => m.getAttribute("title") || "");
+        const allowed = items.filter((item) => !item.termSource && states(said(item))).length;
+        check(name + ": its chambers' marks state their terms with the provision",
+          chambers.length > 0 && chambers.every((t) => states(t) && !uncited(t).length) &&
+            !!b.chambers.upper.termSource && chambers.some((t) => t.includes(b.chambers.upper.termSource.cite)),
+          chambers.join(" | "));
+        check(name + ": every mark that states a term cites it, but an entry with no provision (" + allowed + ")",
+          titles.filter(states).length >= new Set(cites).size && titles.filter((t) => uncited(t).length).length <= allowed,
+          titles.map((t) => t + (uncited(t).length ? "  <- uncited" : "")).join(" | "));
+        check(name + ": each entry's provision is named on a mark that states its term",
+          items.filter((item) => item.termSource && states(said(item))).every((item) =>
+            titles.some((t) => states(t) && t.includes(item.termSource.cite))),
+          cites.join(" | "));
+        if (code === "VT" && name.startsWith("states/")) {
+          const bare = Object.keys(b.offices).concat(Object.keys(b.chambers)).filter((k) => {
+            const item = b.offices[k] || b.chambers[k];
+            return item && !item.termSource && states(said(item));
+          });
+          check(name + ": the attorney general's mark cites 3 V.S.A. s. 151, and only the secretary " +
+              "of state's states its term with no provision",
+            titles.some((t) => t.includes("2-year term (3 V.S.A. s. 151)")) &&
+              bare.join() === "sos" && titles.filter((t) => uncited(t).length).length === 1,
+            bare.join() + " / " + titles.map((t) => t + (uncited(t).length ? "  <- uncited" : "")).join(" | "));
+        }
+      }
+    });
+  }
+  {
     // A fusion ballot's lines are not parties (STATEGOV-21); a coalition
     // runs Alaska's chambers (STATEGOV-05, rule 54).
     const sg = {};
@@ -12064,11 +12156,14 @@ async function testRunoffDatesElsewhere() {
     // Arkansas and Mississippi: runoffs for no federal office.
     const ar12 = voting("AR", "2026-11-12");
     check("AR, Nov 12: early voting November 24 to 30, ballots received by 7:30 pm on the day, from the calendar",
-      /^November 24 – November 30, 2026\. In-person early voting for a runoff, if one is held\./.test(text(ar12, "runoff-early")) &&
+      /^November 24 – November 30, 2026\. In-person early voting for a runoff, if one is held, excluding Thursday, November 26 and Saturday, November 28; in the office’s words, “during your county clerk’s regular office hours”\./.test(text(ar12, "runoff-early")) &&
         /^December 1, 2026\. Mail ballots for a runoff, if one is held, must arrive at the election office by 7:30 pm on this day\./
-          .test(text(ar12, "runoff-return")) && href(ar12, "runoff-early") === AR_CAL && href(ar12, "runoff-return") === AR_CAL,
+          .test(text(ar12, "runoff-return")) && href(ar12, "runoff-early").split(" ")[0] === AR_CAL &&
+        href(ar12, "runoff-return") === AR_CAL,
       text(ar12, "runoff-early") + " || " + text(ar12, "runoff-return"));
-    check("AR, Nov 24: under way", /Under way/.test(text(voting("AR", "2026-11-24"), "runoff-early")) &&
+    // Held in the clerk's regular hours: "Under way, during those hours"
+    // (testRunoffRegistration has the holiday and the weekend).
+    check("AR, Nov 24: under way, during those hours", /Under way, during those hours/.test(text(voting("AR", "2026-11-24"), "runoff-early")) &&
       status(cell(voting("AR", "2026-11-24"), "Nov 24–30Local runoff early voting, if needed")) === "now",
       cells(voting("AR", "2026-11-24")).join(" | "));
     check("AR, Dec 1: the ballots are due today", /Today/.test(text(voting("AR", "2026-12-01"), "runoff-return")),
@@ -12323,6 +12418,63 @@ async function testRunoffRegistration() {
     const dates = arBallot.out.querySelector(".ballot-dates");
     check("Your ballot (72201) on Nov 2 says the same", !!dates &&
       text(dates, "runoff-register") === text(a, "runoff-register"), dates && text(dates, "runoff-register"));
+  });
+
+  // Arkansas's December 1 runoff: early voting November 24 to 30 "during
+  // your county clerk’s regular office hours" (the Secretary of State's
+  // voting page), never on a state holiday (the State Board of Election
+  // Commissioners' manual; Act 92 of 2023), and Thanksgiving, November 26,
+  // a legal holiday on the Secretary of State's calendar; never on a
+  // Saturday ("Runoff & Special Election early hours are County Clerk office
+  // working hours, no Saturday", the Board's 2026 Election Coordinator
+  // Manual; read 2026-11-14). The page would have called every day of it
+  // "Under way": Thanksgiving, the Saturday, and the Sunday, which no
+  // official words close and which is "Under way, during those hours".
+  const AR_EARLY = /^November 24 – November 30, 2026\. In-person early voting for a runoff, if one is held, excluding Thursday, November 26 and Saturday, November 28; in the office’s words, “during your county clerk’s regular office hours”\./;
+  const AR_DAYS = ["2026-11-24", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29", "2026-11-30"];
+  const AR_OFF = ["2026-11-26", "2026-11-28"];
+  const arDay = {};
+  for (const day of AR_DAYS) arDay[day] = await buildPage("states/ar.html", { now: day + "T09:00:00" });
+  const arBallots = {};
+  for (const day of AR_OFF) arBallots[day] = await ballotFor("#/?zip=72201", { now: day + "T09:00:00" });
+  suite("states/ar.html and Your ballot (72201) — the runoff's early voting on Thanksgiving and the weekend", () => {
+    const all = Object.values(arDay).concat(Object.values(arBallots));
+    check("no page errors", all.every((p) => !p.errors.length), all.map((p) => p.errors.join(" | ")).filter(Boolean).join(" / "));
+    const ar = (day) => arDay[day].D.getElementById("voting");
+    const EARLY_CELL = "Nov 24–30Local runoff early voting, if needed";
+    check("every day, the line says the excluded Thursday and Saturday and quotes the clerk's hours",
+      AR_DAYS.every((day) => AR_EARLY.test(text(ar(day), "runoff-early"))),
+      AR_DAYS.map((day) => day + ": " + text(ar(day), "runoff-early")).join(" || "));
+    for (const day of AR_OFF) {
+      check("AR, " + day + ": no early voting today, naming no day it resumes, never 'Under way'",
+        /No early voting today(?![;,])/.test(text(ar(day), "runoff-early")) &&
+          !/Under way|resumes/.test(text(ar(day), "runoff-early")) &&
+          status(cell(ar(day), EARLY_CELL)) === "ahead",
+        text(ar(day), "runoff-early") + " | cell " + status(cell(ar(day), EARLY_CELL)));
+    }
+    for (const day of ["2026-11-24", "2026-11-27", "2026-11-29", "2026-11-30"]) {
+      check("AR, " + day + ": under way, during those hours, never 'Under way' alone",
+        /Under way, during those hours/.test(text(ar(day), "runoff-early")) &&
+          !/No early voting today/.test(text(ar(day), "runoff-early")) && status(cell(ar(day), EARLY_CELL)) === "now",
+        text(ar(day), "runoff-early"));
+    }
+    check("the line links the calendar, the Board's manual, the Act, the Board's coordinators' manual and the voting page",
+      JSON.stringify(hrefs(items(ar("2026-11-24"), "runoff-early")[0])) === JSON.stringify([AR_CAL,
+        "https://sbec.arkansas.gov/wp-content/uploads/2026-CBEC-Manual.pdf",
+        "https://arkleg.state.ar.us/Home/FTPDocument?path=%2FACTS%2F2023R%2FPublic%2FACT92.pdf",
+        "https://sbec.arkansas.gov/wp-content/uploads/2026-Election-Coordinator-Manual.pdf",
+        "https://www.sos.arkansas.gov/elections/voter-information/voter-registration-information/voting-in-arkansas"]),
+      hrefs(items(ar("2026-11-24"), "runoff-early")[0]).join(" "));
+    const ballotLine = (day) => {
+      const b = arBallots[day].out.querySelector(".ballot-dates");
+      return b ? text(b, "runoff-early") : "no dates";
+    };
+    check("Your ballot on the Saturday: no early voting today, naming no day it resumes",
+      /No early voting today(?![;,])/.test(ballotLine("2026-11-28")) && !/Under way|resumes/.test(ballotLine("2026-11-28")),
+      ballotLine("2026-11-28"));
+    const differ = AR_OFF.map((day) => ballotLine(day) === text(ar(day), "runoff-early") ? "" : day + ": " + ballotLine(day))
+      .filter(Boolean);
+    check("Your ballot says what the state page says, on Thanksgiving and the Saturday", differ.length === 0, differ.join(" || "));
   });
 }
 

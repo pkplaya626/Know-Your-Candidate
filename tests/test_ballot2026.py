@@ -372,5 +372,124 @@ class TestOpenSeats(unittest.TestCase):
                     self.assertNotIn("holderStatus", item, (code, key))
 
 
+class TestTermsHaveASourceThatSaysThem(unittest.TestCase):
+    """South Dakota's governor, attorney general and secretary of state read
+    "4-year term; last elected 2022", and both chambers "all (2-year terms)",
+    each cited to the Secretary of State's candidate list, which names no
+    term and no year (read 2026-11-14), and the legislature panel said
+    "Members serve 2-year terms, as the state's record says" beside it. The
+    terms are the constitution's as the Legislature publishes it (TERMS);
+    the list still says who and which seats are on the ballot."""
+
+    LIST = "https://vip.sdsos.gov/candidatelist.aspx?eid=774"
+
+    def broken(self, states=None, terms=None):
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(states=states, terms=terms)
+        return str(caught.exception)
+
+    def test_south_dakota_cites_its_constitution_for_each_term(self):
+        sd = ballot2026.STATES["SD"]
+        for key, cite, years in (("governor", "S.D. Const. art. IV, s. 2", 4),
+                                 ("ag", "S.D. Const. art. IV, s. 7", 4),
+                                 ("sos", "S.D. Const. art. IV, s. 7", 4),
+                                 ("upper", "S.D. Const. art. III, s. 6", 2),
+                                 ("lower", "S.D. Const. art. III, s. 6", 2)):
+            source, got, words = ballot2026.TERMS[("SD", key)]
+            self.assertEqual(got, cite, key)
+            self.assertTrue(source.startswith("https://sdlegislature.gov/api/Statutes/0N-"), key)
+            self.assertIn(years, ballot2026.provision_terms(words), key)
+            # The list still says who and which seats are on the ballot.
+            self.assertEqual(sd[key][-1], self.LIST, key)
+            item = ballot2026.for_state("SD")["offices" if key in ballot2026.OFFICES else "chambers"][key]
+            self.assertEqual(item["termSource"], {"url": source, "cite": cite}, key)
+        # No year the list does not give.
+        self.assertFalse([k for k in ballot2026.OFFICES if "last elected" in sd[k][2]])
+        # Only an entry the table cites a provision for carries one.
+        self.assertNotIn("termSource", ballot2026.for_state("SD")["offices"]["lt"])
+        self.assertNotIn("termSource", ballot2026.for_state("AZ")["offices"]["governor"])
+
+    def test_vermonts_two_year_terms_are_cited_to_their_provisions(self):
+        vt = ballot2026.for_state("VT")
+        for key, cite in (("governor", "Vt. Const. ch. II, s. 49"), ("lt", "Vt. Const. ch. II, s. 49"),
+                          ("ag", "3 V.S.A. s. 151"),
+                          ("upper", "Vt. Const. ch. II, s. 46"), ("lower", "Vt. Const. ch. II, s. 46")):
+            item = vt["offices" if key in ballot2026.OFFICES else "chambers"][key]
+            self.assertEqual(item["termSource"]["cite"], cite, key)
+            self.assertTrue(item["termSource"]["url"].startswith("https://legislature.vermont.gov/statutes/"),
+                            key)
+            self.assertEqual(ballot2026.stated_terms(item.get("note") or item.get("basis")), {2}, key)
+            self.assertIn(2, ballot2026.provision_terms(ballot2026.TERMS[("VT", key)][2]), key)
+        # The attorney general's is the statute's, which the Legislature
+        # publishes ("... and continue for a term of two years", read
+        # 2026-11-14), not the candidates page's, which names no term.
+        self.assertEqual(ballot2026.TERMS[("VT", "ag")][0],
+                         "https://legislature.vermont.gov/statutes/section/03/007/00151")
+        self.assertTrue(ballot2026.TERMS[("VT", "ag")][2].endswith("and continue for a term of two years."))
+        # The secretary of state's has no provision: the constitution elects
+        # the secretary "biennially" (ch. II, s. 43), which is how often and
+        # gives no term, and no statute read gives one. None is cited.
+        self.assertNotIn("termSource", vt["offices"]["sos"])
+        self.assertEqual(ballot2026.provision_terms("shall be elected biennially"), set())
+
+    def test_a_term_on_a_list_that_names_none_needs_its_provision(self):
+        # Without the constitution's words, South Dakota's terms rest on the
+        # candidate list alone.
+        terms = {k: v for k, v in ballot2026.TERMS.items() if k != ("SD", "upper")}
+        self.assertIn("SD upper: states a term its source, which names none, does not say",
+                      self.broken(terms=terms))
+        states = copy.deepcopy(ballot2026.STATES)
+        sel, up, note, src = states["SD"]["sos"]
+        states["SD"]["sos"] = (sel, up, note + "; last elected 2022", src)
+        self.assertIn("SD sos: states the year it was last elected, which its source does not say",
+                      self.broken(states=states))
+
+    def test_the_provision_must_give_the_very_term(self):
+        terms = dict(ballot2026.TERMS)
+        source, cite, words = terms[("SD", "lower")]
+        terms[("SD", "lower")] = (source, cite, words.replace("two years", "four years"))
+        self.assertIn("term SD lower: the entry states 2-year terms, and S.D. Const. art. III, s. 6's "
+                      "words give 4-year", self.broken(terms=terms))
+        terms = dict(ballot2026.TERMS)
+        terms[("SD", "lt")] = ballot2026.TERMS[("SD", "governor")]
+        self.assertIn("term SD lt: the entry states no term", self.broken(terms=terms))
+        terms = dict(ballot2026.TERMS)
+        terms[("SD", "upper")] = ("https://ballotpedia.org/South_Dakota_State_Senate", cite, words)
+        self.assertIn("compiled table", self.broken(terms=terms))
+
+    def test_the_words_are_read_as_a_reader_reads_them(self):
+        self.assertEqual(ballot2026.stated_terms("all (2-year terms)"), {2})
+        self.assertEqual(ballot2026.stated_terms("4-year staggered terms"), {4})
+        self.assertEqual(ballot2026.provision_terms("for a term of four years"), {4})
+        self.assertEqual(ballot2026.provision_terms("shall continue for the term of two years"), {2})
+        self.assertEqual(ballot2026.provision_terms(
+            "The terms of office of the members of the Legislature shall be two years"), {2})
+        self.assertEqual(ballot2026.provision_terms("a term of four (4) years"), {4})
+        self.assertEqual(ballot2026.provision_terms("a 2-year term"), {2})
+        self.assertEqual(ballot2026.provision_terms("the Legislature shall meet"), set())
+        # Only a term of office's length counts: how often an election is
+        # held, or a span that is not a term, gives none.
+        self.assertEqual(ballot2026.provision_terms("every four years thereafter"), set())
+        self.assertEqual(ballot2026.provision_terms("shall be two years"), set())
+        self.assertEqual(ballot2026.provision_terms("shall be elected biennially"), set())
+        self.assertEqual(ballot2026.provision_terms(
+            "chosen at the general election of the Governor and every four years thereafter, who "
+            "shall severally hold their offices for a term of four years"), {4})
+
+    def test_an_election_every_four_years_is_no_four_year_term(self):
+        # A provision whose words say only how often the office is elected
+        # does not give the term the entry states (S.D. Const. art. IV, s. 7
+        # says both, and only its "for a term of four years" counts).
+        terms = dict(ballot2026.TERMS)
+        source, cite, _words = terms[("SD", "ag")]
+        terms[("SD", "ag")] = (source, cite, "There shall be chosen by the qualified electors of the "
+                               "state at the general election of the Governor and every four years "
+                               "thereafter the following constitutional officers: attorney general")
+        self.assertIn("term SD ag: the entry states 4-year terms, and S.D. Const. art. IV, s. 7's words "
+                      "give none", self.broken(terms=terms))
+        # The real entries still pass.
+        ballot2026.check()
+
+
 if __name__ == "__main__":
     unittest.main()
