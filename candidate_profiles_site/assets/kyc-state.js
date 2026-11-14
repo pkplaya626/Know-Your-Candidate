@@ -1242,16 +1242,25 @@
     if (!hit && fold.delegation === "search") setDelegation(false);
   }
 
+  /* The query as typed, as the grid keeps it: its capitals tell "IN
+   * congress" from "in congress" (rule 5), and every reader folds it. On a
+   * state's own page its own code, typed in any case before other words,
+   * is that state: the page holds no one else, and read as words "oh
+   * delegation" hid all 33 of Ohio's cards with no word of why (the PR
+   * #252 second read). Another state's code that is a word stays a word. */
   function searchQuery() {
     var input = el("stateSearch");
-    return input ? input.value.trim().toLowerCase() : "";
+    var q = input ? input.value.trim() : "";
+    var lead = /^([A-Za-z]{2})(?![A-Za-z])/.exec(q);
+    if (lead && code && lead[1].toUpperCase() === code && KYC.codeIsWord(code)) q = code + q.slice(2);
+    return q;
   }
 
   function initSearch() {
     var input = el("stateSearch");
     if (!input) return;
     var run = KYC.debounce(function () {
-      var q = input.value.trim().toLowerCase();
+      var q = searchQuery();
       if (kind === "states") {
         // Folded like every other search on the site (KYC.foldText).
         var folded = KYC.foldText(q);

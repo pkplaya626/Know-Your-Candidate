@@ -3085,6 +3085,48 @@
     "n dak": ["ND", true], "s dak": ["SD", true], "n car": ["NC", true], "s car": ["SC", true],
   };
 
+  /* The postal codes that are also a word or a name a query is made of:
+   * "in", "or", "me", "as", "oh", "hi", "ok", "id", "Al", "Mo", "Ma", "Pa",
+   * "de" and "la" of a surname, "va" for Veterans Affairs, "co" a company,
+   * "ne" a direction, "ms" a title, "mt" a mount, "ct" a court. Beside other
+   * words such a code is a state only typed in capitals ("IN congress", "AS
+   * delegate"), as uppercased prose would otherwise turn "in", "or" and "me"
+   * into Indiana, Oregon and Maine (rule 5); alone, or before a district,
+   * it is the place however typed. One table, for the grid (parsePlace) and
+   * the answers above it (kyc-search.js), rule 12. Every code was asked;
+   * the others ("tx", "ny", "gu", "md") are no word a reader types. A code
+   * whose AP style abbreviation is itself and a period ("Pa.", "Va.",
+   * "La.", "Mo.") is the place written so, as "Calif." is (rule 97): no
+   * word is written that way. The period forms "Ms.", "Mt." and "Co." are
+   * a title, a mount and a company, so those codes carry none. */
+  var CODE_WORDS = { in: 1, or: 1, me: 1, oh: 1, hi: 1, ok: 1, de: 1, al: 1, la: "La.", ma: 1,
+    mo: "Mo.", id: 1, as: 1, pa: "Pa.", co: 1, ne: 1, va: "Va.", ms: 1, mt: 1, ct: 1 };
+
+  /** Whether a postal code is also a word (CODE_WORDS), in any case. */
+  function codeIsWord(code) {
+    return Object.prototype.hasOwnProperty.call(CODE_WORDS, String(code || "").toLowerCase());
+  }
+
+  /** Whether *raw*, as typed, holds *code* in capitals as a word of its own,
+   *  or as its AP abbreviation with the period: "IN governor", "Pa. senate"
+   *  and "pa. senate" do, "in governor", "Pa senate" and "Indiana" do not. */
+  function typedInCapitals(raw, code) {
+    var text = String(raw || "");
+    var upper = String(code).toUpperCase();
+    if (new RegExp("(^|[^A-Za-z])" + upper + "([^A-Za-z]|$)").test(text)) return true;
+    var ap = CODE_WORDS[upper.toLowerCase()];
+    // Its first letter in either case ("pa." typed on a phone), and not
+    // after a letter and a period: "W.Va." is West Virginia.
+    return typeof ap === "string" && new RegExp("(^|[^A-Za-z.])[" + ap[0] + ap[0].toLowerCase() + "]" +
+      ap.slice(1).replace(".", "\\.")).test(text);
+  }
+
+  /** Whether *raw* opens with *code* typed in capitals (typedInCapitals). */
+  function leadsInCapitals(raw, code) {
+    var lead = /^[^A-Za-z]*[A-Za-z]{2}\.?/.exec(String(raw || ""));
+    return !!lead && typedInCapitals(lead[0], code);
+  }
+
   /** The state a short form names ("calif" -> "CA"), or null; *alone*
    *  asks only for the forms that name it typed on their own. */
   function stateAbbreviation(word, alone) {
@@ -3195,9 +3237,20 @@
     });
     var code = best ? byName[best] : null;
     var rest = best ? s.slice(best.length + 1) : "";
+    // A code that is also a word, before words that name no district, is a
+    // place only typed in capitals (rule 5): the grid lowercased the query,
+    // and "as delegate" was American Samoa's Delegate, "in congress"
+    // Indiana's members. Before a district it is that district however
+    // typed ("al 3", "al at large"); a code no word ("tx") is a place in any
+    // case, and so is a state's name.
+    var wordOnly = false;
     if (!code) {
       var two = /^([a-z]{2}) (.+)$/.exec(s);
-      if (two && states[two[1].toUpperCase()]) { code = two[1].toUpperCase(); rest = two[2]; }
+      if (two && states[two[1].toUpperCase()]) {
+        code = two[1].toUpperCase();
+        rest = two[2];
+        wordOnly = codeIsWord(code) && !leadsInCapitals(query, code);
+      }
     }
     if (!code) {
       // "Resident Commissioner of Puerto Rico", "delegate from Guam": the
@@ -3213,6 +3266,8 @@
         var out = SEAT_REST[i][1](m, code);
         // A title the place's seat does not have: words, as before.
         if (!out) return null;
+        // A word-code in lower case names a district only.
+        if (wordOnly && out.district === undefined) return null;
         out.state = code;
         if (out.district !== undefined) out.chamber = "House";
         return out;
@@ -3248,6 +3303,14 @@
    *  holds or runs for. The count of seats is the build's (one at large
    *  answers "1" too); a state with none listed concludes nothing. */
   function seatNote(place) {
+    // "AS senate": a place with no senator has no Senate seats to name, and
+    // the line, and the grid's offer of the capitals form, said "American
+    // Samoa’s Senate seats" over nobody (the PR #252 second read). The count
+    // is the build's; a place it does not hold concludes nothing.
+    if (place && place.chamber === "Senate" && place.district === undefined) {
+      var info = (meta().states || {})[place.state];
+      return info && info.senators === 0 ? placeStart(place.state) + " has no seat in the U.S. Senate." : "";
+    }
     if (!place || place.district === undefined || place.any) return "";
     var seats = houseSeats(place.state);
     if (!seats) return "";
@@ -3270,6 +3333,7 @@
         ? "AL" : String(place.district);
       return place.any ? "district " + seat + " in every state" : place.state + "-" + seat;
     }
+    if (seatNote(place)) return "";
     var name = stateName(place.state);
     // In a sentence the place is named as one names it (rule 75): "the U.S.
     // Virgin Islands’ sitting House members", never "U.S. Virgin Islands’s".
@@ -3332,8 +3396,25 @@
     }
     var two = place && /^[a-z]{2}$/.test(q);
     compiled = { query: query, place: place, seat: seat, terms: terms, exact: exact,
-                 two: two, title: title, label: placeLabel(place), note: seatNote(place) };
+                 two: two, title: title, label: placeLabel(place), note: seatNote(place),
+                 hint: place ? null : capitalsHint(query) };
     return compiled;
+  }
+
+  /* What a query opening with a code that is a word, not in capitals, would
+   * name in capitals, or null: "pa senate" is words (rule 5), and "PA
+   * senate" Pennsylvania's Senate seats. A reader on a phone types in lower
+   * case, and the line offers the capitals form rather than leave them with
+   * 120 profiles led by Padilla; it never reads the query as the place
+   * itself, since "as delegate" and "in congress" are words. */
+  function capitalsHint(query) {
+    var raw = String(query || "").trim();
+    var lead = /^([A-Za-z]{2})(?![A-Za-z])\.?/.exec(raw);
+    if (!lead || !codeIsWord(lead[1])) return null;
+    var asked = lead[1].toUpperCase() + raw.slice(lead[0].length);
+    var place = parsePlace(asked);
+    var label = place && place.district === undefined ? placeLabel(place) : "";
+    return label ? { query: asked, label: label } : null;
   }
 
   function placeScore(c, item) {
@@ -4625,11 +4706,14 @@
     queryPlace: function (query) { return compileQuery(query).place; },
     queryLabel: function (query) { return compileQuery(query).label; },
     queryNote: function (query) { return compileQuery(query).note; },
+    queryHint: function (query) { return compileQuery(query).hint; },
     searchSnippet: searchSnippet,
     searchFold: searchFold,
     nameScore: nameScore,
     stateNamed: stateNamed,
     stateAbbreviation: stateAbbreviation,
+    codeIsWord: codeIsWord,
+    typedInCapitals: typedInCapitals,
     loadData: loadData,
     onDemandSrc: onDemandSrc,
     people: people,
