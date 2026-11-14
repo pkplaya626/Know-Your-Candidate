@@ -36,6 +36,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… legphotos` | The portraits of the legislators Open States has none for, from each legislature's own pages and records, writing `data/legislator_photos.json` (`--check` reports the cache; `--state ST` reads one state; `--force` reads entries younger than 14 days again) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… localgov --check-sites` | Open every website the listing gives a local government - many hosts at once, one request at a time per host - and record what each is now in `data/local_sites.json` (hand-editable; a stopped run resumes; `--recheck VERDICT` looks again at one kind, `--states`, `--limit`, and `--max-minutes`, a time budget after which it opens nothing new, saves and stops) |
+| `… guidesources` | Open every source the guide's sections and their words, its maps and the 2026 ballot table cite, and the statutes the page code links - a GET as this project, the first bytes only, one request at a time per host - and record what each answered in `data/guide_sources.json` (hand-editable; `--check` reports the cache; `--refresh` opens every one, not only those due; `--limit`, `--workers`, and `--max-minutes`, a time budget after which it opens nothing new, saves and stops). Only a 404 or 410 on two reads on different days, or a host gone at two public resolvers, is gone; a refusal, a challenge or a timeout concludes nothing. The build warns on a gone source by name and section, and on one not looked at in 30 days. See [Know Your Government](#know-your-government) |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
@@ -2257,6 +2258,27 @@ here in a different way:
   `site:map.html`, `state:TX` or an `https://` URL. `validate.check_guide`
   fails on a missing page, section or state, an unknown source, or a source
   no section cites.
+- **A source that stops opening is said.** No gate opens an external link,
+  and some eighty sources are the Law Revision Counsel's
+  `uscode.house.gov/us/usc/tN/sM/` pages, on a site that says it runs in a
+  "temporary format" and whose previous `view.xhtml` addresses already answer
+  404. `guidesources` (`kyc/guide_sources.py`), run weekly by the refresh,
+  opens every address the guide's sections and their words, its maps, the
+  2026 ballot table and the page code's statute links cite: a GET as this
+  project, the first bytes only, one request at a time per host. It keeps
+  each one's day and answer in `data/guide_sources.json`. A source is
+  **gone** after a 404 or 410 on two reads on different days, or when its
+  host does not exist here and at both dns.google and Cloudflare; it is
+  **elsewhere** when two days' reads opened a page that is not it (titled
+  "Page Not Found", a deep link its own site sends to its front page, a Code
+  section's address whose page's title names another section). A 403, a
+  429, a 5xx, a timeout, a bot wall or a challenge concludes nothing:
+  constitution.congress.gov answers the reader with Cloudflare's "Just a
+  moment...", and is never called gone for it. The build warns, never fails,
+  on each gone or elsewhere source by its address, its names and every
+  section that cites it, on one never opened, and on one not looked at in
+  30 days; it says how many could not be read, by host, as a line of its
+  own.
 - **One name per page.** A guide page's title, heading, navigation entry,
   card, pager link and every other page's link to it are one string
   (`government.name`), and a test fails on a link that calls a page anything

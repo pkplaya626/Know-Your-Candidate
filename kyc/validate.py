@@ -2253,7 +2253,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
         history=None, voting_dates=None, statewide=None, measures=None, portraits=None,
         photo_routes=(), guides=None, photo_manifest=None, legislators=None, officers=None,
-        local_measures=None, judge_disclosures=False):
+        local_measures=None, judge_disclosures=False, guide_sources=None, root="."):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -2308,6 +2308,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_results_pages(results)
     issues += check_seats_contested(profiles)
     issues += check_guide()
+    issues += check_guide_sources(guide_sources, root)
     issues += check_ballot2026()
     issues += check_federal(federal)
     issues += check_succession(federal, snapshot)
@@ -2768,6 +2769,32 @@ def check_guide(today=None):
                              f"{len(due)} passage(s) of the guide describe dates that have passed "
                              f"since the page was checked; re-check them and move its 'reviewed'",
                              [f"{slug} (since {day}): {what}" for slug, day, what in due]))
+    return issues
+
+
+def check_guide_sources(cache, root=".", today=None):
+    """Whether the sources the guide, its maps and the 2026 ballot table cite,
+    and the statutes the page code links, still open (kyc/guide_sources.py,
+    rule 48): a source gone or opening another page, by its address, its
+    names and every section that cites it; a source never opened; one not
+    looked at in ``guide_sources.WARN_DAYS``.
+
+    Warnings, never errors: the sites are other people's, and a refresh must
+    not fail because one of them moved (rule 8). With *cache* None the
+    caller did not supply it, and nothing is said."""
+    if cache is None:
+        return []
+    from . import guide_sources
+    cited = guide_sources.citations(root)
+    found = guide_sources.problems(cache, cited, today)
+    issues = [Issue(level, code, message, detail) for level, code, message, detail in found]
+    unread = guide_sources.unread_hosts(cache, cited)
+    if unread:
+        # What no read could confirm, said for a person, counted as neither.
+        issues.append(Issue("info", "guide-sources-unread",
+                            f"{sum(unread.values())} address(es) the guide cites could not be read "
+                            f"by 'guidesources' (a refusal, a challenge or a timeout concludes "
+                            f"nothing): " + ", ".join(f"{host} {n}" for host, n in unread.items())))
     return issues
 
 

@@ -58,6 +58,7 @@ data/political_history.json ──┤   (public offices held: congress-legislato
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
+data/guide_sources.json     ──┤   (each source the guide and the ballot table cite, opened: guidesources; rule 48)
 data/members.json           ──┤   (members' platforms, education, careers, offices: members)
 data/roll_calls.json        ──┤   (every roll call of the Congress: House Clerk, Senate LIS; votes)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
@@ -145,7 +146,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `judge_disclosures.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
-  `seat_history.json`, `outside_spending.json`
+  `guide_sources.json`, `seat_history.json`, `outside_spending.json`
   and `departed_members.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
@@ -193,6 +194,8 @@ python build_profile_site.py statelegs        # every state legislator (Open Sta
 python build_profile_site.py legphotos       # their portraits Open States lacks, from each legislature's own records
 python build_profile_site.py localgov         # every local government (Census listing), checked
 python build_profile_site.py localgov --check-sites  # open every listed local website; resumes (rule 78)
+python build_profile_site.py guidesources     # open every source the guide, its maps and the ballot table cite (rule 48)
+                                              # --max-minutes N: nothing new opened after N minutes; the rest keep their last read
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster, and its justices' photographs
@@ -225,7 +228,7 @@ npm install && npm test                       # 4984 real-DOM checks (needs jsdo
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `executives`,
+`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `guidesources`, `executives`,
 `officers`, `courts`, `ballotphotos`, `guidephotos`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside`, `photocopies` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
@@ -1083,6 +1086,28 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     section holds is listed by its words in `government_text.UNSOURCED`
     (README names each): a section's date says when its sources were read,
     never that they hold it.
+    A source cited is a source that opens, and only a read says so: no gate
+    opened an external link, and some eighty sources are the Law Revision
+    Counsel's `uscode.house.gov/us/usc/tN/sM/` pages, on a site that says it
+    runs in a "temporary format" and whose previous `view.xhtml` addresses
+    already answer 404 (PR #255's review). `guidesources`
+    (`kyc/guide_sources.py`) opens every address the guide's sections and
+    their words, its maps, the 2026 ballot table and the page code's statute
+    links cite - a GET as this project (rule 103; HEAD lies, rule 51), the
+    first bytes only, one request at a time per host - and keeps each one's
+    day and answer in `data/guide_sources.json`, weekly in the refresh. Only
+    404 or 410 on two reads on different days, or a host gone here and at
+    both public resolvers (rule 35), is `gone`; a page that is not the source
+    on two days (titled "Page Not Found", a deep link its own site sends to
+    its front page, a Code section's address whose page's title names
+    another section) is `elsewhere`. A 403, 429, 5xx, timeout, bot wall or
+    challenge concludes nothing (rule 8): constitution.congress.gov answers
+    the reader with Cloudflare's "Just a moment...", and eCFR sends it to
+    the Federal Register's "Request Access" page, never its front page. The
+    build warns on each gone or elsewhere source by its address, names and
+    every section that cites it, on one never opened and on one not looked
+    at in 30 days (`validate.check_guide_sources`): warnings, never errors,
+    since a refresh must not fail on someone else's site.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title. The 2026-10-17 audit found
