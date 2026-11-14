@@ -29,10 +29,14 @@ What one read answers (``assess``):
 * ``notfound`` - HTTP 404 or 410 (never one a bot wall's own host gives
   after a redirect: ``agent.wall_host``);
 * ``elsewhere`` - a page that is not the source: one titled "Page Not
-  Found", a deep address sent to its own site's front page or another's, a
-  lapsed domain's page (a marketplace, a parking service or its "/lander",
-  a domain for sale, expired or parked, gambling spam: ``kyc/localsites.py``
-  reads them, rules 35 and 39), or a section's address opening a page with
+  Found", a deep address sent to its own site's front page or another's
+  (where the redirect ended, query and all: another host's
+  "/index.php?section=5" is a page), a lapsed domain's page (a marketplace,
+  a parking service or its "/lander", a domain for sale, expired or parked:
+  ``kyc/localsites.py`` reads them, rules 35 and 39), gambling spam in its
+  title or headings, on another host a redirect sent it to, or in spam's
+  own brand words throughout its text - never a betting word in a law's
+  own text (``gambling``) - or a section's address opening a page with
   words whose title names another section or none;
 * ``dead`` - its host does not resolve here, and dns.google and Cloudflare
   both answer NXDOMAIN or no address for it (rule 35's second resolver);
@@ -40,11 +44,14 @@ What one read answers (``assess``):
   a certificate or connection failure, a bot wall or a challenge
   (constitution.congress.gov answers this project with Cloudflare's "Just a
   moment..."), a name a public resolver finds or cannot answer for, a
-  sign-in page (another host's, or a redirect to the site's own), a page
-  where its address names a PDF, a server's error or maintenance page that
-  answers 200 (Illinois's "Error Display": "An error has occurred"), a web
-  server's placeholder, and a page with almost no text (one drawn by
-  script, ``officers.says_nothing``).
+  sign-in page (another host's, or a redirect to the site's own), an answer
+  whose first bytes are not the file its address or its Content-Type names
+  (a "Request Rejected" page served as a PDF: rule 52), a server's error or
+  maintenance page that answers 200 (Illinois's "Error Display": "An error
+  has occurred", in its title, its headings, its ``<main>`` or a short
+  page), a web server's placeholder, and a page with almost no text (one
+  drawn by script, ``officers.says_nothing``) that is not a deep link sent
+  to a front page.
 
 What the cache keeps (``merge``):
 
@@ -144,13 +151,15 @@ _SIGN_IN_TITLE = re.compile(
 WALL_HOSTS = ("unblock.federalregister.gov",)
 # A title that says the page asked for is not there: "Page Not Found - US
 # Code", the Law Revision Counsel's own 404 page's. "404" counts only at the
-# title's start or beside "error" or "not found": "RCW 29A.04.404:
-# Definitions" and "Sec. 404 - Terms of office" are statutes.
+# title's start, and not as a section's number there ("404.020 Definitions"),
+# or beside "error" or "not found": "RCW 29A.04.404: Definitions" and "Sec.
+# 404 - Terms of office" are statutes.
 _NOT_FOUND_TITLE = re.compile(
     r"\b(?:page|file|document|resource|content)\b(?:\s+(?:you|was|is|has|been|requested|"
     r"looking|for|are|were|the))*\s+(?:not\s+found|(?:could\s+not|cannot|can[’']t)\s+be\s+found|"
     r"no\s+longer\s+(?:exists|available))\b|"
-    r"^\s*(?:error\s+)?404\b|\b404\s+(?:error|not\s+found)\b|\berror\s*404\b|^\s*not\s+found\s*$",
+    r"^\s*(?:error\s+)?404\b(?![.\d])|\b404\s+(?:error|not\s+found)\b|\berror\s*404\b|"
+    r"^\s*not\s+found\s*$",
     re.I)
 # A server's error or maintenance page that answers 200 in the source's
 # place is a 5xx dressed as a page, and says nothing of the source (rule 8):
@@ -182,8 +191,22 @@ _ERROR_TEXT = re.compile(
     re.I)
 # A page is short enough to be read whole for an error's words under this
 # many characters of text: Illinois's error page holds 1,053, Louisiana's
-# 576; the laws those sites serve run to many thousands.
+# 576; the laws those sites serve run to many thousands. Its headings and
+# its <main> are read first, so a page whose navigation runs past this
+# still says its error (both sites put it in their <main>).
 ERROR_TEXT_MAX = 4_000
+_MAIN = re.compile(r"<main\b[^>]*>(.*?)</main\s*>", re.I | re.S)
+# A file says what it is in its first bytes, whatever its Content-Type
+# (rule 52: a server's "Request Rejected" page has been served as the file):
+# (what it is, the address's endings, words of its type, its first bytes).
+_FILES = (
+    ("PDF", (".pdf",), ("application/pdf",), (b"%PDF",)),
+    ("ZIP file", (".zip",), ("application/zip", "application/x-zip"), (b"PK\x03\x04", b"PK\x05\x06")),
+    ("spreadsheet", (".xlsx",), ("spreadsheetml",), (b"PK\x03\x04",)),
+    ("document", (".docx",), ("wordprocessingml",), (b"PK\x03\x04",)),
+    ("spreadsheet", (".xls",), ("ms-excel",), (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1",)),
+    ("document", (".doc",), ("msword",), (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1",)),
+)
 _TITLE = re.compile(r"<title[^>]*>(.*?)(?:</title|$)", re.I | re.S)
 _BODY_OR_SVG = re.compile(r"<(?:body|svg)\b", re.I)
 _FRONT = re.compile(r"^/(?:(?:index|default|home)(?:\.[a-z]{2,5})?)?/?$", re.I)
@@ -427,9 +450,10 @@ def va_section(url):
 def names_va_section(title, section):
     """Whether a page's *title* names the Code of Virginia's *section*, as
     the Legislative Information System titles it: "§ 24.2-214. Election and
-    term of Senators" names "24.2-214", never "24.2-214.1" or "24.2-2140"."""
+    term of Senators" names "24.2-214", never "24.2-214.1", "24.2-2140" or
+    "24.2-214:1" (the Code numbers a section inserted after another so)."""
     folded = re.sub(r"[‐-―−]", "-", title or "")
-    return bool(re.search(rf"(?:§+|sec\.?|section)\s*{re.escape(section)}(?![\w-]|\.\w)", folded,
+    return bool(re.search(rf"(?:§+|sec\.?|section)\s*{re.escape(section)}(?![\w-]|[.:]\w)", folded,
                           re.I))
 
 
@@ -495,6 +519,53 @@ def _decode(body, kind):
         return body.decode("utf-8", "replace")
 
 
+def file_expected(url, kind):
+    """``(what, "address" | "type", first bytes)`` for a file *url* names by
+    its ending (".pdf", ".xlsx", ".zip"), else its Content-Type *kind*
+    names; None for a page."""
+    path = urllib.parse.urlsplit(address(url)).path.lower()
+    for what, endings, _types, magic in _FILES:
+        if path.endswith(endings):
+            return what, "address", magic
+    kind = (kind or "").lower()
+    for what, _endings, types, magic in _FILES:
+        if any(t in kind for t in types):
+            return what, "type", magic
+    return None
+
+
+def gambling(head, body, cross):
+    """Whether a cited source's page is a gambling page: spam or betting
+    words in its title or headings (``head``), the same on another host a
+    redirect sent it to (*cross*), or spam's own brand words throughout its
+    text (``localsites.brand_spam``). Never a betting word in its text: a
+    constitution, a statute or a ballot question about online casinos or
+    sportsbooks says them as often as a slot site."""
+    return (localsites.gambling_at(head, body, cross) in ("head", "redirect")
+            or localsites.brand_spam(body) >= 3)
+
+
+def error_words(markup, page, text):
+    """An error page's own words ("An error has occurred") where a page
+    says them as one: in a heading, in its ``<main>`` when that is short,
+    or in the whole page when that is; None otherwise. A long page's
+    navigation does not hide its main content's error, and a long statute
+    that says the words mid-text is not an error page."""
+    places = [words for tag, words in page.headings if tag in ("h1", "h2", "h3")]
+    main = _MAIN.search(markup or "")
+    if main:
+        inner = officers.visible_text(main.group(1))
+        if len(inner) < ERROR_TEXT_MAX:
+            places.append(inner)
+    if len(text) < ERROR_TEXT_MAX:
+        places.append(text)
+    for words in places:
+        said = _ERROR_TEXT.search(words)
+        if said:
+            return said
+    return None
+
+
 def assess(url, seen):
     """``(answer, evidence, final address)`` for what :func:`visit` saw:
     ``open``, ``notfound``, ``elsewhere`` or ``nothing`` (the caller asks
@@ -537,22 +608,34 @@ def assess(url, seen):
         return NOTHING, f"HTTP {status}{wall}{moved}", final
     if not body.strip():
         return NOTHING, f"HTTP {status} with an empty body{moved}", final
+    # Whether it is a deep link sent to a front page is asked of where the
+    # redirect really ended, query and all: "/index.php?section=5" on a new
+    # host is a page, not the host's front page. The evidence shows *final*.
+    front = _front_page(address(url), chain[-1])
+    expected = file_expected(url, kind)
+    lead = body.lstrip()[:16]
+    if expected and not lead.startswith(expected[2]):
+        # Not the file its address or its type names: a rejection page, a
+        # challenge or an error served in its place says nothing of the file
+        # (rule 52), whatever the Content-Type says.
+        markup = _decode(body, kind) if lead.startswith(b"<") else ""
+        if markup and agent.walled(markup):
+            return (NOTHING, f"a bot wall's or a challenge's page ('{_words(page_title(markup), 60)}')"
+                             f"{moved}", final)
+        said = f"a page ('{_words(page_title(markup), 60)}')" if markup else "other bytes"
+        return (NOTHING, f"HTTP {status}, {said} where its {expected[1]} names a {expected[0]}{moved}",
+                final)
     title = ""
-    if _is_page(kind) and not body.lstrip().startswith(b"%PDF"):
+    if not expected and _is_page(kind) and not lead.startswith(b"%PDF"):
         markup = _decode(body, kind)
         if agent.walled(markup):
             return NOTHING, f"a bot wall's or a challenge's page ('{_words(page_title(markup), 60)}'){moved}", final
         title = page_title(markup)
         quoted = f"'{_words(title, 60)}'"
-        if address(url).lower().endswith(".pdf"):
-            # A page where a file was asked for may be a rejection page
-            # (rule 52): it says nothing of the file.
-            return NOTHING, f"HTTP {status}, a page where its address names a PDF ({quoted}){moved}", final
         page = enrich.parse_page(markup)
         head = localsites.page_head(page)
-        spam = localsites.gambling_at(head, page.body, redirected and not _same_site(
-            urllib.parse.urlsplit(url).hostname or "", end))
-        if spam in localsites.PLAIN:
+        if gambling(head, page.body, redirected and not _same_site(
+                urllib.parse.urlsplit(url).hostname or "", end)):
             return ELSEWHERE_ANSWER, f"HTTP {status}, a gambling page ({quoted}){moved}", final
         lapsed = localsites.domain_page(page, head)
         if lapsed == localsites.PLACEHOLDER:
@@ -565,7 +648,7 @@ def assess(url, seen):
         if _NOT_FOUND_TITLE.search(title):
             return ELSEWHERE_ANSWER, f"HTTP {status}, a page titled {quoted}{moved}", final
         text = officers.visible_text(markup)
-        said = _ERROR_TEXT.search(text) if len(text) < ERROR_TEXT_MAX else None
+        said = error_words(markup, page, text)
         if _ERROR_TITLE.search(title) or said:
             # A server's error or maintenance page in the source's place: a
             # 5xx dressed as a 200 concludes nothing (rule 8).
@@ -574,14 +657,16 @@ def assess(url, seen):
                              f"{moved}", final)
         if _SIGN_IN_TITLE.search(title):
             return NOTHING, f"HTTP {status}, a sign-in page ({quoted}){moved}", final
-        if officers.says_nothing(markup):
+        if not front and officers.says_nothing(markup):
             # A page that draws itself with JavaScript, or holds next to no
             # text, says nothing either way (rules 8 and 56): uscode.house.gov
-            # has served this project only a script shell before.
+            # has served this project only a script shell before. A deep link
+            # sent to a front page has gone, however that front page draws
+            # itself, and is said below.
             return (NOTHING, f"HTTP {status}, a page with almost no text ({len(text)} characters; "
                              f"one drawn by script says nothing until it runs, {quoted}){moved}",
                     final)
-    if _front_page(address(url), final):
+    if front:
         own = _same_site(urllib.parse.urlsplit(url).hostname or "", end)
         here = "its site's" if own else "another site's"
         return ELSEWHERE_ANSWER, f"redirects to {here} front page, {final}", final

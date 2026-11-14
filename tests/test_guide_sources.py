@@ -339,6 +339,160 @@ class TestWhatAPageSaysOfItself(unittest.TestCase):
             self.assertFalse(gs._SIGN_IN_TITLE.search(title), title)
 
 
+class TestTheThirdReadersCases(unittest.TestCase):
+    """The third read of the source check (2026-11-14): another host's page
+    taken for its front page, a domain's own "is for sale" title, betting
+    words in a law's text, a statute numbered 404, a Code of Virginia
+    section inserted as ":1", a file answered with a page, a front page
+    drawn by script, and an error said in a long page's main content. Each
+    makes the page it tests."""
+
+    LAW = "https://law.example.gov/statutes/sec-5"
+
+    def test_another_hosts_page_with_a_query_is_not_its_front_page(self):
+        """The front-page test read the address as the cache keeps it, with
+        another host's query cut off, so ".../index.php?section=5" read as
+        that host's front page and a source that moved became elsewhere."""
+        for end in ("https://www.newlaws.gov/index.php?section=5", "https://www.newlaws.gov/?p=123",
+                    "https://www.newlaws.gov/default.aspx?cite=5"):
+            read = gs.assess(self.LAW, seen(200, page("Section 5 - Terms of office"),
+                                            chain=[self.LAW, end]))
+            self.assertEqual(read[0], gs.OPEN, end)
+            # The cache still keeps no other host's query (shown).
+            self.assertNotIn("?", read[1] + read[2], end)
+            self.assertEqual(two_days(self.LAW, read)["verdict"], gs.OK, end)
+        for end in ("https://www.newlaws.gov/", "https://www.newlaws.gov/index.php",
+                    "https://newlaws.gov"):
+            read = gs.assess(self.LAW, seen(200, page("New Laws"), chain=[self.LAW, end]))
+            self.assertEqual(read[0], gs.ELSEWHERE_ANSWER, end)
+            self.assertIn("another site's front page", read[1])
+            self.assertEqual(two_days(self.LAW, read)["verdict"], gs.ELSEWHERE, end)
+
+    def test_a_domains_own_title_saying_it_is_for_sale(self):
+        """"ncsl.org is for sale", a marketplace's title on the lapsed
+        domain itself, read open over two days."""
+        url = "https://www.ncsl.org/elections-and-campaigns/state-primary-election-types"
+        for title in ("ncsl.org is for sale", "NCSL.ORG may be for sale", "www.ncsl.org is for sale!"):
+            read = gs.assess(url, seen(200, page(title), chain=[url]))
+            self.assertEqual(read[0], gs.ELSEWHERE_ANSWER, title)
+            self.assertIn("a domain for sale", read[1])
+            self.assertEqual(two_days(url, read)["verdict"], gs.ELSEWHERE, title)
+        # A sale that is not a domain's is no lapsed domain.
+        for title in ("Parcel 12.5 is for sale", "The fire engine at 12 Main St. is for sale",
+                      "Surplus property is for sale - Example County"):
+            self.assertFalse(gs.localsites._FOR_SALE.search(title), title)
+
+    def test_betting_words_in_a_laws_text_are_not_a_gambling_page(self):
+        """A constitution, statute or ballot question about online betting
+        says its words as often as a slot site; only spam's own words, a
+        title or heading, or another host a redirect sent it to, say
+        gambling (the review made the Florida Constitution "elsewhere")."""
+        url = "https://www.flsenate.gov/Laws/Constitution"
+        law = ("Section 30. Gaming. The legislature may not authorize online casinos, sportsbooks and "
+               "slot machines except as provided herein. " * 6
+               + "Sweepstakes casinos, casino sites and online slots are prohibited. " * 3)
+        read = gs.assess(url, seen(200, page("The Florida Constitution - The Florida Senate", law),
+                                   chain=[url]))
+        self.assertEqual(read[0], gs.OPEN, read)
+        self.assertEqual(two_days(url, read)["verdict"], gs.OK)
+        self.assertEqual(gs.localsites.brand_spam(law), 0)
+        # Spam is still spam: in the title, throughout the text in its own
+        # words, or on another host a redirect sent the source to.
+        spam = "Daftar situs slot gacor terpercaya, togel online, pgbet888 maxwin. " * 2
+        for chain, title, text in (
+                ([url], "Situs Slot Gacor Hari Ini", ""),
+                ([url], "The Florida Constitution", spam),
+                ([url, "https://casinos.example/best"], "Best Picks", law)):
+            read = gs.assess(url, seen(200, page(title, text), chain=chain))
+            self.assertEqual(read[0], gs.ELSEWHERE_ANSWER, title)
+            self.assertIn("gambling", read[1])
+        self.assertGreaterEqual(gs.localsites.brand_spam(spam), 3)
+
+    def test_a_statute_numbered_404_at_its_titles_start(self):
+        for title in ("404.020 Definitions", "404.1 Scope of chapter", "4040 Election code"):
+            self.assertFalse(gs._NOT_FOUND_TITLE.search(title), title)
+            url = "https://revisor.example.gov/statutes/404.020"
+            self.assertEqual(gs.assess(url, seen(200, page(title), chain=[url]))[0], gs.OPEN, title)
+        for title in ("404 Not Found", "404", "Error 404 - Example", "404 - Page missing"):
+            self.assertTrue(gs._NOT_FOUND_TITLE.search(title), title)
+
+    def test_a_virginia_section_inserted_after_another(self):
+        """§ 24.2-946.1:1 is a section of its own: its title does not name
+        § 24.2-946.1, and its own address names it."""
+        url = "https://law.lis.virginia.gov/vacode/title24.2/chapter9.3/section24.2-946.1/"
+        read = gs.assess(url, seen(200, page("§ 24.2-946.1:1. Another section"), chain=[url]))
+        self.assertEqual(read[0], gs.ELSEWHERE_ANSWER)
+        self.assertIn("does not name Va. Code 24.2-946.1", read[1])
+        inserted = "https://law.lis.virginia.gov/vacode/title24.2/chapter9.3/section24.2-946.1:1/"
+        self.assertEqual(gs.va_section(inserted), "24.2-946.1:1")
+        self.assertEqual(gs.assess(inserted, seen(200, page("§ 24.2-946.1:1. Its own title"),
+                                                  chain=[inserted]))[0], gs.OPEN)
+        self.assertEqual(gs.assess(url, seen(200, page("§ 24.2-946.1. Its own title"),
+                                             chain=[url]))[0], gs.OPEN)
+
+    def test_a_file_is_judged_by_its_first_bytes_whatever_its_type(self):
+        """Rule 52: a "Request Rejected" page served under application/pdf
+        read open; so would a spreadsheet's or an archive's address that
+        answered a page."""
+        rejected = (b"<html><head><title>Request Rejected</title></head>"
+                    b"<body>The requested URL was rejected.</body></html>")
+        error = page("Server Error", "Something went wrong.")
+        for url, kind, body in (
+                ("https://www.example.gov/a/b.pdf", "application/pdf", rejected),
+                ("https://www.example.gov/a/b.PDF", "application/octet-stream", error),
+                ("https://www.example.gov/a/list.xlsx",
+                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", error),
+                ("https://www.example.gov/a/tables.zip", "application/zip", b"\x00\x01not a zip"),
+                ("https://www.example.gov/media/460/download?inline=", "application/pdf", error)):
+            read = gs.assess(url, seen(200, body, kind=kind, chain=[url]))
+            self.assertEqual(read[0], gs.NOTHING, url)
+            self.assertEqual(two_days(url, read)["verdict"], gs.UNREAD, url)
+        # The files themselves open, whatever their type says.
+        for url, kind, body in (
+                ("https://www.example.gov/a/b.pdf", "text/html", b"%PDF-1.7\n"),
+                ("https://www.example.gov/a/list.xlsx", "application/octet-stream", b"PK\x03\x04\x14\x00"),
+                ("https://www.example.gov/a/tables.zip", "", b"PK\x03\x04\x14\x00"),
+                ("https://www.example.gov/media/460/download?inline=", "application/pdf", b"%PDF-1.4\n")):
+            self.assertEqual(gs.assess(url, seen(200, body, kind=kind, chain=[url]))[0], gs.OPEN, url)
+
+    def test_a_deep_link_sent_to_a_front_page_drawn_by_script(self):
+        """The front page answered as a script shell concluded nothing,
+        because the test of almost no text ran first; the deep link is not
+        there either way."""
+        url = "https://www.example.gov/elections/candidates/2026"
+        shell = (b"<html><head><title>Example</title><script src='/app.js'></script></head>"
+                 b"<body><div id=root></div></body></html>")
+        read = gs.assess(url, seen(200, shell, chain=[url, "https://www.example.gov/"]))
+        self.assertEqual(read[0], gs.ELSEWHERE_ANSWER)
+        self.assertIn("its site's front page", read[1])
+        self.assertEqual(two_days(url, read)["verdict"], gs.ELSEWHERE)
+        # The address itself drawn by script still says nothing.
+        self.assertEqual(gs.assess(url, seen(200, shell, chain=[url]))[0], gs.NOTHING)
+
+    def test_an_error_in_a_long_pages_main_content(self):
+        """Louisiana's Law.aspx for a bad id says "An Error Occurred on This
+        Page" in its <main> (576 characters of text today); past 4,000
+        characters of navigation it read open."""
+        url = "https://legis.la.gov/legis/Law.aspx?d=99999999"
+        nav = TestWhatAPageSaysOfItself.NAV * 60
+        self.assertGreater(len(nav), gs.ERROR_TEXT_MAX)
+        for inner in ("<main><div><span>An Error Occurred on This Page</span> The Document ID "
+                      "parameter ('d') is missing or invalid.</div></main>",
+                      "<div><h2>An error has occurred</h2><p>Please try again later.</p></div>"):
+            body = (f"<html><head><title>Louisiana Laws - Louisiana State Legislature</title></head>"
+                    f"<body><nav>{nav}</nav>{inner}<footer>{nav}</footer></body></html>").encode()
+            read = gs.assess(url, seen(200, body, chain=[url]))
+            self.assertEqual(read[0], gs.NOTHING, inner)
+            self.assertIn("says an error occurred", read[1])
+        # A long statute in its <main> that says the words mid-text is a
+        # statute.
+        law = ("An error has occurred in the canvass when the totals do not agree, and the board "
+               "shall recount. " * 60)
+        body = (f"<html><head><title>RS 18:1431 - Louisiana State Legislature</title></head><body>"
+                f"<nav>{nav}</nav><main><h1>RS 18:1431</h1><p>{law}</p></main></body></html>").encode()
+        self.assertEqual(gs.assess(url, seen(200, body, chain=[url]))[0], gs.OPEN)
+
+
 class TestAGetAsThisProject(unittest.TestCase):
     """Rule 103 and rule 51: a GET, saying who sends it, reading only the
     first bytes; HEAD lies."""

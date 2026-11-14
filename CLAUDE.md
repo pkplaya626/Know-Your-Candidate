@@ -151,8 +151,9 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   they *are* hand-editable. `stategov.js` is generated from `executives.json`,
   `partisan_composition.json`, `state_legislators.json`,
   `statewide_officers.json`, `courts.json`, `statewide_candidates.json`,
-  `statewide_photos.json`, `guide_photos.json` and `political_history.json`,
-  with `kyc/ballot2026.py`: which state offices and legislative seats are on
+  `statewide_photos.json`, `guide_photos.json`, `photo_copies.json`,
+  `political_history.json` and `primary_results.json` (the day the results
+  were read), with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
   `members.json` (`members`, rule 86) is a hand-editable cache too, and so
   is `guide_sources.json` (`guidesources`, rule 48), which no page reads:
@@ -228,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3292 tests, no dependencies
+python -m unittest discover tests             # 3353 tests, no dependencies
 npm install && npm test                       # 5008 real-DOM checks (needs jsdom)
 ```
 
@@ -1100,17 +1101,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     their words, its maps, the 2026 ballot table and the page code's statute
     links cite - a GET as this project (rule 103; HEAD lies, rule 51), the
     first bytes only, one request at a time per host - and keeps each one's
-    day and answer in `data/guide_sources.json`, saved at the end of a run:
-    one a week, and a missing or unread one on every run. Only
+    day and answer in `data/guide_sources.json`, saved at the end of a run;
+    one that opened is opened again after six days, a missing or unread one
+    on every run. Only
     404 or 410 on two reads on different days, or a host gone here and at
     both public resolvers (rule 35), is `gone`; a page that is not the source
     on two days (titled "Page Not Found", a deep link sent to its own site's
-    front page or another's, a lapsed domain's marketplace, parking,
-    "/lander", for-sale, expired or gambling page read by localsites' own
-    tests, rules 35 and 39, or a section's address - the U.S. Code's
+    front page or another's - asked of where the redirect really ended, so
+    another host's "/index.php?section=5" is a page - a lapsed domain's
+    marketplace, parking, "/lander", for-sale (a title "ncsl.org is for
+    sale" too) or expired page read by localsites' own tests, rules 35 and
+    39, gambling spam in its title or headings, on another host or in spam's
+    own words throughout - never a betting word in a law's text, since a
+    constitution on online casinos says "sportsbooks" as a slot site does -
+    or a section's address - the U.S. Code's
     `uscode.house.gov/us/usc/tN/sM/`, the Code of Virginia's
-    `.../section24.2-214/` - whose page's title names another section) is
-    `elsewhere`. A 403, 429, 5xx, timeout, bot wall or challenge concludes
+    `.../section24.2-214/`, its ":1" sections apart - whose page's title
+    names another section) is `elsewhere`. A 403, 429, 5xx, timeout, bot wall or challenge concludes
     nothing (rule 8): constitution.congress.gov answers the reader with
     Cloudflare's "Just a moment...", and eCFR sends it to the Federal
     Register's "Request Access" page, never its front page. Nor does a 200
@@ -1118,11 +1125,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     first cache called Illinois's CandidatesFiled.aspx, the ballot table's
     source for its attorney general and secretary of state, "ok" over "Error
     Display: An error has occurred", and Louisiana's Law.aspx answers a bad
-    id under its usual title - a sign-in page, a web server's placeholder,
-    and a page with almost no text (`officers.says_nothing`): served the
-    script shell uscode.house.gov has served before, the first reader would
-    have called all eighty-one Code sources `elsewhere`. "404" in a title is
-    "not found" only at its start or beside "error" or "not found" ("RCW
+    id under its usual title, the error read in its headings or its
+    `<main>` however long the navigation around it - a sign-in page, a web server's placeholder, an answer whose first
+    bytes are not the file its address or Content-Type names (a "Request
+    Rejected" page served as a PDF, rule 52), and a page with almost no
+    text (`officers.says_nothing`) where no deep link was sent to a front
+    page: served the script shell uscode.house.gov has served before, the
+    first reader would have called all eighty-one Code sources `elsewhere`.
+    "404" in a title is "not found" only at its start, never as a number
+    there ("404.020 Definitions"), or beside "error" or "not found" ("RCW
     29A.04.404: Definitions" is a statute). The build warns on each gone or
     elsewhere source by its address, names and every section that cites it,
     on one never opened, on one not looked at in 30 days, and on one "not
@@ -2324,7 +2335,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     slot online" on the Keansburg schools' blood-drive notice and "Secure
     your 15-minute slot online" on the Landfill of North Iowa's were
     shipped as gambling sites, for good. A person's finding goes in
-    `overrides.BLOCKED_LOCAL_HOSTS`. A look that concludes nothing never
+    `overrides.BLOCKED_LOCAL_HOSTS`, with the day and what was seen; a
+    lapsed domain's own host serving someone else's site is "unrelated",
+    a kind only a look gives, since the check reads the domain's own words
+    as the body's: the Town of Roseland, Indiana's `www.roselandgov.org` was
+    "ok" on 2026-11-14 over "Roselandgov - All About Everything", a blog of
+    film and national news (read that day by this project's reader, an
+    agent). A bot check is no finding (`townofwashingtonpark.com`'s "Bot
+    Verification", rule 8). A look that concludes nothing never
     undoes a withdrawal (`merge`). Domains keep lapsing (rule 39): the
     weekly refresh looks at 6,000 addresses a run, oldest first, inside a
     time budget that ends the run cleanly well before its step's limit

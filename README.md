@@ -2284,16 +2284,20 @@ here in a different way:
   host does not exist here and at both dns.google and Cloudflare; it is
   **elsewhere** when two days' reads opened a page that is not it (titled
   "Page Not Found", a deep link sent to its own site's front page or
-  another's, a lapsed domain's marketplace, parking, for-sale, expired or
-  gambling page as the local websites' check reads them, a statute
-  section's address - the U.S. Code's, the Code of Virginia's - whose
-  page's title names another section). A 403, a 429, a 5xx, a timeout, a
+  another's, a lapsed domain's marketplace, parking, for-sale or expired
+  page as the local websites' check reads them, gambling spam in its title,
+  on another host or in spam's own words throughout - never a betting word
+  in a law's own text - or a statute section's address - the U.S. Code's,
+  the Code of Virginia's - whose page's title names another section). A
+  403, a 429, a 5xx, a timeout, a
   bot wall or a challenge concludes nothing: constitution.congress.gov
   answers the reader with Cloudflare's "Just a moment...", and is never
   called gone for it. Nor does a 200 that says nothing of the source: a
   server's error or maintenance page (Illinois's "Error Display: An error
   has occurred", which the first read called open), a sign-in page, a web
-  server's placeholder, or a page with almost no text, one drawn by script.
+  server's placeholder, an answer whose first bytes are not the file its
+  address names (a "Request Rejected" page served as a PDF), or a page with
+  almost no text, one drawn by script.
   The build warns, never fails, on each gone or elsewhere source by its
   address, its names and every section that cites it, on one never opened,
   on one not looked at in 30 days, and on one not confirmed in 30 days
@@ -3507,7 +3511,10 @@ address the visitor came from, and read as the address it once made 41
 links "ok" over Google's sign-in and Radware's wall. The cache keeps no
 query of any address a redirect ended at, since a bot wall writes the
 reader's own address there. A person's own
-finding goes in `overrides.BLOCKED_LOCAL_HOSTS`. Gambling seen plainly - in
+finding goes in `overrides.BLOCKED_LOCAL_HOSTS`, with the day and what was
+seen, among them a lapsed domain's own host now serving an unrelated site (a
+content farm under the town's old domain name, which the check reads as the
+town's own), which only a look can say. Gambling seen plainly - in
 a page's title, on a site a lapsed address now redirects to, or all over
 its text - is never cleared by a later check; seen once in a page's text it
 is withdrawn and reported for a person, since "Schedule your slot online"

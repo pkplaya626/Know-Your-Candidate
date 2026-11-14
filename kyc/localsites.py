@@ -82,8 +82,14 @@ ELSEWHERE = "elsewhere"
 BUSINESS = "business"
 DEAD = "dead"
 GONE = "gone"
-VERDICTS = (OK, MOVED, UNREAD, GAMBLING, PARKED, FOR_SALE, EXPIRED, ELSEWHERE, BUSINESS, DEAD, GONE)
-WITHDRAWN = (GAMBLING, PARKED, FOR_SALE, EXPIRED, ELSEWHERE, BUSINESS, DEAD, GONE)
+# Only a person's look says this (overrides.BLOCKED_LOCAL_HOSTS), never the
+# check: a lapsed domain's own host now serving someone else's site - a
+# content farm under the domain's name (www.roselandgov.org, 2026-11-14) -
+# carries the domain's words and answers 200, as the body's own site does.
+UNRELATED = "unrelated"
+VERDICTS = (OK, MOVED, UNREAD, GAMBLING, PARKED, FOR_SALE, EXPIRED, ELSEWHERE, BUSINESS, DEAD, GONE,
+            UNRELATED)
+WITHDRAWN = (GAMBLING, PARKED, FOR_SALE, EXPIRED, ELSEWHERE, BUSINESS, DEAD, GONE, UNRELATED)
 # What a later check never clears: a domain once used for gambling spam
 # under a government's name is not linked again without a person's look -
 # where the spam was plain: in the page's title or headings, on the site a
@@ -125,6 +131,11 @@ _SPAM_MORE = re.compile(
     r"\b[a-z]*(?:bet|slot|toto|win)(?:88|888|77|777|99|138|4d)\b|\bpgbet|"
     "nh\u00e0\\s+c\u00e1i|c\u00e1\\s+c\u01b0\u1ee3c|\\bqh88|"
     "\u30ab\u30b8\u30ce|\u535a\u5f69|\u767e\u5bb6\u4e50|\u5a31\u4e50\u57ce", re.I)
+# Of those, the ones that are ordinary English, which a law or a ballot
+# question about online betting writes as often as a slot site does
+# ("sweepstakes casinos" was a 2025 bill's subject): spam's brand words are
+# the rest (``brand_spam``).
+_SPAM_WORDS = re.compile(r"sweepstakes\s+casinos?|casino\s+sites?|online\s+slots?", re.I)
 # "Slot online" is English too: "Schedule your slot online" (the Keansburg
 # schools' blood drive), "Secure your 15-minute slot online" (the Landfill
 # of North Iowa's Saturday drop-off). A slot someone books is not a slot
@@ -147,7 +158,10 @@ _FOR_SALE = re.compile(
     r"get\s+this\s+domain|inquire\s+about\s+this\s+domain|domain\s+broker|"
     # "ncsl.org - This website is for sale!", the page the review of the
     # guide's source check made of a lapsed domain (2026-11-14).
-    r"this\s+web\s*site\s+is\s+for\s+sale", re.I)
+    r"this\s+web\s*site\s+is\s+for\s+sale|"
+    # And a marketplace's own title for a domain, "ncsl.org is for sale":
+    # a host's name, ending in a word for its domain, never "St." or "12.5".
+    r"\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}\s+(?:is|may\s+be)\s+for\s+sale\b", re.I)
 _EXPIRED = re.compile(
     r"(?:this\s+)?domain\s+(?:name\s+)?(?:has\s+)?expired|domain\s+is\s+expired|"
     r"website\s+(?:has\s+)?expired|renew\s+(?:this|your)\s+domain|"
@@ -731,6 +745,17 @@ def gambling_at(head, body, moved):
     if moved:
         return "redirect"
     return "text" if spam + more + words >= 3 else "once"
+
+
+def brand_spam(text):
+    """How many times *text* carries gambling spam's own words - a slot
+    site's brand and jargon ("slot gacor", "togel", "pgbet888") - leaving
+    out the words a law, a ballot question or a news page about betting
+    writes too ("online casinos", "sportsbooks", "sweepstakes casinos").
+    A booked slot is neither."""
+    text = _BOOKED_SLOT.sub(" ", text or "")
+    return (len(enrich._SPAM.findall(text))
+            + sum(1 for m in _SPAM_MORE.finditer(text) if not _SPAM_WORDS.fullmatch(m.group(0))))
 
 
 def assess(names, url, seen):

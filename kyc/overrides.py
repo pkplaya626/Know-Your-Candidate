@@ -1128,9 +1128,11 @@ BLOCKED_CAMPAIGN_HOSTS = {
 # "www." also covers the "www." form). `localgov --check-sites` withdraws
 # what it finds on its own (data/local_sites.json, kyc/localsites.py); an
 # entry here is a person's look, which no later check undoes - the kind is
-# one of the check's verdicts. Each was opened in headless Chrome on
+# one of the check's withdrawn verdicts, or "unrelated", which only a look
+# gives (localsites.UNRELATED). The first were opened in headless Chrome on
 # 2026-10-17 by the reader-side audit and again by its verifier (LINKS-07,
-# TRUST-07). The build warns about an entry no listed address matches.
+# TRUST-07); each later group says who read it and when. The build warns
+# about an entry no listed address matches.
 BLOCKED_LOCAL_HOSTS = {
     "clintonct.com": ("gambling", "2026-10-17",
                       "Town of Clinton, CT: redirects to id-pgdemoslot.com, 'Demo Slot'"),
@@ -1174,6 +1176,29 @@ BLOCKED_LOCAL_HOSTS = {
     "whitehallcitygov.com": ("gambling", "2026-10-18",
                              "City of White Hall, IL: titled 'tiger227 ini sebuah permainan games "
                              "online', 'Min Depo 20.000 ... Maxwin'"),
+    # Read on 2026-11-14 by this project's reader, an agent, as the project
+    # (agent.USER_AGENT), at the review of the guide's source check: the
+    # check called the first "ok" and could not name the second, and each
+    # plainly is not the body's site. Every redirect is written without its
+    # query.
+    "roselandgov.org": ("unrelated", "2026-11-14",
+                        "Town of Roseland, IN: read by this project's reader (an agent) on "
+                        "2026-11-14: http://www.roselandgov.org/ redirects to "
+                        "https://roselandgov.org/, HTTP 200, titled 'Roselandgov - All About "
+                        "Everything', described as 'a blog that shares useful knowledge and "
+                        "insights for everyone about Everything', its posts on films and national "
+                        "news ('The Complicated Legacy of 'Forgetting Sarah Marshall' in the Age "
+                        "of #MeToo'); no word of Indiana, the town, its council or its clerk"),
+    "yellowstonecountry.org": ("elsewhere", "2026-11-14",
+                               "Park County Travel Council Joint Powers Board, WY: read by this "
+                               "project's reader (an agent) on 2026-11-14: "
+                               "http://www.yellowstonecountry.org redirects through "
+                               "https://dltracking.com/r, a tracking redirector, to "
+                               "https://everydayconsumers.org/travel/national-parks-made-simple-a-"
+                               "no-jargon-breakdown, HTTP 200, titled 'National Parks Travel Guide: "
+                               "Simple Tips for Visitors', an article on national parks in general; "
+                               "no word of Park County, Cody, Yellowstone Country or a travel "
+                               "council"),
 }
 
 # A member's contact-form address that congress-legislators holds in a form
