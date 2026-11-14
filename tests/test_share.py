@@ -119,6 +119,13 @@ class TestStatusWords(unittest.TestCase):
         self.assertEqual(share.held_seat_in_words("House • PR-AL"), "Puerto Rico’s seat in the U.S. House")
         self.assertEqual(share.held_seat_in_words("Governor"), "Governor")
         self.assertEqual(share.held_seat_in_words(None), "")
+        # One House seat, one form: the seat run for is written as the seat
+        # held ("PR-AL" run for beside Puerto Rico's seat held, the first
+        # version), and a state's at-large seat is its code both ways.
+        for code in ("AS", "DC", "GU", "MP", "PR", "VI", "WY"):
+            label = f"House • {code}-AL"
+            self.assertEqual(share.seat_in_words(label), share.held_seat_in_words(label), label)
+        self.assertEqual(share.seat_in_words("House • GU-AL"), "Guam’s seat in the U.S. House")
         # The table the render suite asks KYC.heldSeatInWords about holds
         # every state's Senate seat and every place's seat that is no state.
         rows = dict(share.status_table()["heldSeatWords"])

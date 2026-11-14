@@ -6028,6 +6028,24 @@ async function testHeldSeatWords() {
           /re-election to the District of Columbia’s seat in the U\.S\. House/.test(fromDC) &&
           /re-election to a U\.S\. Senate seat from Kentucky/.test(fromKY),
         [fromIA, fromDC, fromKY].join(" | "));
+      // E: two days only some clocks' data reaches, made here (its review):
+      // a filing whose member has left ("Held GA-10 until 2027-01-03" on
+      // the January rehearsal), and an appointee's term to a special
+      // election's winner (Jon Husted's, gone on January 3).
+      const filing = filings[0];
+      const member = filing ? KYC.byId(filing.incumbentId) : null;
+      const filingCross = filing && member ? borrow(member, { formerMember: LEFT }, () =>
+        dialogOf(filing).filter(([what]) => what === "cross-link").map(([, s]) => s).join(" ")) : "";
+      check("made here: a filing whose member has left says the seat held and the day in words",
+        !!filing && filingCross.indexOf("Held " + KYC.heldSeatInWords(filing.incumbentSeat) +
+          " until Dec. 8, 2026") !== -1 && !ISO.test(filingCross),
+        filingCross || "no member's filing to borrow");
+      const termOf = senator ? borrow(senator, { appointed: true, raceStatus: "unlisted", raceId: "S-KY-2026",
+        term_start: "2025-01-21 - until the winner of the 2026-11-03 special election is sworn in" },
+      (item) => dialogOf(item).filter(([what]) => what === "term line").map(([, s]) => s).join(" ")) : "";
+      check("made here: an appointee's term line says the special election's day in words",
+        /until the winner of the Nov\. 3, 2026 special election is sworn in/.test(termOf) && !ISO.test(termOf),
+        termOf || "no senator to borrow");
     });
     window.close();
   }

@@ -4885,8 +4885,8 @@
 ["Senate • WY","the U.S. Senate in Wyoming"],
 ["House • CA-6","CA-6"],
 ["House • WY-AL","WY-AL"],
-["House • DC-AL","DC-AL"],
-["House • PR-AL","PR-AL"],
+["House • DC-AL","the District of Columbia’s seat in the U.S. House"],
+["House • PR-AL","Puerto Rico’s seat in the U.S. House"],
 ["Governor","Governor"]
 ],
 "heldSeatWords": [

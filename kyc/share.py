@@ -1030,7 +1030,8 @@ def seat_in_words(label):
     """A seat in a sentence that follows "who" (``KYC.seatInWords``): a
     Senate seat in words, "the U.S. Senate in Kentucky" (:func:`seat_phrase`),
     and a House district by its code, as the site writes districts in every
-    sentence ("CA-6", "WY-AL"). The label is read, never rebuilt (rule 4):
+    sentence ("CA-6", "WY-AL"), the District's or a territory's one seat in
+    its own words (:func:`_house_seat_words`). The label is read, never rebuilt (rule 4):
     "Senate KY", the card's label with its bullet taken out, read "Held by
     Andy Barr, who was elected to Senate KY in November". A label of another
     shape is returned as it is."""
@@ -1039,7 +1040,23 @@ def seat_in_words(label):
         return str(label or "")
     if parts[0] == "U.S. Senate":
         return seat_phrase(label)
-    return str(label).partition(" • ")[2]
+    return _house_seat_words(str(label).partition(" • ")[2])
+
+
+def _house_seat_words(seat):
+    """A House seat in a sentence, the seat run for and the seat held alike
+    (``KYC``'s houseSeatWords): a district by its code ("CA-3", "WY-AL"),
+    and the one seat of the District or a territory in the place's own words
+    (rule 75), "the District of Columbia’s seat in the U.S. House", never
+    "DC-AL". The first version wrote a territory's seat run for as "PR-AL"
+    and the same seat held in words: one seat, two forms (its review)."""
+    from .normalize import TERRITORIES
+    from .pages import _possessive
+    from .voting_dates import place
+
+    if seat.endswith("-AL") and seat[:-3] in TERRITORIES:
+        return f"{_possessive(place(seat[:-3]), '’')} seat in the U.S. House"
+    return seat
 
 
 def held_seat_in_words(label):
@@ -1052,8 +1069,6 @@ def held_seat_in_words(label):
     Kentucky" - "holds the U.S. Senate in Kentucky" would be false. The
     hovers read "; holds House • CA-3 until 2027-01-03", the card's label
     run into a sentence. A label of another shape is returned as it is."""
-    from .normalize import TERRITORIES
-    from .pages import _possessive
     from .voting_dates import place
 
     chamber, _, seat = str(label or "").partition(" • ")
@@ -1061,9 +1076,7 @@ def held_seat_in_words(label):
         return str(label or "")
     if chamber == "Senate":
         return f"a U.S. Senate seat from {place(seat)}"
-    if seat.endswith("-AL") and seat[:-3] in TERRITORIES:
-        return f"{_possessive(place(seat[:-3]), '’')} seat in the U.S. House"
-    return seat
+    return _house_seat_words(seat)
 
 
 def _role(person, post=False):

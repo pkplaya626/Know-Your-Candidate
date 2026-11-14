@@ -336,15 +336,18 @@ page, so it is written by one set of helpers in `kyc/pages.py`, and
   otherwise the share card), the facts in plain text, and a link to the view
   that `assets/kyc-share.js` follows for a reader with scripts. Each status
   names the source the profile dialog credits; the description writes the
-  seat in words ("member of the U.S. House for AL-4"), and so do a status
-  line, a list's standing and every hover that names a seat a member ran
-  for or holds: the seat run for as `KYC.seatInWords` /
-  `share.seat_in_words` says it ("Elected in November for the U.S. Senate
-  in Kentucky"), the seat held as `KYC.heldSeatInWords` /
-  `share.held_seat_in_words` does ("not seeking re-election to IA-2, whose
-  term ends Jan. 3, 2027", "a U.S. Senate seat from Kentucky", "the
-  District of Columbia’s seat in the U.S. House"), and a day in words,
-  never a card's "House • IA-2" or "2027-01-03" in a sentence; a race page
+  seat in words ("member of the U.S. House for AL-4"), and so do its status
+  line and a state page's list standings, the seat run for as
+  `KYC.seatInWords` / `share.seat_in_words` says it ("Elected in November
+  for the U.S. Senate in Kentucky"). The seat a member holds or held is in
+  words in the page's own sentences - the run's hovers, the dialog's
+  cross-link and a filing's record line - as `KYC.heldSeatInWords` says it
+  ("not seeking re-election to IA-2, whose term ends Jan. 3, 2027", "a U.S.
+  Senate seat from Kentucky", "Held GA-10 until Jan. 3, 2027"), and
+  `share.held_seat_in_words` holds those words to the status table's rows;
+  the District's or a territory's one House seat is "the District of
+  Columbia’s seat in the U.S. House" both ways. A day is in words, never a
+  card's "House • IA-2" or "2027-01-03" in a sentence; a race page
   marks the seat's holder. A page shared under an id its profile no longer has (a
   folded filing, a filer since seated) is kept as that profile's, never
   deleted. "Copy link" in the profile dialog and on every race section gives

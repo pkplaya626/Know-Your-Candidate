@@ -1406,7 +1406,8 @@
   /** A seat in a sentence (rules 4 and 96; kyc/share.py seat_in_words): a
    *  Senate seat in words, with the place as a sentence names it - "the U.S.
    *  Senate in Kentucky" - and a House district by its code, as the site
-   *  writes districts everywhere ("CA-6", "WY-AL"). The card's label is
+   *  writes districts everywhere ("CA-6", "WY-AL"), the District's or a
+   *  territory's one seat in its own words (houseSeatWords). The card's label is
    *  read, never rebuilt: "who was elected to Senate KY in November" stood
    *  over KY-6's race, the label with its bullet taken out. A label of
    *  another shape is returned as it is. */
@@ -1415,8 +1416,24 @@
     var parts = text.split(" • ");
     if (parts.length !== 2 || !parts[1]) return text;
     if (parts[0] === "Senate") return "the U.S. Senate in " + placeWords(parts[1]);
-    if (parts[0] === "House") return parts[1];
+    if (parts[0] === "House") return houseSeatWords(parts[1]);
     return text;
+  }
+
+  /** A House seat in a sentence, the seat run for and the seat held alike:
+   *  a district by its code ("CA-3", "WY-AL"), and the one seat of the
+   *  District or a territory in the place's own words (rule 75), "the
+   *  District of Columbia’s seat in the U.S. House", never "DC-AL". The
+   *  first version wrote a territory's seat run for as "PR-AL" and the
+   *  same seat held in words: one seat, two forms (its review). */
+  function houseSeatWords(seat) {
+    var at = /^([A-Z]{2})-AL$/.exec(seat);
+    // The build's word for a place that is no state (summary.py's
+    // `territory`, the District's included).
+    if (at && ((meta().states || {})[at[1]] || {}).territory) {
+      return possessive(placeWords(at[1]), "’") + " seat in the U.S. House";
+    }
+    return seat;
   }
 
   /** The seat a member holds or held, in a sentence (rules 4, 75 and 96;
@@ -1435,13 +1452,7 @@
     if (parts.length !== 2 || !parts[1]) return text;
     if (parts[0] === "Senate") return "a U.S. Senate seat from " + placeWords(parts[1]);
     if (parts[0] !== "House") return text;
-    var at = /^([A-Z]{2})-AL$/.exec(parts[1]);
-    // The build's word for a place that is no state (summary.py's
-    // `territory`, the District's included).
-    if (at && ((meta().states || {})[at[1]] || {}).territory) {
-      return possessive(placeWords(at[1]), "’") + " seat in the U.S. House";
-    }
-    return parts[1];
+    return houseSeatWords(parts[1]);
   }
 
   /** Whether a race's record holder's 2026 run was another race: the race

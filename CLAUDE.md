@@ -3495,8 +3495,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     place's own words (rule 75: "the District of Columbia’s seat in the U.S.
     House", "the U.S. Virgin Islands’ seat in the U.S. House"), held
     together by the status table's `heldSeatWords` rows - in the hovers, the
-    cross-link ("Currently holds GA-10", "Held CA-3 until Jan. 3, 2027") and
-    a filing's record line ("as the member for KY-6"). A day in those
+    cross-link ("Currently holds GA-10", "Held GA-10 until Jan. 3, 2027" on
+    the January rehearsal) and a filing's record line ("as the member for
+    KY-6"). The seat run for takes the same place's words for that one seat
+    (`houseSeatWords` / `_house_seat_words`): the first version wrote it
+    "PR-AL" beside the seat held in words, one seat in two forms, and its
+    review found it. An unfurl's description keeps "the U.S. House in
+    CA-40", as it stands alone. A day in those
     sentences is `KYC.dateWords`' ("whose term ends Jan. 3, 2027"), and so
     is every day the same check found in a profile's words: a former
     member's "Left office Dec. 8, 2026" and "Represented (until ...)", an
