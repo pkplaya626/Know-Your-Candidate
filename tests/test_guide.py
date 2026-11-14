@@ -61,6 +61,376 @@ class TestGuideText(unittest.TestCase):
             self.assertNotIn(name, text)
 
 
+class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
+    """Rule 48: each section cites the primary sources it was checked against.
+    Until 2026-11-14 the guide cited Cornell's Legal Information Institute 78
+    times (its copies of the U.S. Code and of the Court's opinions, and its Wex
+    encyclopedia), the guide's maps once and the 2026 ballot table six times: a
+    compiled copy of the law, not its publication. Each check makes the state
+    it refuses and asks the real tables for the rest."""
+
+    CORNELL = "https://www.law.cornell.edu/uscode/text/2/8"
+
+    def test_no_source_is_on_a_compiled_copy_of_the_law(self):
+        from kyc import government_maps
+        from kyc.government_text import COMPILED_LAW_PENDING, compiled_law
+        for key, (_title, url) in government_maps.SOURCES.items():
+            if key in COMPILED_LAW_PENDING:
+                # Waiting for a person, with what refused this reader.
+                self.assertTrue(compiled_law(url), key)
+                self.assertTrue(COMPILED_LAW_PENDING[key].strip(), key)
+                continue
+            self.assertIsNone(compiled_law(url), (key, url))
+        # The U.S. Code is the Law Revision Counsel's, or the edition govinfo
+        # publishes, never a copy of it.
+        for key, (title, url) in SOURCES.items():
+            if re.match(r"\d+ U\.S\.C\. ", title):
+                self.assertTrue(url.startswith(("https://uscode.house.gov/us/usc/t",
+                                                "https://www.govinfo.gov/")), (key, url))
+
+    def test_the_guide_refuses_one_put_back(self):
+        original = SOURCES["usc-2-8"]
+        SOURCES["usc-2-8"] = (original[0], self.CORNELL)
+        try:
+            found = government.check()
+        finally:
+            SOURCES["usc-2-8"] = original
+        self.assertTrue(any("'usc-2-8' is on law.cornell.edu" in p for p in found), found)
+        self.assertEqual(government.check(), [])
+        # Its encyclopedia too, and a host's other names.
+        for url in ("https://www.law.cornell.edu/wex/police_powers",
+                    "https://law.cornell.edu/supremecourt/text/5/137",
+                    "https://supreme.justia.com/cases/federal/us/5/137/",
+                    # The copies of opinions (the review of 2026-11-14).
+                    "https://www.courtlistener.com/opinion/84759/marbury-v-madison/",
+                    "https://scholar.google.com/scholar_case?case=1"):
+            from kyc.government_text import compiled_law_problems
+            self.assertTrue(compiled_law_problems({"k": ("t", url)}, pending={}), url)
+
+    def test_a_link_in_the_text_is_refused_there_too(self):
+        with self.assertRaises(ValueError):
+            government.href(self.CORNELL, "index")
+        with self.assertRaises(ValueError):
+            government.inline(f"See [the statute]({self.CORNELL}).", "index")
+
+    def test_the_maps_refuse_one_put_back(self):
+        from kyc import government_maps
+        original = government_maps.SOURCES["usc-48-1824"]
+        government_maps.SOURCES["usc-48-1824"] = (original[0],
+                                                  "https://www.law.cornell.edu/uscode/text/48/1824")
+        try:
+            found = government_maps.check()
+        finally:
+            government_maps.SOURCES["usc-48-1824"] = original
+        self.assertTrue(any("'usc-48-1824' is on law.cornell.edu" in p for p in found), found)
+
+    def test_a_pending_source_that_has_moved_is_stale(self):
+        from kyc.government_text import compiled_law_problems
+        moved = {"nh-const": ("New Hampshire Constitution",
+                              "https://www.nh.gov/glance/state-constitution/executive-power-governor")}
+        found = compiled_law_problems(moved)
+        self.assertTrue(any("no longer on a compiled copy" in p for p in found), found)
+
+    def test_the_build_reports_it(self):
+        from kyc import validate
+        original = SOURCES["usc-2-8"]
+        SOURCES["usc-2-8"] = (original[0], self.CORNELL)
+        try:
+            issues = validate.check_guide("2026-11-14")
+        finally:
+            SOURCES["usc-2-8"] = original
+        self.assertTrue(any(i.level == "error" and i.code == "guide" for i in issues), issues)
+
+    def test_the_page_code_links_no_compiled_copy_either(self):
+        # The federal hub's and the state pages' statute links (3 U.S.C. 19,
+        # 28 U.S.C. 1295, 48 U.S.C. 891) were Cornell's copies too.
+        from kyc.government_text import COMPILED_LAW
+        # The one exception is no citation: a court page's "Find a case"
+        # names CourtListener beside PACER, the courts' own records, as "free
+        # copies of some, from the Free Law Project" - a place to look, said
+        # to be a copy, never a source cited for the law.
+        finding_aids = {("kyc-federal.js", "courtlistener.com"): "Free Law Project"}
+        folder = os.path.join(SITE, "assets")
+        for name in sorted(os.listdir(folder)):
+            if not name.endswith(".js"):
+                continue
+            with open(os.path.join(folder, name), encoding="utf-8") as handle:
+                script = handle.read()
+            for host in COMPILED_LAW:
+                said = finding_aids.get((name, host))
+                if said:
+                    self.assertEqual(script.count(host), 1, f"assets/{name} links {host}")
+                    at = script.index(host)
+                    self.assertIn(said, script[at:at + 200], f"assets/{name} links {host}")
+                    continue
+                self.assertNotIn(host, script, f"assets/{name} links {host}")
+
+    def test_the_host_is_read_as_a_browser_reads_it(self):
+        # The first reader took the network location for the host, so a
+        # port, a user before an "@" or a trailing dot passed Cornell's copy
+        # as a source (the review of 2026-11-14, with 50 U.S.C. 3021 at
+        # www.law.cornell.edu:443: the guide's tests passed).
+        from kyc.government_text import compiled_law
+        for url in ("https://www.law.cornell.edu:443/uscode/text/50/3021",
+                    "https://x@law.cornell.edu/uscode/text/50/3021",
+                    "https://user:pass@www.law.cornell.edu/uscode/text/50/3021",
+                    "https://www.law.cornell.edu./uscode/text/50/3021",
+                    "HTTPS://WWW.LAW.CORNELL.EDU/uscode/text/50/3021"):
+            self.assertEqual(compiled_law(url), "law.cornell.edu", url)
+            original = SOURCES["usc-50-3021"]
+            SOURCES["usc-50-3021"] = (original[0], url)
+            try:
+                found = government.check()
+            finally:
+                SOURCES["usc-50-3021"] = original
+            self.assertTrue(any("'usc-50-3021' is on law.cornell.edu" in p for p in found),
+                            (url, found))
+        # A host that merely ends in the name is not it, and a bad address
+        # is no host at all.
+        self.assertIsNone(compiled_law("https://notlaw.cornell.edu.example/x"))
+        self.assertIsNone(compiled_law("https://[broken/x"))
+        self.assertEqual(government.check(), [])
+
+    def test_a_pending_entry_whose_source_is_gone_is_reported(self):
+        # Deleted with its section's citation, New Hampshire's constitution
+        # left its pending entry excusing nothing, unreported (the review of
+        # 2026-11-14); a later source given the key would have been excused.
+        from kyc import government_maps, government_text
+        sections = [s for page in PAGES for s in page["sections"]
+                    if "nh-const" in (s.get("sources") or ())]
+        self.assertTrue(sections)
+        text_entry = government_text.SOURCES.pop("nh-const")
+        maps_entry = government_maps.SOURCES.pop("nh-const")
+        places = [section["sources"].index("nh-const") for section in sections]
+        for section in sections:
+            section["sources"].remove("nh-const")
+        try:
+            found = government.check()
+        finally:
+            government_text.SOURCES["nh-const"] = text_entry
+            government_maps.SOURCES["nh-const"] = maps_entry
+            for section, place in zip(sections, places):
+                section["sources"].insert(place, "nh-const")
+        self.assertIn("COMPILED_LAW_PENDING names 'nh-const', which names no source: "
+                      "remove the entry", found)
+        self.assertEqual(government.check(), [])
+
+    def test_a_statute_or_an_opinion_is_on_its_publishers_host(self):
+        # A blocklist of copies is never whole: Marbury on CourtListener
+        # passed every check (the review of 2026-11-14). A source titled as a
+        # Supreme Court case is on the Court's host or the Library of
+        # Congress's, as one titled as a Code section is on the Law Revision
+        # Counsel's or govinfo's.
+        from kyc import government_maps
+        from kyc.government_text import OFFICIAL_HOSTS, compiled_law_problems
+        cases = [k for k, (t, _u) in government_maps.SOURCES.items()
+                 if OFFICIAL_HOSTS[1][0](t)]
+        code = [k for k, (t, _u) in government_maps.SOURCES.items()
+                if OFFICIAL_HOSTS[0][0](t)]
+        # Every case the guide cites is read as one: its orders and its
+        # U.S. Reports citations alike.
+        for key in ("marbury", "watson-rnc", "wilcox", "onder", "pruneyard", "slaughter"):
+            self.assertIn(key, cases)
+        self.assertGreater(len(code), 60)
+        for key, url, what in (
+                ("marbury", "https://www.courtlistener.com/opinion/84759/marbury-v-madison/",
+                 "a case of the Supreme Court"),
+                ("marbury", "https://www.oyez.org/cases/1789-1850/5us137",
+                 "a case of the Supreme Court"),
+                ("wilcox", "https://www.oyez.org/cases/2024/24A966",
+                 "a case of the Supreme Court"),
+                ("usc-2-8", "https://www.example.org/uscode/2/8",
+                 "a section of the U.S. Code")):
+            original = SOURCES[key]
+            SOURCES[key] = (original[0], url)
+            try:
+                found = government.check()
+            finally:
+                SOURCES[key] = original
+            self.assertTrue(any(f"{key!r} is titled as {what}" in p for p in found), (key, found))
+        # The old way the guide wrote a slip opinion, a docket and a bare
+        # date, is a case too; a lower court's, naming its court, is not.
+        slip = {"k": ("Watson v. Republican National Committee, No. 24-1260 (June 29, 2026)",
+                      "https://www.example.org/watson")}
+        self.assertTrue(compiled_law_problems(slip, pending={}))
+        lower = {"k": ("Doe v. Roe, No. 24-1260 (9th Cir. June 29, 2026)",
+                       "https://www.ca9.uscourts.gov/x")}
+        self.assertEqual(compiled_law_problems(lower, pending={}), [])
+        # The Library of Congress's host is its bound U.S. Reports, the
+        # Court's is its own; both stand.
+        self.assertEqual(compiled_law_problems(
+            {"k": ("Marbury v. Madison, 5 U.S. 137 (1803)",
+                   "https://tile.loc.gov/storage-services/service/ll/usrep/usrep005/"
+                   "usrep005137/usrep005137.pdf")}, pending={}), [])
+        self.assertEqual(government.check(), [])
+        # The maps' own sources are held to it too.
+        original = government_maps.SOURCES["usc-28-1294"]
+        government_maps.SOURCES["usc-28-1294"] = (original[0], "https://www.example.org/1294")
+        try:
+            found = government_maps.check()
+        finally:
+            government_maps.SOURCES["usc-28-1294"] = original
+        self.assertTrue(any("'usc-28-1294' is titled as a section of the U.S. Code" in p
+                            for p in found), found)
+
+    def test_a_case_is_known_however_its_citation_is_written(self):
+        # The pin keyed on "U.S." alone and on every loc.gov host: Marbury
+        # on oyez.org passed it written as the U.S. Reports print it ("5 U.
+        # S. 137") or with no citation at all, and on the Library's blog
+        # (blogs.loc.gov, not the U.S. Reports) as written here (the review
+        # of 2026-11-14).
+        from kyc.government_text import compiled_law_problems, supreme_court_case
+        for title, url in (
+                ("Marbury v. Madison, 5 U. S. 137 (1803)", "https://www.oyez.org/cases/1789-1850/5us137"),
+                ("Marbury v. Madison (1803)", "https://www.oyez.org/cases/1789-1850/5us137"),
+                ("Marbury v. Madison", "https://www.oyez.org/cases/1789-1850/5us137"),
+                ("Marbury v. Madison, 5 U.S. 137 (1803)", "https://blogs.loc.gov/law/2013/02/marbury/"),
+                ("Marbury v. Madison, 5 U.S. 137 (1803)", "https://loc.gov/item/usrep005137/"),
+                ("Trump v. Wilcox, No. 24A966 (order of May 22, 2025)", "https://www.oyez.org/x")):
+            found = compiled_law_problems({"k": (title, url)}, pending={})
+            self.assertTrue(found and "is titled as a case of the Supreme Court" in found[0],
+                            (title, url, found))
+        # The Court's own host and the Library's U.S. Reports stand.
+        for url in ("https://www.supremecourt.gov/opinions/x.pdf",
+                    "https://tile.loc.gov/storage-services/service/ll/usrep/usrep005/"
+                    "usrep005137/usrep005137.pdf",
+                    "https://www.loc.gov/item/usrep005137/"):
+            self.assertEqual(compiled_law_problems(
+                {"k": ("Marbury v. Madison, 5 U. S. 137 (1803)", url)}, pending={}), [], url)
+        # A case another court decided names that court, by its reporter or
+        # beside its year, and is not the Supreme Court's.
+        for title in ("Doe v. Roe, 123 F.3d 456 (9th Cir. 1997)",
+                      "Harper v. Hall, 384 N.C. 292 (2023)",
+                      "Doe v. Roe (D.D.C. 2025)",
+                      "Doe v. Roe, No. 24-1260 (9th Cir. June 29, 2026)",
+                      "2 U.S.C. 8 (when a House vacancy is filled)"):
+            self.assertFalse(supreme_court_case(title), title)
+        # Every case the guide and its maps cite is read as one.
+        from kyc import government_maps
+        for key, (title, _url) in government_maps.SOURCES.items():
+            if " v. " in title:
+                self.assertTrue(supreme_court_case(title), key)
+
+    # (page, section, words the section says, the source that holds them).
+    # Each claim cited a source that holds only part of it until 2026-11-14
+    # (the review of the guide's primary sources): the Tax Court's sentence
+    # cites 26 U.S.C. 7443, its judges, and the petition before paying is
+    # 26 U.S.C. 6213.
+    CLAIMS = (
+        ("courts", "other-courts", "before paying it", "usc-26-6213"),
+        ("courts", "other-courts", "Sixteen judges with 15-year terms", "usc-28-172"),
+        ("courts", "other-courts", "challenges to federal contract awards", "usc-28-1491"),
+        ("courts", "other-courts", "vaccine-injury", "usc-42-300aa-12"),
+        ("courts", "other-courts", "Reviews decisions of the Board of Veterans' Appeals",
+         "usc-38-7252"),
+        ("courts", "other-courts", "highest court for courts-martial", "usc-10-941"),
+        ("courts", "other-courts", "highest court for courts-martial", "usc-10-867"),
+        ("courts", "other-courts", "below the Supreme Court", "usc-28-1259"),
+        ("courts", "other-courts", "ten-year terms", "usc-48-1424b"),
+        ("courts", "other-courts", "ten-year terms", "usc-48-1614"),
+        ("courts", "other-courts", "ten-year terms", "usc-48-1821"),
+        ("courts", "district", "tariffs, customs and trade laws", "usc-28-1581"),
+        ("courts", "district", "no more than six months", "usc-18-3559"),
+        ("courts", "district", "89 in the", "usc-28-81-131"),
+        ("courts", "district", "ten-year terms", "usc-48-1424b"),
+        ("courts", "district", "ten-year terms", "usc-48-1614"),
+        ("courts", "district", "ten-year terms", "usc-48-1821"),
+        # The memorandum in force, not the one it superseded: the first fix
+        # cited National Security Memorandum 2 (2021), which NSPM-1 of
+        # January 20, 2025 "prevails over" (the review of 2026-11-14).
+        ("executive", "eop", "run by the national security advisor", "nspm-1"),
+        ("executive", "eop", "reviews significant regulations before they are issued",
+         "eo-12866"),
+        ("executive", "eop", "Advises the president and the White House on legal questions",
+         "wh-departments"),
+        ("states", "powers", "the state's own constitution", "pruneyard"),
+        # 50 U.S.C. 1803 gives the court "electronic surveillance"; the
+        # searches are 1822's.
+        ("courts", "other-courts", "applications for surveillance and searches", "usc-50-1822"),
+        # 5 U.S.C. 3105 names no agency and no appeal.
+        ("courts", "other-courts", "Social Security Administration", "cfr-20-404-929"),
+        ("courts", "other-courts", "National Labor Relations Board", "cfr-29-102-34"),
+        ("courts", "other-courts", "Securities and Exchange Commission", "cfr-17-200-14"),
+        ("courts", "other-courts", "appealed within the agency", "usc-5-557"),
+        ("courts", "other-courts", "and then to a court", "usc-5-704"),
+    )
+
+    @staticmethod
+    def _words(value):
+        if isinstance(value, str):
+            return value
+        if isinstance(value, dict):
+            return " ".join(TestSourcesAreTheLawsOwnPublication._words(v)
+                            for v in value.values())
+        if isinstance(value, (list, tuple)):
+            return " ".join(TestSourcesAreTheLawsOwnPublication._words(v) for v in value)
+        return ""
+
+    def test_a_claim_cites_the_source_that_holds_it(self):
+        for slug, sid, words, key in self.CLAIMS:
+            section = next(s for p in PAGES if p["slug"] == slug for s in p["sections"]
+                           if s["id"] == sid)
+            text = " ".join(self._words(section["blocks"]).split())
+            if words not in text:
+                # The words were changed: the pairing is for whoever changed
+                # them to read again, not a pass.
+                self.fail(f"{slug}#{sid} no longer says {words!r}: read its sources again "
+                          f"and update CLAIMS")
+            self.assertIn(key, section["sources"], f"{slug}#{sid}: {words!r} is {key}'s")
+            # A section read again on the day its sources were added says so.
+            self.assertGreaterEqual(section.get("reviewed", ""), "2026-11-14", f"{slug}#{sid}")
+
+    def test_a_claim_with_no_primary_source_is_named(self):
+        # README and the comment above COMPILED_LAW said the dated sections
+        # now listed "the sources that hold the rest", over a chief of staff,
+        # a White House Counsel and a sentence about state constitutions that
+        # no source they list holds (the review of 2026-11-14). Such a claim
+        # is in UNSOURCED, by its words, and README names each one.
+        from kyc.government_text import UNSOURCED
+        self.assertTrue(UNSOURCED)
+        with open(os.path.join(ROOT, "README.md"), encoding="utf-8") as handle:
+            readme = " ".join(handle.read().split())
+        for slug, sid, said, why in UNSOURCED:
+            section = next(s for p in PAGES if p["slug"] == slug for s in p["sections"]
+                           if s["id"] == sid)
+            self.assertIn(" ".join(said.split()), " ".join(self._words(section["blocks"]).split()),
+                          f"{slug}#{sid}")
+            self.assertTrue(why.strip(), f"{slug}#{sid}: say what was looked for")
+            self.assertIn(said, readme, f"README does not name {slug}#{sid}'s {said!r}")
+        # Nor do README or the comment say the sections hold "the rest".
+        self.assertNotIn("the sources that hold the rest", readme)
+        with open(os.path.join(ROOT, "kyc", "government_text.py"), encoding="utf-8") as handle:
+            self.assertNotIn("the sources that\n# hold the rest", handle.read())
+
+    def test_an_unsourced_entry_the_page_no_longer_says_is_reported(self):
+        # The list must not outlive its words: an entry whose sentence was
+        # changed names a claim the page no longer makes.
+        from kyc import government_text
+        original = government_text.UNSOURCED
+        changed = (("executive", "eop", "Runs the president's diary.", "a test"),) + original
+        government_text.UNSOURCED = changed
+        government.UNSOURCED = changed
+        try:
+            found = government.check()
+        finally:
+            government_text.UNSOURCED = original
+            government.UNSOURCED = original
+        self.assertIn("UNSOURCED names executive#eop's \"Runs the president's diary.\", which the "
+                      "section no longer says: read its sources again and remove the entry", found)
+        self.assertEqual(government.check(), [])
+
+    def test_the_northern_mariana_islands_circuit_is_the_statutes(self):
+        # The circuits map sent the Northern Mariana Islands' appeals to the
+        # Ninth Circuit on 48 U.S.C. 1824 alone, which applies Guam's title-28
+        # provisions to it: the route is 28 U.S.C. 1294(4)'s, Guam's.
+        from kyc import government_maps
+        circuits = next(m for m in government_maps.modes()["courts"] if m["id"] == "circuits")
+        for code in ("GU", "MP"):
+            self.assertIn("usc-28-1294", government_maps.sources_for(circuits, code), code)
+        self.assertIn("usc-48-1824", government_maps.sources_for(circuits, "MP"))
+        self.assertNotIn("usc-28-1294", government_maps.sources_for(circuits, "VI"))
+
+
 class TestNavigation(unittest.TestCase):
     """The sidebar, by level of government: one table (pages.nav_groups)."""
 

@@ -2165,6 +2165,80 @@ here in a different way:
   replaced by what Article II says. The footer gives the date the text was
   last checked (`REVIEWED`), and a section read again on another day gives
   its own.
+- **A source is the law's own publication, never a copy of it.** A U.S. Code
+  section links the Office of the Law Revision Counsel's text
+  (`uscode.house.gov/us/usc/t<title>/s<section>/`) or govinfo's edition, an
+  opinion the Court's own PDF or the bound U.S. Reports as the Library of
+  Congress publishes it. Until 2026-11-14 the guide linked Cornell's Legal
+  Information Institute 78 times (its copies of the Code and of the opinions,
+  and its Wex encyclopedia for the states' police power, now *Jacobson v.
+  Massachusetts*, *NFIB v. Sebelius* and *PruneYard Shopping Center v. Robins*
+  in the Court's words), the maps once and the 2026 ballot table six times;
+  each was replaced by the official text, opened that day. Read again for the
+  words each sentence relies on, some claims cited a section that holds only
+  part of them: the Tax Court's sentence cites 26 U.S.C. 7443, its judges,
+  and the petition before paying is 26 U.S.C. 6213. Their sections now also
+  list each primary source found for a part, read on 2026-11-14 and dated
+  there (`tests/test_guide.py`'s `CLAIMS` pairs each with its words): the
+  Court of Federal Claims' term, cases and vaccine petitions (28 U.S.C. 172
+  and 1491, 42 U.S.C. 300aa-12), what the Court of Appeals for Veterans
+  Claims reviews (38 U.S.C. 7252), the Court of Appeals for the Armed Forces
+  below the Supreme Court (10 U.S.C. 941 and 867, 28 U.S.C. 1259), the
+  surveillance court's searches (50 U.S.C. 1822), the administrative law
+  judges' three agencies (each agency's own rules: 20 C.F.R. 404.929, 29
+  C.F.R. 102.34, 17 C.F.R. 200.14) and the appeal within the agency and then
+  to a court (5 U.S.C. 557 and 704), the territorial judges' ten-year terms
+  (48 U.S.C. 1424b, 1614 and 1821), the districts state by state (28 U.S.C.
+  81-131), the Court of International Trade's cases (28 U.S.C. 1581), a petty
+  offense's six months (18 U.S.C. 3559), the circuits map's route for Guam's
+  and the Northern Mariana Islands' appeals (28 U.S.C. 1294), OMB's review of
+  significant regulations before they are issued (Executive Order 12866, secs.
+  6(b) and 8), the National Security Council run by the national security
+  advisor (National Security Presidential Memorandum 1 of January 20, 2025,
+  which prevails over the memoranda of 2021 and 2017, not the statute), the
+  White House Counsel's advice on legal questions (the White House's own page
+  of its offices) and the state's own constitution limiting its power
+  (*PruneYard*). A sentence's
+  own parenthetical citation is as it was: changing it changes the text,
+  which a second reader checks (rule 48). Not every part has a source. The
+  guide still holds these claims with no primary source among their
+  section's sources (`government_text.UNSOURCED`, which `government.check`
+  holds to the page's words), until a source is found or a second reader
+  narrows the words:
+  - executive#eop, the White House chief of staff: "Runs the president's
+    staff and schedule, and is often a principal negotiator with Congress."
+    (the White House's own pages say nothing of the office's work, and no
+    statute or regulation describes it);
+  - executive#eop, the matters the White House Counsel advises on:
+    "including nominations, pardons and requests from congressional
+    investigators." (the White House's page of its offices says the Counsel
+    advises on legal issues and names none of them, and no statute or
+    regulation describes the office);
+  - states#powers, its second sentence: "Each state constitution sets up a
+    legislature, an executive and courts, and many go into far more detail
+    than the federal one, on taxes, debt, education and local government."
+    (each constitution is its own state's, and none of the section's four
+    sources speaks of them).
+
+  The guide's and the maps' checks fail on any source on a compiled copy of
+  the law (`government_text.COMPILED_LAW`: Cornell's, Justia, FindLaw,
+  Casetext, CounselStack, and the copies of opinions on CourtListener, Google
+  Scholar, Leagle, Casemine, vLex and OpenJurist), its host read as a browser
+  reads it (a port, a user name, a trailing dot or capitals are no way past),
+  and on any source titled as a Code section or a Supreme Court case
+  (`government_text.supreme_court_case`: "v." and a U.S. Reports citation
+  however spaced, the Court's docket, or no other court named) that is not on
+  its publisher's host (`OFFICIAL_HOSTS`: `uscode.house.gov` or `govinfo.gov`;
+  the Court's `supremecourt.gov`, or the Library of Congress's `tile.loc.gov`
+  and `www.loc.gov`, never another `loc.gov` host), save an entry in
+  `COMPILED_LAW_PENDING` that says what refused the official copy (New
+  Hampshire's constitution, whose state pages answered this project's reader
+  "Access Denied"); an entry whose source has moved, or that no source
+  carries any more, is stale and fails too. The 2026 ballot table's sources
+  carry no title for that pin to read: its check (`ballot2026._source_problems`)
+  refuses a host in `COMPILED_LAW` and in its own list of compiled tables
+  (Ballotpedia, Wikipedia, NCSL, 270toWin), read the same way, and an Ohio
+  county's own domain, by the address alone.
 - **Its tense is the build's day.** Words about the election and what
   follows it are a `government_text.Tense`: a form for the campaign, one for
   after Election Day (the results read after it, as the pages tell), one for
