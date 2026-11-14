@@ -5852,6 +5852,9 @@ async function testHeldSeatWords() {
       const cross = D.getElementById("profileModalCrossLink");
       if (!cross.hidden) out.push(["cross-link", cross.textContent.replace(/\s+/g, " ").trim()]);
       out.push(["region line", D.getElementById("profileModalRegionLabel").textContent]);
+      // The term line: an appointee's "until the winner of the 2026-11-03
+      // special election is sworn in" beside "Jan. 21, 2025".
+      out.push(["term line", D.getElementById("profileModalTerm").textContent]);
       [...D.querySelectorAll("#profileModal .field-credit")].forEach((c) => {
         if (/record as the member/.test(c.textContent)) out.push(["record's credit", c.textContent]);
       });
@@ -5900,8 +5903,8 @@ async function testHeldSeatWords() {
         const why = what === "region line" ? (ISO.test(s) ? "an ISO day" : "") : wrongIn(s);
         if (why) dialogOff.push(`${p.name} (${p.id}), ${what}: ${why}: ${s.slice(0, 140)}`);
       }));
-      check("no dialog's status line, cross-link, region line or record's credit runs a label or an ISO day " +
-        "into its words", asked.length > 0 && dialogOff.length === 0,
+      check("no dialog's status line, cross-link, region line, term line or record's credit runs a label or " +
+        "an ISO day into its words", asked.length > 0 && dialogOff.length === 0,
         dialogOff.slice(0, 5).join(" | ") || `${asked.length} dialogs`);
       // The cross-link names both seats in words: the run's (seatInWords)
       // and, for a run elsewhere, the seat held.
@@ -14909,11 +14912,14 @@ async function testLongBadgesWrap() {
   const mover = index.window.KYC.people().find((p) => !p.isCandidate && /^Senate/.test(p.contestLabel || "") &&
     index.window.KYC.standing(p, "long"));
   let moverBadge = null;
+  let moverWraps = false;
   if (mover) {
     index.window.KYC.profile.open(mover.id);
     await until(() => !index.D.getElementById("profileModalStatus").hidden, 4000);
     moverBadge = [...index.D.querySelectorAll("#profileModalStatus .badge")]
       .find((b) => b.textContent.indexOf(index.window.KYC.seatInWords(mover.contestLabel)) !== -1) || null;
+    // Asked while it is in the dialog: closed, it is no longer in its line.
+    moverWraps = !!moverBadge && wraps(moverBadge);
     index.window.KYC.profile.close();
   }
   // A leadership post in the dialog, for a member who holds one.
@@ -14943,7 +14949,7 @@ async function testLongBadgesWrap() {
     check("a leadership post's badge wraps too", !leader || (!!post && wraps(post)),
       leader && leader.name + ": " + (post ? post.textContent : "no badge drawn"));
     check("and the status line of a member who ran for another seat, the seat in words",
-      !mover || (!!moverBadge && wraps(moverBadge)),
+      !mover || moverWraps,
       mover ? mover.name + ": " + (moverBadge ? moverBadge.textContent : "no badge drawn") : "no such member");
     check("a folded race row's badges wrap, in a text column no wider than the row",
       rowBadges.length > 0 && rowBadges.every(wraps) && rowCss,
@@ -26227,7 +26233,7 @@ async function testTheJanuaryWords() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
   if (!only || only === "split") await testLazyStateData();
-  if (!only || only === "index.html" || only === "votes") await testVotes();
+  if (!only || only === "index.html" || only === "votes" || only === "heldseat") await testVotes();
   if (!only || only === "money") await testRaceMoney();
   if (!only || only === "money" || only === "map") await testMapMoney();
   if (!only || only === "charts") await testCharts();
@@ -26251,11 +26257,11 @@ async function testTheJanuaryWords() {
   if (!only || only === "index.html" || only === "search") await testSearchAnswers();
   if (!only || only === "index.html" || only === "search" || only === "codewords") await testCodeWords();
   if (!only || only === "index.html" || only === "search" || only === "followups") await testTerritoryFollowups();
-  if (!only || only === "index.html" || only === "states" || only === "followups") await testLongBadgesWrap();
+  if (!only || only === "index.html" || only === "states" || only === "followups" || only === "heldseat") await testLongBadgesWrap();
   if (!only || only === "search" || only === "states" || only === "places") await testPlaceSentences();
   if (!only || only === "federal" || only === "search") await testJudgeSearch();
   if (!only || only === "index.html") await testReseatedSpecial();
-  if (!only || only === "index.html") await testFormerIncumbent();
+  if (!only || only === "index.html" || only === "heldseat") await testFormerIncumbent();
   if (!only || only === "index.html") await testRecordPhase();
   if (!only || only === "states") await testSenateWinner();
   if (!only || only === "guide") await testCommitteesPending();
@@ -26292,14 +26298,14 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "ballot" || only === "counties") await testLocalMeasures();
   if (!only || only === "findrep") await testFindRepNav();
   if (!only || only === "index.html") await testContactActions();
-  if (!only || only === "index.html") await testPayLine();
+  if (!only || only === "index.html" || only === "heldseat") await testPayLine();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "redistricting" || only === "districtphone") await testDistrictsPhonePlans();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
-  if (!only || only === "links") await testRunningElsewhere();
+  if (!only || only === "links" || only === "heldseat") await testRunningElsewhere();
   if (!only || only === "links" || only === "otherseat" || only === "january") await testOtherSeatWords();
   if (!only || only === "links" || only === "otherseat" || only === "january" || only === "heldseat") await testHeldSeatWords();
   if (!only || only === "links") await testOtherRunWalk();
@@ -26309,7 +26315,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "index.html" || only === "words") await testWordsSinceElectionDay();
   if (!only || only === "frame") await testFrame();
-  if (!only || only === "share") await testSharePages();
+  if (!only || only === "share" || only === "heldseat") await testSharePages();
   if (!only || only === "share") await testOfficialSharePages();
   if (!only || only === "share" || only === "governors") await testGovernorSharePages();
   if (!only || only === "share" || only === "january") await testTheJanuaryPage();

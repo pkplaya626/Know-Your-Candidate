@@ -1520,7 +1520,9 @@
       if (i) term.appendChild(doc.createTextNode(" - "));
       var span = doc.createElement("span");
       if (part.length <= 24) span.className = "nowrap";
-      span.textContent = KYC.dateWords(part);
+      // A day inside the sentence is in words too: "until the winner of the
+      // 2026-11-03 special election is sworn in" stood beside "Jan. 21, 2025".
+      span.textContent = KYC.dateWords(part).replace(/\b\d{4}-\d{2}-\d{2}\b/g, KYC.dateWords);
       term.appendChild(span);
     });
 
