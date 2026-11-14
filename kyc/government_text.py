@@ -176,14 +176,21 @@ COMPILED_LAW_PENDING = {
 #   schedule to its Office of Presidential Scheduling and the legislative
 #   agenda to its Office of Legislative Affairs. The Federal Register's search
 #   of presidential documents published from January 20, 2025 finds 24 for the
-#   phrase "Chief of Staff" (read 2026-11-14, each document's text opened): three
-#   orders have offices report to the chief of staff or the chief of staff's
-#   office (14158, 14213, 14338); others make the "Assistant to the President
-#   and Chief of Staff" a member or co-chair of a commission or task force
-#   (14313, 14328, 14379, 14423, 14437, and the memoranda of July 31 and
-#   August 12, 2025), let that office ask the Director of OMB to exempt
-#   regulations (14192, sec. 5) or be consulted (14409); and the legislative
-#   work they name is a deputy chief of staff's, not the chief's (Executive
+#   phrase "Chief of Staff" (read 2026-11-14, each document's text opened).
+#   Twelve name the White House chief of staff: three orders have offices
+#   report to the chief of staff or the chief of staff's office (14158, 14213,
+#   14338); five make the "Assistant to the President and Chief of Staff" a
+#   member or co-chair of a commission or task force (14313, 14328, 14379,
+#   14423, 14437); two let that office ask the Director of OMB to exempt
+#   regulations (14192, sec. 5) or be consulted (14409); and two memoranda
+#   are addressed to that official among others, the memorandum of July 15,
+#   2025 revoking Presidential Policy Directive 6 and the memorandum of June
+#   30, 2025 reissuing National Security Presidential Memorandum 5 (published
+#   July 31 and Aug. 12). The other twelve name someone else: ten a deputy
+#   chief of staff (14147, 14149, 14185, 14189, 14202, 14212, 14234, 14364,
+#   14370, 14376), one the Army's and the Air Force's chiefs of staff (14417)
+#   and one each agency head's chief of staff (14356). The legislative work
+#   two of them give is a deputy chief of staff's, not the chief's (Executive
 #   Order 14370: "shall work with the Congress to update the statutory
 #   definition"; 14376: "shall prepare a legislative recommendation"). The
 #   National Archives' George W. Bush Library (georgewbushlibrary.gov, "White
@@ -230,10 +237,12 @@ COMPILED_LAW_PENDING = {
 UNSOURCED = (
     ("executive", "president", "roughly the order in which their offices were first created",
      "when each office was first created: 3 U.S.C. 19 (cited) gives the order, and its "
-     "amendment notes, read 2026-11-14, show each department since 1965 written in as it was "
-     "made (\"1966—Subsec. (d)(1). Pub. L. 89-670 inserted reference to Secretary of "
-     "Transportation\", and so on to Homeland Security in 2006), but no source in the section "
-     "says when the older offices were created"),
+     "amendment notes, read 2026-11-14, give the year and the law that wrote in each department "
+     "added since 1965 (\"1965—Subsec. (d)(1). Pub. L. 89-174 inserted reference to Secretary "
+     "of Health, Education, and Welfare and Secretary of Housing and Urban Development\", "
+     "\"1966—Subsec. (d)(1). Pub. L. 89-670 inserted reference to Secretary of "
+     "Transportation\", and so on to Homeland Security in 2006), not when any department was "
+     "created, and no source in the section says when any office was created"),
     ("executive", "departments", "What it does, for example",
      "the table's examples of each department's work: 5 U.S.C. 101 (cited) names the "
      "departments and nothing of their work; the U.S. Government Manual, the Office of the "
@@ -1949,12 +1958,12 @@ EXECUTIVE = {
                 ("roles", [
                     ("White House chief of staff",
                      "The president has made the chief of staff a member of the National "
-                     "Security Council, and a voting participant in its Principals or Deputies "
-                     "Committee who disputes that the committee's conclusions or decisions were "
-                     "recorded correctly may, if the dispute is not resolved, appeal to the chief "
-                     "of staff, or to the deputy chief of staff for policy if the chief of staff "
-                     "so designates, whose decision is final (National Security Presidential "
-                     "Memorandum 1). By "
+                     "Security Council. If a voting attendee of the Council's Principals or "
+                     "Deputies Committee disputes how the committee recorded its conclusions or "
+                     "decisions, and the dispute is not resolved, the attendee may appeal to the "
+                     "chief of staff. If the chief of staff so designates, the appeal goes to "
+                     "the deputy chief of staff for policy instead. Either way, the decision on "
+                     "the appeal is final (National Security Presidential Memorandum 1). By "
                      "executive order, the National Design Studio's administrator (Executive "
                      "Order 14338), the functions of the National Energy Dominance Council "
                      "(Executive Order 14213) and the administrator of the U.S. DOGE Service, "
@@ -2000,6 +2009,16 @@ EXECUTIVE = {
             # offices the last entry names. The chief of staff's entry first
             # named only the three orders' offices, which say nothing of what
             # the office does (the review that day); it now leads with NSPM-1.
+            # Its first form of that put the Council seat, the dispute and the
+            # appeal in one sentence of 74 words ending "whose decision is
+            # final", which read as the deputy's decision alone (that day's
+            # second review): the memorandum's own words are "the disputing
+            # attendee may appeal the matter to the White House Chief of
+            # Staff or, should that official so designate, to the White House
+            # Deputy Chief of Staff for Policy, whose decision shall be
+            # final", and it names no step after that appeal, so the entry
+            # says the decision on the appeal is final whichever of the two
+            # makes it ("Either way"), each step in a sentence of its own.
             "sources": ["eo-8248", "usc-31-502", "eo-12866", "usc-50-3021", "nspm-1",
                         "wh-departments", "eo-14158", "eo-14338", "eo-14213"],
             "reviewed": "2026-11-14",
@@ -2083,11 +2102,33 @@ EXECUTIVE = {
             # keeps it (``wh-cabinet``'s comment quotes both): the vice
             # president and the fifteen heads, and the officials each
             # president added. The table's examples of each department's work
-            # have no source here (``UNSOURCED``).
+            # have no source here (``UNSOURCED``). The section's day is that
+            # read's, and holds for the sources it opened: the two cabinet
+            # pages, 5 U.S.C. 101, 3 U.S.C. 19, 10 U.S.C. 111 ("The Department
+            # of Defense is an executive department"), 20 U.S.C. 3411,
+            # Executive Order 14347 ("Department of War" as a "secondary
+            # title") and the Senate's floor log (the 50-46 vote), each HTTP
+            # 200 on 2026-11-14. It does not hold for the four that hold the
+            # Department of Education's transfers and the Research Service's
+            # account of them (``notOpened``): each answered this project's
+            # reader a challenge page that day, which concludes nothing (rule
+            # 8), so the day says nothing of them and the page lists them
+            # apart from it, until a person reads them or another official
+            # copy of their words.
             "sources": ["usc-5-101", "usc-3-19", "usc-10-111", "eo-14347", "senate-2026-07-14",
                         "crs-in12704", "usc-20-3411", "ed-2025-11", "ed-treasury", "ed-2026-06",
                         "wh-cabinet", "wh-cabinet-2021"],
             "reviewed": "2026-11-14",
+            "notOpened": {
+                "crs-in12704": "congress.gov answered a challenge page, \"Just a moment...\" "
+                               "(HTTP 403), on 2026-11-14",
+                "ed-2025-11": "ed.gov answered a challenge page, \"Azure WAF\" (HTTP 403), on "
+                              "2026-11-14",
+                "ed-treasury": "ed.gov answered a challenge page, \"Azure WAF\" (HTTP 403), on "
+                               "2026-11-14",
+                "ed-2026-06": "ed.gov answered a challenge page, \"Azure WAF\" (HTTP 403), on "
+                              "2026-11-14",
+            },
         },
         {
             "id": "agencies",
@@ -2133,7 +2174,16 @@ EXECUTIVE = {
             # agencies' charters (their single head, appointed with no term or
             # limit on removal) beside Slaughter's "the President may remove
             # his subordinates at will", and the SEC's and the FCC's statutes
-            # (terms and party limits); their comments quote each.
+            # (terms and party limits); their comments quote each. Every
+            # source here was read that day for the words it is cited for,
+            # the rest of the section's too: 39 U.S.C. 201 (the Postal
+            # Service "an independent establishment of the executive branch"),
+            # 49 U.S.C. 24301 (Amtrak "not a department, agency, or
+            # instrumentality of the United States Government"), 15 U.S.C. 41
+            # ("inefficiency, neglect of duty, or malfeasance in office"), 12
+            # U.S.C. 242, Slaughter, Cook (on the application for a stay,
+            # decided June 29, 2026) and Wilcox ("uniquely structured,
+            # quasi-private entity"), each HTTP 200.
             "sources": ["usc-15-41", "usc-12-242", "usc-39-201", "usc-49-24301", "slaughter",
                         "cook", "wilcox", "reorg-plan-3-1970", "usc-51-20111", "usc-50-3036",
                         "usc-15-78d", "usc-47-154"],
@@ -2404,6 +2454,10 @@ STATES = {
             # what each holds (their sources' comments quote the articles). Its
             # first narrowing added "for example" after the three, which
             # pointed at the general claim it had dropped (the review that day).
+            # Every source here was read on 2026-11-14 for the words it is
+            # cited for, each HTTP 200 but the Tenth Amendment's page, whose
+            # words were read in the National Archives' transcription of the
+            # Bill of Rights as above.
             "sources": ["const-amdt10", "jacobson", "nfib", "pruneyard", "fl-constitution",
                         "oh-constitution", "wa-constitution"],
             "reviewed": "2026-11-14",
@@ -2604,10 +2658,31 @@ STATES = {
             # The state courts' share of the country's cases is the federal
             # judiciary's word, read 2026-11-14 (``uscourts-compare``'s comment
             # quotes it); the table's levels across the states and the ways of
-            # choosing judges are held only in part (``UNSOURCED``).
+            # choosing judges are held only in part (``UNSOURCED``). The
+            # section's day is that read's, and holds for the sources it
+            # opened, each HTTP 200 on 2026-11-14: the two federal pages;
+            # Texas's page of its courts, through the chart it links ("Court
+            # Structure Chart - October 2026": the Supreme Court's "Final
+            # appellate jurisdiction in civil and juvenile cases", the Court of
+            # Criminal Appeals' "Final appellate jurisdiction in criminal
+            # cases"); Oklahoma's Rule 7.1 (an appeal "from: 1. an
+            # adjudication of juvenile delinquency") and its Constitution's
+            # Article VII ("in the event there is any conflict as to
+            # jurisdiction, the Supreme Court shall determine which court has
+            # jurisdiction"); and Missouri's page of its plan (adopted
+            # "in November 1940", "commonly called the Missouri Plan", a
+            # retention election after a year; it answered HTTP 500 with an
+            # empty body before it answered 200). It does not hold for New
+            # York's page (``notOpened``), which answered this project's
+            # reader a challenge page that day, which concludes nothing (rule
+            # 8): the day says nothing of it, and the page lists it apart.
             "sources": ["nycourts", "tx-courts", "ok-occa", "ok-const-7", "mo-plan",
                         "uscourts-compare", "ksd-courts"],
             "reviewed": "2026-11-14",
+            "notOpened": {
+                "nycourts": "nycourts.gov answered a challenge page, \"Just a moment...\" "
+                            "(HTTP 403), on 2026-11-14",
+            },
         },
         {
             "id": "taking-part",

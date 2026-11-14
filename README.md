@@ -2222,11 +2222,18 @@ here in a different way:
   holds. The White House chief of staff's entry ("Runs the president's staff
   and schedule, and is often a principal negotiator with Congress.") now
   says what National Security Presidential Memorandum 1 makes of the office
-  (a member of the National Security Council, to whom a voting participant
-  in its Principals or Deputies Committee may appeal a dispute over how the
-  committee's conclusions were recorded, the decision final), then the
-  offices three executive orders have report to it (Executive Orders 14338,
-  14213 and 14158). The White House Counsel's ("..., including nominations,
+  (a member of the National Security Council; a voting attendee of its
+  Principals or Deputies Committee who disputes how the committee recorded
+  its conclusions or decisions may, if the dispute is not resolved, appeal
+  to the chief of staff, or to the deputy chief of staff for policy if the
+  chief of staff so designates; and the decision on the appeal is final
+  either way), each step in a sentence of its own, then the offices three
+  executive orders have report to it (Executive Orders 14338, 14213 and
+  14158). Its first form put the seat and the appeal in one sentence of 74
+  words ending "whose decision is final", which read as the deputy's
+  decision alone; the memorandum's "whose decision shall be final" follows
+  both officials and names no step after the appeal. The White House
+  Counsel's ("..., including nominations,
   pardons and requests from congressional investigators.") says what the
   White House's own page of its offices says, and a new entry names the
   offices that page gives the legislative agenda, the selection of
@@ -2264,8 +2271,20 @@ here in a different way:
   among their sections' sources, and each is listed with what was looked
   for. NCSL's pages, which the states page cites, are an association's
   compilation, not a primary source (rule 50): where one holds a claim, the
-  entry says so. Only the claims that review named were read this way; the
-  guide's other pages, and the other claims on these two, have not been.
+  entry says so. A section's own day says only that the sources it opened
+  were read that day: one this project's reader could not open is listed by
+  the section apart from the day, under "Not checked that day, when this
+  site's reader could not open them" (the section's `notOpened`, with why).
+  On 2026-11-14 that was the Congressional Research Service's Insight
+  IN12704 and the Department of Education's three pages on its transfers
+  (executive#departments), and New York's page of its courts
+  (states#courts): each answered a challenge page (HTTP 403), which
+  concludes nothing (rule 8), and none was read by hand. Every other source
+  of the sections dated that day was read that day, the Constitution's
+  words in the National Archives' transcription where
+  constitution.congress.gov answered a challenge page. Only the claims that
+  review named were read this way; the guide's other pages, and the other
+  claims on these two, have not been.
   Unsourced claims listed now:
   - executive#president, the line of succession: "roughly the order in
     which their offices were first created" (3 U.S.C. 19 gives the order,

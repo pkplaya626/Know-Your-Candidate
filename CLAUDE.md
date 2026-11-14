@@ -1082,12 +1082,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     address alone (`ballot2026._source_problems`). A claim no primary source
     in its section holds (NCSL's pages are an association's compilation; a
     lede's claim is under the section "lede") is listed by its words in
-    `government_text.UNSOURCED` (README names each, and "none" over a list
-    that holds one fails): a section's date says when its sources were read,
-    never that they hold it. One address is one source key, and a page citing
-    a president's order or memorandum carries a revisit, dated by the next
-    inauguration day, that names each (`government.presidential_revisit_problems`):
-    deleting the executive page's failed nothing.
+    `government_text.UNSOURCED` (README lists each, one item to an entry,
+    and "none" over a list that holds one fails): a section's date says when
+    its sources were read, never that they hold it, and only of those it
+    opened. A source that day's read could not open (a challenge page or a
+    refusal, which concludes nothing: rule 8) is in the section's
+    `notOpened` with why, and the page lists it apart from the day
+    (`government._sources_line`): the departments' and the state courts'
+    sections said "checked on Nov. 14, 2026" over five pages that had
+    answered this project's reader HTTP 403 that day. One address is one
+    source key, and a page citing a president's instrument carries a
+    revisit, dated by the next inauguration day, that names each
+    (`government.presidential_revisit_problems`): deleting the executive
+    page's failed nothing. An instrument is known by its title
+    (`government.presidential_instrument`, as a title capitalises it): an
+    executive order or a proclamation by its number, a National Security
+    (Presidential) Memorandum or a presidential directive by its letters
+    ("NSPM-1", "PPD-6", "HSPD-12"), and any other presidential memorandum
+    by the date its title gives ("Memorandum of July 15, 2025"), else by its
+    whole title; the first version knew orders and National Security
+    memoranda alone.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title. The 2026-10-17 audit found
