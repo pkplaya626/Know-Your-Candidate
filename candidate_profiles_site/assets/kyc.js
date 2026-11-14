@@ -1290,9 +1290,9 @@
    *  ("Elected to Senate KY"), and *clause* follows "who" in a sentence,
    *  the seat in words ("was elected to the U.S. Senate in Kentucky in
    *  November", "ran for TX-33 and was not on its November ballot"), as the
-   *  hover (*title*) writes it: "Senate KY", the label with its bullet taken
-   *  out, read "Held by Andy Barr, who was elected to Senate KY in November"
-   *  over KY-6's race.
+   *  hover (*title*) writes it. The clause once ran the label in, its bullet
+   *  taken out: "Held by Andy Barr, who was elected to Senate KY in
+   *  November" stood over KY-6's race.
    *
    *  Running again under a new district number is re-election, not leaving
    *  (rule 74): "Running in CA-40 (redrawn)". A run that ended is in the past
@@ -1344,13 +1344,13 @@
         clause: won ? "was re-elected in " + number + map + " " + when
           : past ? "ran in " + number + map + (ending ? ", and " + ending : waiting)
           : "is running in " + number + map,
-        title: won ? "Re-elected under the state's new district map, in " + item.contestLabel +
+        title: won ? "Re-elected under the state's new district map, in " + number +
             ", " + when + (gone ? heldTo : "; holds " + item.officeLabel + " until the new term begins.")
           : past ? "Ran for re-election under the state's new district map, in " +
-            item.contestLabel + (ending ? ", and " + ending : waiting) + (gone ? heldTo : "; holds " +
+            number + (ending ? ", and " + ending : waiting) + (gone ? heldTo : "; holds " +
             item.officeLabel + (end ? " until " + end : "") + ".")
           : "Running for re-election under the state's new district map, in " +
-            item.contestLabel + (gone ? heldTo
+            number + (gone ? heldTo
               : "; holds " + item.officeLabel + " until the new term begins.") };
     }
     var verb = won ? "Elected to" : past ? "Ran for" : "Running for";
@@ -1438,7 +1438,8 @@
   /** A moved holder's run (movedFrom), in contestLine's shape: their own
    *  contestLine where their profile still holds the run, else the record's
    *  words - "was re-elected in CA-40 under the state's new district map",
-   *  "won the race for Senate KY" for a member seated for the seat they won,
+   *  "won the race for the U.S. Senate in Kentucky" for a member seated for
+   *  the seat they won,
    *  "ran for" the race their result is for. kyc/share.py moved_clause says
    *  the same clause, and tests/fixtures/share_status_words.json ("moved")
    *  holds both to it. */

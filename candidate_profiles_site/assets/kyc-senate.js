@@ -143,12 +143,8 @@
     });
   }
 
-  /* *race*: the race the cards are drawn in, for the people running in it
-   * (KYC.cards.statusBadge). */
-  function cards(items, race) {
-    return '<div class="card-grid">' + items.map(function (p) {
-      return KYC.cards.card(p, race ? { race: race } : null);
-    }).join("") + "</div>";
+  function cards(items) {
+    return '<div class="card-grid">' + items.map(KYC.cards.card).join("") + "</div>";
   }
 
   function count(n, word) {
@@ -209,7 +205,7 @@
                  ? "On the November ballot (" : "Running for this seat (") + (running.length +
                  (race ? KYC.cards.unprofiledNames(race).none.length +
                    KYC.cards.unprofiledNames(race).maybe.length : 0)) + ")</p>" +
-               cards(running, race) + unlisted + KYC.cards.orderNote(running, race) + "</div>");
+               cards(running) + unlisted + KYC.cards.orderNote(running, race) + "</div>");
     }
     if (row.length) html.push('<div class="senate-seat-row">', row.join(""), "</div>");
     // The markets after the people still running, before those who left
@@ -220,7 +216,7 @@
                 (KYC.electionStatus().phase === "post-election"
                   ? "Not on the November ballot (" : "No longer running for this seat (") +
                 out.length + ") &mdash; lost the primary, withdrew, or " +
-                "were not on the primary ballot</p>", cards(out, race), "</div>");
+                "were not on the primary ballot</p>", cards(out), "</div>");
     }
     html.push("</section>");
     return { html: html.join(""),

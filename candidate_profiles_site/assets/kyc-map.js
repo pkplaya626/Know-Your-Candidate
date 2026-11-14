@@ -382,8 +382,15 @@
     // rather than leaving.
     var line = KYC.contestLine(item);
     var words = line.verb + " " + label + (line.renumbered ? " (redrawn)" : "");
+    // A run for another seat is one badge, its result in it: the panel lists
+    // members under the seat they hold, so a bare "Elected" at the row's end
+    // read as Andy Barr's win in KY-6 (rule 74; KYC.cards.statusBadge says
+    // it the same way). "Elected to Senate" says it alone.
+    var spec = line.renumbered ? null : KYC.raceStatusOf(item, "short");
     return '<span class="badge ' + line.cls + ' contest" title="' +
-      KYC.escapeAttr(line.title) + '">' + KYC.escapeHtml(words) + "</span>";
+      KYC.escapeAttr(line.title + (spec ? " " + spec.title : "")) + '">' + KYC.escapeHtml(words) +
+      (spec && line.stage !== "won" ? " &middot; " + KYC.escapeHtml(spec.label) +
+        KYC.ballotLineSuffix(item) : "") + "</span>";
   }
 
   function badge(spec, item) {
@@ -398,13 +405,10 @@
     return spec ? badge(spec, item) : "";
   }
 
-  /* The run's own status beside the seat it is for, on a member's row: the
-   * panel lists members under the seat they hold ("House • KY-6"), so a bare
-   * "Elected" there read as Andy Barr's win in KY-6 (rule 74). "Elected to
-   * Senate" is the one statement of a run for another seat; a member
-   * re-elected under a new number (renumbered) keeps the result beside
-   * "Re-elected in CA-40 (redrawn)", as their card does
-   * (KYC.cards.statusBadge). */
+  /* The run's own status at the row's end, for a member re-elected under a
+   * new number (renumbered) beside "Re-elected in CA-40 (redrawn)", as their
+   * card says it (KYC.cards.statusBadge); a run for another seat says its
+   * result inside the seat's badge (contestSeat). */
   function contestResult(item) {
     return KYC.contestLine(item).renumbered ? contestBadge(item) : "";
   }
@@ -443,7 +447,8 @@
     // four lines, so the seat ("Running in CA-41 (redrawn)") takes a line
     // under the text and the result ("Nominee") stays at the end, in line
     // with every other row's "Renominated". The grid in kyc.css places them.
-    // A run for another seat is the seat's badge alone (contestResult).
+    // A run for another seat is the seat's badge, its result in it
+    // (contestSeat).
     var elsewhere = !item.isCandidate && item.contestLabel;
     return [
       '<button type="button" class="person-row" data-id="',

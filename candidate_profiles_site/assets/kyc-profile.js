@@ -1194,13 +1194,16 @@
       el(tiles[field]).innerHTML = '<span class="kyc-absent" title="' + KYC.escapeAttr(
         (item.formerMember
           ? "Checked with the FEC: no filing for the " + chamber + " seat this member held, in the " +
-            KYC.cycleYears() + " cycle. Their campaign for " + filing.officeLabel + " filed separately"
+            KYC.cycleYears() + " cycle. Their campaign for " + KYC.seatInWords(filing.officeLabel) +
+            " filed separately"
           : "Checked with the FEC: no filing for the " + chamber + " seat this member holds in this " +
-            "cycle. Their campaign for " + filing.officeLabel + " files separately") +
+            "cycle. Their campaign for " + KYC.seatInWords(filing.officeLabel) + " files separately") +
         "; its totals are below.") + '">No ' + chamber + " filing</span>";
     });
     var line = KYC.contestLine(item);
-    var seat = filing.officeLabel;
+    // A sentence: the seat in words (KYC.seatInWords), never "elected to
+    // Senate • KY".
+    var seat = KYC.seatInWords(filing.officeLabel);
     var words = (missing ? "No " + chamber + " filing this cycle; " : "") +
       (line && line.past ? line.verb.toLowerCase() + " " : missing ? "running for "
         : "Also running for ") +
