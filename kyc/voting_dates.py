@@ -523,7 +523,11 @@ def official_source(url, code):
     if inner:
         ok, label = official_source(inner[0], code)
         stamp = inner[1]
-        return ok, (f"{label} (archived {stamp[:4]}-{stamp[4:6]}-{stamp[6:8]})" if ok else label)
+        # The capture's day in words, as every day in a sentence is (rule 96):
+        # "(archived 2026-09-29)" stood beside "read on Oct. 17, 2026".
+        from .pages import date_words
+        day = date_words(f"{stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}") or stamp[:8]
+        return ok, (f"{label} (archived {day})" if ok else label)
     for prefix, (owners, label, _evidence) in OFFICIAL_ELSEWHERE.items():
         if url.startswith(prefix):
             return (code in owners), (label if code in owners

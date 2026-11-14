@@ -221,7 +221,7 @@ python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, 
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 3289 tests, no dependencies
-npm install && npm test                       # 5007 real-DOM checks (needs jsdom)
+npm install && npm test                       # 5008 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2547,7 +2547,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     holidays and one naming the day one (`closes_as_holiday`: the Board's
     CBEC Procedures Manual and Act 92 of 2023, and the Secretary of State's
     calendar's starred "November 26, 2026 – Thursday*"), never from a general
-    calendar. The cycle's dates are reread each cycle, and `check` refuses a
+    calendar. The block's own days are in words, as every sentence's is
+    (rule 96): "read on Oct. 17, 2026", "Each link opened Nov. 13, 2026",
+    "opened by hand Oct. 26, 2026" and an archived page's "(archived Sept.
+    29, 2026)" stood as ISO days beside the profiles' words, and a check
+    draws every place's block and refuses one. The cycle's dates are reread each cycle, and `check` refuses a
     date outside it.
 
 85. **A ZIP code is not a place, and a location is placed on lines fine
