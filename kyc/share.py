@@ -482,6 +482,19 @@ def _seat_words_table():
     return [[label, seat_in_words(label)] for label in labels]
 
 
+def _held_seat_words_table():
+    """``[label, words]``: :func:`held_seat_in_words` for every state's
+    Senate seat, the District's and every territory's House seat, and a few
+    states' districts, which ``KYC.heldSeatInWords`` must say alike."""
+    from .normalize import TERRITORIES, US_STATES
+
+    codes = sorted(set(US_STATES.values()))
+    labels = [f"Senate • {code}" for code in codes if code not in TERRITORIES]
+    labels += [f"House • {code}-AL" for code in sorted(TERRITORIES)]
+    labels += ["House • CA-6", "House • KY-6", "House • WY-AL", "House • AK-AL", "Governor"]
+    return [[label, held_seat_in_words(label)] for label in labels]
+
+
 def _contest_rounds():
     """What :func:`contest_clause` says of a member's other run in a December
     round or a general election runoff, read the day before it, on the day
@@ -544,7 +557,8 @@ def status_table():
     combination of status and option, what :func:`contest_clause` says of a
     member's other run in every status and every kind of round
     (``contestSeats``: for other kinds of seat; ``seatWords``: each seat in a
-    sentence's words), what :func:`moved_sentence` says of a seat's holder whose run went elsewhere
+    sentence's words; ``heldSeatWords``: each seat held, in a sentence's
+    words), what :func:`moved_sentence` says of a seat's holder whose run went elsewhere
     (seated in it or not, a member seated since for the seat they won or
     not), what :func:`standing` says for each kind of filer the results do
     not settle, (``record``) what :func:`_race_status` says in the record
@@ -679,7 +693,8 @@ def status_table():
                       "appointed", "unconfirmed", "minor", "post", "label", "off"],
             "statuses": words, "credits": credits, "contest": contest, "moved": moved,
             "contestRounds": _contest_rounds(), "contestSeats": _contest_seats(),
-            "seatWords": _seat_words_table(), "filers": filers, "record": record,
+            "seatWords": _seat_words_table(), "heldSeatWords": _held_seat_words_table(),
+            "filers": filers, "record": record,
             "former": former, "seated": seated, "seatedOthers": seated_others}
 
 
@@ -700,7 +715,7 @@ def status_table_text():
     table = status_table()
     lines = ["{", f'"words": {json.dumps(table["words"])},']
     keys = ("statuses", "credits", "contest", "contestRounds", "contestSeats", "seatWords",
-            "moved", "filers", "record", "former", "seated", "seatedOthers")
+            "heldSeatWords", "moved", "filers", "record", "former", "seated", "seatedOthers")
     for key in keys:
         rows = table[key]
         lines.append(f'"{key}": [')
@@ -802,14 +817,16 @@ def status_words(item, by_id, races_by_id, post_election=False, seat=None):
     """Where *item* stands, as the profile dialog's badge says it: the
     standing, "for <seat>" when a member runs for another, and the ballot
     line when it is not their party's. None for someone with no 2026 race
-    (a senator whose seat is not up). *seat* writes the other seat's label
-    for prose (:func:`seat_phrase`); the dialog's own is the label."""
+    (a senator whose seat is not up). The other seat is in words
+    (:func:`seat_in_words`, as the dialog's line writes it: "Elected in
+    November for the U.S. Senate in Kentucky", never "for Senate • KY");
+    *seat* writes it another way for a description (:func:`seat_phrase`)."""
     spec = standing(item, by_id, races_by_id, post_election)
     if not spec:
         return None
     words = spec[0]
     if not item.get("isCandidate") and item.get("contestLabel"):
-        words += " for " + ((seat or (lambda label: label))(item["contestLabel"]))
+        words += " for " + (seat or seat_in_words)(item["contestLabel"])
     line = ballot_line(item, by_id)
     if line:
         words += " – " + line + " line"
@@ -1025,6 +1042,30 @@ def seat_in_words(label):
     return str(label).partition(" • ")[2]
 
 
+def held_seat_in_words(label):
+    """The seat a member holds or held, in a sentence
+    (``KYC.heldSeatInWords``): a House district by its code, as
+    :func:`seat_in_words` writes the seat run for ("holds CA-3", "WY-AL");
+    the one House seat of the District or a territory in the place's own
+    words (rule 75), "the District of Columbia’s seat in the U.S. House";
+    and a Senate seat as one of the state's two, "a U.S. Senate seat from
+    Kentucky" - "holds the U.S. Senate in Kentucky" would be false. The
+    hovers read "; holds House • CA-3 until 2027-01-03", the card's label
+    run into a sentence. A label of another shape is returned as it is."""
+    from .normalize import TERRITORIES
+    from .pages import _possessive
+    from .voting_dates import place
+
+    chamber, _, seat = str(label or "").partition(" • ")
+    if chamber not in ("House", "Senate") or not seat:
+        return str(label or "")
+    if chamber == "Senate":
+        return f"a U.S. Senate seat from {place(seat)}"
+    if seat.endswith("-AL") and seat[:-3] in TERRITORIES:
+        return f"{_possessive(place(seat[:-3]), '’')} seat in the U.S. House"
+    return seat
+
+
 def _role(person, post=False):
     from .record import seated
 
@@ -1124,7 +1165,7 @@ def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
     """``p/<id>.html``; with *alias*, the same page at ``p/<alias>.html``
     for an id the person's profile once had (rule 25's merged filings, a
     filer since seated), its canonical address their own page's."""
-    from .pages import _possessive
+    from .pages import _possessive, date_words
 
     pid = person["id"]
     lead, description, status = describe(person, by_id, races_by_id, post)
@@ -1137,9 +1178,11 @@ def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
     other = other_office(person, post)
     if other:
         found = person["otherOffice"]
+        # The day read in words, as KYC.otherOffice's hover says it.
+        checked = found.get("checked") or ""
         body.append(f'<p class="share-other">{_e(other)}. <span class="faint">Source: '
                     f'<a href="{_e(found.get("source") or "")}">the election&#x27;s Wikipedia page</a>, '
-                    f"which marks the primary&#x27;s winner (read {_e(found.get('checked') or '')}).</span></p>")
+                    f"which marks the primary&#x27;s winner (read {_e(date_words(checked) or checked)}).</span></p>")
     if seat_up(person):
         body.append(f'<p class="share-next">{_e(seat_up(person))}</p>')
     race = races_by_id.get(person.get("contestRaceId") or person.get("raceId") or "")

@@ -1244,18 +1244,23 @@
       /* Al Green read "Running in 2026 for House • TX-18" beside "Lost the
        * 2026 primary for House • TX-18" (PROFILES-04): a run that ended is
        * in the past tense, and a renumbered seat is re-election. */
+      /* A sentence, so both seats are in words (rules 4, 96): the seat run
+       * for as KYC.seatInWords says it, the seat held as
+       * KYC.heldSeatInWords does - "Elected in 2026 to Senate • KY; holds
+       * House • KY-6" ran two card labels into one line. */
       if (item.contestLabel && !item.isCandidate) {
         var line = KYC.contestLine(item);
         link.hidden = false;
         var won = line.stage === "won";
         link.innerHTML = KYC.icon("branch") + ' <span class="cross-link-text">' + (line.renumbered
           ? (won ? "Re-elected" : (line.past ? "Ran" : "Running") + " for re-election") + " in <strong>" +
-            KYC.escapeHtml(item.contestLabel) +
+            KYC.escapeHtml(KYC.seatInWords(item.contestLabel)) +
             "</strong> under the new district map"
           : (won ? "Elected in 2026 to <strong>" : line.past ? "Ran in 2026 for <strong>"
             : "Running in 2026 for <strong>") +
-            KYC.escapeHtml(item.contestLabel) + "</strong>" + (won ? "; holds " : " instead of ") +
-            KYC.escapeHtml(item.officeLabel)) + "</span>";
+            KYC.escapeHtml(KYC.seatInWords(item.contestLabel)) + "</strong>" +
+            (won ? "; holds " : " instead of ") +
+            KYC.escapeHtml(KYC.heldSeatInWords(item.officeLabel))) + "</span>";
         return;
       }
       link.hidden = true;
@@ -1282,12 +1287,16 @@
     // capitals ("lost in November", never "lost in november").
     var elected = !!other && other.raceStatus === "elected";
     var how = ended && !elected ? KYC.raceStatusOf(other, "mate") : null;
+    // The seat in words, the one run for (seatInWords) or the one held
+    // (heldSeatInWords), and the day in words after it: "Held until
+    // 2027-01-03 House • CA-3" read a day and a label into one line.
     link.innerHTML =
       KYC.icon("branch") + ' <span class="cross-link-text">' +
       (item.alsoRunningId ? (elected ? "Elected to" : ended ? "Also ran for" : "Also running for")
-        : left ? "Held until " + left : "Currently holds") +
+        : left ? "Held" : "Currently holds") +
       ' <button type="button" data-goto="' + KYC.escapeAttr(id) + '">' +
-      KYC.escapeHtml(seat) + "</button>" +
+      KYC.escapeHtml(item.alsoRunningId ? KYC.seatInWords(seat) : KYC.heldSeatInWords(seat)) +
+      "</button>" + (!item.alsoRunningId && left ? " until " + KYC.escapeHtml(KYC.dateWords(left)) : "") +
       (how ? " (" + KYC.escapeHtml(how.label.charAt(0).toLowerCase() + how.label.slice(1)) + ")" : "") +
       "</span>";
   }
@@ -1297,7 +1306,7 @@
     var pieces = [];
 
     /* A member running for another seat reads as anyone else in that race,
-     * named: "On the November ballot for Senate • IA". The member wording -
+     * named: "On the November ballot for the U.S. Senate in Iowa". The member wording -
      * "renominated", "not seeking re-election" - is about the seat they
      * hold, and their result there is not their 2026 story. */
     var elsewhere = !item.isCandidate && !!item.contestLabel;
@@ -1306,7 +1315,10 @@
     // over a dialog with no status at all (PROFILES-05, PROFILES-06).
     var race = KYC.standing(item, "long");
     if (race) {
-      var label = elsewhere ? race.label + " for " + item.contestLabel : race.label;
+      // The seat run for in words (KYC.seatInWords; kyc/share.py
+      // status_words): "Elected in November for Senate • KY" ran the card's
+      // label into the line.
+      var label = elsewhere ? race.label + " for " + KYC.seatInWords(item.contestLabel) : race.label;
       // "On the November ballot – Speak The Truth line": a primary loser on
       // a minor-party line must not read as their party's second nominee.
       var line = KYC.ballotLine(item);
@@ -1594,17 +1606,20 @@
     renderPlatform(item);
     /* A sitting member's filing for another seat is the same person: their
      * voting record and committees are the member's, not "(not a sitting
-     * member)" under "Currently holds House • AL-1" (PROFILES-03). */
+     * member)" under "Currently holds AL-1" (PROFILES-03). */
     var sitting = item.isCandidate && item.incumbentId ? KYC.byId(item.incumbentId) : null;
     sitting = sitting && KYC.seated(sitting) && sitting.id !== item.id ? sitting : null;
     var challenger = !!item.isCandidate && !sitting;
     arrange(challenger);
     collapseAbsences(item, challenger);
     // In the filing's own name: "From Garland Barr's record" on Andy Barr's
-    // Senate filing read as someone else's (the roster's name).
+    // Senate filing read as someone else's (the roster's name). The seat in
+    // a sentence's words (KYC.heldSeatInWords), never "the member for House
+    // • KY-6".
     var from = sitting ? '<p class="field-credit">From ' + KYC.escapeHtml(item.name) +
       "’s record as the member for " + '<button type="button" class="link-button" data-goto="' +
-      KYC.escapeAttr(sitting.id) + '">' + KYC.escapeHtml(sitting.officeLabel) + "</button></p>" : "";
+      KYC.escapeAttr(sitting.id) + '">' + KYC.escapeHtml(KYC.heldSeatInWords(sitting.officeLabel)) +
+      "</button></p>" : "";
     renderVoting(sitting || item);
     // The votes panel draws when its chamber's file has come, and carries
     // the same line then.

@@ -95,7 +95,45 @@ class TestStatusWords(unittest.TestCase):
         member = person(raceStatus="unlisted", contestRaceId="S-TX-2026",
                         contestLabel="Senate • TX", alsoRunningId="FEC_S1")
         filing = person(id="FEC_S1", isCandidate=True, raceId="S-TX-2026", raceStatus="nominee")
-        self.assertEqual(words(member, filing), "On the November ballot for Senate • TX")
+        # The seat in words, as the dialog's status line says it (rules 4,
+        # 96): "On the November ballot for Senate • TX" ran the card's label
+        # into the line. A district is its code.
+        self.assertEqual(words(member, filing), "On the November ballot for the U.S. Senate in Texas")
+        moved = person(raceStatus="eliminated", contestRaceId="H-TX-33-2026",
+                       raceStatusRace="H-TX-33-2026", contestLabel="House • TX-33")
+        self.assertEqual(words(moved), "Lost the 2026 primary for TX-33")
+
+    def test_the_seat_a_member_holds_is_in_words(self):
+        # "; holds House • CA-3 until 2027-01-03" and "not seeking
+        # re-election to House • IA-2" ran a card's label into a hover; the
+        # seat held is one of a state's two Senate seats, a district's code,
+        # or the one House seat of the District or a territory in its words
+        # (rule 75), and anything else as it is.
+        self.assertEqual(share.held_seat_in_words("Senate • KY"), "a U.S. Senate seat from Kentucky")
+        self.assertEqual(share.held_seat_in_words("House • IA-2"), "IA-2")
+        self.assertEqual(share.held_seat_in_words("House • WY-AL"), "WY-AL")
+        self.assertEqual(share.held_seat_in_words("House • DC-AL"),
+                         "the District of Columbia’s seat in the U.S. House")
+        self.assertEqual(share.held_seat_in_words("House • VI-AL"),
+                         "the U.S. Virgin Islands’ seat in the U.S. House")
+        self.assertEqual(share.held_seat_in_words("House • PR-AL"), "Puerto Rico’s seat in the U.S. House")
+        self.assertEqual(share.held_seat_in_words("Governor"), "Governor")
+        self.assertEqual(share.held_seat_in_words(None), "")
+        # The table the render suite asks KYC.heldSeatInWords about holds
+        # every state's Senate seat and every place's seat that is no state.
+        rows = dict(share.status_table()["heldSeatWords"])
+        self.assertEqual(rows["Senate • KY"], "a U.S. Senate seat from Kentucky")
+        self.assertTrue(all(f"House • {code}-AL" in rows for code in ("AS", "DC", "GU", "MP", "PR", "VI")))
+        self.assertFalse(any(" • " in words for label, words in rows.items() if label != "Governor"))
+
+    def test_the_other_office_is_read_on_a_day_in_words(self):
+        # "(read 2026-10-17)" stood on the share page beside the other
+        # office, as in KYC.otherOffice's hover.
+        member = person(otherOffice={"text": "Republican nominee for Governor of Alabama",
+                                     "source": "https://en.wikipedia.org/wiki/X", "checked": "2026-10-17"})
+        html = share.render_profile(member, "example.org", {member["id"]: member}, {})
+        self.assertIn("(read Oct. 17, 2026)", html)
+        self.assertNotIn("2026-10-17", html)
 
     def test_a_ballot_line_not_the_partys(self):
         self.assertEqual(words(person(isCandidate=True, ballotLine="Speak The Truth")),

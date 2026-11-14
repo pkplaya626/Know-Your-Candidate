@@ -421,10 +421,13 @@
     return !!item && !item.isCandidate && !item.formerMember;
   }
 
-  /** "Left office 2026-12-08" for a former member, else "". */
+  /** "Left office Dec. 8, 2026" for a former member, else "": the day in
+   *  words (dateWords), as the officials' dialog says theirs ("Left office
+   *  Feb. 13, 2025"). It read "Left office 2026-12-08" on a former member's
+   *  status line and in their card's hover. */
   function formerText(item) {
     var former = item && item.formerMember;
-    return former ? "Left office " + former.left : "";
+    return former ? "Left office " + dateWords(former.left) : "";
   }
 
   /** True for a sitting member whose 2026 filing is for a different seat -
@@ -1301,6 +1304,11 @@
    *  for Senate KY" on his own seat's race beside "Elected in November" on
    *  his profile. kyc/share.py's contest_clause says the same words, and
    *  tests/fixtures/share_status_words.json holds both to them.
+   *
+   *  The hover names the seat held in words too (heldSeatInWords), and its
+   *  day as the page writes a day (dateWords): "; holds House • CA-3 until
+   *  2027-01-03" and "; not seeking re-election to House • IA-2, whose term
+   *  ends 2027-01-03" ran a card's label and an ISO day into a sentence.
    *  *opts.now* is the day asked about, as KYC.raceStatus takes it. */
   function contestLine(item, opts) {
     if (!item || item.isCandidate || !item.contestLabel) return null;
@@ -1323,7 +1331,7 @@
     var ending = stage === "lost" ? lost : stage === "out" ? absent : "";
     var waiting = stage === "awaiting" ? "; the result is awaited" : "";
     var end = String(item.term_start || "").split(" - ")[1] || "";
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) end = "";
+    end = /^\d{4}-\d{2}-\d{2}$/.test(end) ? dateWords(end) : "";
     var past = stage !== "running";
     var won = stage === "won";
     var cls = won ? RACE_STATUS.elected.cls : past ? "badge-neutral" : "badge-warn";
@@ -1335,7 +1343,10 @@
     // whose terms had ended.
     var gone = item.formerMember;
     var left = gone ? String(gone.left || "") : "";
-    var heldTo = "; held " + item.officeLabel + (left ? " until " + left : "") + ".";
+    // The seat held, in a sentence's words (heldSeatInWords): "holds CA-3",
+    // "holds a U.S. Senate seat from Kentucky".
+    var held = heldSeatInWords(item.officeLabel);
+    var heldTo = "; held " + held + (left ? " until " + dateWords(left) : "") + ".";
     if (item.renumbered) {
       var map = " under the state\u2019s new district map";
       var inVerb = won ? "Re-elected in" : past ? "Ran in" : "Running in";
@@ -1345,13 +1356,13 @@
           : past ? "ran in " + number + map + (ending ? ", and " + ending : waiting)
           : "is running in " + number + map,
         title: won ? "Re-elected under the state's new district map, in " + number +
-            ", " + when + (gone ? heldTo : "; holds " + item.officeLabel + " until the new term begins.")
+            ", " + when + (gone ? heldTo : "; holds " + held + " until the new term begins.")
           : past ? "Ran for re-election under the state's new district map, in " +
             number + (ending ? ", and " + ending : waiting) + (gone ? heldTo : "; holds " +
-            item.officeLabel + (end ? " until " + end : "") + ".")
+            held + (end ? " until " + end : "") + ".")
           : "Running for re-election under the state's new district map, in " +
             number + (gone ? heldTo
-              : "; holds " + item.officeLabel + " until the new term begins.") };
+              : "; holds " + held + " until the new term begins.") };
     }
     var verb = won ? "Elected to" : past ? "Ran for" : "Running for";
     // The badge is a label ("Elected to Senate KY"); the clause and the
@@ -1363,12 +1374,12 @@
         : past ? "ran for " + words + (ending ? " and " + ending : waiting)
         : "is running for " + words,
       title: won ? "Elected to " + words + " " + when + (gone ? heldTo : "; holds " +
-          item.officeLabel + (end ? " until " + end : " until the new term begins") + ".")
+          held + (end ? " until " + end : " until the new term begins") + ".")
         : past ? "Ran for " + words + " in 2026" +
           (ending ? " and " + ending : waiting) + (gone ? heldTo : "; not seeking re-election to " +
-          item.officeLabel + (end ? ", whose term ends " + end : "") + ".")
+          held + (end ? ", whose term ends " + end : "") + ".")
         : "Running for " + words + " in 2026" + (gone ? heldTo
-          : "; not seeking re-election to " + item.officeLabel + ".") };
+          : "; not seeking re-election to " + held + ".") };
   }
 
   /* A race id's seat as a badge names it: "Senate KY", "CA-40", "WY-AL"
@@ -1402,6 +1413,31 @@
     if (parts[0] === "Senate") return "the U.S. Senate in " + placeWords(parts[1]);
     if (parts[0] === "House") return parts[1];
     return text;
+  }
+
+  /** The seat a member holds or held, in a sentence (rules 4, 75 and 96;
+   *  kyc/share.py held_seat_in_words): a House district by its code, as
+   *  seatInWords writes the seat run for ("holds CA-3", "WY-AL"); the one
+   *  House seat of the District or a territory in the place's own words,
+   *  "the District of Columbia’s seat in the U.S. House", never "DC-AL";
+   *  and a Senate seat as one of the state's two, "a U.S. Senate seat from
+   *  Kentucky" ("holds the U.S. Senate in Kentucky" would be false). The
+   *  hovers read "; holds House • CA-3 until 2027-01-03" and "; not seeking
+   *  re-election to House • IA-2", the card's label run into a sentence. A
+   *  label of another shape is returned as it is. */
+  function heldSeatInWords(label) {
+    var text = String(label || "");
+    var parts = text.split(" • ");
+    if (parts.length !== 2 || !parts[1]) return text;
+    if (parts[0] === "Senate") return "a U.S. Senate seat from " + placeWords(parts[1]);
+    if (parts[0] !== "House") return text;
+    var at = /^([A-Z]{2})-AL$/.exec(parts[1]);
+    // The build's word for a place that is no state (summary.py's
+    // `territory`, the District's included).
+    if (at && ((meta().states || {})[at[1]] || {}).territory) {
+      return possessive(placeWords(at[1]), "’") + " seat in the U.S. House";
+    }
+    return parts[1];
   }
 
   /** Whether a race's record holder's 2026 run was another race: the race
@@ -1512,8 +1548,10 @@
     var other = item && !item.isCandidate && item.otherOffice;
     if (!other || !other.text) return null;
     var past = electionStatus(undefined, now).phase === "post-election";
+    // The day read in words (dateWords), as every other "read" is: "(read
+    // 2026-10-17)" stood in the hover beside the status line.
     var read = " Source: the election's Wikipedia page, which marks the primary's winner " +
-      "(read " + other.checked + ").";
+      "(read " + dateWords(other.checked) + ").";
     return past
       ? { past: true, text: "Was the " + other.text,
           title: "Was on the November 3 ballot for an office this site does not cover; this " +
@@ -4639,6 +4677,7 @@
     otherCampaign: otherCampaign,
     contestLine: contestLine,
     seatInWords: seatInWords,
+    heldSeatInWords: heldSeatInWords,
     movedFrom: movedFrom,
     sitsIn: sitsIn,
     cycleYears: cycleYears,
