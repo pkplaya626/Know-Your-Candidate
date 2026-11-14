@@ -1286,8 +1286,13 @@
    *  stands: "running", "won", "lost", "out" (not on its November ballot),
    *  "awaiting" (the status table's word, after the vote and before a
    *  result) or "ran" (after the vote, with no status read). *verb* opens the
-   *  badge ("Elected to", "Ran for", "Running in"), *clause* follows "who" in
-   *  a sentence ("was elected to Senate KY in November").
+   *  badge ("Elected to", "Ran for", "Running in"), *label* is the badge
+   *  ("Elected to Senate KY"), and *clause* follows "who" in a sentence,
+   *  the seat in words ("was elected to the U.S. Senate in Kentucky in
+   *  November", "ran for TX-33 and was not on its November ballot"), as the
+   *  hover (*title*) writes it. The clause once ran the label in, its bullet
+   *  taken out: "Held by Andy Barr, who was elected to Senate KY in
+   *  November" stood over KY-6's race.
    *
    *  Running again under a new district number is re-election, not leaving
    *  (rule 74): "Running in CA-40 (redrawn)". A run that ended is in the past
@@ -1339,36 +1344,64 @@
         clause: won ? "was re-elected in " + number + map + " " + when
           : past ? "ran in " + number + map + (ending ? ", and " + ending : waiting)
           : "is running in " + number + map,
-        title: won ? "Re-elected under the state's new district map, in " + item.contestLabel +
+        title: won ? "Re-elected under the state's new district map, in " + number +
             ", " + when + (gone ? heldTo : "; holds " + item.officeLabel + " until the new term begins.")
           : past ? "Ran for re-election under the state's new district map, in " +
-            item.contestLabel + (ending ? ", and " + ending : waiting) + (gone ? heldTo : "; holds " +
+            number + (ending ? ", and " + ending : waiting) + (gone ? heldTo : "; holds " +
             item.officeLabel + (end ? " until " + end : "") + ".")
           : "Running for re-election under the state's new district map, in " +
-            item.contestLabel + (gone ? heldTo
+            number + (gone ? heldTo
               : "; holds " + item.officeLabel + " until the new term begins.") };
     }
     var verb = won ? "Elected to" : past ? "Ran for" : "Running for";
+    // The badge is a label ("Elected to Senate KY"); the clause and the
+    // hover are sentences, with the seat in words (seatInWords).
+    var words = seatInWords(item.contestLabel);
     return { cls: cls, past: past, stage: stage, renumbered: false,
       verb: verb, label: verb + " " + seat,
-      clause: won ? "was elected to " + number + " " + when
-        : past ? "ran for " + number + (ending ? " and " + ending : waiting)
-        : "is running for " + number,
-      title: won ? "Elected to " + item.contestLabel + " " + when + (gone ? heldTo : "; holds " +
+      clause: won ? "was elected to " + words + " " + when
+        : past ? "ran for " + words + (ending ? " and " + ending : waiting)
+        : "is running for " + words,
+      title: won ? "Elected to " + words + " " + when + (gone ? heldTo : "; holds " +
           item.officeLabel + (end ? " until " + end : " until the new term begins") + ".")
-        : past ? "Ran for " + item.contestLabel + " in 2026" +
+        : past ? "Ran for " + words + " in 2026" +
           (ending ? " and " + ending : waiting) + (gone ? heldTo : "; not seeking re-election to " +
           item.officeLabel + (end ? ", whose term ends " + end : "") + ".")
-        : "Running for " + item.contestLabel + " in 2026" + (gone ? heldTo
+        : "Running for " + words + " in 2026" + (gone ? heldTo
           : "; not seeking re-election to " + item.officeLabel + ".") };
   }
 
-  /* A race id's seat in a clause's words: "Senate KY", "CA-40", "WY-AL"
-   * (kyc/share.py seat_words). */
+  /* A race id's seat as a badge names it: "Senate KY", "CA-40", "WY-AL"
+   * (kyc/share.py seat_words). Never in a sentence: seatInWords is. */
   function seatWords(rid) {
     var m = /^([SH])-([A-Z]{2})(?:-(\d+))?-\d{4}$/.exec(String(rid || ""));
     if (!m) return "";
     return m[1] === "S" ? "Senate " + m[2] : m[2] + "-" + (Number(m[3]) ? String(Number(m[3])) : "AL");
+  }
+
+  /* A race id's seat as its card's label: "Senate • KY", "House • CA-40",
+   * "House • WY-AL" (kyc/races.py seat_label). */
+  function seatLabelOf(rid) {
+    var m = /^([SH])-([A-Z]{2})(?:-(\d+))?-\d{4}$/.exec(String(rid || ""));
+    if (!m) return "";
+    return m[1] === "S" ? "Senate • " + m[2]
+      : "House • " + m[2] + "-" + (Number(m[3]) ? String(Number(m[3])) : "AL");
+  }
+
+  /** A seat in a sentence (rules 4 and 96; kyc/share.py seat_in_words): a
+   *  Senate seat in words, with the place as a sentence names it - "the U.S.
+   *  Senate in Kentucky" - and a House district by its code, as the site
+   *  writes districts everywhere ("CA-6", "WY-AL"). The card's label is
+   *  read, never rebuilt: "who was elected to Senate KY in November" stood
+   *  over KY-6's race, the label with its bullet taken out. A label of
+   *  another shape is returned as it is. */
+  function seatInWords(label) {
+    var text = String(label || "");
+    var parts = text.split(" • ");
+    if (parts.length !== 2 || !parts[1]) return text;
+    if (parts[0] === "Senate") return "the U.S. Senate in " + placeWords(parts[1]);
+    if (parts[0] === "House") return parts[1];
+    return text;
   }
 
   /** Whether a race's record holder's 2026 run was another race: the race
@@ -1405,7 +1438,8 @@
   /** A moved holder's run (movedFrom), in contestLine's shape: their own
    *  contestLine where their profile still holds the run, else the record's
    *  words - "was re-elected in CA-40 under the state's new district map",
-   *  "won the race for Senate KY" for a member seated for the seat they won,
+   *  "won the race for the U.S. Senate in Kentucky" for a member seated for
+   *  the seat they won,
    *  "ran for" the race their result is for. kyc/share.py moved_clause says
    *  the same clause, and tests/fixtures/share_status_words.json ("moved")
    *  holds both to it. */
@@ -1414,23 +1448,26 @@
     if (line) return line;
     opts = opts || {};
     var won = item.raceRole === "winner" && !!item.raceId && item.raceId !== (race || {}).id;
-    var seat = seatWords(won ? item.raceId : (item.contestRaceId || item.raceStatusRace));
+    var rid = won ? item.raceId : (item.contestRaceId || item.raceStatusRace);
+    var seat = seatWords(rid);
+    // In a sentence, the seat in words (seatInWords); the badge keeps its label.
+    var words = seatInWords(seatLabelOf(rid));
     var map = " under the state’s new district map";
     var moved = !!item.renumbered;
     if (won) {
       return { cls: RACE_STATUS.elected.cls, past: true, stage: "won", renumbered: moved,
         verb: moved ? "Re-elected in" : "Elected to",
         label: moved ? "Re-elected in " + seat + " (redrawn)" : "Elected to " + seat,
-        clause: moved ? "was re-elected in " + seat + map : "won the race for " + seat,
+        clause: moved ? "was re-elected in " + seat + map : "won the race for " + words,
         title: moved ? "Re-elected under the state's new district map, in " + seat + ", in 2026."
-          : "Won the race for " + seat + " in 2026." };
+          : "Won the race for " + words + " in 2026." };
     }
     var past = electionStatus(2026, opts.now).phase === "post-election";
     var verb = moved ? (past ? "Ran in" : "Running in") : (past ? "Ran for" : "Running for");
     return { cls: past ? "badge-neutral" : "badge-warn", past: past, stage: past ? "ran" : "running",
       renumbered: moved, verb: verb, label: verb + " " + seat + (moved ? " (redrawn)" : ""),
-      clause: (past ? "ran " : "is running ") + (moved ? "in " + seat + map : "for " + seat),
-      title: verb + " " + seat + (moved ? map : "") + " in 2026." };
+      clause: (past ? "ran " : "is running ") + (moved ? "in " + seat + map : "for " + words),
+      title: verb + " " + (moved ? seat + map : words) + " in 2026." };
   }
 
   /** A moved holder in one sentence, as a race's folded row and its share
@@ -4520,6 +4557,7 @@
     standing: standing,
     otherCampaign: otherCampaign,
     contestLine: contestLine,
+    seatInWords: seatInWords,
     movedFrom: movedFrom,
     sitsIn: sitsIn,
     cycleYears: cycleYears,

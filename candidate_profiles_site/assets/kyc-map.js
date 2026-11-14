@@ -231,8 +231,9 @@
           // election; the verbs are KYC.contestLine's.
           defender.seekingReelection2026 ? (counted ? " ran" : " running") :
           defender.contestLabel ? " " + lowerFirst(KYC.contestLine(defender).verb) + " " +
-            defender.contestLabel :
-          defender.alsoRunningSeat ? (counted ? " ran for " : " running for ") + defender.alsoRunningSeat :
+            KYC.seatInWords(defender.contestLabel) :
+          defender.alsoRunningSeat ? (counted ? " ran for " : " running for ") +
+            KYC.seatInWords(defender.alsoRunningSeat) :
           counted ? " did not run" : " not running") + ")",
     };
   }
@@ -381,8 +382,15 @@
     // rather than leaving.
     var line = KYC.contestLine(item);
     var words = line.verb + " " + label + (line.renumbered ? " (redrawn)" : "");
+    // A run for another seat is one badge, its result in it: the panel lists
+    // members under the seat they hold, so a bare "Elected" at the row's end
+    // read as Andy Barr's win in KY-6 (rule 74; KYC.cards.statusBadge says
+    // it the same way). "Elected to Senate" says it alone.
+    var spec = line.renumbered ? null : KYC.raceStatusOf(item, "short");
     return '<span class="badge ' + line.cls + ' contest" title="' +
-      KYC.escapeAttr(line.title) + '">' + KYC.escapeHtml(words) + "</span>";
+      KYC.escapeAttr(line.title + (spec ? " " + spec.title : "")) + '">' + KYC.escapeHtml(words) +
+      (spec && line.stage !== "won" ? " &middot; " + KYC.escapeHtml(spec.label) +
+        KYC.ballotLineSuffix(item) : "") + "</span>";
   }
 
   function badge(spec, item) {
@@ -395,6 +403,14 @@
     // it: "Advanced" from a top-two primary, never "Nominee: won the primary".
     var spec = KYC.raceStatusOf(item, "short");
     return spec ? badge(spec, item) : "";
+  }
+
+  /* The run's own status at the row's end, for a member re-elected under a
+   * new number (renumbered) beside "Re-elected in CA-40 (redrawn)", as their
+   * card says it (KYC.cards.statusBadge); a run for another seat says its
+   * result inside the seat's badge (contestSeat). */
+  function contestResult(item) {
+    return KYC.contestLine(item).renumbered ? contestBadge(item) : "";
   }
 
   function rowBadge(item) {
@@ -426,11 +442,13 @@
   }
 
   function personRow(item) {
-    // A member contesting another seat carries two badges. Both at the row's
-    // end squeezed the name to nothing and broke "House • CA-38" over four
-    // lines, so the seat ("Running for CA-41") takes a line under the text
-    // and the result ("Nominee") stays at the end, in line with every other
-    // row's "Renominated". The grid in kyc.css places them.
+    // A member re-elected under a new number carries two badges. Both at the
+    // row's end squeezed the name to nothing and broke "House • CA-38" over
+    // four lines, so the seat ("Running in CA-41 (redrawn)") takes a line
+    // under the text and the result ("Nominee") stays at the end, in line
+    // with every other row's "Renominated". The grid in kyc.css places them.
+    // A run for another seat is the seat's badge, its result in it
+    // (contestSeat).
     var elsewhere = !item.isCandidate && item.contestLabel;
     return [
       '<button type="button" class="person-row" data-id="',
@@ -442,7 +460,7 @@
       '<span class="party ', KYC.partyClass(item), '">',
       KYC.escapeHtml(item.party), "</span>",
       "</span>",
-      elsewhere ? contestSeat(item) + contestBadge(item) : rowBadge(item),
+      elsewhere ? contestSeat(item) + contestResult(item) : rowBadge(item),
       KYC.icon("chevron"),
       "</button>",
     ].join("");

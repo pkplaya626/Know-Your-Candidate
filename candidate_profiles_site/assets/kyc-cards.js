@@ -21,11 +21,20 @@
   }
 
   function raceBadge(item) {
+    var spec = raceSpec(item, "card");
+    return spec ? '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(spec.title) +
+      '">' + KYC.escapeHtml(spec.label) + spec.suffix + "</span>" : "";
+  }
+
+  /* Where *item* stands in their race, as a card's badge says it: {cls,
+   * label, suffix (HTML: the ballot line), title}, in the status table's
+   * *form*; null where it says nothing. */
+  function raceSpec(item, form) {
     // "Renominated" is about the seat a member holds; a member on another
     // seat's ballot is simply on it. A filer the results do not settle
     // reads as the dialog and the map read them (KYC.standing).
-    var spec = KYC.standing(item, "card");
-    if (!spec) return "";
+    var spec = KYC.standing(item, form);
+    if (!spec) return null;
     // A nominee on another line than their party's says so, or a primary
     // loser on a minor-party line reads as a second Democratic nominee.
     var line = KYC.ballotLine(item);
@@ -36,8 +45,7 @@
       KYC.electionStatus().phase !== "post-election";
     var title = line ? "On the general election ballot on the " + line +
       " line, per Wikipedia's results page." + (campaign ? "" : " " + spec.title) : spec.title;
-    return '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(title) +
-      '">' + KYC.escapeHtml(spec.label) + KYC.ballotLineSuffix(item) + "</span>";
+    return { cls: spec.cls, label: spec.label, suffix: KYC.ballotLineSuffix(item), title: title };
   }
 
   /* The badges a card shows about a seat rather than a race, in one table
@@ -113,13 +121,49 @@
       '">' + KYC.escapeHtml(label || spec.label) + "</span>";
   }
 
+  /* A member's run for another seat, on their card (statusBadge). Rule 74:
+   * a status word describes the race it badges. The card is the member's,
+   * its office line the seat they hold or held ("House • KY-6"), and a bare
+   * "Elected" beside "Elected to Senate KY" read as though Andy Barr had won
+   * KY-6, as in January "Former member" beside "Lost in November" read as
+   * though Mike Collins had lost GA-10. So the run is one badge, its result
+   * inside it, as the dialog's race rows say it (kyc-profile.js): "Ran for
+   * Senate IA · Lost in November", "Running for Senate KY · On the ballot",
+   * and "Elected to Senate KY" alone, the verb saying it. Its hover is the
+   * run's sentence (KYC.contestLine) and the result's, which names its
+   * source. One badge is true wherever the card is drawn, in the race run
+   * for as under the seat held. A member running again under a new
+   * district number (renumbered) is running for re-election, and keeps the
+   * result beside "Re-elected in CA-40 (redrawn)". */
+  function otherRun(item) {
+    var line = KYC.contestLine(item);
+    if (line.renumbered) {
+      var how = raceBadge(item);
+      return lineBadge(line) + (how ? " " + how : "");
+    }
+    var spec = raceSpec(item, "mate");
+    return '<span class="badge ' + line.cls + '" title="' +
+      KYC.escapeAttr(line.title + (spec ? " " + spec.title : "")) + '">' +
+      KYC.escapeHtml(line.label) +
+      (spec && line.stage !== "won" ? " &middot; " + KYC.escapeHtml(spec.label) + spec.suffix : "") +
+      "</span>";
+  }
+
+  function lineBadge(line) {
+    return '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(line.title) + '">' +
+      KYC.escapeHtml(line.label) + "</span>";
+  }
+
   function statusBadge(item) {
     var status = String(item.status || "").toLowerCase();
+    var elsewhere = !item.isCandidate && !!item.contestLabel;
 
     /* A 2026 incumbent who has left Congress: that first, then how their
-     * race went. Never "seat up", never a sitting member's badge. */
+     * race went. Never "seat up", never a sitting member's badge. A former
+     * member renumbered says how the race went, as before; one who ran for
+     * another seat says where, its result in it (otherRun). */
     if (item.formerMember) {
-      var how = raceBadge(item);
+      var how = elsewhere && !KYC.contestLine(item).renumbered ? otherRun(item) : raceBadge(item);
       // A 2026 winner who has since left (raceRole, no seat held on the
       // ballot) won the seat in that race; they did not hold it in it.
       var won = item.raceRole === "winner" && !item.heldRaceId;
@@ -137,11 +181,7 @@
     /* A member contesting another seat - the other chamber, or a redrawn
      * district - is leaving this one, and the reader should see where they
      * went before anything else. */
-    if (!item.isCandidate && item.contestLabel) {
-      var line = KYC.contestLine(item);
-      return '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(line.title) + '">' +
-        KYC.escapeHtml(line.label) + "</span>" + (raceBadge(item) ? " " + raceBadge(item) : "");
-    }
+    if (elsewhere) return otherRun(item);
     /* A sitting member the primary eliminated is leaving too, and a reader
      * should see that before "seat up" - and where they are going, when a
      * results page has made them another office's nominee. */
@@ -524,7 +564,7 @@
     var holder = movedHolder(race);
     if (!holder) {
       return race.holderMoved.name + ", who holds this seat, is running for " +
-        race.holderMoved.to.replace(/ • /, " ") + " under the state’s new district map";
+        KYC.seatInWords(race.holderMoved.to) + " under the state’s new district map";
     }
     // "who held this seat" once they no longer sit in it (KYC.sitsIn): Kevin
     // Kiley, who left on January 3, read "who holds this seat, ran in CA-6"
@@ -568,10 +608,10 @@
     return !holder ? (named ? named + " no longer holds the seat." : noMember()) :
       // Seated since in the seat they won elsewhere (kyc/record.py).
       holder.raceRole === "winner" && holder.raceId !== race.id
-        ? holder.name + " won the race for " + holder.officeLabel.replace(/ • /, " ") + "." :
+        ? holder.name + " won the race for " + KYC.seatInWords(holder.officeLabel) + "." :
       // Their other run, in the one set of words (KYC.contestLine).
       holder.contestLabel ? holder.name + " " + heldByWhat(holder, race) + "." :
-      holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
+      holder.alsoRunningSeat ? holder.name + " is running for " + KYC.seatInWords(holder.alsoRunningSeat) + "." :
       // Out of this seat's race, in their own card's words: never "not on
       // the November ballot", which Byron Donalds is, for governor, and a
       // retiring member's card says "Not running for re-election" (rule 61).
