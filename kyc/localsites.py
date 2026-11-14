@@ -144,7 +144,10 @@ _FOR_SALE = re.compile(
     r"domain\s+(?:name\s+)?(?:is|may\s+be)\s+for\s+sale|buy\s+this\s+domain|"
     r"this\s+domain\s+is\s+for\s+sale|make\s+an\s+offer\s+on\s+this\s+domain|"
     r"this\s+domain\s+(?:name\s+)?(?:is\s+)?available|hugedomains|afternic|"
-    r"get\s+this\s+domain|inquire\s+about\s+this\s+domain|domain\s+broker", re.I)
+    r"get\s+this\s+domain|inquire\s+about\s+this\s+domain|domain\s+broker|"
+    # "ncsl.org - This website is for sale!", the page the review of the
+    # guide's source check made of a lapsed domain (2026-11-14).
+    r"this\s+web\s*site\s+is\s+for\s+sale", re.I)
 _EXPIRED = re.compile(
     r"(?:this\s+)?domain\s+(?:name\s+)?(?:has\s+)?expired|domain\s+is\s+expired|"
     r"website\s+(?:has\s+)?expired|renew\s+(?:this|your)\s+domain|"
@@ -439,6 +442,76 @@ def _snippet(text, limit=90):
     return text[:limit].strip()
 
 
+def off_site(final):
+    """*final*, where a redirect to another site ended, as a cache keeps it:
+    its scheme, host and path, never its query. A bot wall writes the
+    reader's own address into its query - Radware's validate.perfdrive.com
+    wrote this machine's IP address, base64-encoded, into "ssr=", and a
+    "Bot Verification" page on a lapsed town domain wrote it plain into
+    "ip=", which the cache kept from 2026-10-17 to 2026-11-14 - and a
+    marketplace's, a parking service's or a sign-in
+    page's carries the visit's tracking and session ids. None of it is the
+    address's, and no page shows it. The rest is kept as written (no
+    credentials)."""
+    parts = urllib.parse.urlsplit(final or "")
+    netloc = parts.netloc.rpartition("@")[2]
+    return urllib.parse.urlunsplit((parts.scheme, netloc, parts.path, "", ""))[:300]
+
+
+# ---------------------------------------------------------- a lapsed domain
+#
+# What a lapsed domain answers, read one way wherever this project opens an
+# address it links (rule 12): a local government's listed website here, a
+# source the guide cites in kyc/guide_sources.py.
+
+MARKETPLACE, PARKING, LANDER = "marketplace", "parking", "lander"
+PLACEHOLDER = "placeholder"
+
+
+def landing(final):
+    """Where an address that ended at *final* has landed, if a lapsed
+    domain's: ``"marketplace"`` (a domain marketplace), ``"parking"`` (a
+    parking service), ``"lander"`` (the "/lander" a parking script sends a
+    visitor to, rule 39), or ``""``."""
+    parts = urllib.parse.urlsplit(final or "")
+    if _on(parts.hostname or "", _MARKET_HOSTS):
+        return MARKETPLACE
+    if _on(parts.hostname or "", _PARKING_HOSTS):
+        return PARKING
+    if parts.path.rstrip("/").endswith("/lander"):
+        return LANDER
+    return ""
+
+
+def page_head(page):
+    """What a page says of itself (``enrich.parse_page``'s *page*): its
+    title, its description and its top headings."""
+    return " ".join([page.title] + [page.meta.get(k, "") for k in
+                     ("description", "og:description", "og:title")]
+                    + [h for t, h in page.headings if t in ("h1", "h2")])
+
+
+def domain_page(page, head=None):
+    """What a page that answered 200 says of its domain: ``FOR_SALE``,
+    ``EXPIRED``, ``PARKED``, ``PLACEHOLDER`` (a web server's default page,
+    which says nothing of whose it is), or ``""``. A short page is read
+    whole; a long one by what it says of itself."""
+    head = page_head(page) if head is None else head
+    body = page.body
+    small = len(body) < 2500
+    if _FOR_SALE.search(head) or (small and _FOR_SALE.search(body)):
+        return FOR_SALE
+    if _EXPIRED.search(head) or (small and _EXPIRED.search(body)):
+        return EXPIRED
+    if (enrich._PARKED.search(head) or (small and enrich._PARKED.search(body))
+            or enrich._PARKING_CODE.search(page.small) or _PARKED_MORE.search(head)
+            or (small and _PARKED_MORE.search(body))):
+        return PARKED
+    if _PLACEHOLDER.search(head) or (small and _PLACEHOLDER.search(body)):
+        return PLACEHOLDER
+    return ""
+
+
 # ------------------------------------------------------------------ network
 
 class _Gate:
@@ -673,16 +746,29 @@ def _assess(names, url, seen):
     final = chain[-1]
     start, end = urllib.parse.urlsplit(url).hostname or "", urllib.parse.urlsplit(final).hostname or ""
     # A site that moved onto a host's platform under its own address -
-    # sites.google.com/a/rollinsford.k12.nh.us/... - has not left it.
-    moved = not same_site(start, end) and bare(start) not in final.lower()
+    # sites.google.com/a/rollinsford.k12.nh.us/... - has not left it. Its
+    # address is the host and the path, never the query: a sign-in page's,
+    # a bot wall's or a forwarder's query names where the visitor came from
+    # (Google's "continue=https://sites.google.com/site/...", Radware's),
+    # and read as the address it made 41 listed websites "ok" over the page
+    # they ended on: 30 at Google's sign-in (deleted or private Google
+    # Sites), Geisinger's at Radware's wall, others at forwarding and other
+    # hosts (found 2026-11-14, each looked at again that day).
+    ended = urllib.parse.urlsplit(final)
+    moved = not same_site(start, end) and bare(start) not in (ended.netloc + ended.path).lower()
     where = f"redirects to {bare(end)}: " if moved else ""
     if moved and _on(end, _SIGN_IN_HOSTS):
         return UNREAD, f"redirects to {bare(end)}, which asks visitors to sign in", final, ""
-    if _on(end, _MARKET_HOSTS):
+    if moved and agent.wall_host(final):
+        # A bot wall's own host, whatever it answers, says nothing of the
+        # body's site (rule 103).
+        return UNREAD, f"redirects to {bare(end)}, a bot wall's host", final, ""
+    landed = landing(final)
+    if landed == MARKETPLACE:
         return FOR_SALE, f"redirects to {bare(end)}, a domain marketplace", final, ""
-    if _on(end, _PARKING_HOSTS):
+    if landed == PARKING:
         return PARKED, f"redirects to {bare(end)}, a parking service", final, ""
-    if urllib.parse.urlsplit(final).path.rstrip("/").endswith("/lander"):
+    if landed == LANDER:
         return (PARKED, f"{where}a script sends visitors to a parking lander ({bare(end)}/lander)",
                 final, "")
     status = seen["status"]
@@ -692,9 +778,7 @@ def _assess(names, url, seen):
         return UNREAD, f"HTTP {status} without a usable redirect", final, ""
     markup = seen["markup"]
     page = enrich.parse_page(markup)
-    head = " ".join([page.title] + [page.meta.get(k, "") for k in
-                     ("description", "og:description", "og:title")]
-                    + [h for t, h in page.headings if t in ("h1", "h2")])
+    head = page_head(page)
     body = page.body
     title = _snippet(page.title or (page.headings[0][1] if page.headings else ""), 60)
     quoted = f" ('{title}')" if title else ""
@@ -706,16 +790,14 @@ def _assess(names, url, seen):
         if status in (404, 410):
             return (GONE if not moved else UNREAD), f"{where}HTTP {status}", final, ""
         return UNREAD, f"{where}HTTP {status}", final, ""
-    small = len(body) < 2500
-    if _FOR_SALE.search(head) or (small and _FOR_SALE.search(body)):
+    lapsed = domain_page(page, head)
+    if lapsed == FOR_SALE:
         return FOR_SALE, f"{where}domain for sale{quoted}", final, ""
-    if _EXPIRED.search(head) or (small and _EXPIRED.search(body)):
+    if lapsed == EXPIRED:
         return EXPIRED, f"{where}expired domain{quoted}", final, ""
-    if (enrich._PARKED.search(head) or (small and enrich._PARKED.search(body))
-            or enrich._PARKING_CODE.search(page.small) or _PARKED_MORE.search(head)
-            or (small and _PARKED_MORE.search(body))):
+    if lapsed == PARKED:
         return PARKED, f"{where}parked domain{quoted}", final, ""
-    if _PLACEHOLDER.search(head) or (small and _PLACEHOLDER.search(body)):
+    if lapsed == PLACEHOLDER:
         return UNREAD, f"{where}a web server's placeholder page{quoted}", final, ""
     if agent.turned_away(page.title):
         # A bot wall's or a challenge's page, here or at the host a redirect
@@ -829,7 +911,8 @@ def check_one(url, names, gate, visit_fn=visit, doh_fn=doh, resolves=resolves_he
         entry["evidence"] = (entry.get("evidence", "") + "; its certificate is not valid").lstrip("; ")
     if final and not same_site(urllib.parse.urlsplit(url).hostname or "",
                                urllib.parse.urlsplit(final).hostname or ""):
-        entry["final"] = final[:300]
+        # Never its query: a bot wall writes the reader's own address there.
+        entry["final"] = off_site(final)
     return entry
 
 

@@ -3367,10 +3367,13 @@ async function testStates() {
     check("each opens in a new tab, without an opener",
       links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
     check("it names NASS's Can I Vote and the dates it was listed and opened",
-      !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed (?:it|them) on \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
+      !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed (?:it|them) on [A-Z][a-z]+\.? \d{1,2}, \d{4}/.test(box.textContent) &&
         // Opened that day, every link or each as the check found it: which
         // answer is the week's record, checked for every state below.
-        /(Each link opened|Links checked|” opened) \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
+        /(Each link opened|Links checked|” opened) [A-Z][a-z]+\.? \d{1,2}, \d{4}/.test(box.textContent) &&
+        // Every day in words, as every sentence's day is (rule 96): "Each link
+        // opened 2026-11-13" stood beside the profiles' "Nov. 13, 2026".
+        !/\b\d{4}-\d{2}-\d{2}\b/.test(box.textContent), box.textContent);
     // The deadlines are Texas's own, dated and linked; vote.gov's compiled
     // page is not shown beside them (rules 50 and 53; STATEGOV-11).
     check("no vote.gov deadlines link where the state's own dates are shown",
@@ -3413,6 +3416,22 @@ async function testStates() {
       cells.some((li) => li.classList.contains("is-today") && /Oct 20/.test(li.textContent)), strip && strip.textContent);
     check("passed dates are marked passed", cells.some((li) => li.classList.contains("is-past") && /Oct 5/.test(li.textContent)));
     check("no SVG text in the voting block", !D.querySelector("#voting svg text"));
+    // Every place's block - its links' note, its dates' note, an archived
+    // page's label - writes each day in words, as every sentence's day is
+    // (rule 96): "Each link opened 2026-11-13", "read on 2026-10-17" and
+    // "(archived 2026-09-29)" stood beside the profiles' "Nov. 13, 2026".
+    const isoDay = /\b\d{4}-\d{2}-\d{2}\b/;
+    const voting = window.kycBuildMeta.voting || {};
+    const drawn = Object.keys(window.kycBuildMeta.states || {}).filter((c) => voting[c]);
+    const isoOff = drawn.map((c) => {
+      const block = D.createElement("div");
+      block.innerHTML = window.KYC.ballot.votingBlock(c, window.KYC.stateName(c));
+      return [c, block.textContent];
+    }).filter(([, t]) => isoDay.test(t));
+    check("no place's voting block writes a day as an ISO date",
+      drawn.length > 50 && isoOff.length === 0,
+      isoOff.slice(0, 3).map(([c, t]) => c + ": " + (/.{0,60}\b\d{4}-\d{2}-\d{2}\b/.exec(t) || [""])[0]).join(" | ") ||
+        `${drawn.length} places`);
   });
 
   /* "The first four from NASS" credited NASS with a curated sample-ballot
@@ -3493,6 +3512,8 @@ async function testStates() {
    * kind the case names is shown, with "See a sample ballot" opened by
    * the check beside them. */
   const CHECKED = "2026-10-20";
+  // As the page writes it (KYC.dateWords).
+  const CHECKED_WORDS = "Oct. 20, 2026";
   const votingNote = (page, code, place, mine) => {
     const meta = page.window.kycBuildMeta.voting;
     const kinds = new Set((mine.unreached || []).concat(Object.keys(mine.byHand || {}), ["sample"]));
@@ -3536,13 +3557,13 @@ async function testStates() {
     const note = votingNote(okHand, "OK", "Oklahoma",
       { unreached: ["results"], byHand: { results: [DAY, "opened"] } });
     check("said opened by hand, on its day, never unconfirmed",
-      /“Official results” opened by hand 2026-10-19\./.test(note) && !/could not be confirmed/.test(note), note);
+      /“Official results” opened by hand Oct\. 19, 2026\./.test(note) && !/could not be confirmed/.test(note), note);
     // "Each link opened <the check's day>" would claim the check opened the
     // link only a person did (rule 79): the sentence names what the check
     // opened, on its day, then what a person did, on theirs.
     check("the links the check opened are named on the check's day, apart",
       !/Each link opened/.test(note) &&
-        new RegExp("“[^”]+” opened " + CHECKED + "; “Official results” opened by hand").test(note) &&
+        new RegExp("“[^”]+” opened " + CHECKED_WORDS.replace(".", "\\.") + "; “Official results” opened by hand").test(note) &&
         !new RegExp("“Official results”[^;.]* opened " + CHECKED).test(note), note);
   });
   suite("states/ok.html — a link the check found live", () => {
@@ -3550,7 +3571,7 @@ async function testStates() {
     // pipeline drops it, and the page never says a person opened it.
     const note = votingNote(okHand, "OK", "Oklahoma", { unreached: [], byHand: { results: [DAY, "opened"] } });
     check("said opened on the check's day, never by hand",
-      new RegExp("Each link opened " + CHECKED + "\\.").test(note) &&
+      new RegExp("Each link opened " + CHECKED_WORDS.replace(".", "\\.") + "\\.").test(note) &&
         !/by hand|could not be confirmed/.test(note), note);
   });
   suite("states/al.html — a link nobody could open", () => {
@@ -3564,7 +3585,7 @@ async function testStates() {
       unreached: ["absentee", "polling", "register", "status"],
       byHand: { absentee: [DAY, "opened"], register: [DAY, "opened"],
                 polling: [DAY, "human-check"], status: [DAY, "human-check"] } });
-    const said = /; ([^;]*) opened by hand 2026-10-19/.exec(note);
+    const said = /; ([^;]*) opened by hand Oct\. 19, 2026/.exec(note);
     check("absentee and registration pages opened by hand, a portal that asks for people",
       !!said && /“Vote absentee or early”/.test(said[1]) && /“Register to vote”/.test(said[1]) &&
         /“Check your registration” and “Find your polling place” lead to New Hampshire's own portal, which asks visitors to show they are people, so this site cannot open them itself\./.test(note) &&
@@ -3574,14 +3595,14 @@ async function testStates() {
     check("one link behind the check is said in the singular, and is never also said opened",
       /“Vote absentee or early” leads to Alaska's own portal, which asks visitors to show they are people, so this site cannot open it itself\./.test(one) &&
         !/“Vote absentee or early”[^.]*(could not be confirmed|opened by hand)/.test(one) &&
-        /“Register to vote” opened by hand 2026-10-19/.test(one) && !/“Register to vote”[^.]*lead/.test(one), one);
+        /“Register to vote” opened by hand Oct\. 19, 2026/.test(one) && !/“Register to vote”[^.]*lead/.test(one), one);
   });
   suite("states/az.html — readings by hand on two days, and one past its days", () => {
     const note = votingNote(azVote, "AZ", "Arizona", {
       unreached: ["absentee", "polling", "status"],
       byHand: { status: ["2026-10-18", "opened"], polling: [DAY, "opened"], absentee: [DAY, "opened"] } });
     check("each day's links are said opened by hand on that day",
-      /“Check your registration” opened by hand 2026-10-18; “Find your polling place” and “Vote absentee or early” opened by hand 2026-10-19\./.test(note) &&
+      /“Check your registration” opened by hand Oct\. 18, 2026; “Find your polling place” and “Vote absentee or early” opened by hand Oct\. 19, 2026\./.test(note) &&
         !/could not be confirmed/.test(note), note);
     // Past BY_HAND_DAYS on the reader's calendar, a reading no longer counts.
     const later = votingNote(azVote, "AZ", "Arizona", {
@@ -3623,7 +3644,7 @@ async function testStates() {
       const unreached = ((meta._unreached || {})[code] || []).filter((k) => shown.indexOf(k) !== -1);
       const hand = (meta._byHand || {})[code] || {};
       const live = (k) => !!hand[k] && counts(hand[k][0]);
-      const opened = namedBefore(note, "opened by hand ([\\d-]+)");
+      const opened = namedBefore(note, "opened by hand ([A-Z][a-z]+\\.? \\d{1,2}, \\d{4})");
       const asks = namedBefore(note, "leads? to [^.]* own portal, which asks visitors");
       const unknown = namedBefore(note, "could not be confirmed");
       // A link the check never opened (added since it ran) is said so,
@@ -3637,7 +3658,7 @@ async function testStates() {
         const wantFresh = missed && !wantHand && !wantAsks && never.indexOf(k) !== -1;
         const wantUnknown = missed && !wantHand && !wantAsks && !wantFresh;
         if (wantHand) byHandSeen += 1;
-        if (opened.has(labels[k]) !== wantHand || (wantHand && opened.get(labels[k]) !== hand[k][0]) ||
+        if (opened.has(labels[k]) !== wantHand || (wantHand && opened.get(labels[k]) !== W.KYC.dateWords(hand[k][0])) ||
             asks.has(labels[k]) !== wantAsks || unknown.has(labels[k]) !== wantUnknown ||
             fresh.has(labels[k]) !== wantFresh) {
           wrong.push(code + " " + k + ": " + note.slice(note.indexOf("Links checked") >= 0 ? note.indexOf("Links checked") : -200));
@@ -3789,7 +3810,7 @@ async function testStates() {
     !namedBefore(note, "could not be confirmed").has(label) &&
       (missedOn(page, code).indexOf(kind) === -1
         ? !namedBefore(note, "opened by hand").has(label)
-        : namedBefore(note, "opened by hand ([\\d-]+)").get(label) === "2026-10-26");
+        : namedBefore(note, "opened by hand ([A-Z][a-z]+\\.? \\d{1,2}, \\d{4})").get(label) === "Oct. 26, 2026");
   suite("states/nh.html — vote.gov's registration page and the results, opened", () => {
     const note = nhHand.D.querySelector("#voting .state-note").textContent;
     check("vote.gov's page is said for what it is",
@@ -3874,7 +3895,7 @@ async function testStates() {
     // linked as the Internet Archive captured them, and say so.
     const archived = [...box.querySelectorAll(".vote-src a")].filter((a) => /web\.archive\.org/.test(a.href));
     check("an archived page of the Commission's is labelled as archived",
-      archived.length > 0 && archived.every((a) => /gec\.guam\.gov \(archived \d{4}-\d{2}-\d{2}\)/.test(a.textContent)),
+      archived.length > 0 && archived.every((a) => /gec\.guam\.gov \(archived [A-Z][a-z]+\.? \d{1,2}, \d{4}\)/.test(a.textContent)),
       archived.map((a) => a.textContent).join(" | "));
     // Sources are separated by semicolons, so a label's own date never
     // reads as another source (PR #102 review).
@@ -3939,11 +3960,11 @@ async function testStates() {
     // 2026-10-25, not on the record's read and check days.
     const nvNote = (nvVote.D.querySelector("#voting") || {}).textContent || "";
     check("Nevada's note gives the day nvsos.gov was read",
-      /read on 2026-10-17 and checked again on 2026-10-18 \(nvsos\.gov read on 2026-10-25\);/.test(nvNote),
+      /read on Oct\. 17, 2026 and checked again on Oct\. 18, 2026 \(nvsos\.gov read on Oct\. 25, 2026\);/.test(nvNote),
       nvNote.slice(nvNote.indexOf("Each date"), nvNote.indexOf("Each date") + 200));
     const maNote = (maVote.D.querySelector("#voting") || {}).textContent || "";
     check("a state with no later reading says nothing more",
-      /checked again on 2026-10-18; where/.test(maNote) && !/ read on 2026-10-2/.test(maNote));
+      /checked again on Oct\. 18, 2026; where/.test(maNote) && !/\([^()]* read on /.test(maNote));
     check("North Carolina after its deadline: the regular deadline, same-day registration until October 31",
       /The regular deadline to register for November 3 was October 9, 2026; you can still register and vote at the same time, until October 31, 2026/.test(lead(ncVote)) &&
         !!ncVote.D.querySelector('#voting .vote-dates li[data-kind="sameday"]') &&
@@ -12152,7 +12173,7 @@ async function testMarianasRunoff() {
     check("and the strip names it for what it was",
       strip(gone).some((t) => t === "Nov 20Governor or attorney general runoff date"), strip(gone).join(" | "));
     check("the note says when the Commission's calendar was read",
-      /\(votecnmi\.gov\.mp read on 2026-11-11\)/.test(voting.textContent), voting.textContent.slice(-600));
+      /\(votecnmi\.gov\.mp read on Nov\. 11, 2026\)/.test(voting.textContent), voting.textContent.slice(-600));
   });
   // Saipan's ZIP code on Your ballot: the same line, from the same module.
   const ballotNow = await ballotFor("#/?zip=96950", { now: "2026-11-11T09:00:00" });

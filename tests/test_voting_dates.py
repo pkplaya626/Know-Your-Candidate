@@ -143,7 +143,8 @@ class TestSources(unittest.TestCase):
         self.assertTrue(ok)
         # In brackets: the page separates sources with semicolons, and a
         # comma inside a label ran one source into the next.
-        self.assertEqual(label, "gec.guam.gov (archived 2026-10-04)")
+        # The capture's day in words, as every day in a sentence is.
+        self.assertEqual(label, "gec.guam.gov (archived Oct. 4, 2026)")
 
     def test_a_file_on_a_shared_host_counts_only_for_the_office_it_is_listed_for(self):
         url = next(iter(voting_dates.OFFICIAL_ELSEWHERE))
