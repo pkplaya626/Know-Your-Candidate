@@ -173,12 +173,30 @@
    *  office is on the ballot - "last elected 2022", Guam's statute, "open
    *  seat (Mills term-limited)" - and is no term (PR #195 review). Written
    *  as a length: under the label "Term", "4-year term" read "Term 4-year
-   *  term (if elected)". */
-  function termLength(code) {
+   *  term (if elected)". ``{length, item}``, the office's ballot entry
+   *  beside it for the provision that states the term where its own
+   *  source does not (ballot2026.TERMS, its termSource), or null. */
+  function termOf(code) {
     var b = sg().ballotOf(code);
     var item = b && b.offices.governor;
     var years = item && item.up ? sg().termYears(item) : "";
-    return years ? years + (years === "1" ? " year" : " years") : "";
+    return years ? { length: years + (years === "1" ? " year" : " years"), item: item } : null;
+  }
+
+  /** The overlay's term line, from its words ("Term 4 years (if elected;
+   *  S.D. Const. art. IV, s. 2)"): the length strong, and the provision
+   *  linked to the page that states it, as the ballot mark's own link is.
+   *  One block of text beside the icon: a flex item per run split "(if
+   *  elected;", the link and ")" apart, as the holder line's brackets were. */
+  function termLine(words, term) {
+    if (!words.term || !term) return "";
+    var rest = KYC.escapeHtml(words.term.slice(("Term " + term.length).length));
+    var source = term.item.termSource;
+    if (source && source.cite && /^https:\/\//.test(source.url || "")) {
+      rest = rest.replace(KYC.escapeHtml(source.cite), outLink(source.url, source.cite));
+    }
+    return '<span class="gov-term">' + KYC.icon("calendar") + '<span class="gov-term-text">Term <strong>' +
+      KYC.escapeHtml(term.length) + "</strong>" + rest + "</span></span>";
   }
 
   /** One candidate as a row in the race panel, in the profile dialog's
@@ -455,7 +473,7 @@
       return out;
     }
     var list = (item && item.candidates) || {};
-    var term = termLength(code);
+    var term = termOf(code);
     out.kind = "Governor (Candidate)";
     out.seeking = past ? "Ran for" : "Running for";
     out.office = "Governor • " + code;
@@ -464,7 +482,9 @@
     out.ballotName = p.ballotName ? "Printed on the ballot as “" + p.ballotName + "”" : "";
     out.surnameOnly = p.surnameOnly ? "The list gives a surname only." : "";
     out.runningMate = p.runningMate ? p.runningMate + " for lieutenant governor" : "";
-    out.term = term ? "Term " + term + (past ? "" : " (if elected)") : "";
+    // With the provision that states it where the entry's own source does
+    // not, in the ballot mark's form (KYC.stategov.withTermCite, rule 12).
+    out.term = term ? "Term " + sg().withTermCite(term.length + (past ? "" : " (if elected)"), term.item) : "";
     out.record = p.holder ? RECORD.holder : p.member ? (p.memberFormer ? RECORD.former : RECORD.member) : "";
     var named = listFor(list, p);
     out.source = "Source: " + named.source + " (read " + KYC.dateWords(named.read) + ").";
@@ -568,12 +588,10 @@
     var printed = el("governorModalPrinted");
     printed.textContent = words.printed;
     printed.hidden = !words.printed;
-    var term = /^Term (.+?)( \(if elected\))?$/.exec(words.term);
     el("governorModalMeta").innerHTML =
       "<span>" + KYC.icon("pin") + " " + KYC.escapeHtml(words.seeking) +
       " <strong>" + KYC.escapeHtml(words.office) + "</strong> " + stateLink(code, "governor-race") + "</span>" +
-      (term ? '<span class="gov-term">' + KYC.icon("calendar") + " Term <strong>" + KYC.escapeHtml(term[1]) +
-        "</strong>" + (term[2] || "") + "</span>" : "");
+      termLine(words, termOf(code));
     var status = el("governorModalStatus");
     status.innerHTML = statusBadge(person) +
       (words.ballotName ? ' <span class="faint">' + KYC.escapeHtml(words.ballotName) + "</span>" : "") +

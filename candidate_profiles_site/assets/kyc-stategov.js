@@ -190,11 +190,28 @@
    *  chambers hovered "all (2-year terms)" beside a candidate list that
    *  names no term, while their offices named the constitution. */
   function citeTerm(text, item) {
-    var cite = item && item.termSource && item.termSource.cite;
-    if (!cite) return text;
-    return String(text).replace(/\b\d+-year(?:\s+[a-z]+)?\s+terms?\b(\))?/g, function (words, close) {
-      return close ? words.slice(0, -1) + "; " + cite + ")" : words + " (" + cite + ")";
+    if (!(item && item.termSource && item.termSource.cite)) return text;
+    return String(text).replace(/\b\d+-year(?:\s+[a-z]+)?\s+terms?\b\)?/g, function (words) {
+      return withTermCite(words, item);
     });
+  }
+
+  /** *words* that state *item*'s term, with the provision that states it
+   *  (its termSource's cite) at their end: inside the parenthesis they
+   *  close with ("all (2-year terms)" -> "all (2-year terms; S.D. Const.
+   *  art. III, s. 6)", "4 years (if elected)" -> "4 years (if elected;
+   *  S.D. Const. art. IV, s. 2)"), else in one of its own ("4-year term
+   *  (S.D. Const. art. IV, s. 2)"); unchanged where the item cites none.
+   *  The one form a term's provision takes (rule 12): the ballot marks'
+   *  hovers (citeTerm), the governor overlay's "Term" (kyc-governor.js
+   *  shareWords) and, word for word, the governor share pages'
+   *  (kyc/ballot2026.py with_term_cite). The overlay said "Term 4 years"
+   *  with no provision beside a mark that named the constitution. */
+  function withTermCite(words, item) {
+    var cite = item && item.termSource && item.termSource.cite;
+    words = String(words);
+    if (!cite) return words;
+    return /\)$/.test(words) ? words.slice(0, -1) + "; " + cite + ")" : words + " (" + cite + ")";
   }
 
   /* An office on the ballot's hover: the term's length its note opens
@@ -219,7 +236,7 @@
 
   /** The term's length in years that an office on the ballot's note opens
    *  with ("4-year term; ..." -> "4"), else "". One parse for the hover
-   *  above and the governor overlay's "Term" (kyc-governor.js termLength). */
+   *  above and the governor overlay's "Term" (kyc-governor.js termOf). */
   function termYears(item) {
     var m = item && /^(\d+)-year term(?=[;,.]|$)/.exec(String(item.note || ""));
     return m ? m[1] : "";
@@ -1688,6 +1705,7 @@
     // page shows them, for the Your ballot page too (kyc-ballot.js, rule 12).
     ballotOf: ballot,
     termYears: termYears,
+    withTermCite: withTermCite,
     officeMark: officeMark,
     openSeat: openSeat,
     termBegun: termBegun,

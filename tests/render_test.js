@@ -24363,26 +24363,79 @@ async function testGovernorOverlays() {
       // "(if elected)" only beside it, nothing where the note opens with none.
       const bad = [];
       let shown = 0;
+      let cited = 0;
+      let bare = 0;
+      // Every state's, from the whole file: a state's page holds its own
+      // state's part alone (data/stategov/<st>.js, PR #172), so read from
+      // Georgia's this loop asked Georgia alone. The page's own part is put
+      // back after, for the checks below that change its records.
+      const ownPart = window.kycStateGov;
+      window.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
+      // A check of the rule, not of the day's data: one entry with a term
+      // and no provision is given one for the loop (a test's own, restored
+      // after), so a cited line and an uncited one are both asked whichever
+      // entries the table cites (South Dakota's and Vermont's now).
+      const listed = (item) => item && item.up && item.candidates &&
+        item.candidates.candidates.some((p) => !p.writeIn) && /^\d+-year term(?=[;,.]|$)/.test(item.note || "");
+      const govOf = (st) => st.ballot2026 && st.ballot2026.offices.governor;
+      const made = Object.values(window.kycStateGov.states).map(govOf)
+        .find((item) => listed(item) && !item.termSource);
+      if (made) made.termSource = { url: "https://law.example.gov/const-4-2", cite: "Test Const. art. IV, s. 2" };
       for (const [code, st] of Object.entries(window.kycStateGov.states)) {
-        const item = st.ballot2026 && st.ballot2026.offices.governor;
+        const item = govOf(st);
         const people = item && item.up && item.candidates ? item.candidates.candidates.filter((p) => !p.writeIn) : [];
         if (!people.length) continue;
         window.KYC.governor.open(people[0].id);
         const term = modal().querySelector("#governorModalMeta .gov-term");
         const lead = /^(\d+)-year term(?=[;,.]|$)/.exec(item.note || "");
         if (term) shown += 1;
-        if (lead ? !term || term.textContent.trim() !== "Term " + lead[1] + (lead[1] === "1" ? " year" : " years") +
-            " (if elected)" : !!term) {
-          bad.push(code + ": " + (term ? term.textContent : "(none)") + " | " + item.note);
+        // Where the entry's own source states no term, the provision that
+        // does, in the ballot mark's form and linked as the mark is
+        // (ballot2026.TERMS, its termSource; rule 79): South Dakota's and
+        // Vermont's overlays said "Term 4 years (if elected)" beside a mark
+        // naming the constitution.
+        const source = item.termSource;
+        const want = lead ? "Term " + lead[1] + (lead[1] === "1" ? " year" : " years") +
+          (source ? " (if elected; " + source.cite + ")" : " (if elected)") : "";
+        const said = term ? term.textContent.replace(/\s+/g, " ").trim() : "";
+        if (lead ? said !== want : !!term) {
+          bad.push(code + ": " + (term ? said : "(none)") + " | " + item.note);
         }
+        const link = term && term.querySelector("a");
+        if (term && source) {
+          cited += 1;
+          const holder = window.document.createElement("div");
+          holder.innerHTML = window.KYC.stategov.officeMark(code, "governor");
+          const mark = holder.querySelector(".gov-ballot-mark");
+          if (!link || link.getAttribute("href") !== source.url || link.textContent !== source.cite ||
+              link.getAttribute("target") !== "_blank") {
+            bad.push(code + ": the provision is not linked to " + source.url);
+          }
+          if (!mark || (mark.getAttribute("title") || "").indexOf("(" + source.cite + ")") === -1) {
+            bad.push(code + ": the ballot mark names another provision than the term line");
+          }
+        } else if (term) {
+          bare += 1;
+          if (link) bad.push(code + ": a link in a term line with no provision");
+        }
+        // One block of text beside the icon (kyc.css .gov-term-text): as flex
+        // items, "(if elected;", the link and ")" stood apart.
+        if (term && !term.querySelector(".gov-term-text")) bad.push(code + ": the term's words are not one block");
         if (/last elected|Elected with|ticket|term-limited|noncandidacy|certified/i.test(text("#governorModalMeta"))) {
           bad.push(code + ": the note's basis printed: " + text("#governorModalMeta"));
         }
       }
+      if (made) delete made.termSource;
+      window.kycStateGov = ownPart;
+      if (!/\.modal-meta \.gov-term-text\s*\{[^}]*display:\s*block/.test(
+        fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8"))) {
+        bad.push("kyc.css does not make the term's words one block");
+      }
       window.KYC.governor.close();
       await until(() => !open(), 2000);
-      check("every state's Term line is the note's term length alone, or nothing", !bad.length && shown > 0,
-        bad.slice(0, 4).join(" || "));
+      check("every state's Term line is the note's term length alone, with the provision that states it " +
+        "where the entry's source does not, linked, or nothing", !bad.length && cited > 0 && bare > 0 && shown > 20,
+        bad.slice(0, 4).join(" || ") || `${shown} term lines, ${cited} cited`);
 
       // The article line, made in each state the pipeline records.
       const saved = { wikipedia: first.wikipedia, articleNone: first.articleNone, articleRead: first.articleRead,
