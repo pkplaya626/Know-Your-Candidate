@@ -23,8 +23,8 @@ import re
 from collections import namedtuple
 
 from . import pages
-from .government_text import (HOLDERS, PAGES, REVIEWED, SEE, SOURCES, Tense, compiled_law,
-                              compiled_law_problems)
+from .government_text import (COMPILED_LAW_PENDING, HOLDERS, PAGES, REVIEWED, SEE, SOURCES,
+                              Tense, compiled_law, compiled_law_problems)
 
 FOLDER = "government"
 # The site's own pages, which a "site:" link must name.
@@ -1026,6 +1026,15 @@ def check():
     # A compiled copy of the law is not its publication (rule 48): Cornell's
     # copies stood behind 78 of these sources until 2026-11-14.
     problems.extend(compiled_law_problems(SOURCES))
+    # A pending entry waits for its source to move off the copy; one whose
+    # source neither the guide nor its maps hold any more waits for nothing,
+    # and would excuse the next source given its key (CLAUDE.md, "Curated
+    # data": an override that matches nothing is reported).
+    from . import government_maps
+    for key in COMPILED_LAW_PENDING:
+        if key not in SOURCES and key not in government_maps.SOURCES:
+            problems.append(f"COMPILED_LAW_PENDING names {key!r}, which names no source: "
+                            f"remove the entry")
     if slugs()[0] != "index":
         problems.append("the guide's first page must be its index")
     # Every "see it" and "who holds it" entry belongs to a section there is.

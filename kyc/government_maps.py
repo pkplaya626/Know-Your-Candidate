@@ -34,6 +34,15 @@ SOURCES = dict(TEXT_SOURCES)
 SOURCES.update({
     "usc-48-1824": ("48 U.S.C. 1824 (District Court for the Northern Mariana Islands)",
                     "https://uscode.house.gov/us/usc/t48/s1824/"),
+    # The circuit Guam's appeals go to, and through 1824(b) ("Those portions
+    # of title 28 which apply to Guam or the District Court of Guam shall be
+    # applicable to ... the District Court for the Northern Mariana
+    # Islands") the Northern Mariana Islands': 1294(4), "From the District
+    # Court of Guam, to the Court of Appeals for the Ninth Circuit". 28 U.S.C.
+    # 41 lists Guam in the Ninth Circuit and does not name the Northern
+    # Mariana Islands. Read 2026-11-14.
+    "usc-28-1294": ("28 U.S.C. 1294 (the circuits appeals go to)",
+                    "https://uscode.house.gov/us/usc/t28/s1294/"),
     "ncsl-legislators": ("NCSL: Number of Legislators and Length of Terms in Years",
                          "https://www.ncsl.org/resources/details/number-of-legislators-and-length-of-terms-in-years"),
     "bots-4-14": ("Council of State Governments, Book of the States 2022, Table 4.14: "
@@ -535,8 +544,9 @@ def _circuits():
                   "the four colors only tell neighboring circuits apart and do not group them. "
                   "A thirteenth court, the Federal Circuit, hears certain kinds of appeal (patents, "
                   "trade, money claims against the United States) from everywhere."),
-        "sources": ["usc-28-41", "usc-48-1824", "usc-28-1295", "uscourts-structure"],
-        "scoped": {"usc-48-1824": ["MP"]},
+        "sources": ["usc-28-41", "usc-48-1824", "usc-28-1294", "usc-28-1295",
+                    "uscourts-structure"],
+        "scoped": {"usc-48-1824": ["MP"], "usc-28-1294": ["GU", "MP"]},
     }
 
 

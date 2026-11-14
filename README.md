@@ -2167,20 +2167,42 @@ here in a different way:
   its own.
 - **A source is the law's own publication, never a copy of it.** A U.S. Code
   section links the Office of the Law Revision Counsel's text
-  (`uscode.house.gov/us/usc/t<title>/s<section>/`), an opinion the Court's own
-  PDF or the bound U.S. Reports as the Library of Congress publishes it. Until
-  2026-11-14 the guide linked Cornell's Legal Information Institute 78 times
-  (its copies of the Code and of the opinions, and its Wex encyclopedia for
-  the states' police power, now *Jacobson v. Massachusetts* and *NFIB v.
-  Sebelius* in the Court's words), the maps once and the 2026 ballot table six
-  times; each was replaced by the official text, opened that day and read for
-  the words it is cited for. The guide's, the maps' and the ballot table's
-  checks fail on any source on a compiled copy of the law
-  (`government_text.COMPILED_LAW`: Cornell's, Justia, FindLaw, Casetext,
-  CounselStack), save an entry in `COMPILED_LAW_PENDING` that says what
-  refused the official copy (New Hampshire's constitution, whose state pages
-  answered this project's reader "Access Denied"); an entry whose source has
-  moved is stale and fails too.
+  (`uscode.house.gov/us/usc/t<title>/s<section>/`) or govinfo's edition, an
+  opinion the Court's own PDF or the bound U.S. Reports as the Library of
+  Congress publishes it. Until 2026-11-14 the guide linked Cornell's Legal
+  Information Institute 78 times (its copies of the Code and of the opinions,
+  and its Wex encyclopedia for the states' police power, now *Jacobson v.
+  Massachusetts*, *NFIB v. Sebelius* and *PruneYard Shopping Center v. Robins*
+  in the Court's words), the maps once and the 2026 ballot table six times;
+  each was replaced by the official text, opened that day. Read again for the
+  words each sentence relies on, some claims cited a section that holds only
+  part of them: the Tax Court's sentence cites 26 U.S.C. 7443, its judges,
+  and the petition before paying is 26 U.S.C. 6213. Their sections now list,
+  beside the section the sentence names, the sources that hold the rest, read
+  the same day and dated there: the Court of Federal Claims' term, cases and
+  vaccine petitions (28 U.S.C. 172 and 1491, 42 U.S.C. 300aa-12), what the
+  Court of Appeals for Veterans Claims reviews (38 U.S.C. 7252), the Court of
+  Appeals for the Armed Forces below the Supreme Court (10 U.S.C. 941 and 867,
+  28 U.S.C. 1259), the territorial judges' ten-year terms (48 U.S.C. 1424b,
+  1614 and 1821), the districts state by state (28 U.S.C. 81-131), the Court
+  of International Trade's cases (28 U.S.C. 1581), a petty offense's six months
+  (18 U.S.C. 3559), the circuits map's route for Guam's and the Northern
+  Mariana Islands' appeals (28 U.S.C. 1294), the National Security Council
+  run by the national security advisor (the President's memorandum of 2021,
+  not the statute) and the state's own constitution limiting its power
+  (*PruneYard*). A sentence's own parenthetical citation is as it was:
+  changing it changes the text, which a second reader checks (rule 48). The
+  guide's, the maps' and the ballot table's checks fail on any source on a
+  compiled copy of the law (`government_text.COMPILED_LAW`: Cornell's,
+  Justia, FindLaw, Casetext, CounselStack, and the copies of opinions on
+  CourtListener, Google Scholar, Leagle, Casemine, vLex and OpenJurist), its
+  host read as a browser reads it (a port, a user name or a trailing dot is
+  no way past), and on any source titled as a Code section or a Supreme
+  Court case that is not on its publisher's host (`OFFICIAL_HOSTS`), save an
+  entry in `COMPILED_LAW_PENDING` that says what refused the official copy
+  (New Hampshire's constitution, whose state pages answered this project's
+  reader "Access Denied"); an entry whose source has moved, or that no
+  source carries any more, is stale and fails too.
 - **Its tense is the build's day.** Words about the election and what
   follows it are a `government_text.Tense`: a form for the campaign, one for
   after Election Day (the results read after it, as the pages tell), one for

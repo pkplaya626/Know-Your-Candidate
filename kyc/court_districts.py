@@ -77,7 +77,12 @@ FORMER_COUNTIES = {
 # amended words. Every section 81-131 was read in Cornell LII's current
 # text on 2026-10-17 for a Public Law later than the edition's; sections 84
 # and 124 had one (Pub. L. 119-109, Sept. 16, 2026, 140 Stat. 1022). Neither
-# moved a county.
+# moved a county. Both were read again on 2026-11-14 in the Office of the Law
+# Revision Counsel's text (uscode.house.gov/us/usc/t28/s84/ and s124/,
+# current through Pub. L. 119-142), which cites Pub. L. 119-109 under each
+# and holds the words below: 84(d), "Court for the Southern District shall
+# be held at San Diego and El Centro", and 124(b)(2), "Court for the Houston
+# Division shall be held at Houston and College Station".
 AMENDMENTS = {
     # Sec. 3 inserted "and El Centro" after "at San Diego" in 28 U.S.C. 84(d).
     ("CA", "Southern", None): "San Diego and El Centro",
