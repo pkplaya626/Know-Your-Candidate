@@ -84,22 +84,28 @@ class TestWordsTable(unittest.TestCase):
         self.assertEqual(statuses - {""}, {"On the Nov 3, 2026 ballot", "Was on the Nov 3, 2026 ballot",
                                            "Write-in candidate", "Was a write-in candidate"})
 
-    def test_it_holds_a_term_with_its_provision_and_without_on_both_clocks(self):
+    def test_it_holds_a_term_with_its_provision_and_without_on_every_clock(self):
         # The render suite asks the page code every row, so the overlay's
-        # "Term" names the provision exactly as the share page does (rule 79).
+        # "Term" names the provision exactly as the share page does (rule 79),
+        # on each of the table's three clocks: the cited rows were on the
+        # first two alone (the review of the term's provision).
         rows = governor_share.words_table()["cases"]
         terms = {}
         for post, _code, kind, _person, state, _src, _results, words in rows:
             item = state.get("ballot2026", {}).get("offices", {}).get("governor") or {}
-            if kind == "candidate" and post in (False, True):
+            if kind == "candidate":
                 terms.setdefault((post, bool(item.get("termSource"))), set()).add(words["term"])
             if kind == "governor":
                 self.assertEqual(words["term"], "", "a governor's own words carry no term")
         self.assertIn("Term 4 years (if elected; Const. art. IV, s. 2)", terms[(False, True)])
         self.assertIn("Term 2 years (Const. ch. II, s. 49)", terms[(True, True)])
+        self.assertIn("Term 4 years (Const. art. IV, s. 2)", terms[("2027-01-10", True)])
+        self.assertIn("Term 2 years (Const. ch. II, s. 49)", terms[("2027-01-10", True)])
         self.assertIn("", terms[(False, True)], "a note with no length cites nothing")
+        self.assertIn("", terms[("2027-01-10", True)], "a note with no length cites nothing")
         self.assertIn("Term 4 years (if elected)", terms[(False, False)])
         self.assertIn("Term 4 years", terms[(True, False)])
+        self.assertIn("Term 4 years", terms[("2027-01-10", False)])
         for (post, cited), said in terms.items():
             for words in said - {""}:
                 self.assertEqual("Const." in words, cited, words)

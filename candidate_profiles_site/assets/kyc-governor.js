@@ -193,7 +193,11 @@
     var rest = KYC.escapeHtml(words.term.slice(("Term " + term.length).length));
     var source = term.item.termSource;
     if (source && source.cite && /^https:\/\//.test(source.url || "")) {
-      rest = rest.replace(KYC.escapeHtml(source.cite), outLink(source.url, source.cite));
+      // A function, not a string: a string replacement reads "$&", "$'" and
+      // "$`" in it as patterns, and an address holding one was drawn with
+      // the cite spliced into its href, while the share page linked it whole.
+      var link = outLink(source.url, source.cite);
+      rest = rest.replace(KYC.escapeHtml(source.cite), function () { return link; });
     }
     return '<span class="gov-term">' + KYC.icon("calendar") + '<span class="gov-term-text">Term <strong>' +
       KYC.escapeHtml(term.length) + "</strong>" + rest + "</span></span>";

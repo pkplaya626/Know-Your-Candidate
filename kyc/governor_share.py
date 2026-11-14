@@ -590,7 +590,10 @@ def words_table():
     # (rule 79), and the governor's own words are as they were. A note that
     # opens with no length gives no term line to cite it in, and an office
     # not on the ballot none either; the same entries without it are the
-    # rows above.
+    # rows above. Asked on the January clock too, beside the term the
+    # election chose: on the first two clocks alone, nothing held the cited
+    # words once the new term could have begun (the review of the term's
+    # provision).
     cited = [
         {"selection": "elected", "up": True, "note": "4-year term",
          "source": "https://sos.example.gov/candidates", "holderStatus": status,
@@ -606,7 +609,7 @@ def words_table():
          "next": {"year": 2028, "source": "https://law.example.gov/"},
          "termSource": {"url": "https://law.example.gov/const-4-2", "cite": "Const. art. IV, s. 2"}},
     ]
-    for post in (False, True):
+    for post in (False, True, "2027-01-10"):
         results = "https://results.example.gov/" if post else None
         for item in cited:
             state = {"governor": governor, "ballot2026": {"offices": {"governor": dict(
