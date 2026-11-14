@@ -593,7 +593,16 @@
       (more ? ' <span class="faint">' + KYC.escapeHtml("The state's record: " + more) + "</span>" : "") +
       " " + link(b.source, "Source") + (!b.up ? nextLine(b) : "") + "</p>" +
       (c.termYears ? '<p class="leg-term">Members serve ' + KYC.escapeHtml(String(c.termYears)) +
-        "-year terms, as the state's record says.</p>" : "");
+        "-year terms, as " + termCite(b) + " says.</p>" : "");
+  }
+
+  /** Where the term the chamber's line states is said: the provision the
+   *  ballot table cites for it where the record's own source is a list that
+   *  does not say it (ballot2026.TERMS: "S.D. Const. art. III, s. 6"), else
+   *  the state's record the line links. South Dakota's line said "as the
+   *  state's record says" beside a candidate list that names no term. */
+  function termCite(b) {
+    return b.termSource ? link(b.termSource.url, b.termSource.cite) : "the state's record";
   }
 
   /** Whether district *id*'s seat in chamber *c* (a legislature file's) is

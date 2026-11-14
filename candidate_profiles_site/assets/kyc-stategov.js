@@ -196,7 +196,9 @@
     var years = termYears(item);
     var parts = [];
     if (after()) parts.push("On the Nov 3, 2026 ballot");
-    if (years) parts.push(years + "-year term");
+    // The provision that says the term, where the mark's own link is a list
+    // that does not (ballot2026.TERMS: South Dakota's candidate list).
+    if (years) parts.push(years + "-year term" + (item.termSource ? " (" + item.termSource.cite + ")" : ""));
     return parts.join("; ");
   }
 

@@ -9555,6 +9555,39 @@ async function testLegislatures() {
     });
   }
   {
+    // South Dakota's chambers and offices cited the Secretary of State's
+    // candidate list for "2-year terms" and "4-year term", and the panel
+    // said "as the state's record says" beside it; the list names no term
+    // (read 2026-11-14). The term is the constitution's (ballot2026.TERMS),
+    // named and linked where the page says it; the list stays the line's
+    // source for which seats are on the ballot.
+    const LIST = "https://vip.sdsos.gov/candidatelist.aspx?eid=774";
+    const leg = await buildPage("legislature/sd.html");
+    const state = await buildPage("states/sd.html");
+    const ne = await buildPage("legislature/ne.html");
+    suite("legislature/sd.html and states/sd.html — a term is cited to the provision that says it", () => {
+      check("no page errors", !leg.errors.length && !state.errors.length && !ne.errors.length,
+        leg.errors.concat(state.errors, ne.errors).join(" | "));
+      const term = leg.D.querySelector("#legPanelBody .leg-term");
+      const a = term && term.querySelector("a");
+      check("the term line names S.D. Const. art. III, s. 6 and links it",
+        !!term && term.textContent === "Members serve 2-year terms, as S.D. Const. art. III, s. 6 says." &&
+          !!a && a.getAttribute("href") === "https://sdlegislature.gov/api/Statutes/0N-3-6.html",
+        term ? term.innerHTML : "no term line");
+      const source = [...leg.D.querySelectorAll("#legPanelBody .leg-ballot a")].map((x) => x.getAttribute("href"));
+      check("the seats' line still links the candidate list", source.includes(LIST), source.join(" "));
+      const neTerm = ne.D.querySelector("#legPanelBody .leg-term");
+      check("a record that states its own term still says so (Nebraska)",
+        !neTerm || /, as the state's record says\.$/.test(neTerm.textContent), neTerm && neTerm.textContent);
+      const marks = [...state.D.querySelectorAll(".gov-ballot-mark.up")].map((m) => m.getAttribute("title") || "");
+      check("the offices' marks name the constitution beside the term",
+        marks.some((t) => t.includes("4-year term (S.D. Const. art. IV, s. 2)")) &&
+          marks.some((t) => t.includes("4-year term (S.D. Const. art. IV, s. 7)")) &&
+          !marks.some((t) => /4-year term(?! \()/.test(t)),
+        marks.join(" | "));
+    });
+  }
+  {
     // A fusion ballot's lines are not parties (STATEGOV-21); a coalition
     // runs Alaska's chambers (STATEGOV-05, rule 54).
     const sg = {};
