@@ -397,9 +397,10 @@
         KYC.seatedWords(KYC.newTerm(seat)).title) + '">Seated: ' + KYC.escapeHtml(seat.name) +
         "</span>";
     }
-    var asOf = (KYC.meta().election || {}).resultsAsOf;
+    // The day the results were read in words, as a person's hover says it
+    // (KYC.resultsReadOn): ", on 2026-11-05," stood over the race.
     return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
-      "The results this site last read" + (asOf ? ", on " + asOf + "," : "") +
+      "The results this site last read" + KYC.resultsReadOn() +
       " had not marked a winner.") + '">Awaiting result</span>';
   }
 
