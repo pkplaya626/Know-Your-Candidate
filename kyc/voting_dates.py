@@ -362,9 +362,19 @@ _NOT_A_RANGE = r"(?![,\s\d]*[–—-]|[,\s\d]*(?:through|to)\b)"
 _MONTH_OR_DAY = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d)"
 _DAY_STEM = r"(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)"
 _A_DAY = _DAY_STEM + r"days?\b"
+# A run of weekdays as a class (plural: "Saturdays and Sundays", "Saturdays,
+# Sundays and holidays"); a weekday in the singular is a day, read by
+# ``closes`` beside its date. Read one weekday at a time, "Excluding
+# Saturdays and Sundays" closed the Saturdays alone and "Saturdays and
+# Sundays excepted" the same; and the words between a run and the word that
+# closes it never cross a comma, or Tennessee's "open Saturdays in the
+# period, closed on holidays" closed its Saturdays.
+_DAYS = _DAY_STEM + r"days\b"
+_DAYS_RUN = (r"(" + _DAYS + r"(?:(?:\s*,\s*(?:(?:or|and)\s+)?|\s+(?:or|and)\s+)(?:all\s+)?"
+             + _DAYS + r")*)")
 CLOSED_CLASS = re.compile(
-    r"\b" + _CLOSED + r"\s+(?:all\s+)?(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b"
-    r"|\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b[^.;()]{0,40}?\b(?:excluded|excepted|closed)\b"
+    r"\b" + _CLOSED + r"\s+(?:all\s+)?" + _DAYS_RUN +
+    r"|\b" + _DAYS_RUN + r"[^.;(),]{0,40}?\b(?:excluded|excepted|closed)\b"
     r"|\bno\s+(" + _A_DAY + r"(?:(?:\s*,\s*(?:(?:or|and)\s+)?|\s+(?:or|and)\s+)(?:no\s+)?" + _A_DAY + r")*)"
     r"(?:,?\s*(?:or|and)\s+(?:no\s+)?(?:legal\s+|state\s+)?holidays?\b)?"
     r"(?=\s*(?:(?:early\s+)?(?:voting|hours)\b|[.;)\]]"
