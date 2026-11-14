@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (5007 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (5010 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2625,7 +2625,10 @@ Three more tables, each checked by `ballot2026.check()`:
   parenthesis the words close with, else one of its own, and nothing
   changes where an entry cites none; the governors' words table
   (`tests/fixtures/governor_share_words.json`) holds a term with a
-  provision and without on both clocks, asked of the page code. Vermont's
+  provision and without on each of its three clocks (the campaign's,
+  after Election Day, and January's), asked of the page code, and the
+  render suite draws every state's overlay term line, and reads its link
+  whole, on both sides of Election Day. Vermont's
   secretary of state has no entry: the constitution elects the secretary
   "biennially" (ch. II, s. 43) and no provision read gives a term, so that
   mark states its term with no provision named.

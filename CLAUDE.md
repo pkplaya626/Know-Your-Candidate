@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3289 tests, no dependencies
-npm install && npm test                       # 5007 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3292 tests, no dependencies
+npm install && npm test                       # 5010 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2347,8 +2347,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Const. art. IV, s. 2)", "Term 4 years (S.D. Const. art. IV, s. 2)"
     from the day after Election Day, linked, the marks and the term lines
     in one form (`withTermCite` in kyc-stategov.js, `with_term_cite` in
-    ballot2026.py, held together by the governors' words table), and
-    nothing more where an entry cites none. Vermont's
+    ballot2026.py, held together by the governors' words table on each of
+    its three clocks, January's too), and nothing more where an entry
+    cites none. The overlay's line is drawn and its link read on both
+    sides of Election Day, and the link goes in by a function: a string
+    replacement reads "$&" and "$'" as patterns, so an address holding one
+    was drawn with the provision spliced into its href while the share
+    page linked it whole (its review). Vermont's
     secretary of state has none: the constitution elects the secretary
     "biennially" (ch. II, s. 43), which is how often and not how long, and
     no statute read gives a term. A source read and found to name no term
