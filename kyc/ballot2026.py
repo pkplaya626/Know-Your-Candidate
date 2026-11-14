@@ -1324,12 +1324,29 @@ def stated_terms(words):
     return {int(n) for n in re.findall(r"\b(\d)-year\b", str(words or ""))}
 
 
+# A length in years, as a provision writes it: "four", "four (4)", "4".
+_YEARS = r"(\d|" + "|".join(_NUMBER_WORDS) + r")(?:\s+\(\d\))?[- ]years?\b"
+# Only the forms that say how long a term of office is: "for a term of four
+# years", "the term of two years", "The terms of office of the members of
+# the Legislature shall be two years", "a 2-year term". A clause that says
+# how often an election is held ("every four years thereafter", S.D. Const.
+# art. IV, s. 7) or when ("biennially") is no term's length.
+_TERM_FORMS = (
+    re.compile(r"\bterms?\s+of\s+" + _YEARS, re.I),
+    re.compile(r"\bterms?\s+of\s+office\b[^.;]{0,120}?\bshall\s+be\s+" + _YEARS, re.I),
+    re.compile(r"\b" + _YEARS + r"(?:\s+[a-z]+)?\s+terms?\b", re.I),
+)
+
+
 def provision_terms(words):
-    """The term lengths, in years, a provision's words give: "for a term of
-    four years", "shall be two years", "a 2-year term"."""
-    out = {int(n) for n in re.findall(r"\b(\d)[- ]years?\b", str(words or ""), re.I)}
-    out |= {_NUMBER_WORDS[w.lower()] for w in re.findall(
-        r"\b(" + "|".join(_NUMBER_WORDS) + r")\s+(?:\(\d\)\s+)?years?\b", str(words or ""), re.I)}
+    """The term lengths, in years, a provision's words give as a term of
+    office's (``_TERM_FORMS``): "for a term of four years", "The terms of
+    office of the members of the Legislature shall be two years", "a 2-year
+    term"; never an election's frequency ("every four years thereafter")."""
+    out = set()
+    for form in _TERM_FORMS:
+        for n in form.findall(str(words or "")):
+            out.add(int(n) if n.isdigit() else _NUMBER_WORDS[n.lower()])
     return out
 
 

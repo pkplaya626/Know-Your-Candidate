@@ -397,10 +397,34 @@ class TestTermsHaveASourceThatSaysThem(unittest.TestCase):
         self.assertEqual(ballot2026.stated_terms("all (2-year terms)"), {2})
         self.assertEqual(ballot2026.stated_terms("4-year staggered terms"), {4})
         self.assertEqual(ballot2026.provision_terms("for a term of four years"), {4})
-        self.assertEqual(ballot2026.provision_terms("shall be two years"), {2})
+        self.assertEqual(ballot2026.provision_terms("shall continue for the term of two years"), {2})
+        self.assertEqual(ballot2026.provision_terms(
+            "The terms of office of the members of the Legislature shall be two years"), {2})
         self.assertEqual(ballot2026.provision_terms("a term of four (4) years"), {4})
-        self.assertEqual(ballot2026.provision_terms("every four years thereafter"), {4})
+        self.assertEqual(ballot2026.provision_terms("a 2-year term"), {2})
         self.assertEqual(ballot2026.provision_terms("the Legislature shall meet"), set())
+        # Only a term of office's length counts: how often an election is
+        # held, or a span that is not a term, gives none.
+        self.assertEqual(ballot2026.provision_terms("every four years thereafter"), set())
+        self.assertEqual(ballot2026.provision_terms("shall be two years"), set())
+        self.assertEqual(ballot2026.provision_terms("shall be elected biennially"), set())
+        self.assertEqual(ballot2026.provision_terms(
+            "chosen at the general election of the Governor and every four years thereafter, who "
+            "shall severally hold their offices for a term of four years"), {4})
+
+    def test_an_election_every_four_years_is_no_four_year_term(self):
+        # A provision whose words say only how often the office is elected
+        # does not give the term the entry states (S.D. Const. art. IV, s. 7
+        # says both, and only its "for a term of four years" counts).
+        terms = dict(ballot2026.TERMS)
+        source, cite, _words = terms[("SD", "ag")]
+        terms[("SD", "ag")] = (source, cite, "There shall be chosen by the qualified electors of the "
+                               "state at the general election of the Governor and every four years "
+                               "thereafter the following constitutional officers: attorney general")
+        self.assertIn("term SD ag: the entry states 4-year terms, and S.D. Const. art. IV, s. 7's words "
+                      "give none", self.broken(terms=terms))
+        # The real entries still pass.
+        ballot2026.check()
 
 
 if __name__ == "__main__":
