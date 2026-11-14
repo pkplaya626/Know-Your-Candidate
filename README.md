@@ -2200,25 +2200,33 @@ here in a different way:
   of its offices) and the state's own constitution limiting its power
   (*PruneYard*). A sentence's
   own parenthetical citation is as it was: changing it changes the text,
-  which a second reader checks (rule 48). Not every part has a source. The
-  guide still holds these claims with no primary source among their
-  section's sources (`government_text.UNSOURCED`, which `government.check`
-  holds to the page's words), until a source is found or a second reader
-  narrows the words:
-  - executive#eop, the White House chief of staff: "Runs the president's
-    staff and schedule, and is often a principal negotiator with Congress."
-    (the White House's own pages say nothing of the office's work, and no
-    statute or regulation describes it);
-  - executive#eop, the matters the White House Counsel advises on:
-    "including nominations, pardons and requests from congressional
-    investigators." (the White House's page of its offices says the Counsel
-    advises on legal issues and names none of them, and no statute or
-    regulation describes the office);
-  - states#powers, its second sentence: "Each state constitution sets up a
-    legislature, an executive and courts, and many go into far more detail
-    than the federal one, on taxes, debt, education and local government."
-    (each constitution is its own state's, and none of the section's four
-    sources speaks of them).
+  which a second reader checks (rule 48). A claim with no primary source
+  among its section's sources is listed by its words in
+  `government_text.UNSOURCED`, which `government.check` holds to the page's
+  words, and named at the end of this paragraph, until a source is found or
+  a second reader narrows the words. The three listed on 2026-11-14 were
+  searched for again that day and none had a primary source for its words,
+  so each was narrowed to what one holds. The White House chief of staff's
+  entry ("Runs the president's staff and schedule, and is often a principal
+  negotiator with Congress.") now names the offices that report to the
+  chief of staff by executive order (Executive Orders 14158, 14338 and
+  14213). The White House Counsel's ("..., including nominations, pardons
+  and requests from congressional investigators.") says what the White
+  House's own page of its offices says, and a new entry names the offices
+  that page gives the legislative agenda, the selection of appointees and
+  the president's schedule (Legislative Affairs, Presidential Personnel,
+  Presidential Scheduling). The states page's "Each state constitution sets
+  up a legislature, an executive and courts, and many go into far more
+  detail than the federal one, on taxes, debt, education and local
+  government." now names the constitutions of Florida, Ohio and Washington,
+  read from their own legislatures' sites, and says what each holds (no one
+  source speaks for every state's, or for "many"). Where each was looked for,
+  and what answered, is in `UNSOURCED`'s comment: the Congressional Research
+  Service's reports on congress.gov answered this project's reader a
+  challenge page, which concludes nothing, and the National Archives' George
+  W. Bush Library and a 1982 presidential memorandum describe the Counsel's
+  and the chief of staff's work in one administration, not now.
+  Unsourced claims listed now: none.
 
   The guide's and the maps' checks fail on any source on a compiled copy of
   the law (`government_text.COMPILED_LAW`: Cornell's, Justia, FindLaw,

@@ -341,9 +341,28 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
         ("executive", "eop", "run by the national security advisor", "nspm-1"),
         ("executive", "eop", "reviews significant regulations before they are issued",
          "eo-12866"),
-        ("executive", "eop", "Advises the president and the White House on legal questions",
+        # The three claims UNSOURCED listed on 2026-11-14, narrowed that day
+        # to what a primary source holds: the chief of staff's entry to the
+        # offices three executive orders have report to it, the Counsel's to
+        # the White House's own words, the schedule, Congress and nominations
+        # to the White House offices its page gives them to, and the states'
+        # constitutions to three read from their own legislatures' sites.
+        ("executive", "eop", "the administrator of the U.S. DOGE Service reports to the chief of "
+         "staff", "eo-14158"),
+        ("executive", "eop", "the National Design Studio's administrator", "eo-14338"),
+        ("executive", "eop", "the functions of the National Energy Dominance Council", "eo-14213"),
+        ("executive", "eop", "on legal issues concerning the president and the White House",
          "wh-departments"),
+        ("executive", "eop", "advances the president's legislative agenda in Congress",
+         "wh-departments"),
+        ("executive", "eop", "presents candidates the president has approved to the Senate for "
+         "confirmation", "wh-departments"),
+        ("executive", "eop", "manages the president's meetings, public engagements and daily "
+         "activities", "wh-departments"),
         ("states", "powers", "the state's own constitution", "pruneyard"),
+        ("states", "powers", "constitutions of Florida, Ohio and Washington", "fl-constitution"),
+        ("states", "powers", "constitutions of Florida, Ohio and Washington", "oh-constitution"),
+        ("states", "powers", "constitutions of Florida, Ohio and Washington", "wa-constitution"),
         # 50 U.S.C. 1803 gives the court "electronic surveillance"; the
         # searches are 1822's.
         ("courts", "other-courts", "applications for surveillance and searches", "usc-50-1822"),
@@ -380,27 +399,68 @@ class TestSourcesAreTheLawsOwnPublication(unittest.TestCase):
             # A section read again on the day its sources were added says so.
             self.assertGreaterEqual(section.get("reviewed", ""), "2026-11-14", f"{slug}#{sid}")
 
+    # README's list of the claims UNSOURCED holds ends its paragraph after
+    # these words: "none." while the list is empty, else each claim's words.
+    UNSOURCED_LISTED = "Unsourced claims listed now:"
+
+    @classmethod
+    def _readme_unsourced_problems(cls, readme, unsourced):
+        """What README's list of unsourced claims gets wrong against
+        *unsourced* (``UNSOURCED``'s entries), as strings."""
+        if cls.UNSOURCED_LISTED not in readme:
+            return [f"README has no {cls.UNSOURCED_LISTED!r} list"]
+        block = readme.split(cls.UNSOURCED_LISTED, 1)[1].split("\n\n", 1)[0]
+        block = " ".join(block.split())
+        problems = []
+        if not unsourced and block != "none.":
+            problems.append(f"UNSOURCED is empty but README lists: {block!r}")
+        if unsourced and block.startswith("none"):
+            problems.append(f"README says none, over {len(unsourced)} unsourced claim(s)")
+        for slug, sid, said, _why in unsourced:
+            if " ".join(said.split()) not in block:
+                problems.append(f"README does not name {slug}#{sid}'s {said!r}")
+        return problems
+
     def test_a_claim_with_no_primary_source_is_named(self):
         # README and the comment above COMPILED_LAW said the dated sections
         # now listed "the sources that hold the rest", over a chief of staff,
         # a White House Counsel and a sentence about state constitutions that
         # no source they list holds (the review of 2026-11-14). Such a claim
-        # is in UNSOURCED, by its words, and README names each one.
+        # is in UNSOURCED, by its words, and README names each one - and,
+        # once the list is settled, says it names none: README still named
+        # the three after they were narrowed, until the list said "none.".
         from kyc.government_text import UNSOURCED
-        self.assertTrue(UNSOURCED)
         with open(os.path.join(ROOT, "README.md"), encoding="utf-8") as handle:
-            readme = " ".join(handle.read().split())
+            raw = handle.read()
+        readme = " ".join(raw.split())
         for slug, sid, said, why in UNSOURCED:
             section = next(s for p in PAGES if p["slug"] == slug for s in p["sections"]
                            if s["id"] == sid)
             self.assertIn(" ".join(said.split()), " ".join(self._words(section["blocks"]).split()),
                           f"{slug}#{sid}")
             self.assertTrue(why.strip(), f"{slug}#{sid}: say what was looked for")
-            self.assertIn(said, readme, f"README does not name {slug}#{sid}'s {said!r}")
+        self.assertEqual(self._readme_unsourced_problems(raw, UNSOURCED), [])
         # Nor do README or the comment say the sections hold "the rest".
         self.assertNotIn("the sources that hold the rest", readme)
         with open(os.path.join(ROOT, "kyc", "government_text.py"), encoding="utf-8") as handle:
             self.assertNotIn("the sources that\n# hold the rest", handle.read())
+
+    def test_readmes_list_follows_unsourced_both_ways(self):
+        # The rule, made: a claim listed that README does not name, a README
+        # that names one the list no longer holds, and a "none." over a list
+        # that holds one are each reported.
+        claim = ("executive", "eop", "Runs the president's diary.", "a test")
+        none = f"Lead.\n{self.UNSOURCED_LISTED} none.\n\nNext paragraph."
+        named = (f"Lead.\n{self.UNSOURCED_LISTED}\n- executive#eop: \"Runs the "
+                 f"president's\n  diary.\"\n\nNext paragraph.")
+        self.assertEqual(self._readme_unsourced_problems(none, ()), [])
+        self.assertEqual(self._readme_unsourced_problems(named, (claim,)), [])
+        self.assertEqual(self._readme_unsourced_problems(none, (claim,)),
+                         ["README says none, over 1 unsourced claim(s)",
+                          "README does not name executive#eop's \"Runs the president's diary.\""])
+        self.assertTrue(self._readme_unsourced_problems(named, ()))
+        self.assertEqual(self._readme_unsourced_problems("Lead.", ()),
+                         [f"README has no {self.UNSOURCED_LISTED!r} list"])
 
     def test_an_unsourced_entry_the_page_no_longer_says_is_reported(self):
         # The list must not outlive its words: an entry whose sentence was
