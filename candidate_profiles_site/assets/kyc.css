@@ -6002,12 +6002,26 @@ html.has-jumpbar { scroll-padding-top: calc(var(--header-h) + var(--jump-h, 49px
   font-variant-numeric: tabular-nums;
 }
 .race-row-num.is-word { font-size: var(--t-sm); line-height: 1.6; }
-.race-row-main { display: grid; gap: var(--s-1); min-width: 0; font-size: var(--t-sm); line-height: 1.45; }
+/* The row's text is one column the row's own width: as an implicit "auto"
+ * track it took the width of its widest line, and from Election Day "No
+ * challenger was on the ballot · 2 out" on one line made Florida's and
+ * Wisconsin's pages 9px wider than a 320px phone, the whole page scrolling
+ * sideways. A badge there wraps inside the row (rule 44). Measured in headless
+ * Chrome on every state page at 280, 320, 360 and 390px. */
+.race-row-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--s-1);
+  min-width: 0;
+  font-size: var(--t-sm);
+  line-height: 1.45;
+}
 .race-row-held { font-weight: 600; }
 .race-row-ballot,
 .race-row-unsettled { color: var(--text-muted); }
 .race-row-label { font-weight: 600; color: var(--text); }
 .race-row-badges { display: flex; flex-wrap: wrap; gap: var(--s-1); }
+.race-row-badges .badge { max-width: 100%; white-space: normal; }
 .race-row-chevron { margin-top: 2px; transition: transform 0.15s ease; }
 .race-row[aria-expanded="true"] .race-row-chevron { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) {

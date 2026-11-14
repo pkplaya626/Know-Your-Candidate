@@ -14120,6 +14120,13 @@ async function testLongBadgesWrap() {
       });
     }
   }
+  // A folded race row's badges on a phone (rule 99), after Election Day:
+  // "No challenger was on the ballot · 2 out" on one line made Florida's
+  // page 9px wider than a 320px screen. Every row of a big state's page.
+  const folded = await buildPage("states/fl.html", { setup: (w) => phoneWidth(w, true), now: "2026-11-13T12:00:00" });
+  await settle(100);
+  const rowBadges = [...folded.D.querySelectorAll(".race-row-badges .badge")];
+  const rowCss = /\.race-row-main\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/.test(css);
   // A leadership post in the dialog, for a member who holds one.
   const leader = index.window.KYC.people().find((p) => index.window.KYC.seated(p) && (p.leadership || []).length);
   let post = null;
@@ -14146,6 +14153,10 @@ async function testLongBadgesWrap() {
         ": " + (f.el.parentElement.className || f.el.parentElement.id)).join(" | "));
     check("a leadership post's badge wraps too", !leader || (!!post && wraps(post)),
       leader && leader.name + ": " + (post ? post.textContent : "no badge drawn"));
+    check("a folded race row's badges wrap, in a text column no wider than the row",
+      rowBadges.length > 0 && rowBadges.every(wraps) && rowCss,
+      rowBadges.length + " badges on Florida's rows" + (rowCss ? "" : "; .race-row-main sets no minmax(0, 1fr) column") +
+        "; " + rowBadges.filter((b) => !wraps(b)).map((b) => b.textContent).slice(0, 3).join(" | "));
     // The rule is the test's own: a badge nothing lets wrap is caught.
     const loose = index.D.createElement("span");
     loose.className = "badge badge-neutral other-office";
