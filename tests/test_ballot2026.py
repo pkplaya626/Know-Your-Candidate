@@ -355,18 +355,28 @@ class TestTermsHaveASourceThatSaysThem(unittest.TestCase):
         self.assertNotIn("termSource", ballot2026.for_state("SD")["offices"]["lt"])
         self.assertNotIn("termSource", ballot2026.for_state("AZ")["offices"]["governor"])
 
-    def test_vermonts_two_year_terms_are_its_constitutions(self):
+    def test_vermonts_two_year_terms_are_cited_to_their_provisions(self):
         vt = ballot2026.for_state("VT")
         for key, cite in (("governor", "Vt. Const. ch. II, s. 49"), ("lt", "Vt. Const. ch. II, s. 49"),
+                          ("ag", "3 V.S.A. s. 151"),
                           ("upper", "Vt. Const. ch. II, s. 46"), ("lower", "Vt. Const. ch. II, s. 46")):
             item = vt["offices" if key in ballot2026.OFFICES else "chambers"][key]
             self.assertEqual(item["termSource"]["cite"], cite, key)
+            self.assertTrue(item["termSource"]["url"].startswith("https://legislature.vermont.gov/statutes/"),
+                            key)
             self.assertEqual(ballot2026.stated_terms(item.get("note") or item.get("basis")), {2}, key)
             self.assertIn(2, ballot2026.provision_terms(ballot2026.TERMS[("VT", key)][2]), key)
-        # The attorney general's and secretary of state's terms have no
-        # provision read for them: none is cited.
-        self.assertNotIn("termSource", vt["offices"]["ag"])
+        # The attorney general's is the statute's, which the Legislature
+        # publishes ("... and continue for a term of two years", read
+        # 2026-11-14), not the candidates page's, which names no term.
+        self.assertEqual(ballot2026.TERMS[("VT", "ag")][0],
+                         "https://legislature.vermont.gov/statutes/section/03/007/00151")
+        self.assertTrue(ballot2026.TERMS[("VT", "ag")][2].endswith("and continue for a term of two years."))
+        # The secretary of state's has no provision: the constitution elects
+        # the secretary "biennially" (ch. II, s. 43), which is how often and
+        # gives no term, and no statute read gives one. None is cited.
         self.assertNotIn("termSource", vt["offices"]["sos"])
+        self.assertEqual(ballot2026.provision_terms("shall be elected biennially"), set())
 
     def test_a_term_on_a_list_that_names_none_needs_its_provision(self):
         # Without the constitution's words, South Dakota's terms rest on the

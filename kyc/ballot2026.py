@@ -1255,11 +1255,15 @@ NEXT = {
 # serve 2-year terms, as the state's record says" beside that list; so did
 # Vermont's, beside its candidates page.
 # {(state, office or chamber): (source, cite, the provision's words)}, each
-# the constitution as the state's own legislature publishes it. The words
-# must give the very term the entry states (``_term_problems``); the page
-# names the provision where it says the term (kyc-ballot.js chamberBallot,
-# kyc-stategov.js upWords), the entry's own source still saying which seats
-# and offices are on the ballot.
+# the constitution, or a statute, as the state's own legislature publishes
+# it. The words must give the very term the entry states
+# (``_term_problems``), and the entry's own source still says which seats
+# and offices are on the ballot. The page names the provision on the ballot
+# marks, an office's and a chamber's alike (kyc-stategov.js citeTerm,
+# through ballotMark and upWords), and on the legislature panel's term line
+# (kyc-ballot.js chamberBallot, termCite). The governor overlay's "Term 4
+# years" (kyc-governor.js termLength) and the governor share pages' (kyc/
+# governor_share.py) do not name it yet.
 TERMS = {
     ("SD", "governor"): ("https://sdlegislature.gov/api/Statutes/0N-4-2.html",
         "S.D. Const. art. IV, s. 2",
@@ -1284,10 +1288,15 @@ TERMS = {
         "S.D. Const. art. III, s. 6",
         "The terms of office of the members of the Legislature shall be two years"),
     # Vermont's cited the Secretary of State's candidates page, which names
-    # no term either (read 2026-11-14). Its attorney general and secretary
-    # of state are not here: the constitution elects the secretary
-    # "biennially" (ch. II, s. 43) and names no term for either, and no
-    # statute was read for them (the branch's report lists them).
+    # no term either (read 2026-11-14). The constitution names the
+    # governor's, lieutenant governor's and members' terms; the attorney
+    # general's is a statute's, 3 V.S.A. s. 151, as the Legislature
+    # publishes it. The secretary of state is not here: the constitution
+    # elects the secretary "biennially" (ch. II, s. 43), which says how often
+    # and not for how long, s. 48 leaves the election to legislation, and the
+    # secretary's chapter of the statutes, 3 V.S.A. ch. 5, names no term
+    # (its s. 101, "Commission; office", read 2026-11-14). No provision read
+    # gives it, so that mark states its term with none named.
     ("VT", "governor"): ("https://legislature.vermont.gov/statutes/constitution-of-the-state-of-vermont/",
         "Vt. Const. ch. II, s. 49",
         "The term of office of the Governor, Lieutenant-Governor and Treasurer of the State, "
@@ -1298,6 +1307,12 @@ TERMS = {
         "The term of office of the Governor, Lieutenant-Governor and Treasurer of the State, "
         "respectively, shall commence when they shall be chosen and qualified, and shall continue for "
         "the term of two years"),
+    ("VT", "ag"): ("https://legislature.vermont.gov/statutes/section/03/007/00151",
+        "3 V.S.A. s. 151",
+        "An Attorney General shall be elected at the same time and in the same manner as provided for "
+        "the election of other State officers. ... His or her term of office shall commence when his or "
+        "her election is declared by the committee appointed by the Senate and House of Representatives "
+        "to canvass the votes ... and continue for a term of two years."),
     ("VT", "upper"): ("https://legislature.vermont.gov/statutes/constitution-of-the-state-of-vermont/",
         "Vt. Const. ch. II, s. 46",
         "The term of office of Senators and Representatives shall be two years"),
@@ -1310,8 +1325,8 @@ TERMS = {
 # whose words give a term needs the provision that does (TERMS), and one
 # whose words give a last-elected year says it nowhere (``_term_problems``).
 # A source joins this list only once every entry citing it is held to it;
-# kyc/ballot2026.py's other lists and calendars are named in the branch's
-# report for a person to read.
+# none of the other lists and calendars this file cites has been read for
+# this yet, and each waits for a person to read it.
 NO_TERM_STATED = frozenset({
     "https://vip.sdsos.gov/candidatelist.aspx?eid=774",
 })

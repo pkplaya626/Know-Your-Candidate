@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3264 tests, no dependencies
-npm install && npm test                       # 4983 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3269 tests, no dependencies
+npm install && npm test                       # 4984 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2320,14 +2320,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "all (2-year terms)" and "4-year term; last elected 2022" cited the
     Secretary of State's candidate list, which names neither, and the
     legislature panel said "Members serve 2-year terms, as the state's
-    record says" beside it. The term is the constitution's
-    (`ballot2026.TERMS`, S.D. Const. art. III, s. 6 and art. IV, ss. 2 and
-    7; Vermont's governor, lieutenant governor and chambers too, Vt. Const.
-    ch. II, ss. 46 and 49), named where the page says it: the legislature
-    panel's term line, and every office's and chamber's mark through one
-    helper (`citeTerm` in kyc-stategov.js; the chambers' marks hovered "all
-    (2-year terms)" uncited beside offices that named the constitution,
-    the review of the branch). A source read and found to name no term
+    record says" beside it. The term is the provision's that says it
+    (`ballot2026.TERMS`: S.D. Const. art. III, s. 6 and art. IV, ss. 2 and
+    7; Vermont's governor, lieutenant governor and chambers, Vt. Const.
+    ch. II, ss. 46 and 49, and its attorney general, 3 V.S.A. s. 151),
+    named on the ballot marks, every office's and chamber's through one
+    helper (`citeTerm` in kyc-stategov.js: the chambers' marks hovered "all
+    (2-year terms)" uncited beside offices that named the constitution),
+    and on the legislature panel's term line. The governor overlay's and
+    the governor share pages' "Term 4 years" do not name it yet. Vermont's
+    secretary of state has none: the constitution elects the secretary
+    "biennially" (ch. II, s. 43), which is how often and not how long, and
+    no statute read gives a term. A source read and found to name no term
     (`NO_TERM_STATED`) holds every entry citing it to such a provision and
     to no last-elected year (read 2026-11-14), and a provision counts only
     where its words give a term of office's length ("for a term of four

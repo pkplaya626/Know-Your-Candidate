@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (4983 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (4984 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2516,7 +2516,8 @@ Three more tables, each checked by `ballot2026.check()`:
 - `TERMS`: the provision that states a term an entry gives where the
   entry's own source says who or which seats are on the ballot but not for
   how long (South Dakota's candidate list; Vermont's candidates page), each
-  the constitution as the state's legislature publishes it; `check()` fails
+  the constitution, or a statute (Vermont's attorney general, 3 V.S.A.
+  s. 151), as the state's legislature publishes it; `check()` fails
   a provision whose words do not give the entry's very term as a term of
   office's ("for a term of four years", never "every four years
   thereafter"), an entry citing a source in `NO_TERM_STATED` (read and
@@ -2524,9 +2525,15 @@ Three more tables, each checked by `ballot2026.check()`:
   any last-elected year, and a `TERMS` entry that is stale or cites a
   compiled table. Each entry with one carries it as `termSource` (`url`,
   `cite`) in `data/stategov.js` and `data/legislature/*.js`, and the page
-  names it wherever it says the term: an office's and a chamber's ballot
-  mark ("4-year term (S.D. Const. art. IV, s. 2)", "all (2-year terms;
-  S.D. Const. art. III, s. 6)") and the legislature panel's term line.
+  names it on the ballot marks, an office's and a chamber's alike, through
+  one helper (`citeTerm` in kyc-stategov.js: "4-year term (S.D. Const.
+  art. IV, s. 2)", "all (2-year terms; S.D. Const. art. III, s. 6)"), and
+  on the legislature panel's term line ("Members serve 2-year terms, as
+  S.D. Const. art. III, s. 6 says."). The governor overlay's "Term 4
+  years" and the governor share pages' do not name it yet. Vermont's
+  secretary of state has no entry: the constitution elects the secretary
+  "biennially" (ch. II, s. 43) and no provision read gives a term, so that
+  mark states its term with no provision named.
 
 - `NEXT`: when an office or chamber that is not on the 2026 ballot is next
   elected, only where a statute or the state's own record gives the year

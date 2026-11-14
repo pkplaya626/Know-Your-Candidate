@@ -9593,9 +9593,11 @@ async function testLegislatures() {
     // the offices beside them named the constitution: every mark that
     // states a term states it with the provision its entry cites (one
     // helper, kyc-stategov.js citeTerm). Only an entry the table cites no
-    // provision for may state its term without one (Vermont's attorney
-    // general's and secretary of state's: TERMS holds none), counted from
-    // the data, never typed in.
+    // provision for may state its term without one (Vermont's secretary of
+    // state's: the constitution elects the secretary "biennially" and gives
+    // no term, and TERMS holds none), counted from the data, never typed
+    // in. Vermont's attorney general's mark hovered a bare "2-year term"
+    // while 3 V.S.A. s. 151, which says it, was in hand.
     const TERM = /\b\d+-year(?:\s+[a-z]+)?\s+terms?\b/g;
     const states = (words) => (String(words).match(TERM) || []).length > 0;
     const pages = [["states/sd.html", "SD", await buildPage("states/sd.html")],
@@ -9630,6 +9632,17 @@ async function testLegislatures() {
           items.filter((item) => item.termSource && states(said(item))).every((item) =>
             titles.some((t) => states(t) && t.includes(item.termSource.cite))),
           cites.join(" | "));
+        if (code === "VT" && name.startsWith("states/")) {
+          const bare = Object.keys(b.offices).concat(Object.keys(b.chambers)).filter((k) => {
+            const item = b.offices[k] || b.chambers[k];
+            return item && !item.termSource && states(said(item));
+          });
+          check(name + ": the attorney general's mark cites 3 V.S.A. s. 151, and only the secretary " +
+              "of state's states its term with no provision",
+            titles.some((t) => t.includes("2-year term (3 V.S.A. s. 151)")) &&
+              bare.join() === "sos" && titles.filter((t) => uncited(t).length).length === 1,
+            bare.join() + " / " + titles.map((t) => t + (uncited(t).length ? "  <- uncited" : "")).join(" | "));
+        }
       }
     });
   }

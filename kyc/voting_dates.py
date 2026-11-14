@@ -345,17 +345,30 @@ _CLOSED = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early v
 _BEFORE = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early voting on)"
 _NOT_A_RANGE = r"(?![,\s\d]*[–—-]|[,\s\d]*(?:through|to)\b)"
 # A weekday the office closes as a class, beside the words that close it:
-# Hawaii's "(Excluding Sundays)", or "Sundays ... excepted"; or a weekday
-# after "no" that ends its phrase or names its hours or its voting, never
-# one a date follows ("no Saturday", "no Saturday hours": Arkansas's State
-# Board of Election Commissioners, "Runoff & Special Election early hours
-# are County Clerk office working hours, no Saturday").
+# Hawaii's "(Excluding Sundays)", or "Sundays ... excepted"; or a run of
+# weekdays after "no" that ends its phrase or names its hours or its voting
+# ("no Saturday", "no Saturday hours": Arkansas's State Board of Election
+# Commissioners, "Runoff & Special Election early hours are County Clerk
+# office working hours, no Saturday"; "no Saturday or Sunday voting", "no
+# Saturday and no Sunday hours", "no Saturday, Sunday or holiday voting",
+# each weekday it names). The whole run is a class or none of it is: never
+# a weekday a date follows ("no Saturday, November 28", "no Saturday, the
+# 28th"), never a run that ends on one ("no Saturday, Sunday, November
+# 29"), and never a "no" about something else ("no Saturday deadline",
+# "no Saturday or Sunday deadline"). Read one weekday at a time, "no
+# Saturday or Sunday voting" closed neither day and "no Saturday and no
+# Sunday hours" only the Sunday: the days left out would have needed no
+# listing, and the page would have called them "Under way".
 _MONTH_OR_DAY = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d)"
+_DAY_STEM = r"(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)"
+_A_DAY = _DAY_STEM + r"days?\b"
 CLOSED_CLASS = re.compile(
     r"\b" + _CLOSED + r"\s+(?:all\s+)?(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b"
     r"|\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b[^.;()]{0,40}?\b(?:excluded|excepted|closed)\b"
-    r"|\bno\s+(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days?\b"
-    r"(?=\s*(?:(?:early\s+)?(?:voting|hours)\b|[.;)\]]|,(?!\s*" + _MONTH_OR_DAY + r")|$))",
+    r"|\bno\s+(" + _A_DAY + r"(?:(?:\s*,\s*(?:(?:or|and)\s+)?|\s+(?:or|and)\s+)(?:no\s+)?" + _A_DAY + r")*)"
+    r"(?:,?\s*(?:or|and)\s+(?:no\s+)?(?:legal\s+|state\s+)?holidays?\b)?"
+    r"(?=\s*(?:(?:early\s+)?(?:voting|hours)\b|[.;)\]]"
+    r"|,(?!\s*(?:" + _MONTH_OR_DAY + r"|the\s+\d|" + _DAY_STEM + r"day))|$))",
     re.I)
 # A qualifier that is a claim of its own is said in a quote it stands on, as
 # "postmarked" and "received" are: a start that is only the latest day early
@@ -642,11 +655,12 @@ def _day_words(iso):
 
 def closed_weekdays(quote):
     """The weekdays *quote* closes as a class ("Excluding Sundays", "no
-    Saturday"), by name."""
+    Saturday", each of "no Saturday or Sunday voting"), by name."""
     out = set()
     for m in CLOSED_CLASS.finditer(str(quote or "")):
-        stem = next(g for g in m.groups() if g).lower()
-        out |= {w for w in _WEEKDAYS if w[:-3].lower() == stem}
+        named = next(g for g in m.groups() if g)
+        for stem in re.findall(r"\b(" + _DAY_STEM + r")", named, re.I):
+            out |= {w for w in _WEEKDAYS if w[:-3].lower() == stem.lower()}
     return out
 
 

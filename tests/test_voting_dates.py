@@ -1338,8 +1338,35 @@ class TestOfficeHoursAndHolidays(unittest.TestCase):
         # Not a weekday a date follows, nor one whose "no" is about
         # something else ("no Saturday deadline").
         self.assertEqual(closed("no Saturday, November 28 early voting"), set())
+        self.assertEqual(closed("no Saturday, the 28th"), set())
         self.assertEqual(closed("There is no Saturday deadline"), set())
         self.assertEqual(closed("Saturday hours: 10 a.m. to 4 p.m."), set())
+
+    def test_no_and_a_run_of_weekdays_closes_each_of_them(self):
+        # Read one weekday at a time, "no Saturday or Sunday voting" closed
+        # neither day and "no Saturday and no Sunday hours" only the Sunday:
+        # the days left out would have needed no listing, and the page would
+        # have called them "Under way".
+        closed = voting_dates.closed_weekdays
+        both = {"Saturday", "Sunday"}
+        for words in ("no Saturday or Sunday voting", "no Saturday and Sunday voting",
+                      "no Saturday and no Sunday hours", "no Saturday, Sunday or holiday voting",
+                      "no Saturday, Sunday, or legal holiday voting.", "No Saturdays or Sundays.",
+                      "NO SATURDAY OR SUNDAY EARLY VOTING"):
+            self.assertEqual(closed(words), both, words)
+        self.assertTrue(voting_dates.closes("no Saturday or Sunday voting", "2026-11-29"))
+        self.assertTrue(voting_dates.closes("no Saturday and no Sunday hours", "2026-11-28"))
+        self.assertFalse(voting_dates.closes("no Saturday or Sunday voting", "2026-11-27"))
+        # The whole run is a class or none of it is: not a run a date ends,
+        # nor one whose "no" is about something else.
+        self.assertEqual(closed("no Saturday, Sunday, November 29 early voting"), set())
+        self.assertEqual(closed("no Saturday or Sunday, November 29"), set())
+        self.assertEqual(closed("There is no Saturday or Sunday deadline"), set())
+        # Arkansas's quotes still close the Saturday alone.
+        self.assertEqual(closed(self.NO_SATURDAY), {"Saturday"})
+        for source in DATA["states"]["AR"]["sources"]:
+            if source["field"].startswith("runoff.earlyVoting"):
+                self.assertNotIn("Sunday", closed(source["quote"]), source["quote"])
 
     def test_a_holiday_is_named_by_two_quotes_together(self):
         holiday = voting_dates.closes_as_holiday
