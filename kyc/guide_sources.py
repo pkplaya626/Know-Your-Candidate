@@ -14,25 +14,37 @@ request at a time per host and paced (``HOST_INTERVAL``), as this project
 (``agent.USER_AGENT``, rule 103), with a GET - HEAD lies (rule 51) - reading
 only the first bytes of a large file, and writes what each answered to
 ``data/guide_sources.json``: per address, the day and the answer. The cache
-is hand-editable, one address a line, and a stopped run resumes.
+is hand-editable, one address a line, and is saved once, at the end of a run:
+a run ended by its time budget (``--max-minutes``) saves what it read, and
+one killed before then keeps nothing, the next opening what is due.
 
 What one read answers (``assess``):
 
-* ``open`` - a page: 2xx, not a bot wall's or an empty answer, and for a
-  section of the U.S. Code on uscode.house.gov a page whose title names
-  that section ("2 U.S.C. § 8: Vacancies");
+* ``open`` - a page with words of its own: 2xx, not a bot wall's, an error's,
+  a sign-in or an empty answer, and for a statute's section where the
+  address and the publisher's titles both name it (the U.S. Code on
+  uscode.house.gov, "2 U.S.C. § 8: Vacancies"; the Code of Virginia on
+  law.lis.virginia.gov, "§ 24.2-214. Election and term of Senators") a page
+  whose title names that section;
 * ``notfound`` - HTTP 404 or 410 (never one a bot wall's own host gives
   after a redirect: ``agent.wall_host``);
 * ``elsewhere`` - a page that is not the source: one titled "Page Not
-  Found", a deep address sent to its site's front page, or a Code section's
-  address opening a page whose title names another section or none;
+  Found", a deep address sent to its own site's front page or another's, a
+  lapsed domain's page (a marketplace, a parking service or its "/lander",
+  a domain for sale, expired or parked, gambling spam: ``kyc/localsites.py``
+  reads them, rules 35 and 39), or a section's address opening a page with
+  words whose title names another section or none;
 * ``dead`` - its host does not resolve here, and dns.google and Cloudflare
   both answer NXDOMAIN or no address for it (rule 35's second resolver);
 * ``nothing`` - nothing concluded (rule 8): a 403, a 429, a 5xx, a timeout,
   a certificate or connection failure, a bot wall or a challenge
   (constitution.congress.gov answers this project with Cloudflare's "Just a
   moment..."), a name a public resolver finds or cannot answer for, a
-  sign-in page, a page where its address names a PDF.
+  sign-in page (another host's, or a redirect to the site's own), a page
+  where its address names a PDF, a server's error or maintenance page that
+  answers 200 (Illinois's "Error Display": "An error has occurred"), a web
+  server's placeholder, and a page with almost no text (one drawn by
+  script, ``officers.says_nothing``).
 
 What the cache keeps (``merge``):
 
@@ -49,8 +61,12 @@ day stay and the try is dated beside them (``tried``), as
 ``kyc/localsites.py`` does. The build (``problems``, through
 ``validate.check_guide_sources``) warns - never an error: the refresh must
 not fail on someone else's site - on each gone or elsewhere source by its
-name and every section that cites it, on a source never opened, and on one
-not looked at in ``WARN_DAYS``.
+name and every section that cites it, on a source never opened, on one not
+looked at in ``WARN_DAYS``, and on one whose last verdict is older than
+that while every read since has concluded nothing ("not confirmed since"):
+a source confirmed once and turned away ever after would otherwise read
+"ok" for months. A source no read has ever opened is counted by host on an
+info line of its own (``unread_hosts``): the cache claims nothing of it.
 """
 
 import datetime
@@ -70,8 +86,8 @@ import urllib.request
 import zlib
 from concurrent.futures import ThreadPoolExecutor
 
-from . import agent, tls
-from .localsites import _Gate, bare, doh, resolves_here
+from . import agent, enrich, localsites, officers, tls
+from .localsites import _SIGN_IN_HOSTS, _Gate, bare, doh, off_site, resolves_here
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "guide_sources.json")
 SOURCE = ("Each address the guide's sections, its maps and the 2026 ballot table cite, and each "
@@ -114,25 +130,71 @@ _HEADERS = dict(agent.HEADERS, **{
     # A body read only in part is undone more surely when it was not packed.
     "Accept-Encoding": "identity",
 })
-# A sign-in page says nothing of the source (rule 8).
-_SIGN_IN_HOSTS = ("accounts.google.com", "login.microsoftonline.com", "login.live.com",
-                  "login.yahoo.com")
+# A sign-in page says nothing of the source (rule 8): another host's
+# (localsites' list), or the site's own - a redirect to a sign-in path, or a
+# page titled as one.
+_SIGN_IN_PATH = re.compile(r"(?:^|/)(?:log[-_]?in|log[-_]?on|sign[-_]?in|sign[-_]?on|sso|saml2?|"
+                           r"oauth2?|auth|authenticate|cas)(?:[/.]|$)", re.I)
+_SIGN_IN_TITLE = re.compile(
+    r"^\s*(?:please\s+)?(?:sign|log)[\s-]?(?:in|on)\b(?:\s+(?:to|required|page)\b.*)?\s*"
+    r"(?:[|:\-–—].*)?$|[|:\-–—]\s*(?:sign|log)[\s-]?(?:in|on)\s*$", re.I | re.S)
 # Bot walls a redirect lands on, beside ``agent.WALL_HOSTS``: eCFR sends a
 # script to unblock.federalregister.gov's "Federal Register :: Request
 # Access" (HTTP 200, read 2026-11-14), which says nothing of the section.
 WALL_HOSTS = ("unblock.federalregister.gov",)
 # A title that says the page asked for is not there: "Page Not Found - US
-# Code", the Law Revision Counsel's own 404 page's.
+# Code", the Law Revision Counsel's own 404 page's. "404" counts only at the
+# title's start or beside "error" or "not found": "RCW 29A.04.404:
+# Definitions" and "Sec. 404 - Terms of office" are statutes.
 _NOT_FOUND_TITLE = re.compile(
     r"\b(?:page|file|document|resource|content)\b(?:\s+(?:you|was|is|has|been|requested|"
-    r"looking|for|are|were|the))*\s+(?:not\s+found|(?:could\s+not|cannot|can't)\s+be\s+found|"
+    r"looking|for|are|were|the))*\s+(?:not\s+found|(?:could\s+not|cannot|can[’']t)\s+be\s+found|"
     r"no\s+longer\s+(?:exists|available))\b|"
-    r"^\s*(?:error\s+)?404\b|\b404\s*(?:error|[-–—:|])|\berror\s*404\b|^\s*not\s+found\s*$",
+    r"^\s*(?:error\s+)?404\b|\b404\s+(?:error|not\s+found)\b|\berror\s*404\b|^\s*not\s+found\s*$",
     re.I)
+# A server's error or maintenance page that answers 200 in the source's
+# place is a 5xx dressed as a page, and says nothing of the source (rule 8):
+# Illinois's CandidatesFiled.aspx answered 200 titled "Error Display", "An
+# error has occurred. The State Board of Elections has been automatically
+# notified of this error." (2026-11-14), and Louisiana's Law.aspx for a bad
+# id answers 200 under its usual title with "An Error Occurred on This
+# Page". By its title, or by the words of a short page.
+_ERROR_TITLE = re.compile(
+    r"^\s*(?:an?\s+)?(?:(?:runtime|server|application|unexpected|internal\s+server|system|"
+    r"general|database)\s+)?error(?:\s+(?:display|page|message))?\s*(?:[.!|:\-–—].*)?$|"
+    r"^\s*an?\s+(?:unexpected\s+)?error\s+(?:has\s+)?occurred\b|"
+    r"\bserver\s+error\s+in\s+['‘’]|"
+    r"^\s*(?:(?:site|website|system|scheduled|planned)\s+)?maintenance(?:\s+(?:mode|page|notice|"
+    r"in\s+progress))?\s*(?:[.!|:\-–—].*)?$|"
+    r"^\s*(?:(?:this\s+)?(?:site|website|page)\s+(?:is\s+)?)?(?:currently\s+)?(?:under|down\s+for|"
+    r"undergoing)\s+(?:scheduled\s+|planned\s+)?maintenance\b|"
+    r"^\s*(?:503\s+)?service\s+(?:is\s+)?(?:temporarily\s+)?unavailable\b",
+    re.I | re.S)
+# The same said in a short page's text, written as an error page writes it:
+# "An error has occurred", "An Error Occurred on This Page" (a statute says
+# "an error has occurred" mid-sentence, in lower case), ASP.NET's "Server
+# Error in '/' Application", "is down for maintenance".
+_ERROR_TEXT = re.compile(
+    r"(?<![\w-])(?-i:An|AN)\s+(?:unexpected\s+)?error\s+(?:has\s+)?occurred\b|"
+    r"\bserver\s+error\s+in\s+['‘’]|"
+    r"\b(?:is|are)\s+(?:currently\s+)?(?:down\s+for|undergoing)\s+(?:scheduled\s+|planned\s+)?"
+    r"maintenance\b|\b(?:site|website)\s+is\s+(?:currently\s+)?under\s+maintenance\b",
+    re.I)
+# A page is short enough to be read whole for an error's words under this
+# many characters of text: Illinois's error page holds 1,053, Louisiana's
+# 576; the laws those sites serve run to many thousands.
+ERROR_TEXT_MAX = 4_000
 _TITLE = re.compile(r"<title[^>]*>(.*?)(?:</title|$)", re.I | re.S)
 _BODY_OR_SVG = re.compile(r"<(?:body|svg)\b", re.I)
 _FRONT = re.compile(r"^/(?:(?:index|default|home)(?:\.[a-z]{2,5})?)?/?$", re.I)
 _CODE_SECTION = re.compile(r"^https?://uscode\.house\.gov/us/usc/t(\w+)/s([^/?#]+)/?$", re.I)
+# The Code of Virginia's sections, whose address and title both name the
+# section: ".../vacode/title24.2/chapter2/section24.2-214/" is titled "§
+# 24.2-214. Election and term of Senators". On 2026-11-14 that address once
+# answered under another statute's title, and an address for a section that
+# does not exist is sent to its chapter's page.
+_VA_SECTION = re.compile(r"^https?://law\.lis\.virginia\.gov/vacode/(?:[^/?#]+/)*section"
+                         r"([0-9][\w.:-]*)/?$", re.I)
 _LINK = re.compile(r"\]\((https?://[^)\s]+)\)")
 
 
@@ -355,6 +417,36 @@ def names_section(title, section):
                           rf"\s*{part}(?![\w-])", folded, re.I))
 
 
+def va_section(url):
+    """The section of the Code of Virginia at *url*
+    (``law.lis.virginia.gov/vacode/.../section24.2-214/``), or None."""
+    match = _VA_SECTION.match(address(url))
+    return urllib.parse.unquote(match.group(1)) if match else None
+
+
+def names_va_section(title, section):
+    """Whether a page's *title* names the Code of Virginia's *section*, as
+    the Legislative Information System titles it: "§ 24.2-214. Election and
+    term of Senators" names "24.2-214", never "24.2-214.1" or "24.2-2140"."""
+    folded = re.sub(r"[‐-―−]", "-", title or "")
+    return bool(re.search(rf"(?:§+|sec\.?|section)\s*{re.escape(section)}(?![\w-]|\.\w)", folded,
+                          re.I))
+
+
+def section_check(url, title):
+    """``(what, named)`` for an address that names a statute's section on a
+    site whose page titles name it too - the U.S. Code at the Law Revision
+    Counsel's, the Code of Virginia at the Legislative Information System's
+    - and whether *title* names that section; None for any other address."""
+    section = code_section(url)
+    if section:
+        return f"{section[0]} U.S.C. {section[1]}", names_section(title, section)
+    section = va_section(url)
+    if section:
+        return f"Va. Code {section}", names_va_section(title, section)
+    return None
+
+
 def _on(host, hosts):
     host = bare(host)
     return any(host == h or host.endswith("." + h) for h in hosts)
@@ -372,23 +464,25 @@ def shown(url, final):
     no query anywhere else. A bot wall's redirect carries the reader's own
     address in its query (Radware's validate.perfdrive.com wrote the
     machine's IP address, base64-encoded, into "ssr=" on 2026-11-14), and
-    no other host's query is the source's to say."""
+    no other host's query is the source's to say - nor a parking service's
+    under the domain's own name ("ww25.") or its "/lander"
+    (``localsites.off_site``, one way for both caches)."""
     asked, ended = urllib.parse.urlsplit(url), urllib.parse.urlsplit(final or "")
     if (_same_site(asked.hostname or "", ended.hostname or "")
-            and not agent.wall_host(final) and not _on(ended.hostname or "", WALL_HOSTS)):
+            and not agent.wall_host(final) and not _on(ended.hostname or "", WALL_HOSTS)
+            and not localsites.landing(final)):
         return (final or "")[:300]
-    return urllib.parse.urlunsplit((ended.scheme, ended.hostname or "", ended.path, "", ""))[:300]
+    return off_site(final)
 
 
 def _front_page(url, final):
-    """Whether *final* is the front page of *url*'s own site and *url*, the
-    cited address, is not: a deep link a site sends home is the classic
-    answer of a page that has gone where the server will not say 404.
-    Another host's front page is not the site's (eCFR sends a script to a
-    bot wall's)."""
+    """Whether *final* is a front page and *url*, the cited address, is not:
+    a deep link a site sends home is the classic answer of a page that has
+    gone where the server will not say 404, and one sent to another host's
+    front page has left it too (a lapsed or renamed domain). A bot wall's
+    page is never a front page: the caller asks about walls first (eCFR
+    sends a script to the Federal Register's)."""
     asked, ended = urllib.parse.urlsplit(url), urllib.parse.urlsplit(final)
-    if not _same_site(asked.hostname or "", ended.hostname or ""):
-        return False
     deep = bool(asked.query) or not _FRONT.match(asked.path or "/")
     return deep and not ended.query and bool(_FRONT.match(ended.path or "/"))
 
@@ -407,17 +501,28 @@ def assess(url, seen):
     the public resolvers before a name that does not resolve is ``dead``)."""
     chain = seen["chain"]
     final = shown(url, chain[-1])
-    moved = f" at {final}" if chain[-1] != url else ""
+    redirected = chain[-1] != url
+    moved = f" at {final}" if redirected else ""
     status = seen["status"]
     end = urllib.parse.urlsplit(final).hostname or ""
     if status is None:
         return NOTHING, seen["error"] or "could not be reached", final
-    if chain[-1] != url and _on(end, _SIGN_IN_HOSTS):
+    if redirected and _on(end, _SIGN_IN_HOSTS):
         return NOTHING, f"redirects to {bare(end)}, which asks visitors to sign in", final
-    if chain[-1] != url and (agent.wall_host(chain[-1]) or _on(end, WALL_HOSTS)):
+    if redirected and (agent.wall_host(chain[-1]) or _on(end, WALL_HOSTS)):
         # A bot wall's page, its redirect or its own 404 says nothing of the
         # page asked for.
         return NOTHING, f"HTTP {status} from a bot wall's host{moved}", final
+    landed = localsites.landing(chain[-1]) if redirected else ""
+    if landed:
+        # A lapsed domain's: wherever the marketplace or the parking service
+        # answers, the redirect itself says the source is not there (rules
+        # 35 and 39, localsites' reading).
+        what = {localsites.MARKETPLACE: "a domain marketplace",
+                localsites.PARKING: "a parking service"}.get(landed, "a parking lander")
+        return ELSEWHERE_ANSWER, f"redirects to {final}, {what}", final
+    if redirected and _SIGN_IN_PATH.search(urllib.parse.urlsplit(chain[-1]).path or ""):
+        return NOTHING, f"HTTP {status}, redirected to a sign-in page{moved}", final
     if 300 <= status < 400:
         return NOTHING, f"HTTP {status} without a usable redirect{moved}", final
     if status in (404, 410):
@@ -438,18 +543,52 @@ def assess(url, seen):
         if agent.walled(markup):
             return NOTHING, f"a bot wall's or a challenge's page ('{_words(page_title(markup), 60)}'){moved}", final
         title = page_title(markup)
+        quoted = f"'{_words(title, 60)}'"
         if address(url).lower().endswith(".pdf"):
             # A page where a file was asked for may be a rejection page
             # (rule 52): it says nothing of the file.
-            return NOTHING, f"HTTP {status}, a page where its address names a PDF ('{_words(title, 60)}'){moved}", final
+            return NOTHING, f"HTTP {status}, a page where its address names a PDF ({quoted}){moved}", final
+        page = enrich.parse_page(markup)
+        head = localsites.page_head(page)
+        spam = localsites.gambling_at(head, page.body, redirected and not _same_site(
+            urllib.parse.urlsplit(url).hostname or "", end))
+        if spam in localsites.PLAIN:
+            return ELSEWHERE_ANSWER, f"HTTP {status}, a gambling page ({quoted}){moved}", final
+        lapsed = localsites.domain_page(page, head)
+        if lapsed == localsites.PLACEHOLDER:
+            return (NOTHING, f"HTTP {status}, a web server's placeholder page ({quoted}){moved}",
+                    final)
+        if lapsed:
+            what = {localsites.FOR_SALE: "a domain for sale",
+                    localsites.EXPIRED: "an expired domain"}.get(lapsed, "a parked domain")
+            return ELSEWHERE_ANSWER, f"HTTP {status}, {what} ({quoted}){moved}", final
         if _NOT_FOUND_TITLE.search(title):
-            return ELSEWHERE_ANSWER, f"HTTP {status}, a page titled '{_words(title, 60)}'{moved}", final
+            return ELSEWHERE_ANSWER, f"HTTP {status}, a page titled {quoted}{moved}", final
+        text = officers.visible_text(markup)
+        said = _ERROR_TEXT.search(text) if len(text) < ERROR_TEXT_MAX else None
+        if _ERROR_TITLE.search(title) or said:
+            # A server's error or maintenance page in the source's place: a
+            # 5xx dressed as a 200 concludes nothing (rule 8).
+            words = f", '{_words(said.group(0), 60)}'" if said else ""
+            return (NOTHING, f"HTTP {status}, a page that says an error occurred ({quoted}{words})"
+                             f"{moved}", final)
+        if _SIGN_IN_TITLE.search(title):
+            return NOTHING, f"HTTP {status}, a sign-in page ({quoted}){moved}", final
+        if officers.says_nothing(markup):
+            # A page that draws itself with JavaScript, or holds next to no
+            # text, says nothing either way (rules 8 and 56): uscode.house.gov
+            # has served this project only a script shell before.
+            return (NOTHING, f"HTTP {status}, a page with almost no text ({len(text)} characters; "
+                             f"one drawn by script says nothing until it runs, {quoted}){moved}",
+                    final)
     if _front_page(address(url), final):
-        return ELSEWHERE_ANSWER, f"redirects to its site's front page, {final}", final
-    section = code_section(url)
-    if section and not names_section(title, section):
+        own = _same_site(urllib.parse.urlsplit(url).hostname or "", end)
+        here = "its site's" if own else "another site's"
+        return ELSEWHERE_ANSWER, f"redirects to {here} front page, {final}", final
+    section = section_check(url, title)
+    if section and not section[1]:
         return (ELSEWHERE_ANSWER, f"HTTP {status}, a page whose title ('{_words(title, 60)}') does not "
-                                  f"name {section[0]} U.S.C. {section[1]}{moved}", final)
+                                  f"name {section[0]}{moved}", final)
     what = f", titled '{_words(title, 60)}'" if title else (
         f", {_words(kind.split(';')[0], 40)}" if kind else "")
     return OPEN, f"HTTP {status}{what}{moved}", final
@@ -675,7 +814,8 @@ def problems(cache, cited, today=None):
     warning, never an error - a site that is someone else's must not fail the
     refresh. A gone or elsewhere source by its address, its names and every
     section that cites it; the addresses never opened; those not looked at in
-    ``WARN_DAYS``."""
+    ``WARN_DAYS``; those not confirmed in ``WARN_DAYS`` while every read
+    since concluded nothing (:func:`unconfirmed`)."""
     sources = (cache or {}).get("sources") or {}
     today = datetime.date.fromisoformat(today or datetime.date.today().isoformat())
     out = []
@@ -711,7 +851,45 @@ def problems(cache, cited, today=None):
                     f"{len(old)} address(es) the guide cites were last looked at more than "
                     f"{WARN_DAYS} days ago; the weekly refresh runs 'guidesources' - is it running?",
                     old))
+    since = []
+    for url in sorted(cited):
+        entry = sources.get(url)
+        if unconfirmed(entry, today):
+            tried = f" ({entry['triedEvidence']})" if entry.get("triedEvidence") else ""
+            since.append(f"{url}: not confirmed since {entry['checked']} (then "
+                         f"{entry['verdict']}); every read since concluded nothing, the last on "
+                         f"{entry['tried']}{tried}")
+    if since:
+        # The cache's verdict is a read that old: a source that has turned
+        # every read away since (a bot wall, a challenge) may have gone
+        # behind it, and its "ok" would stand for months with no word.
+        out.append(("warn", "guide-source-unconfirmed",
+                    f"{len(since)} address(es) the guide cites have not been confirmed in more "
+                    f"than {WARN_DAYS} days: 'guidesources' looked, and every read since its "
+                    f"last verdict concluded nothing (rule 8), so that verdict is old. Open each "
+                    f"by hand; where it is there, record the day in its 'checked' with 'read by "
+                    f"hand' in its evidence, and where it is not, cite where it now is",
+                    since))
     return out
+
+
+def unconfirmed(entry, today):
+    """Whether *entry*'s verdict, ``ok`` or ``missing``, is older than
+    ``WARN_DAYS`` while reads have gone on since that concluded nothing
+    (``tried``): a source confirmed once and turned away ever after. A
+    verdict that warns of its own (gone, elsewhere) is said as that, and an
+    address no read has opened as unread (``unread_hosts``)."""
+    entry = entry or {}
+    if (entry.get("verdict") not in (OK, MISSING)
+            or entry.get("tried", "") <= entry.get("checked", "")):
+        return False
+    try:
+        then = datetime.date.fromisoformat(entry["checked"])
+    except (KeyError, ValueError):
+        return False
+    if isinstance(today, str):
+        today = datetime.date.fromisoformat(today)
+    return (today - then).days > WARN_DAYS
 
 
 def unread_hosts(cache, cited):

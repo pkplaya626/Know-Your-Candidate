@@ -2777,7 +2777,9 @@ def check_guide_sources(cache, root=".", today=None):
     and the statutes the page code links, still open (kyc/guide_sources.py,
     rule 48): a source gone or opening another page, by its address, its
     names and every section that cites it; a source never opened; one not
-    looked at in ``guide_sources.WARN_DAYS``.
+    looked at in ``guide_sources.WARN_DAYS``; one not confirmed in that long
+    while every read since concluded nothing. What no read has opened is an
+    info line by host.
 
     Warnings, never errors: the sites are other people's, and a refresh must
     not fail because one of them moved (rule 8). With *cache* None the
@@ -2793,8 +2795,9 @@ def check_guide_sources(cache, root=".", today=None):
         # What no read could confirm, said for a person, counted as neither.
         issues.append(Issue("info", "guide-sources-unread",
                             f"{sum(unread.values())} address(es) the guide cites could not be read "
-                            f"by 'guidesources' (a refusal, a challenge or a timeout concludes "
-                            f"nothing): " + ", ".join(f"{host} {n}" for host, n in unread.items())))
+                            f"by 'guidesources' (a refusal, a challenge, a timeout, an error page "
+                            f"or a page drawn by script concludes nothing): "
+                            + ", ".join(f"{host} {n}" for host, n in unread.items())))
     return issues
 
 

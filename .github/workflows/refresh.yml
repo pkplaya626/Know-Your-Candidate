@@ -403,11 +403,15 @@ jobs:
       # statutes the page code links, opened again (kyc/guide_sources.py, rule
       # 48): some eighty are the Law Revision Counsel's uscode.house.gov
       # pages, which that site serves in a "temporary format", and a change of
-      # its scheme would break them all with no gate to notice. Each is opened
-      # once a week, one request at a time per host; the build warns on one
-      # gone (404 or 410 on two days, or its host gone at two resolvers) and
-      # on one not looked at in 30 days. A read that concludes nothing keeps
-      # the last one and stops nothing else in this run (rule 8).
+      # its scheme would break them all with no gate to notice. One that opened
+      # is opened again after six days, and one missing or unread on every run
+      # (the refresh runs daily until December 15), one request at a time per
+      # host; the cache is saved when the run ends, inside its budget. The
+      # build warns on one gone (404 or 410 on two days, or its host gone at
+      # two resolvers) or elsewhere, on one not looked at in 30 days, and on
+      # one not confirmed in 30 days while every read since concluded
+      # nothing. A read that concludes nothing keeps the last one and stops
+      # nothing else in this run (rule 8).
       - name: Open the guide's sources again
         if: ${{ !inputs.results_only }}
         continue-on-error: true

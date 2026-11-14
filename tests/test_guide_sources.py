@@ -107,9 +107,6 @@ class TestOneRead(unittest.TestCase):
                                                        chain=chain))
         self.assertEqual(answer, gs.NOTHING)
         self.assertIn("bot wall", evidence)
-        # Nor is another host's front page this site's.
-        other = [url, "https://www.example.org/"]
-        self.assertEqual(gs.assess(url, seen(200, page("Example"), chain=other))[0], gs.OPEN)
 
     def test_a_refusal_a_challenge_or_a_timeout_concludes_nothing(self):
         for status in (401, 403, 406, 429, 451, 500, 502, 503):
@@ -178,6 +175,168 @@ class TestOneRead(unittest.TestCase):
                                                        chain=[pdf]))
         self.assertEqual(answer, gs.OPEN)
         self.assertIn("application/pdf", evidence)
+
+
+def two_days(url, read):
+    """What the cache keeps after the same read on two days."""
+    entry = gs.merge(None, read, "2026-11-14", url)
+    return gs.merge(entry, read, "2026-11-21", url)
+
+
+class TestWhatAPageSaysOfItself(unittest.TestCase):
+    """The review of 2026-11-14: an error page, a script shell, a lapsed
+    domain's page, a statute numbered 404 and a sign-in page, each read as
+    what it is. Each makes the page it tests."""
+
+    NAV = ("Skip to Content Home Publications Feedback Information For Voters Running for Office "
+           "Candidate Filing and Results Press Room Forms About The Board ")
+
+    def test_an_error_page_that_answers_200_concludes_nothing(self):
+        """Illinois's CandidatesFiled.aspx answered 200 titled "Error
+        Display" (2026-11-14) and the first cache called it ok; Louisiana's
+        Law.aspx for a bad id answers 200 under its usual title."""
+        il = "https://www.elections.il.gov/ElectionOperations/CandidatesFiled.aspx"
+        la = "https://legis.la.gov/legis/Law.aspx?d=99999999"
+        pages = (
+            (il, "Error Display", self.NAV + "An error has occurred. The State Board of Elections "
+                                             "has been automatically notified of this error."),
+            (la, "Louisiana Laws - Louisiana State Legislature",
+             self.NAV + "An Error Occurred on This Page The Document ID parameter ('d') is missing or "
+                        "invalid. Please contact this site's web-master."),
+            (CODE, "Runtime Error", "Server Error in '/' Application. Runtime Error Description: An "
+                                    "application error occurred on the server."),
+            (CODE, "Site Maintenance", "We are performing scheduled maintenance. " * 12),
+            (CODE, "Error", self.NAV * 3),
+            (CODE, "An error has occurred | Example", self.NAV * 3),
+            (CODE, "Service Unavailable", self.NAV * 3),
+            (CODE, "Example State", self.NAV + "The site is currently down for maintenance. " * 8),
+        )
+        for url, title, text in pages:
+            body = (f"<html><head><title>{title}</title></head><body><p>{text}</p></body>"
+                    f"</html>").encode("utf-8")
+            read = gs.assess(url, seen(200, body, chain=[url]))
+            self.assertEqual(read[0], gs.NOTHING, title)
+            self.assertIn("says an error occurred", read[1], title)
+            self.assertEqual(two_days(url, read)["verdict"], gs.UNREAD, title)
+        # A statute that speaks of errors, or of maintenance, is a statute;
+        # the Code's own notice that features are "temporarily unavailable"
+        # is the Code's page.
+        rcw = "https://app.leg.wa.gov/RCW/default.aspx?cite=29A.60.210"
+        for url, title, text in (
+                (rcw, "RCW 29A.60.210: Errors in ballots", "If the canvassing board finds that an error "
+                                                          "has occurred in the count, it shall recount. "
+                                                          * 10),
+                (rcw, "Maintenance of effort - Department of Education", "Text of the page. " * 40),
+                (CODE, "2 U.S.C. § 8: Vacancies",
+                 "Notice: The uscode.house.gov website is currently operating in a temporary format. "
+                 "Some website features and functionality are temporarily unavailable. " * 5)):
+            body = page(title, text)
+            self.assertEqual(gs.assess(url, seen(200, body, chain=[url]))[0], gs.OPEN, title)
+
+    def test_a_script_shell_concludes_nothing(self):
+        """uscode.house.gov has served this project only a script shell (the
+        notes on 48 U.S.C. 1422 and 1591, 2026-10-18): read as a page whose
+        title names no section, it made all eighty-one Code sources
+        "elsewhere" on the second day."""
+        shell = (b"<!DOCTYPE html><html><head><title>US Code</title><script src='/app.js'></script>"
+                 b"</head><body><div id=root></div></body></html>")
+        read = gs.assess(CODE, seen(200, shell))
+        self.assertEqual(read[0], gs.NOTHING)
+        self.assertIn("almost no text", read[1])
+        self.assertEqual(two_days(CODE, read)["verdict"], gs.UNREAD)
+        cited = {CODE: [("guide congress#vacancies", "usc-2-8")]}
+        self.assertEqual(gs.problems({"sources": {CODE: two_days(CODE, read)}}, cited,
+                                     today="2026-11-21"), [])
+        # Anywhere: an empty title over no text is no page of the source.
+        url = "https://www.house.gov/the-house-explained"
+        self.assertEqual(gs.assess(url, seen(200, b"<title></title><div id=app></div>",
+                                             chain=[url]))[0], gs.NOTHING)
+        # A page with words of its own, titled with another section, is still
+        # not the source; so is the site's own "Page Not Found", short or not.
+        other = gs.assess(CODE, seen(200, page("2 U.S.C. § 9: Another section")))
+        self.assertEqual(other[0], gs.ELSEWHERE_ANSWER)
+        self.assertEqual(two_days(CODE, other)["verdict"], gs.ELSEWHERE)
+        short = b"<title>Page Not Found - US Code</title><p>Not here.</p>"
+        self.assertEqual(gs.assess(CODE, seen(200, short))[0], gs.ELSEWHERE_ANSWER)
+
+    def test_a_lapsed_domains_page_is_not_the_source(self):
+        """Rules 35 and 39, read as kyc/localsites.py reads them: thirty-one
+        cited addresses are on hosts outside .gov and .us, ncsl.org's four
+        among them, and a lapsed domain is bought."""
+        url = "https://www.ncsl.org/elections-and-campaigns/state-primary-election-types"
+        for chain, title in (
+                ([url, "https://www.hugedomains.com/domain_profile.cfm?d=ncsl.org"],
+                 "NCSL.org is for sale | HugeDomains"),
+                ([url, "https://ww25.ncsl.org/elections-and-campaigns/?subid1=x"], "ncsl.org"),
+                ([url, "https://www.ncsl.org/lander"], "ncsl.org"),
+                ([url], "ncsl.org - This website is for sale!"),
+                ([url], "ncsl.org - Buy this domain"),
+                ([url, "https://www.example.org/"], "Example Domain"),
+                ([url, "https://slots.example/situs/gacor"], "Situs Slot Gacor Hari Ini")):
+            read = gs.assess(url, seen(200, page(title), chain=chain))
+            self.assertEqual(read[0], gs.ELSEWHERE_ANSWER, (chain[-1], title))
+            entry = two_days(url, read)
+            self.assertEqual(entry["verdict"], gs.ELSEWHERE, title)
+            self.assertNotIn("subid1", str(entry))
+        # A parked page on the domain itself, said in its own words.
+        parked = (b"<title>ncsl.org</title><meta name='description' content='Find the best information "
+                  b"and most relevant links on all topics related to ncsl.org.'>")
+        self.assertEqual(gs.assess(url, seen(200, parked, chain=[url]))[0], gs.ELSEWHERE_ANSWER)
+        # A web server's placeholder says nothing of whose it is.
+        nginx = page("Welcome to nginx!", "If you see this page, the nginx web server is working.")
+        read = gs.assess(url, seen(200, nginx, chain=[url]))
+        self.assertEqual(read[0], gs.NOTHING)
+        self.assertIn("placeholder", read[1])
+        # Its own site's moved page is still the source.
+        moved = [url, "https://www.ncsl.org/elections-and-campaigns/primary-types"]
+        self.assertEqual(gs.assess(url, seen(200, page("State Primary Election Types"),
+                                             chain=moved))[0], gs.OPEN)
+
+    def test_a_statute_numbered_404_is_not_a_not_found_page(self):
+        for title in ("RCW 29A.04.404: Definitions", "Sec. 404 - Terms of office",
+                      "5 U.S.C. § 404: Records", "§ 24.2-404. Duties of the Department"):
+            self.assertFalse(gs._NOT_FOUND_TITLE.search(title), title)
+        for title in ("404 - File or directory not found", "404 Not Found", "Error 404",
+                      "Oops! 404 error", "Page not found (404)", "That page can’t be found"):
+            self.assertTrue(gs._NOT_FOUND_TITLE.search(title), title)
+        url = "https://uscode.house.gov/us/usc/t5/s404/"
+        self.assertEqual(gs.assess(url, seen(200, page("5 U.S.C. § 404: Records"), chain=[url]))[0],
+                         gs.OPEN)
+
+    def test_a_virginia_section_opens_where_its_title_names_it(self):
+        """On 2026-11-14 the address of § 24.2-214 answered once under "§
+        55.1-1257. Who may recover rent or possession", and the first cache
+        called it ok; an address for a section that does not exist is sent
+        to its chapter's page."""
+        url = "https://law.lis.virginia.gov/vacode/title24.2/chapter2/section24.2-214/"
+        self.assertEqual(gs.va_section(url), "24.2-214")
+        self.assertEqual(gs.assess(url, seen(200, page("§ 24.2-214. Election and term of Senators"),
+                                             chain=[url]))[0], gs.OPEN)
+        for title, chain in (("§ 55.1-1257. Who may recover rent or possession", [url]),
+                             ("§ 24.2-214.1. Another section", [url]),
+                             ("§ 24.2-2140. Another section", [url]),
+                             ("Code of Virginia Code - Chapter 2. Federal, Commonwealth, and Local "
+                              "Officers", [url, "https://law.lis.virginia.gov/vacode/title24.2/chapter2/"])):
+            read = gs.assess(url, seen(200, page(title), chain=chain))
+            self.assertEqual(read[0], gs.ELSEWHERE_ANSWER, title)
+            self.assertIn("does not name Va. Code 24.2-214", read[1])
+        dotted = "https://law.lis.virginia.gov/vacode/title24.2/chapter2/section24.2-214.1/"
+        self.assertEqual(gs.assess(dotted, seen(200, page("§ 24.2-214.1. A section"),
+                                                chain=[dotted]))[0], gs.OPEN)
+        self.assertIsNone(gs.va_section("https://law.lis.virginia.gov/constitution/article4/section2/"))
+
+    def test_a_redirect_to_the_sites_own_sign_in_page_concludes_nothing(self):
+        url = "https://www.example.gov/elections/login"
+        sign_in = "https://www.example.gov/signin?returnUrl=/elections/login"
+        for title in ("Sign In", "Example State Portal"):
+            read = gs.assess(url, seen(200, page(title), chain=[url, sign_in]))
+            self.assertEqual(read[0], gs.NOTHING, title)
+            self.assertIn("sign-in", read[1])
+        for title in ("Log in | Example State", "Please sign in to continue", "Example | Sign In"):
+            self.assertEqual(gs.assess(CODE, seen(200, page(title)))[0], gs.NOTHING, title)
+        for title in ("Signing statements", "Logan County", "Login.gov", "Sign-on bonuses for poll "
+                                                                          "workers"):
+            self.assertFalse(gs._SIGN_IN_TITLE.search(title), title)
 
 
 class TestAGetAsThisProject(unittest.TestCase):
@@ -396,12 +555,58 @@ class TestTheBuildWarns(unittest.TestCase):
         found = gs.problems(self.cache(entry, look), self.CITED, today=later)
         self.assertEqual([c for _l, c, _m, _d in found], ["guide-source-stale"])
         self.assertEqual(len(found[0][3]), 2)
-        # A try that concluded nothing is a look.
+        # A try that concluded nothing is a look (and is said otherwise:
+        # test_a_source_confirmed_once_and_turned_away_since_warns).
         tried = dict(entry, tried=later)
-        self.assertEqual([d for _l, _c, _m, details in gs.problems(self.cache(tried, look),
-                                                                   self.CITED, today=later)
-                          for d in details], [f"{CONSTITUTION}: last looked at 2026-11-14"])
+        self.assertEqual([d for _l, code, _m, details in gs.problems(self.cache(tried, look),
+                                                                     self.CITED, today=later)
+                          if code == "guide-source-stale" for d in details],
+                         [f"{CONSTITUTION}: last looked at 2026-11-14"])
         self.assertEqual(gs.WARN_DAYS, 30)
+
+    def test_a_source_confirmed_once_and_turned_away_since_warns(self):
+        """Opened on 2026-11-14, then a challenge every day: its "ok" is a
+        read that old, and past WARN_DAYS it is said - the Law Revision
+        Counsel's eighty-one sections behind a challenge would otherwise
+        read "ok" for months (the review of 2026-11-14)."""
+        refused = (gs.NOTHING, "HTTP 403, a bot wall's or a challenge's page ('Just a moment...')",
+                   CODE)
+        entry = gs.merge(None, TestTheDays.OPENED, "2026-11-14", CODE)
+        day = datetime.date(2026, 11, 15)
+        while day <= datetime.date(2027, 1, 30):
+            entry = gs.merge(entry, refused, day.isoformat(), CODE)
+            day += datetime.timedelta(days=1)
+        self.assertEqual((entry["verdict"], entry["checked"], entry["tried"]),
+                         (gs.OK, "2026-11-14", "2027-01-30"))
+        constitution = {"checked": "2027-01-30", "verdict": gs.UNREAD, "evidence": "HTTP 403"}
+        found = gs.problems(self.cache(entry, constitution), self.CITED, today="2027-01-30")
+        self.assertEqual([c for _l, c, _m, _d in found], ["guide-source-unconfirmed"])
+        self.assertEqual(found[0][0], "warn")
+        detail = found[0][3]
+        self.assertEqual(len(detail), 1)
+        for words in (CODE, "not confirmed since 2026-11-14 (then ok)", "the last on 2027-01-30",
+                      "Just a moment"):
+            self.assertIn(words, detail[0])
+        self.assertIn("Open each by hand", found[0][2])
+        # Within WARN_DAYS of its verdict it is not yet said.
+        thirty = (datetime.date(2026, 11, 14) + datetime.timedelta(days=gs.WARN_DAYS)).isoformat()
+        self.assertFalse(gs.unconfirmed(dict(entry, tried=thirty), thirty))
+        self.assertTrue(gs.unconfirmed(entry, "2027-01-30"))
+        # One day's 404 that every read since has turned away is said too.
+        missing = gs.merge(None, TestTheDays.NOT_FOUND, "2026-11-14", CODE)
+        missing = gs.merge(missing, refused, "2027-01-30", CODE)
+        self.assertTrue(gs.unconfirmed(missing, "2027-01-30"))
+        # A gone or elsewhere source is said as that; an unread one is
+        # counted on the info line, its cache claiming nothing.
+        gone = {"checked": "2026-11-21", "verdict": gs.GONE, "evidence": "HTTP 404",
+                "tried": "2027-01-30"}
+        self.assertEqual([c for _l, c, _m, _d in gs.problems(self.cache(gone, constitution),
+                                                             self.CITED, today="2027-01-30")],
+                         ["guide-source-gone"])
+        self.assertFalse(gs.unconfirmed(dict(constitution, tried="2027-01-30"), "2027-03-30"))
+        # A read that concludes something clears it.
+        self.assertFalse(gs.unconfirmed(gs.merge(entry, TestTheDays.OPENED, "2027-01-31", CODE),
+                                        "2027-01-31"))
 
     def test_the_build_never_fails_on_it(self):
         """Every cited address gone: warnings, not one error (the refresh
@@ -599,6 +804,24 @@ class TestTheCommittedCache(unittest.TestCase):
                 self.assertIn(miss["answer"], (gs.NOTFOUND, gs.ELSEWHERE_ANSWER), url)
             if entry["verdict"] == gs.GONE and entry.get("misses"):
                 self.assertEqual(gs.settle(entry["misses"]), gs.GONE, url)
+            # Another site's address is kept without its query (shown).
+            final = entry.get("final", "")
+            if final and not gs._same_site(gs.urllib.parse.urlsplit(url).hostname or "",
+                                           gs.urllib.parse.urlsplit(final).hostname or ""):
+                self.assertNotIn("?", final, url)
+
+    def test_no_cache_keeps_a_bot_walls_query(self):
+        """Radware's wall writes the reader's own IP address, base64-encoded,
+        into its redirect's query ("ssr="): no committed cache may hold a
+        wall's address with a query, or that parameter anywhere."""
+        wall = re.compile(r"(?:" + "|".join(re.escape(h) for h in agent.WALL_HOSTS)
+                          + r")[^\"\s]*\?|[?&]ssr=", re.I)
+        folder = os.path.join(ROOT, "candidate_profiles_site", "data")
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".json"):
+                with open(os.path.join(folder, name), encoding="utf-8") as handle:
+                    self.assertIsNone(wall.search(handle.read()), name)
+        self.assertTrue(wall.search('"https://validate.perfdrive.com/?ssa=1"'))
 
 
 if __name__ == "__main__":

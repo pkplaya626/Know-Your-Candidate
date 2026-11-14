@@ -146,12 +146,17 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `judge_disclosures.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
-  `guide_sources.json`, `seat_history.json`, `outside_spending.json`
+  `seat_history.json`, `outside_spending.json`
   and `departed_members.json` are caches, but
-  they *are* hand-editable. `stategov.js` is generated from the last five,
+  they *are* hand-editable. `stategov.js` is generated from `executives.json`,
+  `partisan_composition.json`, `state_legislators.json`,
+  `statewide_officers.json`, `courts.json`, `statewide_candidates.json`,
+  `statewide_photos.json`, `guide_photos.json` and `political_history.json`,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
-  `members.json` (`members`, rule 86) is a hand-editable cache too.
+  `members.json` (`members`, rule 86) is a hand-editable cache too, and so
+  is `guide_sources.json` (`guidesources`, rule 48), which no page reads:
+  only the build's warnings.
   `roll_calls.json`, written by `votes`, is a cache too; `data/votes/*.js`
   is generated from it alone.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
@@ -223,7 +228,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3330 tests, no dependencies
+python -m unittest discover tests             # 3340 tests, no dependencies
 npm install && npm test                       # 5007 real-DOM checks (needs jsdom)
 ```
 
@@ -1095,19 +1100,38 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     their words, its maps, the 2026 ballot table and the page code's statute
     links cite - a GET as this project (rule 103; HEAD lies, rule 51), the
     first bytes only, one request at a time per host - and keeps each one's
-    day and answer in `data/guide_sources.json`, weekly in the refresh. Only
+    day and answer in `data/guide_sources.json`, saved at the end of a run:
+    one a week, and a missing or unread one on every run. Only
     404 or 410 on two reads on different days, or a host gone here and at
     both public resolvers (rule 35), is `gone`; a page that is not the source
-    on two days (titled "Page Not Found", a deep link its own site sends to
-    its front page, a Code section's address whose page's title names
-    another section) is `elsewhere`. A 403, 429, 5xx, timeout, bot wall or
-    challenge concludes nothing (rule 8): constitution.congress.gov answers
-    the reader with Cloudflare's "Just a moment...", and eCFR sends it to
-    the Federal Register's "Request Access" page, never its front page. The
-    build warns on each gone or elsewhere source by its address, names and
-    every section that cites it, on one never opened and on one not looked
-    at in 30 days (`validate.check_guide_sources`): warnings, never errors,
-    since a refresh must not fail on someone else's site.
+    on two days (titled "Page Not Found", a deep link sent to its own site's
+    front page or another's, a lapsed domain's marketplace, parking,
+    "/lander", for-sale, expired or gambling page read by localsites' own
+    tests, rules 35 and 39, or a section's address - the U.S. Code's
+    `uscode.house.gov/us/usc/tN/sM/`, the Code of Virginia's
+    `.../section24.2-214/` - whose page's title names another section) is
+    `elsewhere`. A 403, 429, 5xx, timeout, bot wall or challenge concludes
+    nothing (rule 8): constitution.congress.gov answers the reader with
+    Cloudflare's "Just a moment...", and eCFR sends it to the Federal
+    Register's "Request Access" page, never its front page. Nor does a 200
+    that is not a page of words: a server's error or maintenance page - the
+    first cache called Illinois's CandidatesFiled.aspx, the ballot table's
+    source for its attorney general and secretary of state, "ok" over "Error
+    Display: An error has occurred", and Louisiana's Law.aspx answers a bad
+    id under its usual title - a sign-in page, a web server's placeholder,
+    and a page with almost no text (`officers.says_nothing`): served the
+    script shell uscode.house.gov has served before, the first reader would
+    have called all eighty-one Code sources `elsewhere`. "404" in a title is
+    "not found" only at its start or beside "error" or "not found" ("RCW
+    29A.04.404: Definitions" is a statute). The build warns on each gone or
+    elsewhere source by its address, names and every section that cites it,
+    on one never opened, on one not looked at in 30 days, and on one "not
+    confirmed since" a verdict 30 days old while every read since concluded
+    nothing - a source confirmed once and turned away ever after, which read
+    "ok" for good (`validate.check_guide_sources`): warnings, never errors,
+    since a refresh must not fail on someone else's site. A source no read
+    has opened is counted by host on an info line, its cache claiming
+    nothing.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title. The 2026-10-17 audit found
