@@ -32,6 +32,9 @@ Never name a person who holds an office here: who holds one comes from the
 data, on the page (``assets/kyc-guide.js``), so it cannot go stale.
 """
 
+import re
+import urllib.parse
+
 REVIEWED = "2026-10-18"
 
 
@@ -56,7 +59,177 @@ class Tense(tuple):
             raise ValueError("a Tense opens with its campaign words")
         return super().__new__(cls, forms)
 
-# key -> (title, URL). Primary sources wherever one exists.
+# Hosts that publish a compiled copy of the law, not the law: Cornell's Legal
+# Information Institute, Justia, FindLaw, Casetext, CounselStack, and the
+# copies of opinions on CourtListener, Google Scholar, Leagle, Casemine, vLex
+# and OpenJurist. A copy reads like the law and links like it, and is one
+# more hand between the law and the page; its encyclopedia (Cornell's Wex) is
+# a secondary source. So a U.S. Code section is cited from the Office of the
+# Law Revision Counsel (uscode.house.gov) or the edition govinfo publishes, an
+# opinion from the Court's own publication (supremecourt.gov) or the bound
+# U.S. Reports as the Library of Congress publishes it (``OFFICIAL_HOSTS``
+# pins both by the source's title), a state's law from the state (rules 48
+# and 50). Until 2026-11-14 the guide cited Cornell's copies 78 times, the
+# guide's maps once and the 2026 ballot table six times; each was replaced by
+# the official text, opened that day. Read again for the words each sentence
+# relies on, claims about the courts outside Article III, the trial courts,
+# the circuits map, the Executive Office of the President and the states'
+# police power cited a source that holds only part of them (the Tax Court's
+# 26 U.S.C. 7443 holds its judges, not the petition before paying, which is
+# 26 U.S.C. 6213): their sections now also list each primary source found
+# that day for a part (``tests/test_guide.py``'s CLAIMS pairs each with its
+# words), while a sentence's own parenthetical citation is as it was, since
+# changing it changes the text. Not every part has one: the claims the guide
+# still holds with no primary source among its section's sources are
+# ``UNSOURCED``, by their words, until a source is found or a second reader
+# narrows them. The guide's and the maps' checks refuse any source on one of
+# these hosts (``compiled_law``) and pin a source titled as a Code section or
+# a case to its publisher (``OFFICIAL_HOSTS``); the ballot table's sources
+# carry no title for that pin to read, so its check refuses these hosts, and
+# its own list of compiled tables, by the address alone
+# (``ballot2026._source_problems``).
+COMPILED_LAW = ("law.cornell.edu", "justia.com", "findlaw.com", "casetext.com",
+                "counselstack.com", "courtlistener.com", "scholar.google.com", "leagle.com",
+                "casemine.com", "vlex.com", "openjurist.org")
+# A source titled as a section of the U.S. Code ("2 U.S.C. 8 (...)") is on the
+# Law Revision Counsel's host or govinfo's; one titled as a case of the
+# Supreme Court (``supreme_court_case``) on the Court's own host or the
+# Library of Congress's U.S. Reports (tile.loc.gov's files, www.loc.gov's
+# records), never another loc.gov host: blogs.loc.gov is the Library's blog,
+# not the U.S. Reports. A blocklist of copies is never whole; a pin to the
+# publisher is.
+_US_REPORTS = re.compile(r"\b\d+ U\.\s?S\. \d+\b")
+_COURT_DOCKET = re.compile(r"\bNo\. \d{2}A\d+\b"
+                           r"|\bNo\. \d{2}-\d+ \((?:order of )?[A-Z][a-z]+\.? \d{1,2}, \d{4}\)")
+# A citation's reporter ("5 U.S. 137", "123 F.3d 456", "384 N.C. 292"), and the
+# reporters of the Supreme Court's own cases.
+_REPORTER = re.compile(r"\b\d+ ((?:[A-Z][A-Za-z']*\.\s?)+(?:\d(?:d|th)\b)?)\s?\d+\b")
+_SUPREME_REPORTERS = ("U.S.", "S.Ct.", "L.Ed.", "L.Ed.2d")
+# The parentheses after a Supreme Court citation hold its year or its date
+# alone ("(1803)", "(order of May 22, 2025)", "(June 29, 2026)"); a lower
+# court's hold the court too ("(9th Cir. June 29, 2026)", "(D.D.C. 2025)").
+_COURT_DATE = re.compile(r"\((?:order of )?(?:[A-Z][a-z]+\.? \d{1,2}, )?\d{4}\)")
+
+
+def supreme_court_case(title):
+    """Whether a source's *title* names a case of the Supreme Court: "v." and
+    a U.S. Reports citation, however spaced ("5 U.S. 137", the Reports' own
+    "5 U. S. 137"), or the Court's docket and a bare date ("Trump v. Wilcox,
+    No. 24A966 (order of May 22, 2025)"); or "v." and no other court named,
+    by another court's reporter or by its name beside the year ("Marbury v.
+    Madison (1803)" is the Court's; "Doe v. Roe, 123 F.3d 456 (9th Cir. 1997)"
+    is not). The first pin keyed on "U.S." alone, so "5 U. S. 137" and a
+    title with no citation passed an opinion on oyez.org (the review of
+    2026-11-14)."""
+    title = title or ""
+    if " v. " not in title:
+        return False
+    if _US_REPORTS.search(title) or _COURT_DOCKET.search(title):
+        return True
+    for reporter in _REPORTER.findall(title):
+        if reporter.replace(" ", "") not in _SUPREME_REPORTERS:
+            return False
+    for parens in re.findall(r"\([^()]*\)", title):
+        if re.search(r"\b\d{4}\b", parens) and not _COURT_DATE.fullmatch(parens):
+            return False
+    return True
+
+
+OFFICIAL_HOSTS = (
+    (re.compile(r"\d+ U\.S\.C\. ").match, "a section of the U.S. Code",
+     ("uscode.house.gov", "govinfo.gov")),
+    (supreme_court_case, "a case of the Supreme Court",
+     ("supremecourt.gov", "tile.loc.gov", "www.loc.gov")),
+)
+# A source still on one of those hosts, and why it has not been replaced: an
+# entry is allowed there only while it names what refused, and one whose
+# source has left the host is stale and fails the check too, as does one
+# whose source no table holds any more (``government.check``).
+COMPILED_LAW_PENDING = {
+    "nh-const": ("New Hampshire's own copies of its constitution - the State's page "
+                 "(www.nh.gov/glance/state-constitution/executive-power-governor) and the "
+                 "Secretary of State's PDF (mm.nh.gov/files/uploads/sos/docs/nh-constitution.pdf) "
+                 "- answered this project's reader \"Access Denied\" (HTTP 403) on 2026-11-14; "
+                 "a person can read Part Second, Articles 46, 52 and 56 there and cite it"),
+}
+# Claims the guide still holds with no primary source among its section's
+# sources: (page, section, the words, what was looked for and where). Each is
+# here until a source is found and cited or a second reader narrows the words
+# (rule 48), and README names them; ``government.check`` reports an entry
+# whose words its section no longer says, so the list cannot outlive them.
+UNSOURCED = (
+    ("executive", "eop",
+     "Runs the president's staff and schedule, and is often a principal negotiator with "
+     "Congress.",
+     "the White House chief of staff's work: on 2026-11-14 whitehouse.gov's search for "
+     "\"Chief of Staff\", its Administration page, its release naming the 33rd chief of "
+     "staff and its page of the White House's offices (Presidential Departments, which names "
+     "none of the chief of staff's) said nothing of the office's work, and no statute or "
+     "regulation describes it"),
+    ("executive", "eop",
+     "including nominations, pardons and requests from congressional investigators.",
+     "the matters the White House Counsel advises on: the White House's own page of its "
+     "offices says the Counsel \"advises the President, the Executive Office of the President, "
+     "and the White House staff on legal issues\" (wh-departments, cited) and names none of "
+     "them; on 2026-11-14 whitehouse.gov's search for \"White House Counsel\" found no other "
+     "page about the office, and no statute or regulation describes it"),
+    ("states", "powers",
+     "Each state constitution sets up a legislature, an executive and courts, and many go "
+     "into far more detail than the federal one, on taxes, debt, education and local "
+     "government.",
+     "what the state constitutions hold: each is its own state's document, and no one primary "
+     "source says what many of them hold; none of the section's four sources speaks of it"),
+)
+
+
+def host_of(url):
+    """*url*'s host name, lower-cased and without a trailing dot: never its
+    port or the user before an "@", which the network location carries and a
+    browser does not take for the host ("www.law.cornell.edu:443",
+    "x@law.cornell.edu" and "www.law.cornell.edu." are all Cornell's)."""
+    try:
+        host = urllib.parse.urlsplit(url or "").hostname or ""
+    except ValueError:
+        return ""
+    return host.lower().rstrip(".")
+
+
+def on_host(host, hosts):
+    """The one of *hosts* that *host* is, or is a subdomain of, or None:
+    "notlaw.cornell.edu" is not Cornell's."""
+    return next((h for h in hosts if host == h or host.endswith("." + h)), None)
+
+
+def compiled_law(url):
+    """The compiled-law host *url* is on (``COMPILED_LAW``), or None."""
+    return on_host(host_of(url), COMPILED_LAW)
+
+
+def compiled_law_problems(sources, pending=None):
+    """Problems, as strings, with a ``{key: (title, url)}`` table's sources on
+    a compiled copy of the law: any but a pending entry, and a pending entry
+    that is no longer on one; and a statute or an opinion of the Supreme
+    Court, by its title, off its publisher's host (``OFFICIAL_HOSTS``)."""
+    pending = COMPILED_LAW_PENDING if pending is None else pending
+    found = []
+    for key, (title, url) in sources.items():
+        host = compiled_law(url)
+        if host and key not in pending:
+            found.append(f"source {key!r} is on {host}, a compiled copy of the law, not its "
+                         f"official publication: {url}")
+        for titled, what, hosts in OFFICIAL_HOSTS:
+            if titled(title or "") and not on_host(host_of(url), hosts):
+                found.append(f"source {key!r} is titled as {what} ({title}) but is not on "
+                             f"{' or '.join(hosts)}, its official publication: {url}")
+    for key in pending:
+        if key in sources and not compiled_law(sources[key][1]):
+            found.append(f"COMPILED_LAW_PENDING names {key!r}, which is no longer on a "
+                         f"compiled copy of the law: remove the entry")
+    return found
+
+
+# key -> (title, URL). Primary sources wherever one exists: never a compiled
+# copy of the law (``COMPILED_LAW``).
 SOURCES = {
     # The Constitution
     "const-art1": ("U.S. Constitution, Article I",
@@ -80,151 +253,331 @@ SOURCES = {
 
     # Federal statutes
     "usc-2-8": ("2 U.S.C. 8 (when a House vacancy is filled)",
-                "https://www.law.cornell.edu/uscode/text/2/8"),
+                "https://uscode.house.gov/us/usc/t2/s8/"),
     "usc-3-19": ("3 U.S.C. 19 (presidential succession)",
-                 "https://www.law.cornell.edu/uscode/text/3/19"),
+                 "https://uscode.house.gov/us/usc/t3/s19/"),
     "usc-5-101": ("5 U.S.C. 101 (the executive departments)",
-                  "https://www.law.cornell.edu/uscode/text/5/101"),
+                  "https://uscode.house.gov/us/usc/t5/s101/"),
     "usc-5-3105": ("5 U.S.C. 3105 (administrative law judges)",
-                   "https://www.law.cornell.edu/uscode/text/5/3105"),
+                   "https://uscode.house.gov/us/usc/t5/s3105/"),
+    # The rest of the administrative law judges' entry (courts#other-courts),
+    # which 3105 (their appointment) does not say, read 2026-11-14. The
+    # appeals: 5 U.S.C. 557(b), the presiding employee's initial decision
+    # "becomes the decision of the agency without further proceedings unless
+    # there is an appeal to, or review on motion of, the agency", and "On
+    # appeal from or review of the initial decision, the agency has all the
+    # powers which it would have in making the initial decision"; 5 U.S.C.
+    # 704, "Agency action made reviewable by statute and final agency action
+    # for which there is no other adequate remedy in a court are subject to
+    # judicial review". The three agencies, each in its own rules as the
+    # Code of Federal Regulations' annual edition on govinfo prints them
+    # (eCFR's pages answer a script with a bot check; its versions API, the
+    # same day, dates each section's last change before its edition: 20 CFR
+    # 404.929 2024-11-23, 29 CFR 102.34 2017-03-03, 17 CFR 200.14
+    # 2021-02-16): the Social Security Administration's 404.929, "will
+    # appoint an administrative law judge to conduct the hearing" and "The
+    # administrative law judge will issue a decision"; the National Labor
+    # Relations Board's 102.34, "The hearing for the purpose of taking
+    # evidence upon a complaint will be conducted by an Administrative Law
+    # Judge"; the Securities and Exchange Commission's 200.14(a), "Under the
+    # Administrative Procedure Act (5 U.S.C. 551-559) and the federal
+    # securities laws, the Office of Administrative Law Judges conducts
+    # hearings in proceedings instituted by the Commission", and may "prepare
+    # an initial decision".
+    "usc-5-557": ("5 U.S.C. 557 (initial decisions; review by the agency)",
+                  "https://uscode.house.gov/us/usc/t5/s557/"),
+    "usc-5-704": ("5 U.S.C. 704 (actions reviewable in court)",
+                  "https://uscode.house.gov/us/usc/t5/s704/"),
+    "cfr-20-404-929": ("20 C.F.R. 404.929 (Social Security Administration: hearing before an "
+                       "administrative law judge)",
+                       "https://www.govinfo.gov/content/pkg/CFR-2025-title20-vol2/pdf/"
+                       "CFR-2025-title20-vol2-sec404-929.pdf"),
+    "cfr-29-102-34": ("29 C.F.R. 102.34 (National Labor Relations Board: who conducts the "
+                      "hearing)",
+                      "https://www.govinfo.gov/content/pkg/CFR-2025-title29-vol2/pdf/"
+                      "CFR-2025-title29-vol2-sec102-34.pdf"),
+    "cfr-17-200-14": ("17 C.F.R. 200.14 (Securities and Exchange Commission: Office of "
+                      "Administrative Law Judges)",
+                      "https://www.govinfo.gov/content/pkg/CFR-2025-title17-vol3/pdf/"
+                      "CFR-2025-title17-vol3-sec200-14.pdf"),
     "usc-10-111": ("10 U.S.C. 111 (the Department of Defense)",
-                   "https://www.law.cornell.edu/uscode/text/10/111"),
+                   "https://uscode.house.gov/us/usc/t10/s111/"),
     "usc-10-942": ("10 U.S.C. 942 (Court of Appeals for the Armed Forces)",
-                   "https://www.law.cornell.edu/uscode/text/10/942"),
+                   "https://uscode.house.gov/us/usc/t10/s942/"),
+    # The court's place below the Supreme Court (courts#other-courts), read
+    # 2026-11-14: 941, "The court is established under article I of the
+    # Constitution"; 867(a), "The Court of Appeals for the Armed Forces shall
+    # review the record in" the cases it lists; and 28 U.S.C. 1259, its
+    # decisions "may be reviewed by the Supreme Court by writ of certiorari".
+    "usc-10-941": ("10 U.S.C. 941 (Court of Appeals for the Armed Forces: status)",
+                   "https://uscode.house.gov/us/usc/t10/s941/"),
+    "usc-10-867": ("10 U.S.C. 867 (review by the Court of Appeals for the Armed Forces)",
+                   "https://uscode.house.gov/us/usc/t10/s867/"),
+    "usc-28-1259": ("28 U.S.C. 1259 (the Supreme Court's review of the Court of Appeals for "
+                    "the Armed Forces)", "https://uscode.house.gov/us/usc/t28/s1259/"),
     "usc-12-242": ("12 U.S.C. 242 (Federal Reserve Board)",
-                   "https://www.law.cornell.edu/uscode/text/12/242"),
+                   "https://uscode.house.gov/us/usc/t12/s242/"),
     "usc-15-41": ("15 U.S.C. 41 (Federal Trade Commission)",
-                  "https://www.law.cornell.edu/uscode/text/15/41"),
+                  "https://uscode.house.gov/us/usc/t15/s41/"),
     "usc-20-3411": ("20 U.S.C. 3411 (Department of Education)",
-                    "https://www.law.cornell.edu/uscode/text/20/3411"),
+                    "https://uscode.house.gov/us/usc/t20/s3411/"),
     "usc-26-7443": ("26 U.S.C. 7443 (Tax Court)",
-                    "https://www.law.cornell.edu/uscode/text/26/7443"),
+                    "https://uscode.house.gov/us/usc/t26/s7443/"),
+    # Read 2026-11-14 for the Tax Court's sentence (courts#other-courts),
+    # which 7443 holds only the judges of: 6213(a), "the taxpayer may file a
+    # petition with the Tax Court for a redetermination of the deficiency",
+    # and "no assessment of a deficiency ... shall be made ... until such
+    # notice has been mailed to the taxpayer, nor until the expiration of
+    # such 90-day or 150-day period".
+    "usc-26-6213": ("26 U.S.C. 6213 (deficiencies: petition to the Tax Court)",
+                    "https://uscode.house.gov/us/usc/t26/s6213/"),
     "usc-28-1": ("28 U.S.C. 1 (the Supreme Court)",
-                 "https://www.law.cornell.edu/uscode/text/28/1"),
+                 "https://uscode.house.gov/us/usc/t28/s1/"),
     "usc-28-41": ("28 U.S.C. 41 (the circuits)",
-                  "https://www.law.cornell.edu/uscode/text/28/41"),
+                  "https://uscode.house.gov/us/usc/t28/s41/"),
     "usc-28-45": ("28 U.S.C. 45 (chief judges of the circuits)",
-                  "https://www.law.cornell.edu/uscode/text/28/45"),
+                  "https://uscode.house.gov/us/usc/t28/s45/"),
     "usc-28-151": ("28 U.S.C. 151 (bankruptcy courts)",
-                   "https://www.law.cornell.edu/uscode/text/28/151"),
+                   "https://uscode.house.gov/us/usc/t28/s151/"),
     "usc-28-152": ("28 U.S.C. 152 (bankruptcy judges)",
-                   "https://www.law.cornell.edu/uscode/text/28/152"),
+                   "https://uscode.house.gov/us/usc/t28/s152/"),
     "usc-28-171": ("28 U.S.C. 171 (Court of Federal Claims)",
-                   "https://www.law.cornell.edu/uscode/text/28/171"),
+                   "https://uscode.house.gov/us/usc/t28/s171/"),
+    # The rest of the Court of Federal Claims' sentence (courts#other-courts),
+    # which 171 holds only the sixteen judges of, read 2026-11-14: 172(a),
+    # "appointed for a term of fifteen years"; 1491(a)(1), "jurisdiction to
+    # render judgment upon any claim against the United States founded
+    # either upon the Constitution, or any Act of Congress ... or upon any
+    # express or implied contract with the United States", and (b)(1), "an
+    # action by an interested party objecting to a solicitation ... or to a
+    # proposed award or the award of a contract"; 42 U.S.C. 300aa-12(a), the
+    # court and its "special masters shall ... have jurisdiction over
+    # proceedings to determine if a petitioner ... is entitled to compensation
+    # under the Program" (the Vaccine Injury Compensation Program).
+    "usc-28-172": ("28 U.S.C. 172 (Court of Federal Claims: judges' terms)",
+                   "https://uscode.house.gov/us/usc/t28/s172/"),
+    "usc-28-1491": ("28 U.S.C. 1491 (Court of Federal Claims: claims against the United "
+                    "States)", "https://uscode.house.gov/us/usc/t28/s1491/"),
+    "usc-42-300aa-12": ("42 U.S.C. 300aa-12 (vaccine injury petitions)",
+                        "https://uscode.house.gov/us/usc/t42/s300aa-12/"),
     "usc-28-251": ("28 U.S.C. 251 (Court of International Trade)",
-                   "https://www.law.cornell.edu/uscode/text/28/251"),
+                   "https://uscode.house.gov/us/usc/t28/s251/"),
+    # What the court hears (courts#district), which 251 does not say (it
+    # holds the nine judges and the New York offices), read 2026-11-14:
+    # 1581(a), "The Court of International Trade shall have exclusive
+    # jurisdiction of any civil action commenced to contest the denial of a
+    # protest ... under section 515 of the Tariff Act of 1930", and (i)(1),
+    # "exclusive jurisdiction of any civil action commenced against the
+    # United States ... that arises out of any law of the United States
+    # providing for ... tariffs, duties, fees, or other taxes on the
+    # importation of merchandise".
+    "usc-28-1581": ("28 U.S.C. 1581 (Court of International Trade: jurisdiction)",
+                    "https://uscode.house.gov/us/usc/t28/s1581/"),
+    # The district courts as the sections the courts pages read lay them out
+    # (courts#district): chapter 5 of title 28 as govinfo publishes it, the
+    # edition kyc/court_districts.py reads (its later amendments move where
+    # court is held, not a district), gives each state one section and at
+    # least one district, 89 in the fifty, and one each to the District of
+    # Columbia (88) and Puerto Rico (119). Read 2026-11-14.
+    "usc-28-81-131": ("28 U.S.C. 81-131 (the judicial districts)",
+                      "https://www.govinfo.gov/content/pkg/USCODE-2024-title28/html/"
+                      "USCODE-2024-title28-partI-chap5.htm"),
+    # The territorial courts' ten-year terms (courts#district and
+    # #other-courts), which no source the sections cited held, read
+    # 2026-11-14: Guam's judge "shall hold office for the term of ten years"
+    # (1424b(a)), the Virgin Islands' two judges "for terms of ten years"
+    # (1614(a)), the Northern Mariana Islands' judge "for the term of ten
+    # years" (1821(b)(1)).
+    "usc-48-1424b": ("48 U.S.C. 1424b (District Court of Guam: its judge)",
+                     "https://uscode.house.gov/us/usc/t48/s1424b/"),
+    "usc-48-1614": ("48 U.S.C. 1614 (District Court of the Virgin Islands: its judges)",
+                    "https://uscode.house.gov/us/usc/t48/s1614/"),
+    "usc-48-1821": ("48 U.S.C. 1821 (District Court for the Northern Mariana Islands: its "
+                    "judge)",
+                    "https://uscode.house.gov/us/usc/t48/s1821/"),
     "usc-28-331": ("28 U.S.C. 331 (Judicial Conference)",
-                   "https://www.law.cornell.edu/uscode/text/28/331"),
+                   "https://uscode.house.gov/us/usc/t28/s331/"),
     "usc-28-371": ("28 U.S.C. 371 (senior status)",
-                   "https://www.law.cornell.edu/uscode/text/28/371"),
+                   "https://uscode.house.gov/us/usc/t28/s371/"),
     "usc-28-621": ("28 U.S.C. 621 (Federal Judicial Center)",
-                   "https://www.law.cornell.edu/uscode/text/28/621"),
+                   "https://uscode.house.gov/us/usc/t28/s621/"),
     "usc-28-631": ("28 U.S.C. 631 (magistrate judges)",
-                   "https://www.law.cornell.edu/uscode/text/28/631"),
+                   "https://uscode.house.gov/us/usc/t28/s631/"),
     "usc-28-636": ("28 U.S.C. 636 (magistrate judges: jurisdiction)",
-                   "https://www.law.cornell.edu/uscode/text/28/636"),
+                   "https://uscode.house.gov/us/usc/t28/s636/"),
     "usc-18-3401": ("18 U.S.C. 3401 (misdemeanors tried by magistrate judges)",
-                    "https://www.law.cornell.edu/uscode/text/18/3401"),
+                    "https://uscode.house.gov/us/usc/t18/s3401/"),
     "usc-28-1295": ("28 U.S.C. 1295 (Federal Circuit)",
-                    "https://www.law.cornell.edu/uscode/text/28/1295"),
+                    "https://uscode.house.gov/us/usc/t28/s1295/"),
     "usc-28-1441": ("28 U.S.C. 1441 (removal of civil actions)",
-                    "https://www.law.cornell.edu/uscode/text/28/1441"),
+                    "https://uscode.house.gov/us/usc/t28/s1441/"),
     "usc-28-1442": ("28 U.S.C. 1442 (removal: federal officers)",
-                    "https://www.law.cornell.edu/uscode/text/28/1442"),
+                    "https://uscode.house.gov/us/usc/t28/s1442/"),
     "usc-31-502": ("31 U.S.C. 502 (Office of Management and Budget)",
-                   "https://www.law.cornell.edu/uscode/text/31/502"),
+                   "https://uscode.house.gov/us/usc/t31/s502/"),
     "usc-31-703": ("31 U.S.C. 703 (Comptroller General)",
-                   "https://www.law.cornell.edu/uscode/text/31/703"),
+                   "https://uscode.house.gov/us/usc/t31/s703/"),
     "usc-38-7253": ("38 U.S.C. 7253 (Court of Appeals for Veterans Claims)",
-                    "https://www.law.cornell.edu/uscode/text/38/7253"),
+                    "https://uscode.house.gov/us/usc/t38/s7253/"),
+    # What the court reviews (courts#other-courts), which 7253 (its judges)
+    # does not say, read 2026-11-14: 7252(a), "The Court of Appeals for
+    # Veterans Claims shall have exclusive jurisdiction to review decisions of
+    # the Board of Veterans' Appeals."
+    "usc-38-7252": ("38 U.S.C. 7252 (Court of Appeals for Veterans Claims: jurisdiction)",
+                    "https://uscode.house.gov/us/usc/t38/s7252/"),
     "usc-39-201": ("39 U.S.C. 201 (Postal Service)",
-                   "https://www.law.cornell.edu/uscode/text/39/201"),
+                   "https://uscode.house.gov/us/usc/t39/s201/"),
     "usc-49-24301": ("49 U.S.C. 24301 (Amtrak)",
-                     "https://www.law.cornell.edu/uscode/text/49/24301"),
+                     "https://uscode.house.gov/us/usc/t49/s24301/"),
     "usc-50-1803": ("50 U.S.C. 1803 (Foreign Intelligence Surveillance Court)",
-                    "https://www.law.cornell.edu/uscode/text/50/1803"),
+                    "https://uscode.house.gov/us/usc/t50/s1803/"),
+    # The court's searches (courts#other-courts), which 1803 does not hold
+    # (its jurisdiction there is "electronic surveillance"), read 2026-11-14:
+    # 1822(c), "The Foreign Intelligence Surveillance Court shall have
+    # jurisdiction to hear applications for and grant orders approving a
+    # physical search for the purpose of obtaining foreign intelligence
+    # information", and (d), "The court of review established under section
+    # 1803(b) of this title shall have jurisdiction to review the denial of
+    # any application made under this subchapter".
+    "usc-50-1822": ("50 U.S.C. 1822 (Foreign Intelligence Surveillance Court: physical "
+                    "searches)", "https://uscode.house.gov/us/usc/t50/s1822/"),
     "usc-18-1151": ("18 U.S.C. 1151 (Indian country defined)",
-                    "https://www.law.cornell.edu/uscode/text/18/1151"),
+                    "https://uscode.house.gov/us/usc/t18/s1151/"),
     "usc-18-1152": ("18 U.S.C. 1152 (General Crimes Act)",
-                    "https://www.law.cornell.edu/uscode/text/18/1152"),
+                    "https://uscode.house.gov/us/usc/t18/s1152/"),
     "usc-18-19": ("18 U.S.C. 19 (petty offense defined)",
-                  "https://www.law.cornell.edu/uscode/text/18/19"),
+                  "https://uscode.house.gov/us/usc/t18/s19/"),
+    # The six months (courts#district): 19 makes a petty offense "a Class B
+    # misdemeanor, a Class C misdemeanor, or an infraction", and 3559(a),
+    # read 2026-11-14, classes an offense whose maximum term is "(7) six
+    # months or less but more than thirty days, as a Class B misdemeanor; (8)
+    # thirty days or less but more than five days, as a Class C misdemeanor;
+    # or (9) five days or less, or if no imprisonment is authorized, as an
+    # infraction".
+    "usc-18-3559": ("18 U.S.C. 3559 (sentencing classification of offenses)",
+                    "https://uscode.house.gov/us/usc/t18/s3559/"),
     "usc-2-2a": ("2 U.S.C. 2a (apportionment of representatives)",
-                 "https://www.law.cornell.edu/uscode/text/2/2a"),
+                 "https://uscode.house.gov/us/usc/t2/s2a/"),
     "usc-2-2c": ("2 U.S.C. 2c (single-member districts)",
-                 "https://www.law.cornell.edu/uscode/text/2/2c"),
+                 "https://uscode.house.gov/us/usc/t2/s2c/"),
     "usc-2-641": ("2 U.S.C. 641 (budget reconciliation)",
-                  "https://www.law.cornell.edu/uscode/text/2/641"),
+                  "https://uscode.house.gov/us/usc/t2/s641/"),
     "usc-5-551": ("5 U.S.C. 551 (agency defined)",
-                  "https://www.law.cornell.edu/uscode/text/5/551"),
+                  "https://uscode.house.gov/us/usc/t5/s551/"),
     "usc-5-552": ("5 U.S.C. 552 (Freedom of Information Act)",
-                  "https://www.law.cornell.edu/uscode/text/5/552"),
+                  "https://uscode.house.gov/us/usc/t5/s552/"),
     "usc-5-552a": ("5 U.S.C. 552a (Privacy Act)",
-                   "https://www.law.cornell.edu/uscode/text/5/552a"),
+                   "https://uscode.house.gov/us/usc/t5/s552a/"),
     "usc-5-553": ("5 U.S.C. 553 (rulemaking)",
-                  "https://www.law.cornell.edu/uscode/text/5/553"),
+                  "https://uscode.house.gov/us/usc/t5/s553/"),
     "usc-52-10301": ("52 U.S.C. 10301 (Voting Rights Act, section 2)",
-                     "https://www.law.cornell.edu/uscode/text/52/10301"),
+                     "https://uscode.house.gov/us/usc/t52/s10301/"),
     "usc-52-30101": ("52 U.S.C. 30101 (candidate, federal office and independent expenditure "
-                     "defined)", "https://www.law.cornell.edu/uscode/text/52/30101"),
+                     "defined)", "https://uscode.house.gov/us/usc/t52/s30101/"),
     "usc-18-1153": ("18 U.S.C. 1153 (Major Crimes Act)",
-                    "https://www.law.cornell.edu/uscode/text/18/1153"),
+                    "https://uscode.house.gov/us/usc/t18/s1153/"),
     "usc-18-1162": ("18 U.S.C. 1162 (Public Law 280: criminal jurisdiction)",
-                    "https://www.law.cornell.edu/uscode/text/18/1162"),
+                    "https://uscode.house.gov/us/usc/t18/s1162/"),
     "usc-28-1360": ("28 U.S.C. 1360 (Public Law 280: civil actions)",
-                    "https://www.law.cornell.edu/uscode/text/28/1360"),
+                    "https://uscode.house.gov/us/usc/t28/s1360/"),
     "usc-25-1302": ("25 U.S.C. 1302 (Indian Civil Rights Act)",
-                    "https://www.law.cornell.edu/uscode/text/25/1302"),
+                    "https://uscode.house.gov/us/usc/t25/s1302/"),
     "usc-25-1304": ("25 U.S.C. 1304 (special Tribal criminal jurisdiction)",
-                    "https://www.law.cornell.edu/uscode/text/25/1304"),
+                    "https://uscode.house.gov/us/usc/t25/s1304/"),
     "usc-25-1911": ("25 U.S.C. 1911 (Indian Child Welfare Act)",
-                    "https://www.law.cornell.edu/uscode/text/25/1911"),
+                    "https://uscode.house.gov/us/usc/t25/s1911/"),
     "usc-25-3601": ("25 U.S.C. 3601 (Indian Tribal Justice Act)",
-                    "https://www.law.cornell.edu/uscode/text/25/3601"),
+                    "https://uscode.house.gov/us/usc/t25/s3601/"),
     "usc-25-5123": ("25 U.S.C. 5123 (tribal constitutions)",
-                    "https://www.law.cornell.edu/uscode/text/25/5123"),
+                    "https://uscode.house.gov/us/usc/t25/s5123/"),
     "usc-25-5301": ("25 U.S.C. 5301 (Indian Self-Determination Act)",
-                    "https://www.law.cornell.edu/uscode/text/25/5301"),
+                    "https://uscode.house.gov/us/usc/t25/s5301/"),
     "usc-25-5361": ("25 U.S.C. 5361 (Tribal Self-Governance)",
-                    "https://www.law.cornell.edu/uscode/text/25/5361"),
+                    "https://uscode.house.gov/us/usc/t25/s5361/"),
     "cfr-25-11": ("25 C.F.R. 11.201 (Courts of Indian Offenses: magistrates)",
                   "https://www.ecfr.gov/current/title-25/chapter-I/subchapter-B/part-11/subpart-B/section-11.201"),
 
-    # Court decisions
+    # Court decisions. The older cases in the bound U.S. Reports as the Library
+    # of Congress publishes them (the PDF its record names: www.loc.gov's item
+    # pages answer a script with a bot check, its JSON record and tile.loc.gov
+    # do not); the later ones in the Court's own copy, the file its own pages
+    # link (its U.S. Reports page for volume 567's bound volume, the term's
+    # opinion listing for the rest) at the case's first page. Each was opened
+    # on 2026-11-14 and holds the case, the citation and the year given here,
+    # and the words the sections cite it for (rule 48).
     "marbury": ("Marbury v. Madison, 5 U.S. 137 (1803)",
-                "https://www.law.cornell.edu/supremecourt/text/5/137"),
+                "https://tile.loc.gov/storage-services/service/ll/usrep/usrep005/"
+                "usrep005137/usrep005137.pdf"),
     "johnson": ("Johnson v. M'Intosh, 21 U.S. 543 (1823)",
-                "https://www.law.cornell.edu/supremecourt/text/21/543"),
+                "https://tile.loc.gov/storage-services/service/ll/usrep/usrep021/"
+                "usrep021543/usrep021543.pdf"),
     "cherokee": ("Cherokee Nation v. Georgia, 30 U.S. 1 (1831)",
-                 "https://www.law.cornell.edu/supremecourt/text/30/1"),
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep030/"
+                 "usrep030001/usrep030001.pdf"),
     "worcester": ("Worcester v. Georgia, 31 U.S. 515 (1832)",
-                  "https://www.law.cornell.edu/supremecourt/text/31/515"),
+                  "https://tile.loc.gov/storage-services/service/ll/usrep/usrep031/"
+                  "usrep031515/usrep031515.pdf"),
+    # Read 2026-11-14 for the states' police power (states#powers), at 197
+    # U.S. 24-25: "what is commonly called the police power - a power which
+    # the State did not surrender when becoming a member of the Union under
+    # the Constitution", embracing "such reasonable regulations established
+    # directly by legislative enactment as will protect the public health and
+    # the public safety", "subject ... to the condition that no rule prescribed
+    # by a State ... shall contravene the Constitution of the United States",
+    # and "must always yield in case of conflict with the exercise by the
+    # General Government of any power it possesses under the Constitution".
+    "jacobson": ("Jacobson v. Massachusetts, 197 U.S. 11 (1905)",
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep197/"
+                 "usrep197011/usrep197011.pdf"),
     "youngstown": ("Youngstown Sheet & Tube Co. v. Sawyer, 343 U.S. 579 (1952)",
-                   "https://www.law.cornell.edu/supremecourt/text/343/579"),
+                   "https://tile.loc.gov/storage-services/service/ll/usrep/usrep343/"
+                   "usrep343579/usrep343579.pdf"),
     "bryan": ("Bryan v. Itasca County, 426 U.S. 373 (1976)",
-              "https://www.law.cornell.edu/supremecourt/text/426/373"),
+              "https://tile.loc.gov/storage-services/service/ll/usrep/usrep426/"
+              "usrep426373/usrep426373.pdf"),
     "oliphant": ("Oliphant v. Suquamish Indian Tribe, 435 U.S. 191 (1978)",
-                 "https://www.law.cornell.edu/supremecourt/text/435/191"),
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep435/"
+                 "usrep435191/usrep435191.pdf"),
+    # Read 2026-11-14 for the state's own constitution limiting its power
+    # (states#powers), which Jacobson and NFIB do not say, at 447 U.S. 81:
+    # "Our reasoning in Lloyd, however, does not ex proprio vigore limit the
+    # authority of the State to exercise its police power or its sovereign
+    # right to adopt in its own Constitution individual liberties more
+    # expansive than those conferred by the Federal Constitution."
+    "pruneyard": ("PruneYard Shopping Center v. Robins, 447 U.S. 74 (1980)",
+                  "https://tile.loc.gov/storage-services/service/ll/usrep/usrep447/"
+                  "usrep447074/usrep447074.pdf"),
     "michigan-long": ("Michigan v. Long, 463 U.S. 1032 (1983)",
-                      "https://www.law.cornell.edu/supremecourt/text/463/1032"),
+                      "https://tile.loc.gov/storage-services/service/ll/usrep/usrep463/"
+                      "usrep4631032/usrep4631032.pdf"),
     "dole": ("South Dakota v. Dole, 483 U.S. 203 (1987)",
-             "https://www.law.cornell.edu/supremecourt/text/483/203"),
+             "https://tile.loc.gov/storage-services/service/ll/usrep/usrep483/"
+             "usrep483203/usrep483203.pdf"),
     "printz": ("Printz v. United States, 521 U.S. 898 (1997)",
-               "https://www.law.cornell.edu/supremecourt/text/521/898"),
+               "https://tile.loc.gov/storage-services/service/ll/usrep/usrep521/"
+               "usrep521898/usrep521898.pdf"),
+    # The bound volume's page 555 is 567 U.S. 519; Part II of the Chief
+    # Justice's opinion, the Court's, at 535-536 (read 2026-11-14 for
+    # states#powers): the States "perform many of the vital functions of
+    # modern government ... Our cases refer to this general power of
+    # governing, possessed by the States but not by the Federal Government,
+    # as the 'police power.'"
     "nfib": ("NFIB v. Sebelius, 567 U.S. 519 (2012)",
-             "https://www.law.cornell.edu/supremecourt/text/11-393"),
+             "https://www.supremecourt.gov/opinions/boundvolumes/567BV.pdf#page=555"),
     "wilcox": ("Trump v. Wilcox, No. 24A966 (order of May 22, 2025)",
                "https://www.supremecourt.gov/opinions/24pdf/24a966_1b8e.pdf"),
     "wesberry": ("Wesberry v. Sanders, 376 U.S. 1 (1964)",
-                 "https://www.law.cornell.edu/supremecourt/text/376/1"),
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep376/"
+                 "usrep376001/usrep376001.pdf"),
     "reynolds": ("Reynolds v. Sims, 377 U.S. 533 (1964)",
-                 "https://www.law.cornell.edu/supremecourt/text/377/533"),
+                 "https://tile.loc.gov/storage-services/service/ll/usrep/usrep377/"
+                 "usrep377533/usrep377533.pdf"),
     "rucho": ("Rucho v. Common Cause, 588 U.S. 684 (2019)",
-              "https://www.law.cornell.edu/supremecourt/text/18-422"),
+              "https://www.supremecourt.gov/opinions/preliminaryprint/588US2PP_final.pdf#page=346"),
     "mcgirt": ("McGirt v. Oklahoma, 591 U.S. 894 (2020)",
-               "https://www.law.cornell.edu/supremecourt/text/18-9526"),
+               "https://www.supremecourt.gov/opinions/preliminaryprint/591US2PP_web.pdf#page=453"),
     "castro-huerta": ("Oklahoma v. Castro-Huerta, 597 U.S. 629 (2022)",
-                      "https://www.law.cornell.edu/supremecourt/text/21-429"),
+                      "https://www.supremecourt.gov/opinions/21pdf/597us2r64_5436.pdf"),
     "callais": ("Louisiana v. Callais, 608 U.S. 85 (2026)",
                 "https://www.supremecourt.gov/opinions/25pdf/608us1r29_n648.pdf"),
     "onder": ("People Not Politicians v. Onder, No. 26A388 (order of Sept. 25, 2026)",
@@ -258,7 +611,7 @@ SOURCES = {
     "gao": ("Government Accountability Office: About", "https://www.gao.gov/about"),
     "cbo": ("Congressional Budget Office: Overview", "https://www.cbo.gov/about/overview"),
     "crs": ("2 U.S.C. 166 (Congressional Research Service)",
-            "https://www.law.cornell.edu/uscode/text/2/166"),
+            "https://uscode.house.gov/us/usc/t2/s166/"),
     "aoc": ("Architect of the Capitol: About", "https://www.aoc.gov/about-us"),
     "house-legislative-process": ("U.S. House of Representatives: The Legislative Process",
                                   "https://www.house.gov/the-house-explained/the-legislative-process"),
@@ -279,7 +632,51 @@ SOURCES = {
     "eo-8248": ("Executive Order 8248 (1939), establishing the Executive Office of the President",
                 "https://www.archives.gov/federal-register/codification/executive-order/08248.html"),
     "usc-50-3021": ("50 U.S.C. 3021 (National Security Council)",
-                    "https://www.law.cornell.edu/uscode/text/50/3021"),
+                    "https://uscode.house.gov/us/usc/t50/s3021/"),
+    # Who runs the Council is the President's word, not the statute's
+    # (3021(e) puts its staff under "a civilian executive secretary"). The
+    # memorandum in force, read 2026-11-14 on whitehouse.gov (HTTP 200, headed
+    # "National Security Presidential Memorandum/NSPM-1", January 20, 2025):
+    # "This Memorandum prevails over any prior orders, directives, memoranda,
+    # or other Presidential guidance related to the organization of the
+    # National Security Council (NSC or Council)"; "The National Security
+    # Advisor shall be responsible, as appropriate and at the President's
+    # direction, for determining the agenda for the NSC, ensuring that the
+    # necessary papers are prepared, and recording and communicating Council
+    # actions and Presidential decisions in a timely manner"; and "The PC
+    # [Principals Committee] shall be convened and chaired by the National
+    # Security Advisor". So National Security Memorandum 2 (Feb. 4, 2021),
+    # which the guide cited for a day, and National Security Presidential
+    # Memorandum-4 (Apr. 4, 2017), which the Code prints under 3021, are
+    # superseded.
+    "nspm-1": ("National Security Presidential Memorandum 1, Organization of the National "
+               "Security Council and Subcommittees (Jan. 20, 2025)",
+               "https://www.whitehouse.gov/presidential-actions/2025/01/"
+               "organization-of-the-national-security-council-and-subcommittees/"),
+    # What OMB does with agencies' rules (executive#eop), which neither EO
+    # 8248 nor 31 U.S.C. 502 says: read 2026-11-14 in the Office of the
+    # Federal Register's copy of the order on archives.gov (HTTP 200,
+    # "Federal Register / Vol. 58, No. 190 / Monday, October 4, 1993",
+    # "[FR citation 58 FR 51735]"). Sec. 2(b): "Within OMB, the Office of
+    # Information and Regulatory Affairs (OIRA) is the repository of
+    # expertise concerning regulatory issues"; sec. 6(b)(1), "OIRA may review
+    # only actions identified by the agency or by OIRA as significant
+    # regulatory actions"; sec. 6(a)(3)(B), the agency "shall provide to OIRA
+    # ... The text of the draft regulatory action"; and sec. 8, an agency
+    # "shall not publish in the Federal Register or otherwise issue to the
+    # public any regulatory action that is subject to review under section 6
+    # ... until" OIRA has waived or completed its review or its time has run.
+    "eo-12866": ("Executive Order 12866, Regulatory Planning and Review, 58 FR 51735 "
+                 "(Oct. 4, 1993)",
+                 "https://www.archives.gov/files/federal-register/executive-orders/pdf/12866.pdf"),
+    # The White House Counsel's work as the White House describes its own
+    # offices (executive#eop), read 2026-11-14 (HTTP 200): "The Office of
+    # White House Counsel advises the President, the Executive Office of the
+    # President, and the White House staff on legal issues pertaining to the
+    # President and the White House." It names no office of the chief of
+    # staff, and nothing of nominations, pardons or investigators.
+    "wh-departments": ("The White House: Presidential Departments",
+                       "https://www.whitehouse.gov/internships/presidential-departments/"),
     "eo-14347": ("Executive Order 14347, 90 FR 43893 (Sept. 10, 2025)",
                  "https://www.govinfo.gov/content/pkg/FR-2025-09-10/pdf/2025-17508.pdf"),
     "senate-2026-07-14": ("U.S. Senate floor log, July 14, 2026",
@@ -316,8 +713,6 @@ SOURCES = {
                 "https://www.bia.gov/faqs/what-federally-recognized-tribe"),
 
     # States
-    "wex-police": ("Legal Information Institute: police powers",
-                   "https://www.law.cornell.edu/wex/police_powers"),
     "nebraska": ("Nebraska Legislature: History of the Unicameral",
                  "https://nebraskalegislature.gov/about/history_unicameral.php"),
     "nebraska-senators": ("Nebraska Legislature: Senators by district",
@@ -392,15 +787,19 @@ SOURCES = {
     "const-amdt20": ("U.S. Constitution, Twentieth Amendment",
                      "https://constitution.congress.gov/constitution/amendment-20/"),
     "usc-2-1": ("2 U.S.C. 1 (the election of senators)",
-                "https://www.law.cornell.edu/uscode/text/2/1"),
+                "https://uscode.house.gov/us/usc/t2/s1/"),
     "usc-2-7": ("2 U.S.C. 7 (the day of the House election)",
-                "https://www.law.cornell.edu/uscode/text/2/7"),
+                "https://uscode.house.gov/us/usc/t2/s7/"),
     "usc-48-1712": ("48 U.S.C. 1712 (the Delegates from Guam and the U.S. Virgin Islands)",
-                    "https://www.law.cornell.edu/uscode/text/48/1712"),
+                    "https://uscode.house.gov/us/usc/t48/s1712/"),
     "usc-52-21082": ("52 U.S.C. 21082 (provisional ballots)",
-                     "https://www.law.cornell.edu/uscode/text/52/21082"),
-    "watson-rnc": ("Watson v. Republican National Committee, No. 24-1260 (June 29, 2026)",
-                   "https://www.law.cornell.edu/supremecourt/text/24-1260"),
+                     "https://uscode.house.gov/us/usc/t52/s21082/"),
+    # The Court's preliminary print, 609 U.S. 672, read 2026-11-14: "Held: The
+    # federal election-day statutes do not prevent Mississippi from counting
+    # absentee ballots postmarked by election day but received up to five days
+    # thereafter".
+    "watson-rnc": ("Watson v. Republican National Committee, 609 U.S. 672 (2026)",
+                   "https://www.supremecourt.gov/opinions/25pdf/609us2r65_g314.pdf"),
     "eac-in-charge": ("U.S. Election Assistance Commission, Who is in charge of elections in "
                       "my state?", "https://www.eac.gov/who-is-in-charge-of-elections-in-my-state"),
     "eac-primaries": ("U.S. Election Assistance Commission, Primary election types",
@@ -1235,7 +1634,16 @@ EXECUTIVE = {
                      "nominations, pardons and requests from congressional investigators."),
                 ]),
             ],
-            "sources": ["eo-8248", "usc-31-502", "usc-50-3021"],
+            # The National Security Council "run by the national security
+            # advisor" is the President's memorandum's, not the statute's, and
+            # OMB's review of regulations Executive Order 12866's, and the
+            # Counsel's advice the White House's own page's; every source here
+            # was read on 2026-11-14 for the words it is cited for. The chief
+            # of staff's entry, and the matters the Counsel's names, have no
+            # primary source among them (``UNSOURCED``).
+            "sources": ["eo-8248", "usc-31-502", "eo-12866", "usc-50-3021", "nspm-1",
+                        "wh-departments"],
+            "reviewed": "2026-11-14",
         },
         {
             "id": "departments",
@@ -1485,8 +1893,17 @@ COURTS = {
                      "to 14-year terms (28 U.S.C. 152)."),
                 ]),
             ],
-            "sources": ["uscourts-structure", "uscourts-judgeships", "usc-28-251", "usc-28-631",
-                        "usc-28-636", "usc-18-3401", "usc-18-19", "usc-28-151", "usc-28-152"],
+            # The Court of International Trade's cases are 28 U.S.C. 1581's,
+            # and the petty offense's six months 18 U.S.C. 3559's, beside the
+            # sections the sentences cite; the districts state by state are
+            # chapter 5's and the territorial judges' terms title 48's. Every
+            # source here was read on 2026-11-14 for the words it is cited for
+            # (the judgeships table's 2025 row: 673 district, 4 territorial).
+            "sources": ["uscourts-structure", "uscourts-judgeships", "usc-28-81-131",
+                        "usc-48-1424b", "usc-48-1614", "usc-48-1821", "usc-28-251",
+                        "usc-28-1581", "usc-28-631", "usc-28-636", "usc-18-3401", "usc-18-19",
+                        "usc-18-3559", "usc-28-151", "usc-28-152"],
+            "reviewed": "2026-11-14",
         },
         {
             "id": "other-courts",
@@ -1531,8 +1948,29 @@ COURTS = {
                       "Congress may protect the judges of courts like these ([removal "
                       "protection](guide:executive#removal))."),
             ],
-            "sources": ["usc-26-7443", "usc-28-171", "usc-38-7253", "usc-10-942", "usc-50-1803",
-                        "const-art4", "usc-5-3105", "uscourts-structure", "slaughter"],
+            # Each court's sentence cites the section that sets up its bench;
+            # what it hears, and the Court of Federal Claims' fifteen years,
+            # are in the sections beside each, the territorial judges'
+            # ten-year terms in title 48's, the surveillance court's searches
+            # in 50 U.S.C. 1822, and the administrative law judges' agencies
+            # and appeals in those agencies' rules and 5 U.S.C. 557 and 704.
+            # Every source here was read on 2026-11-14 for the words it is
+            # cited for: Article IV's "needful Rules and Regulations
+            # respecting the Territory" in the National Archives' transcription
+            # (archives.gov), since constitution.congress.gov answered this
+            # reader a challenge page ("Just a moment...", HTTP 403), which
+            # concludes nothing (rule 8); Slaughter at 609 U.S. 422, "the
+            # permissibility of tenure protections for the judges of 'non-
+            # Article III courts,' such as the Tax Court and the Court of
+            # Federal Claims, is not 'presented' or 'briefed' in this case ...
+            # We leave those questions for another day."
+            "sources": ["usc-26-7443", "usc-26-6213", "usc-28-171", "usc-28-172", "usc-28-1491",
+                        "usc-42-300aa-12", "usc-38-7253", "usc-38-7252", "usc-10-942",
+                        "usc-10-941", "usc-10-867", "usc-28-1259", "usc-50-1803", "usc-50-1822",
+                        "const-art4", "usc-48-1424b", "usc-48-1614", "usc-48-1821", "usc-5-3105",
+                        "cfr-20-404-929", "cfr-29-102-34", "cfr-17-200-14", "usc-5-557",
+                        "usc-5-704", "uscourts-structure", "slaughter"],
+            "reviewed": "2026-11-14",
         },
     ],
 }
@@ -1574,7 +2012,18 @@ STATES = {
                       "into far more detail than the federal one, on taxes, debt, education and "
                       "local government."),
             ],
-            "sources": ["const-amdt10", "wex-police"],
+            # Cited to Cornell's Wex, a legal encyclopedia, until 2026-11-14,
+            # and read that day against the Court's own words: Jacobson (the
+            # police power, public health and safety, within the Constitution
+            # and yielding to federal law), NFIB (what the Court calls it) and
+            # PruneYard (the state's own constitution, which may secure
+            # liberties beyond the federal one's); the Tenth Amendment's words
+            # in the National Archives' transcription, since
+            # constitution.congress.gov answered this reader a challenge page.
+            # The second sentence has no primary source among these
+            # (``UNSOURCED``).
+            "sources": ["const-amdt10", "jacobson", "nfib", "pruneyard"],
+            "reviewed": "2026-11-14",
         },
         {
             "id": "legislatures",

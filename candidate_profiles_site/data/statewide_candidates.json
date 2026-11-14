@@ -2005,10 +2005,10 @@
       {
        "addedBy": "skeptic 2026-10-18",
        "field": "incumbentNote (48 U.S.C. 1422)",
-       "note": "The statute's text, read from Cornell LII's copy because uscode.house.gov served only its script shell to this reader on 2026-10-18; the quote is the Organic Act's own words, not a compiled summary.",
+       "note": "The statute's text, read again on 2026-11-14 from the Office of the Law Revision Counsel's uscode.house.gov, which now serves the section's text to this reader, and the quote is word for word there. The skeptic's read of 2026-10-18 was of Cornell LII's copy, because uscode.house.gov served only its script shell that day.",
        "pageUpdated": null,
        "quote": "No person who has been elected Governor for two full successive terms shall again be eligible to hold that office until one full term has intervened.",
-       "url": "https://www.law.cornell.edu/uscode/text/48/1422"
+       "url": "https://uscode.house.gov/us/usc/t48/s1422/"
       }
      ],
      "title": "Governor of Guam"
@@ -6460,10 +6460,10 @@
       {
        "addedBy": "skeptic 2026-10-18",
        "field": "incumbentNote and notes (48 U.S.C. 1591)",
-       "note": "The Revised Organic Act's own words, from Cornell LII's copy of the statute (uscode.house.gov serves only a script shell to this reader).",
+       "note": "The Revised Organic Act's own words, read again on 2026-11-14 from the Office of the Law Revision Counsel's uscode.house.gov, which now serves the section's text to this reader; both quoted sentences are word for word there. The skeptic's read of 2026-10-18 was of Cornell LII's copy, because uscode.house.gov served only a script shell then.",
        "pageUpdated": null,
        "quote": "No person who has been elected Governor for two full successive terms shall be again eligible to hold that office until one full term has intervened. ... If no candidates receive a majority of the votes cast in any election, on the fourteenth day thereafter a run-off election shall be held",
-       "url": "https://www.law.cornell.edu/uscode/text/48/1591"
+       "url": "https://uscode.house.gov/us/usc/t48/s1591/"
       }
      ],
      "title": "Governor of the Virgin Islands"

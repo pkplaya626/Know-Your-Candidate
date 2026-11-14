@@ -785,7 +785,7 @@
         offCycle(info)
           ? '<p class="state-note">' + KYC.escapeHtml(name) + " elects its " +
             KYC.escapeHtml(delegateTitle(info)) + " at large for a " + info.houseTerm.years +
-            '-year term (<a href="https://www.law.cornell.edu/uscode/text/48/891" target="_blank" ' +
+            '-year term (<a href="https://uscode.house.gov/us/usc/t48/s891/" target="_blank" ' +
             'rel="noopener noreferrer">48 U.S.C. § 891</a>). The seat was last on the ballot in ' +
             info.houseTerm.last + " and is next in " + info.houseTerm.next + ", so no seat in Congress " +
             "is on " + KYC.escapeHtml(KYC.possessive(KYC.placeWords(code, name))) + " 2026 ballot.</p>"

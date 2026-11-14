@@ -23,7 +23,8 @@ import re
 from collections import namedtuple
 
 from . import pages
-from .government_text import HOLDERS, PAGES, REVIEWED, SEE, SOURCES, Tense
+from .government_text import (COMPILED_LAW_PENDING, HOLDERS, PAGES, REVIEWED, SEE, SOURCES,
+                              UNSOURCED, Tense, compiled_law, compiled_law_problems)
 
 FOLDER = "government"
 # The site's own pages, which a "site:" link must name.
@@ -294,6 +295,9 @@ def href(target, here):
     if target == VOTING:
         return "../states/index.html", False
     if target.startswith("https://"):
+        if compiled_law(target):
+            raise ValueError(f"{here}: {target} is on {compiled_law(target)}, a compiled copy "
+                             f"of the law, not its official publication")
         return target, True
     if target.startswith("#"):
         if target[1:] not in _section_ids(here):
@@ -980,6 +984,18 @@ def revisits(today):
     return out
 
 
+def _plain_words(value):
+    """Every string a section's blocks hold, joined: the words of each tense
+    and table cell, never the markup the page draws them with."""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        return " ".join(_plain_words(v) for v in value.values())
+    if isinstance(value, (list, tuple)):
+        return " ".join(_plain_words(v) for v in value)
+    return ""
+
+
 def check():
     """Problems with the guide's text, as strings. Empty when it is sound.
 
@@ -1019,6 +1035,28 @@ def check():
             problems.append(f"source {key!r} is listed but no section cites it")
         if not url.startswith("https://"):
             problems.append(f"source {key!r} is not an https URL: {url}")
+    # A compiled copy of the law is not its publication (rule 48): Cornell's
+    # copies stood behind 78 of these sources until 2026-11-14.
+    problems.extend(compiled_law_problems(SOURCES))
+    # A pending entry waits for its source to move off the copy; one whose
+    # source neither the guide nor its maps hold any more waits for nothing,
+    # and would excuse the next source given its key (CLAUDE.md, "Curated
+    # data": an override that matches nothing is reported).
+    from . import government_maps
+    for key in COMPILED_LAW_PENDING:
+        if key not in SOURCES and key not in government_maps.SOURCES:
+            problems.append(f"COMPILED_LAW_PENDING names {key!r}, which names no source: "
+                            f"remove the entry")
+    # A claim listed as holding no primary source is one the section still
+    # says, or the list (and README after it) names words the page no longer
+    # shows.
+    for slug, sid, said, _why in UNSOURCED:
+        section = next((s for p in PAGES if p.get("slug") == slug
+                        for s in p.get("sections", ()) if s.get("id") == sid), None)
+        text = " ".join(_plain_words(section["blocks"]).split()) if section else ""
+        if " ".join(said.split()) not in text:
+            problems.append(f"UNSOURCED names {slug}#{sid}'s {said!r}, which the section no "
+                            f"longer says: read its sources again and remove the entry")
     if slugs()[0] != "index":
         problems.append("the guide's first page must be its index")
     # Every "see it" and "who holds it" entry belongs to a section there is.

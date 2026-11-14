@@ -31,6 +31,7 @@ import urllib.parse
 
 from .government_maps import SEATS
 from .government_maps import STATES as STATE_CODES
+from .government_text import compiled_law, host_of, on_host
 
 ELECTION = "2026-11-03"
 REVIEWED = "2026-10-14"
@@ -40,10 +41,15 @@ SELECTIONS = ("elected", "elected-jointly-with-governor", "appointed",
 OFFICES = ("governor", "lt", "ag", "sos")
 TITLES = {"governor": "Governor", "lt": "Lieutenant governor", "ag": "Attorney general",
           "sos": "Secretary of state"}
-# Compiled tables are leads, never the cited source (rule 50); a county's
-# page is not the state's record of a statewide count.
-NOT_A_SOURCE = ("ncsl.org", "ballotpedia.org", "wikipedia.org", "270towin.com",
-                "countyohio.gov")
+# Compiled tables are leads, never the cited source (rule 50): a source on
+# one of these hosts, or a subdomain of one, is refused.
+NOT_A_SOURCE = ("ncsl.org", "ballotpedia.org", "wikipedia.org", "270towin.com")
+# A county's page is not the state's record of a statewide count. Ohio's
+# counties name their own domains "<county>countyohio.gov"
+# ("vote.franklincountyohio.gov"), so these are endings of the host's name,
+# not hosts: the one list held both until 2026-11-14, read as endings of the
+# network location, so "ballotpedia.org:443" passed.
+COUNTY_HOST_ENDINGS = ("countyohio.gov",)
 
 STATES = {
     "AK": {
@@ -1083,10 +1089,10 @@ TERRITORIES = {
         "governor": ("elected", True,
             "Elected with the lieutenant governor on one ticket at the general election "
             "every four years from 1974 (48 U.S.C. 1422); a runoff if no ticket wins a majority",
-            "https://www.law.cornell.edu/uscode/text/48/1422"),
+            "https://uscode.house.gov/us/usc/t48/s1422/"),
         "lt": ("elected-jointly-with-governor", True,
             "Elected on one ticket with the governor (48 U.S.C. 1422)",
-            "https://www.law.cornell.edu/uscode/text/48/1422"),
+            "https://uscode.house.gov/us/usc/t48/s1422/"),
         # 5 GCA s.30101 (the Compiler of Laws' Title 5, ch. 30, COL
         # 2026-10-26, read 2026-11-11): "the Attorney General of Guam, who
         # shall be elected by the people of Guam for a term of four (4)
@@ -1105,10 +1111,10 @@ TERRITORIES = {
             "Elected with the lieutenant governor on one ticket at the general election "
             "every four years from 1974 (48 U.S.C. 1591); the Elections System's 2026 "
             "candidate listing names the tickets",
-            "https://www.law.cornell.edu/uscode/text/48/1591"),
+            "https://uscode.house.gov/us/usc/t48/s1591/"),
         "lt": ("elected-jointly-with-governor", True,
             "Elected on one ticket with the governor (48 U.S.C. 1591)",
-            "https://www.law.cornell.edu/uscode/text/48/1591"),
+            "https://uscode.house.gov/us/usc/t48/s1591/"),
     },
     "MP": {
         "governor": ("elected", True,
@@ -1440,10 +1446,10 @@ OPEN_SEATS = {
         "https://www.scstatehouse.gov/scconstitution/A04.pdf",
         "S.C. Const. art. IV, s.3: no one elected for more than two successive terms"),
     ("GU", "governor"): ("Lou Leon Guerrero", "term-limit", 2,
-        "https://www.law.cornell.edu/uscode/text/48/1422",
+        "https://uscode.house.gov/us/usc/t48/s1422/",
         "48 U.S.C. 1422: no one elected for two full successive terms"),
     ("VI", "governor"): ("Albert Bryan", "term-limit", 2,
-        "https://www.law.cornell.edu/uscode/text/48/1591",
+        "https://uscode.house.gov/us/usc/t48/s1591/",
         "48 U.S.C. 1591: no one elected for two full successive terms"),
 }
 OPEN_REASONS = ("term-limit", "not-listed", "listed")
@@ -1631,13 +1637,35 @@ def unchecked(holder):
             if holder else None)
 
 
+def not_a_source(source):
+    """Why *source*'s host is no source for this table or the terms' table
+    (``terms_begin``), or None. The host is read as a browser reads it, never
+    the network location: read from netloc, "ballotpedia.org:443",
+    "ballotpedia.org." and its capitals all passed (the review of
+    2026-11-14), and "notballotpedia.org" would have been refused as
+    Ballotpedia."""
+    host = host_of(source)
+    table = on_host(host, NOT_A_SOURCE)
+    if table:
+        return f"{host} is a compiled table ({table}), not a source"
+    if host.endswith(COUNTY_HOST_ENDINGS):
+        return f"{host} is a county's page, not the state's record"
+    # A statute is cited from its publisher, never a compiled copy of it: the
+    # territories' Organic Acts were Cornell's copies until 2026-11-14.
+    if compiled_law(source):
+        return f"{host} is a compiled copy of the law, not its official publication"
+    return None
+
+
 def _source_problems(code, field, source):
-    parts = urllib.parse.urlsplit(source or "")
-    if parts.scheme not in ("http", "https") or not parts.netloc:
+    try:
+        parts = urllib.parse.urlsplit(source or "")
+    except ValueError:
         return [f"{code} {field}: source is not a link: {source!r}"]
-    if any(parts.netloc.endswith(host) for host in NOT_A_SOURCE):
-        return [f"{code} {field}: {parts.netloc} is a compiled table, not a source"]
-    return []
+    if parts.scheme not in ("http", "https") or not host_of(source):
+        return [f"{code} {field}: source is not a link: {source!r}"]
+    why = not_a_source(source)
+    return [f"{code} {field}: {why}"] if why else []
 
 
 def for_state(code):

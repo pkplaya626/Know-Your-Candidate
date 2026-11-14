@@ -1368,6 +1368,30 @@ class TestOfficeHoursAndHolidays(unittest.TestCase):
             if source["field"].startswith("runoff.earlyVoting"):
                 self.assertNotIn("Sunday", closed(source["quote"]), source["quote"])
 
+    def test_excluding_or_excepting_a_run_of_weekdays_closes_each_of_them(self):
+        # The more common wording had the same under-read: "Excluding
+        # Saturdays and Sundays" closed the Saturdays alone, and "Saturdays
+        # and Sundays excepted" the same, so a window quoting either would
+        # have needed no Sunday listed.
+        closed = voting_dates.closed_weekdays
+        both = {"Saturday", "Sunday"}
+        for words in ("Excluding Saturdays and Sundays", "except Saturdays, Sundays and holidays",
+                      "closed Saturdays and Sundays.", "excluding Saturdays or all Sundays",
+                      "Saturdays and Sundays excepted",
+                      "Saturdays, Sundays and legal holidays excluded"):
+            self.assertEqual(closed(words), both, words)
+        self.assertTrue(voting_dates.closes("Excluding Saturdays and Sundays", "2026-11-29"))
+        self.assertFalse(voting_dates.closes("Excluding Saturdays and Sundays", "2026-11-27"))
+        # One weekday stays one; a weekday in the singular is a day, not a
+        # class; and a weekday that is not the run is not read into it.
+        self.assertEqual(closed("(Excluding Sundays)"), {"Sunday"})
+        self.assertEqual(closed("Sundays and federal holidays excepted"), {"Sunday"})
+        self.assertEqual(closed("except Sundays and the first Saturday of the period"), {"Sunday"})
+        self.assertEqual(closed("excluding Sunday, November 29"), set())
+        # The words between a run and what closes it never cross a comma:
+        # Tennessee's note says its Saturdays are open.
+        self.assertEqual(closed("open Saturdays in the period, closed on holidays"), set())
+
     def test_a_holiday_is_named_by_two_quotes_together(self):
         holiday = voting_dates.closes_as_holiday
         self.assertTrue(holiday([self.RULE, self.NAMED], "2026-11-26"))

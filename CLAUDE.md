@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3271 tests, no dependencies
-npm install && npm test                       # 5003 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3289 tests, no dependencies
+npm install && npm test                       # 5007 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1069,6 +1069,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     second agent before it was written. When the text is revised, re-check
     what can change (counts, decisions, agency names) and move `REVIEWED`;
     a page checked on another day carries its own `"reviewed"` date.
+    A source is the law's own publication, never a compiled copy of it: the
+    guide's and its maps' checks refuse a host in
+    `government_text.COMPILED_LAW` (Cornell's, Justia's, CourtListener's and
+    the like; Cornell's stood behind 78 sources until 2026-11-14) and a
+    source titled as a Code section or a Supreme Court case off its
+    publisher's host (`OFFICIAL_HOSTS`), save New Hampshire's constitution,
+    pending in `COMPILED_LAW_PENDING` because every state copy answered this
+    project's reader "Access Denied", until a person reads and cites the
+    State's own. The ballot table's sources carry no title for that pin: its
+    check refuses `COMPILED_LAW`'s hosts and its own compiled tables by the
+    address alone (`ballot2026._source_problems`). A claim no source in its
+    section holds is listed by its words in `government_text.UNSOURCED`
+    (README names each): a section's date says when its sources were read,
+    never that they hold it.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title. The 2026-10-17 audit found
@@ -2522,7 +2536,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     no official words close, so it stays "Under way, during those hours". A
     weekday after "no" ("no Saturday", "no Saturday hours") closes that
     weekday as a class, as "Excluding Sundays" does (`CLOSED_CLASS`), and
-    every such day of the window must be listed. A state holiday is closed
+    every such day of the window must be listed. A run of them closes each
+    one it names, in every form ("no Saturday or Sunday voting", "Excluding
+    Saturdays and Sundays", "Saturdays and Sundays excepted"): read one
+    weekday at a time, each form closed only the first, and a window quoting
+    one would have needed no Sunday listed. The words between a run and what
+    closes it never cross a comma, or Tennessee's "open Saturdays in the
+    period, closed on holidays" closed its Saturdays. A state holiday is closed
     only by two of the offices' own quotes together, one closing state
     holidays and one naming the day one (`closes_as_holiday`: the Board's
     CBEC Procedures Manual and Act 92 of 2023, and the Secretary of State's

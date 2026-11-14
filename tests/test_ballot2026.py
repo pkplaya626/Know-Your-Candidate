@@ -73,6 +73,30 @@ class TestCheck(unittest.TestCase):
             states["OH"]["ag"] = (sel, up, note, "https://www.ncsl.org/elections")
         self.assertIn("compiled table", self.broken(cite))
 
+    def test_a_compiled_copy_of_the_law_is_not_a_source(self):
+        # Guam's and the Virgin Islands' Organic Acts were cited from Cornell's
+        # copies until 2026-11-14; the Law Revision Counsel publishes the Code.
+        self.assertEqual(ballot2026.check(), True)
+        territories = copy.deepcopy(ballot2026.TERRITORIES)
+        sel, up, note, _src = territories["GU"]["governor"]
+        territories["GU"]["governor"] = (sel, up, note,
+                                         "https://www.law.cornell.edu/uscode/text/48/1422")
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(territories=territories)
+        self.assertIn("compiled copy of the law", str(caught.exception))
+        seats = dict(ballot2026.OPEN_SEATS)
+        holder, why, terms, _source, cite = seats[("VI", "governor")]
+        seats[("VI", "governor")] = (holder, why, terms,
+                                     "https://law.justia.com/codes/us/title-48/1591/", cite)
+        with self.assertRaises(ballot2026.Ballot2026Error) as caught:
+            ballot2026.check(open_seats=seats)
+        self.assertIn("compiled copy of the law", str(caught.exception))
+        # Every source the table holds is on the official host now.
+        for entry in list(ballot2026.TERRITORIES.values()) + list(ballot2026.STATES.values()):
+            for value in entry.values():
+                if value:  # Nebraska has no lower chamber
+                    self.assertIsNone(ballot2026.compiled_law(value[-1]), value)
+
     def test_a_chamber_size_that_disagrees_fails(self):
         def grow(states):
             name, total, up, basis, src = states["OH"]["upper"]
@@ -84,7 +108,37 @@ class TestCheck(unittest.TestCase):
             name, total, up, basis, _src = states["OH"]["upper"]
             states["OH"]["upper"] = (name, total, up, basis,
                                      "https://vote.franklincountyohio.gov/Candidates")
-        self.assertIn("compiled table", self.broken(cite))
+        self.assertIn("a county's page, not the state's record", self.broken(cite))
+
+    def test_a_source_is_read_by_its_host_as_a_browser_reads_it(self):
+        # Read from the network location, "ballotpedia.org:443",
+        # "ballotpedia.org." and "BALLOTPEDIA.ORG" passed as sources (the
+        # review of 2026-11-14), as the compiled-law list's port and trailing
+        # dot had; and a host merely ending in a table's name was refused as
+        # it. A county's domain is still known by its name's ending.
+        problems = ballot2026._source_problems
+        for url in ("https://ballotpedia.org/Guam", "https://ballotpedia.org:443/Guam",
+                    "https://ballotpedia.org./Guam", "https://BALLOTPEDIA.ORG/Guam",
+                    "https://user@ballotpedia.org/Guam", "HTTPS://Ballotpedia.Org:8443/Guam"):
+            self.assertEqual(problems("GU", "governor", url),
+                             ["GU governor: ballotpedia.org is a compiled table (ballotpedia.org), "
+                              "not a source"], url)
+        for url in ("https://en.wikipedia.org:443/wiki/Guam", "https://EN.WIKIPEDIA.ORG./wiki/x",
+                    "https://www.ncsl.org:443/x", "https://www.270towin.com./x"):
+            self.assertIn("is a compiled table", problems("GU", "governor", url)[0], url)
+        for url in ("https://vote.franklincountyohio.gov:443/Candidates",
+                    "https://VOTE.FRANKLINCOUNTYOHIO.GOV./Candidates"):
+            self.assertIn("is a county's page", problems("OH", "upper", url)[0], url)
+        self.assertEqual(problems("GU", "governor", "https://notballotpedia.org/x"), [])
+        self.assertEqual(problems("GU", "governor", "https://uscode.house.gov/us/usc/t48/s1422/"),
+                         [])
+        self.assertIn("not a link", problems("GU", "governor", "https://[broken/x")[0])
+        # Every real entry passes.
+        for entries in (ballot2026.STATES, ballot2026.TERRITORIES, ballot2026.DISTRICT):
+            for code, entry in entries.items():
+                for field, value in entry.items():
+                    if value:
+                        self.assertEqual(problems(code, field, value[-1]), [], (code, field))
 
     def test_the_build_reports_a_broken_table(self):
         from kyc import validate
