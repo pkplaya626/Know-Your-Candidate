@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3292 tests, no dependencies
-npm install && npm test                       # 5010 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3295 tests, no dependencies
+npm install && npm test                       # 5011 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2288,7 +2288,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     of 39,447 governments' links are withdrawn: 5,090 dead, 1,179 gone,
     351 for sale, 255 gambling, 254 parked, 208 elsewhere, 20 expired and
     9 a business's; 5,269 could not be confirmed and stay linked, marked
-    so.
+    so. Where a redirect ended is its host and path, never its query: a
+    sign-in page's, a bot wall's or a forwarder's query names the address
+    the visitor came from (Google's "continue=", Radware's), and read as
+    the address it made 41 listed websites "ok" over the page they ended on:
+    30 deleted or private Google Sites at Google's sign-in, Geisinger's at
+    Radware's validate.perfdrive.com, and others, each looked at again on
+    2026-11-14.
+    A redirect to a bot wall's host (`agent.WALL_HOSTS`) concludes nothing
+    whatever it answers, and the cache keeps no query of any address a
+    redirect ended at (`localsites.off_site`): Radware writes the reader's
+    own IP address, base64-encoded, into its query ("ssr=", cut off by the
+    cache's 300 characters in the one such address committed), and a
+    "Bot Verification" page on a lapsed town domain (recaptcha.cloud) wrote
+    it plain ("ip="): the first full run, from the owner's machine on
+    2026-10-17, committed that address, and it stood in the public cache
+    until 2026-11-14. Its history is the owner's to decide; no cache a
+    reader writes may hold an address in a query, or a parameter made to
+    carry one (`test_no_committed_cache_carries_a_readers_address`).
 
 79. **A mark about an office sits on the office, and "not running" is a
     source's word.** "On the Nov 3, 2026 ballot" sat under Brian Kemp,
@@ -2558,7 +2575,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     holidays and one naming the day one (`closes_as_holiday`: the Board's
     CBEC Procedures Manual and Act 92 of 2023, and the Secretary of State's
     calendar's starred "November 26, 2026 – Thursday*"), never from a general
-    calendar. The cycle's dates are reread each cycle, and `check` refuses a
+    calendar. The block's own days are in words, as every sentence's is
+    (rule 96): "read on Oct. 17, 2026", "Each link opened Nov. 13, 2026",
+    "opened by hand Oct. 26, 2026" and an archived page's "(archived Sept.
+    29, 2026)" stood as ISO days beside the profiles' words, and a check
+    draws every place's block and refuses one. The cycle's dates are reread each cycle, and `check` refuses a
     date outside it.
 
 85. **A ZIP code is not a place, and a location is placed on lines fine

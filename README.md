@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (5010 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (5011 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -3483,7 +3483,12 @@ the listing's Town of Greenfield) is the government's own site as often as
 not, and stays linked, marked "not confirmed". Everything else is linked and
 labelled "Website as listed by the Census in 2022, checked Oct 17, 2026"
 (its own day); a 403, a 429, a timeout or a bot wall concludes nothing, and
-a row whose link could not be confirmed says so in words. A person's own
+a row whose link could not be confirmed says so in words. Where a redirect
+ended is its host and path: a sign-in page's or a bot wall's query names the
+address the visitor came from, and read as the address it once made 41
+links "ok" over Google's sign-in and Radware's wall. The cache keeps no
+query of any address a redirect ended at, since a bot wall writes the
+reader's own address there. A person's own
 finding goes in `overrides.BLOCKED_LOCAL_HOSTS`. Gambling seen plainly - in
 a page's title, on a site a lapsed address now redirects to, or all over
 its text - is never cleared by a later check; seen once in a page's text it
