@@ -1242,16 +1242,18 @@
     if (!hit && fold.delegation === "search") setDelegation(false);
   }
 
+  /* The query as typed, as the grid keeps it: its capitals tell "IN
+   * congress" from "in congress" (rule 5), and every reader folds it. */
   function searchQuery() {
     var input = el("stateSearch");
-    return input ? input.value.trim().toLowerCase() : "";
+    return input ? input.value.trim() : "";
   }
 
   function initSearch() {
     var input = el("stateSearch");
     if (!input) return;
     var run = KYC.debounce(function () {
-      var q = input.value.trim().toLowerCase();
+      var q = searchQuery();
       if (kind === "states") {
         // Folded like every other search on the site (KYC.foldText).
         var folded = KYC.foldText(q);

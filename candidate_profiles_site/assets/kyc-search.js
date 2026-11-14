@@ -46,14 +46,12 @@
 
   function phrase(ws) { return ws.join(" "); }
 
-  /* Two-letter codes that are also words a query is made of ("governor of
-   * ohio" has "of" in it, "in" and "me" are words, "va" is Veterans
-   * Affairs): read as a state only typed in capitals (rule 5). */
-  var AMBIGUOUS = { in: 1, or: 1, me: 1, oh: 1, hi: 1, ok: 1, de: 1, al: 1, la: 1, ma: 1,
-    mo: 1, id: 1, as: 1, pa: 1, co: 1, ne: 1, va: 1, ms: 1, mt: 1, ct: 1 };
-
+  /* Two-letter codes that are also words a query is made of ("in" and "me"
+   * are words, "va" is Veterans Affairs) are read as a state only typed in
+   * capitals (rule 5), by kyc.js's one table of them, which the grid reads
+   * too (KYC.codeIsWord, rule 12). */
   function capitalised(raw, code) {
-    return new RegExp("(^|[^A-Za-z])" + code + "([^A-Za-z]|$)").test(String(raw || ""));
+    return KYC.typedInCapitals(raw, code);
   }
 
   /** The first state *ws* names - its name, an alias, a short form or its
@@ -68,7 +66,7 @@
         var code = null;
         if (len === 1 && /^[a-z]{2}$/.test(p)) {
           var upper = p.toUpperCase();
-          if (states[upper] && (!AMBIGUOUS[p] || capitalised(raw, upper))) code = upper;
+          if (states[upper] && (!KYC.codeIsWord(p) || capitalised(raw, upper))) code = upper;
         } else {
           code = KYC.stateNamed(p) || KYC.stateAbbreviation(p, false);
         }

@@ -221,7 +221,7 @@ python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, 
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 3251 tests, no dependencies
-npm install && npm test                       # 4910 real-DOM checks (needs jsdom)
+npm install && npm test                       # 4947 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -262,7 +262,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
    Arkansans first and "TX-3" all of TX-30 to TX-39 (audit 2026-10-17,
    GRID-03/04). A search word matches where a word starts, and a query that
    is a state's whole name or code, or a district however written, is that
-   place (`KYC.queryScore`), never text.
+   place (`KYC.queryScore`), never text. The grid did not read the casing:
+   it lowercased its query before anything read it, so `KYC.parsePlace`
+   took any code before any words as the place - "as delegate" was American
+   Samoa's Delegate, "as delegation" its members and "in congress" Indiana's
+   members of Congress - while the answers above the cards, reading the
+   query as typed, called the same words words. A first fix asked
+   `parsePlace` for capitals and lost "AL at large", typed in capitals, to
+   the lowercasing. The grid keeps the query as typed, in its state and its
+   address (`#/?q=` keeps its capitals), and so does a state page's own
+   search; every reader folds it itself, and a change of capitals alone is
+   a new query. The codes that are also words or names are one table in
+   kyc.js (`KYC.codeIsWord`), which the answers read too (rule 12): such a
+   code beside words that name no district is a place only typed in
+   capitals ("AS delegate", "IN congress") or as its AP abbreviation with
+   the period ("Pa. senate", "Va. house", "La.", "Mo."; never "W.Va."'s
+   "Va.", and not "Ms.", "Mt." or "Co."); alone, or before a district ("al
+   3", "al at large", "me 2"), it is the place however typed; a code that
+   is no word ("tx") and a state's name are places in any case
+   (`testCodeWords` asks every code). Its review found the cost: a reader
+   on a phone types in lower case, and "pa senate", Pennsylvania's two
+   senators before, became 120 profiles led by Padilla with no word of
+   why. Read as words, such a query's results line says what the capitals
+   would name and offers that search ("For Pennsylvania’s Senate seats,
+   type the code in capitals: Search “PA senate”", `KYC.queryHint`); it
+   never reads the query as the place itself.
 
 6. **A filed `$0` is not missing data.** `fmt_curr(0)` returns `"$0.00"`.
 
@@ -3498,10 +3522,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     A word is matched whole: "Proposition 50" is not Proposition 5, and
     "3.5%" in North Carolina's question title is not "Amendment 3". A short
     form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov.", "CNMI"), but in
-    the answers a two-letter code that is a word ("oh", "in", "va") beside
-    another word is a state only typed in capitals (rule 5), and changing
-    only the capitals redraws them; the grid still reads a code typed alone
-    as the state. "DNC" is not North Carolina's courts, "Doe" is not the
+    the answers and the grid alike a two-letter code that is a word ("oh",
+    "in", "va": `KYC.codeIsWord`, one table) beside another word is a state
+    only typed in capitals (rule 5), and changing only the capitals redraws
+    them; the grid still reads a code typed alone, or before a district, as
+    the place.
+    "DNC" is not North Carolina's courts, "Doe" is not the
     Department of Energy (only "DOE" is), and "Mich" alone is a name being
     typed, not Michigan. No fuzzy match: "Govenor of Ohio" names nobody,
     since a near spelling can put one person's office on another (rule 3).

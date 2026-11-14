@@ -730,7 +730,19 @@
   }
 
   function renderLabel(label, html) {
-    label.innerHTML = html;
+    label.innerHTML = html + capitalsNote();
+  }
+
+  /* A code that is a word, not typed in capitals, is read as words (rule
+   * 5): "pa senate" matches words, not Pennsylvania's senators. The line
+   * says what the code in capitals would name and offers that search. */
+  function capitalsNote() {
+    var hint = state.q ? KYC.queryHint(state.q) : null;
+    if (!hint) return "";
+    return '<span class="results-note"> ' + KYC.escapeHtml("For " + hint.label +
+      ", type the code in capitals: ") + '<button type="button" class="link-button" data-capitals="' +
+      KYC.escapeAttr(hint.query) + '">' + KYC.escapeHtml("Search “" + hint.query + "”") +
+      "</button>.</span>";
   }
 
   function gridLabel() {
@@ -1789,6 +1801,19 @@
         apply();
         return;
       }
+      var capitals = event.target.closest("[data-capitals]");
+      if (capitals) {
+        var input = doc.getElementById("searchInput");
+        state.q = capitals.getAttribute("data-capitals");
+        if (input) input.value = state.q;
+        apply();
+        // The button is gone with the line it was in: focus goes back to
+        // the query, but not on a touch screen, where it would open the
+        // keyboard over the cards just drawn.
+        var touch = !!(global.matchMedia && global.matchMedia("(pointer: coarse)").matches);
+        if (input && !touch) input.focus({ preventScroll: true });
+        return;
+      }
       if (!event.target.closest("[data-out-toggle]")) return;
       state.eliminated = state.eliminated === "show" ? "hide" : "show";
       apply();
@@ -1852,21 +1877,14 @@
 
   function initSearch() {
     var input = doc.getElementById("searchInput");
-    var raw = input.value.trim();
     var run = function () {
-      var q = input.value.toLowerCase().trim();
-      if (q === state.q) {
-        // Only the capitals changed: the grid reads the query folded, but
-        // the answers read "IN governor" as Indiana's and "in governor" as
-        // every state's (rule 97), and the results line quotes the query
-        // as typed, so both are drawn again.
-        if (input.value.trim() !== raw) {
-          raw = input.value.trim();
-          if (listDrawn) render();
-        }
-        return;
-      }
-      raw = input.value.trim();
+      // The query as typed: its capitals tell "IN congress" (Indiana's)
+      // from "in congress" (words), in the grid as in the answers (rule 5),
+      // and a copied link keeps them. Every reader folds it itself
+      // (KYC.searchFold). Lowercased here, "as delegate" was American
+      // Samoa's Delegate. A change of capitals alone is a new query.
+      var q = input.value.trim();
+      if (q === state.q) return;
       state.q = q;
       apply();
       // Searching from 800px down the list left the reader among the
@@ -2030,7 +2048,7 @@
      * a throttled phone - was wiped when they arrived (TECH-03). The first
      * draw keeps it when the address names none. */
     var adopted = !listDrawn && !state.q && !!input.value.trim();
-    if (adopted) state.q = input.value.toLowerCase().trim();
+    if (adopted) state.q = input.value.trim();
     state.chamber = params.chamber || "all";
     state.party = params.party || "all";
     state.role = ROLE_TEST[params.role] ? params.role : "all";

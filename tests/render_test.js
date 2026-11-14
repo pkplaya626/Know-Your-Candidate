@@ -13350,10 +13350,243 @@ async function testSearchAndFilters() {
   await settle(50);
   suite("search — a query typed while the page loads is kept (TECH-03)", () => {
     check("the box still holds it", early.D.getElementById("searchInput").value === "Warren");
-    check("and the grid is searched for it", /q=warren/.test(early.window.location.hash) &&
+    check("and the grid is searched for it, as typed", /q=Warren/.test(early.window.location.hash) &&
       /“Warren”/.test(early.D.getElementById("resultsLabel").textContent),
       early.window.location.hash);
   });
+}
+
+/* A postal code that is also a word or a name ("in", "as", "or", "Al") is
+ * a state, beside other words, only typed in capitals (rule 5). The grid
+ * lowercased the query before anything read it, so "as delegate" was
+ * American Samoa's Delegate, "as delegation" its members and "in congress"
+ * Indiana's members of Congress, while the answers above the cards read
+ * them as words. The grid now keeps the query as typed, and the one table
+ * (KYC.codeIsWord) is asked of every code. */
+async function testCodeWords() {
+  const { window, D, errors } = await buildPage("index.html");
+  await settle(50);
+  loadAnswers(window);
+  const KYC = window.KYC;
+  const meta = KYC.meta().states;
+  const codes = Object.keys(meta);
+  const isWord = (c) => !!(KYC.codeIsWord && KYC.codeIsWord(c));
+  const words = codes.filter(isWord);
+  const label = () => D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+  const hashQ = (w) => {
+    const m = /[?&]q=([^&]*)/.exec((w || window).location.hash);
+    return m ? decodeURIComponent(m[1]) : null;
+  };
+  const ask = async (q) => { typeInto(window, D, ""); await settle(160); typeInto(window, D, q); await settle(250); };
+  const src = fs.readFileSync(path.join(SITE, "assets", "kyc-search.js"), "utf8");
+
+  suite("search — the codes that are words are one table, in kyc.js (rule 12)", () => {
+    check("KYC.codeIsWord answers for a code", typeof KYC.codeIsWord === "function");
+    check("the codes shipped wrong are in it, and a code that is no word is not",
+      ["IN", "AS", "OR", "ME", "OH", "AL"].every(isWord) && ["TX", "NY", "CA"].every((c) => !isWord(c)),
+      words.join(" "));
+    check("in either case", isWord("in") && isWord("In"));
+    check("kyc-search.js keeps no table of its own", !/\bAMBIGUOUS\b/.test(src) && /KYC\.codeIsWord\(/.test(src));
+  });
+
+  // Every code, asked of the rule: beside words, a word-code is a place only
+  // in capitals; beside a district, a place however typed; alone, the state.
+  suite("search — every code: beside words only in capitals, a district however typed (rule 5)", () => {
+    const wrong = [];
+    const placed = (q, code, district) => {
+      const p = KYC.queryPlace(q);
+      const ok = !!p && p.state === code && (district ? p.district !== undefined : p.district === undefined);
+      if (!ok) wrong.push(q + " -> " + JSON.stringify(p));
+    };
+    const unplaced = (q) => { const p = KYC.queryPlace(q); if (p) wrong.push(q + " -> " + JSON.stringify(p)); };
+    codes.forEach((c) => {
+      const lower = c.toLowerCase();
+      ["congress", "delegation", "senate", "house", "senators", "representatives", "members of congress"]
+        .forEach((rest) => {
+          if (isWord(c)) unplaced(lower + " " + rest); else placed(lower + " " + rest, c, false);
+          placed(c + " " + rest, c, false);
+        });
+      if (meta[c].delegateTitle) {
+        if (isWord(c)) unplaced(lower + " delegate"); else placed(lower + " delegate", c, false);
+        placed(c + " delegate", c, false);
+      }
+      ["3", "at large", "district 2", "al", "2nd district", "cd 2"].forEach((rest) => {
+        placed(lower + " " + rest, c, true);
+        placed(c + " " + rest, c, true);
+      });
+      [lower + "-3", c + "-3", lower + "3", c + " AT LARGE"].forEach((q) => placed(q, c, true));
+      [lower, c].forEach((q) => placed(q, c, false));
+    });
+    check("the case exists to test: codes that are words, and codes that are not",
+      words.length > 0 && words.length < codes.length, words.join(" "));
+    check("every code, in every form", wrong.length === 0, wrong.length + ": " + wrong.slice(0, 12).join(" | "));
+    check("a state's name beside words is the state in any case",
+      words.every((c) => {
+        const p = KYC.queryPlace(KYC.stateName(c).toLowerCase() + " congress");
+        return p && p.state === c;
+      }));
+  });
+
+  const delegateWord = words.find((c) => meta[c].delegateTitle);
+  const memberWord = words.find((c) => !meta[c].territory && c !== "DC" && (meta[c].house || 0) > 1);
+  const seen = {};
+  for (const q of ["as delegate", "AS delegate", "as delegation", "in congress", "IN congress",
+    delegateWord ? delegateWord.toLowerCase() + " delegate" : "", memberWord ? memberWord.toLowerCase() + " congress" : "",
+    "al 3", "AL at large", "al at large", "tx-3"].filter(Boolean)) {
+    await ask(q);
+    seen[q] = { label: label(), q: hashQ() };
+  }
+  suite("the grid — 'as delegate', 'as delegation', 'in congress' are words; in capitals, places", () => {
+    for (const q of ["as delegate", "as delegation", "in congress"]) {
+      check(`'${q}' is matched as words`, seen[q].label.indexOf(" matching “" + q + "”") !== -1, seen[q].label);
+    }
+    for (const q of [delegateWord && delegateWord.toLowerCase() + " delegate", memberWord && memberWord.toLowerCase() + " congress"].filter(Boolean)) {
+      check(`and '${q}', from the table`, seen[q].label.indexOf(" matching “" + q + "”") !== -1, seen[q].label);
+    }
+    check("'AS delegate' is American Samoa’s seat", /for “AS delegate” \(American Samoa’s Delegate in the U\.S\. House\)/.test(seen["AS delegate"].label),
+      seen["AS delegate"].label);
+    check("'IN congress' is Indiana’s members", /for “IN congress” \(Indiana’s sitting members of Congress\)/.test(seen["IN congress"].label),
+      seen["IN congress"].label);
+    check("the address keeps the query as typed", seen["AS delegate"].q === "AS delegate" &&
+      seen["in congress"].q === "in congress" && seen["IN congress"].q === "IN congress",
+      Object.keys(seen).map((q) => q + "=" + seen[q].q).join(" | "));
+  });
+  suite("the grid — a district is that district however typed", () => {
+    check("'al 3' is AL-3", /\(AL-3\)/.test(seen["al 3"].label), seen["al 3"].label);
+    for (const q of ["AL at large", "al at large"]) {
+      // Read as a seat: Alabama's has none at large, and the line says so.
+      check(`'${q}' is Alabama's at-large seat, read as a seat`,
+        /Alabama has no at-large seat/.test(seen[q].label) || /\(AL-AL\)/.test(seen[q].label), seen[q].label);
+    }
+    check("'tx-3' is TX-3", /\(TX-3\)/.test(seen["tx-3"].label), seen["tx-3"].label);
+  });
+
+  // Only the capitals change: a new query, drawn again and written again.
+  await ask("in congress");
+  const lowered = label();
+  typeInto(window, D, "IN congress");
+  await settle(300);
+  suite("the grid — a change of capitals alone redraws (rule 97)", () => {
+    check("the line is drawn for the new query", label() !== lowered && /“IN congress”/.test(label()) &&
+      /Indiana/.test(label()), label());
+    check("and the address says it", hashQ() === "IN congress", window.location.hash);
+  });
+
+  // The answers read the one table: told that a code is a word, they no
+  // longer read it as a state in lower case, and still do in capitals.
+  const real = KYC.codeIsWord;
+  const asState = KYC.answers.findState(["tx", "governor"], "tx governor");
+  KYC.codeIsWord = (c) => String(c).toLowerCase() === "tx" || real(c);
+  const asWord = KYC.answers.findState(["tx", "governor"], "tx governor");
+  const inCapitals = KYC.answers.findState(["tx", "governor"], "TX governor");
+  KYC.codeIsWord = real;
+  suite("search answers — read the one table", () => {
+    check("'tx governor' names Texas", !!asState && asState.code === "TX", JSON.stringify(asState));
+    check("and, the table saying 'tx' is a word, no state; 'TX governor' still Texas",
+      asWord === null && !!inCapitals && inCapitals.code === "TX", JSON.stringify([asWord, inCapitals]));
+  });
+
+  // A link someone copied keeps its capitals.
+  const links = {};
+  for (const q of ["AS delegate", "as delegate", "IN congress"]) {
+    const p = await buildPage("index.html", { hash: "#/?q=" + encodeURIComponent(q) });
+    await settle(150);
+    links[q] = { input: p.D.getElementById("searchInput").value,
+      label: p.D.getElementById("resultsLabel").textContent.replace(/\s+/g, " "), q: hashQ(p.window) };
+    p.window.close();
+  }
+  suite("the grid — a #/?q= link keeps its capitals", () => {
+    check("'AS delegate' is the box's, the line's and the address's", links["AS delegate"].input === "AS delegate" &&
+      /for “AS delegate” \(American Samoa/.test(links["AS delegate"].label) && links["AS delegate"].q === "AS delegate",
+      JSON.stringify(links["AS delegate"]));
+    check("'as delegate' is words", / matching “as delegate”/.test(links["as delegate"].label), links["as delegate"].label);
+    check("'IN congress' is Indiana's", /\(Indiana’s sitting members of Congress\)/.test(links["IN congress"].label),
+      links["IN congress"].label);
+  });
+
+  // Read as words, a code in lower case before a seat's words is offered in
+  // capitals: "pa senate" was Pennsylvania's senators, and a reader on a
+  // phone types in lower case (the PR review: 2 profiles became 120, led by
+  // Padilla, with no word of why).
+  const hintCode = words.find((c) => !meta[c].territory && c !== "DC");
+  const hintAsked = hintCode.toLowerCase() + " senate";
+  const hintFixed = hintCode + " senate";
+  const hintPlace = KYC.queryLabel(hintFixed);
+  await ask(hintAsked);
+  const hintLine = label();
+  const hintButton = D.querySelector("#resultsLabel [data-capitals]");
+  const noHint = {};
+  for (const q of [hintFixed, "al 3", "Al Green", "tx senate", "AS delegate", "veterans"]) {
+    await ask(q);
+    noHint[q] = !D.querySelector("#resultsLabel [data-capitals]");
+  }
+  await ask(hintAsked);
+  const hintAgain = D.querySelector("#resultsLabel [data-capitals]");
+  if (hintAgain) hintAgain.click();
+  await settle(250);
+  suite("the grid — a code read as words offers its capitals (rule 5)", () => {
+    check("the line names what the capitals would, and offers that search",
+      !!hintPlace && hintLine.indexOf(" matching “" + hintAsked + "”") !== -1 &&
+        hintLine.indexOf("For " + hintPlace + ", type the code in capitals: Search “" + hintFixed + "”.") !== -1 &&
+        !!hintButton && hintButton.tagName === "BUTTON", hintLine);
+    check("never where the query is a place, a district, a name or other words",
+      Object.keys(noHint).every((q) => noHint[q]), JSON.stringify(noHint));
+    check("the button searches the capitals form: the box, the line and the address",
+      D.getElementById("searchInput").value === hintFixed && hashQ() === hintFixed &&
+        label().indexOf("for “" + hintFixed + "” (" + hintPlace + ")") !== -1 &&
+        !D.querySelector("#resultsLabel [data-capitals]"), label() + " / " + window.location.hash);
+  });
+
+  // The AP style abbreviation with its period is the place (rule 97, as
+  // "Calif." is): "Pa. senate" named Pennsylvania's senators before the
+  // grid kept the query as typed. A title, a mount and a company are not.
+  const apWrong = [];
+  for (const [q, code] of [["Pa. senate", "PA"], ["Va. house", "VA"], ["La. senate", "LA"], ["Mo. congress", "MO"],
+    ["pa. senate", "PA"], ["W.Va. senate", "WV"], ["Ms. senate", null], ["Mt. senate", null], ["Co. senate", null],
+    ["Pa senate", null]]) {
+    const p = KYC.queryPlace(q);
+    if (code ? !(p && p.state === code) : !!p) apWrong.push(q + " -> " + JSON.stringify(p));
+  }
+  const apAnswer = KYC.answers.findState(["pa", "governor"], "Pa. governor");
+  const wvAnswer = KYC.answers.findState(["w", "va", "governor"], "W.Va. governor");
+  suite("search — an AP abbreviation with its period is the place", () => {
+    check("in the grid", apWrong.length === 0, apWrong.join(" | "));
+    check("and in the answers, never West Virginia's as Virginia's",
+      !!apAnswer && apAnswer.code === "PA" && !!wvAnswer && wvAnswer.code === "WV",
+      JSON.stringify([apAnswer, wvAnswer]));
+    check("'W.Va.' holds no Virginia in capitals, wherever it stands",
+      KYC.typedInCapitals("Va. governor", "VA") && !KYC.typedInCapitals("W.Va. governor", "VA") &&
+        !KYC.typedInCapitals("va governor W.Va.", "VA"));
+  });
+  check("no errors", errors.length === 0, errors.join("\n"));
+
+  // A state page's own search reads the query as typed too: lowercased,
+  // "IN congress" on Indiana's page was words (the PR review found no check
+  // held it).
+  const st = await buildPage("states/in.html");
+  await settle(80);
+  const stInput = st.D.getElementById("stateSearch");
+  const shownIds = async (q) => {
+    stInput.value = q;
+    stInput.dispatchEvent(new st.window.Event("input", { bubbles: true }));
+    await settle(220);
+    return [...new Set([...st.D.querySelectorAll("#stateContent .card[data-id]")]
+      .filter((c) => !c.closest("[hidden]")).map((c) => c.getAttribute("data-id")))].sort().join(" ");
+  };
+  const byCode = await shownIds("IN congress");
+  const byName = await shownIds("Indiana congress");
+  const asWords = await shownIds("in congress");
+  const seatedAll = byCode.split(" ").filter(Boolean).every((id) => st.window.KYC.seated(st.window.KYC.byId(id)));
+  await shownIds("");
+  suite("states/in.html — the page's search reads the query as typed (rule 5)", () => {
+    check("the case exists: the words find someone the place does not", !!asWords && asWords !== byName,
+      asWords.split(" ").length + " vs " + byName.split(" ").length);
+    check("'IN congress' is Indiana's sitting members, as 'Indiana congress' is",
+      !!byCode && byCode === byName && seatedAll, byCode.split(" ").length + " vs " + byName.split(" ").length);
+    check("'in congress' is matched as words", asWords !== byCode);
+  });
+  check("no errors on the state page", st.errors.length === 0, st.errors.join("\n"));
+  st.window.close();
 }
 
 /* The search answers what a reader types about government (rule 97):
@@ -25428,6 +25661,7 @@ async function testTheJanuaryWords() {
   if (!only || only === "index.html") await testBootSurvivesAFailure();
   if (!only || only === "index.html" || only === "search") await testSearchAndFilters();
   if (!only || only === "index.html" || only === "search") await testSearchAnswers();
+  if (!only || only === "index.html" || only === "search" || only === "codewords") await testCodeWords();
   if (!only || only === "index.html" || only === "search" || only === "followups") await testTerritoryFollowups();
   if (!only || only === "index.html" || only === "states" || only === "followups") await testLongBadgesWrap();
   if (!only || only === "search" || only === "states" || only === "places") await testPlaceSentences();
