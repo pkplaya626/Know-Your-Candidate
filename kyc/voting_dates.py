@@ -39,10 +39,10 @@ null: the state's own links stay beside it.
   (``earlyVoting.except``, ``runoff.earlyVoting.except``: Louisiana's
   "excluding Sunday, November 29") is named, closed, in a quote it stands
   on (``closes``), and every day of a weekday the office closes as a class
-  ("Excluding Sundays") is listed: on Sunday, October 25 the Louisiana,
-  Delaware, South Carolina and Hawaii pages called early voting "Under way"
-  on a day each office had excluded. A day the law closes as a state
-  holiday is named so by two of the office's own quotes together
+  ("Excluding Sundays", "no Saturday") is listed: on Sunday, October 25 the
+  Louisiana, Delaware, South Carolina and Hawaii pages called early voting
+  "Under way" on a day each office had excluded. A day the law closes as a
+  state holiday is named so by two of the office's own quotes together
   (``closes_as_holiday``): one that closes state holidays ("Early voting
   shall not be held on state holidays", Arkansas's State Board of Election
   Commissioners), one that names the day a holiday (its Secretary of
@@ -52,9 +52,12 @@ null: the state's own links stay beside it.
   hours": Arkansas's December 1 runoff, South Dakota's in-person absentee
   voting) says so in the office's words, quoted (``hours_problems``), and
   the page then calls it "Under way, during those hours", never "Under
-  way" alone: on Saturday, November 28 a county clerk's office with no
-  Saturday hours holds no early voting, and no office's words say which
-  offices keep which hours;
+  way" alone: the offices' words close some of its days and leave others
+  to each office's hours (the Board's 2026 Election Coordinator Manual says
+  "Runoff & Special Election early hours are County Clerk office working
+  hours, no Saturday", and of the clerks' hours only what they will be "in
+  most cases"), so a day not listed is not said to be one every office is
+  open;
 - a qualifier that is a claim of its own is said in a quote it stands on
   (``SAID``): a runoff's early voting that may begin before its first date
   ("as soon as possible, but no later than"), an application taken in
@@ -293,16 +296,23 @@ RULES = ("registration.mail.rule", "mail.requestDeadline.rule", "mail.returnDead
 # Louisiana's Sunday, November 29; a day is never inferred from a weekday or
 # a holiday the office does not name (Arkansas's "during regular office
 # hours" names none: its hours are ``HOURS``' words, and only the state
-# holiday its own calendar names is listed, ``closes_as_holiday``).
+# holiday its own calendar names, ``closes_as_holiday``, and the Saturday
+# its State Board of Election Commissioners' words close, "no Saturday",
+# are listed; its Sunday, which no official words close, is not).
 EXCEPT = {"earlyVoting.except": "earlyVoting",
           "runoff.earlyVoting.except": "runoff.earlyVoting"}
 # Where a window runs only in an office's regular hours, the office's words
 # that say so: {field: the window it is about}. Arkansas's December 1 runoff
 # is held "during your county clerk’s regular office hours" (the Secretary of
-# State's voting page; Ark. Code 7-5-418(a)(2)), and the page called it
-# "Under way" on Saturday and Sunday, November 28 and 29, though no source
-# says any clerk's office keeps hours then, and the State Board of Election
-# Commissioners' own manual says "in most cases" none does.
+# State's voting page; Ark. Code 7-5-418(a)(2)), and the page would have
+# called it "Under way" on every day of it, November 24 to 30: on
+# Thanksgiving, which the law closes, on Saturday, November 28, which the
+# State Board of Election Commissioners' 2026 Election Coordinator Manual
+# closes ("Runoff & Special Election early hours are County Clerk office
+# working hours, no Saturday"), and on Sunday, November 29, which no
+# official words close and the same manual leaves out of the hours it says
+# the clerks will keep "in most cases" ("8 a.m. to 4:30 p.m. Tuesday through
+# Friday and Monday before Election Day and, no Saturday hours").
 HOURS = {"earlyVoting.hours": "earlyVoting",
          "runoff.earlyVoting.hours": "runoff.earlyVoting"}
 # Words that put a window's days in an office's regular hours: "during
@@ -335,10 +345,17 @@ _CLOSED = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early v
 _BEFORE = r"(?:exclud(?:e|es|ed|ing)|except(?:ed|ing)?|closed(?: on)?|no early voting on)"
 _NOT_A_RANGE = r"(?![,\s\d]*[–—-]|[,\s\d]*(?:through|to)\b)"
 # A weekday the office closes as a class, beside the words that close it:
-# Hawaii's "(Excluding Sundays)", or "Sundays ... excepted".
+# Hawaii's "(Excluding Sundays)", or "Sundays ... excepted"; or a weekday
+# after "no" that ends its phrase or names its hours or its voting, never
+# one a date follows ("no Saturday", "no Saturday hours": Arkansas's State
+# Board of Election Commissioners, "Runoff & Special Election early hours
+# are County Clerk office working hours, no Saturday").
+_MONTH_OR_DAY = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d)"
 CLOSED_CLASS = re.compile(
     r"\b" + _CLOSED + r"\s+(?:all\s+)?(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b"
-    r"|\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b[^.;()]{0,40}?\b(?:excluded|excepted|closed)\b",
+    r"|\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days\b[^.;()]{0,40}?\b(?:excluded|excepted|closed)\b"
+    r"|\bno\s+(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days?\b"
+    r"(?=\s*(?:(?:early\s+)?(?:voting|hours)\b|[.;)\]]|,(?!\s*" + _MONTH_OR_DAY + r")|$))",
     re.I)
 # A qualifier that is a claim of its own is said in a quote it stands on, as
 # "postmarked" and "received" are: a start that is only the latest day early
@@ -624,10 +641,11 @@ def _day_words(iso):
 
 
 def closed_weekdays(quote):
-    """The weekdays *quote* closes as a class ("Excluding Sundays"), by name."""
+    """The weekdays *quote* closes as a class ("Excluding Sundays", "no
+    Saturday"), by name."""
     out = set()
     for m in CLOSED_CLASS.finditer(str(quote or "")):
-        stem = (m.group(1) or m.group(2)).lower()
+        stem = next(g for g in m.groups() if g).lower()
         out |= {w for w in _WEEKDAYS if w[:-3].lower() == stem}
     return out
 
@@ -636,8 +654,9 @@ def closes(quote, iso):
     """Does *quote* say early voting is not held on the day *iso*: the day
     named beside the words that close it ("excluding Sunday, November 29",
     "Closed Sunday, October 25", "October 25, 2026 – NO EARLY VOTING"), or
-    its weekday closed as a class ("Excluding Sundays")? A day the words do
-    not name is not closed, whatever the calendar makes of it (rule 84)."""
+    its weekday closed as a class ("Excluding Sundays", "no Saturday")? A
+    day the words do not name is not closed, whatever the calendar makes of
+    it (rule 84)."""
     if closes_on_date(quote, iso):
         return True
     return _WEEKDAYS[datetime.date.fromisoformat(iso).weekday()] in closed_weekdays(str(quote or ""))
@@ -774,8 +793,10 @@ def hours_problems(code, record):
     (``OFFICE_HOURS``), found in a quote of its own field or its window's,
     and stands only beside a window. And a quote the window stands on that
     puts its days in an office's regular hours holds the record to saying
-    so: otherwise the page calls every day of the window "Under way",
-    Arkansas's weekend before its December 1 runoff included."""
+    so: otherwise the page would call every day of the window not listed
+    "Under way" alone, Sunday, November 29 before Arkansas's December 1
+    runoff included, which no official words close and the Board's manual
+    leaves out of the hours it says the clerks keep "in most cases"."""
     out = []
     for path, window in HOURS.items():
         hours = get(record, path)

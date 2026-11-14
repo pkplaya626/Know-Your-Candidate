@@ -143,10 +143,14 @@
    *  A window held only in an office's regular hours (the pipeline's "h":
    *  Arkansas's December 1 runoff, "during your county clerk’s regular
    *  office hours") is "Under way, during those hours", the line's quoted
-   *  words, never "Under way" alone: on Saturday, November 28 a clerk's
-   *  office with no Saturday hours holds none, and no source says which
-   *  offices keep which hours. A day it is not held there names no day it
-   *  resumes, for the same reason. */
+   *  words, never "Under way" alone: the offices' words close Thanksgiving
+   *  and Saturday, November 28 (listed, "x"), and of Sunday, November 29
+   *  say only that early voting is in the clerk's regular office hours,
+   *  which the State Board of Election Commissioners' manual says "in most
+   *  cases will be 8 a.m. to 4:30 p.m. Tuesday through Friday and Monday
+   *  before Election Day". A day it is not held there names no day it
+   *  resumes: the next day the office has not excluded may still be one a
+   *  clerk's office keeps no hours on (the Sunday after that Saturday). */
   function when(line, today) {
     if (!line.d) return null;
     if (line.e) {
