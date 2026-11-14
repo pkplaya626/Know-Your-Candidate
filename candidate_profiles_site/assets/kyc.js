@@ -3097,8 +3097,8 @@
    * the others ("tx", "ny", "gu", "md") are no word a reader types. A code
    * whose AP style abbreviation is itself and a period ("Pa.", "Va.",
    * "La.", "Mo.") is the place written so, as "Calif." is (rule 97): no
-   * word is written that way. "Ms.", "Mt." and "Co." are a title, a mount
-   * and a company, and are not here. */
+   * word is written that way. The period forms "Ms.", "Mt." and "Co." are
+   * a title, a mount and a company, so those codes carry none. */
   var CODE_WORDS = { in: 1, or: 1, me: 1, oh: 1, hi: 1, ok: 1, de: 1, al: 1, la: "La.", ma: 1,
     mo: "Mo.", id: 1, as: 1, pa: "Pa.", co: 1, ne: 1, va: "Va.", ms: 1, mt: 1, ct: 1 };
 
@@ -3303,6 +3303,14 @@
    *  holds or runs for. The count of seats is the build's (one at large
    *  answers "1" too); a state with none listed concludes nothing. */
   function seatNote(place) {
+    // "AS senate": a place with no senator has no Senate seats to name, and
+    // the line, and the grid's offer of the capitals form, said "American
+    // Samoa’s Senate seats" over nobody (the PR #252 second read). The count
+    // is the build's; a place it does not hold concludes nothing.
+    if (place && place.chamber === "Senate" && place.district === undefined) {
+      var info = (meta().states || {})[place.state];
+      return info && info.senators === 0 ? placeStart(place.state) + " has no seat in the U.S. Senate." : "";
+    }
     if (!place || place.district === undefined || place.any) return "";
     var seats = houseSeats(place.state);
     if (!seats) return "";
@@ -3325,6 +3333,7 @@
         ? "AL" : String(place.district);
       return place.any ? "district " + seat + " in every state" : place.state + "-" + seat;
     }
+    if (seatNote(place)) return "";
     var name = stateName(place.state);
     // In a sentence the place is named as one names it (rule 75): "the U.S.
     // Virgin Islands’ sitting House members", never "U.S. Virgin Islands’s".

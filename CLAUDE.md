@@ -221,7 +221,7 @@ python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, 
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 3251 tests, no dependencies
-npm install && npm test                       # 4947 real-DOM checks (needs jsdom)
+npm install && npm test                       # 4957 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -270,9 +270,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
    query as typed, called the same words words. A first fix asked
    `parsePlace` for capitals and lost "AL at large", typed in capitals, to
    the lowercasing. The grid keeps the query as typed, in its state and its
-   address (`#/?q=` keeps its capitals), and so does a state page's own
-   search; every reader folds it itself, and a change of capitals alone is
-   a new query. The codes that are also words or names are one table in
+   address (`#/?q=` keeps its capitals), and a state page's own search
+   reads it as typed too; every reader folds it itself, and a change of
+   capitals alone is a new query. The codes that are also words or names are one table in
    kyc.js (`KYC.codeIsWord`), which the answers read too (rule 12): such a
    code beside words that name no district is a place only typed in
    capitals ("AS delegate", "IN congress") or as its AP abbreviation with
@@ -286,7 +286,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
    why. Read as words, such a query's results line says what the capitals
    would name and offers that search ("For Pennsylvania’s Senate seats,
    type the code in capitals: Search “PA senate”", `KYC.queryHint`); it
-   never reads the query as the place itself.
+   never reads the query as the place itself. Its second read found three
+   more, each now held by a check. A state page has no results line to
+   say so, and "oh delegation" hid all 33 of Ohio's cards: on a state's own
+   page its own code, in any case, is that state, the page holding no one
+   else, while another state's code that is a word stays a word. The hint
+   offered "American Samoa’s Senate seats", which do not exist: a place
+   the build counts no senator for has none to name, and the line says
+   "American Samoa has no seat in the U.S. Senate", typed in capitals or
+   not. And it was offered where the reader's own filters or view (the
+   House chip, the Senate view for a delegate, the races view) leave the
+   capitals form nobody: it is offered only where that search, under them,
+   shows someone, and its button keeps them.
 
 6. **A filed `$0` is not missing data.** `fmt_curr(0)` returns `"$0.00"`.
 
@@ -3524,7 +3535,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov.", "CNMI"), but in
     the answers and the grid alike a two-letter code that is a word ("oh",
     "in", "va": `KYC.codeIsWord`, one table) beside another word is a state
-    only typed in capitals (rule 5), and changing only the capitals redraws
+    only typed in capitals or as its AP abbreviation ("Pa. governor", rule
+    5), and changing only the capitals redraws
     them; the grid still reads a code typed alone, or before a district, as
     the place.
     "DNC" is not North Carolina's courts, "Doe" is not the

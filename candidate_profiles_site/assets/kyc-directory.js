@@ -738,11 +738,33 @@
    * says what the code in capitals would name and offers that search. */
   function capitalsNote() {
     var hint = state.q ? KYC.queryHint(state.q) : null;
-    if (!hint) return "";
+    if (!hint || !finds(hint.query)) return "";
     return '<span class="results-note"> ' + KYC.escapeHtml("For " + hint.label +
       ", type the code in capitals: ") + '<button type="button" class="link-button" data-capitals="' +
       KYC.escapeAttr(hint.query) + '">' + KYC.escapeHtml("Search “" + hint.query + "”") +
       "</button>.</span>";
+  }
+
+  /* Whether *query* would show anyone in this view under the reader's other
+   * filters: offered under "House" only, or in the races view, the
+   * capitals form of "pa senate" found nobody (the PR #252 second read). */
+  function finds(query) {
+    var kept = { q: state.q, scores: scores };
+    state.q = query;
+    scores = new Map();
+    try {
+      // The Senate view counts whom its seats show (a House delegate passes
+      // its filter and sits under no seat).
+      if (state.view === "senate" && KYC.senate) {
+        return KYC.senate.render(data, races, { matches: senateMatches,
+          showOut: state.eliminated === "show" }).people > 0;
+      }
+      var found = data.filter(matchesFilters);
+      return state.view === "race" ? racesShown(found).length > 0 : found.length > 0;
+    } finally {
+      state.q = kept.q;
+      scores = kept.scores;
+    }
   }
 
   function gridLabel() {
@@ -841,9 +863,11 @@
       showOut: state.eliminated === "show",
     });
     if (view.people) {
-      renderLabel(label, KYC.escapeHtml("Showing " + view.people.toLocaleString() +
-        " profiles across " + view.seats.toLocaleString() + " Senate seat" +
-        (view.seats === 1 ? "" : "s") + narrowed() + (zipWords() ? "." + zipWords() : "")) +
+      // A sentence that ends: a screen reader heard the line and the note
+      // after it as one (the PR #252 second read).
+      renderLabel(label, KYC.escapeHtml("Showing " + plural(view.people, "profile", "profiles") +
+        " across " + view.seats.toLocaleString() + " Senate seat" +
+        (view.seats === 1 ? "" : "s") + narrowed() + "." + zipWords()) +
         wordsNote());
     } else {
       renderLabel(label, emptyLabel(officials, answers));
@@ -1808,10 +1832,16 @@
         if (input) input.value = state.q;
         apply();
         // The button is gone with the line it was in: focus goes back to
-        // the query, but not on a touch screen, where it would open the
-        // keyboard over the cards just drawn.
+        // the query, or on a touch screen, where that would open the
+        // keyboard over the cards just drawn, to the line that now says
+        // what they are.
         var touch = !!(global.matchMedia && global.matchMedia("(pointer: coarse)").matches);
-        if (input && !touch) input.focus({ preventScroll: true });
+        if (input && !touch) {
+          input.focus({ preventScroll: true });
+        } else {
+          label.setAttribute("tabindex", "-1");
+          label.focus({ preventScroll: true });
+        }
         return;
       }
       if (!event.target.closest("[data-out-toggle]")) return;

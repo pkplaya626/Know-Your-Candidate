@@ -13524,7 +13524,22 @@ async function testCodeWords() {
   const hintAgain = D.querySelector("#resultsLabel [data-capitals]");
   if (hintAgain) hintAgain.click();
   await settle(250);
+  const focusDesk = D.activeElement && D.activeElement.id;
+  // On a touch screen the box would open the keyboard over the new cards:
+  // focus goes to the line that says what they are (the PR #252 second read).
+  const realMedia = window.matchMedia;
+  window.matchMedia = (q) => ({ matches: /pointer: coarse/.test(q), media: q,
+    addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
+  await ask(hintAsked);
+  const touchButton = D.querySelector("#resultsLabel [data-capitals]");
+  if (touchButton) touchButton.click();
+  await settle(250);
+  const focusTouch = D.activeElement && D.activeElement.id;
+  window.matchMedia = realMedia;
   suite("the grid — a code read as words offers its capitals (rule 5)", () => {
+    check("after the click, focus is in the box, or on a touch screen on the line",
+      focusDesk === "searchInput" && !!touchButton && focusTouch === "resultsLabel",
+      focusDesk + " / " + focusTouch);
     check("the line names what the capitals would, and offers that search",
       !!hintPlace && hintLine.indexOf(" matching “" + hintAsked + "”") !== -1 &&
         hintLine.indexOf("For " + hintPlace + ", type the code in capitals: Search “" + hintFixed + "”.") !== -1 &&
@@ -13560,33 +13575,151 @@ async function testCodeWords() {
   });
   check("no errors", errors.length === 0, errors.join("\n"));
 
+  // A place with no senator has no Senate seats to name: "AS senate" read
+  // "American Samoa’s Senate seats", and the hint offered that to every
+  // reader typing "as senate" (the PR #252 second read).
+  const noSenate = codes.filter((c) => meta[c].senators === 0);
+  const senateWrong = [];
+  codes.forEach((c) => {
+    const want = meta[c].senators === 0 ? KYC.placeStart(c) + " has no seat in the U.S. Senate." : "";
+    if (KYC.queryNote(c + " senate") !== want || (want && KYC.queryLabel(c + " senate"))) {
+      senateWrong.push(c + ": " + KYC.queryLabel(c + " senate") + " / " + KYC.queryNote(c + " senate"));
+    }
+    if (want && isWord(c) && KYC.queryHint(c.toLowerCase() + " senate")) senateWrong.push(c + ": hint offered");
+  });
+  suite("search — a place with no senator has no Senate seats to name", () => {
+    check("the case exists", noSenate.length > 0 && noSenate.some(isWord), noSenate.join(" "));
+    check("every code: the note says so, no seats are named, and nothing is offered",
+      senateWrong.length === 0, senateWrong.slice(0, 6).join(" | "));
+  });
+
+  // The hint in every view the line is drawn in, under the reader's other
+  // filters, which the button keeps; never where those filters leave the
+  // capitals form nobody. An empty line is made from the rule: a word-code
+  // and seat phrase whose words match no one and whose capitals form does.
+  // Asked of the profiles' own words too, which a page opened on a link
+  // with ?q= loads at once.
+  if (!KYC.wordsHeld()) await KYC.loadWords();
+  const scoreAll = (q) => KYC.people().filter((p) => KYC.queryScore(p, q) >= 0).length;
+  let emptyAsk = null;
+  for (const c of words.filter((x) => meta[x].senators > 0)) {
+    for (const rest of ["senators", "delegation", "representatives", "congressmen"]) {
+      const lower = c.toLowerCase() + " " + rest;
+      if (!emptyAsk && KYC.queryHint(lower) && scoreAll(lower) === 0 && scoreAll(KYC.queryHint(lower).query) > 0) {
+        emptyAsk = lower;
+      }
+    }
+  }
+  const inRace = new Set();
+  KYC.races().forEach((r) => r.incumbentIds.concat(r.candidateIds).forEach((id) => inRace.add(id)));
+  const noRaceCode = words.find((c) => meta[c].senators > 0 && KYC.queryHint(c.toLowerCase() + " senate") &&
+    scoreAll(c + " senate") > 0 &&
+    !KYC.people().some((p) => inRace.has(p.id) && KYC.queryScore(p, c + " senate") >= 0));
+  const senators = KYC.people().filter((p) => KYC.seated(p) && p.state === hintCode && /Senate/.test(p.chamber));
+  const party = senators.length && /Democrat/.test(senators[0].party) ? "Democrat" : "Republican";
+  const views = {};
+  for (const [key, hash] of [
+    ["senate view", "#/?view=senate&q=" + encodeURIComponent(hintAsked)],
+    ["races view", "#/?view=race&q=" + encodeURIComponent(hintAsked)],
+    ["party", "#/?party=" + party + "&q=" + encodeURIComponent(hintAsked)],
+    // A delegate under the Senate filter: a place with a delegate has no
+    // senator (rule 5's table, the build's counts), so nobody, whatever the day.
+    ["Senate only", delegateWord ? "#/?chamber=Senate&q=" + encodeURIComponent(delegateWord.toLowerCase() + " delegate") : ""],
+    // The races view lists races: a state whose capitals form finds nobody
+    // in any race (its seats not up, nobody running for one) has nothing to
+    // offer there.
+    ["races view, no race", noRaceCode ? "#/?view=race&q=" + encodeURIComponent(noRaceCode.toLowerCase() + " senate") : ""],
+    // The Senate view lets a House delegate past its filter and draws them
+    // under no seat: nothing to offer there either.
+    ["Senate view, a delegate", delegateWord ? "#/?view=senate&q=" + encodeURIComponent(delegateWord.toLowerCase() + " delegate") : ""],
+    ["empty line", emptyAsk ? "#/?q=" + encodeURIComponent(emptyAsk) : ""],
+  ]) {
+    if (!hash) continue;
+    const p = await buildPage("index.html", { hash });
+    await settle(400);
+    const line = p.D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+    const button = p.D.querySelector("#resultsLabel [data-capitals]");
+    let after = null;
+    if (button) {
+      button.click();
+      await settle(250);
+      after = { hash: decodeURIComponent(p.window.location.hash), line: p.D.getElementById("resultsLabel").textContent };
+    }
+    views[key] = { line, button: !!button, after };
+    p.window.close();
+  }
+  const keeps = (v, part) => !!v && !!v.after && v.after.hash.indexOf(part) !== -1 &&
+    v.after.hash.indexOf("q=" + hintFixed) !== -1;
+  suite("the grid — the hint in every view, under the reader's filters", () => {
+    check("the Senate view offers it, as a sentence that ends, and the click keeps the view",
+      views["senate view"].button && /Senate seats? matching “[^”]+”\. /.test(views["senate view"].line) &&
+        keeps(views["senate view"], "view=senate"), JSON.stringify(views["senate view"]));
+    check("so does the races view where the capitals form's people are in a race, or it offers nothing",
+      views["races view"].button ? keeps(views["races view"], "view=race") &&
+        !/Showing 0 races/.test(views["races view"].after.line) : !/type the code in capitals/.test(views["races view"].line),
+      JSON.stringify(views["races view"]));
+    check("but not where the capitals form's people are in no race", !noRaceCode || !views["races view, no race"].button,
+      noRaceCode + ": " + JSON.stringify(views["races view, no race"]));
+    check("a party filter is kept by the click", views.party.button && keeps(views.party, "party=" + party),
+      JSON.stringify(views.party));
+    check("under a filter that leaves the capitals form nobody, nothing is offered",
+      !!delegateWord && !!KYC.queryHint(delegateWord.toLowerCase() + " delegate") && !views["Senate only"].button &&
+        !views["Senate view, a delegate"].button,
+      views["Senate only"] && views["Senate only"].line + " / " + views["Senate view, a delegate"].line);
+    check("the empty line offers it too", !emptyAsk || (views["empty line"].button &&
+      /^No profiles/.test(views["empty line"].line.trim())), emptyAsk + ": " + JSON.stringify(views["empty line"]));
+  });
+
   // A state page's own search reads the query as typed too: lowercased,
   // "IN congress" on Indiana's page was words (the PR review found no check
-  // held it).
-  const st = await buildPage("states/in.html");
-  await settle(80);
-  const stInput = st.D.getElementById("stateSearch");
-  const shownIds = async (q) => {
-    stInput.value = q;
-    stInput.dispatchEvent(new st.window.Event("input", { bubbles: true }));
-    await settle(220);
-    return [...new Set([...st.D.querySelectorAll("#stateContent .card[data-id]")]
-      .filter((c) => !c.closest("[hidden]")).map((c) => c.getAttribute("data-id")))].sort().join(" ");
+  // held it). Its own code, in any case, is the page's state; another
+  // state's code that is a word is a word (the PR #252 second read: "oh
+  // delegation" hid every card on Ohio's page).
+  const statePage = async (st) => {
+    const page = await buildPage("states/" + st.toLowerCase() + ".html");
+    await settle(80);
+    const input = page.D.getElementById("stateSearch");
+    const shownIds = async (q) => {
+      input.value = q;
+      input.dispatchEvent(new page.window.Event("input", { bubbles: true }));
+      await settle(220);
+      return [...new Set([...page.D.querySelectorAll("#stateContent .card[data-id]")]
+        .filter((c) => !c.closest("[hidden]")).map((c) => c.getAttribute("data-id")))].sort().join(" ");
+    };
+    return { page, shownIds };
   };
-  const byCode = await shownIds("IN congress");
-  const byName = await shownIds("Indiana congress");
-  const asWords = await shownIds("in congress");
-  const seatedAll = byCode.split(" ").filter(Boolean).every((id) => st.window.KYC.seated(st.window.KYC.byId(id)));
-  await shownIds("");
+  const own = words.find((c) => !meta[c].territory && c !== "DC" && (meta[c].house || 0) > 1 && c !== "IN");
+  const ownPage = await statePage(own);
+  const ownByName = await ownPage.shownIds(KYC.stateName(own) + " delegation");
+  const ownLower = await ownPage.shownIds(own.toLowerCase() + " delegation");
+  const ownTitle = await ownPage.shownIds(own[0] + own[1].toLowerCase() + " delegation");
+  const ownCaps = await ownPage.shownIds(own + " delegation");
+  const otherLower = await ownPage.shownIds("in congress");
+  const otherCaps = await ownPage.shownIds("IN congress");
+  const ownSeated = ownByName.split(" ").filter(Boolean).every((id) =>
+    ownPage.page.window.KYC.seated(ownPage.page.window.KYC.byId(id)));
+  await ownPage.shownIds("");
+  suite(`states/${own.toLowerCase()}.html — its own code is its state, in any case (rule 5)`, () => {
+    check(`'${own.toLowerCase()} delegation', '${own} delegation' and its title case are the page's members, as its name is`,
+      !!ownByName && ownSeated && ownLower === ownByName && ownTitle === ownByName && ownCaps === ownByName,
+      [ownByName, ownLower, ownTitle, ownCaps].map((s) => s.split(" ").filter(Boolean).length).join(" / "));
+    check("another state's code that is a word is a word: 'in congress' is not Indiana's",
+      !!otherLower && otherLower !== otherCaps, otherLower.split(" ").length + " vs " + otherCaps.split(" ").length);
+  });
+  check("no errors on the state page", ownPage.page.errors.length === 0, ownPage.page.errors.join("\n"));
+  ownPage.page.window.close();
+
+  const inPage = await statePage("IN");
+  const byCode = await inPage.shownIds("IN congress");
+  const byName = await inPage.shownIds("Indiana congress");
+  const seatedAll = byCode.split(" ").filter(Boolean).every((id) => inPage.page.window.KYC.seated(inPage.page.window.KYC.byId(id)));
+  await inPage.shownIds("");
   suite("states/in.html — the page's search reads the query as typed (rule 5)", () => {
-    check("the case exists: the words find someone the place does not", !!asWords && asWords !== byName,
-      asWords.split(" ").length + " vs " + byName.split(" ").length);
     check("'IN congress' is Indiana's sitting members, as 'Indiana congress' is",
       !!byCode && byCode === byName && seatedAll, byCode.split(" ").length + " vs " + byName.split(" ").length);
-    check("'in congress' is matched as words", asWords !== byCode);
   });
-  check("no errors on the state page", st.errors.length === 0, st.errors.join("\n"));
-  st.window.close();
+  check("no errors on Indiana's page", inPage.page.errors.length === 0, inPage.page.errors.join("\n"));
+  inPage.page.window.close();
 }
 
 /* The search answers what a reader types about government (rule 97):
