@@ -5875,6 +5875,21 @@ async function testHeldSeatWords() {
       }));
       check("no card, hover or status word of any profile runs a label or an ISO day into its words",
         off.length === 0, off.slice(0, 5).join(" | ") || `${people.length} profiles`);
+      // Every race's head, whose hovers say the same of a race: its
+      // "Awaiting result" read "The results this site last read, on
+      // 2026-11-05, had not marked a winner" over the race.
+      const headOff = [];
+      let heads = 0;
+      KYC.races().forEach((race) => KYC.cards.raceBadgeItems(race).forEach((b) => {
+        // An item drawn as markup (the outcome's), or as words and a hover.
+        (b.html ? badgesOf(b.html) : [{ title: b.title || "" }]).forEach((x) => {
+          heads += 1;
+          const why = wrongIn(x.title);
+          if (why) headOff.push(`${race.id}, ${b.key}'s hover: ${why}: ${x.title.slice(0, 140)}`);
+        });
+      }));
+      check("no race head's hover runs a label or an ISO day into its words",
+        heads > 400 && headOff.length === 0, headOff.slice(0, 5).join(" | ") || `${heads} badges`);
       // B: every run's hover names the seat held in its words, and its day.
       const movers = people.filter((p) => !p.isCandidate && p.contestLabel);
       const named = movers.filter((p) => {
@@ -11913,7 +11928,7 @@ async function testElectionNight() {
     const o = head(open);
     const badge = o && [...o.querySelectorAll(".badge")].find((b) => /Awaiting result/.test(b.textContent));
     check("a race nobody has marked is awaiting a result, as of the last read",
-      !!badge && /2026-11-05/.test(badge.getAttribute("title")), o && o.textContent);
+      !!badge && /Nov\. 5, 2026/.test(badge.getAttribute("title")), o && o.textContent);
     const waiting = open.incumbentIds.concat(open.candidateIds).map(KYC.byId)
       .filter((p) => p && p.raceStatus === "nominee");
     check("its nominees no longer read On the November ballot, as if nothing had happened",
@@ -11927,7 +11942,7 @@ async function testElectionNight() {
     const hover = (KYC.cards.raceBadge(lineHolder).match(/title="([^"]*)"/) || [])[1] || "";
     delete lineHolder.ballotLine;
     check("a nominee on another line still says when the results were last read",
-      /Speak The Truth line/.test(hover) && /2026-11-05/.test(hover) && /had not marked/.test(hover),
+      /Speak The Truth line/.test(hover) && /Nov\. 5, 2026/.test(hover) && /had not marked/.test(hover),
       hover);
     check("Won by appears once per called race, and nowhere else",
       D.querySelectorAll(".race-head").length > 0 &&
@@ -12784,7 +12799,7 @@ async function testGeorgiaRunoffPast() {
     check("the race's head says so, and its hover names the two and the last read",
       !!badge && !/Going to a runoff/.test(h.textContent) &&
         /December 1 general election runoff/.test(badge.getAttribute("title")) &&
-        /2026-12-04/.test(badge.getAttribute("title")) &&
+        /Dec\. 4, 2026/.test(badge.getAttribute("title")) &&
         two.every((p) => badge.getAttribute("title").indexOf(p.name) !== -1),
       h && h.textContent);
     const long = KYC.standing(two[0], "long");
@@ -12792,7 +12807,7 @@ async function testGeorgiaRunoffPast() {
       "not a November result", KYC.standing(two[0], "short").label === "Awaiting runoff result",
       KYC.standing(two[0], "short").label);
     check("the profile's words: ran in it, awaiting result, as of the last read, credited",
-      long.label === LONG && /had not marked a winner/.test(long.title) && /2026-12-04/.test(long.title) &&
+      long.label === LONG && /had not marked a winner/.test(long.title) && /Dec\. 4, 2026/.test(long.title) &&
         /Wikipedia/.test(long.title), long.label + " / " + long.title);
     const card = cardOf(after.D, race, two[0]);
     if (card) card.click();

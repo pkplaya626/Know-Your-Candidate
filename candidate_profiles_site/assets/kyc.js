@@ -4682,6 +4682,7 @@
     contestLine: contestLine,
     seatInWords: seatInWords,
     heldSeatInWords: heldSeatInWords,
+    resultsReadOn: resultsReadOn,
     movedFrom: movedFrom,
     sitsIn: sitsIn,
     cycleYears: cycleYears,
