@@ -38,6 +38,7 @@ from . import vacancies as vacancies_mod
 from . import ballot_measures as measures_mod
 from . import local_measures as local_measures_mod
 from . import search_index as search_index_mod
+from . import guide_sources as guide_sources_mod
 from . import official_share
 
 
@@ -321,7 +322,11 @@ def _build(args):
                           guides=guide_photos.load_cache(args.root),
                           photo_manifest=photocopies.load(args.root),
                           legislators=_legislators(args.root),
-                          officers=_officer_cache(args.root))
+                          officers=_officer_cache(args.root),
+                          # Whether the guide's sources still open: warnings
+                          # only (kyc/guide_sources.py, rule 48).
+                          guide_sources=guide_sources_mod.load_cache(args.root),
+                          root=args.root)
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -2016,6 +2021,34 @@ def _local_sites(args):
     return 0
 
 
+def _guide_sources(args):
+    """Open each source the guide, its maps and the 2026 ballot table cite, and
+    the statutes the page code links, and record what each answered
+    (kyc/guide_sources.py, rule 48). A source that cannot be read concludes
+    nothing and stops nothing (rule 8): the command never fails on another
+    site's answer."""
+    cited = guide_sources_mod.citations(args.root)
+    if args.check:
+        cache = guide_sources_mod.load_cache(args.root)
+    else:
+        budget = args.max_minutes * 60 if args.max_minutes else None
+        cache = guide_sources_mod.check_all(args.root, workers=args.workers, limit=args.limit,
+                                            refresh=args.refresh, max_seconds=budget)
+    counts = guide_sources_mod.summary(cache, cited)
+    print(f"[ok] {sum(counts.values())} of {len(cited)} cited addresses in "
+          f"{guide_sources_mod.CACHE_PATH}: " + ", ".join(
+              f"{counts[v]} {v}" for v in guide_sources_mod.VERDICTS if counts.get(v)))
+    unread = guide_sources_mod.unread_hosts(cache, cited)
+    if unread:
+        print("     could not be read (concludes nothing): " +
+              ", ".join(f"{host} {n}" for host, n in unread.items()))
+    for _level, code, message, detail in guide_sources_mod.problems(cache, cited):
+        print(f"  [warn] {code}: {message}")
+        for item in detail[:5]:
+            print(f"           - {item}")
+    return 0
+
+
 def _localgov(args):
     """Every local government, county by county, checked against the
     published table before anything is written (kyc/localgov.py)."""
@@ -3026,6 +3059,22 @@ def build_parser():
     local.add_argument("--states", default="",
                        help="only these states, comma-separated codes")
 
+    sources_cmd = add("guidesources", help="open each source the guide, its maps and the 2026 "
+                                           "ballot table cite, and the statutes the page code "
+                                           "links; record what each answered "
+                                           "(data/guide_sources.json)")
+    sources_cmd.add_argument("--check", action="store_true",
+                             help="report the committed cache; make no network call")
+    sources_cmd.add_argument("--workers", type=int, default=8,
+                             help="hosts read at once (default 8); one request at a time per host")
+    sources_cmd.add_argument("--limit", type=int, default=None,
+                             help="open at most this many addresses this run, oldest first")
+    sources_cmd.add_argument("--max-minutes", type=float, default=None,
+                             help="open no new address after this many minutes, then save and "
+                                  "stop (it resumes); keep it well inside a CI step's time limit")
+    sources_cmd.add_argument("--refresh", action="store_true",
+                             help="open every address again, not only those due")
+
     courts_cmd = add("courts", help="every state's highest court and its members, from the courts")
     courts_cmd.add_argument("--check", action="store_true",
                             help="report the committed cache; make no network call")
@@ -3207,6 +3256,8 @@ def main(argv=None):
         return _statelegs(args)
     if args.command == "localgov":
         return _localgov(args)
+    if args.command == "guidesources":
+        return _guide_sources(args)
     if args.command == "executives":
         return _executives(args)
     if args.command == "federal":

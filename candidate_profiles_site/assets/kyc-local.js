@@ -89,6 +89,9 @@
     elsewhere: "the web address the Census listed now redirects to another site, whose title " +
       "and address do not name it",
     business: "the web address the Census listed now redirects to a business's site",
+    // Only a person's look (overrides.BLOCKED_LOCAL_HOSTS): the lapsed
+    // domain's own host serving someone else's pages, a content farm.
+    unrelated: "the web address the Census listed now shows an unrelated site, which says nothing of it",
   };
 
   function day(iso) {

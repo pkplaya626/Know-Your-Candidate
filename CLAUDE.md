@@ -58,6 +58,7 @@ data/political_history.json ──┤   (public offices held: congress-legislato
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
+data/guide_sources.json     ──┤   (each source the guide and the ballot table cite, opened: guidesources; rule 48)
 data/members.json           ──┤   (members' platforms, education, careers, offices: members)
 data/roll_calls.json        ──┤   (every roll call of the Congress: House Clerk, Senate LIS; votes)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
@@ -147,10 +148,16 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
   `seat_history.json`, `outside_spending.json`
   and `departed_members.json` are caches, but
-  they *are* hand-editable. `stategov.js` is generated from the last five,
-  with `kyc/ballot2026.py`: which state offices and legislative seats are on
+  they *are* hand-editable. `stategov.js` is generated from `executives.json`,
+  `partisan_composition.json`, `state_legislators.json`,
+  `statewide_officers.json`, `courts.json`, `statewide_candidates.json`,
+  `statewide_photos.json`, `guide_photos.json`, `photo_copies.json`,
+  `political_history.json` and `primary_results.json` (the day the results
+  were read), with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
-  `members.json` (`members`, rule 86) is a hand-editable cache too.
+  `members.json` (`members`, rule 86) is a hand-editable cache too, and so
+  is `guide_sources.json` (`guidesources`, rule 48), which no page reads:
+  only the build's warnings.
   `roll_calls.json`, written by `votes`, is a cache too; `data/votes/*.js`
   is generated from it alone.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
@@ -193,6 +200,8 @@ python build_profile_site.py statelegs        # every state legislator (Open Sta
 python build_profile_site.py legphotos       # their portraits Open States lacks, from each legislature's own records
 python build_profile_site.py localgov         # every local government (Census listing), checked
 python build_profile_site.py localgov --check-sites  # open every listed local website; resumes (rule 78)
+python build_profile_site.py guidesources     # open every source the guide, its maps and the ballot table cite (rule 48)
+                                              # --max-minutes N: nothing new opened after N minutes; the rest keep their last read
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster, and its justices' photographs
@@ -220,12 +229,12 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3302 tests, no dependencies
+python -m unittest discover tests             # 3363 tests, no dependencies
 npm install && npm test                       # 5011 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `executives`,
+`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `guidesources`, `executives`,
 `officers`, `courts`, `ballotphotos`, `guidephotos`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside`, `photocopies` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
@@ -1102,6 +1111,57 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     by the date its title gives ("Memorandum of July 15, 2025"), else by its
     whole title; the first version knew orders and National Security
     memoranda alone.
+    A source cited is a source that opens, and only a read says so: no gate
+    opened an external link, and some eighty sources are the Law Revision
+    Counsel's `uscode.house.gov/us/usc/tN/sM/` pages, on a site that says it
+    runs in a "temporary format" and whose previous `view.xhtml` addresses
+    already answer 404 (PR #255's review). `guidesources`
+    (`kyc/guide_sources.py`) opens every address the guide's sections and
+    their words, its maps, the 2026 ballot table and the page code's statute
+    links cite - a GET as this project (rule 103; HEAD lies, rule 51), the
+    first bytes only, one request at a time per host - and keeps each one's
+    day and answer in `data/guide_sources.json`, saved at the end of a run;
+    one that opened is opened again after six days, a missing or unread one
+    on every run. Only
+    404 or 410 on two reads on different days, or a host gone here and at
+    both public resolvers (rule 35), is `gone`; a page that is not the source
+    on two days (titled "Page Not Found", a deep link sent to its own site's
+    front page or another's - asked of where the redirect really ended, so
+    another host's "/index.php?section=5" is a page - a lapsed domain's
+    marketplace, parking, "/lander", for-sale (a title "ncsl.org is for
+    sale" too) or expired page read by localsites' own tests, rules 35 and
+    39, gambling spam in its title or headings, on another host or in spam's
+    own words throughout - never a betting word in a law's text, since a
+    constitution on online casinos says "sportsbooks" as a slot site does -
+    or a section's address - the U.S. Code's
+    `uscode.house.gov/us/usc/tN/sM/`, the Code of Virginia's
+    `.../section24.2-214/`, its ":1" sections apart - whose page's title
+    names another section) is `elsewhere`. A 403, 429, 5xx, timeout, bot wall or challenge concludes
+    nothing (rule 8): constitution.congress.gov answers the reader with
+    Cloudflare's "Just a moment...", and eCFR sends it to the Federal
+    Register's "Request Access" page, never its front page. Nor does a 200
+    that is not a page of words: a server's error or maintenance page - the
+    first cache called Illinois's CandidatesFiled.aspx, the ballot table's
+    source for its attorney general and secretary of state, "ok" over "Error
+    Display: An error has occurred", and Louisiana's Law.aspx answers a bad
+    id under its usual title, the error read in its headings or its
+    `<main>` however long the navigation around it - a sign-in page, a web server's placeholder, an answer whose first
+    bytes are not the file its address or Content-Type names (a "Request
+    Rejected" page served as a PDF, rule 52), and a page with almost no
+    text (`officers.says_nothing`) where no deep link was sent to a front
+    page: served the script shell uscode.house.gov has served before, the
+    first reader would have called all eighty-one Code sources `elsewhere`.
+    "404" in a title is "not found" only at its start, never as a number
+    there ("404.020 Definitions"), or beside "error" or "not found" ("RCW
+    29A.04.404: Definitions" is a statute). The build warns on each gone or
+    elsewhere source by its address, names and every section that cites it,
+    on one never opened, on one not looked at in 30 days, and on one "not
+    confirmed since" a verdict 30 days old while every read since concluded
+    nothing - a source confirmed once and turned away ever after, which read
+    "ok" for good (`validate.check_guide_sources`): warnings, never errors,
+    since a refresh must not fail on someone else's site. A source no read
+    has opened is counted by host on an info line, its cache claiming
+    nothing.
     Who holds an office is never typed in: the Congress page renders
     committee leads from the rosters, and a committee's minority lead is
     found by the seat's `side`, not its title. The 2026-10-17 audit found
@@ -2294,7 +2354,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     slot online" on the Keansburg schools' blood-drive notice and "Secure
     your 15-minute slot online" on the Landfill of North Iowa's were
     shipped as gambling sites, for good. A person's finding goes in
-    `overrides.BLOCKED_LOCAL_HOSTS`. A look that concludes nothing never
+    `overrides.BLOCKED_LOCAL_HOSTS`, with the day and what was seen; a
+    lapsed domain's own host serving someone else's site is "unrelated",
+    a kind only a look gives, since the check reads the domain's own words
+    as the body's: the Town of Roseland, Indiana's `www.roselandgov.org` was
+    "ok" on 2026-11-14 over "Roselandgov - All About Everything", a blog of
+    film and national news (read that day by this project's reader, an
+    agent). A bot check is no finding (`townofwashingtonpark.com`'s "Bot
+    Verification", rule 8). A look that concludes nothing never
     undoes a withdrawal (`merge`). Domains keep lapsing (rule 39): the
     weekly refresh looks at 6,000 addresses a run, oldest first, inside a
     time budget that ends the run cleanly well before its step's limit

@@ -204,6 +204,62 @@ class TestSiteCheck(unittest.TestCase):
             ["http://www.imperialne.com", "https://www.hugedomains.com/domain_profile.cfm?d=imperialne.com"]))
         self.assertEqual(verdict, localsites.FOR_SALE)
 
+    def test_a_domains_own_title_saying_it_is_for_sale(self):
+        """A marketplace's title on the lapsed domain itself, "<host> is for
+        sale", with ordinary words under it (the third read of the guide's
+        source check, which shares this test, 2026-11-14)."""
+        url = "http://www.townofexample.com"
+        for title in ("townofexample.com is for sale", "TownOfExample.com may be for sale"):
+            markup = f"<title>{title}</title><p>{'Inquire today. ' * 300}</p>"
+            verdict, _e, _f = localsites.assess(["Town of Example"], url, self.seen([url], markup=markup))
+            self.assertEqual(verdict, localsites.FOR_SALE, title)
+        # A government's own sale is not its domain's.
+        markup = ("<title>Surplus: the 2009 fire engine at 12 Main St. is for sale - Town of Example"
+                  "</title><p>" + "Sealed bids are due at Town Hall. " * 40 + "</p>")
+        verdict, _e, _f = localsites.assess(["Town of Example"], url, self.seen([url], markup=markup))
+        self.assertEqual(verdict, localsites.OK)
+
+    def test_spams_own_words_are_not_a_laws_words(self):
+        """``brand_spam`` counts a slot site's words, never the betting words
+        a law or a ballot question writes, nor a slot booked online."""
+        law = ("No person may operate online casinos, sportsbooks, sweepstakes casinos, casino sites "
+               "or online slots. ") * 5
+        self.assertEqual(localsites.brand_spam(law), 0)
+        self.assertEqual(localsites.brand_spam("Schedule your slot online today."), 0)
+        self.assertGreaterEqual(localsites.brand_spam("Situs slot gacor, togel online, PGBET888 maxwin"), 3)
+        # The check of a local site reads all of them, as before.
+        self.assertEqual(localsites.gambling_at("Home", law, False), "text")
+
+    def test_every_withdrawn_kind_has_words_on_the_county_pages(self):
+        """A withdrawn link whose kind the page has no words for vanished
+        from its row with nothing said (kyc-local.js's WITHDRAWN): every
+        kind the build can write, the check's and a person's alike."""
+        path = os.path.join(ROOT, "candidate_profiles_site", "assets", "kyc-local.js")
+        with open(path, encoding="utf-8") as handle:
+            text = handle.read()
+        block = re.search(r"var WITHDRAWN = \{(.*?)\n  \};", text, re.S).group(1)
+        said = set(re.findall(r"^\s*\"?([a-z-]+)\"?:\s*\"", block, re.M))
+        self.assertEqual(sorted(k for k in localsites.WITHDRAWN if k not in said), [])
+        self.assertIn(localsites.UNRELATED, localsites.WITHDRAWN)
+
+    def test_a_person_finding_an_unrelated_site_withdraws_it(self):
+        """A content farm on a lapsed domain's own host answers 200 under the
+        domain's own words, which the check reads as the body's site: only a
+        look says otherwise, recorded as "unrelated" with what was seen."""
+        url = "http://www.townofexample.org/"
+        cache = {"sites": {url: {"checked": "2026-11-14", "verdict": "ok"}}}
+        self.assertEqual(localsites.status(url, cache), (url, "ok 2026-11-14"))
+        saved = dict(overrides.BLOCKED_LOCAL_HOSTS)
+        overrides.BLOCKED_LOCAL_HOSTS["townofexample.org"] = (
+            "unrelated", "2026-11-14", "Town of Example: a blog about everything; no word of the town")
+        try:
+            self.assertEqual(localsites.status(url, cache), ("", "unrelated 2026-11-14"))
+            self.assertEqual(localsites.stale_blocks([url]),
+                             sorted(k for k in saved))
+        finally:
+            overrides.BLOCKED_LOCAL_HOSTS.clear()
+            overrides.BLOCKED_LOCAL_HOSTS.update(saved)
+
     def test_a_parking_page_of_links_is_parked(self):
         markup = ('<title>rutlandcity.com</title><meta name="description" content="Find the best '
                   'information and most relevant links on all topics related to rutlandcity.com.">')

@@ -36,6 +36,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… legphotos` | The portraits of the legislators Open States has none for, from each legislature's own pages and records, writing `data/legislator_photos.json` (`--check` reports the cache; `--state ST` reads one state; `--force` reads entries younger than 14 days again) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… localgov --check-sites` | Open every website the listing gives a local government - many hosts at once, one request at a time per host - and record what each is now in `data/local_sites.json` (hand-editable; a stopped run resumes; `--recheck VERDICT` looks again at one kind, `--states`, `--limit`, and `--max-minutes`, a time budget after which it opens nothing new, saves and stops) |
+| `… guidesources` | Open every source the guide's sections and their words, its maps and the 2026 ballot table cite, and the statutes the page code links - a GET as this project, the first bytes only, one request at a time per host - and record what each answered in `data/guide_sources.json` (hand-editable; `--check` reports the cache; `--refresh` opens every one, not only those due; `--limit`, `--workers`, and `--max-minutes`, a time budget after which it opens nothing new, saves and stops). Only a 404 or 410 on two reads on different days, or a host gone at two public resolvers, is gone; a refusal, a challenge, a timeout, an error page that answers 200 or a page drawn by script concludes nothing. The build warns on a gone or elsewhere source by name and section, on one not looked at in 30 days, and on one not confirmed in 30 days. See [Know Your Government](#know-your-government) |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
 | `… officers` | Every lieutenant governor (NLGA) and secretary of state (NASS), cross-checked where the rosters overlap |
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
@@ -2359,6 +2360,40 @@ here in a different way:
   `site:map.html`, `state:TX` or an `https://` URL. `validate.check_guide`
   fails on a missing page, section or state, an unknown source, or a source
   no section cites.
+- **A source that stops opening is said.** No gate opens an external link,
+  and some eighty sources are the Law Revision Counsel's
+  `uscode.house.gov/us/usc/tN/sM/` pages, on a site that says it runs in a
+  "temporary format" and whose previous `view.xhtml` addresses already answer
+  404. `guidesources` (`kyc/guide_sources.py`), run weekly by the refresh,
+  opens every address the guide's sections and their words, its maps, the
+  2026 ballot table and the page code's statute links cite: a GET as this
+  project, the first bytes only, one request at a time per host; one that
+  opened is opened again after six days, one missing or unread on every
+  run. It keeps each one's day and answer in `data/guide_sources.json`,
+  saved when the run ends. A source is
+  **gone** after a 404 or 410 on two reads on different days, or when its
+  host does not exist here and at both dns.google and Cloudflare; it is
+  **elsewhere** when two days' reads opened a page that is not it (titled
+  "Page Not Found", a deep link sent to its own site's front page or
+  another's, a lapsed domain's marketplace, parking, for-sale or expired
+  page as the local websites' check reads them, gambling spam in its title,
+  on another host or in spam's own words throughout - never a betting word
+  in a law's own text - or a statute section's address - the U.S. Code's,
+  the Code of Virginia's - whose page's title names another section). A
+  403, a 429, a 5xx, a timeout, a
+  bot wall or a challenge concludes nothing: constitution.congress.gov
+  answers the reader with Cloudflare's "Just a moment...", and is never
+  called gone for it. Nor does a 200 that says nothing of the source: a
+  server's error or maintenance page (Illinois's "Error Display: An error
+  has occurred", which the first read called open), a sign-in page, a web
+  server's placeholder, an answer whose first bytes are not the file its
+  address names (a "Request Rejected" page served as a PDF), or a page with
+  almost no text, one drawn by script.
+  The build warns, never fails, on each gone or elsewhere source by its
+  address, its names and every section that cites it, on one never opened,
+  on one not looked at in 30 days, and on one not confirmed in 30 days
+  while every read since concluded nothing; it says how many no read could
+  open, by host, as a line of its own.
 - **One name per page.** A guide page's title, heading, navigation entry,
   card, pager link and every other page's link to it are one string
   (`government.name`), and a test fails on a link that calls a page anything
@@ -3578,7 +3613,10 @@ address the visitor came from, and read as the address it once made 41
 links "ok" over Google's sign-in and Radware's wall. The cache keeps no
 query of any address a redirect ended at, since a bot wall writes the
 reader's own address there. A person's own
-finding goes in `overrides.BLOCKED_LOCAL_HOSTS`. Gambling seen plainly - in
+finding goes in `overrides.BLOCKED_LOCAL_HOSTS`, with the day and what was
+seen, among them a lapsed domain's own host now serving an unrelated site (a
+content farm under the town's old domain name, which the check reads as the
+town's own), which only a look can say. Gambling seen plainly - in
 a page's title, on a site a lapsed address now redirects to, or all over
 its text - is never cleared by a later check; seen once in a page's text it
 is withdrawn and reported for a person, since "Schedule your slot online"
