@@ -25156,6 +25156,12 @@
      "total": 238712.0
     },
     {
+     "committee": "MAJORITY PAC",
+     "committeeId": "C00741355",
+     "count": 1,
+     "total": 195000.0
+    },
+    {
      "committee": "A STRONGER MICHIGAN",
      "committeeId": "C00952259",
      "count": 1,
@@ -28363,5 +28369,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-11-14"
+ "read": "2026-11-15"
 }
