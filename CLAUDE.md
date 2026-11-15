@@ -1857,13 +1857,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     A status read from it credits "the Louisiana Secretary of State's
     election results, unofficial until its canvass" (`raceStatusSource`
     "office", `raceStatusSourceName`; "official" once flagged) on the card,
-    the dialog, the race head and its "Won by", the map's sources, the share
+    the dialog, the race head - its "Won by" and its December round's badge,
+    which said "per the published results", a certified count's words, over
+    LA-5's unofficial one (its review) - the map's sources, the share
     pages (`share._race_source`, the status table's credits) and the
     footers, never Wikipedia. A read that fails, a gate that holds, or a run
     with no qualified list to check the names against keeps the last office
-    result read for the seat, else what it had; where the page also decides
-    the seat and names someone else, neither is shown and the seat reads
-    from the list (`office-result-disagrees`), and a failed page never takes
+    result read for the seat, else what it had. So does a round whose files
+    are older than the last read's (`la_results.older`): a races file's
+    `WriteTime` or a votes file's `VersionDateTime` before the one the last
+    read relied on, or missing where it had one. The three files are fetched
+    one by one and the votes file's time reads 1900-01-01, so a cached copy
+    of one beside a fresh `ElectionDates.htm` would have paired old counts
+    with a new official flag and released LA-6 as "official" from counts
+    before the canvass (its review); the newer read stays the baseline, and
+    the older stamp is recorded beside it (`staleRead`). Where the page also
+    decides the seat and names someone else, neither is shown and the seat
+    reads from the list (`office-result-disagrees`) - a page name that fits
+    no filing but is the office's list name for one, as a page writes it
+    ('Patricia "Bubba" Moore' as "Bubba Moore", `_one_person`), is that
+    filing's person, not someone else - and a failed page never takes
     an office result away. What each read relied on - the election's date,
     id, official flag and write time, the addresses, each seat's names and
     codes as printed, counts, outcomes, reporting and verdict or why it

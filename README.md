@@ -1096,9 +1096,17 @@ for the round's date. The election is found by its date, a seat by
 - A gate that fails, a read that fails, or a run with no qualified list to
   check the names against concludes nothing: the seat keeps what it had
   (the last office result read, else the page's or the list's), and
-  `build --check` warns (`office-result-held`, `office-results-unread`).
+  `build --check` warns (`office-result-held`, `office-results-unread`). So
+  does a round whose races file's `WriteTime`, or votes file's
+  `VersionDateTime`, is older than the one the last read relied on (or
+  missing where it had one): the three files are fetched one by one, and an
+  old copy of one beside a fresh official flag would read old counts as
+  official. The newer read's stamps stay the baseline, and the older ones
+  are kept beside them as `staleRead`.
 - Where the page also decides a seat and names someone else, neither is
   shown: the seat reads from the list, and `office-result-disagrees` says so.
+  A page name that fits no filing but is the office's list name for one
+  ("Bubba Moore" for 'Patricia "Bubba" Moore') is that person.
 - The December round is read the same way once the office posts it, between
   the first round's two only; its winner reads "Elected on December 12".
 - What each read relied on is in `data/primary_results.json` under
