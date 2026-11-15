@@ -43,8 +43,13 @@
     // a line like that; after it, "awaiting result" still needs its date.
     var campaign = KYC.contestStatus(item) === "nominee" &&
       KYC.electionStatus().phase !== "post-election";
+    // Credited to the source the person's status is (rule 64: Louisiana's
+    // list, or its election office's own results), else the page.
+    var per = item.raceStatusSource === "qualified" ? "per the Secretary of State's list of qualified candidates"
+      : item.raceStatusSource === "office" && item.raceStatusSourceName ? "per " + item.raceStatusSourceName
+      : "per Wikipedia's results page";
     var title = line ? "On the general election ballot on the " + line +
-      " line, per Wikipedia's results page." + (campaign ? "" : " " + spec.title) : spec.title;
+      " line, " + per + "." + (campaign ? "" : " " + spec.title) : spec.title;
     return { cls: spec.cls, label: spec.label, suffix: KYC.ballotLineSuffix(item), title: title };
   }
 
@@ -241,8 +246,8 @@
       '<h3 class="legend-heading">About the seat</h3>' +
       '<dl class="legend-list">' + seats.map(row).join("") + "</dl>" +
       '<p class="legend-note">A card’s own badge names the source its status was read ' +
-      "from: Wikipedia’s results page for the state, or the state’s list of " +
-      "candidates.</p></details>";
+      "from: Wikipedia’s results page for the state, the state’s list of " +
+      "candidates, or its election office’s own results.</p></details>";
   }
 
   /* The latest public office beyond the seat the card is about: "Fmr.
@@ -373,8 +378,11 @@
     var res = race.results || {};
     var won = namesWith(race, "elected", res.otherElected);
     if (won.length === 1) {
-      return '<span class="badge badge-money" title="' + KYC.escapeAttr(
-        "Marked as the winner on Wikipedia's election results page.") +
+      // Credited to whoever said so: the state election office's own
+      // results, read as they are published (rule 64), else the page.
+      return '<span class="badge badge-money" title="' + KYC.escapeAttr(res.fromOfficeResults &&
+        !res.fromQualifiedList ? "The winner, " + KYC.ballotSource(race) + "."
+        : "Marked as the winner on Wikipedia's election results page.") +
         '">Won by ' + KYC.escapeHtml(won[0]) + "</span>";
     }
     var runoff = namesWith(race, "runoff", res.otherRunoff);
@@ -471,10 +479,16 @@
    *  date has passed. */
   function primaryState(race) {
     var listed = !!(race.results && race.results.fromQualifiedList);
+    // A result the state election office's own results gave (rule 64).
+    var office = !listed && !!(race.results && race.results.fromOfficeResults);
     var held = race.settled && (!listed || race.primaryDate < todayIso());
     return {
       held: held,
-      title: held && listed
+      title: held && office
+        ? "Primary held " + KYC.dateWords(race.primaryDate) +
+          (race.runoffDate ? "; runoff " + KYC.dateWords(race.runoffDate) : "") +
+          ". Results " + KYC.ballotSource(race) + "."
+        : held && listed
         ? "Primary held " + KYC.dateWords(race.primaryDate) +
           (race.runoffDate ? "; runoff " + KYC.dateWords(race.runoffDate) : "") +
           ". Its ballot was the Secretary of State's list of qualified candidates; no result " +
@@ -902,7 +916,8 @@
     var parties = ((race.results || {}).otherParties) || {};
     // Credited as the section's own note credits them (rules 64, 77), and
     // in the qualified list's words on an open primary's seat.
-    var noProfileLabel = ((race.results || {}).fromQualifiedList ? "Also on the Nov 3 ballot "
+    var noProfileLabel = ((race.results || {}).fromQualifiedList ||
+        (race.results || {}).fromOfficeResults ? "Also on the Nov 3 ballot "
       : "Also on the November ballot ") + KYC.ballotSource(race) + ", no profile here";
     u.none.forEach(function (n) {
       var abbr = parties[n] ? KYC.partyAbbr({ party: parties[n] }) : "";
