@@ -4400,6 +4400,7 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         entry, why = None, None
         held_round = None      # (race, verdict once official) of a first round a gate held
         december_round = None  # the December race a gate held, its first round a runoff
+        had_december = False   # the last read had the office's December verdict for the seat
         if not tried:
             pass
         elif unread:
@@ -4516,7 +4517,14 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         page_decides = bool(page) and page.get("source") != OFFICE and any(
             ids or names for ids, names in _decided_people(page).values())
         if entry is None:
-            if held_round is not None and page_decides:
+            # A first round a gate holds says nothing of December: where the
+            # last read had December's verdict and set the page's call aside
+            # beside it, that hold stands. Asked of the first round's counts
+            # alone, a December winner they led went live over the December
+            # count that had contradicted the call.
+            set_aside = had_december and any(rid in (prev_meta.get(kind) or {})
+                                             for kind in ("disagree", "pageHeld"))
+            if held_round is not None and page_decides and not set_aside:
                 _page_beside_a_held_round(rid, page, held_round, listed[rid], names_of,
                                           by_race.get(rid, []), (aliases or {}).get(rid),
                                           races, calls, meta, log)
@@ -4535,22 +4543,24 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
             continue
         races[rid] = entry
         calls[rid] = CALLED_OFFICE
-    # A seat this read wrote no record for - no list to check its names
-    # against, a round's file older than the last read's, the first round
-    # dropped from the dates file or holding no race for the district - keeps
-    # the last read's record (rule 8), said to be kept and from which read.
-    # Dropped, the next read no longer knew the office had counted December,
-    # and said of a seat whose page it had contradicted that "the office has
-    # posted no December count for the seat yet" (the reader of the fix that
-    # keeps a hold).
+    # A round this read wrote no record of for a seat - no list to check its
+    # names against, a round's file older than the last read's, the first
+    # round dropped from the dates file or holding no race for the district,
+    # a December the read never reached behind a first round a gate held -
+    # keeps the last read's record (rule 8), said to be kept and from which
+    # read. Dropped, the next read no longer knew the office had counted
+    # December, and said of a seat whose page it had contradicted that "the
+    # office has posted no December count for the seat yet" (the reader of
+    # the fix that keeps a hold).
     # (Where the office was unread or no read was made, the whole record is
     # the last read's already, under its ``read`` day and ``carried``.)
     if meta.get("races") is not prev_meta.get("races"):
         since = prev_meta.get("read")
         for rid, record in sorted((prev_meta.get("races") or {}).items()):
-            if rid not in meta["races"]:
-                meta["races"][rid] = {day: _kept_facts(found, since)
-                                      for day, found in (record or {}).items()}
+            mine = meta["races"].setdefault(rid, {})
+            for day, found in sorted((record or {}).items()):
+                if day not in mine:
+                    mine[day] = _kept_facts(found, since)
     meta["kept"] = sorted(meta.get("kept") or [])
     return meta
 

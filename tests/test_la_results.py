@@ -1404,6 +1404,27 @@ class TestAHoldKeepsTheRecordItStandsOn(NoGap):
         self.assertNotIn("heldRead", record)     # an older file's counts are not kept
         self.assertIn("before the", later["officeResults"]["held"][self.RID])
 
+    def test_a_first_round_a_gate_holds_keeps_decembers_record_and_the_hold(self):
+        # The November file back to partial counts: the read never reaches
+        # December. Its first-round counts lead Moore, the page's December
+        # winner, and say nothing of the runoff the office's count gave Firment.
+        first = self.disagreed()
+        later = self.build(read({"11/03/2026": {5: (LA5, (10, 791, 0, 24))},
+                                 "12/12/2026": {5: TWO}}, today=self.D1), today=self.D1,
+                           page=self.moore_page(), previous=first)
+        self.assert_still_disagrees(later, first)
+        self.assert_record_kept(later, first)
+        november = later["officeResults"]["races"][self.RID]["2026-11-03"]
+        self.assertEqual(november["reporting"]["precincts"][0], 10)     # this read's own
+        self.assertNotIn("keptFrom", november)
+        self.assertIn("10 of 791 precincts", later["officeResults"]["held"][self.RID])
+        # With no December verdict before, a held first round is read against
+        # the page as ever: here its counts lead the page's two.
+        runoff_page = TestTheOfficesResultBesideOtherSources().runoff_page("Patricia Moore")
+        nov = self.build(read({"11/03/2026": {5: (LA5, (10, 791, 0, 24))}}), page=runoff_page)
+        self.assertFalse(nov["officeResults"]["disagree"])
+        self.assertEqual(nov["races"][self.RID]["status"]["H6LA05341"], "runoff")
+
     def test_a_page_call_that_waited_beside_decembers_verdict_is_kept_the_same_way(self):
         # The state made: the last read's hold is a ``pageHeld``, its December
         # record holding a verdict.

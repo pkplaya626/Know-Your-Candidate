@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3461 tests, no dependencies
+python -m unittest discover tests             # 3485 tests, no dependencies
 npm install && npm test                       # 5151 real-DOM checks (needs jsdom)
 ```
 
@@ -1884,13 +1884,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     aside beside a page that named someone else - leaves the last read
     standing and the record it was decided on, this read's counts beside it
     (`heldRead`): such a file made a call the office's December count had
-    contradicted a runoff that call merely waited on. A seat a read writes
-    no record for (no list, an older first round, a first round the dates
-    file dropped, no race for its district) keeps the last read's, each
-    round's said to be kept and from which read (`keptFrom`): dropped, the
-    next read said "the office has posted no December count for the seat
-    yet" of a seat whose page its own December count had contradicted
-    (the reader of the fix that keeps a hold, below). Where the
+    contradicted a runoff that call merely waited on. A round a read writes
+    no record of for a seat (no list, an older first round, a first round
+    the dates file dropped, no race for its district, a December the read
+    never reached behind a first round a gate held) keeps the last read's,
+    said to be kept and from which read (`keptFrom`): dropped, the next read
+    said "the office has posted no December count for the seat yet" of a
+    seat whose page its own December count had contradicted (the reader of
+    the fix that keeps a hold, below). Where the
     page also decides the seat and names someone else, neither is shown and
     the seat reads from the list (`office-result-disagrees`) - a page name
     that fits no filing but is the office's list name for one, as a page
@@ -1918,10 +1919,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `keptFrom`, and validate naming it again); a read that itself decides
     resets both. `keptFrom` is the day of the read that found it, through
     any number of reads that conclude nothing, never the day of the last of
-    those. And with no read made, a held line's clause about a page's call
-    that waits is said only while the page still makes the call (the
-    `pageHeld` record keeps the seat's own reason apart, `why`): kept whole,
-    it spoke of a call the page had stopped making. PR #265's last verifier
+    those. A first round a gate holds says nothing of December: a hold that
+    stood on December's verdict stands beside it, never asked of the first
+    round's counts, which led the page's December winner over the December
+    count that had contradicted the call. And with no read made, a held
+    line's clause about a page's call that waits is said only while the page
+    still makes the call (the `pageHeld` record keeps the seat's own reason
+    apart, `why`): kept whole, it spoke of a call the page had stopped
+    making. PR #265's last verifier
     made LA-1's page mark Lauren Jewett over the office's count for Scalise,
     and the next read, ElectionDates.htm answering 403, showed her "elected",
     credited to Wikipedia, with no warning. A failed page never takes

@@ -1115,8 +1115,8 @@ for the round's date. The election is found by its date, a seat by
   one, beside a December result the last read had, whether it was shown or
   set aside beside a page that named someone else: the last read stands,
   the record the result was decided on stays, and this read's counts are
-  kept beside it as `heldRead`. A seat a read writes no record for keeps the
-  last read's record, each round's marked with the day of the read that
+  kept beside it as `heldRead`. A round a read writes no record of for a
+  seat keeps the last read's record, marked with the day of the read that
   wrote it (`keptFrom`), so a later read still knows what the office had
   counted.
 - Where the page also decides a seat and names someone else, neither is
@@ -1136,8 +1136,10 @@ for the round's date. The election is found by its date, a seat by
   from (`keptFrom`: the read that found it, however many reads have
   concluded nothing since), so the warning stands; one failed request once
   let the call the office's counts contradicted go live, credited to
-  Wikipedia. With no read made at all, a held line says a page's call waits
-  only while the page still makes that call. A
+  Wikipedia. A hold that stood on December's verdict stands while a gate
+  holds the first round, whose counts say nothing of the runoff. With no
+  read made at all, a held line says a page's call waits only while the page
+  still makes that call. A
   page mark the
   read refuses never takes an office result away (`carry_refused`).
 - The December round is read the same way once the office posts it, between
