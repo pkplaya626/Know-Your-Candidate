@@ -4258,7 +4258,8 @@ def _keep_last_hold(rid, page, prev_meta, why, races, calls, meta, log):
     """A page that decides a seat for which this read of the office's results
     concludes nothing (rule 8: the office unread, a round's file older than
     the last read's, no qualified list to check the names against, a December
-    round held), where the last read set the page's call aside - its counts
+    round held, a first round a gate holds where the hold stood on December's
+    verdict), where the last read set the page's call aside - its counts
     contradicting it (``disagree``), or its close margin holding it until the
     official results (``pageHeld``). The call stays set aside, as that read
     set it aside, and the record is kept with the day of the read it is kept
