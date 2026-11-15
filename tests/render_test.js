@@ -478,6 +478,7 @@ function rewindToCampaign(window) {
     // the record, for the all-party words).
     const race = raceOf[p.raceStatusRace || p.contestRaceId || p.raceId];
     if (race && race.primaryKind === "open") {
+      if (p.raceStatusSource === "office") delete p.raceStatusSourceName;
       p.raceStatus = "qualified";
       p.raceStatusSource = "qualified";
     } else {
@@ -487,7 +488,15 @@ function rewindToCampaign(window) {
   window.kycRaces.forEach((r) => {
     const res = r.results;
     if (!res) return;
-    if (r.primaryKind === "open") res.fromQualifiedList = true;
+    if (r.primaryKind === "open") {
+      // Before its count no office had published a result (rule 64).
+      res.fromQualifiedList = true;
+      if (res.fromOfficeResults) {
+        res.fromOfficeResults = false;
+        res.officeResults = null;
+        res.sourceUrl = "https://voterportal.sos.la.gov/CandidateInquiry";
+      }
+    }
     res.nominees = (res.nominees || 0) + (res.elected || 0) + (res.defeated || 0) + (res.runoff || 0);
     res.elected = res.defeated = res.runoff = 0;
     res.otherElected = [];
@@ -11922,6 +11931,145 @@ async function testQualifiedBallot() {
   });
 }
 
+/* A Louisiana House race decided by the Secretary of State's own results
+ * (kyc/la_results.py, rule 64): every word about it credits the office, as
+ * unofficial until its canvass, and none says Wikipedia. */
+const OFFICE_CREDIT = "the Louisiana Secretary of State's election results, unofficial until its canvass";
+
+function officeRace(window) {
+  const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
+  const race = window.kycRaces.find((r) => r.state === "LA" && r.chamber === "House" &&
+    r.candidateIds.length >= 2);
+  if (!race) return;
+  const people = race.candidateIds.map((id) => byId[id]).filter(Boolean);
+  people.forEach((p, i) => {
+    p.raceStatus = i === 0 ? "elected" : "defeated";
+    p.raceStatusRace = race.id;
+    p.raceStatusSource = "office";
+    p.raceStatusSourceName = OFFICE_CREDIT;
+  });
+  race.settled = true;
+  race.results = Object.assign({}, race.results, {
+    fromQualifiedList: false, fromOfficeResults: true, calledBy: "office",
+    officeResults: { source: OFFICE_CREDIT, official: false, read: "2026-11-15" },
+    sourceUrl: "https://voterportal.sos.la.gov/graphical",
+    nominees: 0, qualified: 0, elected: 1, defeated: people.length - 1,
+    otherNominees: ["Kate Cotten"], otherDefeated: ["Kate Cotten"], otherElected: [], otherRunoff: [] });
+  window.__office = { race, winner: people[0], losers: people.slice(1) };
+}
+
+/* LA-5 as the office's results left it: the top two to the December 12
+ * general election, the rest defeated, credited to the office. */
+function officeRunoffRace(window) {
+  const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
+  const race = window.kycRaces.find((r) => r.id === "H-LA-05-2026") ||
+    window.kycRaces.find((r) => r.state === "LA" && r.chamber === "House" &&
+      r.candidateIds.length >= 3);
+  if (!race) return;
+  const people = race.candidateIds.map((id) => byId[id]).filter(Boolean);
+  people.forEach((p, i) => {
+    p.raceStatus = i < 2 ? "runoff" : "defeated";
+    p.raceStatusRace = race.id;
+    p.raceStatusSource = "office";
+    p.raceStatusSourceName = OFFICE_CREDIT;
+  });
+  race.settled = true;
+  race.results = Object.assign({}, race.results, {
+    fromQualifiedList: false, fromOfficeResults: true,
+    officeResults: { source: OFFICE_CREDIT, official: false, read: "2026-11-15" },
+    sourceUrl: "https://voterportal.sos.la.gov/graphical",
+    nominees: 0, qualified: 0, elected: 0, runoff: 2, defeated: people.length - 2,
+    otherNominees: [], otherDefeated: [], otherElected: [], otherRunoff: [] });
+  window.__officeRunoff = { race, two: people.slice(0, 2) };
+}
+
+async function testOfficeRunoff() {
+  // Before the December round and after it, awaiting its result: the head's
+  // hover credits the office, never "the published results" (a certified
+  // count's words) or Wikipedia.
+  for (const now of ["2026-11-16T09:00:00", "2026-12-13T09:00:00"]) {
+    const { window, D, errors } = await buildPage("states/la.html",
+      { now, data: officeRunoffRace });
+    const { race, two } = window.__officeRunoff || {};
+    suite("states/la.html — a December round the office's results set (" + now.slice(0, 10) + ")", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("a Louisiana House race in a December round", !!race && two.length === 2);
+      if (!race) return;
+      const section = D.getElementById("race-" + race.id);
+      const head = section && section.querySelector(".race-head");
+      const badge = head && [...head.querySelectorAll(".badge[title]")].find((b) =>
+        /general election|Dec 12/.test(b.textContent));
+      const title = badge ? badge.getAttribute("title") : "";
+      check("the head's December badge credits the office's results as unofficial",
+        !!badge && title.indexOf(OFFICE_CREDIT) !== -1 && !/published results|Wikipedia/.test(title) &&
+          two.every((p) => title.indexOf(p.name) !== -1), title || (head && head.textContent));
+      check("nothing in the race's head says Wikipedia or the published results",
+        !!head && !/Wikipedia|published results/.test(head.innerHTML),
+        head && (head.innerHTML.match(/[^"]*(Wikipedia|published results)[^"]*/) || [""])[0]);
+    });
+  }
+}
+
+async function testOfficeResults() {
+  const { window, D, errors } = await buildPage("states/la.html",
+    { now: "2026-11-16T09:00:00", data: officeRace });
+  const { race, winner, losers } = window.__office || {};
+  const KYC = window.KYC;
+  suite("states/la.html — a race the Secretary of State's own results decided (rule 64)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("a Louisiana House race to read", !!race);
+    if (!race) return;
+    const section = D.getElementById("race-" + race.id);
+    const head = section && section.querySelector(".race-head");
+    const badgeOf = (p) => {
+      const card = section.querySelector('.card[data-id="' + p.id + '"]');
+      return card && [...card.querySelectorAll(".badge[title]")].find((b) =>
+        /Elected|Lost/.test(b.textContent));
+    };
+    const won = badgeOf(winner);
+    check("the winner's card says Elected, credited to the office as unofficial",
+      !!won && /Elected/.test(won.textContent) && won.getAttribute("title").indexOf(OFFICE_CREDIT) !== -1 &&
+        !/Wikipedia/.test(won.getAttribute("title")), won && won.getAttribute("title"));
+    const lost = badgeOf(losers[0]);
+    check("and a loser's, credited the same way",
+      !!lost && /Lost/.test(lost.textContent) && lost.getAttribute("title").indexOf(OFFICE_CREDIT) !== -1 &&
+        !/Wikipedia/.test(lost.getAttribute("title")), lost && lost.getAttribute("title"));
+    const source = head && head.querySelector(".race-source");
+    const link = source && source.querySelector("a");
+    check("the race's source line links the office's results, read on its day, unofficial",
+      !!link && link.getAttribute("href") === "https://voterportal.sos.la.gov/graphical" &&
+        /^Results: the Secretary of State, read Nov\. 15, 2026$/.test(link.textContent) &&
+        /unofficial until its canvass/.test(source.textContent),
+      source && source.textContent);
+    check("nothing in the race's head says Wikipedia", !!head && !/Wikipedia/.test(head.innerHTML),
+      head && (head.innerHTML.match(/[^"]*Wikipedia[^"]*/) || [""])[0]);
+    const unprofiled = head && [...head.querySelectorAll(".badge")].find((b) => /no profile here/.test(b.textContent));
+    check("a name with no profile is credited to the office's results too",
+      !!unprofiled && unprofiled.getAttribute("title").indexOf(OFFICE_CREDIT) !== -1,
+      unprofiled && unprofiled.getAttribute("title"));
+    const spec = KYC.standing(winner, "long");
+    check("the profile's long words cite the office as their source",
+      !!spec && /Source: the Louisiana Secretary of State's election results, unofficial until its canvass\.$/
+        .test(spec.title) && !/Wikipedia/.test(spec.title), spec && spec.title);
+    // In every round's words: the December round's and a result it decided.
+    const off = [];
+    ["elected", "defeated", "runoff"].forEach((status) => {
+      [{}, { own: true }, { round: "2026-12-12" },
+        { round: "2026-12-12", now: new window.Date(2026, 11, 13, 12) },
+        { decided: { date: "2026-12-12", open: true } },
+        { decided: { date: "2026-12-12", open: true }, own: true }].forEach((extra) => {
+        const s = KYC.raceStatus(status, "long", Object.assign(
+          { source: "office", sourceName: OFFICE_CREDIT, now: new window.Date(2026, 10, 16, 12) }, extra));
+        if (!s || /Wikipedia/.test(s.title) || s.title.indexOf(OFFICE_CREDIT) === -1) {
+          off.push(status + " " + JSON.stringify(extra) + ": " + (s && s.title));
+        }
+      });
+    });
+    check("each result's hover, in every round's words, credits the office and never Wikipedia",
+      off.length === 0, off.slice(0, 3).join(" | "));
+  });
+}
+
 async function testElectionNight() {
   const { window, D, errors } = await buildPage("states/ga.html",
     { now: "2026-11-05T09:00:00", data: electionNight });
@@ -13398,6 +13546,23 @@ async function testSearchAndFilters() {
     const split = D.getElementById("challengerSplit");
     check("the sidebar's split is visible text", !!split && !split.hidden &&
       /have a profile here/.test(split.textContent), split && split.textContent);
+    // Each name with no profile credited by its own source (rules 64, 77):
+    // the hover once gave every one to "Wikipedia's results pages", over
+    // names from Louisiana's own results and lists, and the split to "the
+    // published results".
+    const e = window.kycBuildMeta.election;
+    const by = e.challengersUnprofiledBySource || [];
+    const hover = D.getElementById("challengerCount").title;
+    check("the names with no profile are counted by their sources, adding up",
+      by.length > 0 && by.reduce((n, item) => n + item[1], 0) === e.challengersUnprofiled,
+      JSON.stringify(by));
+    check("the hover and the split credit each source with its count",
+      by.every((item) => hover.indexOf(item[1].toLocaleString() + " " + item[0]) !== -1 &&
+        split.textContent.indexOf(item[1].toLocaleString() + " " + item[0]) !== -1),
+      hover + " | " + split.textContent);
+    check("neither credits them all to one source",
+      !/named on Wikipedia's results pages|named by the published results/.test(
+        hover + split.textContent), hover);
     D.querySelector('[data-group="role"][data-value="candidate"]').click();
     check("the Challengers chip's line says what the sidebar adds",
       /sidebar/.test(label()), label());
@@ -18845,7 +19010,7 @@ async function testFrame() {
     const { window } = grid;
     const KYC = window.KYC;
     const race = (window.kycRaces || []).find((r) => r.results && r.results.sourceUrl &&
-      !r.results.fromQualifiedList);
+      !r.results.fromQualifiedList && !r.results.fromOfficeResults);
     if (!race) { check("no race names a results page in this data; nothing to check", true); return; }
     const html = KYC.cards.raceBadges(race);
     const holder = window.document.createElement("div");
@@ -26433,6 +26598,8 @@ async function testTheJanuaryWords() {
   if (!only || only === "states" || only === "governors" || only === "photos") await testGovernorPhotoCredits();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
+  if (!only || only === "states") await testOfficeResults();
+  if (!only || only === "states" || only === "office") await testOfficeRunoff();
   if (!only || only === "states") await testLouisianaDecember();
   if (!only || only === "states") await testGeorgiaRunoffPast();
   if (!only || only === "states" || only === "ballot" || only === "mprunoff") await testMarianasRunoff();

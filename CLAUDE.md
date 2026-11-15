@@ -189,7 +189,7 @@ python build_profile_site.py geo              # regenerate map geometry only (bo
 python build_profile_site.py congress         # refresh membership, and who has left this Congress (network)
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
-python build_profile_site.py results          # who is still in, from Wikipedia (Louisiana's qualified list; the states' certified ballots)
+python build_profile_site.py results          # who is still in, from Wikipedia (Louisiana's qualified list and its own House results; the states' certified ballots)
 gh workflow run refresh.yml -f results_only=true  # the field and the results alone, about 45 minutes to the page: read them often after an election
 python build_profile_site.py record           # the frozen 2026 race record (--freeze writes it; refuses to overwrite)
 python build_profile_site.py campaigns        # campaign websites from FEC committees
@@ -229,8 +229,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3363 tests, no dependencies
-npm install && npm test                       # 5011 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3432 tests, no dependencies
+npm install && npm test                       # 5031 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1820,7 +1820,99 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     keeps the last list read (rule 8), and a page that fails after the count
     never takes the list away. A status read from it credits the Secretary
     of State, never "the published results". After the count the results
-    page decides, as everywhere else.
+    page decides, as everywhere else - and twelve days after the 2026 count
+    it had decided none of the six: its infobox declared four majority
+    winners over tables with no counts, its prose named a runoff no table
+    marked, and LA-6 had nothing. So the office's own results decide them
+    first (`kyc/la_results.py`): the JSON its results page reads
+    (`ElectionDates.htm`, then the round's `RacesCandidates_Multiparish.htm`
+    and `Votes_Multiparish.htm`), the election found by the seat's round's
+    date (`OPEN_PRIMARY_SEATS`, December's as November's), never a typed id,
+    and a race by "U. S. Representative" and its title's district number
+    alone. A seat's result is the office's only where every gate passes
+    (`la_results.judge`), each concluding nothing where it fails (rule 8):
+    every precinct and absentee batch in; one to elect; every `Outcome` one
+    whose meaning is known ("Elected", "Defeated", "Runoff"; the office's
+    script also knows "Advances" and "Approved", which this reader does
+    not take); every name the list for that seat holds, as the list writes
+    names with the party code taken off ('"Clay" Higgins (REP)' is
+    "Clay Higgins", "Troy A. Carter, Sr." is "Troy A. Carter Sr."), of the
+    party the list gives (`PARTY_CODES`, each code read beside the list's
+    word for the same candidates), and every name on the list in the
+    results; the outcomes the counts' own result - one elected with a
+    majority of every vote the race counts, or in a first round the two
+    highest in the runoff with nobody at a majority, everyone else
+    defeated; the December round between the first round's two alone. The
+    office's own page draws no outcome until it marks the election's
+    results official (its script shows `Outcome` only where
+    `ResultsOfficial`; "Unofficial Results" before), so a result read before
+    then is the counts' own, and a deciding margin under `CLOSE_MARGIN` -
+    the winner's share over half, the leader's short of it, the second
+    runoff place's over the third's - waits for the official flag: read on
+    2026-11-15, LA-1 to LA-4 were elected and LA-5's two went to December
+    12, while LA-6's second place was 956 votes, 0.36 points, ahead of the
+    third and waits. Names reach filings as the list's do (`match_names`,
+    the roster's aliases, `RESULT_NAMES` through `_claim_unmatched`), and a
+    withdrawal or a filer the list does not name is still the list's word.
+    A status read from it credits "the Louisiana Secretary of State's
+    election results, unofficial until its canvass" (`raceStatusSource`
+    "office", `raceStatusSourceName`; "official" once flagged) on the card,
+    the dialog, the race head - its "Won by" and its December round's badge,
+    which said "per the published results", a certified count's words, over
+    LA-5's unofficial one (its review) - the map's sources, the share
+    pages (`share._race_source`, the status table's credits) and the
+    footers, never Wikipedia. A read that fails, a gate that holds, or a run
+    with no qualified list to check the names against keeps the last office
+    result read for the seat, else what it had. So does a round whose files
+    are older than the last read's (`la_results.older`): a races file's
+    `WriteTime` or a votes file's `VersionDateTime` before the one the last
+    read relied on, or missing where it had one. The three files are fetched
+    one by one and the votes file's time reads 1900-01-01, so a cached copy
+    of one beside a fresh `ElectionDates.htm` would have paired old counts
+    with a new official flag and released LA-6 as "official" from counts
+    before the canvass (its review); the newer read stays the baseline, and
+    the older stamp is recorded beside it (`staleRead`). So, where the last
+    read had December's result for a seat, does a read whose
+    `ElectionDates.htm` lists no December election or whose December file
+    holds no race for the seat: its second reader built both and saw LA-5's
+    winner read "runoff" again with nothing held or said, so December
+    concludes nothing, the last read's record and its election's stand
+    (`unlistedOn`), and the seat is held (`office-result-held`). Where the
+    page also decides the seat and names someone else, neither is shown and
+    the seat reads from the list (`office-result-disagrees`) - a page name
+    that fits no filing but is the office's list name for one, as a page
+    writes it ('Patricia "Bubba" Moore' as "Bubba Moore", `_one_person`), is
+    that filing's person, not someone else. That holds where a gate holds
+    the office's round too, its files read whole: the counts still rank the
+    seat (`la_results.ranking`), and a page whose winner they do not lead,
+    or whose runoff is not their two highest, disagrees with them
+    (`_against_ranking`) - a page marking Lauren Jewett beside the office's
+    50.4% for Scalise, or beside 100 of 522 precincts that he led, was shown,
+    credited to Wikipedia - and a page's call of a seat the office holds for
+    its close margin alone waits, agreeing or not, until the office marks
+    its results official (`pageHeld`, the held line saying so): half a point
+    is the canvass's to settle. Once December 12 is held, a page that marks
+    one of the office's two the winner before the office's December count is
+    posted or passes its gates waits as well, and the office's runoff stands
+    (`_december_call_waits`): called against it, LA-5 went back to the list,
+    its eight first-round losers "qualified" again; a page winner the
+    December counts do not lead still disagrees. A failed page never takes
+    an office result away, nor does a refused page mark: `carry_refused` leaves alone a race
+    this read took from the office's results, or a vandal's "Peter Griffin"
+    on the page would have put LA-1 back on the list and a December winner
+    back in the runoff. And the checks the refresh runs on the cache it has
+    just read hold an office-decided seat to what `resolve_race` holds it to,
+    settled once its first round is past (`open_seat`): reading it against
+    the December 12 runoff date, the unit step would have failed the first
+    refresh after the office's results were read. They are asked of a cache
+    the tests make with the office's November and December results
+    (`RealCacheChecks`, `RealBuildChecks`), not only of the committed one,
+    which holds none. What each read relied on - the election's date,
+    id, official flag and write time, the addresses, each seat's names and
+    codes as printed, counts, outcomes, reporting and verdict or why it
+    held - is in the cache's `officeResults`, and `validate` names every
+    held seat (`office-result-held`) and a failed read
+    (`office-results-unread`).
 
 65. **A cycle's races are frozen, not re-derived from whoever sits.** A
     Senate seat was "up" because its senator's term ends at the election,

@@ -500,6 +500,14 @@
   // as a loser's source too (PR #224 review).
   var NATIONAL_COUNTS_NOTE = "which marks the winner and gives no vote count; the state's " +
     "page, read the same day, counts that winner ahead and names no winner";
+  // A result read from the state election office's own results (Louisiana's
+  // House seats, kyc/la_results.py, rule 64): who won, lost or went to the
+  // runoff is the office's word, credited as the pipeline words it
+  // (`raceStatusSourceName`: unofficial until its canvass where the office
+  // says so), never Wikipedia's. share.OFFICE_SOURCE writes the default.
+  var OFFICE_NAME = "the Secretary of State's election results";
+  var OFFICE_STATUS = { elected: true, defeated: true, runoff: true };
+  var WIKIPEDIA_PER = "per Wikipedia's results page";
   /* A sitting member leaving the seat they hold, in the same words whether
    * the results list them as withdrawn or do not list them: only the title,
    * which cites its source, differs. */
@@ -913,13 +921,17 @@
       spec = merged;
     }
     if (status === "unlisted" && opts.unconfirmed && !certified) spec = UNCONFIRMED;
+    var office = opts.source === "office" && !!OFFICE_STATUS[status];
     var own = (opts.own && spec.member) || {};
     if (opts.own && opts.appointed && spec.member && spec.off) own = APPOINTEE_LEAVING;
     // In the past tense once the Congress the cycle elects sits (LEFT).
     var record = opts.record === undefined ? recordPhase() : !!opts.record;
     if (record && own.leaving) own = leftWords(own);
     var title = own.title || spec.title;
-    var source = spec.source || (listed ? LISTED_SOURCE : certified
+    if (office) title = String(title).split(WIKIPEDIA_PER).join("per " + (opts.sourceName || OFFICE_NAME));
+    var source = spec.source || (listed ? LISTED_SOURCE : office
+      ? " Source: " + (opts.sourceName || OFFICE_NAME) + "."
+      : certified
       ? " Source: " + (opts.sourceName || "the certified list of candidates") + "."
       : (opts.source === "national" || opts.source === "national-counts") &&
           (status === "elected" || status === "defeated")
@@ -1611,6 +1623,7 @@
   function ballotSource(race) {
     var res = (race && race.results) || {};
     if (res.fromQualifiedList) return "per the Secretary of State's list of qualified candidates";
+    if (res.fromOfficeResults) return "per " + ((res.officeResults || {}).source || OFFICE_NAME);
     // A state's certified November ballot (rule 77), named by its office;
     // a party's list of its own nominees only adds to the results.
     if (res.certifiedBy) {
@@ -1629,14 +1642,23 @@
     if (!r || !/^https:\/\//.test(r.sourceUrl || "")) return "";
     var asOf = (meta().election || {}).resultsAsOf;
     var listed = !!r.fromQualifiedList;
+    // The office's own results (rule 64): its count, unofficial until its
+    // canvass where it says so, read on the day the results were read.
+    var office = !!r.fromOfficeResults && !listed;
+    var officeOf = r.officeResults || {};
     var label = listed ? "Ballot: the Secretary of State's list"
+      : office ? "Results: the Secretary of State" + (officeOf.read ? ", read " + dateWords(officeOf.read) : "")
       : "Results: Wikipedia" + (asOf ? ", read " + dateWords(asOf) : "");
     var title = listed
       ? "The Secretary of State's list of candidates qualified for this seat"
+      : office ? "The Secretary of State's own election results, which this site reads for who " +
+        "won, lost or went to the runoff."
       : "The state's election results page on Wikipedia, which this site reads for who " +
         "won, lost or withdrew.";
     // The caveat is page text: a title is a hover a phone never shows.
-    var note = listed ? "" : '<span class="race-source-note"> (not the state\u2019s certified count)</span>';
+    var note = listed ? "" : office
+      ? (officeOf.official ? "" : '<span class="race-source-note"> (unofficial until its canvass)</span>')
+      : '<span class="race-source-note"> (not the state\u2019s certified count)</span>';
     // A winner called from the national summary, where the state's page
     // named no winner (rule 63's national route): its own source, said beside
     // the page's (rule 19), in the words true of that read - the page gave no
@@ -4097,8 +4119,8 @@
           (election.challengersWithProfile !== undefined
             ? election.challengersWithProfile + " with a profile here" +
               withProfileParts(election) + ", " +
-              election.challengersUnprofiled + " named on Wikipedia's results pages with no FEC " +
-              "filing over $5,000"
+              election.challengersUnprofiled + " with no FEC filing over $5,000" +
+              unprofiledSources(election)
             : running + " in all") + ".";
         // The same split as page text: a title is a hover a phone and a
         // keyboard never show, and the Challengers chip counts profiles
@@ -4107,12 +4129,28 @@
         if (split && election.challengersWithProfile !== undefined) {
           split.textContent = "Of the " + running.toLocaleString() + " in these two rows, " +
             election.challengersWithProfile.toLocaleString() + " have a profile here; " +
-            election.challengersUnprofiled.toLocaleString() + " are named by the published " +
-            "results with no FEC filing over $5,000, so have none.";
+            election.challengersUnprofiled.toLocaleString() + " have no FEC filing over " +
+            "$5,000, so have none" + unprofiledSources(election) + ".";
           split.hidden = false;
         }
       }
     }
+  }
+
+  /* Whose word the sidebar's names with no profile are, counted by source
+   *  (summary.py `challengersUnprofiledBySource`, in each race's own credit,
+   *  `KYC.ballotSource`), as the map's state panel counts them: credited
+   *  whole to "Wikipedia's results pages", the count held Louisiana's own
+   *  results' names, its qualified list's and the certified lists' (rules 64,
+   *  77). "" where the build gives no breakdown. */
+  function unprofiledSources(election) {
+    var by = election.challengersUnprofiledBySource || [];
+    if (!by.length) return "";
+    // Semicolons apart: a source's own words may hold a comma ("..., unofficial
+    // until its canvass").
+    return " (" + by.map(function (item) {
+      return item[1].toLocaleString() + " " + item[0];
+    }).join("; ") + ")";
   }
 
   /* What the sidebar's "with a profile here" holds besides filings, as

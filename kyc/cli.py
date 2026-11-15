@@ -1542,6 +1542,23 @@ def _results(args):
         except Exception as exc:          # inconclusive: say so, conclude nothing
             print(f"  [warn] Louisiana's qualified list could not be read: {exc}")
             listed = None
+        # The Secretary of State's own results for those seats, once their
+        # round has come (kyc/la_results.py, rule 64). A failed read concludes
+        # nothing: each seat keeps what it had (rule 8).
+        from . import la_results
+        from .overrides import OPEN_PRIMARY_SEATS
+        office = None
+        rounds = [d for (st, off, cyc), fixed in OPEN_PRIMARY_SEATS.items()
+                  if (st, off, cyc) == ("LA", "H", results_mod.CYCLE)
+                  for d in (fixed["primary"], fixed.get("runoff")) if d]
+        if rounds and min(rounds) <= datetime.date.today().isoformat():
+            try:
+                office = la_results.fetch(rounds, log=print)
+                print(f"  Louisiana's results: {', '.join(sorted(office['elections'])) or 'none'} "
+                      f"read ({la_results.SOURCE})")
+            except Exception as exc:      # inconclusive: say so, conclude nothing
+                office = {"unread": la_results.failure(exc)}
+                print(f"  [warn] Louisiana's results could not be read: {office['unread']}")
         previous = results_mod.load_cache(args.root)
         # Each state's certified November ballot, where one is published
         # (rule 77). A state whose list cannot be read keeps the last one
@@ -1567,7 +1584,8 @@ def _results(args):
         cache = results_mod.build(field, dates, today=datetime.date.today(), log=print,
                                   aliases=aliases, qualified=listed, certified=ballots,
                                   national=national, previous=previous,
-                                  incumbents=(raw.get("record") or {}).get("incumbents") or {})
+                                  incumbents=(raw.get("record") or {}).get("incumbents") or {},
+                                  office_results=office)
         kept = results_mod.carry_qualified(cache, previous)
         if kept:
             print(f"  [warn] kept the qualified list read on "
