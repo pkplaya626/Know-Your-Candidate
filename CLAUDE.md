@@ -229,8 +229,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3390 tests, no dependencies
-npm install && npm test                       # 5110 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3392 tests, no dependencies
+npm install && npm test                       # 5129 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -4354,28 +4354,49 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the seats not yet called as of the read's day could change it, never
     that the election is undecided (rule 19). A Senate state with a seat
     vacant is "one seat or both vacant": one Republican beside an empty seat
-    was keyed "Both Republican" (PR review). It is shown from the day after Election Day on the
-    reader's calendar until the Congress it counts sits (the record phase,
+    was keyed "Both Republican" (PR review), and so is the Now view's: a
+    state's two seats, one nobody sits in vacant, are stepped by the same
+    helper (`summary.by_state`'s `senateStep`, by `incoming.senate_step`,
+    rule 12), with the same key - the Now view drew one senator beside an
+    empty seat as both of that senator's party. It is shown from the day
+    after Election Day on the reader's calendar until the Congress it counts sits (the record phase,
     when the build sends none and the page shows none, `KYC.incoming`);
     from then the normal view is that Congress. One count, one bar
     (`KYC.balanceBar` with `basis: "elected"`, rules 12 and 73): the
     sidebar's U.S. Congress block draws it under today's bars on every page
     that carries one, with when the members-elect take office and that the
     counts above are who sits; the map's Senate and House views - the map
-    and the House's squares - switch between "Sitting now" and "Elected to
-    the 120th" at their own address (`congress=elected`, `KYC.router`), and
-    the 2026 races view stays as it is. A seat not yet called is a grid of
+    and the House's squares - switch between "Now" and "The 120th
+    Congress, as called" at their own address (`congress=elected`,
+    `KYC.router`), and the 2026 races view stays as it is. The count is
+    titled for what it is, "The 120th Congress, as called so far" (the
+    sidebar's heading, `KYC.incomingWords.title`, and in the same words the
+    map's bar, panel and hovers), never "Elected to the 120th Congress so
+    far": most of the Senate's count
+    is senators in seats not on the 2026 ballot, which the Senate bar's note
+    and spoken count say apart. A seat not yet called is a grid of
     its own (`--pending-fill`, `--pending-grid`; `bb-pending`, `ht-pending`
     and the map's `pending` pattern), never the dots of a seat on the
     ballot, the diagonal hatch of split and none, or vacant's outline (rule
     88, `testColourVision` in all three themes), and a state with seats not
     yet called has a dotted outline (`is-pending`), never the special
-    election's dashes; words give every count. A square's title names its
+    election's dashes; words give every count. Both marks, and a picked
+    state's solid line, are drawn in screen pixels (`vector-effect:
+    non-scaling-stroke`, their width and dash in px), and each key draws the
+    mark's own width and dash on a 1:1 SVG: in map units the 975-wide map
+    drawn 344px wide on a phone made the dotted outline 0.7px, a hairline
+    beside the state's border, and the picked line thinner than a special's
+    dash (rule 88). A square's title names its
     winner, its December round or the day the results were read. The
-    state's panel leads with that its members-elect take office on January
-    3 and are not who represents it now (rule 27), with a way back to the
-    Now view, then its members-elect, its senators whose seats were not up,
-    and its races not yet called with their people split as every race
+    state's panel leads with when its members-elect take office and that
+    until then the Now view shows who represents it (rule 27; its button is
+    the way back) - never that they "are not who represents" it now, which
+    was false over Jon Ossoff, Georgia's one senator-elect, re-elected, and
+    over 61 state-chamber panels holding a sitting member among the
+    members-elect (PR review) - and where none of its seats on the ballot is
+    called yet, that none is as of the read's day, with no members-elect
+    sentence over nobody (`electedLead`: Louisiana's House); then its
+    members-elect, its senators whose seats were not up, and its races not yet called with their people split as every race
     view splits them (`KYC.cards.racePeople`, then `KYC.stillRunning`, as
     Your ballot does, rules 12 and 73: a second split of its own listed
     Mike Collins, who ran for the Senate, under GA-10's uncalled race) in
