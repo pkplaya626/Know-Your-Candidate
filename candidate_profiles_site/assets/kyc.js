@@ -2890,8 +2890,13 @@
     "split-soft": ["color-mix(in srgb, var(--split) 70%, var(--surface-1))",
       "color-mix(in srgb, var(--split-hatch) 70%, var(--surface-1))", 0.4],
     "none": ["var(--none-fill)", "var(--none-hatch)", 0.22],
+    // A seat not yet called, in the elected Congress's view (rule 104): a
+    // grid, never a diagonal hatch (split, none) nor dots (a seat on the
+    // ballot), so one pattern means one thing on every screen (rule 88).
+    "pending": ["var(--pending-fill)", "var(--pending-grid)", 0.16, "grid"],
   };
-  var HATCHED = { "var(--split)": "split", "var(--none-fill)": "none" };
+  var HATCHED = { "var(--split)": "split", "var(--none-fill)": "none",
+    "var(--pending-fill)": "pending" };
 
   /** The patterns, *unit* map units apart (about 6px on screen), with ids
    *  that begin with *prefix*. */
@@ -2900,10 +2905,13 @@
     var w = function (share) { return (unit * share).toFixed(2); };
     return "<defs>" + Object.keys(HATCHES).map(function (key) {
       var h = HATCHES[key];
+      var grid = h[3] === "grid";
       return '<pattern id="' + prefix + "hatch-" + key + '" patternUnits="userSpaceOnUse" width="' +
-        u + '" height="' + u + '" patternTransform="rotate(45)">' +
+        u + '" height="' + u + '"' + (grid ? "" : ' patternTransform="rotate(45)"') + ">" +
         '<rect width="' + u + '" height="' + u + '" style="fill:' + h[0] + '"/>' +
-        '<rect width="' + w(h[2]) + '" height="' + u + '" style="fill:' + h[1] + '"/></pattern>';
+        '<rect width="' + w(h[2]) + '" height="' + u + '" style="fill:' + h[1] + '"/>' +
+        (grid ? '<rect width="' + u + '" height="' + w(h[2]) + '" style="fill:' + h[1] + '"/>' : "") +
+        "</pattern>";
     }).join("") + "</defs>";
   }
 
@@ -2940,6 +2948,7 @@
     "var(--party-d-tint)": "var(--text)",
     "var(--vacant-fill)": "var(--vacant-ink)",
     "var(--none-fill)": "var(--text)",
+    "var(--pending-fill)": "var(--text)",
   };
   function fillInk(fill) {
     return FILL_INK[fill] || (/--surface-/.test(fill || "") ? "var(--text)" : "");
@@ -2950,6 +2959,10 @@
     var key = HATCHED[fill];
     if (!key) return fill;
     var h = HATCHES[key];
+    if (h[3] === "grid") {
+      return "repeating-linear-gradient(0deg, " + h[1] + " 0 1px, transparent 1px 4px), " +
+        "repeating-linear-gradient(90deg, " + h[1] + " 0 1px, " + h[0] + " 1px 4px)";
+    }
     var edge = (5 * h[2]).toFixed(1);
     return "repeating-linear-gradient(135deg, " + h[1] + " 0 " + edge + "px, " + h[0] + " " +
       edge + "px 5px)";
@@ -4859,6 +4872,7 @@
    *  a phone has no hover to read the track's title. */
   function balanceBar(chamber, opts) {
     opts = opts || {};
+    if (opts.basis === "elected") return electedBar(chamber, opts);
     var info = KYC.meta();
     var basis = chamber === "senate" ? KYC.senateBases() : { dotted: "" };
     var c = info[chamber];
@@ -4950,6 +4964,160 @@
       "</figure>";
   }
 
+  /* ------------------------------------------- the elected Congress */
+
+  /** The seats elected so far to the Congress the 2026 election chooses
+   *  (kyc/incoming.py, rule 104), from the day after Election Day on the
+   *  reader's own calendar until that Congress sits (the record phase,
+   *  when the build sends none): null at any other time. Never a
+   *  projection: the called winners, the Senate's seats not on the
+   *  ballot by who holds them now, and the rest not yet called. */
+  function incoming() {
+    var m = KYC.meta().incoming;
+    return m && past() && !KYC.recordPhase() ? m : null;
+  }
+
+  /** "Nov. 14, 2026", the day the results were last read, or null. */
+  function readOn(m) {
+    return m && m.resultsAsOf ? KYC.dateWords(m.resultsAsOf) : null;
+  }
+
+  /** "not yet called as of Nov. 14, 2026": a claim about this site's
+   *  read, never about the count (rule 19). */
+  function notCalled(m) {
+    var day = readOn(m);
+    return "not yet called" + (day ? " as of " + day : " in the results this site has read");
+  }
+
+  /** The December rounds the uncalled seats go to, in words: "2 going to
+   *  the Dec. 12, 2026 general election" (an open primary's December round
+   *  is its general election), "1 going to the Dec. 1, 2026 runoff"; once
+   *  the day has passed on the reader's calendar, "awaiting the result of". */
+  function roundWords(rounds) {
+    var today = KYC.localDay(new Date());
+    return (rounds || []).filter(function (r) { return r.seats; }).map(function (r) {
+      var held = r.date && r.date < today;
+      return r.seats + (held ? " awaiting the result of " : " going to ") + "the " +
+        (r.date ? KYC.dateWords(r.date) + " " : "December ") + (r.open ? "general election" : "runoff");
+    });
+  }
+
+  /** "take office on Jan. 3, 2027", in the tense the reader's day gives. */
+  function takeOffice(m) {
+    var day = KYC.dateWords(m.termStart);
+    return (m.termStart && m.termStart <= KYC.localDay(new Date()) ? "were due to take office on "
+      : "take office on ") + day;
+  }
+
+  /** One chamber's elected count by party: the winners, and in the Senate
+   *  the seats not on the ballot by who holds them now. */
+  function electedTotals(e) {
+    var out = {};
+    ["R", "D", "I"].forEach(function (k) {
+      out[k] = ((e.elected || {})[k] || 0) + ((e.notUp || {})[k] || 0);
+    });
+    out.vacant = (e.notUp || {}).vacant || 0;
+    out.pending = e.uncalled || 0;
+    return out;
+  }
+
+  /** The not-yet-called clause: "1 seat not yet called as of Nov. 14,
+   *  2026", with its December rounds. */
+  function pendingWords(m, e) {
+    var n = e.uncalled || 0;
+    if (!n) return "every seat called as of " + (readOn(m) || "the results this site has read");
+    var rounds = roundWords(e.rounds);
+    return n + (n === 1 ? " seat " : " seats ") + notCalled(m) +
+      (rounds.length ? " (of them, " + rounds.join("; ") + ")" : "");
+  }
+
+  function sumNotUp(e) {
+    var u = e.notUp || {};
+    return (u.R || 0) + (u.D || 0) + (u.I || 0) + (u.vacant || 0);
+  }
+
+  /** The bar, on the elected basis (KYC.balanceBar's opts.basis): the
+   *  parts in the same order, Republicans from the left and Democrats from
+   *  the right, the seats not yet called a grid of their own between them
+   *  (bb-pending: never the dots of a seat on the ballot, nor vacant's
+   *  outline, rule 88), every count in words too. */
+  function electedBar(chamber, opts) {
+    var m = KYC.meta().incoming;
+    var e = m && m[chamber];
+    if (!e) return "";
+    var seats = e.seats;
+    var n = electedTotals(e);
+    var parts = [];
+    var add = function (key, count) { if (count > 0) parts.push({ key: key, n: count }); };
+    add("r", n.R);
+    add("i", n.I);
+    add("vacant", n.vacant);
+    add("pending", n.pending);
+    add("d", n.D);
+    var name = chamber === "senate" ? "Senate" : "House";
+    var counted = [["R", n.R], ["I", n.I], ["D", n.D]].filter(function (p) { return p[1]; })
+      .map(function (p) {
+        var won = (e.elected || {})[p[0]] || 0;
+        var kept = (e.notUp || {})[p[0]] || 0;
+        return p[1] + " " + WORDS[p[0]][p[1] === 1 ? 0 : 1] + (chamber === "senate" && kept
+          ? " (" + won + " elected in 2026, " + kept + " in seats not on the 2026 ballot)" : "");
+      });
+    if (n.vacant) counted.push(n.vacant + " vacant, not on the 2026 ballot");
+    var majority = chamber === "senate" ? 51 : Math.floor(seats / 2) + 1;
+    var spoken = "The " + KYC.ordinal(m.congress) + " Congress’s " + name + ", as elected so far: " +
+      (counted.join(", ") || "no seat called") + "; " + pendingWords(m, e) +
+      ". The tick marks half the seats: " + majority + " is a majority.";
+    var bar = parts.map(function (p) {
+      return '<span class="bb-seg bb-' + p.key + '" style="width:' + share(p.n, seats) + '"></span>';
+    }).join("");
+    var track = '<div class="bb-track" role="img" aria-label="' + attr(spoken) + '" title="' + attr(spoken) +
+      '">' + bar + '<span class="bb-half" aria-hidden="true"></span></div>';
+    var counts = !opts.counts ? "" : [["R", "r"], ["I", "i"], ["D", "d"]].filter(function (p) { return n[p[0]]; })
+      .map(function (p) {
+        return '<strong class="party-' + p[1] + '">' + n[p[0]] + " " + p[0] + "</strong>";
+      }).concat(n.vacant ? ["<strong>" + n.vacant + " vacant</strong>"] : []).join(" · ");
+    var pending = pendingWords(m, e);
+    var grid = n.pending
+      ? '<span class="bb-swatch bb-pending" aria-hidden="true"></span> Grid: ' + esc(pending) + ". "
+      : esc(pending.charAt(0).toUpperCase() + pending.slice(1)) + ". ";
+    return '<figure class="balance-bar balance-bar-compact" data-chamber="' + attr(chamber) +
+      '" data-basis="elected">' +
+      (opts.title ? '<figcaption class="bb-title">' + esc(opts.title) + "</figcaption>" : "") + track +
+      '<p class="bb-note">' + (counts ? '<span class="bb-counts">' + counts + ". </span>" : "") + grid +
+      (chamber === "senate" && sumNotUp(e)
+        ? "Seats not on the 2026 ballot are counted by the party of who holds each now. " : "") +
+      "The tick marks half: " + majority + " is a majority.</p></figure>";
+  }
+
+  /** The sidebar's elected Congress, under today's bars (rule 104): each
+   *  chamber's elected count in the same pills and an elected bar, the day
+   *  the results were read, and when the members-elect take office - and
+   *  that the counts above, not these, are who sits now (rule 27). */
+  function incomingBlock() {
+    var m = incoming();
+    if (!m) return "";
+    var pill = function (count, cls, label) {
+      return count ? '<span class="' + cls + '">' + count + " " + label + "</span>" : "";
+    };
+    var chamber = function (key, label) {
+      var n = electedTotals(m[key]);
+      return '<div class="balance-label">' + label + "</div>" +
+        '<div class="balance">' + [pill(n.R, "party-r", "R"), pill(n.D, "party-d", "D"),
+          pill(n.I, "party-i", "I"), pill(n.vacant, "party-vacant", "Vacant"),
+          pill(n.pending, "faint", "not yet called")].filter(Boolean)
+          .join('<span class="sep">/</span>') + "</div>" + balanceBar(key, { basis: "elected" });
+    };
+    var onMap = /(^|\/)map\.html$/.test(String(global.location.pathname || ""));
+    return '<div class="incoming-block" data-incoming>' +
+      '<h3 class="balance-label incoming-head">Elected to the ' + esc(KYC.ordinal(m.congress)) +
+      " Congress so far</h3>" + chamber("senate", "Senate") + chamber("house", "House") +
+      '<p class="bb-note">From the races the results this site last read' +
+      (readOn(m) ? ", on " + esc(readOn(m)) + "," : "") + " mark as won. The members-elect " +
+      esc(takeOffice(m)) + "; until then the counts above are who sits. House: voting seats only." +
+      (onMap ? "" : ' <a href="' + attr(KYC.siteRoot() + "map.html#/?congress=elected") +
+        '">On the map ›</a>') + "</p></div>";
+  }
+
   /* ------------------------------------------- the House, a square a seat */
 
   function houseLayout() {
@@ -4984,6 +5152,7 @@
     opts = opts || {};
     var layout = houseLayout();
     if (!layout) return "";
+    if (opts.basis === "elected") return electedTiles(layout, opts);
     var who = seatedBySeat();
     var W = layout.width;
     var H = layout.height;
@@ -5025,10 +5194,96 @@
       (W / H).toFixed(4) + '">' + html + "</div>";
   }
 
+  /** A race by its id, from the races the page holds (the map's index). */
+  var raceById = null;
+  function raceOf(id) {
+    if (!raceById) {
+      raceById = {};
+      (KYC.races() || []).forEach(function (r) { raceById[r.id] = r; });
+    }
+    return raceById[id] || null;
+  }
+
+  /** One seat of the elected Congress's House (kycBuildMeta.incoming): its
+   *  winner's party and words, or its race not yet called. */
+  function electedSeat(code, n) {
+    var m = KYC.meta().incoming || {};
+    var seat = ((((m.states || {})[code] || {}).house || {}).seats || {})[n];
+    var label = code + (n === "0" ? " at large" : "-" + n);
+    if (!seat) return { kind: "pending", title: label + ": " + notCalled(m) };
+    if (seat.party) {
+      var p = seat.id ? KYC.byId(seat.id) : null;
+      var who = p ? p.name + " (" + p.party + ")" : (seat.name || "") +
+        (seat.partyName ? " (" + seat.partyName + ")" : "");
+      return { kind: seat.party.toLowerCase(), title: label + ": " + who + ", elected in 2026" };
+    }
+    var race = raceOf(seat.race);
+    var words = seat.status === "runoff" && race ? KYC.runoffWords(race).race : null;
+    return { kind: "pending", title: label + ": " + (words ? words + "; " : "") + notCalled(m) };
+  }
+
+  /** The House's squares on the elected basis: the 2026 map's districts
+   *  (kyc/incoming.tile_problems holds them to the races), each its
+   *  winner's party, or the grid where it is not yet called; each square's
+   *  title names its winner, its December round, or the day this site last
+   *  read the results. */
+  function electedTiles(layout, opts) {
+    var W = layout.width;
+    var H = layout.height;
+    var m = KYC.meta().incoming || {};
+    var html = Object.keys(layout.states).sort().map(function (code) {
+      var b = layout.states[code];
+      var gap = layout.gap || 0;
+      var slot = Math.max(b.cols, layout.slot || 2);
+      var reach = slot + gap;
+      var left = b.x - (slot - b.cols) / 2 - gap / 2;
+      var top = b.y - layout.band;
+      var cells = b.cells2026 || b.cells;
+      var tally = { r: 0, d: 0, i: 0, pending: 0 };
+      var squares = Object.keys(cells).map(function (n) {
+        var seat = electedSeat(code, n);
+        tally[seat.kind] += 1;
+        return '<span class="ht-seat ht-' + seat.kind + '" style="grid-column:' + (cells[n][0] + 1) +
+          ";grid-row:" + (cells[n][1] + 1) + '" title="' + attr(seat.title) + '"></span>';
+      }).join("");
+      var said = [["r", "Republican"], ["d", "Democratic"], ["i", "independent"],
+        ["pending", notCalled(m)]].filter(function (k) { return tally[k[0]]; })
+        .map(function (k) { return tally[k[0]] + " " + k[1]; });
+      var total = Object.keys(cells).length;
+      var label = KYC.stateName(code) + ", elected so far: " + total + (total === 1 ? " seat, " : " seats, ") +
+        said.join(", ");
+      return '<button type="button" class="ht-state' + (opts.selected === code ? " is-selected" : "") +
+        '" data-state="' + attr(code) + '" aria-pressed="' + String(opts.selected === code) +
+        '" aria-label="' + attr(label) + '" style="left:' + share(left, W) + ";top:" + share(top, H) +
+        ";width:" + share(reach, W) + ";height:" + share(layout.band + b.rows, H) + '">' +
+        '<span class="ht-code" style="height:' + share(layout.band, layout.band + b.rows) + '">' +
+        esc(code) + "</span>" +
+        '<span class="ht-block" style="width:' + share(b.cols, reach) + ";height:" +
+        share(b.rows, layout.band + b.rows) + ";grid-template-columns:repeat(" + b.cols +
+        ",1fr);grid-template-rows:repeat(" + b.rows + ',1fr)">' + squares + "</span></button>";
+    }).join("");
+    return '<div class="house-tiles" data-basis="elected" style="aspect-ratio:' + W + " / " + H +
+      ";--ht-ratio:" + (W / H).toFixed(4) + '">' + html + "</div>";
+  }
+
   /** The key under the tiles: only the kinds some square is drawn in. */
-  function houseTilesKey() {
+  function houseTilesKey(opts) {
     var layout = houseLayout();
     if (!layout) return "";
+    if (opts && opts.basis === "elected") {
+      var kinds = {};
+      Object.keys(layout.states).forEach(function (code) {
+        var b = layout.states[code];
+        Object.keys(b.cells2026 || b.cells).forEach(function (n) { kinds[electedSeat(code, n).kind] = true; });
+      });
+      return [["r", "Republican"], ["d", "Democratic"], ["i", "Independent"],
+        ["pending", "Grid: " + notCalled(KYC.meta().incoming)]]
+        .filter(function (k) { return kinds[k[0]]; })
+        .map(function (k) {
+          return '<span class="key"><span class="swatch ht-swatch ht-' + k[0] + '"></span>' + esc(k[1]) +
+            "</span>";
+        }).join("");
+    }
     var who = seatedBySeat();
     var seen = {};
     Object.keys(layout.states).forEach(function (code) {
@@ -5117,9 +5372,22 @@
       wrap.innerHTML = balanceBar(pair[1], { compact: true });
       slot.parentNode.insertBefore(wrap, slot.nextSibling);
     });
+    // The elected Congress under today's bars, until it sits (rule 104).
+    var house = doc.getElementById("houseBalance");
+    var block = house && incomingBlock();
+    if (block) {
+      var next = house.nextElementSibling;
+      var after = next && next.className === "balance-bar-slot" ? next : house;
+      var holder = doc.createElement("div");
+      holder.innerHTML = block;
+      after.parentNode.insertBefore(holder.firstChild, after.nextSibling);
+    }
   });
 
   KYC.balanceBar = balanceBar;
+  KYC.incoming = incoming;
+  KYC.incomingWords = { readOn: readOn, notCalled: notCalled, rounds: roundWords,
+    takeOffice: takeOffice, totals: electedTotals, pending: pendingWords };
   KYC.houseTiles = houseTiles;
   KYC.houseTilesKey = houseTilesKey;
   KYC.districtTiles = districtTiles;

@@ -28,6 +28,25 @@
   // The House view drawn as the map ("map") or one square per seat
   // ("tiles", VISUALS-27); in the address as layout=tiles.
   var layout = "map";
+  // The Senate and House views drawn as who sits now ("now") or as the
+  // Congress the 2026 election has elected so far ("elected", rule 104),
+  // from the day after Election Day until that Congress sits; in the
+  // address as congress=elected.
+  var basis = "now";
+
+  /** The elected Congress's figures (KYC.incoming), where the view is the
+   *  Senate's or the House's and the reader asked for them; else null. */
+  function elected() {
+    if (basis !== "elected" || (mode !== "senate" && mode !== "house")) return null;
+    return KYC.incoming ? KYC.incoming() : null;
+  }
+
+  /** The chamber the view draws, and the state's part of the elected count. */
+  function electedPart(code) {
+    var m = elected();
+    var st = m && (m.states || {})[code];
+    return st ? st[mode === "house" ? "house" : "senate"] || null : null;
+  }
 
   /* --------------------------------------------------------- delegations */
 
@@ -96,6 +115,9 @@
   var UNKNOWN_FILL = "var(--surface-3)";
   var SPLIT_FILL = "var(--split)";
   var I_FILL = "var(--party-i-fill)";
+  // A delegation the seats not yet called could still change (rule 104):
+  // a grid of its own, hatched by KYC.svgFill like split and none.
+  var PENDING_FILL = "var(--pending-fill)";
 
   /* "In the general election runoff" -> "in the general election runoff",
    * for a status's words inside a sentence. */
@@ -143,9 +165,51 @@
     return KYC.stategov.modes.indexOf(mode) !== -1;
   }
 
+  /* The elected view's fills, by the step kyc/incoming.py works out for
+   * each delegation over every way its uncalled seats could go: a step
+   * the uncalled seats cannot change is drawn as decided, and one they
+   * could is "not yet decided". */
+  var STEP_FILL = {
+    allR: "var(--party-r)", majR: tint("r"), even: SPLIT_FILL, majD: tint("d"), allD: "var(--party-d)",
+    split: SPLIT_FILL, allI: I_FILL, vacant: VACANT_FILL, none: NONE_FILL, undecided: PENDING_FILL,
+  };
+  var STEP_WORDS = {
+    senate: { allR: "both Republican", allD: "both Democratic", split: "split, or one independent",
+      allI: "both independent", vacant: "vacant", none: "no senators", undecided: "not yet decided" },
+    house: { allR: "all Republican", majR: "a Republican majority", even: "even", majD: "a Democratic majority",
+      allD: "all Democratic", allI: "all independent", none: "no seats", undecided: "not yet decided" },
+  };
+
+  /** The counts of one state's part of the elected Congress, in words. */
+  function partWords(part) {
+    var n = KYC.incomingWords.totals(part);
+    return [["R", "R"], ["D", "D"], ["I", "I"]].filter(function (k) { return n[k[0]]; })
+      .map(function (k) { return n[k[0]] + k[1]; })
+      .concat(n.vacant ? [n.vacant + " vacant"] : [])
+      .concat(n.pending ? [n.pending + " " + KYC.incomingWords.notCalled(elected())] : []).join(", ");
+  }
+
+  /** Fill and hover text for one state in the elected Congress's view. */
+  function electedLook(code) {
+    var part = electedPart(code);
+    var chamber = mode === "house" ? "House" : "Senate";
+    if (!part) return { fill: NONE_FILL, text: code + ": no senators (not a state)" };
+    var fill = STEP_FILL[part.step] || PENDING_FILL;
+    var words = STEP_WORDS[mode === "house" ? "house" : "senate"][part.step] || part.step;
+    var ordinal = KYC.ordinal(elected().congress);
+    return {
+      fill: fill,
+      ink: inkFor(fill),
+      text: code + " " + chamber + ", " + ordinal + " Congress as elected so far: " + partWords(part) +
+        (part.step === "undecided" ? " (the delegation's balance is not yet decided)"
+          : part.uncalled ? " (" + words + " whatever the seats not yet called decide)" : ""),
+    };
+  }
+
   /** Fill and hover text for one state in the current mode. */
   function appearance(code) {
     if (stateMode()) return KYC.stategov.look(code, mode);
+    if (elected()) return electedLook(code);
     var counts = tally(code);
 
     if (mode === "senate") {
@@ -245,6 +309,8 @@
     onSelect: function (code) { select(code); },
     // A special election's state is outlined (RACES-21).
     marked: function (code) { return mode === "senate2026" && !!appearance(code).special; },
+    // A state with seats not yet called, in the elected view (rule 104).
+    pending: function (code) { var part = electedPart(code); return !!(part && part.uncalled); },
   });
 
   /* --------------------------------------------------------------- legend */
@@ -289,6 +355,10 @@
   /** A legend key's swatch, drawn as the map draws its fill (hatched where
    *  the map hatches), naming that fill in data-fill. */
   function swatch(fill) {
+    if (fill === "pending-outline") {
+      return '<svg class="swatch swatch-pending" data-fill="pending-outline" viewBox="0 0 26 12"' +
+        ' aria-hidden="true" focusable="false"><rect x="1" y="1" width="24" height="10"/></svg>';
+    }
     /* The key is the map's own dash, on a shape wide enough to show it: a
      * dashed border on a 10px square drew as a solid box, the look of the
      * picked state's outline. */
@@ -309,8 +379,42 @@
     });
   }
 
+  /* The elected view's keys, in each chamber's order: only the steps some
+   * state is drawn in, and the dotted outline where a state has seats not
+   * yet called. */
+  var ELECTED_KEYS = {
+    senate: [["allR", "Both Republican"], ["allD", "Both Democratic"], ["split", "Split, or one independent"],
+      ["allI", "Both independent"], ["vacant", "A seat vacant"],
+      ["undecided", "Not yet decided: a race not yet called"], ["none", "No senators (D.C. and territories)"]],
+    house: [["allR", "All R"], ["majR", "R majority"], ["even", "Even"], ["majD", "D majority"],
+      ["allD", "All D"], ["allI", "All independent"],
+      ["undecided", "Not yet decided: the seats not yet called could change it"]],
+  };
+
+  function electedLegend() {
+    var codes = map.codes();
+    var drawn = {};
+    var pending = false;
+    codes.forEach(function (code) {
+      var part = electedPart(code);
+      drawn[part ? part.step : "none"] = true;
+      if (part && part.uncalled) pending = true;
+    });
+    var chamber = mode === "house" ? "house" : "senate";
+    return ELECTED_KEYS[chamber].filter(function (k) { return drawn[k[0]]; })
+      .map(function (k) {
+        return '<span class="key" data-step="' + k[0] + '">' + swatch(STEP_FILL[k[0]]) +
+          KYC.escapeHtml(k[1]) + "</span>";
+      }).join("") + (pending ? '<span class="key" data-step="pending-outline">' + swatch("pending-outline") +
+        "Dotted outline: seats " + KYC.escapeHtml(KYC.incomingWords.notCalled(elected())) + "</span>" : "");
+  }
+
   function drawLegend() {
     var target = doc.getElementById("mapLegend");
+    if (elected()) {
+      target.innerHTML = electedLegend();
+      return;
+    }
     if (stateMode()) {
       target.innerHTML = KYC.stategov.legend(mode).map(function (entry) {
         return '<span class="key">' + swatch(entry[0]) + KYC.escapeHtml(entry[1]) + "</span>";
@@ -548,7 +652,9 @@
     var people = forMode(code).slice();
 
     doc.getElementById("panelState").textContent = map.name(code);
-    doc.getElementById("panelMode").textContent = MODE_TITLE[mode];
+    doc.getElementById("panelMode").textContent = elected()
+      ? (mode === "house" ? "House" : "Senate") + ", elected to the " + KYC.ordinal(elected().congress) +
+        " Congress so far" : MODE_TITLE[mode];
     var pageLink = doc.getElementById("panelStateLink");
     if (pageLink) {
       pageLink.hidden = false;
@@ -570,6 +676,11 @@
         ? KYC.stategov.racePanel(code)
         : KYC.stategov.render(code, { links: true, raceLink: !governorViews })) + "</div>";
       list.scrollTop = 0;
+      return;
+    }
+
+    if (elected()) {
+      electedPanel(code, list);
       return;
     }
 
@@ -797,11 +908,88 @@
     });
   }
 
-  /** The address of what is on screen: the state, the view, and the
-   *  House's layout when it is the squares. */
+  /** A state's panel in the elected view (rule 104): its members-elect,
+   *  its senators whose seats were not on the 2026 ballot, then its races
+   *  not yet called with their people in their status words
+   *  (KYC.standing, through personRow) - and, first, that the members-elect
+   *  take office in January and are not who represents the state now
+   *  (rule 27): the Now view shows who does. */
+  function electedPanel(code, list) {
+    var m = elected();
+    var part = electedPart(code);
+    var esc = KYC.escapeHtml;
+    var words = KYC.incomingWords;
+    var pill = function (n, cls, label) {
+      return n ? '<span class="' + cls + '">' + n + " " + label + "</span>" : "";
+    };
+    if (!part) {
+      doc.getElementById("panelCounts").innerHTML = '<span class="faint">No seats</span>';
+      list.innerHTML = '<div class="empty-state">' + KYC.icon("info") + "<p>" + nothingHere(code) + "</p></div>";
+      return;
+    }
+    var n = words.totals(part);
+    doc.getElementById("panelCounts").innerHTML = [pill(n.R, "party-r", "R"), pill(n.D, "party-d", "D"),
+      pill(n.I, "party-i", "I"), pill(n.vacant, "party-vacant", "vacant"),
+      pill(n.pending, "faint", "not yet called")].filter(Boolean).join(" ");
+    var place = KYC.placeWords(code);
+    var html = '<p class="panel-note incoming-note">Elected so far, as the results this site last read' +
+      (words.readOn(m) ? ", on " + esc(words.readOn(m)) + "," : "") + " mark the winners. The members-elect " +
+      esc(words.takeOffice(m)) + ". They are not who represents " + esc(place) +
+      ' now: <button type="button" class="link-button" data-basis="now">the Now view</button> shows who does.</p>';
+    var seats = mode === "house"
+      ? Object.keys(part.seats).sort(function (a, b) { return a - b; }).map(function (k) { return part.seats[k]; })
+      : part.seats;
+    var won = seats.filter(function (seat) { return seat.party; });
+    var open = seats.filter(function (seat) { return !seat.party; });
+    if (won.length) {
+      html += '<p class="panel-subhead">Elected in 2026 <span>' + won.length + "</span></p>" +
+        won.map(function (seat) {
+          var p = seat.id ? KYC.byId(seat.id) : null;
+          return p ? personRow(p) : '<p class="panel-note">' + esc(seat.name) +
+            (seat.partyName ? " (" + esc(seat.partyName) + ")" : "") +
+            ", elected in 2026, as the results page names them; no profile here.</p>";
+        }).join("");
+    }
+    var held = (part.held || []).map(function (h) { return KYC.byId(h.id); }).filter(Boolean);
+    if (mode === "senate" && (held.length || n.vacant)) {
+      html += '<p class="panel-subhead">Seats not on the 2026 ballot <span>' + (held.length + n.vacant) +
+        '</span></p><p class="panel-note">Counted by who holds each now.</p>' + held.map(personRow).join("") +
+        (n.vacant ? '<p class="panel-note">' + n.vacant + (n.vacant === 1 ? " seat" : " seats") +
+          " vacant now.</p>" : "");
+    } else if (held.length) {
+      // Puerto Rico's Resident Commissioner, elected to a four-year term.
+      html += '<p class="panel-subhead">Not on the 2026 ballot <span>' + held.length + "</span></p>" +
+        held.map(personRow).join("");
+    }
+    if (open.length) {
+      html += '<p class="panel-subhead">' + esc(words.notCalled(m).replace(/^./, function (c) {
+        return c.toUpperCase(); })) + " <span>" + open.length + "</span></p>" +
+        '<div class="incoming-open">' + open.map(function (seat) {
+          var race = KYC.races().filter(function (r) { return r.id === seat.race; })[0];
+          if (!race) return "";
+          var people = race.incumbentIds.concat(race.candidateIds).filter(function (id, i, all) {
+            return all.indexOf(id) === i;
+          }).map(KYC.byId).filter(function (p) {
+            if (!p) return false;
+            var contest = p.isCandidate ? p.raceId : (p.raceStatusRace || p.contestRaceId || p.raceId);
+            return contest === race.id && KYC.stillRunning(race, p);
+          }).sort(function (a, b) { return KYC.racePosition(a) - KYC.racePosition(b); });
+          var round = seat.status === "runoff" ? KYC.runoffWords(race) : null;
+          return '<p class="panel-seat">' + esc(race.label || race.id) +
+            (round ? ' <span class="badge ' + round.cls + '">' + esc(round.race) + "</span>" : "") + "</p>" +
+            people.map(personRow).join("") + KYC.cards.unprofiledNote(race, "panel-note");
+        }).join("") + "</div>";
+    }
+    list.innerHTML = html;
+    list.scrollTop = 0;
+  }
+
+  /** The address of what is on screen: the state, the view, the House's
+   *  layout when it is the squares, and the elected Congress's basis. */
   function routeNow() {
     return { state: selected, mode: mode === "senate" ? "" : mode,
-             layout: mode === "house" && layout === "tiles" ? "tiles" : "" };
+             layout: mode === "house" && layout === "tiles" ? "tiles" : "",
+             congress: elected() ? "elected" : "" };
   }
 
   /* ------------------------------------------- bars and squares (charts) */
@@ -818,8 +1006,19 @@
     var chamber = mode === "house" ? "house" : mode === "senate" || mode === "senate2026" ? "senate" : "";
     var squares = mode === "house" && layout === "tiles" && !!KYC.houseTiles &&
       !!(KYC.meta() || {}).houseTiles;
+    var m = KYC.incoming ? KYC.incoming() : null;
+    var shown = elected();
+    // Now or the Congress elected so far, in the Senate's and the House's
+    // views, from the day after Election Day until it sits (rule 104).
+    var basisChoice = m && (mode === "senate" || mode === "house")
+      ? '<div class="map-layout map-basis"><span id="mapBasisLabel">Show the ' +
+        (mode === "house" ? "House" : "Senate") + "</span>" +
+        '<div class="segmented" role="group" aria-labelledby="mapBasisLabel">' +
+        '<button type="button" data-basis="now" aria-pressed="' + String(!shown) + '">Sitting now</button>' +
+        '<button type="button" data-basis="elected" aria-pressed="' + String(!!shown) + '">Elected to the ' +
+        KYC.escapeHtml(KYC.ordinal(m.congress)) + "</button></div></div>" : "";
     box.hidden = !chamber;
-    box.innerHTML = !chamber ? "" :
+    box.innerHTML = !chamber ? "" : basisChoice +
       (mode === "house" && (KYC.meta() || {}).houseTiles
         ? '<div class="map-layout"><span id="mapLayoutLabel">Draw the House as</span>' +
           '<div class="segmented" role="group" aria-labelledby="mapLayoutLabel">' +
@@ -831,16 +1030,25 @@
       // review), pushing Vermont and Connecticut into callouts. Its counts
       // are printed below the laptop layout, where the sidebar is not
       // beside the map and a phone has no hover for the track's title.
-      KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now",
-        compact: true, counts: true });
+      (shown
+        ? KYC.balanceBar(chamber, { basis: "elected", compact: true, counts: true,
+          title: "The " + (chamber === "senate" ? "Senate" : "House") + ", elected so far" })
+        : KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now",
+          compact: true, counts: true }));
     stage.hidden = squares;
     tiles.hidden = !squares;
     if (squares) {
-      tiles.innerHTML = KYC.houseTiles({ selected: selected }) +
-        '<p class="bb-note">Each square is a voting seat, coloured by who sits for it, in bands ' +
-        "from its state’s north to its south. Pick a state for its delegation.</p>";
+      tiles.innerHTML = KYC.houseTiles({ selected: selected, basis: shown ? "elected" : "" }) +
+        (shown
+          ? '<p class="bb-note">Each square is a voting seat on the 2026 district map, coloured by the ' +
+            "party of the winner the results this site last read mark, or a grid where the race is " +
+            KYC.escapeHtml(KYC.incomingWords.notCalled(shown)) + ", in bands from its state’s north to its " +
+            "south. The members-elect " + KYC.escapeHtml(KYC.incomingWords.takeOffice(shown)) +
+            ". Pick a state for its members-elect.</p>"
+          : '<p class="bb-note">Each square is a voting seat, coloured by who sits for it, in bands ' +
+            "from its state’s north to its south. Pick a state for its delegation.</p>");
       // The key says what the squares are, in place of the map's ramp.
-      doc.getElementById("mapLegend").innerHTML = KYC.houseTilesKey();
+      doc.getElementById("mapLegend").innerHTML = KYC.houseTilesKey({ basis: shown ? "elected" : "" });
     } else {
       tiles.innerHTML = "";
     }
@@ -851,6 +1059,27 @@
     drawLegend();
     drawCharts();
     KYC.router.writeFilters(routeNow());
+  }
+
+  /** Now, or the Congress elected so far (rule 104): its own address. */
+  function setBasis(next, opts) {
+    basis = next === "elected" ? "elected" : "now";
+    syncSources();
+    drawLegend();
+    drawCharts();
+    map.paint();
+    if (selected) showPanel(selected);
+    if (!(opts && opts.fromRoute)) KYC.router.writeFilters(routeNow());
+  }
+
+  /* The footer names this view's sources: the national view of Congress
+   * named none (TECH-11), and the elected view counts from the results,
+   * which it says. The state panels date their own. */
+  function syncSources() {
+    var key = elected() ? "elected" : mode;
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-sources]"), function (line) {
+      line.hidden = (" " + line.getAttribute("data-sources") + " ").indexOf(" " + key + " ") === -1;
+    });
   }
 
   function select(code, opts) {
@@ -887,11 +1116,7 @@
     // A phone's one menu of views (TECH-14, VISUALS-12).
     var picker = doc.getElementById("mapModeSelect");
     if (picker) picker.value = mode;
-    // The footer names this view's sources: the national view of Congress
-    // named none (TECH-11). The state panels date their own.
-    Array.prototype.forEach.call(doc.querySelectorAll("[data-sources]"), function (line) {
-      line.hidden = (" " + line.getAttribute("data-sources") + " ").indexOf(" " + mode + " ") === -1;
-    });
+    syncSources();
     drawLegend();
     drawCharts();
     map.paint();
@@ -950,6 +1175,7 @@
      * link and every shared profile link all landed on a blank map. */
     var initial = KYC.router.read();
     layout = initial.params.layout === "tiles" ? "tiles" : "map";
+    basis = initial.params.congress === "elected" ? "elected" : "now";
     setMode(MODE_TITLE[initial.params.mode] ? initial.params.mode : "senate",
             { fromRoute: true });
 
@@ -964,6 +1190,8 @@
     doc.getElementById("mapBalance").addEventListener("click", function (event) {
       var button = event.target.closest("[data-layout]");
       if (button) setLayout(button.getAttribute("data-layout"));
+      var choice = event.target.closest("[data-basis]");
+      if (choice) setBasis(choice.getAttribute("data-basis"));
     });
     doc.getElementById("mapTiles").addEventListener("click", function (event) {
       var state = event.target.closest(".ht-state");
@@ -971,6 +1199,11 @@
     });
 
     doc.getElementById("delegation").addEventListener("click", function (event) {
+      var choice = event.target.closest("[data-basis]");
+      if (choice) {
+        setBasis(choice.getAttribute("data-basis"));
+        return;
+      }
       var row = event.target.closest("[data-id]");
       if (row) KYC.profile.open(row.getAttribute("data-id"));
     });
@@ -987,9 +1220,14 @@
       if (KYC.profile.isOpen()) KYC.profile.close();
       var wanted = route.params.mode || "senate";
       var shape = route.params.layout === "tiles" ? "tiles" : "map";
+      var asked = route.params.congress === "elected" ? "elected" : "now";
       if (shape !== layout) {
         layout = shape;
-        if (wanted === mode) { drawLegend(); drawCharts(); }
+        if (wanted === mode && asked === basis) { drawLegend(); drawCharts(); }
+      }
+      if (asked !== basis) {
+        basis = asked;
+        if (wanted === mode) setBasis(asked, { fromRoute: true });
       }
       if (wanted !== mode) setMode(wanted, { fromRoute: true });
       if (route.params.state && route.params.state !== selected) {
@@ -1007,6 +1245,11 @@
       KYC.profile.open(initial.id, { fromRoute: true });
     } else if (initial.params.state) {
       select(initial.params.state, { fromRoute: true });
+    }
+    // An address asking for the elected Congress where there is none to
+    // show (before Election Day, or once it sits) says what is shown.
+    if (initial.view !== "profile" && initial.params.congress && !elected()) {
+      KYC.router.writeFilters(routeNow());
     }
   });
 })(window);

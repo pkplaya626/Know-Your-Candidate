@@ -6504,13 +6504,15 @@ function testColourVision(css) {
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
   };
   const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
-  const HATCHED = new Set(["var(--split)", "var(--none-fill)", "color-mix(in srgb, var(--split) 70%, var(--surface-1))"]);
+  // The grid of a seat not yet called (rule 104) is a pattern too.
+  const HATCHED = new Set(["var(--split)", "var(--none-fill)", "color-mix(in srgb, var(--split) 70%, var(--surface-1))",
+    "var(--pending-fill)"]);
   const mix70 = (k) => `color-mix(in srgb, var(--${k}) 70%, var(--surface-1))`;
   // The fills each legend draws side by side, as the map modules name them.
   const LEGENDS = {
     "the partisan and state-government maps": ["var(--party-r)", "var(--party-d)", "var(--party-i-fill)",
       "var(--party-r-tint)", "var(--party-d-tint)", "var(--split)", "var(--vacant-fill)",
-      "var(--none-fill)", "var(--nonpartisan-fill)", "var(--text)"],
+      "var(--none-fill)", "var(--nonpartisan-fill)", "var(--text)", "var(--pending-fill)"],
     "the district and legislature maps": [mix70("party-d"), mix70("party-r"), mix70("party-i-fill"),
       mix70("split"), "color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1))"],
     "the guide's categories": ["var(--cat-1)", "var(--cat-2)", "var(--cat-3)", "var(--cat-4)",
@@ -6531,8 +6533,8 @@ function testColourVision(css) {
     if (!fill) throw new Error("no fill rule for " + sel);
     return fill[1].trim();
   };
-  LEGENDS["the balance bar"] = ["r", "d", "i"].map((p) => ruleFill(".bb-" + p));
-  LEGENDS["the House squares"] = ["r", "d", "i"].map((p) => ruleFill(".ht-" + p));
+  LEGENDS["the balance bar"] = ["r", "d", "i"].map((p) => ruleFill(".bb-" + p)).concat([blockFill(".bb-pending")]);
+  LEGENDS["the House squares"] = ["r", "d", "i"].map((p) => ruleFill(".ht-" + p)).concat([blockFill(".ht-pending")]);
   suite("kyc.css — no fill is a text colour (rule 88)", () => {
     const fills = [...css.matchAll(/(?:^|[;{\s])(?:background(?:-color)?|fill)\s*:\s*[^;}]*var\(--party-i\)[^;}]*/g)]
       .map((m) => m[0].trim());
@@ -6541,6 +6543,22 @@ function testColourVision(css) {
     const up = css.match(/^\.bb-up \{([^}]*)\}/m);
     check("the bar marks a seat on the ballot with dots, not the map's hatch",
       !!up && /radial-gradient/.test(up[1]) && !/linear-gradient/.test(up[1]), up ? up[1] : "no .bb-up rule");
+    // A seat not yet called (rule 104) is a grid of its own: never the
+    // dots of a seat on the ballot, nor the diagonal hatch of split and
+    // none, nor vacant's bare outline - on the bar, the squares and the map.
+    ["bb-pending", "ht-pending"].forEach((cls) => {
+      const rule = css.match(new RegExp("^\\." + cls + " \\{([^}]*)\\}", "m"));
+      const body = rule ? rule[1] : "";
+      check(`.${cls} is a grid: lines across and down, no dots, no diagonal`,
+        /repeating-linear-gradient\(0deg/.test(body) && /repeating-linear-gradient\(90deg/.test(body) &&
+          !/radial-gradient|45deg|135deg/.test(body), body);
+    });
+    const js = fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8");
+    check("the map's pattern for it is a grid too, unrotated",
+      /"pending": \["var\(--pending-fill\)", "var\(--pending-grid\)", [\d.]+, "grid"\]/.test(js) &&
+        /grid \? "" : ' patternTransform="rotate\(45\)"'/.test(js));
+    check("and its outline mark is dotted, never the special election's dashes",
+      /\.state\.is-pending \{[^}]*stroke-dasharray: 0\.5 3\.5/.test(css) && /\.state\.is-marked \{[^}]*stroke-dasharray: 5 3/.test(css));
   });
   suite("kyc.css — legend colours under colour-vision deficiency (Machado 2009)", () => {
     for (const [name, t] of Object.entries(themes)) {
@@ -6571,6 +6589,7 @@ function testColourVision(css) {
       // A callout writes on these fills in the ink kyc.js names for them.
       const inks = [["split", "split-ink"], ["party-r-tint", "text"], ["party-d-tint", "text"],
         ["vacant-fill", "vacant-ink"], ["none-fill", "text"], ["nonpartisan-fill", "text-inverse"],
+        ["pending-fill", "text"],
         ["cat-1", "cat-1-ink"], ["cat-2", "cat-2-ink"], ["cat-3", "cat-3-ink"], ["cat-4", "cat-4-ink"]]
         .map(([f, ink]) => [f, ratio(resolve(t, `var(--${f})`), resolve(t, `var(--${ink})`))]);
       // Grey means "none": the Eleventh Circuit drawn in it read as missing
@@ -6607,7 +6626,7 @@ function testColourVision(css) {
     }
     const js = fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8");
     check("the fills the tests call hatched are the ones kyc.js hatches",
-      /"var\(--split\)": "split", "var\(--none-fill\)": "none"/.test(js));
+      /"var\(--split\)": "split", "var\(--none-fill\)": "none",\s*"var\(--pending-fill\)": "pending"/.test(js));
   });
 }
 
@@ -20532,6 +20551,345 @@ async function testCharts() {
   }
 }
 
+/* ======================================================= the elected Congress
+ * Rule 104: from the day after Election Day until the Congress the cycle
+ * elects sits, the seats elected so far (kycBuildMeta.incoming), never a
+ * projection - in the sidebar under today's bars, and on the map's Senate
+ * and House views by a switch with its own address. Each check reads the
+ * figures the build wrote, and the constructed cases (a runoff, an
+ * independent, the record phase) make the state they test. */
+const AFTER_ELECTION = "2026-11-15T12:00:00";
+
+/* What a state's fill must be in the elected view: kyc-map.js's STEP_FILL,
+ * restated so a change on one side fails. */
+const STEP_FILL = {
+  allR: "var(--party-r)", majR: "var(--party-r-tint)", even: "var(--split)", majD: "var(--party-d-tint)",
+  allD: "var(--party-d)", split: "var(--split)", allI: "var(--party-i-fill)", vacant: "var(--vacant-fill)",
+  none: "var(--none-fill)", undecided: "var(--pending-fill)",
+};
+
+function incomingTotals(e) {
+  const n = {};
+  ["R", "D", "I"].forEach((k) => { n[k] = (e.elected[k] || 0) + ((e.notUp || {})[k] || 0); });
+  n.vacant = (e.notUp || {}).vacant || 0;
+  n.pending = e.uncalled || 0;
+  return n;
+}
+
+const segWidth = (bar, cls) => [...bar.querySelectorAll(".bb-seg." + cls)].reduce((n, s) => n + parseFloat(s.style.width), 0);
+
+/** A built House race not yet called, made a December round: the seat's
+ *  record and the race's own day, as kyc/incoming.py writes them. */
+function makeRunoff(window, meta, date) {
+  const states = meta.incoming.states;
+  const code = Object.keys(states).find((c) => !/^(AS|DC|GU|MP|PR|VI)$/.test(c) &&
+    Object.keys(states[c].house.seats).some((n) => states[c].house.seats[n].status === "uncalled"));
+  const n = Object.keys(states[code].house.seats).find((k) => states[code].house.seats[k].status === "uncalled");
+  const seat = states[code].house.seats[n];
+  seat.status = "runoff";
+  seat.date = date;
+  seat.open = true;
+  states[code].house.runoff += 1;
+  meta.incoming.house.runoff += 1;
+  meta.incoming.house.rounds = [{ date, open: true, seats: 1 }];
+  const race = window.kycRaces.find((r) => r.id === seat.race);
+  race.generalRunoff = date;
+  race.primaryKind = "open";
+  return { code, n, race };
+}
+
+async function testIncoming() {
+  {
+    const page = await buildPage("map.html", { now: AFTER_ELECTION });
+    const { window, D, errors } = page;
+    await settle(100);
+    const KYC = window.KYC;
+    const m = window.kycBuildMeta.incoming;
+    const day = KYC.dateWords(m.resultsAsOf);
+    suite("the elected Congress — the build's figures (rule 104)", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the Congress it is comes from the cycle, never typed", m.congress === (window.kycBuildMeta.election.year - 1786) / 2 + 1 ||
+        m.congress === 120, String(m.congress));
+      const s = m.senate;
+      const notUp = Object.values(s.notUp).reduce((a, b) => a + b, 0);
+      check("the Senate's seats not on the ballot and its races are its 100", notUp + s.races === 100,
+        `${notUp} + ${s.races}`);
+      check("the House's races are its 435 voting seats", m.house.races === 435 && m.house.seats === 435);
+      const sum = (e) => e.elected.D + e.elected.R + e.elected.I + e.uncalled;
+      check("every race is called for one party or counted not yet called", sum(s) === s.races &&
+        sum(m.house) === m.house.races, `${sum(s)}/${s.races} ${sum(m.house)}/${m.house.races}`);
+      // One count: the states' parts sum to the chamber's.
+      const states = Object.values(m.states);
+      const add = (chamber, key) => states.reduce((n, st) => n + (st[chamber] && !st.territory ? 0 : 0) +
+        ((st[chamber] || {})[key] || 0), 0);
+      const voting = Object.keys(m.states).filter((c) => !/^(AS|DC|GU|MP|PR|VI)$/.test(c));
+      const hs = (key) => voting.reduce((n, c) => n + m.states[c].house[key], 0);
+      check("the states' House figures are the chamber's", hs("uncalled") === m.house.uncalled &&
+        voting.reduce((n, c) => n + m.states[c].house.elected.R, 0) === m.house.elected.R);
+      check("and the Senate's", add("senate", "uncalled") === s.uncalled);
+      // The statuses say who is elected (rule 63): every profile a seat names
+      // is marked elected for that seat's race.
+      const wrong = [];
+      voting.forEach((c) => Object.entries(m.states[c].house.seats).forEach(([n, seat]) => {
+        if (!seat.id) return;
+        const p = KYC.byId(seat.id);
+        if (!p || p.raceStatus !== "elected") wrong.push(c + "-" + n);
+      }));
+      check("a seat's winner is someone the results mark elected", wrong.length === 0, wrong.slice(0, 5).join(" "));
+    });
+
+    suite("the elected Congress — the sidebar, under today's bars", () => {
+      const block = D.querySelector(".incoming-block");
+      check("the sidebar carries it after the election", !!block);
+      const section = block && block.closest(".sidebar-section");
+      check("inside the U.S. Congress block, after today's House bar", !!section &&
+        !!section.querySelector("#houseBalance") &&
+        section.querySelector("#houseBalance").compareDocumentPosition(block) === 4);
+      check("named as the Congress it is, elected so far", !!block &&
+        block.querySelector(".incoming-head").textContent === "Elected to the 120th Congress so far");
+      ["senate", "house"].forEach((chamber) => {
+        const bar = block.querySelector(`[data-chamber="${chamber}"][data-basis="elected"]`);
+        const e = m[chamber];
+        const n = incomingTotals(e);
+        check(`a ${chamber} bar on the elected basis`, !!bar);
+        if (!bar) return;
+        check(`its parts are the whole ${chamber}`, Math.abs(segWidth(bar, "bb-r") + segWidth(bar, "bb-d") +
+          segWidth(bar, "bb-i") + segWidth(bar, "bb-vacant") + segWidth(bar, "bb-pending") - 100) < 0.01);
+        check(`the ${chamber}'s Republican part is its elected seats, and in the Senate its seats not up`,
+          Math.abs(segWidth(bar, "bb-r") - 100 * n.R / e.seats) < 0.01);
+        check(`the ${chamber}'s seats not yet called are the grid, as many as the build counts`,
+          Math.abs(segWidth(bar, "bb-pending") - 100 * n.pending / e.seats) < 0.01 &&
+            !bar.querySelector(".bb-up"), String(segWidth(bar, "bb-pending")));
+        check(`the ${chamber} bar says every count in words, with the day the results were read`,
+          (bar.querySelector(".bb-track").getAttribute("aria-label") || "").indexOf(n.pending + (n.pending === 1
+            ? " seat" : " seats") + " not yet called as of " + day) !== -1 || !n.pending,
+          bar.querySelector(".bb-track").getAttribute("aria-label"));
+      });
+      check("it says when they take office and that the counts above are who sits (rule 27)", !!block &&
+        /The members-elect take office on Jan\. 3, 2027; until then the counts above are who sits/.test(block.textContent),
+        block && block.textContent);
+      check("never a projection (rule 40)", !/project|forecast|expected to/i.test(block.textContent));
+      const pills = block.querySelectorAll(".balance");
+      const sen = incomingTotals(m.senate);
+      check("the pills count what the bar draws", pills.length === 2 &&
+        pills[0].querySelector(".party-r").textContent === sen.R + " R" &&
+        (!sen.pending || pills[0].textContent.indexOf(sen.pending + " not yet called") !== -1),
+        pills[0] && pills[0].textContent);
+    });
+
+    suite("the elected Congress — the map's Senate view", () => {
+      const balance = D.getElementById("mapBalance");
+      const choice = balance.querySelector('[data-basis="elected"]');
+      check("the Senate view offers now or the elected Congress", !!choice &&
+        !!balance.querySelector('[data-basis="now"][aria-pressed="true"]'));
+      choice.click();
+      check("its own address", /congress=elected/.test(window.location.hash), window.location.hash);
+      const bar = balance.querySelector('[data-chamber="senate"][data-basis="elected"]');
+      check("the bar above the map is the elected Senate's, with its counts", !!bar && !!bar.querySelector(".bb-counts"));
+      const wrong = [], marks = [];
+      D.querySelectorAll("#usMap .state").forEach((node) => {
+        const code = node.getAttribute("data-state");
+        const part = (m.states[code] || {}).senate;
+        const want = KYC.svgFill(part ? STEP_FILL[part.step] : "var(--none-fill)");
+        if (node.style.fill !== want) wrong.push(code + " " + node.style.fill + " for " + (part && part.step));
+        if (node.classList.contains("is-pending") !== !!(part && part.uncalled)) marks.push(code);
+      });
+      check("each state is drawn as the step its senators-elect and its seats not up give", wrong.length === 0,
+        wrong.slice(0, 4).join(" | "));
+      check("a state with a race not yet called is not yet decided", Object.keys(m.states).every((c) => {
+        const part = m.states[c].senate;
+        return !part || !part.uncalled || part.step === "undecided";
+      }));
+      check("a dotted outline marks exactly the states with seats not yet called", marks.length === 0, marks.join(" "));
+      const legend = D.getElementById("mapLegend");
+      const drawn = new Set(Object.keys(m.states).map((c) => (m.states[c].senate || { step: "none" }).step));
+      const keys = [...legend.querySelectorAll("[data-step]")].map((k) => k.getAttribute("data-step"));
+      check("a key for each fill drawn, and none for a fill not drawn",
+        keys.filter((k) => k !== "pending-outline").every((k) => drawn.has(k)) &&
+          [...drawn].every((k) => keys.indexOf(k) !== -1), keys.join(","));
+      check("a key for the dotted outline where a state has one",
+        keys.indexOf("pending-outline") !== -1 === (m.senate.uncalled > 0));
+      check("the footer says what the view counts from", !D.querySelector('[data-sources="elected"]').hidden &&
+        D.querySelector('[data-sources="senate senate2026 house"]').hidden);
+      // A state with a race not yet called (Alaska's ranked-choice count, on
+      // the data of 2026-11-14), or whichever the data holds.
+      const open = Object.keys(m.states).find((c) => m.states[c].senate && m.states[c].senate.uncalled);
+      const called = Object.keys(m.states).find((c) => m.states[c].senate && !m.states[c].senate.uncalled &&
+        m.states[c].senate.seats.some((s) => s.id) && m.states[c].senate.held.length);
+      [open, called].filter(Boolean).forEach((code) => {
+        window.location.hash = "#/?congress=elected&state=" + code;
+        window.dispatchEvent(new window.HashChangeEvent("hashchange"));
+      });
+      if (called) {
+        KYC.router.writeFilters({ state: "", mode: "", congress: "elected" });
+        D.querySelector(`#usMap .state[data-state="${called}"]`).dispatchEvent(new window.Event("click", { bubbles: true }));
+        const panel = D.getElementById("delegation");
+        const part = m.states[called].senate;
+        check("the panel leads with the members-elect, saying they take office in January and are not who represents the state now",
+          /The members-elect take office on Jan\. 3, 2027\. They are not who represents .+ now/.test(
+            panel.querySelector(".incoming-note").textContent), panel.querySelector(".incoming-note").textContent);
+        const ids = [...panel.querySelectorAll("[data-id]")].map((b) => b.getAttribute("data-id"));
+        const want = part.seats.filter((s) => s.id).map((s) => s.id).concat(part.held.map((h) => h.id));
+        check("then its senators-elect and its senators whose seats were not up", want.every((id) => ids.indexOf(id) !== -1),
+          `${ids} for ${want}`);
+        check("the panel's heading says which Congress", /Senate, elected to the 120th Congress so far/.test(
+          D.getElementById("panelMode").textContent));
+      }
+      if (open) {
+        D.querySelector(`#usMap .state[data-state="${open}"]`).dispatchEvent(new window.Event("click", { bubbles: true }));
+        const panel = D.getElementById("delegation");
+        check("a race not yet called is listed with the day the results were read",
+          panel.textContent.indexOf("Not yet called as of " + day) !== -1, panel.textContent.slice(0, 300));
+        const race = window.kycRaces.find((r) => r.id === m.states[open].senate.seats.find((s) => !s.party).race);
+        const people = [...panel.querySelectorAll(".incoming-open .person-row")].map((b) => KYC.byId(b.getAttribute("data-id")));
+        check("its people in their status words (KYC.standing)", people.length > 0 && people.every((p) => {
+          const spec = KYC.standing(p, "short");
+          return spec && (p.isCandidate ? p.raceId : (p.raceStatusRace || p.contestRaceId || p.raceId)) === race.id;
+        }), people.map((p) => p.name).join(", "));
+        const now = panel.querySelector('[data-basis="now"]');
+        check("the panel's way back to who sits now", !!now);
+        now.click();
+        check("which is the now view, its address without the elected Congress",
+          !/congress=/.test(window.location.hash) && !!D.querySelector('#mapBalance [data-basis="now"][aria-pressed="true"]'),
+          window.location.hash);
+      }
+    });
+
+    suite("the elected Congress — the map's House view and its squares", () => {
+      D.querySelector('[data-mode="house"]').click();
+      D.querySelector('#mapBalance [data-basis="elected"]').click();
+      const wrong = [];
+      D.querySelectorAll("#usMap .state").forEach((node) => {
+        const code = node.getAttribute("data-state");
+        const part = (m.states[code] || {}).house;
+        if (part && node.style.fill !== KYC.svgFill(STEP_FILL[part.step])) wrong.push(code);
+      });
+      check("each state is the step its delegation will have whatever its uncalled seats decide", wrong.length === 0,
+        wrong.join(" "));
+      D.querySelector('#mapBalance [data-layout="tiles"]').click();
+      check("the squares keep the elected basis, in the address", /layout=tiles/.test(window.location.hash) &&
+        /congress=elected/.test(window.location.hash), window.location.hash);
+      const tiles = D.getElementById("mapTiles");
+      const squares = [...tiles.querySelectorAll(".ht-seat")];
+      check("one square per voting seat", squares.length === 435, String(squares.length));
+      const count = (cls) => tiles.querySelectorAll(".ht-seat.ht-" + cls).length;
+      check("each square its 2026 district's winner's party", count("r") === m.house.elected.R &&
+        count("d") === m.house.elected.D && count("i") === m.house.elected.I, `${count("r")} R ${count("d")} D`);
+      check("an uncalled square in the grid, as many as the build counts", count("pending") === m.house.uncalled &&
+        !tiles.querySelector(".ht-vacant"), String(count("pending")));
+      const titles = squares.map((sq) => sq.getAttribute("title"));
+      check("each square's title names its winner, or the day the results were read", titles.every((t) =>
+        /, elected in 2026$/.test(t) || t.indexOf("not yet called as of " + day) !== -1), titles.slice(0, 3).join(" | "));
+      const key = D.getElementById("mapLegend").textContent;
+      check("the key names the grid", !m.house.uncalled || key.indexOf("Grid: not yet called as of " + day) !== -1, key);
+      check("the squares' note says the members-elect take office in January",
+        /take office on Jan\. 3, 2027/.test(tiles.textContent));
+      check("no text is drawn inside an SVG (rule 46)", !tiles.querySelector("svg text") && !D.querySelector("#usMap text"));
+      D.querySelector('[data-mode="senate2026"]').click();
+      check("the 2026 races view stays as it is: no switch", !D.querySelector('#mapBalance [data-basis]') &&
+        !/congress=/.test(window.location.hash), window.location.hash);
+    });
+  }
+
+  {
+    // An address arriving with the elected Congress opens it.
+    const { window, D, errors } = await buildPage("map.html", { now: AFTER_ELECTION, hash: "#/?mode=house&congress=elected" });
+    await settle(100);
+    suite("the elected Congress — an address opens it", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the House's elected view", !!D.querySelector('#mapBalance [data-basis="elected"][aria-pressed="true"]') &&
+        !!D.querySelector('#mapBalance [data-chamber="house"][data-basis="elected"]'));
+    });
+  }
+
+  for (const page of ["index.html", "states/tx.html", "districts/tx.html"]) {
+    const { D, errors } = await buildPage(page, { now: AFTER_ELECTION });
+    await settle(50);
+    suite(`the elected Congress — the sidebar on ${page}`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const block = D.querySelector(".incoming-block");
+      check("carries it", !!block && block.querySelectorAll('[data-basis="elected"]').length === 2);
+      const link = block && block.querySelector('a[href$="map.html#/?congress=elected"]');
+      check("with a link to the map's elected view", !!link, block && block.innerHTML.slice(-200));
+    });
+  }
+
+  {
+    // The campaign's clock: nothing incoming, and an address asking for it
+    // shows who sits.
+    const { window, D, errors } = await buildPage("map.html", { hash: "#/?congress=elected" });
+    await settle(100);
+    suite("the elected Congress — not shown before Election Day", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("no sidebar block", !D.querySelector(".incoming-block"));
+      check("no switch, and the Senate now", !D.querySelector("#mapBalance [data-basis]") &&
+        !D.querySelector('[data-basis="elected"]'));
+      check("the address drops what it cannot show", !/congress=/.test(window.location.hash), window.location.hash);
+    });
+  }
+
+  {
+    // Once the Congress the cycle elects sits, nothing is incoming: the
+    // build sends no figures then, and the page shows none even if it did.
+    const { D, errors } = await buildPage("map.html", { now: "2027-01-10T12:00:00",
+      data: (w, meta) => { meta.election.phase = "record"; } });
+    await settle(100);
+    suite("the elected Congress — nothing incoming once it sits", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("no sidebar block and no switch", !D.querySelector(".incoming-block") &&
+        !D.querySelector("#mapBalance [data-basis]"));
+    });
+  }
+
+  {
+    // A December round and an independent, made: the words say each.
+    let made = null;
+    const { window, D, errors } = await buildPage("map.html", { now: AFTER_ELECTION,
+      hash: "#/?mode=house&layout=tiles&congress=elected",
+      data: (w, meta) => {
+        made = makeRunoff(w, meta, "2026-12-12");
+        const states = meta.incoming.states;
+        const code = Object.keys(states).find((c) => !/^(AS|DC|GU|MP|PR|VI)$/.test(c) &&
+          Object.keys(states[c].house.seats).some((n) => states[c].house.seats[n].party === "R"));
+        const n = Object.keys(states[code].house.seats).find((k) => states[code].house.seats[k].party === "R");
+        states[code].house.seats[n] = { party: "I", name: "Pat Made-Up", partyName: "Independent" };
+        states[code].house.elected.R -= 1;
+        states[code].house.elected.I += 1;
+        meta.incoming.house.elected.R -= 1;
+        meta.incoming.house.elected.I += 1;
+      } });
+    await settle(100);
+    suite("the elected Congress — a December round and an independent", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const sq = D.querySelector(`#mapTiles .ht-state[data-state="${made.code}"] .ht-seat[title^="${made.code}-${made.n}:"]`) ||
+        D.querySelector(`#mapTiles .ht-state[data-state="${made.code}"] .ht-seat[title^="${made.code} at large:"]`);
+      check("the square of a race in a December round names it", !!sq &&
+        sq.getAttribute("title").indexOf("Going to the Dec 12 general election") !== -1 && sq.classList.contains("ht-pending"),
+        sq && sq.getAttribute("title"));
+      const bar = D.querySelector('.incoming-block [data-chamber="house"] .bb-track');
+      check("the bar says the round apart, with its day", /\(of them, 1 going to the Dec\. 12, 2026 general election\)/
+        .test(bar.getAttribute("aria-label")), bar.getAttribute("aria-label"));
+      check("an independent is its own part, never folded into a party",
+        !!D.querySelector('.incoming-block [data-chamber="house"] .bb-i') &&
+          /1 independent[,;]/.test(bar.getAttribute("aria-label")));
+      check("its square is the independents' and names them", !!D.querySelector('#mapTiles .ht-i[title*="Pat Made-Up (Independent), elected in 2026"]'));
+    });
+  }
+
+  {
+    // After the round's day: awaiting its result, never "going to".
+    const { D, errors } = await buildPage("map.html", { now: "2026-12-20T12:00:00",
+      data: (w, meta) => { makeRunoff(w, meta, "2026-12-12"); } });
+    await settle(50);
+    suite("the elected Congress — a December round after its day", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const bar = D.querySelector('.incoming-block [data-chamber="house"] .bb-track');
+      check("awaiting its result", /1 awaiting the result of the Dec\. 12, 2026 general election/.test(
+        bar.getAttribute("aria-label")), bar.getAttribute("aria-label"));
+    });
+  }
+}
+
 /* ======================================================= local questions */
 
 /* The local questions of the most populous counties (rule 102), drawn by one
@@ -26387,6 +26745,7 @@ async function testTheJanuaryWords() {
   if (!only || only === "money") await testRaceMoney();
   if (!only || only === "money" || only === "map") await testMapMoney();
   if (!only || only === "charts") await testCharts();
+  if (!only || only === "charts" || only === "incoming") await testIncoming();
   if (!only || only === "guide") await testGuide();
   if (!only || only === "guide") await testBillFlow();
   if (!only || only === "federal") await testFederal();
