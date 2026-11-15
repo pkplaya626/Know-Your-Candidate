@@ -395,6 +395,24 @@ def judge(race, listed, official, close_margin, before=None):
                   f"of {len(choices)}")
 
 
+def ranking(race, listed):
+    """``[(list name, votes)]`` of one race's choices, most votes first, the
+    names in the qualified list's form; None where a choice is not a name on
+    the list (not withdrawn) or two carry one name. What the counts say,
+    complete or not, for a page's call to be read against where a gate of
+    :func:`judge` holds the race."""
+    on_list = {q["name"] for q in listed if not q.get("withdrew")}
+    out = []
+    for c in race.get("choices") or ():
+        name, _code = list_form(c["desc"])
+        if not name or name not in on_list:
+            return None
+        out.append((name, c["votes"]))
+    if not out or len({n for n, _v in out}) != len(out):
+        return None
+    return sorted(out, key=lambda nv: (-nv[1], nv[0]))
+
+
 def failure(exc):
     """Why a read failed, short, for the cache: never an address of the
     machine that asked (an error's text can carry one)."""

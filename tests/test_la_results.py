@@ -759,5 +759,376 @@ class TestTheOfficesResultBesideOtherSources(NoGap):
         self.assertIn("H-LA-05-2026", cache["officeResults"]["disagree"])
 
 
+# -------------------------------------------------- the second review's follow-ups
+
+def box(rows, title="Nonpartisan primary results", total=249336):
+    """A page's election box: *rows* ``(name, party, votes, marked)``."""
+    out = ["{{Election box begin no change", f"| title = {title}", "}}"]
+    for name, party, votes, won in rows:
+        out += ["{{Election box " + ("winning candidate" if won else "candidate") +
+                " with party link no change", f"| party = {party} Party (United States)",
+                f"| candidate = {name}", f"| votes = {votes}", "}}"]
+    out += ["{{Election box total no change", f"| votes = {total:,}", "}}",
+            "{{Election box end}}"]
+    return "\n".join(out)
+
+
+TWO = [('"Gabe" Firment (REP)', 90000, "Elected"),
+       ('Patricia "Pat" Moore (DEM)', 80000, "Defeated")]
+
+
+class TestDecemberIsNotUndoneByAReadThatLacksIt(NoGap):
+    """Rule 8: a dates file that lists no December election, or a December
+    file with no race for the seat, after a read that had December's result,
+    concludes nothing for December. It undid LA-5's result without a word."""
+
+    def decided(self):
+        cache = self.build(read({"11/03/2026": {1: LA1, 5: LA5}, "12/12/2026": {5: TWO}},
+                                today=DECEMBER_AFTER), today=DECEMBER_AFTER)
+        self.assertEqual(cache["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "elected")
+        return cache
+
+    def assert_kept(self, later, why):
+        race = later["races"]["H-LA-05-2026"]
+        self.assertEqual(race["status"]["H6LA05317"], "elected")
+        self.assertEqual(race["status"]["H6LA05341"], "defeated")
+        self.assertEqual(race["decidedIn"]["date"], "2026-12-12")
+        self.assertIn("H-LA-05-2026", later["officeResults"]["kept"])
+        held = later["officeResults"]["held"]["H-LA-05-2026"]
+        self.assertIn(why, held)
+        self.assertTrue(held.startswith("2026-12-12: "), held)
+        # The December record the result stands on is kept with it.
+        self.assertEqual(later["officeResults"]["races"]["H-LA-05-2026"]["2026-12-12"]
+                         ["choices"][0]["outcome"], "Elected")
+        issues = {i.code: i for i in validate.check_results_pages(later)}
+        self.assertTrue(any(d.startswith("H-LA-05-2026: 2026-12-12")
+                            for d in issues["office-result-held"].detail))
+        # LA-1, which December does not touch, is read as ever.
+        self.assertNotIn("H-LA-01-2026", later["officeResults"]["held"])
+        self.assertEqual(later["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
+
+    def test_a_dates_file_without_december_keeps_decembers_result(self):
+        decided = self.decided()
+        later = self.build(read({"11/03/2026": {1: LA1, 5: LA5}}, today=DECEMBER_AFTER),
+                           today=DECEMBER_AFTER, previous=decided)
+        self.assert_kept(later, "the office lists no results for 2026-12-12")
+        # The December election's record stays the baseline a stale file is
+        # compared with.
+        e = later["officeResults"]["elections"]["2026-12-12"]
+        self.assertEqual(e["written"], "2026-12-12T18:55:18.130")
+        self.assertEqual(e["unlistedOn"], DECEMBER_AFTER.isoformat())
+        # And again the next day: still kept, from the kept record.
+        again = self.build(read({"11/03/2026": {1: LA1, 5: LA5}}, today=DECEMBER_AFTER),
+                           today=DECEMBER_AFTER, previous=later)
+        self.assert_kept(again, "the office lists no results for 2026-12-12")
+
+    def test_a_december_file_without_the_seat_keeps_decembers_result(self):
+        decided = self.decided()
+        later = self.build(read({"11/03/2026": {1: LA1, 5: LA5}, "12/12/2026": {}},
+                                today=DECEMBER_AFTER), today=DECEMBER_AFTER, previous=decided)
+        self.assert_kept(later, "the office's 2026-12-12 results hold no race for district 5")
+
+    def test_with_no_december_result_before_a_missing_december_changes_nothing(self):
+        # No December verdict was ever read: the first round's runoff stands,
+        # and nothing is held.
+        nov = self.build(read({"11/03/2026": {5: LA5}}, today=DECEMBER_AFTER),
+                         today=DECEMBER_AFTER)
+        later = self.build(read({"11/03/2026": {5: LA5}}, today=DECEMBER_AFTER),
+                           today=DECEMBER_AFTER, previous=nov)
+        self.assertEqual(later["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "runoff")
+        self.assertNotIn("H-LA-05-2026", later["officeResults"]["held"])
+
+
+CLOSE = [("Randall Arrington (REP)", 9000, "Defeated"),
+         ('E. "Liddy" Glass (NOPTY)', 4000, "Defeated"),
+         ("Lauren Jewett (DEM)", 110000, "Defeated"),
+         ("Steve Scalise (REP)", 125000, "Elected")]
+
+
+class TestAPageBesideAHeldRound(NoGap):
+    """Where the office's files are read whole but a gate holds the seat, its
+    counts still say who leads: a page's call they contradict is a
+    disagreement, and a page's call of a seat held for its close margin waits
+    for the office's official results. A page that marked Lauren Jewett beside
+    the office's 50.4% for Scalise was shown, credited to Wikipedia."""
+
+    def page(self, rows, five=None, total=248000):
+        one = box(rows, total=total) if rows else "Nothing yet."
+        return f"\n==District 1==\n{one}\n==District 5==\n{five or 'Nothing yet.'}\n"
+
+    def test_a_page_winner_the_close_counts_do_not_lead_shows_neither(self):
+        cache = self.build(read({"11/03/2026": {1: CLOSE}}),
+                           page=self.page([("Lauren Jewett", "Democratic", "125,000", True),
+                                           ("Steve Scalise", "Republican", "110,000", False)]))
+        race = cache["races"]["H-LA-01-2026"]
+        self.assertEqual(race["source"], "qualified")
+        self.assertNotEqual(race["status"].get("H6LA01258"), "elected")
+        self.assertIn("H-LA-01-2026", cache["officeResults"]["disagree"])
+        self.assertIn("over half", cache["officeResults"]["held"]["H-LA-01-2026"])
+        codes = [i.code for i in validate.check_results_pages(cache)]
+        self.assertIn("office-result-disagrees", codes)
+
+    def test_a_page_call_of_a_close_seat_waits_for_the_official_results(self):
+        agrees = [("Steve Scalise", "Republican", "125,000", True),
+                  ("Lauren Jewett", "Democratic", "110,000", False)]
+        # The page's call alone, with no office read: shown, as ever.
+        alone = self.build(None, page=self.page(agrees))
+        self.assertEqual(alone["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
+        cache = self.build(read({"11/03/2026": {1: CLOSE}}), page=self.page(agrees))
+        race = cache["races"]["H-LA-01-2026"]
+        self.assertEqual(race["source"], "qualified")
+        self.assertNotEqual(race["status"].get("H0LA01087"), "elected")
+        self.assertIn("H-LA-01-2026", cache["officeResults"]["pageHeld"])
+        self.assertFalse(cache["officeResults"]["disagree"])
+        held = cache["officeResults"]["held"]["H-LA-01-2026"]
+        self.assertIn("over half", held)
+        self.assertIn("the page's call", held)
+        issues = {i.code: i for i in validate.check_results_pages(cache)}
+        self.assertTrue(any("the page's call" in d
+                            for d in issues["office-result-held"].detail))
+        # Once official, the office's result is shown, its own.
+        released = self.build(read({"11/03/2026": {1: CLOSE}}, official=("11/03/2026",)),
+                              page=self.page(agrees))
+        self.assertEqual(released["races"]["H-LA-01-2026"]["source"], "office")
+        self.assertEqual(released["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
+
+    def test_a_page_winner_partial_counts_do_not_lead_shows_neither(self):
+        partial = {1: (LA1, (100, 522, 8, 8))}
+        cache = self.build(read({"11/03/2026": partial}),
+                           page=self.page([("Lauren Jewett", "Democratic", "159,896", True),
+                                           ("Steve Scalise", "Republican", "89,440", False)],
+                                          total=249336))
+        self.assertEqual(cache["races"]["H-LA-01-2026"]["source"], "qualified")
+        self.assertIn("H-LA-01-2026", cache["officeResults"]["disagree"])
+        self.assertIn("lead Steve Scalise 159,896",
+                      cache["officeResults"]["disagree"]["H-LA-01-2026"]["officeSays"])
+        # A page whose winner the partial counts lead is shown, as before: the
+        # reporting gate is the office's own, not a doubt about the page.
+        cache = self.build(read({"11/03/2026": partial}),
+                           page=self.page([("Steve Scalise", "Republican", "159,896", True),
+                                           ("Lauren Jewett", "Democratic", "89,440", False)],
+                                          total=249336))
+        race = cache["races"]["H-LA-01-2026"]
+        self.assertNotIn(race.get("source"), ("qualified", "office"))
+        self.assertEqual(race["status"]["H0LA01087"], "elected")
+        self.assertFalse(cache["officeResults"]["disagree"])
+        self.assertNotIn("pageHeld", cache["officeResults"])
+
+    def test_a_page_runoff_that_is_not_the_counts_top_two_shows_neither(self):
+        partial = {5: (LA5, (100, 522, 8, 8))}
+
+        def five(second, third):
+            return box([("Gabe Firment", "Republican", "39,126", True),
+                        (second, "Republican" if "Echols" in second else "Democratic",
+                         "32,905", True),
+                        (third, "Republican" if "Echols" in third else "Democratic",
+                         "30,786", False),
+                        ("Stewart Cathey Jr.", "Republican", "28,168", False)], total=130985)
+        cache = self.build(read({"11/03/2026": partial}),
+                           page=self.page([], five=five("Michael Echols", "Patricia Moore")))
+        self.assertEqual(cache["races"]["H-LA-05-2026"]["source"], "qualified")
+        self.assertIn("H-LA-05-2026", cache["officeResults"]["disagree"])
+        self.assertIn("to the runoff",
+                      cache["officeResults"]["disagree"]["H-LA-05-2026"]["officeSays"])
+        cache = self.build(read({"11/03/2026": partial}),
+                           page=self.page([], five=five("Patricia Moore", "Michael Echols")))
+        self.assertFalse(cache["officeResults"]["disagree"])
+        self.assertEqual(cache["races"]["H-LA-05-2026"]["status"]["H6LA05341"], "runoff")
+
+    def test_the_ranking(self):
+        race = TestTheGatesNoTestHeld().race(LA5)
+        self.assertEqual([n for n, _v in la_results.ranking(race, LISTS["H-LA-05-2026"])],
+                         ['Patricia "Pat" Moore', "Gabe Firment", "Michael Echols",
+                          "Stewart Cathey Jr."])
+        self.assertIsNone(la_results.ranking(race, LISTS["H-LA-01-2026"]))
+
+
+class TestARefusedPageMarkLeavesTheOfficesResult(NoGap):
+    """carry_refused put the last read back over a race this read took from
+    the office's results whenever the page's mark was refused: a vandal's name
+    on the page took LA-1's correct result off the site, and would put a
+    December race the office decided back to its runoff."""
+
+    VANDAL = page_with(box([("Peter Griffin", "Democratic", "159,896", True),
+                            ("Steve Scalise", "Republican", "89,440", False)]))
+
+    def test_a_refused_mark_keeps_the_offices_november_result(self):
+        before = self.build(None)
+        cache = self.build(read({"11/03/2026": {1: LA1, 5: LA5}}), page=self.VANDAL,
+                           previous=before)
+        self.assertIn("H-LA-01-2026", cache["refusedMarks"])
+        self.assertEqual(results.carry_refused(cache, before), [])
+        race = cache["races"]["H-LA-01-2026"]
+        self.assertEqual(race["source"], "office")
+        self.assertEqual(race["status"]["H0LA01087"], "elected")
+
+    def test_a_refused_mark_keeps_the_offices_december_result(self):
+        nov = self.build(read({"11/03/2026": {1: LA1, 5: LA5}}))
+        vandal = ("\n==District 1==\nNothing yet.\n==District 5==\n" +
+                  box([("Peter Griffin", "Democratic", "90,000", True),
+                       ("Gabe Firment", "Republican", "80,000", False)], total=170000) + "\n")
+        cache = self.build(read({"11/03/2026": {1: LA1, 5: LA5}, "12/12/2026": {5: TWO}},
+                                today=DECEMBER_AFTER), today=DECEMBER_AFTER, page=vandal,
+                           previous=nov)
+        self.assertIn("H-LA-05-2026", cache["refusedMarks"])
+        results.carry_refused(cache, nov)
+        race = cache["races"]["H-LA-05-2026"]
+        self.assertEqual(race["status"]["H6LA05317"], "elected")
+        self.assertEqual(race["decidedIn"]["date"], "2026-12-12")
+
+
+class TestAPageCallOfDecemberWaitsForTheOffice(NoGap):
+    """Once December 12 is held, a page that marks its winner before the office
+    has counted was a disagreement with the office's runoff: LA-5 went back to
+    the qualified list, its first round's eight losers "qualified" again. The
+    office's runoff stands while its December count is not posted or a gate
+    holds it, and the page's call waits; a winner the counts do not lead is
+    still a disagreement."""
+
+    FIRMENT, MOORE = ("Gabe Firment", "Republican"), ("Patricia Moore", "Democratic")
+
+    def page(self, winner, loser):
+        first = TestTheOfficesResultBesideOtherSources().runoff_page("Patricia Moore") \
+            .split("==District 5==\n")[1]
+        december = box([(winner[0], winner[1], "90,000", True),
+                        (loser[0], loser[1], "80,000", False)], title="Runoff results",
+                       total=170000)
+        return f"\n==District 1==\nNothing yet.\n==District 5==\n{first}\n{december}\n"
+
+    def build_december(self, rounds, page):
+        return self.build(read(rounds, today=DECEMBER_AFTER), page=page, today=DECEMBER_AFTER)
+
+    def assert_waits(self, cache, why):
+        race = cache["races"]["H-LA-05-2026"]
+        self.assertEqual(race["source"], "office")
+        self.assertEqual(race["status"]["H6LA05317"], "runoff")
+        self.assertEqual(race["status"]["H6LA05341"], "runoff")
+        self.assertEqual(race["status"]["H6LA05101"], "defeated")
+        self.assertIn("H-LA-05-2026", cache["officeResults"]["pageHeld"])
+        self.assertFalse(cache["officeResults"]["disagree"])
+        held = cache["officeResults"]["held"]["H-LA-05-2026"]
+        self.assertIn(why, held)
+        self.assertIn("the page's call", held)
+
+    def test_a_page_call_beside_a_december_count_under_way_waits(self):
+        page = self.page(self.FIRMENT, self.MOORE)
+        alone = self.build(None, page=page, today=DECEMBER_AFTER)
+        self.assertEqual(alone["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "elected")
+        cache = self.build_december({"11/03/2026": {1: LA1, 5: LA5},
+                                     "12/12/2026": {5: (TWO, (10, 791, 0, 24))}}, page)
+        self.assert_waits(cache, "10 of 791 precincts")
+        # Once the office's count is in, its result is shown.
+        done = self.build_december({"11/03/2026": {1: LA1, 5: LA5}, "12/12/2026": {5: TWO}},
+                                   page)
+        self.assertEqual(done["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "elected")
+        self.assertNotIn("pageHeld", done["officeResults"])
+
+    def test_a_page_call_before_the_office_posts_december_waits(self):
+        cache = self.build_december({"11/03/2026": {1: LA1, 5: LA5}},
+                                    self.page(self.FIRMENT, self.MOORE))
+        self.assert_waits(cache, "posted no December count")
+
+    def test_a_page_winner_the_december_counts_do_not_lead_shows_neither(self):
+        cache = self.build_december({"11/03/2026": {1: LA1, 5: LA5},
+                                     "12/12/2026": {5: (TWO, (10, 791, 0, 24))}},
+                                    self.page(self.MOORE, self.FIRMENT))
+        self.assertEqual(cache["races"]["H-LA-05-2026"]["source"], "qualified")
+        self.assertIn("H-LA-05-2026", cache["officeResults"]["disagree"])
+
+
+# ------------------------------------------------------------------ the real-cache checks
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import test_contests  # noqa: E402
+import test_results  # noqa: E402
+
+
+def with_office_results(today, rounds):
+    """The committed results cache with Louisiana's seats as the office's
+    results decide them on *today* (rule 64), as the refresh's next read
+    writes them: the checks it runs on what it read must pass on them."""
+    gap, results._GAP = results._GAP, 0
+    try:
+        built = results.build(FIELD, CALENDAR, today=today, log=lambda *_: None,
+                              fetch=lambda t: (_ for _ in ()).throw(results.PageMissing(t)),
+                              qualified=(copy.deepcopy(LISTS), {"source": "LA SoS"}),
+                              office_results=read(rounds, today=today))
+    finally:
+        results._GAP = gap
+    cache = copy.deepcopy(results.load_cache(test_results.ROOT))
+    for rid in ("H-LA-01-2026", "H-LA-05-2026"):
+        assert built["races"][rid]["source"] == "office", rid
+        cache["races"][rid] = built["races"][rid]
+    cache["officeResults"] = built["officeResults"]
+    cache["asOf"] = today.isoformat()
+    return cache
+
+
+class OfficeCache:
+    """The made caches, made once, when a class that reads them is set up."""
+    made = {}
+
+    @classmethod
+    def office_cache(cls):
+        key = cls.ROUND
+        if key not in OfficeCache.made:
+            rounds = {"11/03/2026": {1: LA1, 5: LA5}}
+            if key == "december":
+                rounds["12/12/2026"] = {5: TWO}
+            OfficeCache.made[key] = with_office_results(
+                DECEMBER_AFTER if key == "december" else AFTER, rounds)
+        return copy.deepcopy(OfficeCache.made[key])
+
+
+class TestTheRealCacheChecksReadNovembersOfficeResults(OfficeCache,
+                                                       test_results.RealCacheChecks,
+                                                       unittest.TestCase):
+    """The refresh's first office read failed its own unit step: a check of the
+    real cache read Louisiana's elected seats as resolved before the December
+    runoff date."""
+    ROUND = "november"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cache = cls.office_cache()
+
+    def test_the_cache_holds_what_it_tests(self):
+        self.assertEqual(self.cache["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
+        self.assertEqual(self.cache["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "runoff")
+
+
+class TestTheRealCacheChecksReadDecembersOfficeResults(OfficeCache,
+                                                       test_results.RealCacheChecks,
+                                                       unittest.TestCase):
+    ROUND = "december"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cache = cls.office_cache()
+
+    def test_the_cache_holds_what_it_tests(self):
+        race = self.cache["races"]["H-LA-05-2026"]
+        self.assertEqual(race["status"]["H6LA05317"], "elected")
+        self.assertEqual(race["decidedIn"]["date"], "2026-12-12")
+
+
+class TestTheRealBuildReadsNovembersOfficeResults(OfficeCache, test_contests.RealBuildChecks,
+                                                  unittest.TestCase):
+    ROUND = "november"
+
+    @classmethod
+    def results_cache(cls):
+        return cls.office_cache()
+
+
+class TestTheRealBuildReadsDecembersOfficeResults(OfficeCache, test_contests.RealBuildChecks,
+                                                  unittest.TestCase):
+    ROUND = "december"
+
+    @classmethod
+    def results_cache(cls):
+        return cls.office_cache()
+
+
 if __name__ == "__main__":
     unittest.main()
