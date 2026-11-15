@@ -5651,7 +5651,9 @@ def apply_cache(profiles, cache, field=None):
             race = races.get(rid) or {}
             if (status == WITHDRAWN and profile.get("isCandidate")
                     and candidate_id not in (race.get("certifiedIds") or {})
-                    and race.get("source") != "qualified"):
+                    and race.get("source") not in ("qualified", OFFICE)):
+                # (A list's withdrawal - the qualified list's, under its own
+                # race or the office's results - is the office's word.)
                 # "Withdrawn" is the page's reading of a primary winner it
                 # does not find on its November ballot. If that ballot names
                 # someone who may be them - a letter apart, another form of

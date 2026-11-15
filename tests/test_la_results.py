@@ -310,10 +310,15 @@ class TestTheGates(unittest.TestCase):
             # Nobody called.
             [(d, v, "Defeated") for d, v, _o in LA1],
         ]
+        # Elected while another leads.
+        cases.append([LA1[0], LA1[1], ("Lauren Jewett (DEM)", 159896, "Defeated"),
+                      ("Steve Scalise (REP)", 89440, "Elected")])
         for choices in cases:
-            verdict, why = judge(choices, listed)
-            self.assertIsNone(verdict, choices)
-            self.assertTrue(why)
+            # Official or not: no margin gate stands in for these.
+            for official in (False, True):
+                verdict, why = judge(choices, listed, official=official)
+                self.assertIsNone(verdict, (choices, official))
+                self.assertTrue(why)
 
     def test_the_december_round_is_between_the_two(self):
         first, _ = judge(LA5, LISTS["H-LA-05-2026"])
@@ -506,6 +511,27 @@ class TestTheRace(NoGap):
                                 "12/12/2026": {5: (two, (10, 791, 0, 24))}},
                                today=DECEMBER_AFTER), today=DECEMBER_AFTER, previous=cache)
         self.assertEqual(kept["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "elected")
+
+    def test_a_withdrawal_is_the_lists_word_beside_a_like_name(self):
+        # The list says John Smith withdrew; a John Smyth with no filing is on
+        # the ballot. As on the qualified list's own race, the withdrawal
+        # stands: the office's results are not a page that may have missed him.
+        lists = dict(LISTS, **{"H-LA-05-2026": LISTS["H-LA-05-2026"] + [
+            q("John Smith", withdrew=True), q("John Smyth")]})
+        field = {"candidates": FIELD["candidates"] + [row("H6LA05555", "SMITH, JOHN", 5, "REP")]}
+        choices = LA5 + [("John Smyth (REP)", 1000, "Defeated")]
+        cache = results.build(field, CALENDAR, today=AFTER, log=lambda *_: None,
+                              fetch=lambda t: (_ for _ in ()).throw(results.PageMissing(t)),
+                              qualified=(lists, {"source": "LA SoS"}),
+                              office_results=read({"11/03/2026": {5: choices}}))
+        self.assertEqual(cache["races"]["H-LA-05-2026"]["source"], "office")
+        smith = {"id": "FEC_H6LA05555", "fecCandidateId": "H6LA05555", "isCandidate": True,
+                 "source": "fec-field", "name": "John Smith", "party": "Republican",
+                 "state": "LA", "chamber": "House (Candidate)", "districtNum": 5}
+        results.apply_cache([smith], cache, field=field)
+        self.assertEqual(smith.get("raceStatus"), "withdrawn")
+        self.assertNotIn("maybeNamed", smith)
+        self.assertEqual(smith["raceStatusSource"], "qualified")
 
     def test_names_reach_filings_as_the_lists_do(self):
         # A roster alias ties a list name the matcher cannot fit to its filing.
