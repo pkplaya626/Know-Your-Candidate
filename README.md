@@ -1065,6 +1065,70 @@ for each seat and exports it as CSV. Qualifying closed on August 7.
   header reads "Primary held" with no result read yet, and three days on
   `general-uncalled` lists the seat.
 
+Twelve days after the 2026 count all six seats still stood on the list: the
+page's infobox declared four majority winners over tables with no counts.
+So `results` also reads the Secretary of State's own results
+(`kyc/la_results.py`), the JSON files its results page
+(<https://voterportal.sos.la.gov/graphical>) reads:
+`ElectionResults/ElectionResults/Data?blob=ElectionDates.htm`, then
+`<yyyyMMdd>/RacesCandidates_Multiparish.htm` and `Votes_Multiparish.htm`
+for the round's date. The election is found by its date, a seat by
+"U. S. Representative" and its title's district number.
+
+- A seat's result is the office's where every gate passes: every precinct
+  and absentee batch in; one to elect; every `Outcome` "Elected",
+  "Defeated" or "Runoff"; every name on the qualified list for the seat, of
+  the party the list gives (`la_results.PARTY_CODES`: REP, DEM, LBT, NOPTY),
+  and every name on the list in the results; the outcomes the counts' own
+  result (one elected with a majority of every vote counted, or the two
+  highest in the runoff with nobody at a majority, everyone else defeated);
+  and, until the office marks the election's results official
+  (`ResultsOfficial`), a deciding margin of at least `results.CLOSE_MARGIN`.
+  On 2026-11-15 that read LA-1 to LA-4 elected and LA-5's two in the
+  December 12 general election; LA-6's second place was 956 votes, 0.36
+  points, ahead of the third, and waits for the official results.
+- The office's own page draws no outcome until its results are official; it
+  says "Unofficial Results" over the counts. A result read before then is
+  the counts' own, and every status read from it credits "the Louisiana
+  Secretary of State's election results, unofficial until its canvass"
+  (`raceStatusSource: "office"`), never Wikipedia; a filer the list does not
+  name, or who withdrew, is still the list's word. The sidebar's count of the
+  people on the ballot with no profile here credits each source with its
+  own count (`challengersUnprofiledBySource`: Wikipedia's results pages, the
+  office's results, its qualified list, each certified list), as the map's
+  state panel does; it once credited all of them to Wikipedia.
+- A gate that fails, a read that fails, or a run with no qualified list to
+  check the names against concludes nothing: the seat keeps what it had
+  (the last office result read, else the page's or the list's), and
+  `build --check` warns (`office-result-held`, `office-results-unread`). So
+  does a round whose races file's `WriteTime`, or votes file's
+  `VersionDateTime`, is older than the one the last read relied on (or
+  missing where it had one): the three files are fetched one by one, and an
+  old copy of one beside a fresh official flag would read old counts as
+  official. The newer read's stamps stay the baseline, and the older ones
+  are kept beside them as `staleRead`. So does December, where the last read
+  had its result for a seat, when a read's `ElectionDates.htm` lists no
+  December election or its December file holds no race for the seat: the
+  last read's December result and record stand.
+- Where the page also decides a seat and names someone else, neither is
+  shown: the seat reads from the list, and `office-result-disagrees` says so.
+  A page name that fits no filing but is the office's list name for one
+  ("Bubba Moore" for 'Patricia "Bubba" Moore') is that person. Where a gate
+  holds the office's round, its counts are still read against the page: a
+  page winner they do not lead, or a runoff that is not their two highest,
+  is a disagreement too, and a page's call of a seat the office holds for its
+  close margin waits for the official results (`pageHeld`). After December
+  12, a page's December winner waits for the office's December count, the
+  office's runoff standing meanwhile, unless the counts lead someone else. A
+  page mark the
+  read refuses never takes an office result away (`carry_refused`).
+- The December round is read the same way once the office posts it, between
+  the first round's two only; its winner reads "Elected on December 12".
+- What each read relied on is in `data/primary_results.json` under
+  `officeResults`: each election's id, date, official flag, write time and
+  addresses, and each seat's names and codes as printed, counts, outcomes,
+  reporting and verdict, or why it concluded nothing.
+
 ### The states' certified ballots
 
 A results page says who won a primary; it does not say who is on the
@@ -1962,7 +2026,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber. Never set for a winner seated since in the seat they won (`raceRole`); their held seat is `heldRaceId`. `contestLabel` is a label ("Senate • KY"), for a badge; a sentence says it with `KYC.seatInWords` and the seat held (`officeLabel`) with `KYC.heldSeatInWords` (rule 96) |
 | `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy, matched first by any FEC id Congress's record lists for the member, then by name and state. The member's profile links that campaign's totals, labelled with its office and FEC id; they are never folded into the member's own (rule 68) |
 | `otherOffice` | Sitting members only: `{text, source, checked}` when they are another office's November nominee ("Republican nominee for Governor of Florida"), from `overrides.OTHER_OFFICE_NOMINEES`, each the winner the election's results page marks, read on `checked`. From the day after Election Day the page says it in the past tense ("Was the ..."), since this site does not read that race's result. Dropped once the member starts a new term |
-| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; a state's certified list of November candidates, where one was read, decides `nominee` and `unlisted` over the results page (`raceStatusSource: "certified"`, rule 77); after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff), with `raceStatusSource: "national"` or `"national-counts"` where the national summary called the race (rule 63); and the race it refers to |
+| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; a state's certified list of November candidates, where one was read, decides `nominee` and `unlisted` over the results page (`raceStatusSource: "certified"`, rule 77); after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff), with `raceStatusSource: "national"` or `"national-counts"` where the national summary called the race (rule 63), or `"office"` where Louisiana's Secretary of State's own results decided it (rule 64); and the race it refers to |
 | `raceStatusDecided` | With `raceStatus` `elected` or `defeated` only: `{date, open}` when the December round decided the result - an open primary's general election (`open: true`, Louisiana's House seats on December 12) or a general election runoff (Georgia's December 1) - so the badge says it in that round's words ("Elected on December 12", "Lost the December 1 runoff"), never "in November" |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
 | `ballotLine` | For a nominee only: the November ballot line as the results page spells it ("Speak The Truth", "Party for Socialism and Liberation"), when it is not the line of the party shown. Never set for "none", a write-in or a line named after the candidate themselves (an independent petition reads as "Independent"); `party` is never overwritten by it |
@@ -1985,7 +2049,8 @@ Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:
 | `incumbent` | From the frozen record: `{bioguide, name, party, profileId, seated, appointed}` - who held the seat on the ballot, named even when they have no profile here; `seated` while they still sit in it |
 | `winnerId` | The profile of the member seated since Election Day in this seat, when it is not the record incumbent |
 | `senateClass` / `special` | The Senate seat's class, and whether it is a special election, from the record |
-| `results.sourceUrl` | Where the race's statuses were read: the Wikipedia results page the cache names (by its title), or the Secretary of State's Candidate Inquiry for a ballot read from a qualified list. The race head links it ("Results: Wikipedia, read Oct. 17, 2026"), and every status says whose word it is ("per Wikipedia's results page"), never "the published results", which read as a certified count |
+| `results.fromOfficeResults` / `results.officeResults` | The race's result is a state election office's own (Louisiana's House seats, rule 64), and `{source, official, read}`: the credit it is shown with ("unofficial until its canvass" until the office marks it official), and the day it was read |
+| `results.sourceUrl` | Where the race's statuses were read: the Wikipedia results page the cache names (by its title), the Secretary of State's Candidate Inquiry for a ballot read from a qualified list, or its results page for a result read from its own results. The race head links it ("Results: Wikipedia, read Oct. 17, 2026"), and every status says whose word it is ("per Wikipedia's results page"), never "the published results", which read as a certified count |
 
 | `lastElection` | The seat's last election, from `seats` (`kyc/seat_history.py`): `{year, date, kind, candidates: [{name, party, votes, share}], others, othersShare, total, margin, checkedBy}` - the winner and runner-up as the Clerk of the House's statistics count them, shares of the votes cast for a candidate (blank and void ballots excluded), the margin of the votes. `kind` is `general`, `runoff` (Georgia's 2021 runoff), `rcv-final` (Maine's final ranked-choice round) or `unopposed` (with the Clerk's `note`); `rankedChoice: "first-choices"` where the counts are first choices (Alaska). `checkedBy` is `"mit"` or the Wikipedia article checked against. `{redrawn: true, year}` for a district redrawn for 2026, which carries no 2024 figure (rule 90); `{withheld, year}` where no second source agrees. `seatedSince: {name, since, how}` where someone took the seat after the counted election without having won it, by `special-election` or `appointment` (from the frozen record and the snapshot): the result is then the last regular election's. The sources' titles and addresses are `kycBuildMeta.lastElectionSources`, by year |
 | `seatHistory` | The seat's elections from 2018 to 2024, from `seats` (`kyc/seat_history.py` `seat_strip`), in the state's people file only (`emit.RACE_INDEX_LEAVES_OUT`; the index's race is filled from it when the fold opens): `{eras: [{from, to, same}], cells: [{year, era, district?, atLarge?, result \| withheld \| none, holders}], breaks: [{year, kind, title?, drawnBy?, url?, lead?}]}`. A House district's years are grouped by the lines they were fought on (`same`: the lines this district is elected on in 2026); each `break` is a change of lines - `census` (the map drawn after the 2020 census, from 2022, wherever a state has more than one seat), `enacted` (`districts.REDRAWN_BEFORE`: each mid-decade map, from the state's own record) or `redrawn` (2026's, `districts.REDRAWN`). A cell's `result` is the Clerk's count checked as `lastElection`'s is (winner and runner-up with their shares, the margin, `kind`, `checkedBy`); `none` is `no-election` (Puerto Rico's four-year seat), `no-district` (no district of that number on that map) or `no-result` (the Clerk lists none: NC-9, 2018); `holders` are who served the term it chose, from congress-legislators' terms by bioguide id (`{id, name, party, from?, until?, how?, elected?, untilSeated?, winner?}`: one person's consecutive terms are one holder, `elected` the day an appointee was then elected; `untilSeated` an appointee whose term the record ends on the special election's day, serving until its winner is seated; the page says `until` only once the reader's day has reached it; a special's holders are counted from the day its winner took the seat). A result whose round the Clerk prints without naming it carries `roundFrom`: `second-compilation` (the second source's final round has those counts and its first round does not) or `official`, with `roundSource: {title, url}`, the jurisdiction's own official results that give them as a runoff's or a final round's (`overrides.SEAT_HISTORY_ROUNDS`: Guam's November 17, 2020 runoff, Maine's certified 2018 tabulation of its 2nd district), named and linked in the cell. A first-choice count with more than half of every vote counted carries `firstChoiceMajority` (a first-round win); a withheld cell whose Clerk entry is an unopposed name with no count carries `withheldUnopposed`; a `break` cited from the Census Bureau's list alone carries `lead`. A Senate seat's cells are the elections to its class, specials included |
@@ -3943,7 +4008,7 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | `surname` | The surname the person is listed under in their race (`races.surname`): Congress's record for a member, the FEC filing's ("WASSERMAN SCHULTZ, DEBBIE") where it ends the name shown, else the shown name's last word less a suffix. "Name, A to Z" sorts by it | Everyone |
 | `nameVia` | `"election-page"` when the name shown is the results page's spelling for this filing, settled word for word, by an evidenced `overrides.RESULT_NAMES` entry ("Max Ganorkar", whose filing says Mahesh), or by the rule-62 matcher where the page adds a hyphen or uses the short form of the filed given name ("Bob Harvie" for "HARVIE, ROBERT J"; never the formal form of a filed nickname); `"certified-list"` when it is the certified list's printed name (never one printed in capitals) | Filed candidates the results page names differently |
 | `fecName` | The name the FEC files them under, set beside `nameVia`; the profile shows "Files with the FEC as ..." under the ballot's name | Filed candidates the results page names differently |
-| `raceStatusSourceName` | Set with `raceStatusSource: "certified"`: the certified list that set the status, or that does not name the person ("Alaska Division of Elections, 2026 General Election candidate list"), credited in the badge's title | Filers in states whose certified list was read |
+| `raceStatusSourceName` | Set with `raceStatusSource: "certified"`: the certified list that set the status, or that does not name the person ("Alaska Division of Elections, 2026 General Election candidate list"), credited in the badge's title; with `"office"`, the office's results as credited ("the Louisiana Secretary of State's election results, unofficial until its canvass") | Filers in states whose certified list was read |
 | `raceStatusUnconfirmed` | Set beside `raceStatus: "unlisted"` when the results page does not name the person but names someone similar who lost or withdrew. Off the November ballot either way, and shown as "Not on the November ballot", never "not on the primary ballot" | Filers in decided races |
 | `maybeNamed` | Results-page names that may be this person under another spelling, one of them on the ballot. No status is inferred, and the race counts the person once, as that name | Filers the page may name differently |
 | `unprinted` | `{kind, source}`: a complete certified list names the person but does not print them - `"write-in"` (a declared or certified write-in candidate) or `"unopposed"` (Florida does not print an uncontested race). Shown as "Write-in candidate" or "Unopposed, not printed", credited to the list; counted neither on the ballot nor off it (`ballotUnknown` is set beside it) | Filers a certified list names as a write-in |

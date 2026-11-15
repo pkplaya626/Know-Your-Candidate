@@ -287,6 +287,12 @@ def _race_status(status, own=False, unconfirmed=False, appointed=False, source=N
 _WIKIPEDIA = "Wikipedia's election results page"
 _INQUIRY = "the Secretary of State's Candidate Inquiry"
 _CERTIFIED_LIST = "the certified list of candidates"
+# A result read from the state election office's own results (Louisiana's
+# House seats, kyc/la_results.py, rule 64): the words the pipeline gives it
+# (``raceStatusSourceName``, unofficial until the canvass where the office
+# says so), else these - KYC's OFFICE_NAME.
+OFFICE_SOURCE = "the Secretary of State's election results"
+_OFFICE_STATUS = frozenset({"elected", "defeated", "runoff"})
 # A November winner, or loser, called from the national summary where the
 # state's page held no result (rule 63's national route), in the owner's words.
 NATIONAL_SOURCE = ("Wikipedia's national summary of the House elections, which gives no "
@@ -305,6 +311,8 @@ def _race_source(status, source=None, source_name=None):
         return None
     if status == "qualified" or source == "qualified":
         return _INQUIRY
+    if source == "office" and status in _OFFICE_STATUS:
+        return source_name or OFFICE_SOURCE
     if source == "certified" and status in _CERTIFIED:
         return source_name or _CERTIFIED_LIST
     if source == "national" and status in ("elected", "defeated"):
@@ -580,7 +588,10 @@ def status_table():
     for status in sorted(_RACE_STATUS):
         # A top-four primary's words are a top-two's in the long form.
         for all_party in (None, "top-two"):
-            for source in (None, "certified", "qualified"):
+            for source in (None, "certified", "qualified", "office"):
+                # The office's results set only a result (_OFFICE_STATUS).
+                if source == "office" and status not in _OFFICE_STATUS:
+                    continue
                 for round_date, runoff_day, held, decided in rounds:
                     if (round_date or runoff_day or decided) and all_party:
                         continue
@@ -619,7 +630,9 @@ def status_table():
                for source, name in ((None, None), ("certified", None),
                                     ("certified", "the Test Division of Elections"),
                                     ("qualified", None), ("national", None),
-                                    ("national-counts", None))]
+                                    ("national-counts", None), ("office", None),
+                                    ("office", "the Test Secretary of State's election results, "
+                                               "unofficial until its canvass"))]
     contest = []
     for status in ("", *sorted(_RACE_STATUS)):
         for renumbered in (0, 1):
@@ -873,6 +886,8 @@ def ballot_source(race):
     res = (race or {}).get("results") or {}
     if res.get("fromQualifiedList"):
         return "per the Secretary of State's list of qualified candidates"
+    if res.get("fromOfficeResults"):
+        return "per " + ((res.get("officeResults") or {}).get("source") or OFFICE_SOURCE)
     if res.get("certifiedBy"):
         return ("per the " + res["certifiedBy"] if res.get("certifiedComplete")
                 else "per Wikipedia's results page and the " + res["certifiedBy"])

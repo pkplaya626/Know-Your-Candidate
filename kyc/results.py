@@ -2688,6 +2688,10 @@ def _unmark(boxes, tables):
 
 
 CALLED_TABLE, CALLED_INFOBOX, CALLED_NATIONAL = "table", "infobox", "national"
+# A race decided by a state election office's own results, read as they are
+# published (kyc/la_results.py: Louisiana's House seats, rule 64). The race's
+# "source" says the same, and the page credits the office, never Wikipedia.
+CALLED_OFFICE = OFFICE = "office"
 
 
 # ------------------------------------------- the national summary's mark
@@ -4006,6 +4010,432 @@ def _qualified_race(listed, rows, aliases, source):
     }
 
 
+def _office_race(listed, first, second, rows, aliases, rounds):
+    """A race's entry from the office's own results (kyc/la_results.py).
+
+    *first* is the first round's verdict and *second* the December round's,
+    or None (:func:`kyc.la_results.judge`), each ``{list name: status}``;
+    the names are the office's qualified list's, matched to filings exactly
+    as :func:`_qualified_race` matches them (``match_names``,
+    ``overrides.RESULT_NAMES`` through the aliases). The list's withdrawals
+    stay WITHDRAWN, and a filer neither names is not on the ballot
+    (``decided.general``). *rounds* is the ``office`` record the page
+    credits: which rounds decided it, whether the office marks them official,
+    and when they were read.
+    """
+    status = {q["name"]: WITHDRAWN for q in listed if q.get("withdrew")}
+    status.update(first)
+    late = set(second or ())
+    status.update(second or {})
+    parties = {q["name"]: party_key(q["party"]) for q in listed}
+    matched, ambiguous = match_names(list(status), rows, aliases)
+    unsure = match_names.unsure
+    by_id, party = {}, {}
+    for name, cids in matched.items():
+        for cid in cids:
+            by_id[cid] = status[name]
+            party[cid] = parties[name]
+    race = {
+        "page": rounds.get("source") or "",
+        "source": OFFICE,
+        "status": by_id,
+        "party": party,
+        "label": {}, "article": {}, "about": {}, "site": {},
+        "unsure": unsure,
+        "unmatched": {n: s for n, s in sorted(status.items())
+                      if n not in matched and n not in ambiguous},
+        "ambiguous": ambiguous,
+        "decided": {"general": True, "parties": ["all"]},
+        "office": rounds,
+    }
+    late_ids = sorted(cid for name in late for cid in matched.get(name, ())
+                      if by_id.get(cid) in (ELECTED, DEFEATED))
+    if late_ids:
+        race["decidedIn"] = {"date": rounds["rounds"][-1], "open": True, "ids": late_ids}
+    return race
+
+
+def _decided_people(race):
+    """``{status: (ids, names)}`` of who a race's entry elects or sends to a
+    runoff: its filings' ids, and the names that matched none."""
+    out = {}
+    for st in (ELECTED, RUNOFF):
+        out[st] = ({cid for cid, s in (race.get("status") or {}).items() if s == st},
+                   sorted(n for n, s in (race.get("unmatched") or {}).items() if s == st))
+    return out
+
+
+def _same_result(page, office, names_of=None):
+    """Whether a page's result and the office's elect, and send to a runoff,
+    the same people: the same filings, and names with no filing that are one
+    person (:func:`_one_person`).
+
+    A name the page gives that fits no filing is still the person of a
+    filing the office's result holds where it is that filing's list name
+    (*names_of*, ``{candidate id: list name}``) as a page writes it
+    (:func:`_one_person`, which reads a quoted nickname; an evidenced
+    ``RESULT_NAMES`` alias already fits the page's name to the filing): a
+    page writing a runoff's "Bubba Moore", whom the matcher does not fit to
+    MOORE, PATRICIA, agrees with the office's Patricia "Bubba" Moore."""
+    a, b = _decided_people(page), _decided_people(office)
+    names_of = names_of or {}
+
+    def stands_for(name, cid):
+        listed = names_of.get(cid)
+        return bool(listed) and _one_person(name, listed)
+
+    for st in (ELECTED, RUNOFF):
+        page_ids, page_names = set(a[st][0]), list(a[st][1])
+        office_ids, office_names = set(b[st][0]), list(b[st][1])
+        for cid in sorted(office_ids - page_ids):
+            fits = [n for n in page_names if stands_for(n, cid)]
+            if len(fits) == 1:
+                page_ids.add(cid)
+                page_names.remove(fits[0])
+        if page_ids != office_ids or len(page_names) != len(office_names):
+            return False
+        if not all(any(_one_person(x, y) for y in office_names) for x in page_names):
+            return False
+    return True
+
+
+def _says(race):
+    """A race's result in words, for a log line and validate."""
+    people = _decided_people(race)
+    parts = []
+    for st in (ELECTED, RUNOFF):
+        ids, others = people[st]
+        if ids or others:
+            parts.append(f"{st} " + ", ".join(sorted(ids) + others))
+    return "; ".join(parts) or "nobody decided"
+
+
+def _against_ranking(page, ranking, names_of):
+    """Why a page's decided people are not what the office's counts rank, or
+    None: a page's winner must lead them, its runoff's two be their two
+    highest. *ranking* is :func:`kyc.la_results.ranking`'s, *names_of*
+    ``{candidate id: list name}``; a page name no list name fits, or a
+    filing the list does not hold among the counted, is someone the office's
+    results do not rank."""
+    if not ranking:
+        return None
+    people = _decided_people(page)
+
+    def list_names(status):
+        ids, names = people[status]
+        out = set()
+        for cid in ids:
+            if names_of.get(cid) not in {n for n, _v in ranking}:
+                return None
+            out.add(names_of[cid])
+        for name in names:
+            fits = [n for n, _v in ranking if _one_person(name, n)]
+            if len(fits) != 1:
+                return None
+            out.add(fits[0])
+        return out
+
+    elected, runoff = list_names(ELECTED), list_names(RUNOFF)
+    counts = [v for _n, v in ranking]
+    lead = ", ".join(f"{n} {v:,}" for n, v in ranking[:3])
+    if elected is None or runoff is None:
+        return f"the page names someone the office's counts do not (they lead {lead})"
+    leaders = {n for n, v in ranking if v == counts[0]}
+    top_two = {n for n, v in ranking if len(counts) > 1 and v >= counts[1]}
+    if elected and (runoff or len(elected) != 1 or not elected <= leaders):
+        return (f"the page elects {', '.join(sorted(elected))}; the office's counts lead "
+                f"{lead}")
+    if runoff and (len(runoff) != 2 or not runoff <= top_two):
+        return (f"the page sends {', '.join(sorted(runoff))} to the runoff; the office's "
+                f"counts lead {lead}")
+    return None
+
+
+def _december_call_waits(rid, page, entry, december, listed, names_of, meta, log):
+    """Whether a page's call of a seat's December round, once it is held,
+    waits for the office's (rule 64), and so is no disagreement: the office's
+    first round sent two to December, its December count is not posted or a
+    gate holds it, and the page elects one of the two, whom the office's
+    December counts, where posted, lead. The office's runoff stands
+    meanwhile: called against it, the seat went back to the qualified list,
+    its ten first-round candidates "qualified" again, on the night the page
+    marked December's winner first. A page winner the December counts do not
+    lead is still a disagreement."""
+    from . import la_results
+
+    page_people, office_people = _decided_people(page), _decided_people(entry)
+    ids, names = page_people[ELECTED]
+    two_ids, two_names = office_people[RUNOFF]
+    if (page_people[RUNOFF] != (set(), []) or len(ids) + len(names) != 1
+            or len(two_ids) + len(two_names) != 2 or office_people[ELECTED] != (set(), [])):
+        return False
+    two = {names_of.get(cid) for cid in two_ids} | set(two_names)
+    if ids:
+        winner = names_of.get(next(iter(ids))) if next(iter(ids)) in two_ids else None
+    else:
+        fits = [n for n in two if n and _one_person(names[0], n)]
+        winner = fits[0] if len(fits) == 1 else None
+    if not winner:
+        return False
+    ranking = la_results.ranking(december, listed or []) if december else None
+    if ranking and winner not in {n for n, v in ranking if v == ranking[0][1]}:
+        return False
+    meta.setdefault("pageHeld", {})[rid] = {"page": page.get("page"), "pageSays": _says(page)}
+    said = meta["held"].get(rid) or "the office has posted no December count for the seat yet"
+    meta["held"][rid] = f"{said}; the page's call ({_says(page)}) waits for the office's"
+    log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}; it waits for the "
+        "Secretary of State's December count, and the runoff stands")
+    return True
+
+
+def _page_beside_a_held_round(rid, page, held_round, listed, names_of, rows, aliases,
+                              races, calls, meta, log):
+    """A page that decides a seat whose first round a gate of the office's
+    held (rule 64). The office's files were read whole, so its counts still
+    speak: a page whose winner they do not lead, or whose runoff is not
+    their two highest, disagrees with them, and neither is shown. Where the
+    close margin alone held the office's result, the page's call of it waits
+    for the office's official results too, agreeing or not: half a point is
+    a count's to settle, never an editor's (rule 63's ``CLOSE_MARGIN``)."""
+    from . import la_results
+
+    race, would = held_round
+    if would is not None:
+        near = _office_race(listed, would, None, rows, aliases, {"rounds": []})
+        if _same_result(page, near, names_of):
+            races.pop(rid, None)
+            calls.pop(rid, None)
+            meta.setdefault("pageHeld", {})[rid] = {"page": page.get("page"),
+                                                    "pageSays": _says(page)}
+            meta["held"][rid] = (f"{meta['held'].get(rid)}; the page's call "
+                                 f"({_says(page)}) waits for them too")
+            log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}, which the "
+                "Secretary of State holds for its close margin: it waits for the official "
+                "results")
+            return
+        why = f"once official, the office's counts would give {_says(near)}"
+    else:
+        why = _against_ranking(page, la_results.ranking(race, listed), names_of)
+        if why is None:
+            return
+    meta["disagree"][rid] = {"page": page.get("page"), "pageSays": _says(page),
+                             "officeSays": f"nothing yet ({meta['held'].get(rid)}); {why}"}
+    races.pop(rid, None)
+    calls.pop(rid, None)
+    log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}; the Secretary of State's "
+        f"counts do not ({why}): neither is shown")
+
+
+def apply_office_results(races, calls, office, listed, by_race, aliases, previous, today,
+                         log=print):
+    """Lay Louisiana's own results over its open-primary House seats (rule 64).
+
+    *office* is :func:`kyc.la_results.fetch`'s read, ``{"unread": why}`` where
+    it failed, or None where none was attempted; *listed* this run's qualified
+    lists. Each seat's race is the office's result where every gate of
+    :func:`kyc.la_results.judge` passes, ahead of the page; where a gate
+    fails, the read fails, or the list was not read to check the names
+    against, it concludes nothing (rule 8) and the seat keeps what it had -
+    the last office result read for it, else the page's or the list's, as
+    before. Where the page also decides the seat and elects or sends to the
+    runoff someone else, two sources disagree and neither is shown: the seat
+    goes back to the qualified list, and validate says so.
+
+    Returns the cache's ``officeResults`` record, or None where no seat is
+    an office's to read.
+    """
+    from . import la_results
+    from .overrides import OPEN_PRIMARY_SEATS
+
+    fixed = OPEN_PRIMARY_SEATS.get(("LA", "H", CYCLE))
+    prev_races = (previous or {}).get("races") or {}
+    prev_meta = (previous or {}).get("officeResults") or {}
+    rids = sorted({rid for rid in listed if rid.startswith("H-LA-")}
+                  | {rid for rid, race in prev_races.items() if race.get("source") == OFFICE})
+    if not fixed or (not rids and not office):
+        return None
+    first_day, second_day = fixed["primary"], fixed.get("runoff")
+    office = office or {}
+    unread = office.get("unread")
+    elections = office.get("elections") or {}
+    meta = {"source": la_results.SOURCE, "page": la_results.PAGE, "read": office.get("read"),
+            "elections": {day: {k: e.get(k) for k in ("id", "official", "written", "version",
+                                                      "urls")}
+                          for day, e in sorted(elections.items())},
+            "races": {}, "held": {}, "kept": [], "disagree": {}}
+    if unread:
+        meta["unread"] = unread
+    tried = bool(office)
+    if not tried and prev_meta:
+        # Nothing read this run (no request made): the last read's record stands.
+        meta = dict(prev_meta, carried=True)
+        meta.setdefault("held", {})
+        meta["kept"], meta["disagree"] = [], {}
+    elif unread and prev_meta:
+        meta = dict(prev_meta, carried=True, unread=unread, unreadOn=today.isoformat())
+        meta["held"], meta["kept"], meta["disagree"] = {}, [], {}
+
+    # A file written before the one the last read relied on concludes
+    # nothing for its round (rule 8): the three files are fetched one by one,
+    # and a cached copy of one beside a fresh other would pair old counts
+    # with a new official flag. The newer read's record stays the baseline.
+    prev_elections = prev_meta.get("elections") or {}
+    stale = {}
+    if tried and not unread:
+        for day in sorted(elections):
+            last = prev_elections.get(day) or {}
+            why = la_results.older(elections[day].get("written"), last.get("written"),
+                                   "races file's WriteTime") or \
+                la_results.older(elections[day].get("version"), last.get("version"),
+                                 "votes file's VersionDateTime")
+            if why:
+                stale[day] = why
+                meta["elections"][day] = dict(last, staleRead={
+                    "written": elections[day].get("written"),
+                    "version": elections[day].get("version"), "on": today.isoformat()})
+                log(f"    [warn] the Secretary of State's {day} results conclude nothing: {why}")
+    # A December election the last read listed and this one does not is no
+    # sign it was never held: its record stays the baseline (rule 8).
+    if tried and not unread and second_day and second_day not in elections \
+            and second_day in prev_elections:
+        meta["elections"][second_day] = dict(prev_elections[second_day],
+                                             unlistedOn=today.isoformat())
+
+    def facts(race, verdict, why):
+        return {"officeId": race["officeId"], "title": race["title"],
+                "reporting": race["reporting"], "canHaveRunoff": race["canHaveRunoff"],
+                "total": sum(c["votes"] for c in race["choices"]),
+                "choices": [{"name": c["desc"], "votes": c["votes"], "outcome": c["outcome"]}
+                            for c in race["choices"]],
+                "verdict": verdict, "why": why}
+
+    for rid in rids:
+        n = int(rid.split("-")[2])
+        entry, why = None, None
+        held_round = None      # (race, verdict once official) of a first round a gate held
+        december_round = None  # the December race a gate held, its first round a runoff
+        if not tried:
+            pass
+        elif unread:
+            why = f"the office's results could not be read: {unread}"
+        elif rid not in listed:
+            why = "the qualified list was not read this run, so no name can be checked against it"
+        elif first_day not in elections:
+            why = f"the office lists no results for {first_day} yet" if first_day <= \
+                today.isoformat() else None
+        elif first_day in stale:
+            why = f"{first_day}: {stale[first_day]}"
+        elif n not in (elections[first_day].get("races") or {}):
+            why = f"the office's {first_day} results hold no race for district {n}"
+        else:
+            r1 = elections[first_day]["races"][n]
+            official = bool(elections[first_day].get("official"))
+            v1, why = la_results.judge(r1, listed[rid], official, CLOSE_MARGIN)
+            if v1 is None:
+                # What the counts would give once the office marks them
+                # official: a verdict only where the close margin alone held it.
+                held_round = (r1, None if official else
+                              la_results.judge(r1, listed[rid], True, CLOSE_MARGIN)[0])
+            record = {first_day: facts(r1, v1, why)}
+            v2, written, decided_by = None, elections[first_day].get("written"), [first_day]
+            later = elections.get(second_day) if second_day else None
+            r2 = ((later or {}).get("races") or {}).get(n)
+            prev = prev_races.get(rid) or {}
+            prev_december = ((prev_meta.get("races") or {}).get(rid) or {}).get(second_day) \
+                if second_day else None
+            had_december = bool(second_day) and bool(
+                (prev.get("source") == OFFICE and prev.get("decidedIn"))
+                or (prev_december or {}).get("verdict"))
+            if v1 and r2 is None and had_december and RUNOFF in v1.values():
+                # The last read had December's result; a dates file that lists
+                # no December election, or a December file with no race for
+                # the seat, is no sign the runoff was never held (rule 8).
+                why2 = (f"the office lists no results for {second_day}, where its last read "
+                        "had them" if later is None else
+                        f"the office's {second_day} results hold no race for district {n}, "
+                        "where its last read had one")
+                meta["held"][rid] = f"{second_day}: {why2}"
+                log(f"    [warn] {rid}: the Secretary of State's {second_day} results conclude "
+                    f"nothing ({why2}); the last read stands")
+                if prev_december:
+                    record[second_day] = prev_december
+                v1, why = None, f"{second_day}: {why2}"
+            elif v1 and r2 is not None:
+                if RUNOFF not in v1.values():
+                    why2 = "a December race for a seat its first round decided"
+                elif second_day in stale:
+                    why2 = stale[second_day]
+                else:
+                    v2, why2 = la_results.judge(r2, listed[rid], bool(later.get("official")),
+                                                CLOSE_MARGIN, before=v1)
+                if second_day not in stale:
+                    record[second_day] = facts(r2, v2, why2)
+                elif second_day in ((prev_meta.get("races") or {}).get(rid) or {}):
+                    # An older file's counts are not kept as this read's.
+                    record[second_day] = prev_meta["races"][rid][second_day]
+                if v2:
+                    official, written = bool(later.get("official")), later.get("written")
+                    decided_by.append(second_day)
+                else:
+                    meta["held"][rid] = f"{second_day}: {why2}"
+                    log(f"    [warn] {rid}: the Secretary of State's {second_day} results "
+                        f"conclude nothing ({why2}); the first round stands")
+                    if RUNOFF in v1.values() and second_day not in stale:
+                        december_round = r2
+                    prev = prev_races.get(rid) or {}
+                    if prev.get("source") == OFFICE and prev.get("decidedIn"):
+                        v1 = None          # keep the last read, which the December round decided
+                        why = f"{second_day}: {why2}"
+            meta["races"][rid] = record
+            if v1:
+                entry = _office_race(listed[rid], v1, v2, by_race.get(rid, []),
+                                     (aliases or {}).get(rid), {
+                                         "source": la_results.credit(official),
+                                         "rounds": decided_by, "official": official,
+                                         "read": today.isoformat(), "written": written,
+                                         "url": la_results.PAGE})
+        if entry is None:
+            if why:
+                meta["held"].setdefault(rid, why)
+                log(f"    [warn] {rid}: the Secretary of State's results conclude nothing: {why}")
+            prev = prev_races.get(rid)
+            if prev and prev.get("source") == OFFICE:
+                entry = prev
+                meta["kept"].append(rid)
+                if rid not in meta["races"] and rid in (prev_meta.get("races") or {}):
+                    meta["races"][rid] = prev_meta["races"][rid]
+                log(f"    [warn] {rid}: kept the Secretary of State's result read on "
+                    f"{(prev.get('office') or {}).get('read')}")
+        page = races.get(rid)
+        names_of = {}
+        if rid in listed:
+            found, _ambiguous = match_names([q["name"] for q in listed[rid]],
+                                            by_race.get(rid, []), (aliases or {}).get(rid))
+            names_of = {cid: name for name, cids in found.items() for cid in cids}
+        page_decides = bool(page) and page.get("source") != OFFICE and any(
+            ids or names for ids, names in _decided_people(page).values())
+        if entry is None:
+            if held_round is not None and page_decides:
+                _page_beside_a_held_round(rid, page, held_round, listed[rid], names_of,
+                                          by_race.get(rid, []), (aliases or {}).get(rid),
+                                          races, calls, meta, log)
+            continue
+        if page_decides and not _same_result(page, entry, names_of) and not (
+                second_day and second_day < today.isoformat() and _december_call_waits(
+                    rid, page, entry, december_round, listed.get(rid), names_of, meta, log)):
+            meta["disagree"][rid] = {"page": page.get("page"), "pageSays": _says(page),
+                                     "officeSays": _says(entry)}
+            races.pop(rid, None)
+            calls.pop(rid, None)
+            log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}; the Secretary of "
+                f"State's results say {_says(entry)}: neither is shown")
+            continue
+        races[rid] = entry
+        calls[rid] = CALLED_OFFICE
+    meta["kept"] = sorted(meta.get("kept") or [])
+    return meta
+
+
 _NO_PARTY = ("nonpartisan", "undeclared", "unaffiliated", "no party affiliation", "no party",
              "by petition", "independent")
 
@@ -4306,7 +4736,8 @@ def _row_name(row):
 
 
 def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=None,
-          qualified=None, certified=None, national=None, previous=None, incumbents=None):
+          qualified=None, certified=None, national=None, previous=None, incumbents=None,
+          office_results=None):
     """Resolve every settled race. Returns the cache structure.
 
     ``{"asOf": date, "races": {race_id: {"status": {candidate_id: status},
@@ -4316,6 +4747,11 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     ballot of an open-primary seat before its count, used for a seat whose
     page has decided nothing - before November 3, or after it until the
     page marks a result.
+
+    *office_results* is :func:`kyc.la_results.fetch`'s read of the Secretary of
+    State's own results for those seats, ``{"unread": why}`` where it failed,
+    or None where none was attempted (:func:`apply_office_results`): a
+    complete result there decides the seat ahead of the page.
 
     *national* is :func:`fetch_national`'s read of the national article, or
     None where it could not be read; *previous* the last cache, whose
@@ -4794,6 +5230,13 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 races[rid]["decidedIn"] = {"date": date, "open": bool(is_open),
                                            "ids": late_ids}
 
+    # Louisiana's own results for those seats (kyc/la_results.py, rule 64):
+    # where complete, ahead of the page; where they conclude nothing, the
+    # seat keeps what it had; where the page names someone else, neither.
+    # (Named apart from the loop's ``office``, a seat's chamber.)
+    office_meta = apply_office_results(races, calls, office_results, qualified_lists, by_race,
+                                       aliases, previous, today, log=log)
+
     # An open-primary seat its page has not settled - before its count, or
     # after it while the page marks no result, cannot be fetched, is missing
     # or has no section for it: the state's qualified list is its ballot
@@ -4816,7 +5259,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     from .overrides import NO_PRIMARY_SEATS
     for state, spec in sorted((certified or {}).items()):
         for rid, entries in sorted(spec.get("races", {}).items()):
-            if (races.get(rid) or {}).get("source") == "qualified":
+            if (races.get(rid) or {}).get("source") in ("qualified", OFFICE):
                 continue
             races[rid] = certify_race(races.get(rid), dict(spec, entries=entries),
                                       by_race.get(rid, []), (aliases or {}).get(rid),
@@ -4859,7 +5302,8 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         log(f"    [warn] {rid}: the last read's national call of "
             f"{dropped_calls[rid]['name']!r} is not made again: {dropped_calls[rid]['why']}")
     log("    races called, by route: " + ", ".join(
-        f"{route} {routes.get(route, 0)}" for route in (CALLED_TABLE, CALLED_INFOBOX, CALLED_NATIONAL)))
+        f"{route} {routes.get(route, 0)}" for route in (CALLED_TABLE, CALLED_INFOBOX, CALLED_NATIONAL,
+                                                        CALLED_OFFICE)))
     log(f"    settled races with results: {len(races)}   "
         f"pending primaries: {len(pending)}   pages missing: {len(missing_pages)}   "
         f"fetches failed: {len(failed)}   unparsed: {len(unparsed)}")
@@ -4871,6 +5315,13 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         # Where a qualified list was read, and when (kyc/qualified.py).
         "qualified": (dict(qualified_meta or {}, races=sorted(qualified_lists))
                       if qualified_lists else None),
+        # The Secretary of State's own results for Louisiana's open-primary
+        # House seats as this read found them (kyc/la_results.py): each
+        # election's date, id, official flag, write time and addresses; each
+        # seat's names, codes, counts, outcomes and reporting as printed, the
+        # verdict or why it concluded nothing ("held"); the seats that kept
+        # the last read ("kept"), and those the page contradicts ("disagree").
+        "officeResults": office_meta,
         # Each state's certified list as read, so a failed read next time
         # can keep it (kyc/certified.py, rule 8): names, parties and kinds.
         "certified": dict(sorted((certified or {}).items())) or None,
@@ -4989,12 +5440,20 @@ def carry_refused(cache, previous):
     Except a national call this read withdrew (``nationalWithdrawn``): the
     state's page's own counts no longer stand behind it - too close, too early
     or led by someone else - and keeping it would read "Elected" over the very
-    refusal of the page's own declaration for that reason (PR #220 review)."""
+    refusal of the page's own declaration for that reason (PR #220 review).
+
+    And except a race this read took from Louisiana's own results (rule 64,
+    ``source`` "office"): a page's refused mark has no bearing on the
+    office's count, and a vandal's name on the page must not take a correct
+    office result off the site, nor put a December race the office decided
+    back to its runoff."""
     kept = []
     withdrawn = (cache or {}).get("nationalWithdrawn") or {}
     marked_rows = {rid for rid, items in ((cache or {}).get("refusedRows") or {}).items()
                    if any(item.get("marked") for item in items)}
     for rid in sorted(set((cache or {}).get("refusedMarks") or {}) | marked_rows):
+        if ((cache.get("races") or {}).get(rid) or {}).get("source") == OFFICE:
+            continue
         race = ((previous or {}).get("races") or {}).get(rid)
         if race and rid in withdrawn and race.get("calledBy") == CALLED_NATIONAL:
             continue
@@ -5008,7 +5467,7 @@ def carry_refused(cache, previous):
         race = (cache.get("races") or {}).get(rid) or {}
         before = (((previous or {}).get("races") or {}).get(rid) or {}).get("status") or {}
         now = race.get("status") or {}
-        if rid in kept or ELECTED not in now.values():
+        if rid in kept or ELECTED not in now.values() or race.get("source") == OFFICE:
             continue
         for item in items:
             for cid in item.get("ids") or ():
@@ -5411,7 +5870,9 @@ def apply_cache(profiles, cache, field=None):
             race = races.get(rid) or {}
             if (status == WITHDRAWN and profile.get("isCandidate")
                     and candidate_id not in (race.get("certifiedIds") or {})
-                    and race.get("source") != "qualified"):
+                    and race.get("source") not in ("qualified", OFFICE)):
+                # (A list's withdrawal - the qualified list's, under its own
+                # race or the office's results - is the office's word.)
                 # "Withdrawn" is the page's reading of a primary winner it
                 # does not find on its November ballot. If that ballot names
                 # someone who may be them - a letter apart, another form of
@@ -5700,6 +6161,18 @@ def _source_of(profile, race, cid=None, absent=False):
     if race.get("source") == "qualified":
         profile["raceStatusSource"] = "qualified"
         return
+    if race.get("source") == OFFICE:
+        # The office's results set who won, lost or went to the runoff, in the
+        # words the page credits them with (unofficial until the canvass);
+        # who withdrew, or was never on the ballot, is still its qualified
+        # list's word (rule 64).
+        status = profile.get("raceStatus")
+        if not absent and status in (ELECTED, DEFEATED, RUNOFF):
+            profile["raceStatusSource"] = OFFICE
+            profile["raceStatusSourceName"] = (race.get("office") or {}).get("source") or ""
+        else:
+            profile["raceStatusSource"] = "qualified"
+        return
     # A winner, or a loser, the national summary called (rule 63's national
     # route): its source is that summary, which gives no count, never the
     # state's page, which had none (rule 19). Asked before the certified list:
@@ -5774,6 +6247,9 @@ def results_source_url(race):
     if (race or {}).get("source") == "qualified":
         from .qualified import PORTAL
         return PORTAL
+    if (race or {}).get("source") == OFFICE:
+        from .la_results import PAGE
+        return PAGE
     title = str((race or {}).get("page") or "").strip()
     if not title:
         return None
@@ -5813,6 +6289,13 @@ def _race_summary(race, counts, unmatched):
             "qualified": counts[QUALIFIED],
             # The race's ballot is a state's qualified list, not a result.
             "fromQualifiedList": race.get("source") == "qualified",
+            # Or its result is the state election office's own (rule 64):
+            # credited to it, and unofficial until its canvass where it says
+            # so (kyc/la_results.py).
+            "fromOfficeResults": race.get("source") == OFFICE,
+            "officeResults": ({k: (race.get("office") or {}).get(k)
+                               for k in ("source", "official", "read")}
+                              if race.get("source") == OFFICE else None),
             # Where a reader checks it (TRUST-06): the results page the
             # statuses were read from, by the title the cache holds (rule 32),
             # or the Secretary of State's list a qualified ballot came from.

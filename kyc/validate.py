@@ -1173,7 +1173,7 @@ def check_results_pages(cache):
     for race in (cache.get("races") or {}).values():
         if race.get("calledBy"):
             routes[race["calledBy"]] = routes.get(race["calledBy"], 0) + 1
-    if routes.get("infobox") or routes.get("national"):
+    if routes.get("infobox") or routes.get("national") or routes.get("office"):
         national, counted = [], 0
         for rid, race in sorted((cache.get("races") or {}).items()):
             call = race.get("national") or {}
@@ -1191,7 +1191,9 @@ def check_results_pages(cache):
                             f"table's mark, {routes.get('infobox', 0)} from the infobox's "
                             f"declaration, {routes.get('national', 0)} from the national summary "
                             f"where the state's page named no winner ({counted} of them over the "
-                            "page's own counts, which put the same person ahead)", national))
+                            "page's own counts, which put the same person ahead), "
+                            f"{routes.get('office', 0)} from a state election office's own "
+                            "results (rule 64)", national))
     withdrawn = [f"{rid}: {item.get('name')}: "
                  f"{item.get('why') or 'now behind ' + ', '.join(item.get('leaders') or [])} "
                  f"(national revision {item.get('revid')})"
@@ -1296,6 +1298,32 @@ def check_results_pages(cache):
                                 f"format (Alaska's ranked-choice table is not an Election "
                                 f"box; Louisiana's open-primary page may not mark its result "
                                 f"in one either)", uncalled))
+    # Louisiana's own results (kyc/la_results.py, rule 64): a seat whose read
+    # concluded nothing keeps what it had, and a person is told why; one the
+    # page contradicts shows neither; a read that failed keeps the last.
+    office = cache.get("officeResults") or {}
+    held = [f"{rid}: {why}" for rid, why in sorted((office.get("held") or {}).items())]
+    if held:
+        issues.append(Issue("warn", "office-result-held",
+                            f"{len(held)} Louisiana House seats' results from the Secretary of "
+                            "State concluded nothing (rule 64): each keeps what it had - the last "
+                            "result read from them, else the page's or the qualified list's - "
+                            "until every gate passes; each line says which failed", held))
+    disagree = [f"{rid}: {item.get('page')!r} says {item.get('pageSays')}; the Secretary of "
+                f"State's results say {item.get('officeSays')}"
+                for rid, item in sorted((office.get("disagree") or {}).items())]
+    if disagree:
+        issues.append(Issue("warn", "office-result-disagrees",
+                            f"{len(disagree)} Louisiana House seats where the results page and "
+                            "the Secretary of State's own results name different people (rule "
+                            "64): neither is shown, and the seat reads from the qualified list "
+                            "until a person looks", disagree))
+    if office.get("unread"):
+        issues.append(Issue("warn", "office-results-unread",
+                            f"Louisiana's Secretary of State's results could not be read on "
+                            f"{office.get('unreadOn') or as_of} ({office.get('unread')}); "
+                            f"{'the read of ' + str(office.get('read')) + ' is kept' if office.get('carried') else 'nothing was concluded'}",
+                            sorted(office.get("kept") or [])))
     listed = cache.get("qualified") or {}
     if listed.get("carried"):
         issues.append(Issue("warn", "qualified-list-stale",

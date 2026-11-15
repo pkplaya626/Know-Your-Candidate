@@ -1061,16 +1061,21 @@ class TestNamesThePageMayUse(unittest.TestCase):
         self.assertEqual([i.code for i in issues], ["results-name-unresolved"])
 
 
-class TestAgainstTheRealCache(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.cache = results.load_cache(ROOT)
+class RealCacheChecks:
+    """The checks the refresh runs on the cache it has just read (its unit
+    step), asked of ``self.cache``: the committed one here, and a cache
+    holding Louisiana's own results in tests/test_la_results.py, since the
+    committed one cannot hold every source the next read may write (the
+    first office read would have failed the refresh, rule 64)."""
 
     def test_the_cache_is_committed(self):
         self.assertIsNotNone(self.cache, "run: python build_profile_site.py results")
 
     def test_no_race_was_resolved_before_its_primary(self):
-        dates = results.load_dates(ROOT)
+        dates = {}
+        for key, slot in (self.cache.get("dates") or {}).items():
+            state, _, office = key.rpartition("-")
+            dates[(state, office)] = slot
         as_of = datetime.date.fromisoformat(self.cache["asOf"])
         for rid, race in self.cache["races"].items():
             if race.get("source") in ("qualified", "certified"):
@@ -1078,8 +1083,12 @@ class TestAgainstTheRealCache(unittest.TestCase):
             parts = rid.split("-")
             state, office = parts[1], "S" if parts[0] == "S" else "H"
             slot = results.seat_slot(dates, rid)
-            self.assertTrue(results.primary_settled({(state, office): slot}, state, office,
-                                                    as_of), rid)
+            # An open primary's seat is settled once its first round is past,
+            # as resolve_race reads it: Louisiana's November count decides
+            # who won outright and who is in the December runoff (rule 64).
+            self.assertTrue(results.primary_settled(
+                {(state, office): slot}, state, office, as_of,
+                open_seat=results.open_primary(state, office)), rid)
 
     def test_every_status_is_a_known_value(self):
         # Every status the reader writes: the primary's, November's (from the
@@ -1116,6 +1125,12 @@ class TestAgainstTheRealCache(unittest.TestCase):
                             results._fold(by_id[cid].get("name")))
             for party, names in parties.items():
                 self.assertLessEqual(len(names), 1, f"{rid}: {party} nominees {sorted(names)}")
+
+
+class TestAgainstTheRealCache(RealCacheChecks, unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cache = results.load_cache(ROOT)
 
 
 class TestAMarkNeedsAFilingAndACount(unittest.TestCase):

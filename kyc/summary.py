@@ -228,6 +228,7 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
             r.get("candidateCount", 0) for r in races if ballot_known(r)) + maybe
         summary["election"]["challengersUnprofiled"] = sum(
             len((r.get("results") or {}).get("otherNominees") or []) for r in races) - maybe
+        summary["election"]["challengersUnprofiledBySource"] = unprofiled_by_source(races)
         summary["election"]["renumbered"] = sum(1 for r in races if r.get("holderMoved"))
         # Of the profiles that figure counts, those now seated in Congress
         # for a race they won (a newcomer, a House member now a senator),
@@ -335,6 +336,39 @@ def ballot_known(race):
     (neither key present) is not known to have no primary."""
     no_primary = "primaryDate" in race and not race["primaryDate"]
     return not (no_primary and race.get("settled") is False)
+
+
+def unprofiled_by_source(races):
+    """``[[words, count]]``, most first: whose word each name the races put on
+    the ballot with no profile here is (``challengersUnprofiled`` counted by
+    its sources), in the words the race's own head credits
+    (``share.ballot_source``, ``KYC.ballotSource``). The sidebar's hover
+    credited every one of them to "Wikipedia's results pages" while some
+    were Louisiana's own results', its list of qualified candidates' and the
+    states' certified lists' (rules 64, 77), as the map's state panel
+    already counts them apart. A list of qualified candidates is named with
+    its state's name, since the sidebar speaks of every state."""
+    from .pages import state_name
+    from .share import ballot_source
+
+    counts, races_of = {}, {}
+    for race in races or ():
+        res = race.get("results") or {}
+        n = len(res.get("otherNominees") or []) - len(res.get("maybeProfiled") or {})
+        if n <= 0:
+            continue
+        words = ballot_source(race)
+        if res.get("fromQualifiedList"):
+            words = (f"per the {state_name(race.get('state') or race['id'].split('-')[1])} "
+                     "Secretary of State's list of qualified candidates")
+        counts[words] = counts.get(words, 0) + n
+        races_of[words] = races_of.get(words, 0) + 1
+    out = []
+    for words, n in counts.items():
+        if races_of[words] > 1 and words.endswith("results page"):
+            words += "s"        # Wikipedia's results pages, one a state
+        out.append([words, n])
+    return sorted(out, key=lambda item: (-item[1], item[0]))
 
 
 def by_state(profiles, races=None):

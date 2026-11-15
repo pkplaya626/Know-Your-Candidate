@@ -429,7 +429,15 @@ class TestValidation(unittest.TestCase):
         self.assertIn("roster-seat-disagrees-with-fec", codes)
 
 
-class TestAgainstTheRealBuild(unittest.TestCase):
+class RealBuildChecks:
+    """Checks of the real build, its profiles and races laid over the results
+    cache ``results_cache()`` gives: the committed one here, and one holding
+    Louisiana's own results in tests/test_la_results.py (rule 64)."""
+
+    @classmethod
+    def results_cache(cls):
+        return results.load_cache(ROOT)
+
     @classmethod
     def setUpClass(cls):
         from kyc import candidates, fec, legislators
@@ -440,8 +448,9 @@ class TestAgainstTheRealBuild(unittest.TestCase):
             raw, snapshot=legislators.load_snapshot(ROOT),
             field=candidates.load_cache(ROOT), finance=fec.load_cache(ROOT))
         fec.apply_cache(cls.profiles, fec.load_cache(ROOT))
-        results.apply_cache(cls.profiles, results.load_cache(ROOT))
-        cls.races = {r["id"]: r for r in races.build(cls.profiles, results=results.load_cache(ROOT),
+        cache = cls.results_cache()
+        results.apply_cache(cls.profiles, cache)
+        cls.races = {r["id"]: r for r in races.build(cls.profiles, results=cache,
                                                       record=raw["record"])}
         cls.by_id = {p["id"]: p for p in cls.profiles}
 
@@ -467,6 +476,10 @@ class TestAgainstTheRealBuild(unittest.TestCase):
     def test_no_race_gives_one_party_two_nominees(self):
         issues = validate.check_results(self.profiles, list(self.races.values()))
         self.assertEqual([i for i in issues if i.level == "error"], [])
+
+
+class TestAgainstTheRealBuild(RealBuildChecks, unittest.TestCase):
+    pass
 
 
 class TestNomineesUnderTheThreshold(unittest.TestCase):
