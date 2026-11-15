@@ -1111,9 +1111,14 @@ for the round's date. The election is found by its date, a seat by
   December election or its December file holds no race for the seat: the
   last read's December result and record stand. So does the first round
   once a later `ElectionDates.htm` drops it ("where its last read had them",
-  never "yet"), and a December file back to partial counts beside a kept
-  December result: the record the result was decided on stays, and this
-  read's counts are kept beside it as `heldRead`.
+  never "yet"), and a December file back to partial counts, or an older
+  one, beside a December result the last read had, whether it was shown or
+  set aside beside a page that named someone else: the last read stands,
+  the record the result was decided on stays, and this read's counts are
+  kept beside it as `heldRead`. A seat a read writes no record for keeps the
+  last read's record, each round's marked with the day of the read that
+  wrote it (`keptFrom`), so a later read still knows what the office had
+  counted.
 - Where the page also decides a seat and names someone else, neither is
   shown: the seat reads from the list, and `office-result-disagrees` says so.
   A page name that fits no filing but is the office's list name for one
@@ -1128,8 +1133,11 @@ for the round's date. The election is found by its date, a seat by
   file older than the last read's, no qualified list, a December round held -
   keeps the page's call set aside as the last read set it aside, its
   `disagree` or `pageHeld` entry kept with the day of the read it is kept
-  from (`keptFrom`), so the warning stands; one failed request once let the
-  call the office's counts contradicted go live, credited to Wikipedia. A
+  from (`keptFrom`: the read that found it, however many reads have
+  concluded nothing since), so the warning stands; one failed request once
+  let the call the office's counts contradicted go live, credited to
+  Wikipedia. With no read made at all, a held line says a page's call waits
+  only while the page still makes that call. A
   page mark the
   read refuses never takes an office result away (`carry_refused`).
 - The December round is read the same way once the office posts it, between

@@ -1879,9 +1879,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     concludes nothing, the last read's record and its election's stand
     (`unlistedOn`), and the seat is held (`office-result-held`); a first
     round a later dates file drops is held the same way, "where its last read
-    had them", never "yet", and a December file back to partial counts beside
-    a kept December result leaves the record it was decided on, this read's
-    counts beside it (`heldRead`). Where the
+    had them", never "yet", and a December file back to partial counts, or an
+    older one, beside a December result the last read had - shown, or set
+    aside beside a page that named someone else - leaves the last read
+    standing and the record it was decided on, this read's counts beside it
+    (`heldRead`): such a file made a call the office's December count had
+    contradicted a runoff that call merely waited on. A seat a read writes
+    no record for (no list, an older first round, a first round the dates
+    file dropped, no race for its district) keeps the last read's, each
+    round's said to be kept and from which read (`keptFrom`): dropped, the
+    next read said "the office has posted no December count for the seat
+    yet" of a seat whose page its own December count had contradicted
+    (the reader of the fix that keeps a hold, below). Where the
     page also decides the seat and names someone else, neither is shown and
     the seat reads from the list (`office-result-disagrees`) - a page name
     that fits no filing but is the office's list name for one, as a page
@@ -1907,10 +1916,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     read did (`_keep_last_hold`: the race and call popped, the `disagree` or
     `pageHeld` entry kept with the day of the read it is kept from,
     `keptFrom`, and validate naming it again); a read that itself decides
-    resets both. Its last verifier made LA-1's page mark Lauren Jewett over
-    the office's count for Scalise, and the next read, ElectionDates.htm
-    answering 403, showed her "elected", credited to Wikipedia, with no
-    warning. A failed page never takes
+    resets both. `keptFrom` is the day of the read that found it, through
+    any number of reads that conclude nothing, never the day of the last of
+    those. And with no read made, a held line's clause about a page's call
+    that waits is said only while the page still makes the call (the
+    `pageHeld` record keeps the seat's own reason apart, `why`): kept whole,
+    it spoke of a call the page had stopped making. PR #265's last verifier
+    made LA-1's page mark Lauren Jewett over the office's count for Scalise,
+    and the next read, ElectionDates.htm answering 403, showed her "elected",
+    credited to Wikipedia, with no warning. A failed page never takes
     an office result away, nor does a refused page mark: `carry_refused` leaves alone a race
     this read took from the office's results, or a vandal's "Peter Griffin"
     on the page would have put LA-1 back on the list and a December winner

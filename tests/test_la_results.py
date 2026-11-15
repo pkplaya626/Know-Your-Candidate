@@ -1221,6 +1221,361 @@ class TestAFirstRoundALaterFileDrops(NoGap):
                          "the office lists no results for 2026-11-03 yet")
 
 
+# -------------------------------------------------- the fourth review's follow-ups
+
+def day_after(day, n=1):
+    return day + datetime.timedelta(days=n)
+
+
+class TestAHoldKeepsTheRecordItStandsOn(NoGap):
+    """Rule 8: a seat whose page call was set aside lost the office's round
+    record whenever a read concluded nothing before one was written (no list,
+    an older first round, a first round the dates file dropped, no race for
+    the district), so the next read no longer knew the office had counted
+    December and said "the office has posted no December count for the seat
+    yet" of a seat whose page its own count had contradicted; and a December
+    file gone back to partial counts overwrote the record the disagreement
+    stood on, and made it a runoff the page's call merely waited on."""
+
+    RID = "H-LA-05-2026"
+    BOTH = {"11/03/2026": {5: LA5}, "12/12/2026": {5: TWO}}
+    D0, D1, D2 = DECEMBER_AFTER, day_after(DECEMBER_AFTER), day_after(DECEMBER_AFTER, 2)
+
+    def moore_page(self):
+        waits = TestAPageCallOfDecemberWaitsForTheOffice
+        return waits().page(waits.MOORE, waits.FIRMENT)
+
+    def disagreed(self):
+        # The office's December count elects Firment; the page marks Moore.
+        cache = self.build(read(self.BOTH, today=self.D0), today=self.D0, page=self.moore_page())
+        self.assertIn(self.RID, cache["officeResults"]["disagree"])
+        self.assertEqual(cache["races"][self.RID]["source"], "qualified")
+        self.assertTrue(cache["officeResults"]["races"][self.RID]["2026-12-12"]["verdict"])
+        return cache
+
+    def assert_still_disagrees(self, cache, first, kind="disagree"):
+        race = cache["races"][self.RID]
+        self.assertEqual(race["source"], "qualified")
+        self.assertNotIn("elected", race["status"].values())
+        self.assertNotIn("runoff", race["status"].values())
+        self.assertNotIn("calledBy", race)
+        item = cache["officeResults"][kind][self.RID]
+        self.assertEqual(item["keptFrom"], self.D0.isoformat())
+        self.assertEqual(item["officeSays"],
+                         first["officeResults"]["disagree"][self.RID]["officeSays"])
+        self.assertIn("elected H6LA05317", item["officeSays"])
+        other = "pageHeld" if kind == "disagree" else "disagree"
+        self.assertFalse(cache["officeResults"].get(other))
+        self.assertNotIn("posted no December count", cache["officeResults"]["held"][self.RID])
+
+    def assert_record_kept(self, cache, first):
+        """December's record is the one the hold stands on: its verdict and
+        its full counts, said to be kept from the read that wrote it."""
+        record = cache["officeResults"]["races"][self.RID]["2026-12-12"]
+        was = first["officeResults"]["races"][self.RID]["2026-12-12"]
+        self.assertEqual(record["verdict"], was["verdict"])
+        self.assertTrue(record["verdict"])
+        self.assertEqual(record["reporting"]["precincts"][0], 791)
+        self.assertEqual(record["choices"], was["choices"])
+        self.assertEqual(record["keptFrom"], self.D0.isoformat())
+        return record
+
+    def nothing_for_the_seat(self):
+        """Reads that write no record for the seat: ``{what: (office read,
+        lists, a word of why)}``."""
+        older = restamp(feeds(self.BOTH), "20261103", written="2026-11-01T18:55:18.130")
+        return {
+            "no list": (read(self.BOTH, today=self.D1), None, "qualified list"),
+            "an older first round": (read_files(older, today=self.D1), LISTS, "before the"),
+            "the first round dropped": (read({"12/12/2026": {5: TWO}}, today=self.D1), LISTS,
+                                        "lists no results for 2026-11-03"),
+            "no race for the district": (read({"11/03/2026": {1: LA1}, "12/12/2026": {5: TWO}},
+                                              today=self.D1), LISTS,
+                                         "no race for district 5"),
+        }
+
+    def test_a_read_that_writes_no_record_keeps_the_last_reads(self):
+        page = self.moore_page()
+        for what, (office, lists, why) in self.nothing_for_the_seat().items():
+            with self.subTest(what):
+                first = self.disagreed()
+                second = self.build(office, today=self.D1, page=page, previous=first, lists=lists)
+                results.carry_qualified(second, first)
+                self.assertIn(why, second["officeResults"]["held"][self.RID])
+                self.assert_still_disagrees(second, first)
+                self.assert_record_kept(second, first)
+                # The first round's record is kept with it, as that read's.
+                november = second["officeResults"]["races"][self.RID]["2026-11-03"]
+                self.assertEqual(november["keptFrom"], self.D0.isoformat())
+                self.assertEqual(second["officeResults"]["read"], self.D1.isoformat())
+                # Then a dates file that lists no December: the office's last
+                # read had its count, and the read says so.
+                third = self.build(read({"11/03/2026": {5: LA5}}, today=self.D2), today=self.D2,
+                                   page=page, previous=second)
+                self.assert_still_disagrees(third, first)
+                self.assert_record_kept(third, first)
+                held = third["officeResults"]["held"][self.RID]
+                self.assertTrue(held.startswith(
+                    "2026-12-12: the office lists no results for 2026-12-12, where its last "
+                    "read had them"), held)
+                self.assertNotIn("the page's call", held)
+                # This read's own first round is its own, not a kept one.
+                self.assertNotIn("keptFrom",
+                                 third["officeResults"]["races"][self.RID]["2026-11-03"])
+                issues = {i.code: i for i in validate.check_results_pages(third)}
+                self.assertTrue(any(d.startswith(self.RID) and f"as the read of {self.D0}" in d
+                                    for d in issues["office-result-disagrees"].detail))
+
+    def test_a_kept_record_says_the_read_that_wrote_it_through_two_reads(self):
+        first = self.disagreed()
+        second = self.build(read(self.BOTH, today=self.D1), today=self.D1,
+                            page=self.moore_page(), previous=first, lists=None)
+        results.carry_qualified(second, first)
+        third = self.build(read(self.BOTH, today=self.D2), today=self.D2,
+                           page=self.moore_page(), previous=second, lists=None)
+        results.carry_qualified(third, second)
+        self.assertEqual(third["officeResults"]["read"], self.D2.isoformat())
+        self.assert_record_kept(third, first)
+        self.assert_still_disagrees(third, first)
+
+    def test_a_seat_no_page_call_touches_keeps_its_record_too(self):
+        # A seat held for its close margin, no page call beside it: an older
+        # file's read writes no record, and the last read's stays.
+        first = self.build(read_files(restamp(feeds({"11/03/2026": {1: CLOSE}}), "20261103",
+                                              written="2026-11-14T18:55:18.130"), today=EARLY),
+                           today=EARLY)
+        self.assertIsNone(first["officeResults"]["races"]["H-LA-01-2026"]["2026-11-03"]["verdict"])
+        older = restamp(feeds({"11/03/2026": {1: CLOSE}}), "20261103",
+                        written="2026-11-04T09:00:00")
+        later = self.build(read_files(older), previous=first)
+        record = later["officeResults"]["races"]["H-LA-01-2026"]["2026-11-03"]
+        self.assertEqual(record["keptFrom"], EARLY.isoformat())
+        self.assertEqual(record["total"], sum(v for _d, v, _o in CLOSE))
+
+    def partial(self, firment, moore):
+        return {"11/03/2026": {5: LA5},
+                "12/12/2026": {5: ([('"Gabe" Firment (REP)', firment, "Elected"),
+                                    ('Patricia "Pat" Moore (DEM)', moore, "Defeated")],
+                                   (10, 791, 0, 24))}}
+
+    def test_a_december_file_back_to_partial_counts_keeps_the_disagreement(self):
+        page = self.moore_page()
+        # Partial counts that lead the page's winner made the contradicted
+        # call one that waits; partial counts that do not, a new disagreement
+        # with a runoff: either way the count the hold stood on was dropped.
+        for what, counts in (("leading the page's winner", (100, 200)),
+                             ("leading the office's", (200, 100))):
+            with self.subTest(what):
+                first = self.disagreed()
+                later = self.build(read(self.partial(*counts), today=self.D1), today=self.D1,
+                                   page=page, previous=first)
+                self.assert_still_disagrees(later, first)
+                record = self.assert_record_kept(later, first)
+                self.assertEqual(record["heldRead"]["reporting"]["precincts"][0], 10)
+                self.assertIsNone(record["heldRead"]["verdict"])
+                self.assertEqual(record["heldRead"]["on"], self.D1.isoformat())
+                held = later["officeResults"]["held"][self.RID]
+                self.assertTrue(held.startswith("2026-12-12: "), held)
+                self.assertIn("10 of 791 precincts", held)
+                self.assertNotIn("the page's call", held)
+                # And again the next day, from the kept record.
+                again = self.build(read(self.partial(*counts), today=self.D2), today=self.D2,
+                                   page=page, previous=later)
+                self.assert_still_disagrees(again, first)
+                record = self.assert_record_kept(again, first)
+                self.assertEqual(record["heldRead"]["on"], self.D2.isoformat())
+                # A full count settles it afresh: still a disagreement, this read's.
+                full = self.build(read(self.BOTH, today=self.D2), today=self.D2, page=page,
+                                  previous=again)
+                self.assertNotIn("keptFrom", full["officeResults"]["disagree"][self.RID])
+                self.assertNotIn("heldRead",
+                                 full["officeResults"]["races"][self.RID]["2026-12-12"])
+                self.assertNotIn("keptFrom",
+                                 full["officeResults"]["races"][self.RID]["2026-12-12"])
+
+    def test_an_older_december_file_keeps_the_disagreement(self):
+        first = self.disagreed()
+        older = restamp(feeds(self.partial(100, 200)), "20261212",
+                        written="2026-12-01T09:00:00")
+        later = self.build(read_files(older, today=self.D1), today=self.D1,
+                           page=self.moore_page(), previous=first)
+        self.assert_still_disagrees(later, first)
+        record = self.assert_record_kept(later, first)
+        self.assertNotIn("heldRead", record)     # an older file's counts are not kept
+        self.assertIn("before the", later["officeResults"]["held"][self.RID])
+
+    def test_a_page_call_that_waited_beside_decembers_verdict_is_kept_the_same_way(self):
+        # The state made: the last read's hold is a ``pageHeld``, its December
+        # record holding a verdict.
+        first = self.disagreed()
+        made = copy.deepcopy(first)
+        made["officeResults"]["pageHeld"] = {
+            self.RID: made["officeResults"]["disagree"].pop(self.RID)}
+        later = self.build(read(self.partial(100, 200), today=self.D1), today=self.D1,
+                           page=self.moore_page(), previous=made)
+        self.assert_still_disagrees(later, first, kind="pageHeld")
+        record = self.assert_record_kept(later, first)
+        self.assertEqual(record["heldRead"]["reporting"]["precincts"][0], 10)
+
+    def test_with_no_december_verdict_before_a_partial_december_is_read_as_ever(self):
+        # No read had December's result: the page's call waits on the count
+        # under way, as before (nothing is kept that was never read).
+        waits = TestAPageCallOfDecemberWaitsForTheOffice
+        page = waits().page(waits.MOORE, waits.FIRMENT)
+        nov = self.build(read({"11/03/2026": {5: LA5}}, today=self.D0), today=self.D0, page=page)
+        self.assertIn(self.RID, nov["officeResults"]["pageHeld"])
+        later = self.build(read(self.partial(100, 200), today=self.D1), today=self.D1,
+                           page=page, previous=nov)
+        self.assertEqual(later["races"][self.RID]["source"], "office")
+        self.assertEqual(later["races"][self.RID]["status"]["H6LA05341"], "runoff")
+        self.assertIn(self.RID, later["officeResults"]["pageHeld"])
+        self.assertNotIn("keptFrom", later["officeResults"]["pageHeld"][self.RID])
+        record = later["officeResults"]["races"][self.RID]["2026-12-12"]
+        self.assertEqual(record["reporting"]["precincts"][0], 10)
+        self.assertNotIn("heldRead", record)
+
+
+class TestAKeptHoldSaysTheReadThatFoundIt(NoGap):
+    """``keptFrom`` is the day of the read that set the page's call aside,
+    through any number of reads that conclude nothing: taken from the last
+    read's own day, a second older file's read said "as the read of
+    2026-11-15 found" of a disagreement the read of the 14th found - the
+    15th's read had concluded nothing."""
+
+    RID = "H-LA-01-2026"
+    D1, D2 = day_after(EARLY), day_after(EARLY, 2)
+
+    def chain(self, first, page, files, lists=LISTS):
+        """Two reads of *files* after *first*, a day apart, as the cli makes
+        them: ``(second, third)``."""
+        second = self.build(read_files(files, today=self.D1), today=self.D1, page=page,
+                            previous=first, lists=lists)
+        results.carry_qualified(second, first)
+        self.assertEqual(second["officeResults"]["read"], self.D1.isoformat())
+        third = self.build(read_files(files, today=self.D2), today=self.D2, page=page,
+                           previous=second, lists=lists)
+        results.carry_qualified(third, second)
+        self.assertEqual(third["officeResults"]["read"], self.D2.isoformat())
+        return second, third
+
+    def files(self, choices):
+        return {"an older file": (restamp(feeds({"11/03/2026": {1: choices}}), "20261103",
+                                          written="2026-11-01T18:55:18.130"), LISTS),
+                "no list": (restamp(feeds({"11/03/2026": {1: choices}}), "20261103",
+                                    written="2026-11-20T10:00:00"), None)}
+
+    def test_a_disagreement_kept_twice_names_the_read_that_found_it(self):
+        keeps = TestAReadThatConcludesNothingKeepsTheLastHold
+        for what, (files, lists) in self.files(LA1).items():
+            with self.subTest(what):
+                first = keeps.disagreed(self)
+                for cache in self.chain(first, JEWETT_WINS, files, lists):
+                    keeps.assert_set_aside(self, cache, "disagree")
+                    # The record the disagreement stands on, kept the same way.
+                    record = cache["officeResults"]["races"][self.RID]["2026-11-03"]
+                    self.assertEqual(record["keptFrom"], EARLY.isoformat())
+                    self.assertTrue(record["verdict"])
+
+    def test_a_close_margins_hold_kept_twice_names_the_read_that_found_it(self):
+        keeps = TestAReadThatConcludesNothingKeepsTheLastHold
+        for what, (files, lists) in self.files(CLOSE).items():
+            with self.subTest(what):
+                first = keeps.held(self)
+                for cache in self.chain(first, SCALISE_CLOSE, files, lists):
+                    keeps.assert_set_aside(self, cache, "pageHeld")
+                    self.assertEqual(cache["officeResults"]["races"][self.RID]["2026-11-03"]
+                                     ["keptFrom"], EARLY.isoformat())
+
+
+class TestWithNoReadAHeldLineSaysNoCallThePageNoLongerMakes(NoGap):
+    """With no read of the office attempted, the last read's record stands -
+    and its held line for a seat whose page call waited went on saying "the
+    page's call (...) waits" after the page had stopped making the call."""
+
+    CLAUSE = "the page's call"
+
+    def lines(self, cache):
+        held = [d for i in validate.check_results_pages(cache) if i.code == "office-result-held"
+                for d in i.detail]
+        return cache["officeResults"].get("held") or {}, held
+
+    def test_a_close_margins_line_goes_back_to_the_offices_reason(self):
+        rid = "H-LA-01-2026"
+        first = TestAReadThatConcludesNothingKeepsTheLastHold.held(self)
+        before = copy.deepcopy(first)
+        self.assertIn(self.CLAUSE, first["officeResults"]["held"][rid])
+        self.assertIn("over half", first["officeResults"]["pageHeld"][rid]["why"])
+        # The page makes no call now, and no read is made.
+        quiet = self.build(None, previous=first)
+        self.assertNotIn("pageHeld", quiet["officeResults"])
+        held, named = self.lines(quiet)
+        self.assertIn("over half", held[rid])
+        self.assertNotIn(self.CLAUSE, held[rid])
+        self.assertFalse(any(self.CLAUSE in d for d in named), named)
+        self.assertTrue(any(d.startswith(rid) and "over half" in d for d in named), named)
+        # The page still makes it: said once, as the read that found it found.
+        still = self.build(None, page=SCALISE_CLOSE, previous=first)
+        self.assertEqual(still["officeResults"]["held"][rid].count(self.CLAUSE), 1)
+        self.assertIn("over half", still["officeResults"]["pageHeld"][rid]["why"])
+        # ... and then stops: the line is the office's reason again.
+        after = self.build(None, previous=still)
+        self.assertNotIn("pageHeld", after["officeResults"])
+        self.assertIn("over half", after["officeResults"]["held"][rid])
+        self.assertNotIn(self.CLAUSE, after["officeResults"]["held"][rid])
+        # Nothing of the last read's own record was written over.
+        self.assertEqual(first, before)
+
+    def test_a_record_written_before_the_reason_was_kept_apart_reads_the_same(self):
+        rid = "H-LA-01-2026"
+        first = TestAReadThatConcludesNothingKeepsTheLastHold.held(self)
+        del first["officeResults"]["pageHeld"][rid]["why"]
+        quiet = self.build(None, previous=first)
+        self.assertIn("over half", quiet["officeResults"]["held"][rid])
+        self.assertNotIn(self.CLAUSE, quiet["officeResults"]["held"][rid])
+
+    def test_after_an_unread_office_the_line_is_that_reads_reason(self):
+        rid = "H-LA-01-2026"
+        first = TestAReadThatConcludesNothingKeepsTheLastHold.held(self)
+        unread = self.build({"unread": "HTTPError: HTTP Error 403: Forbidden"},
+                            page=SCALISE_CLOSE, previous=first)
+        self.assertIn("could not be read", unread["officeResults"]["pageHeld"][rid]["why"])
+        # No read made, the page silent: every seat's line is the unread
+        # read's, this seat's with them, and none speaks of a call.
+        quiet = self.build(None, previous=unread)
+        self.assertNotIn("pageHeld", quiet["officeResults"])
+        self.assertEqual(quiet["officeResults"]["held"][rid],
+                         "the office's results could not be read: HTTPError: HTTP Error 403: "
+                         "Forbidden")
+
+    def december_wait(self):
+        waits = TestAPageCallOfDecemberWaitsForTheOffice
+        page = waits().page(waits.FIRMENT, waits.MOORE)
+        first = self.build(read({"11/03/2026": {1: LA1, 5: LA5}}, today=DECEMBER_AFTER),
+                           today=DECEMBER_AFTER, page=page)
+        self.assertIn("H-LA-05-2026", first["officeResults"]["pageHeld"])
+        self.assertIsNone(first["officeResults"]["pageHeld"]["H-LA-05-2026"]["why"])
+        return first, page
+
+    def test_a_december_wait_held_for_the_call_alone_drops_its_line(self):
+        rid = "H-LA-05-2026"
+        for old in (False, True):
+            with self.subTest(written_before_the_reason_was_kept_apart=old):
+                first, page = self.december_wait()
+                if old:
+                    del first["officeResults"]["pageHeld"][rid]["why"]
+                # The seat was held for the page's call alone: with no call, no line.
+                quiet = self.build(None, today=DECEMBER_AFTER, previous=first)
+                self.assertNotIn("pageHeld", quiet["officeResults"])
+                self.assertNotIn(rid, quiet["officeResults"]["held"])
+                self.assertEqual(quiet["races"][rid]["status"]["H6LA05317"], "runoff")
+                self.assertFalse(any(d.startswith(rid) for d in self.lines(quiet)[1]))
+                # The page still calls it: it waits, said once.
+                still = self.build(None, today=DECEMBER_AFTER, page=page, previous=first)
+                self.assertIn(rid, still["officeResults"]["pageHeld"])
+                self.assertEqual(still["officeResults"]["held"][rid].count(self.CLAUSE), 1)
+                self.assertEqual(still["races"][rid]["status"]["H6LA05317"], "runoff")
+
+
 class TestARefusedRowLeavesTheOfficesLoss(unittest.TestCase):
     def test_the_second_loop_leaves_an_office_race_alone(self):
         # A November row refused for its name, unmarked, in a race the office
