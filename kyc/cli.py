@@ -395,6 +395,13 @@ def _build(args):
             if not args.json:
                 print(f"  smaller copies of heavy portraits: "
                       f"{photocopies.stats(photocopies.load(args.root), copies_shown)}")
+    # The seats elected so far to the Congress the cycle elects (rule 104):
+    # its chambers must add up, here too, where build --check is run.
+    from . import incoming as incoming_mod
+    try:
+        incoming_mod.build(profiles, race_list, results=outcomes, snapshot=snapshot)
+    except incoming_mod.IncomingError as exc:
+        issues.append(validate.Issue("error", "incoming-count", str(exc), ""))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -418,7 +425,8 @@ def _build(args):
 
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
-                                results=outcomes, snapshot=snapshot, root=args.root)
+                                results=outcomes, snapshot=snapshot, root=args.root,
+                                incoming=True)
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
                                           voting_dates_mod.load(args.root))
     summary["departed"] = departed_rows
@@ -1715,7 +1723,7 @@ def _verify(args):
                                 committees=legislators.load_committees(args.root),
                                 results=outcomes,
                                 snapshot=legislators.load_snapshot(args.root),
-                                root=args.root)
+                                root=args.root, incoming=True)
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
                                           voting_dates_mod.load(args.root))
     summary["departed"] = _departed(args.root, legislators.load_snapshot(args.root), profiles)[0]

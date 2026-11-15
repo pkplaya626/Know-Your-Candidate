@@ -102,11 +102,14 @@ def _either(titles):
     return ", ".join(titles[:-1]) + ", or " + titles[-1]
 
 
-def build(profiles, races=None, committees=None, results=None, snapshot=None, root=None):
+def build(profiles, races=None, committees=None, results=None, snapshot=None, root=None,
+          incoming=False):
     """Chamber balance and 2026 election headline figures. *results*, the
     results cache, dates what the page says about who won. Given *root*,
     the House tile layout is laid out from the district maps under it
-    (``kyc/tiles.py``).
+    (``kyc/tiles.py``). With *incoming*, the build's whole race set, the
+    seats elected so far to the Congress the cycle elects (kyc/incoming.py,
+    rule 104), until it sits.
 
     The balance counts who sits now (``record.seated``); the seats up and
     who defends them count the record's incumbents, a former member among
@@ -290,6 +293,16 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
         summary["houseTiles"] = layout
     if committees:
         summary["committees"] = committee_table(committees, profiles)
+    if incoming and races is not None:
+        # Raises when the seats do not add up to each chamber's: never shipped.
+        from . import incoming as incoming_mod
+        elected = incoming_mod.build(profiles, races, results=results, snapshot=snapshot)
+        if elected:
+            summary["incoming"] = elected
+            if root is not None and "houseTiles" in summary:
+                problems = incoming_mod.tile_problems(summary["houseTiles"], elected)
+                if problems:
+                    raise incoming_mod.IncomingError("; ".join(problems))
     return summary
 
 
@@ -455,6 +468,17 @@ def by_state(profiles, races=None):
     for code, seats in house_races.items():
         balance = out[code]["balance"]["house"]
         balance["vacant"] += max(0, seats - sum(balance.values()))
+    # A state has two Senate seats, and one nobody sits in is vacant. The
+    # Now view's step is the elected view's, by one helper (rule 12,
+    # incoming.senate_step): one senator beside an empty seat was drawn as
+    # both of that senator's party (rule 104's review).
+    from .incoming import senate_step
+    for entry in out.values():
+        senate = entry["balance"]["senate"]
+        if not entry["territory"]:
+            senate["vacant"] = max(0, 2 - senate["D"] - senate["R"] - senate["I"])
+        entry["senateStep"] = "none" if entry["territory"] else senate_step(
+            senate["D"], senate["R"], senate["I"], senate["vacant"])
     _vacancies(out, profiles)
     _delegate_seats(out)
     return out
