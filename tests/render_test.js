@@ -11958,6 +11958,58 @@ function officeRace(window) {
   window.__office = { race, winner: people[0], losers: people.slice(1) };
 }
 
+/* LA-5 as the office's results left it: the top two to the December 12
+ * general election, the rest defeated, credited to the office. */
+function officeRunoffRace(window) {
+  const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
+  const race = window.kycRaces.find((r) => r.id === "H-LA-05-2026") ||
+    window.kycRaces.find((r) => r.state === "LA" && r.chamber === "House" &&
+      r.candidateIds.length >= 3);
+  if (!race) return;
+  const people = race.candidateIds.map((id) => byId[id]).filter(Boolean);
+  people.forEach((p, i) => {
+    p.raceStatus = i < 2 ? "runoff" : "defeated";
+    p.raceStatusRace = race.id;
+    p.raceStatusSource = "office";
+    p.raceStatusSourceName = OFFICE_CREDIT;
+  });
+  race.settled = true;
+  race.results = Object.assign({}, race.results, {
+    fromQualifiedList: false, fromOfficeResults: true,
+    officeResults: { source: OFFICE_CREDIT, official: false, read: "2026-11-15" },
+    sourceUrl: "https://voterportal.sos.la.gov/graphical",
+    nominees: 0, qualified: 0, elected: 0, runoff: 2, defeated: people.length - 2,
+    otherNominees: [], otherDefeated: [], otherElected: [], otherRunoff: [] });
+  window.__officeRunoff = { race, two: people.slice(0, 2) };
+}
+
+async function testOfficeRunoff() {
+  // Before the December round and after it, awaiting its result: the head's
+  // hover credits the office, never "the published results" (a certified
+  // count's words) or Wikipedia.
+  for (const now of ["2026-11-16T09:00:00", "2026-12-13T09:00:00"]) {
+    const { window, D, errors } = await buildPage("states/la.html",
+      { now, data: officeRunoffRace });
+    const { race, two } = window.__officeRunoff || {};
+    suite("states/la.html — a December round the office's results set (" + now.slice(0, 10) + ")", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("a Louisiana House race in a December round", !!race && two.length === 2);
+      if (!race) return;
+      const section = D.getElementById("race-" + race.id);
+      const head = section && section.querySelector(".race-head");
+      const badge = head && [...head.querySelectorAll(".badge[title]")].find((b) =>
+        /general election|Dec 12/.test(b.textContent));
+      const title = badge ? badge.getAttribute("title") : "";
+      check("the head's December badge credits the office's results as unofficial",
+        !!badge && title.indexOf(OFFICE_CREDIT) !== -1 && !/published results|Wikipedia/.test(title) &&
+          two.every((p) => title.indexOf(p.name) !== -1), title || (head && head.textContent));
+      check("nothing in the race's head says Wikipedia or the published results",
+        !!head && !/Wikipedia|published results/.test(head.innerHTML),
+        head && (head.innerHTML.match(/[^"]*(Wikipedia|published results)[^"]*/) || [""])[0]);
+    });
+  }
+}
+
 async function testOfficeResults() {
   const { window, D, errors } = await buildPage("states/la.html",
     { now: "2026-11-16T09:00:00", data: officeRace });
@@ -26530,6 +26582,7 @@ async function testTheJanuaryWords() {
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
   if (!only || only === "states") await testOfficeResults();
+  if (!only || only === "states" || only === "office") await testOfficeRunoff();
   if (!only || only === "states") await testLouisianaDecember();
   if (!only || only === "states") await testGeorgiaRunoffPast();
   if (!only || only === "states" || only === "ballot" || only === "mprunoff") await testMarianasRunoff();

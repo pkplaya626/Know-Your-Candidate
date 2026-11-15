@@ -390,8 +390,15 @@
       // Its December round in its own words: an open primary's is its
       // general election (KYC.runoffWords, the people's table).
       var words = KYC.runoffWords(race);
+      // Credited to the state election office's own results where they
+      // decided it (rule 64), unofficial until its canvass where they say
+      // so: "the published results" reads as a certified count. Split and
+      // joined, never String.replace, which reads "$&" in its words.
+      var raceTitle = res.fromOfficeResults && !res.fromQualifiedList
+        ? words.raceTitle.split("per the published results").join(KYC.ballotSource(race))
+        : words.raceTitle;
       return '<span class="badge ' + words.cls + '" title="' + KYC.escapeAttr(
-        words.raceTitle + runoff.join(", ") + ".") + '">' + KYC.escapeHtml(words.race) + "</span>";
+        raceTitle + runoff.join(", ") + ".") + '">' + KYC.escapeHtml(words.race) + "</span>";
     }
     // Once the new Congress sits, the one its record seats for the term this
     // race decided (KYC.seatedIn, which the others' words ask too), in

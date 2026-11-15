@@ -736,23 +736,27 @@ class TestTheOfficesResultBesideOtherSources(NoGap):
         return "\n==District 1==\nNothing yet.\n==District 5==\n" + "\n".join(box) + "\n"
 
     def test_a_page_writing_a_list_names_short_form_agrees(self):
-        # The page writes the runoff's "Pat Moore", which fits no filing on
-        # its own; the office's list name for her filing is 'Patricia "Pat"
-        # Moore'. One person: the office's result stands.
-        cache = self.build(read({"11/03/2026": {5: LA5}}), page=self.runoff_page("Pat Moore"))
+        # The page writes the runoff's "Bubba Moore", which the matcher fits
+        # to no filing (no nickname table holds it); the office's list name
+        # for her filing, MOORE, PATRICIA, is 'Patricia "Bubba" Moore'. One
+        # person: the office's result stands.
+        lists = dict(LISTS, **{"H-LA-05-2026": [
+            dict(e, name='Patricia "Bubba" Moore') if e["name"].endswith("Moore") else e
+            for e in LISTS["H-LA-05-2026"]]})
+        choices = [('Patricia "Bubba" Moore (DEM)', v, o) if d.endswith("Moore (DEM)") else
+                   (d, v, o) for d, v, o in LA5]
+        office = read({"11/03/2026": {5: choices}})
+        page = self.build(None, page=self.runoff_page("Bubba Moore"), lists=lists)
+        self.assertEqual(page["races"]["H-LA-05-2026"]["unmatched"], {"Bubba Moore": "runoff"})
+        cache = self.build(office, page=self.runoff_page("Bubba Moore"), lists=lists)
         race = cache["races"]["H-LA-05-2026"]
         self.assertEqual(race["source"], "office")
         self.assertEqual(race["status"]["H6LA05341"], "runoff")
         self.assertFalse(cache["officeResults"]["disagree"])
         # Someone else in her place is still a disagreement: neither is shown.
-        cache = self.build(read({"11/03/2026": {5: LA5}}), page=self.runoff_page("Pat Smith"))
+        cache = self.build(office, page=self.runoff_page("Bubba Smith"), lists=lists)
         self.assertEqual(cache["races"]["H-LA-05-2026"]["source"], "qualified")
         self.assertIn("H-LA-05-2026", cache["officeResults"]["disagree"])
-
-    def test_the_list_names_forms(self):
-        self.assertEqual(results._list_name_forms('Patricia "Pat" Moore'),
-                         {'Patricia "Pat" Moore', "Pat Moore", "Patricia Moore"})
-        self.assertEqual(results._list_name_forms("Steve Scalise"), {"Steve Scalise"})
 
 
 if __name__ == "__main__":

@@ -4065,39 +4065,24 @@ def _decided_people(race):
     return out
 
 
-def _list_name_forms(name):
-    """A qualified list's name as a page may write it: as printed, and with
-    a quoted nickname standing in for, or left out beside, the first name
-    ('Patricia "Pat" Moore' is also "Pat Moore" and "Patricia Moore")."""
-    forms = {name}
-    m = re.match(r'^(\S+)\s+"([^"]+)"\s+(.+)$', name or "")
-    if m:
-        forms |= {f"{m.group(2)} {m.group(3)}", f"{m.group(1)} {m.group(3)}"}
-    return forms
-
-
-def _same_result(page, office, names_of=None, aliases=None):
+def _same_result(page, office, names_of=None):
     """Whether a page's result and the office's elect, and send to a runoff,
     the same people: the same filings, and names with no filing that are one
     person (:func:`_one_person`).
 
     A name the page gives that fits no filing is still the person of a
     filing the office's result holds where it is that filing's list name
-    (*names_of*, ``{candidate id: list name}``) in a form the page writes
-    (:func:`_list_name_forms`, :func:`_one_person`) or an evidenced
-    ``RESULT_NAMES`` alias for it (*aliases*, ``[(name, id)]``): a page
-    writing a runoff's "Pat Moore", whom the matcher does not fit to
-    MOORE, PATRICIA, agrees with the office's Patricia "Pat" Moore."""
+    (*names_of*, ``{candidate id: list name}``) as a page writes it
+    (:func:`_one_person`, which reads a quoted nickname; an evidenced
+    ``RESULT_NAMES`` alias already fits the page's name to the filing): a
+    page writing a runoff's "Bubba Moore", whom the matcher does not fit to
+    MOORE, PATRICIA, agrees with the office's Patricia "Bubba" Moore."""
     a, b = _decided_people(page), _decided_people(office)
-    names_of, alias_of = names_of or {}, {}
-    for name, cid in aliases or ():
-        alias_of.setdefault(cid, set()).add(name)
+    names_of = names_of or {}
 
     def stands_for(name, cid):
-        if name in alias_of.get(cid, ()):
-            return True
         listed = names_of.get(cid)
-        return bool(listed) and any(_one_person(name, form) for form in _list_name_forms(listed))
+        return bool(listed) and _one_person(name, listed)
 
     for st in (ELECTED, RUNOFF):
         page_ids, page_names = set(a[st][0]), list(a[st][1])
@@ -4280,7 +4265,7 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
             names_of = {cid: name for name, cids in found.items() for cid in cids}
         if page and page.get("source") != OFFICE and any(
                 ids or names for ids, names in _decided_people(page).values()) \
-                and not _same_result(page, entry, names_of, (aliases or {}).get(rid)):
+                and not _same_result(page, entry, names_of):
             meta["disagree"][rid] = {"page": page.get("page"), "pageSays": _says(page),
                                      "officeSays": _says(entry)}
             races.pop(rid, None)
