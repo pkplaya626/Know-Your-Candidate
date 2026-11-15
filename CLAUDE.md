@@ -4370,9 +4370,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Congress, as called" at their own address (`congress=elected`,
     `KYC.router`), and the 2026 races view stays as it is. The count is
     titled for what it is, "The 120th Congress, as called so far" (the
-    sidebar's heading, `KYC.incomingWords.title`, and in the same words the
-    map's bar, panel and hovers), never "Elected to the 120th Congress so
-    far": most of the Senate's count
+    sidebar's heading, `KYC.incomingWords.title`, and in short forms of it
+    the map's panel and hovers, and its bar, "Senate, as called so far",
+    beside the switch that names the Congress), never "Elected to the 120th
+    Congress so far": most of the Senate's count
     is senators in seats not on the 2026 ballot, which the Senate bar's note
     and spoken count say apart. A seat not yet called is a grid of
     its own (`--pending-fill`, `--pending-grid`; `bb-pending`, `ht-pending`
@@ -4386,8 +4387,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     mark's own width and dash on a 1:1 SVG: in map units the 975-wide map
     drawn 344px wide on a phone made the dotted outline 0.7px, a hairline
     beside the state's border, and the picked line thinner than a special's
-    dash (rule 88). A square's title names its
-    winner, its December round or the day the results were read. The
+    dash (rule 88). On a laptop every line above the map comes out of its
+    height (PR #111), and the elected view's switch, its three lines of key
+    and the bar's long title beside the switch drew Texas 36px tall at
+    1280x800 and 1366x768, its labels heaped into callouts and the bar a
+    stub: the keys are short ("A race not yet called as of Nov. 14,
+    2026", "Seats not yet called as of ... could change it", "Dotted: some
+    seats not yet called"; the day stays in the bar's note), the bar's
+    title names the chamber, and the map page keeps the map at 300px and
+    lets its column scroll (`.map-body .map-stage`, `.map-body >
+    .app-main`; Texas 87px at 1280x800, the Now view's 89px). Measured over
+    CDP with a real wait: a virtual-time screenshot catches the map
+    mid-layout, unfilled and heaped, on main as much as here. A square's
+    title names its winner, its December round or the day the results were
+    read. The
     state's panel leads with when its members-elect take office and that
     until then the Now view shows who represents it (rule 27; its button is
     the way back) - never that they "are not who represents" it now, which

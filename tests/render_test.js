@@ -20766,7 +20766,7 @@ async function testIncoming() {
       const bar = balance.querySelector('[data-chamber="senate"][data-basis="elected"]');
       check("the bar above the map is the elected Senate's, with its counts", !!bar && !!bar.querySelector(".bb-counts"));
       check("titled for what it counts, the seats not up among them", !!bar &&
-        bar.querySelector(".bb-title").textContent === "The " + KYC.ordinal(m.congress) + " Congress’s Senate, as called so far" &&
+        bar.querySelector(".bb-title").textContent === "Senate, as called so far" &&
         /Seats not on the 2026 ballot are counted by the party of who holds each now\./.test(bar.textContent),
         bar && bar.textContent);
       const wrong = [], marks = [];
@@ -21097,7 +21097,19 @@ async function testIncoming() {
           KYC.dateWords(m.resultsAsOf) + " could change it)") !== -1 && !/not yet decided/i.test(title(made.moved.code)),
         title(made.moved.code));
       const key = D.getElementById("mapLegend").textContent;
-      check("and its key says the same, with the day", key.indexOf("Not settled in the results this site read: seats not yet called as of " +
+      {
+        // On a laptop every line above the map came out of its height: the
+        // elected view drew Texas 36px tall at 1280x800, its labels heaped
+        // into callouts. The map page keeps the map at 300px and lets the
+        // column scroll instead (kyc.css, the map-body grid at 1001px and up).
+        const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+        const wide = css.split("@media (min-width: 1001px)").slice(1).join("\n");
+        check("on a laptop the map page's column scrolls rather than squeeze the map",
+          /\.map-body\s*>\s*\.app-main\s*\{[^}]*overflow-y:\s*auto/.test(wide));
+        check("and the map keeps a floor a map can be read at",
+          /\.map-body\s+\.map-stage\s*\{[^}]*min-height:\s*300px/.test(wide));
+      }
+      check("and its key says the same, with the day", key.indexOf("Seats not yet called as of " +
         KYC.dateWords(m.resultsAsOf) + " could change it") !== -1 && !/not yet decided/i.test(key), key);
       {
         const note = click(made.none).querySelector(".incoming-note");

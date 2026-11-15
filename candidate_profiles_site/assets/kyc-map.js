@@ -440,15 +440,18 @@
 
   /* The elected view's keys, in each chamber's order: only the steps some
    * state is drawn in, and the dotted outline where a state has seats not
-   * yet called. */
+   * yet called. "Not yet called as of" a day is the site's own words for
+   * its read (rule 19), never "not yet decided"; kept short, since on a
+   * laptop every line of the key comes out of the map's height (the
+   * elected view's three lines of key drew Texas 36px tall at 1280x800). */
   var ELECTED_KEYS = {
     senate: [["allR", "Both Republican"], ["allD", "Both Democratic"], ["split", "Split, or one independent"],
       ["allI", "Both independent"], ["vacant", "One seat or both vacant"],
-      ["undecided", "Not settled in the results this site read: a race {notCalled}"],
+      ["undecided", "A race {notCalled}"],
       ["none", "No senators (D.C. and territories)"]],
     house: [["allR", "All R"], ["majR", "R majority"], ["even", "Even"], ["majD", "D majority"],
       ["allD", "All D"], ["allI", "All independent"],
-      ["undecided", "Not settled in the results this site read: seats {notCalled} could change it"]],
+      ["undecided", "Seats {notCalled} could change it"]],
   };
 
   function electedLegend() {
@@ -466,7 +469,7 @@
         return '<span class="key" data-step="' + k[0] + '">' + swatch(STEP_FILL[k[0]]) +
           KYC.escapeHtml(k[1].replace("{notCalled}", function () { return KYC.incomingWords.notCalled(elected()); })) + "</span>";
       }).join("") + (pending ? '<span class="key" data-step="pending-outline">' + swatch("pending-outline") +
-        "Dotted outline: seats " + KYC.escapeHtml(KYC.incomingWords.notCalled(elected())) + "</span>" : "");
+        "Dotted: some seats not yet called</span>" : "");
   }
 
   function drawLegend() {
@@ -1102,10 +1105,12 @@
       // review), pushing Vermont and Connecticut into callouts. Its counts
       // are printed below the laptop layout, where the sidebar is not
       // beside the map and a phone has no hover for the track's title.
+      // The switch beside it names the Congress; the title says what the
+      // bar counts in few words, or on a laptop it took the row and left
+      // the bar a stub.
       (shown
         ? KYC.balanceBar(chamber, { basis: "elected", compact: true, counts: true,
-          title: "The " + KYC.ordinal(shown.congress) + " Congress’s " + (chamber === "senate" ? "Senate" : "House") +
-            ", as called so far" })
+          title: (chamber === "senate" ? "Senate" : "House") + ", as called so far" })
         : KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now",
           compact: true, counts: true }));
     stage.hidden = squares;

@@ -4571,6 +4571,13 @@ html.has-zip .ballot-result { min-height: 100vh; }
   .map-body > .app-main { grid-column: 2; grid-row: 1; }
   .map-body > .detail-panel { grid-column: 3; grid-row: 1 / 3; min-height: 0; }
   .map-body > .map-footer { grid-column: 2; grid-row: 2; }
+  /* The map is never drawn smaller than a map can be read at: where the
+   * lines above it would take more (a short laptop window, the elected
+   * view's switch and key: Texas 36px tall at 1280x800), the column
+   * scrolls instead. At 300px Texas is about 100px, as the Now view draws
+   * it at 1280x800, which this floor leaves as it was. */
+  .map-body > .app-main { overflow-y: auto; }
+  .map-body .map-stage { min-height: 300px; }
 }
 .guide-panel .guide-sources { margin-top: var(--s-2); }
 .guide-panel .guide-pager { margin-top: var(--s-5); }
