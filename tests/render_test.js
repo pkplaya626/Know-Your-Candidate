@@ -13546,6 +13546,23 @@ async function testSearchAndFilters() {
     const split = D.getElementById("challengerSplit");
     check("the sidebar's split is visible text", !!split && !split.hidden &&
       /have a profile here/.test(split.textContent), split && split.textContent);
+    // Each name with no profile credited by its own source (rules 64, 77):
+    // the hover once gave every one to "Wikipedia's results pages", over
+    // names from Louisiana's own results and lists, and the split to "the
+    // published results".
+    const e = window.kycBuildMeta.election;
+    const by = e.challengersUnprofiledBySource || [];
+    const hover = D.getElementById("challengerCount").title;
+    check("the names with no profile are counted by their sources, adding up",
+      by.length > 0 && by.reduce((n, item) => n + item[1], 0) === e.challengersUnprofiled,
+      JSON.stringify(by));
+    check("the hover and the split credit each source with its count",
+      by.every((item) => hover.indexOf(item[1].toLocaleString() + " " + item[0]) !== -1 &&
+        split.textContent.indexOf(item[1].toLocaleString() + " " + item[0]) !== -1),
+      hover + " | " + split.textContent);
+    check("neither credits them all to one source",
+      !/named on Wikipedia's results pages|named by the published results/.test(
+        hover + split.textContent), hover);
     D.querySelector('[data-group="role"][data-value="candidate"]').click();
     check("the Challengers chip's line says what the sidebar adds",
       /sidebar/.test(label()), label());

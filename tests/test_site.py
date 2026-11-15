@@ -1384,6 +1384,40 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(e["challengersWithProfile"] + e["challengersUnprofiled"],
                          e["challengersOnBallot"])
 
+    def test_the_names_with_no_profile_are_counted_by_their_sources(self):
+        # The sidebar's hover credited every such name to "Wikipedia's results
+        # pages" while Louisiana's came from its own results and its list of
+        # qualified candidates, and others from the states' certified lists
+        # (rules 64, 77).
+        def race(rid, names, maybe=(), **res):
+            return {"id": rid, "state": rid.split("-")[1], "results": dict(
+                res, otherNominees=list(names), maybeProfiled={n: "X" for n in maybe})}
+        races = [
+            race("H-OH-01-2026", ["A B", "C D"], maybe=["C D"]),
+            race("H-OH-02-2026", ["E F"]),
+            race("H-LA-01-2026", ["G H", "I J"], fromOfficeResults=True,
+                 officeResults={"source": "the Louisiana Secretary of State's election "
+                                          "results, unofficial until its canvass"}),
+            race("H-LA-06-2026", ["K L"], fromQualifiedList=True),
+            race("H-FL-01-2026", ["M N"], certifiedBy="Florida Division of Elections, list",
+                 certifiedComplete=True),
+            race("H-NY-01-2026", []),
+        ]
+        by = summary.unprofiled_by_source(races)
+        self.assertEqual(by, [
+            ["per Wikipedia's results pages", 2],
+            ["per the Louisiana Secretary of State's election results, unofficial until its "
+             "canvass", 2],
+            ["per the Florida Division of Elections, list", 1],
+            ["per the Louisiana Secretary of State's list of qualified candidates", 1]])
+        e = summary.build([member(id="H1", state="OH")], races=[
+            dict(r, candidateCount=0, settled=True) for r in races])["election"]
+        self.assertEqual(sum(n for _w, n in e["challengersUnprofiledBySource"]),
+                         e["challengersUnprofiled"])
+        # One state's page is "page", singular.
+        self.assertEqual(summary.unprofiled_by_source(races[1:2]),
+                         [["per Wikipedia's results page", 1]])
+
     def test_puerto_ricos_seat_says_its_title_and_when_it_is_elected(self):
         # The state page read "1 delegate - 0 seats in Congress on the 2026
         # ballot - 0 challengers", with no reason: the Resident Commissioner

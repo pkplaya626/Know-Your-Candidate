@@ -4119,8 +4119,8 @@
           (election.challengersWithProfile !== undefined
             ? election.challengersWithProfile + " with a profile here" +
               withProfileParts(election) + ", " +
-              election.challengersUnprofiled + " named on Wikipedia's results pages with no FEC " +
-              "filing over $5,000"
+              election.challengersUnprofiled + " with no FEC filing over $5,000" +
+              unprofiledSources(election)
             : running + " in all") + ".";
         // The same split as page text: a title is a hover a phone and a
         // keyboard never show, and the Challengers chip counts profiles
@@ -4129,12 +4129,28 @@
         if (split && election.challengersWithProfile !== undefined) {
           split.textContent = "Of the " + running.toLocaleString() + " in these two rows, " +
             election.challengersWithProfile.toLocaleString() + " have a profile here; " +
-            election.challengersUnprofiled.toLocaleString() + " are named by the published " +
-            "results with no FEC filing over $5,000, so have none.";
+            election.challengersUnprofiled.toLocaleString() + " have no FEC filing over " +
+            "$5,000, so have none" + unprofiledSources(election) + ".";
           split.hidden = false;
         }
       }
     }
+  }
+
+  /* Whose word the sidebar's names with no profile are, counted by source
+   *  (summary.py `challengersUnprofiledBySource`, in each race's own credit,
+   *  `KYC.ballotSource`), as the map's state panel counts them: credited
+   *  whole to "Wikipedia's results pages", the count held Louisiana's own
+   *  results' names, its qualified list's and the certified lists' (rules 64,
+   *  77). "" where the build gives no breakdown. */
+  function unprofiledSources(election) {
+    var by = election.challengersUnprofiledBySource || [];
+    if (!by.length) return "";
+    // Semicolons apart: a source's own words may hold a comma ("..., unofficial
+    // until its canvass").
+    return " (" + by.map(function (item) {
+      return item[1].toLocaleString() + " " + item[0];
+    }).join("; ") + ")";
   }
 
   /* What the sidebar's "with a profile here" holds besides filings, as
