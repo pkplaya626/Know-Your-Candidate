@@ -4065,15 +4065,51 @@ def _decided_people(race):
     return out
 
 
-def _same_result(page, office):
+def _list_name_forms(name):
+    """A qualified list's name as a page may write it: as printed, and with
+    a quoted nickname standing in for, or left out beside, the first name
+    ('Patricia "Pat" Moore' is also "Pat Moore" and "Patricia Moore")."""
+    forms = {name}
+    m = re.match(r'^(\S+)\s+"([^"]+)"\s+(.+)$', name or "")
+    if m:
+        forms |= {f"{m.group(2)} {m.group(3)}", f"{m.group(1)} {m.group(3)}"}
+    return forms
+
+
+def _same_result(page, office, names_of=None, aliases=None):
     """Whether a page's result and the office's elect, and send to a runoff,
     the same people: the same filings, and names with no filing that are one
-    person (:func:`_one_person`)."""
+    person (:func:`_one_person`).
+
+    A name the page gives that fits no filing is still the person of a
+    filing the office's result holds where it is that filing's list name
+    (*names_of*, ``{candidate id: list name}``) in a form the page writes
+    (:func:`_list_name_forms`, :func:`_one_person`) or an evidenced
+    ``RESULT_NAMES`` alias for it (*aliases*, ``[(name, id)]``): a page
+    writing a runoff's "Pat Moore", whom the matcher does not fit to
+    MOORE, PATRICIA, agrees with the office's Patricia "Pat" Moore."""
     a, b = _decided_people(page), _decided_people(office)
+    names_of, alias_of = names_of or {}, {}
+    for name, cid in aliases or ():
+        alias_of.setdefault(cid, set()).add(name)
+
+    def stands_for(name, cid):
+        if name in alias_of.get(cid, ()):
+            return True
+        listed = names_of.get(cid)
+        return bool(listed) and any(_one_person(name, form) for form in _list_name_forms(listed))
+
     for st in (ELECTED, RUNOFF):
-        if a[st][0] != b[st][0] or len(a[st][1]) != len(b[st][1]):
+        page_ids, page_names = set(a[st][0]), list(a[st][1])
+        office_ids, office_names = set(b[st][0]), list(b[st][1])
+        for cid in sorted(office_ids - page_ids):
+            fits = [n for n in page_names if stands_for(n, cid)]
+            if len(fits) == 1:
+                page_ids.add(cid)
+                page_names.remove(fits[0])
+        if page_ids != office_ids or len(page_names) != len(office_names):
             return False
-        if not all(any(_one_person(x, y) for y in b[st][1]) for x in a[st][1]):
+        if not all(any(_one_person(x, y) for y in office_names) for x in page_names):
             return False
     return True
 
@@ -4138,6 +4174,26 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         meta = dict(prev_meta, carried=True, unread=unread, unreadOn=today.isoformat())
         meta["held"], meta["kept"], meta["disagree"] = {}, [], {}
 
+    # A file written before the one the last read relied on concludes
+    # nothing for its round (rule 8): the three files are fetched one by one,
+    # and a cached copy of one beside a fresh other would pair old counts
+    # with a new official flag. The newer read's record stays the baseline.
+    prev_elections = prev_meta.get("elections") or {}
+    stale = {}
+    if tried and not unread:
+        for day in sorted(elections):
+            last = prev_elections.get(day) or {}
+            why = la_results.older(elections[day].get("written"), last.get("written"),
+                                   "races file's WriteTime") or \
+                la_results.older(elections[day].get("version"), last.get("version"),
+                                 "votes file's VersionDateTime")
+            if why:
+                stale[day] = why
+                meta["elections"][day] = dict(last, staleRead={
+                    "written": elections[day].get("written"),
+                    "version": elections[day].get("version"), "on": today.isoformat()})
+                log(f"    [warn] the Secretary of State's {day} results conclude nothing: {why}")
+
     def facts(race, verdict, why):
         return {"officeId": race["officeId"], "title": race["title"],
                 "reporting": race["reporting"], "canHaveRunoff": race["canHaveRunoff"],
@@ -4158,6 +4214,8 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         elif first_day not in elections:
             why = f"the office lists no results for {first_day} yet" if first_day <= \
                 today.isoformat() else None
+        elif first_day in stale:
+            why = f"{first_day}: {stale[first_day]}"
         elif n not in (elections[first_day].get("races") or {}):
             why = f"the office's {first_day} results hold no race for district {n}"
         else:
@@ -4171,10 +4229,16 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
             if v1 and r2 is not None:
                 if RUNOFF not in v1.values():
                     why2 = "a December race for a seat its first round decided"
+                elif second_day in stale:
+                    why2 = stale[second_day]
                 else:
                     v2, why2 = la_results.judge(r2, listed[rid], bool(later.get("official")),
                                                 CLOSE_MARGIN, before=v1)
-                record[second_day] = facts(r2, v2, why2)
+                if second_day not in stale:
+                    record[second_day] = facts(r2, v2, why2)
+                elif second_day in ((prev_meta.get("races") or {}).get(rid) or {}):
+                    # An older file's counts are not kept as this read's.
+                    record[second_day] = prev_meta["races"][rid][second_day]
                 if v2:
                     official, written = bool(later.get("official")), later.get("written")
                     decided_by.append(second_day)
@@ -4209,9 +4273,14 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         if entry is None:
             continue
         page = races.get(rid)
+        names_of = {}
+        if rid in listed:
+            found, _ambiguous = match_names([q["name"] for q in listed[rid]],
+                                            by_race.get(rid, []), (aliases or {}).get(rid))
+            names_of = {cid: name for name, cids in found.items() for cid in cids}
         if page and page.get("source") != OFFICE and any(
                 ids or names for ids, names in _decided_people(page).values()) \
-                and not _same_result(page, entry):
+                and not _same_result(page, entry, names_of, (aliases or {}).get(rid)):
             meta["disagree"][rid] = {"page": page.get("page"), "pageSays": _says(page),
                                      "officeSays": _says(entry)}
             races.pop(rid, None)

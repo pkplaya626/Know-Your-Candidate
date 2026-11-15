@@ -266,6 +266,33 @@ def fetch(rounds, today=None, get=None, log=print):
     return {"read": today.isoformat(), "page": PAGE, "source": SOURCE, "elections": elections}
 
 
+def _stamp(text):
+    try:
+        return datetime.datetime.fromisoformat(str(text).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def older(now, then, what):
+    """Why a file read now concludes nothing beside the last read: its
+    *what* stamp (the races file's ``WriteTime``, the votes file's
+    ``VersionDateTime``) is before the one the last read relied on, or
+    missing where that read had one. None where it is no older, or where
+    the last read had no stamp to compare. The three files are fetched one
+    by one, and a cached copy of one beside a fresh other would pair old
+    counts with a new official flag."""
+    last = _stamp(then) if then else None
+    if last is None:
+        return None
+    current = _stamp(now) if now else None
+    if current is None:
+        return (f"the office's {what} is {now!r}, and the last read relied on one of {then}: "
+                "nothing to tell whether this file is the newer")
+    if current < last:
+        return f"the office's {what} is {now}, before the {then} of the last read"
+    return None
+
+
 def judge(race, listed, official, close_margin, before=None):
     """``(verdict, why)`` for one seat's race in one round.
 

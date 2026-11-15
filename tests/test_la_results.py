@@ -544,5 +544,216 @@ class TestTheRace(NoGap):
         self.assertEqual(cache["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
 
 
+# ------------------------------------------------------------------ the review's follow-ups
+
+def read_files(files, today=AFTER):
+    return la_results.fetch(["2026-11-03", "2026-12-12"], today=today, get=files.__getitem__,
+                            log=lambda *_: None)
+
+
+def restamp(files, day, written=None, version=None, drop_written=False):
+    """*files* with *day*'s races file's WriteTime, or votes file's
+    VersionDateTime, set as given (or the WriteTime taken out)."""
+    files = dict(files)
+    races_name, votes_name = (f"{day}/RacesCandidates_Multiparish.htm",
+                              f"{day}/Votes_Multiparish.htm")
+    races = json.loads(files[races_name])
+    if drop_written:
+        races["Races"].pop("WriteTime")
+    elif written is not None:
+        races["Races"]["WriteTime"] = written
+    files[races_name] = json.dumps(races)
+    if version is not None:
+        votes = json.loads(files[votes_name])
+        votes["Races"]["VersionDateTime"] = version
+        files[votes_name] = json.dumps(votes)
+    return files
+
+
+# LA-1 the other way round: a result a stale file could carry.
+LA1_SWAPPED = [LA1[0], LA1[1], ("Lauren Jewett (DEM)", 159896, "Elected"),
+               ("Steve Scalise (REP)", 89440, "Defeated")]
+
+
+class TestAFileOlderThanTheLastRead(NoGap):
+    """The three files are fetched one by one: a cached races or votes file
+    beside a fresh ElectionDates.htm would pair old counts with a new
+    official flag. A file written before the one the last read relied on
+    concludes nothing for its round (rule 8)."""
+
+    def test_an_older_write_time_keeps_the_last_read(self):
+        decided = self.build(read_files(restamp(feeds({"11/03/2026": {1: LA1}}), "20261103",
+                                                written="2026-11-14T18:55:18.130")))
+        self.assertEqual(decided["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
+        older = restamp(feeds({"11/03/2026": {1: LA1_SWAPPED}}, official=("11/03/2026",)),
+                        "20261103", written="2026-11-01T18:55:18.130")
+        later = self.build(read_files(older), previous=decided)
+        race = later["races"]["H-LA-01-2026"]
+        self.assertEqual(race["status"]["H0LA01087"], "elected")       # the last read stands
+        self.assertNotEqual(race["status"].get("H6LA01258"), "elected")
+        self.assertIn("H-LA-01-2026", later["officeResults"]["kept"])
+        why = later["officeResults"]["held"]["H-LA-01-2026"]
+        self.assertIn("before the 2026-11-14T18:55:18.130 of the last read", why)
+        # The newer read stays the baseline, and the stale stamp is recorded.
+        e = later["officeResults"]["elections"]["2026-11-03"]
+        self.assertEqual(e["written"], "2026-11-14T18:55:18.130")
+        self.assertFalse(e["official"])
+        self.assertEqual(e["staleRead"]["written"], "2026-11-01T18:55:18.130")
+        # The older file's counts are not kept as this read's.
+        record = later["officeResults"]["races"]["H-LA-01-2026"]["2026-11-03"]
+        self.assertEqual(record["choices"][3]["outcome"], "Elected")
+        issues = {i.code: i for i in validate.check_results_pages(later)}
+        self.assertTrue(any("H-LA-01-2026" in d for d in issues["office-result-held"].detail))
+        # And again on the next run with the same old file: still held.
+        again = self.build(read_files(older), previous=later)
+        self.assertEqual(again["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
+        # A newer file is read as ever.
+        newer = restamp(feeds({"11/03/2026": {1: LA1_SWAPPED}}, official=("11/03/2026",)),
+                        "20261103", written="2026-11-20T10:00:00")
+        fresh = self.build(read_files(newer), previous=again)
+        self.assertEqual(fresh["races"]["H-LA-01-2026"]["status"]["H6LA01258"], "elected")
+
+    def test_a_close_race_is_not_released_by_an_old_file_beside_the_official_flag(self):
+        close = [("Randall Arrington (REP)", 9776, "Defeated"),
+                 ('E. "Liddy" Glass (NOPTY)', 1000, "Defeated"),
+                 ("Lauren Jewett (DEM)", 120000, "Defeated"),
+                 ("Steve Scalise (REP)", 132000, "Elected")]
+        held = self.build(read_files(restamp(feeds({"11/03/2026": {1: close}}), "20261103",
+                                             written="2026-11-14T18:55:18.130")))
+        self.assertEqual(held["races"]["H-LA-01-2026"]["source"], "qualified")
+        stale = restamp(feeds({"11/03/2026": {1: close}}, official=("11/03/2026",)), "20261103",
+                        written="2026-11-04T09:00:00")
+        later = self.build(read_files(stale), previous=held)
+        self.assertEqual(later["races"]["H-LA-01-2026"]["source"], "qualified")
+        self.assertIn("before the", later["officeResults"]["held"]["H-LA-01-2026"])
+
+    def test_an_older_votes_version_or_a_lost_write_time_concludes_nothing(self):
+        first = restamp(feeds({"11/03/2026": {1: LA1}}), "20261103",
+                        version="2026-11-14T00:00:00")
+        decided = self.build(read_files(first))
+        older = restamp(feeds({"11/03/2026": {1: LA1_SWAPPED}}), "20261103",
+                        version="1900-01-01T00:00:00")
+        later = self.build(read_files(older), previous=decided)
+        self.assertEqual(later["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
+        self.assertIn("VersionDateTime", later["officeResults"]["held"]["H-LA-01-2026"])
+        lost = restamp(feeds({"11/03/2026": {1: LA1_SWAPPED}}), "20261103", drop_written=True)
+        later = self.build(read_files(lost), previous=decided)
+        self.assertEqual(later["races"]["H-LA-01-2026"]["status"]["H0LA01087"], "elected")
+        self.assertIn("WriteTime", later["officeResults"]["held"]["H-LA-01-2026"])
+
+    def test_an_older_december_file_keeps_decembers_last_read(self):
+        two = [('"Gabe" Firment (REP)', 90000, "Elected"),
+               ('Patricia "Pat" Moore (DEM)', 80000, "Defeated")]
+        swapped = [('"Gabe" Firment (REP)', 80000, "Defeated"),
+                   ('Patricia "Pat" Moore (DEM)', 90000, "Elected")]
+        decided = self.build(read_files(restamp(
+            feeds({"11/03/2026": {5: LA5}, "12/12/2026": {5: two}}), "20261212",
+            written="2026-12-13T08:00:00"), today=DECEMBER_AFTER), today=DECEMBER_AFTER)
+        self.assertEqual(decided["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "elected")
+        later = self.build(read_files(restamp(
+            feeds({"11/03/2026": {5: LA5}, "12/12/2026": {5: swapped}}), "20261212",
+            written="2026-12-12T23:00:00"), today=DECEMBER_AFTER), today=DECEMBER_AFTER,
+            previous=decided)
+        race = later["races"]["H-LA-05-2026"]
+        self.assertEqual(race["status"]["H6LA05317"], "elected")
+        self.assertEqual(race["status"]["H6LA05341"], "defeated")
+        self.assertIn("2026-12-12", later["officeResults"]["held"]["H-LA-05-2026"])
+        self.assertEqual(later["officeResults"]["races"]["H-LA-05-2026"]["2026-12-12"]
+                         ["choices"][0]["outcome"], "Elected")
+
+    def test_stamps_compared(self):
+        self.assertIsNone(la_results.older("2026-11-14T18:55:18.130", None, "x"))
+        self.assertIsNone(la_results.older("2026-11-14T18:55:18.130",
+                                           "2026-11-14T18:55:18.130", "x"))
+        self.assertIsNone(la_results.older("2026-11-15T01:00:00", "2026-11-14T18:55:18.130", "x"))
+        self.assertIn("before", la_results.older("2026-11-13T00:00:00", "2026-11-14T00:00:00", "x"))
+        self.assertIn("nothing to tell", la_results.older(None, "2026-11-14T00:00:00", "x"))
+        self.assertIn("nothing to tell", la_results.older("soon", "2026-11-14T00:00:00", "x"))
+
+
+class TestTheGatesNoTestHeld(unittest.TestCase):
+    """Gates the first tests passed without: each is undone and caught."""
+
+    def race(self, choices, **change):
+        race = la_results.parse_races(*[feeds({"11/03/2026": {9: choices}})[n] for n in (
+            "20261103/RacesCandidates_Multiparish.htm", "20261103/Votes_Multiparish.htm")])[
+            "races"][9]
+        race.update(change)
+        return race
+
+    def test_a_race_that_elects_two_concludes_nothing(self):
+        verdict, why = la_results.judge(self.race(LA1, toElect="2"), LISTS["H-LA-01-2026"],
+                                        True, results.CLOSE_MARGIN)
+        self.assertIsNone(verdict)
+        self.assertIn("elects '2'", why)
+
+    def test_a_first_round_that_cannot_go_to_a_runoff_concludes_nothing(self):
+        verdict, why = la_results.judge(self.race(LA1, canHaveRunoff=False),
+                                        LISTS["H-LA-01-2026"], True, results.CLOSE_MARGIN)
+        self.assertIsNone(verdict)
+        self.assertIn("cannot go to a runoff", why)
+
+    def test_two_choices_of_one_name_say_so(self):
+        # '"Steve" Scalise' and "Steve Scalise" are one list name: the read
+        # says why it holds, not only that the outcomes do not add up.
+        choices = [('"Steve" Scalise (REP)', 10, "Defeated")] + LA1
+        verdict, why = la_results.judge(self.race(choices), LISTS["H-LA-01-2026"], True,
+                                        results.CLOSE_MARGIN)
+        self.assertIsNone(verdict)
+        self.assertEqual(why, "two choices carry one name")
+
+
+class TestTheOfficesResultBesideOtherSources(NoGap):
+    def test_a_certified_list_naming_the_seat_leaves_the_offices_result_alone(self):
+        certified = {"LA": {"source": "LA", "url": "https://x", "fetched": "2026-11-14",
+                            "complete": True,
+                            "races": {"H-LA-01-2026": [{"name": "Lauren Jewett",
+                                                        "party": "Democratic",
+                                                        "kind": "ballot"}]}}}
+        cache = results.build(FIELD, CALENDAR, today=AFTER, log=lambda *_: None,
+                              fetch=lambda t: (_ for _ in ()).throw(results.PageMissing(t)),
+                              qualified=(copy.deepcopy(LISTS), {"source": "LA SoS"}),
+                              certified=certified,
+                              office_results=read({"11/03/2026": {1: LA1, 5: LA5}}))
+        race = cache["races"]["H-LA-01-2026"]
+        self.assertEqual(race["source"], "office")
+        self.assertEqual(race["status"]["H0LA01087"], "elected")
+        self.assertEqual(race["status"]["H6LA01258"], "defeated")
+        self.assertNotIn("certifiedIds", race)
+
+    def runoff_page(self, second):
+        rows = [("Gabe Firment", "Republican", "39,126", True),
+                (second, "Democratic", "40,786", True),
+                ("Michael Echols", "Republican", "32,905", False),
+                ("Stewart Cathey Jr.", "Republican", "28,168", False)]
+        box = ["{{Election box begin no change", "| title = Nonpartisan primary results", "}}"]
+        for name, party, votes, won in rows:
+            box += ["{{Election box " + ("winning candidate" if won else "candidate") +
+                    " with party link no change", f"| party = {party} Party (United States)",
+                    f"| candidate = {name}", f"| votes = {votes}", "}}"]
+        box += ["{{Election box total no change", "| votes = 140,985", "}}",
+                "{{Election box end}}"]
+        return "\n==District 1==\nNothing yet.\n==District 5==\n" + "\n".join(box) + "\n"
+
+    def test_a_page_writing_a_list_names_short_form_agrees(self):
+        # The page writes the runoff's "Pat Moore", which fits no filing on
+        # its own; the office's list name for her filing is 'Patricia "Pat"
+        # Moore'. One person: the office's result stands.
+        cache = self.build(read({"11/03/2026": {5: LA5}}), page=self.runoff_page("Pat Moore"))
+        race = cache["races"]["H-LA-05-2026"]
+        self.assertEqual(race["source"], "office")
+        self.assertEqual(race["status"]["H6LA05341"], "runoff")
+        self.assertFalse(cache["officeResults"]["disagree"])
+        # Someone else in her place is still a disagreement: neither is shown.
+        cache = self.build(read({"11/03/2026": {5: LA5}}), page=self.runoff_page("Pat Smith"))
+        self.assertEqual(cache["races"]["H-LA-05-2026"]["source"], "qualified")
+        self.assertIn("H-LA-05-2026", cache["officeResults"]["disagree"])
+
+    def test_the_list_names_forms(self):
+        self.assertEqual(results._list_name_forms('Patricia "Pat" Moore'),
+                         {'Patricia "Pat" Moore', "Pat Moore", "Patricia Moore"})
+        self.assertEqual(results._list_name_forms("Steve Scalise"), {"Steve Scalise"})
+
+
 if __name__ == "__main__":
     unittest.main()
