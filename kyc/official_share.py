@@ -385,8 +385,9 @@ def _view(found, oid, courts):
             + (f", though not {gone}." if gone else "."))
 
 
-def render_official(oid, found, host, courts=None):
-    """``o/<id>.html``."""
+def render_official(oid, found, host, courts=None, post=False):
+    """``o/<id>.html``; *post*: the results were read after Election Day,
+    for the tense of a role on another card (rule 104)."""
     courts = court_names() if courts is None else courts
     words = share_words(found, courts)
     name = found["person"].get("name") or ""
@@ -407,6 +408,12 @@ def render_official(oid, found, host, courts=None):
         body.append(f'<p class="share-nominated">{_e(words["nominated"])}.</p>')
     if words["leaving"]:
         body.append(f'<p class="share-leaving">{_e(words["leaving"])}.</p>')
+    # Their other roles on this site, each linked to its share page, and
+    # service in Congress with no card here (rule 104).
+    from .identity import congress_bio_html, share_html
+    for line in (share_html(found["person"], post), congress_bio_html(found["person"])):
+        if line:
+            body.append(line)
     if image:
         body.append(f'<p class="share-photo-credit faint">{credit_html(credit)}</p>')
     source = words["source"]
@@ -430,13 +437,13 @@ def render_official(oid, found, host, courts=None):
     )
 
 
-def render_all(fed, per_court, host):
+def render_all(fed, per_court, host, post=False):
     """``{path relative to the site: html}`` for every official, or ``{}``
     without the federal build."""
     if not fed:
         return {}
     courts = court_names()
-    return {official_path(oid): render_official(oid, found, host, courts)
+    return {official_path(oid): render_official(oid, found, host, courts, post)
             for oid, found in officials(fed, per_court).items()}
 
 

@@ -71,6 +71,9 @@
       '        <span id="profileModalCrossLink" hidden></span>',
       "      </p>",
       '      <p class="modal-meta" id="profileModalStatus" hidden></p>',
+      // The person's other roles on this site, each linked to its card
+      // (KYC.alsoHtml, rule 104).
+      '      <div class="modal-also" id="profileModalAlso" hidden></div>',
       // Whose photograph the portrait is, and on what licence (rule 87).
       '      <p class="modal-credit" id="profileModalPhotoCredit" hidden></p>',
       "    </div>",
@@ -1606,6 +1609,9 @@
 
     renderStatus(item);
     renderCrossLink(item);
+    var also = el("profileModalAlso");
+    also.innerHTML = KYC.alsoHtml(item);
+    also.hidden = !also.innerHTML;
     renderPlatform(item);
     /* A sitting member's filing for another seat is the same person: their
      * voting record and committees are the member's, not "(not a sitting
@@ -1788,7 +1794,7 @@
         current = null;
         waitingFor = null;
         if (baseTitle !== null) doc.title = baseTitle;
-        KYC.router.clearProfile();
+        KYC.router.clearProfile("profile");
       },
     });
 

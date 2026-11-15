@@ -77,6 +77,12 @@ def build(historical, snapshot, sitting=None):
             row["district"] = person["district"]
         else:
             row["senateClass"] = person["senateClass"]
+        # The record's own Wikidata item, so another role this person holds
+        # on the site (the Vice President, a Cabinet officer, a governor) is
+        # joined to this row by an id, never a name (kyc/identity.py, rule 104).
+        item = (entry.get("id") or {}).get("wikidata")
+        if item:
+            row["wikidata"] = item
         found = legislators.aliases(person, name)
         if found:
             row["aliases"] = found

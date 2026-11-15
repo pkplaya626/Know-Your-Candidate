@@ -321,8 +321,12 @@
   function card(item, opts) {
     var note = opts && typeof opts === "object" ? opts.note : "";
     var contact = contactLink(item);
+    // The person's other roles on this site, each linked to its card (rule
+    // 104), outside the button as the contact link is: a link cannot sit
+    // inside one.
+    var also = KYC.alsoHtml ? KYC.alsoHtml(item, { cls: "card-also" }) : "";
     var html = cardButton(item, note);
-    return contact ? '<div class="card-cell">' + html + contact + "</div>" : html;
+    return contact || also ? '<div class="card-cell">' + html + contact + also + "</div>" : html;
   }
 
   function cardButton(item, note) {

@@ -139,6 +139,9 @@
       // (rule 87: kyc/legphotos.py).
       (p.image && p.imageCredit ? '<p class="leg-credit">' +
         KYC.photoCreditHtml(KYC.copyCredit(p.imageCredit, p.image, p.photoCopy)) + "</p>" : "") +
+      // Their other roles on this site, each linked to its card (rule 104):
+      // a member running for Congress or governor.
+      KYC.alsoHtml(p, { cls: "leg-also" }) +
       "</div></article>";
   }
 

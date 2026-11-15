@@ -1259,7 +1259,7 @@
     if (federal) {
       [federal.president, federal.vicePresident].forEach(function (p) {
         if (p && p.id && p.name) {
-          add({ id: p.id, name: p.name, kind: "executive", role: p.office,
+          add({ id: p.id, name: p.name, kind: "executive", role: p.office, also: p.also,
                 href: "federal/index.html#/official/" + encodeURIComponent(p.id) });
         }
       });
@@ -1268,7 +1268,7 @@
         if (!h || !h.id || !h.name) return;
         var role = KYC.holderRole(office);
         add({ id: h.id, name: h.name, kind: "executive",
-              role: (role.acting ? "Acting " : "") + (role.title || office.office),
+              role: (role.acting ? "Acting " : "") + (role.title || office.office), also: h.also,
               href: "federal/index.html#/official/" + encodeURIComponent(h.id) });
       });
       ((federal.supremeCourt || {}).members || []).forEach(function (j) {
@@ -1297,7 +1297,7 @@
         var off = states[code][pair[0]];
         if (!namedHolder(off)) return;
         add({ name: off.name, state: code, kind: pair[0] === "governor" ? "governor" : "officer",
-              role: (off.title || pair[1]) + ", " + KYC.stateName(code),
+              role: (off.title || pair[1]) + ", " + KYC.stateName(code), also: off.also,
               href: KYC.stateUrl(code) + "#state-government" });
       });
     });
@@ -1331,7 +1331,7 @@
           add({ name: c.name, alt: c.printed, state: code, kind: "candidate",
                 role: past ? "Was a " + what + ", on the Nov 3, 2026 ballot"
                   : what.charAt(0).toUpperCase() + what.slice(1) + " (Nov 3, 2026 ballot)",
-                href: KYC.stateUrl(code) + "#state-government" });
+                also: c.also, href: KYC.stateUrl(code) + "#state-government" });
         });
       });
     });
@@ -1441,7 +1441,10 @@
     return '<li class="official-row"><span class="official-name">' + KYC.escapeHtml(row.name) +
       '</span> <span class="official-role">Former ' + KYC.escapeHtml(seatWords(row)) +
       ". Left during this Congress; congress-legislators ends the term on " +
-      KYC.escapeHtml(KYC.dateWords(row.left)) + ". " + now + "</span></li>";
+      KYC.escapeHtml(KYC.dateWords(row.left)) + ". " + now + "</span>" +
+      // The office they hold now on this site, by id (rule 104): J.D.
+      // Vance's dialog as Vice President.
+      KYC.alsoHtml(row, { tag: "span", cls: "official-also" }) + "</li>";
   }
 
   function officialRows(hits) {
@@ -1449,7 +1452,9 @@
       var row = h.row;
       return '<li class="official-row"><a class="official-name" href="' +
         KYC.escapeAttr(row.href) + '">' + KYC.escapeHtml(row.name) + "</a> " +
-        '<span class="official-role">' + KYC.escapeHtml(row.role) + "</span></li>";
+        '<span class="official-role">' + KYC.escapeHtml(row.role) + "</span>" +
+        // Their other roles on this site, joined by ids (rule 104).
+        KYC.alsoHtml(row, { tag: "span", cls: "official-also" }) + "</li>";
     }).join("") + "</ul>";
   }
 

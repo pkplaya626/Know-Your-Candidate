@@ -646,7 +646,8 @@ def state_codes(profiles):
                    if seated(p) and p.get("state") not in (None, "", "N/A")})
 
 
-def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=None):
+def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=None,
+                       federal=None):
     """``{relative path: html}`` for every generated page: one per state, the
     index of states, one district map per state, the old address of the
     first one, the directories of legislatures and counties, the guide,
@@ -680,10 +681,15 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
     from . import federal_build, federal_courts, official_share
     # The names, written into the federal pages too (FEDERAL-12): from the
     # same payload as data/federal.js, so verify sees a page that disagrees.
-    try:
-        fed, fed_courts, _search, _problems = federal_build.build(root)
-    except federal_build.FederalBuildError:
-        fed, fed_courts = None, {}
+    # *federal*: the build's own payload and courts, each record carrying
+    # the person's other roles on this site (kyc/identity.py, rule 104).
+    if federal is not None:
+        fed, fed_courts = federal
+    else:
+        try:
+            fed, fed_courts, _search, _problems = federal_build.build(root)
+        except federal_build.FederalBuildError:
+            fed, fed_courts = None, {}
     officials = []
     if races is not None:
         for relative, text in share.render_all(profiles, races, host, summary).items():
@@ -691,7 +697,8 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
         # The President's, the Vice President's, the Cabinet's and every
         # federal judge's (rule 96), with the rest: none without the
         # federal build, whose absence then removes none of them.
-        for relative, text in official_share.render_all(fed, fed_courts, host).items():
+        for relative, text in official_share.render_all(
+                fed, fed_courts, host, post=bool(share.post_election(summary))).items():
             out[os.path.join(SITE_DIR, *relative.split("/"))] = text
         # Each governor's and each candidate for governor's, beside them
         # (kyc/governor_share.py, rules 91 and 96), from the data/stategov.js
@@ -811,7 +818,8 @@ def _alias_pages(profiles, root, summary, stamp_from, races):
             for rel, text in share.render_aliases(profiles, races, host, summary).items()}
 
 
-def write_state_pages(profiles, root=".", summary=None, stamp_from=None, races=None):
+def write_state_pages(profiles, root=".", summary=None, stamp_from=None, races=None,
+                      federal=None):
     """Write one page per state plus the directory, and every other page
     :func:`render_state_pages` renders; keep a share page at an id its
     profile still answers to, as that profile's; remove share pages no
@@ -819,7 +827,7 @@ def write_state_pages(profiles, root=".", summary=None, stamp_from=None, races=N
     text is already on disk is not rewritten: 3,000 share pages that did
     not change keep their modification times."""
     written = []
-    rendered = render_state_pages(profiles, root, summary, stamp_from, races)
+    rendered = render_state_pages(profiles, root, summary, stamp_from, races, federal)
     kept = {rel: text for rel, text in _alias_pages(profiles, root, summary, stamp_from, races).items()
             if os.path.exists(os.path.join(root, rel))}
     for relative, text in list(rendered.items()) + list(kept.items()):
@@ -842,7 +850,8 @@ def _same(path, text):
         return False
 
 
-def check_state_pages(profiles, root=".", summary=None, stamp_from=None, races=None):
+def check_state_pages(profiles, root=".", summary=None, stamp_from=None, races=None,
+                      federal=None):
     """State pages that differ from what the build would write now.
 
     They are generated, so ``verify`` regenerates them in memory and compares:
@@ -850,7 +859,7 @@ def check_state_pages(profiles, root=".", summary=None, stamp_from=None, races=N
     A share page for a profile or race the data no longer holds is "orphaned".
     """
     stale = []
-    rendered = render_state_pages(profiles, root, summary, stamp_from, races)
+    rendered = render_state_pages(profiles, root, summary, stamp_from, races, federal)
     kept = {rel: text for rel, text in _alias_pages(profiles, root, summary, stamp_from, races).items()
             if os.path.exists(os.path.join(root, rel))}
     for relative, text in list(rendered.items()) + list(kept.items()):

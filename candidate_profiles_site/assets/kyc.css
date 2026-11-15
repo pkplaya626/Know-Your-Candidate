@@ -1223,6 +1223,24 @@ a.badge-link {
   .district-fact .card-cell .card-contact { margin-left: calc(64px + var(--s-3)); }
 }
 
+/* "Also on this site" (KYC.alsoHtml, rule 104): the person's other roles
+ * here, each linked to its card. Page text that wraps inside its line at
+ * any width (rule 44): a role's words are long ("On the Nov 3, 2026 ballot
+ * for Governor of the U.S. Virgin Islands"). */
+.also-line {
+  margin: 0;
+  font-size: var(--t-sm);
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  min-width: 0;
+  max-width: 100%;
+}
+.also-label { font-weight: 600; color: var(--text); }
+.also-link { overflow-wrap: anywhere; }
+.card-cell .card-also { padding: 0 var(--s-1); }
+.official-also { display: block; margin-top: var(--s-1); }
+
 /* Public offices held (KYC.officesHeld): newest first, the years beside the
  * office, the place under it. */
 .held-list {
