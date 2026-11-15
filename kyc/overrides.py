@@ -259,6 +259,22 @@ MEMBER_STATUS_BY_ID = {
                 "https://www.thegreenpapers.com/G26/LA"),
 }
 
+# Two cards a person has looked at and settled (kyc/identity.py, rule 105):
+# keyed on both cards' keys exactly as the build's identity warnings name
+# them ("officer:MI:sos", "candidate:gov-MI-jocelyn-benson",
+# "profile:FEC_...", "legislator:GA:ocd-person/..."), each {"same": True
+# where they are one person, False where they are namesakes, "evidence":
+# the pages that tie or part them - the office's own page naming the person
+# beside the other role, never a news story - and "read": the day}. An id
+# and a second source join people without an entry; an entry is for a pair
+# no record ties (identity-look-alike, identity-legislator-look-alike) or
+# whose names an id cannot settle (identity-names-disagree). The build
+# warns on an entry naming a card it no longer makes, one the records now
+# join themselves, and a "two people" entry the records join
+# (stale-identity-join, identity-join-contradicted).
+IDENTITY_JOINS = {}
+
+
 # Members who are on the November ballot for an office this site does not
 # cover, keyed on bioguide id: {bioguide: (what they are, source, checked)}.
 # Without it Byron Donalds, Florida's Republican nominee for governor, read

@@ -3912,8 +3912,16 @@
     var roles = (record && record.also) || [];
     if (!roles.length) return "";
     var post = electionStatus(2026, opts.now).phase === "post-election";
+    var today = localDay(opts.now || new Date());
     var parts = roles.map(function (role) {
-      var words = post && role.after ? role.after : role.words;
+      // A governor's or an officer's role ends on its own card's clock: once
+      // the term the 2026 election chose has begun on the reader's day and
+      // the roster's holder was not on the ballot for it (`ends`, the
+      // pipeline's, as KYC.stategov.pastTermText decides it), its `ended`
+      // words (the review of PR #267: "Attorney General of Texas" stood on
+      // Ken Paxton's dialog in January beside the row saying otherwise).
+      var words = role.ends && role.ended && today >= role.ends ? role.ended
+        : post && role.after ? role.after : role.words;
       var link = role.link ? " (" + role.link + ")" : "";
       return '<a class="also-link" href="' + escapeAttr(alsoHref(role)) + '" data-also-kind="' +
         escapeAttr(role.kind) + '">' + escapeHtml(words + link) + "</a>";

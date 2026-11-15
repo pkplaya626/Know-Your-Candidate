@@ -75,27 +75,72 @@ def _words(name):
     return [w for w in re.findall(r"[a-z]+", text) if w not in _SUFFIX]
 
 
+def _collapse(words):
+    """Initials run together, one word: "J. D." is "jd", as "JD" is."""
+    out = []
+    for word in words:
+        if len(word) == 1 and out and out[-1][1]:
+            out[-1] = (out[-1][0] + word, True)
+        else:
+            out.append((word, len(word) == 1))
+    return [w for w, _initials in out]
+
+
+def _forms(names):
+    """``(firsts, givens, surnames)`` of every form a record writes its
+    person's name in (its name, its sourced aliases, the FEC's filed name):
+    each form's first given name, every given name (initials run together
+    count, a lone initial does not) and every surname word (a hyphenated
+    surname's parts as well as the whole)."""
+    from .candidates import display_name
+    from .results import _tokens
+
+    firsts, givens, surnames = set(), set(), set()
+    for name in names:
+        name = str(name or "")
+        if not name.strip():
+            continue
+        if "," in name:
+            # The FEC's "LAST, FIRST" and a list's "Lombardo, Joseph".
+            last, first = name.split(",", 1)
+            name = display_name(name) if name.upper() == name else f"{first.strip()} {last.strip()}"
+        words = _tokens(name)
+        if len(words) < 2:
+            continue
+        last = words[-1]
+        surnames.add(last.replace("-", ""))
+        surnames.update(p for p in last.split("-") if len(p) > 1)
+        given = [w for w in _collapse(words[:-1]) if len(w) > 1]
+        if given:
+            firsts.add(given[0])
+            givens.update(given)
+    return firsts, givens, surnames
+
+
 def names_agree(a, b):
-    """Whether two records an id ties name one person: the same surname and
-    the same first initial ("Janet Trafton Mills" and "Janet Mills", "J.D.
-    Vance" and "JD Vance"). A check on a join by id, never a join itself."""
-    x, y = _words(a), _words(b)
-    if not x or not y:
+    """Whether two records an id ties name one person (a check on a join by
+    id, never a join itself; rule 82: an id is not proof on its own): a
+    surname in common, and the first given name of one form among the given
+    names of the other, as ``nominee_photos.given_fits`` asks of an item's
+    label - "Janet Trafton Mills" and "Janet Mills", "J.D. Vance" and "JD
+    Vance", "Tom Tiffany" and the member whose sourced aliases hold "Tom
+    Tiffany". No nickname table and no initial alone: "John James" and
+    "Jane James" sharing an item, a spouse's or a namesake's, name two
+    people. *a* and *b* are a name or a list of the forms a record writes."""
+    fa, ga, sa = _forms(a if isinstance(a, (list, tuple)) else [a])
+    fb, gb, sb = _forms(b if isinstance(b, (list, tuple)) else [b])
+    if not (sa & sb):
         return False
-    if x[-1] != y[-1]:
-        # A hyphenated or two-word surname written one way and the other.
-        if not (x[-1] in y or y[-1] in x):
-            return False
-    return x[0][0] == y[0][0]
+    return bool(fa & gb or fb & ga)
 
 
 def look_alike(a, b):
     """The same first and last name, folded: two records a reader would take
-    for one person, which only an id or a second source may join."""
-    x, y = _words(a), _words(b)
-    x = [w for w in x if len(w) > 1]
-    y = [w for w in y if len(w) > 1]
-    return bool(x and y) and x[0] == y[0] and x[-1] == y[-1]
+    for one person, which only an id or a second source may join. Rule 24's
+    test, the one (``nominee_photos.same_name``, rule 12)."""
+    from .nominee_photos import same_name
+
+    return same_name(a, b)
 
 
 def office_names(person_name, officer_name):
@@ -115,13 +160,17 @@ class Node:
     where ``also`` is written), its ids and its role."""
 
     __slots__ = ("key", "kind", "name", "state", "record", "ids", "role", "photo",
-                 "place", "history")
+                 "place", "history", "forms")
 
     def __init__(self, key, kind, name, state, record, role, photo=False, history=None):
         self.key, self.kind, self.name, self.state = key, kind, name, state
         self.record, self.role, self.photo = record, role, bool(photo)
         self.ids = {"bioguide": set(), "wikidata": set(), "fec": set()}
         self.history = history or {}
+        # Every form the record's own sources write the name in: the card's
+        # name, a member's aliases from congress-legislators' name block
+        # (rule 66), the FEC's filed name.
+        self.forms = [name] + [a for a in (record or {}).get("aliases") or [] if a] +             ([record["filedName"]] if (record or {}).get("filedName") else [])
 
     def add(self, scheme, value):
         if value:
@@ -146,9 +195,28 @@ def profile_role(person, by_id, races_by_id, post):
     held to it by the status table), in the campaign's tense and after
     Election Day (``post``, the results day)."""
     from . import share
+    from .record import seated
+
+    def lead_of(when):
+        parts = share._seat_parts(person.get("officeLabel"))
+        if parts and person.get("isCandidate"):
+            body, where = parts
+            # After Election Day the race is named, not the person's place in
+            # it: "In the 2026 race for ...: Withdrew from the 2026 race" read
+            # as though they were still in it (the review of PR #267).
+            return (f"2026 race for the {body} in {where}" if when
+                    else f"Candidate for the {body} in {where}")
+        if parts:
+            # The seat they hold in a sentence (rule 96: share's mirror of
+            # KYC.heldSeatInWords): "a U.S. Senate seat from Minnesota", "the
+            # U.S. Virgin Islands’ seat in the U.S. House".
+            held = share.held_seat_in_words(person.get("officeLabel"))
+            return ("Member of Congress, holding " if seated(person)
+                    else "Former member of Congress, who held ") + held
+        return _cap(share._role(person, when))
 
     def say(when):
-        lead = _cap(share._role(person, when))
+        lead = lead_of(when)
         status = share.status_words(person, by_id, races_by_id, when)
         return f"{lead}: {status}" if status else lead
 
@@ -163,16 +231,36 @@ def profile_role(person, by_id, races_by_id, post):
     return role
 
 
-def departed_role(row):
-    from .pages import date_words, short_name
+def departed_seat_words(row):
+    """The seat a member who left held, as their own row says it
+    (``kyc-directory.js`` seatWords, word for word): "U.S. Senator from
+    Ohio", "Delegate from the U.S. Virgin Islands", "U.S. Representative,
+    NJ-11"."""
+    from .history import DELEGATE_TITLES
+    from .pages import sentence_place, state_name
 
-    chamber = row.get("chamber") or "House"
-    if chamber == "Senate":
-        seat = short_name(row.get("state"))
-    else:
-        district = row.get("district")
-        seat = f"{row.get('state')}-{district if district not in (None, '', 0, '0') else 'AL'}"
-    words = f"Left the U.S. {chamber} on {date_words(row.get('left'))}, as the member for {seat}"
+    state = row.get("state")
+    if (row.get("chamber") or "House") == "Senate":
+        return f"U.S. Senator from {state_name(state)}"
+    if state in DELEGATE_TITLES:
+        return f"{DELEGATE_TITLES[state]} from {sentence_place(state)}"
+    district = row.get("district")
+    return f"U.S. Representative, {state}-{district if district not in (None, '', 0, '0') else 'AL'}"
+
+
+def departed_role(row):
+    """A member who left this Congress, in their row's own words: the seat,
+    and the day as congress-legislators' end of the term, said as theirs -
+    never "Left the U.S. Senate on" that day as the fact. The row's reason:
+    that end can be another day than the leaving (Doug LaMalfa's term ends
+    there on January 5, 2026; the Clerk records his death on January 6), and
+    the first words, "Left the U.S. Senate on Jan. 9, 2025", stated
+    congress-legislators' day for J.D. Vance as the day he left (the review
+    of PR #267)."""
+    from .pages import date_words
+
+    words = (f"Former {departed_seat_words(row)}; congress-legislators ends the term on "
+             f"{date_words(row.get('left'))}")
     bioguide = row.get("id") or row.get("bioguide")
     return {"kind": "departed", "id": bioguide, "state": row.get("state"), "words": words,
             "href": BIOGUIDE_URL.format(bioguide), "share": BIOGUIDE_URL.format(bioguide),
@@ -197,26 +285,83 @@ def official_role(oid, words, after=None):
     return role
 
 
+def judge_court(judge, entries):
+    """Of the courts whose files list *judge* (``[(court id, name)]``), the
+    one of their latest seat by commission: a judge sitting on two is shown
+    where they sit now, never by which court's id sorts first."""
+    seats = sorted((s for s in judge.get("seats") or [] if s.get("court")),
+                   key=lambda s: s.get("commissioned") or "")
+    courts = dict(entries)
+    for seat in reversed(seats):
+        if seat["court"] in courts:
+            return seat["court"], courts[seat["court"]]
+    return entries[0]
+
+
 def judge_role(judge, court_id, court_name):
-    first = (judge.get("seats") or [{}])[0]
-    title = (judge.get("justice") or {}).get("role") or first.get("title") or "Judge"
+    """A judge as their dialog says it (rule 82): the title of the seat on
+    the court whose file is read (their latest there), and their service -
+    senior by the directory, or senior by the courts' list while the
+    directory says active, both said."""
+    from .pages import date_words
+
+    seats = sorted((s for s in judge.get("seats") or [] if s.get("court") == court_id),
+                   key=lambda s: s.get("commissioned") or "")
+    seat = seats[-1] if seats else (judge.get("seats") or [{}])[-1]
+    title = (judge.get("justice") or {}).get("role") or seat.get("title") or "Judge"
     where = "the Supreme Court of the United States" if court_id == "scotus" else (
         court_name if str(court_name or "").startswith("the ") else f"the {court_name}")
+    words = f"{title} of {where}"
+    listed = judge.get("listedSenior") or {}
+    if judge.get("retiredJustice"):
+        words = f"Retired justice of {where}, not a member of the Court"
+    elif seat.get("seniorSince") or judge.get("status") == "senior":
+        words += (f", senior status since {date_words(seat['seniorSince'])}"
+                  if seat.get("seniorSince") else ", senior status")
+    elif listed.get("since"):
+        words += (f", senior status from {date_words(listed['since'])} by the courts’ list of "
+                  "vacancies; the FJC directory still lists active service")
     jid = judge["id"]
     href = (f"federal/index.html#/official/{jid}" if court_id == "scotus"
             else f"courts/{court_id}.html#/official/{jid}")
-    return {"kind": "judge", "id": jid, "words": f"{title} of {where}", "href": href,
+    return {"kind": "judge", "id": jid, "words": words, "href": href,
             "view": f"#/official/{jid}", "court": court_id, "share": f"o/{jid}.html"}
 
 
-def governor_role(code, gov):
+def term_end(role, item, now_words):
+    """A governor's or an officer's role ends on the clock its own card uses
+    (``KYC.stategov.pastTermText``, kyc/terms_begin.py): where the term the
+    2026 election chose has a day the state's law gives (``termBegins``)
+    and the roster's holder was not on the ballot for it (``outgoing``),
+    the role carries that day (``ends``, the first day the term had
+    certainly begun), the roster's day read (``endsRead``) and the words
+    from then (``ended``): "Was Attorney General of Texas, until the term
+    the 2026 election chose began on Jan. 1, 2027". Read in January, the
+    first line went on calling Ken Paxton "Attorney General of Texas" beside
+    the officers' row saying the new term had begun (the review of PR
+    #267)."""
+    from .terms_begin import began_words
+
+    term = (item or {}).get("termBegins")
+    gone = (item or {}).get("outgoing")
+    if not (item or {}).get("up") or not term or not gone or not term.get("from"):
+        return role
+    role["ends"] = term["from"]
+    if gone.get("read"):
+        role["endsRead"] = gone["read"]
+    role["ended"] = f"Was {now_words}, until the term the 2026 election chose {began_words(term)}"
+    return role
+
+
+def governor_role(code, gov, item=None):
     from .pages import governor_of
 
     words = governor_of(code) + (f", in office since {gov['since']}" if gov.get("since") else "")
     gid = gov["id"]
-    return {"kind": "governor", "id": gid, "state": code, "words": words,
-            "href": f"states/{code.lower()}.html#/official/{gid}", "view": f"#/official/{gid}",
-            "share": f"o/{gid}.html"}
+    return term_end({"kind": "governor", "id": gid, "state": code, "words": words,
+                     "href": f"states/{code.lower()}.html#/official/{gid}",
+                     "view": f"#/official/{gid}", "share": f"o/{gid}.html"},
+                    item, governor_of(code))
 
 
 def candidate_role(code, person):
@@ -238,25 +383,35 @@ def candidate_role(code, person):
             "share": f"o/{cid}.html"}
 
 
-def officer_role(code, key, off):
+def officer_role(code, key, off, item=None):
     from .voting_dates import place
 
     title = off.get("title") or {"lt": "Lieutenant Governor", "ag": "Attorney General",
                                  "sos": "Secretary of State"}[key]
-    return {"kind": "officer", "id": f"{code}-{key}", "state": code,
-            "words": f"{title} of {place(code)}",
-            "href": f"states/{code.lower()}.html#state-government",
-            "share": f"states/{code.lower()}.html"}
+    words = f"{title} of {place(code)}"
+    return term_end({"kind": "officer", "id": f"{code}-{key}", "state": code, "words": words,
+                     "href": f"states/{code.lower()}.html#state-government",
+                     "share": f"states/{code.lower()}.html"}, item, words)
+
+
+_DISTRICT_NUMBER = re.compile(r"^\d+[A-Z]?$")
 
 
 def legislator_role(code, member, title):
     """"Member of the Texas House of Representatives, district 49": the
     legislature page's chamber, named with its state, and the district the
-    roster gives."""
+    roster gives - a number as "district 49", a district a legislature
+    names as a place in its own words, "for the 18th Essex district" and
+    "for the Strafford 4 district" (the first read "district 18th
+    Essex")."""
     from .pages import short_name
 
-    district = member.get("district")
-    words = f"Member of the {short_name(code)} {title}" + (f", district {district}" if district else "")
+    district = str(member.get("district") or "").strip()
+    where = ""
+    if district:
+        where = (f", district {district}" if _DISTRICT_NUMBER.match(district)
+                 else f", for the {district} district")
+    words = f"Member of the {short_name(code)} {title}{where}"
     d = member.get("districtId") or ""
     chamber = member.get("chamber")
     query = ("chamber=lower&" if chamber == "lower" else "") + f"d={d}"
@@ -296,6 +451,14 @@ class Links:
         self.parent = {}
         self.problems = []
         self.joined_by = {}       # frozenset of two keys -> why
+        self.settled_pairs = {}   # frozenset of two keys -> an IDENTITY_JOINS entry
+        self.history_cache = {}
+        self.legislators = {}
+        self.titles = {}
+
+    def settled(self, a, b):
+        """Whether a person's evidenced entry settles the pair either way."""
+        return frozenset((a, b)) in self.settled_pairs
 
     # union-find
     def _find(self, key):
@@ -349,8 +512,15 @@ def _same_card(a, b):
     return False
 
 
+# The kinds whose card is a state's: one person on two states' (a
+# candidate on two states' lists for governor, Minnesota's governor on
+# Wisconsin's list) is a record to report, not a role to link.
+STATE_KINDS = ("governor", "candidate", "officer", "legislator")
+
+
 def _join_by_ids(links):
-    """Join every two nodes that hold one id, where their names agree."""
+    """Join every two nodes that hold one id, where their names agree and,
+    for two of a state's cards, their states do."""
     for scheme in ("bioguide", "wikidata", "fec"):
         holders = {}
         for node in links.nodes.values():
@@ -361,7 +531,15 @@ def _join_by_ids(links):
                 continue
             first = nodes[0]
             for other in nodes[1:]:
-                if names_agree(first.name, other.name):
+                if (first.kind in STATE_KINDS and other.kind in STATE_KINDS and first.state
+                        and other.state and first.state != other.state):
+                    links.problems.append((
+                        "warn", "identity-states-disagree",
+                        f"{first.kind} {first.name} ({first.state}) and {other.kind} {other.name} "
+                        f"({other.state}) share the {scheme} id {value}, but one person is not on "
+                        "two states' cards: neither card names the other (rule 105)",
+                        [first.key, other.key]))
+                elif names_agree(first.forms, other.forms):
                     links._union(first.key, other.key, f"{scheme} {value}")
                 else:
                     links.problems.append((
@@ -371,27 +549,46 @@ def _join_by_ids(links):
                         "other (rule 105)", [first.key, other.key]))
 
 
+def office_in_state(row, key, code):
+    """Whether a corroborated row of offices (rule 69) is the officer card's
+    office in *code*: open, the office's words and none of another office's
+    (a deputy's, an assistant's, an acting one's, the U.S. one), and the
+    state in its place - the row's ``where``, or with none, the label itself
+    naming the state in the office's slot ("Texas Attorney General",
+    "Attorney General of Texas"), never a label naming no state: Arizona's
+    rows carry no ``where``, and "Oklahoma Attorney General" was read as
+    Texas's (the review of PR #267)."""
+    from .pages import short_name
+
+    office = row.get("office") or ""
+    if not row.get("current") or not OFFICE_WORDS[key].search(office) \
+            or _NOT_THE_OFFICE.search(office):
+        return False
+    state = short_name(code)
+    if row.get("where"):
+        return row["where"] == state
+    title = OFFICE_WORDS[key].pattern
+    st = re.escape(state)
+    shape = re.compile(rf"(?:(?:the\s+)?(?:state\s+of\s+)?{st}\s+{title}|{title}\s+of\s+(?:the\s+)?"
+                       rf"(?:state\s+of\s+|commonwealth\s+of\s+)?{st})", re.I)
+    return bool(shape.fullmatch(office.strip()))
+
+
 def _join_officers(links, officers):
     """Each officer card to the people whose corroborated record holds that
     office open in that state, where the card's name names them (rule 56)."""
-    from .pages import short_name
-
     people = [n for n in links.nodes.values() if n.kind in ("profile", "candidate", "governor")]
     for node in officers:
         code, key = node.state, node.key.rsplit(":", 1)[-1]
         for person in people:
             if person.state != code:
                 continue
-            held = [r for r in _history_rows(person.record if person.kind != "profile"
-                                             else person.record)
-                    if r.get("current") and OFFICE_WORDS[key].search(r.get("office") or "")
-                    and not _NOT_THE_OFFICE.search(r.get("office") or "")
-                    and (r.get("where") or short_name(code)) == short_name(code)]
+            held = [r for r in _history_rows(person.record) if office_in_state(r, key, code)]
             named = office_names(person.name, node.name)
             if held and named:
                 links._union(node.key, person.key,
                              f"{held[0]['office']} in the record; the officer card names them")
-            elif look_alike(person.name, node.name):
+            elif look_alike(person.name, node.name) and not links.settled(node.key, person.key):
                 links.problems.append((
                     "warn", "identity-look-alike",
                     f"{node.name} ({node.role['words']}) and {person.kind} {person.name} share a "
@@ -401,30 +598,138 @@ def _join_officers(links, officers):
                     [node.key, person.key]))
 
 
+def _legislator_node(links, code, member, chamber_titles):
+    key = f"legislator:{code}:{member.get('id')}"
+    if key in links.nodes:
+        return links.nodes[key]
+    title = chamber_titles.get((code, member.get("chamber"))) or "Legislature"
+    return links.add(Node(key, "legislator", member.get("name"), code, member,
+                          legislator_role(code, member, title), photo=_photo(member, "image")))
+
+
 def _join_legislators(links, legislators, chamber_titles):
     """Each candidate for Congress or governor who sits in their state's
-    legislature, by rule 24's join (``nominee_photos.legislator_for``)."""
-    from .nominee_photos import legislator_for
+    legislature, by rule 24's join (``nominee_photos.legislator_for``); and
+    each who shares their first and last name with a member of their own
+    state's legislature that the join did not tie, reported in one line
+    (``identity-legislator-look-alike``) and linked to nobody (rule 25)."""
+    from .nominee_photos import held_seats, legislator_for, same_name
 
     history = links.history_cache or {}
+    unsettled = []
     for node in list(links.nodes.values()):
         if node.kind not in ("profile", "candidate"):
             continue
         record = node.record
-        if node.kind == "profile" and not record.get("isCandidate"):
-            continue
         person = {"id": record.get("id"), "name": node.name, "state": node.state,
                   "wikipedia": record.get("wikipedia")}
-        member, _why = legislator_for(person, history, legislators)
-        if not member:
+        # Only a candidate is asked of the join (a sitting member of Congress
+        # holds no seat in a legislature); everyone is asked of the report:
+        # the Speaker and Louisiana's Representative Mike Johnson are a pair
+        # for a person to name as two.
+        joinable = node.kind == "candidate" or record.get("isCandidate")
+        member, why = (legislator_for(person, history, legislators) if joinable
+                       else (None, "not a candidate, so not asked of the legislature join"))
+        if member:
+            leg = _legislator_node(links, node.state, member, chamber_titles)
+            links._union(leg.key, node.key, "legislature join (rule 24)")
             continue
-        code = node.state
-        title = chamber_titles.get((code, member.get("chamber"))) or "Legislature"
-        key = f"legislator:{code}:{member.get('id')}"
-        leg = links.nodes.get(key) or links.add(Node(
-            key, "legislator", member.get("name"), code, member,
-            legislator_role(code, member, title), photo=_photo(member, "image")))
-        links._union(key, node.key, "legislature join (rule 24)")
+        roster = ((legislators or {}).get("states") or {}).get(node.state) or []
+        # A corroborated seat whose member the roster writes another way
+        # ("Shev Jones" for "Shevrin \"Shev\" Jones"): the same surname in
+        # that very chamber is reported too, for a person to settle.
+        seats = held_seats(person, history) if joinable else set()
+        surname = (_words(node.name) or [""])[-1]
+        for seat in roster:
+            alike = same_name(node.name, seat.get("name"))
+            if not alike and not ((node.state, seat.get("chamber")) in seats and surname
+                                  and surname in _words(seat.get("name"))):
+                continue
+            key = f"legislator:{node.state}:{seat.get('id')}"
+            if links.settled(key, node.key):
+                continue
+            unsettled.append(f"{node.kind} {node.name} ({record.get('id')}) and "
+                             f"{seat.get('name')} ({node.state} {seat.get('chamber')} "
+                             f"{seat.get('district')}, {seat.get('id')}): "
+                             + (why if alike else "their corroborated record holds a seat in that "
+                                "chamber, but the roster writes the name another way"))
+    if unsettled:
+        links.problems.append((
+            "warn", "identity-legislator-look-alike",
+            f"{len(unsettled)} people look like a member of their own state's legislature - the "
+            "same first and last name, or their surname in a chamber their corroborated record "
+            "holds a seat in - and rule 24's join does not tie them; neither card names the other "
+            "until a corroborated record does, or an evidenced "
+            "overrides.IDENTITY_JOINS entry settles the pair (rule 105)", sorted(unsettled)))
+
+
+def _apply_settled(links):
+    """Read ``overrides.IDENTITY_JOINS``: a person's evidenced word that two
+    cards are one person (``same``) or two (a namesake), keyed on both
+    cards' keys as the build's report names them. An entry with no
+    evidence or day is an error and settles nothing (rule 105)."""
+    from . import overrides
+
+    for pair, entry in sorted(getattr(overrides, "IDENTITY_JOINS", {}).items()):
+        entry = entry or {}
+        if (not isinstance(pair, tuple) or len(pair) != 2 or "same" not in entry
+                or not entry.get("evidence") or not re.match(r"^\d{4}-\d{2}-\d{2}$",
+                                                              str(entry.get("read") or ""))):
+            links.problems.append((
+                "error", "identity-join-unevidenced",
+                f"overrides.IDENTITY_JOINS {pair!r} needs both cards' keys, \"same\", the "
+                "evidence and the day it was read; it settles nothing (rule 105)", [str(pair)]))
+            continue
+        links.settled_pairs[frozenset(pair)] = dict(entry, pair=pair)
+
+
+def _node_for(links, key):
+    """The node a settled entry names, making a legislator's from the Open
+    States cache (their node exists only once something joins them)."""
+    if key in links.nodes:
+        return links.nodes[key]
+    if key.startswith("legislator:"):
+        _kind, code, mid = key.split(":", 2)
+        for member in ((links.legislators or {}).get("states") or {}).get(code) or []:
+            if member.get("id") == mid:
+                return _legislator_node(links, code, member, links.titles)
+    return None
+
+
+def _join_settled(links):
+    """Apply the settled entries after every other join, and say which no
+    longer settle anything (stale, rule 105 and CLAUDE.md, Curated data)."""
+    for pair, entry in sorted(links.settled_pairs.items(), key=lambda kv: kv[1]["pair"]):
+        a_key, b_key = entry["pair"]
+        a, b = _node_for(links, a_key), _node_for(links, b_key)
+        if not a or not b:
+            links.problems.append((
+                "warn", "stale-identity-join",
+                f"overrides.IDENTITY_JOINS {entry['pair']!r}: "
+                + ", ".join(k for k, n in ((a_key, a), (b_key, b)) if not n)
+                + " is no card this build makes; the entry settles nothing", list(entry["pair"])))
+            continue
+        together = links._find(a.key) == links._find(b.key)
+        if entry["same"]:
+            if together:
+                links.problems.append((
+                    "warn", "stale-identity-join",
+                    f"overrides.IDENTITY_JOINS {entry['pair']!r}: the two cards are joined by "
+                    f"ids or a second source already ({links.joined_by.get(pair) or 'joined'}); "
+                    "the entry is no longer needed", list(entry["pair"])))
+            else:
+                links._union(a.key, b.key, "an evidenced overrides.IDENTITY_JOINS entry")
+        elif together:
+            links.problems.append((
+                "warn", "identity-join-contradicted",
+                f"overrides.IDENTITY_JOINS {entry['pair']!r} says two people, but the build joins "
+                f"the two cards ({links.joined_by.get(pair) or 'through another card'}): a person "
+                "must look again", list(entry["pair"])))
+        elif not look_alike(a.name, b.name):
+            links.problems.append((
+                "warn", "stale-identity-join",
+                f"overrides.IDENTITY_JOINS {entry['pair']!r}: {a.name} and {b.name} no longer "
+                "share a name, so there is no look-alike to settle", list(entry["pair"])))
 
 
 def build(profiles, races=None, summary=None, stategov=None, federal=None, courts=None,
@@ -448,9 +753,31 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
     by_id = {p["id"]: p for p in profiles or []}
     post = share.post_election(summary) or share.ResultsDay("2026-11-04")
 
-    def from_history(node, key):
+    def from_history(node, key, *own, article=None):
+        """The bioguide id congress-legislators gives for the record's own
+        Wikidata item, read from the history cache - only where the cache's
+        entry is that item's (*own*, the items the record itself carries)
+        and, for a profile, was read from the article it links (*article*,
+        as ``nominee_photos.held_seats`` asks): a stale entry, read from a
+        namesake's article or a predecessor's item, would have joined a
+        challenger "Scott Turner" to the Secretary of Housing (the review of
+        PR #267)."""
         entry = hist.get(key) or {}
-        node.add("bioguide", entry.get("bioguide"))
+        bioguide = entry.get("bioguide")
+        if not bioguide or bioguide in node.ids["bioguide"]:
+            return                       # a member's own id says no more
+        mine = {i for i in own if i}
+        # The article it was read from, as history.stale asks (``asked``).
+        asked = entry.get("asked")
+        if entry.get("wikidata") in mine and (article is None or not asked or asked == article):
+            node.add("bioguide", bioguide)
+        elif mine:
+            links.problems.append((
+                "warn", "identity-history-stale",
+                f"{node.kind} {node.name}: the history cache's entry under {key} gives the "
+                f"bioguide id {bioguide} for {entry.get('wikidata') or 'no item'}"
+                + (f", read from {asked}" if asked else "") + ", not the record's own "
+                + ", ".join(sorted(mine)) + "; no card is joined by it (rule 105)", [node.key]))
 
     for person in profiles or []:
         node = links.add(Node(f"profile:{person['id']}", "profile", person.get("name"),
@@ -462,7 +789,7 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
         node.add("wikidata", _wikidata(person))
         for fec in [person.get("fecCandidateId")] + list(person.get("otherFecIds") or []):
             node.add("fec", fec)
-        from_history(node, person["id"])
+        from_history(node, person["id"], _wikidata(person), article=person.get("wikipedia"))
 
     items = {}
     for row in ((departed_cache or {}).get("members") or []) + \
@@ -485,7 +812,7 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
                               photo=_photo(person, "photo")))
         node.add("bioguide", (person.get("links") or {}).get("bioguide"))
         node.add("wikidata", _wikidata(person))
-        from_history(node, person["id"])
+        from_history(node, person["id"], _wikidata(person), (person.get("links") or {}).get("wikidata"))
     for office in fed.get("offices") or []:
         person = office.get("holder")
         if not person or not person.get("id"):
@@ -498,7 +825,7 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
                               photo=_photo(person, "photo")))
         node.add("bioguide", (person.get("links") or {}).get("bioguide"))
         node.add("wikidata", _wikidata(person))
-        from_history(node, person["id"])
+        from_history(node, person["id"], _wikidata(person), (person.get("links") or {}).get("wikidata"))
     for person in fed.get("former") or []:
         if not person.get("id") or f"official:{person['id']}" in links.nodes:
             continue
@@ -507,7 +834,8 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
         node = links.add(Node(f"official:{person['id']}", "official", person.get("name"), None,
                               person, official_role(person["id"], words)))
         node.add("wikidata", (person.get("links") or {}).get("wikidata") or held.get("wikidata"))
-        from_history(node, person["id"])
+        from_history(node, person["id"], _wikidata(person), (person.get("links") or {}).get("wikidata"),
+                     held.get("wikidata"))
 
     # The federal judges, by the Wikidata item that carries their FJC id
     # (kyc/judge_links.py, rule 82): the Supreme Court's and every court's.
@@ -519,10 +847,15 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
     for cid, court in sorted((courts or {}).items()):
         for judge in court.get("judges") or []:
             judges.append((judge, cid, court.get("name") or cid))
+    # A judge in two courts' files is noded under the court of their latest
+    # seat (judge_court), never whichever court's id sorts first.
+    listed = {}
     for judge, cid, cname in judges:
-        if not judge.get("id") or f"judge:{judge['id']}" in links.nodes:
-            continue
-        item = judge_items.get(judge["id"])
+        if judge.get("id"):
+            listed.setdefault(judge["id"], (judge, []))[1].append((cid, cname))
+    for jid, (judge, entries) in listed.items():
+        cid, cname = judge_court(judge, entries)
+        item = judge_items.get(jid)
         if not item:
             continue
         node = links.add(Node(f"judge:{judge['id']}", "judge", judge.get("name"), None, judge,
@@ -534,12 +867,13 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
     officers = []
     for code, entry in sorted(((stategov or {}).get("states") or {}).items()):
         gov = entry.get("governor") or {}
+        offices = (entry.get("ballot2026") or {}).get("offices") or {}
+        office = offices.get("governor") or {}
         if gov.get("id"):
             node = links.add(Node(f"governor:{gov['id']}", "governor", gov.get("name"), code, gov,
-                                  governor_role(code, gov), photo=_photo(gov, "headshot")))
+                                  governor_role(code, gov, office), photo=_photo(gov, "headshot")))
             node.add("wikidata", gov.get("wikidata") or _wikidata(gov))
-            from_history(node, gov["id"])
-        office = ((entry.get("ballot2026") or {}).get("offices") or {}).get("governor") or {}
+            from_history(node, gov["id"], gov.get("wikidata"), _wikidata(gov))
         if office.get("up"):
             for person in ((office.get("candidates") or {}).get("candidates") or []):
                 if not person.get("id"):
@@ -549,22 +883,33 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
                                       photo=_photo(person, "photo")))
                 node.add("bioguide", person.get("member"))
                 node.add("wikidata", _wikidata(person))
-                from_history(node, person["id"])
+                # The list's own form of the name and the short form an
+                # evidenced STATEWIDE_NAME_FORMS entry gives it ("Joe
+                # Lombardo" for "Lombardo, Joseph", rule 91).
+                if person.get("printed"):
+                    from .statewide_photos import name_forms
+                    node.forms += [person["printed"]] + name_forms(code, "governor",
+                                                                    person["printed"])
+                from_history(node, person["id"], _wikidata(person))
         for key in OFFICER_KEYS:
             off = entry.get(key)
             if _named_officer(off):
                 officers.append(links.add(Node(f"officer:{code}:{key}", "officer", off.get("name"),
-                                               code, off, officer_role(code, key, off),
+                                               code, off, officer_role(code, key, off, offices.get(key)),
                                                photo=_photo(off, "photo"))))
 
-    _join_by_ids(links)
-    _join_officers(links, officers)
     titles = {}
     for code, payload in (legislatures or {}).items():
         for chamber, info in ((payload or {}).get("chambers") or {}).items():
             titles[(code, chamber)] = info.get("title")
+    links.legislators = legislators or {}
+    links.titles = titles
+    _apply_settled(links)
+    _join_by_ids(links)
+    _join_officers(links, officers)
     if legislators:
         _join_legislators(links, legislators, titles)
+    _join_settled(links)
     _look_alikes(links)
     return links
 
@@ -585,7 +930,7 @@ def _look_alikes(links):
         for i, a in enumerate(nodes):
             for b in nodes[i + 1:]:
                 if (a.kind == b.kind or links._find(a.key) == links._find(b.key)
-                        or _same_card(a, b)):
+                        or _same_card(a, b) or links.settled(a.key, b.key)):
                     continue
                 if a.state and b.state and a.state != b.state:
                     continue
@@ -743,6 +1088,15 @@ def share_html(record, post=False, root="../"):
     parts = []
     for role in roles:
         words = role.get("after") if post and role.get("after") else role.get("words")
+        # A role's end (term_end) on the page's day: the day the results
+        # were read, or a later day the roster itself was read, as the
+        # governor's share page decides its "In office since" (never the
+        # build's clock, rule 96).
+        day = post if isinstance(post, str) else ""
+        if day and (role.get("endsRead") or "") > day:
+            day = role["endsRead"]
+        if role.get("ends") and role.get("ended") and day and day >= role["ends"]:
+            words = role["ended"]
         words += f" ({role['link']})" if role.get("link") else ""
         target = role.get("share") or role.get("href") or ""
         href = target if re.match(r"https?:", target) else root + target

@@ -27334,6 +27334,33 @@ async function testAlsoLines() {
       check("a Congress biography is linked as it is", K.alsoHref(role({ kind: "departed", view: undefined,
         href: "https://bioguide.congress.gov/search/bio/X000000", link: "Congress biography" })) ===
         "https://bioguide.congress.gov/search/bio/X000000");
+      // A governor's or an officer's role ends on its own card's clock (the
+      // review of PR #267: "Attorney General of Texas" on Ken Paxton's
+      // dialog in January, beside the row saying the new term had begun).
+      const ending = { also: [role({ kind: "officer", id: "TX-ag", words: "Attorney General of Texas",
+        after: undefined, view: undefined, href: "states/tx.html#state-government", ends: "2027-01-01",
+        ended: "Was Attorney General of Texas, until the term the 2026 election chose began on Jan. 1, 2027" })] };
+      const at = (y, m, d) => lineText(html(K.alsoHtml(ending, { now: new Date(y, m, d, 12) }))).join("|");
+      check("an officer's role reads in office until its new term begins on the reader's day, and in the " +
+        "past tense from that day, never in the present after it",
+        at(2026, 11, 31) === "Attorney General of Texas" && at(2027, 0, 1).indexOf("Was Attorney General") === 0 &&
+        at(2027, 0, 20).indexOf("Was Attorney General") === 0, [at(2026, 11, 31), at(2027, 0, 20)].join(" / "));
+      const ends = [];
+      people.concat(Object.keys(gov).reduce((all, code) => {
+        const e = gov[code];
+        const item = ((e.ballot2026 || {}).offices || {}).governor;
+        return all.concat([e.governor, e.lt, e.ag, e.sos],
+          (item && item.candidates && item.candidates.candidates) || []);
+      }, [])).forEach((rec) => ((rec && rec.also) || []).forEach((r) => {
+        if (r.ends) ends.push([rec, r]);
+      }));
+      const notEnded = ends.filter(([rec, r]) => {
+        const late = new Date(+r.ends.slice(0, 4), +r.ends.slice(5, 7) - 1, +r.ends.slice(8, 10) + 19, 12);
+        return lineText(html(K.alsoHtml({ also: [r] }, { now: late })))[0] !== r.ended;
+      });
+      check("every role the build ends draws its ended words once its term has begun",
+        !notEnded.length && ends.every(([, r]) => /^Was /.test(r.ended)),
+        notEnded.map(([rec, r]) => rec.name + ": " + r.words).slice(0, 4).join(" | ") || `${ends.length} roles`);
       // The governor's card, a candidate's card and an officer's row.
       const mn = gov.MN;
       const keepGov = mn.governor.also;

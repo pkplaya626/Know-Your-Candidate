@@ -4548,20 +4548,39 @@ Each of these was a shipped defect found by measurement. Do not undo them.
       record's corroborated offices were read from, a governor's NGA
       cross-check, a departed member's from legislators-historical, which
       `departed.build` now keeps) or an FEC candidate id - and only where the
-      two names agree (`names_agree`: surname and first initial). An id whose
-      records name two people is withheld and warned
-      (`identity-names-disagree`), never shown;
+      two names agree (`names_agree`: a surname in common and the first given
+      name of one among the given names of the other, in any form the
+      records' own sources write - a member's aliases, the FEC's filed name,
+      the list's printed form and an evidenced `STATEWIDE_NAME_FORMS`
+      entry; initials run together are a name, "J.D." is "JD", a lone
+      initial is not). An id whose records name two people is withheld and
+      warned (`identity-names-disagree`), never shown, and so is one id on
+      two states' cards for governor or their offices
+      (`identity-states-disagree`);
     - for an office no id ties, two sources: the state officer's card names
       the person by rule 56's test (`officers.names_holder`) and the
       person's corroborated record of offices (rule 69) holds that very
-      office open in that state;
+      office open in that state (`office_in_state`: its `where` the state,
+      or with none the label naming the state in the office's slot; never a
+      deputy's, an assistant's, an acting or the U.S. office);
     - for a legislator, rule 24's legislature join
       (`nominee_photos.legislator_for`), the one test (rule 12).
     A name alone joins nobody (rules 3, 17, 25): two cards of one name in
     one state that nothing ties are a warning (`identity-look-alike`) - on
     2026-11-15 Jocelyn Benson, Christi Jacobsen and Marty Jackley, whose
     records do not hold the office their officer card names - and link
-    nothing. A governor's own entry on their office's list is the same card
+    nothing; so is everyone who looks like a member of their own state's
+    legislature that rule 24's join does not tie, in one line
+    (`identity-legislator-look-alike`: 54 that day, the Speaker and
+    Louisiana's Representative Mike Johnson among them, and Shevrin "Shev"
+    Jones, whose record holds the Florida Senate seat the roster gives
+    "Shev Jones"). A person settles a pair either way in
+    `overrides.IDENTITY_JOINS`, keyed on both cards' keys as the warnings
+    name them, with the evidence and the day: one person joins, a namesake
+    is silenced; an entry with neither is an error, and one naming a card
+    the build no longer makes, one the records now join themselves, or a
+    namesake an id joins is a warning (`stale-identity-join`,
+    `identity-join-contradicted`). A governor's own entry on their office's list is the same card
     (rule 91), and a member's candidacy profile cross-links itself (rule
     30): neither names the other twice. Each record gets `also`: the other
     roles in their own cards' words, written here and never on the page
@@ -4570,8 +4589,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     since when, a candidate for governor's "On the Nov 3, 2026 ballot for
     Governor of Minnesota" and from the day after Election Day "Was on ...",
     never a winner (rules 63, 91), an officer's title and place in its own
-    words (rule 75), a departed member's "Left the U.S. Senate on Jan. 9,
-    2025, as the member for Ohio" (`date_words`) - each with the address
+    words (rule 75), a departed member's own row's "Former U.S. Senator from
+    Ohio; congress-legislators ends the term on Jan. 9, 2025" (that day is
+    the source's, said as its: "Left the U.S. Senate on Jan. 9, 2025"
+    stated it as the day he left), a judge's latest seat on the court whose
+    file is read and their service in the dialog's words (rule 82) - each
+    with the address
     that opens that card from the site's root, the view that opens it in
     place on a page that draws it, and its share page. `KYC.alsoHtml` draws
     the line on the profile card (outside its button, as the contact link
@@ -4594,6 +4617,25 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     and not another, for a decision. State justices and the candidates for
     the other statewide offices are names in a list with no record of their
     own, and are joined to nobody until they have one.
+    Its review found more, each now refused or said, each with a check made
+    by undoing it. The history cache's bioguide joined whatever item its
+    entry was read from: a stale entry (rule 69's `history-stale`) would
+    have tied a challenger named Scott Turner to the Secretary of Housing,
+    so it counts only where the entry's item is the record's own and, for a
+    profile, was read from the article it links (`identity-history-stale`
+    otherwise). A surname and an initial joined "John James" and "Jane
+    James" on one item. A row with no `where` was read as the card's own
+    state, so "Oklahoma Attorney General" was Texas's. And a governor's or
+    an officer's role did not end on its card's clock: in January Ken
+    Paxton's dialog said "Attorney General of Texas" beside the officers'
+    row saying the term the 2026 election chose had begun. Where that term
+    has a day the state's law gives and the roster's holder was not on the
+    ballot for it (`termBegins`, `outgoing`, rule 84's January sweep), the
+    role carries the day (`ends`, `endsRead`) and its past-tense words
+    (`ended`: "Was Attorney General of Texas, until the term the 2026
+    election chose began on Jan. 1, 2027"), read on the reader's day by
+    `KYC.alsoHtml` and on the share pages' day as the governor's share page
+    reads its own.
 
 ## District maps
 
