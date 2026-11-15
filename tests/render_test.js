@@ -20600,6 +20600,29 @@ function makeRunoff(window, meta, date) {
 
 async function testIncoming() {
   {
+    // Data built once the Congress the cycle elects sits (the January
+    // rehearsal): the build sends no figures, and the page shows none - the
+    // now view is that Congress.
+    const { window, D, errors } = await buildPage("map.html", { now: "2027-01-10T12:00:00",
+      hash: "#/?mode=house&congress=elected" });
+    await settle(100);
+    const meta = window.kycBuildMeta;
+    if (meta.election.phase === "record") {
+      suite("the elected Congress — nothing incoming once it sits (the data's record phase)", () => {
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        check("the build sent no figures", !meta.incoming);
+        check("no sidebar block and no switch", !D.querySelector(".incoming-block") &&
+          !D.querySelector("[data-basis]"));
+        const bar = D.querySelector('#mapBalance [data-chamber="house"]');
+        const r = bar ? [...bar.querySelectorAll(".bb-seg.bb-r")].reduce((n, s) => n + parseFloat(s.style.width), 0) : -1;
+        check("the House view is the Congress that sits, counted from who sits",
+          !!bar && Math.abs(r - 100 * meta.house.R / meta.house.seats) < 0.01, String(r));
+        check("the address drops what it cannot show", !/congress=/.test(window.location.hash), window.location.hash);
+      });
+      return;
+    }
+  }
+  {
     const page = await buildPage("map.html", { now: AFTER_ELECTION });
     const { window, D, errors } = page;
     await settle(100);
