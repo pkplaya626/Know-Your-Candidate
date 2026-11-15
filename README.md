@@ -76,7 +76,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (5028 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (5031 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1092,7 +1092,11 @@ for the round's date. The election is found by its date, a seat by
   the counts' own, and every status read from it credits "the Louisiana
   Secretary of State's election results, unofficial until its canvass"
   (`raceStatusSource: "office"`), never Wikipedia; a filer the list does not
-  name, or who withdrew, is still the list's word.
+  name, or who withdrew, is still the list's word. The sidebar's count of the
+  people on the ballot with no profile here credits each source with its
+  own count (`challengersUnprofiledBySource`: Wikipedia's results pages, the
+  office's results, its qualified list, each certified list), as the map's
+  state panel does; it once credited all of them to Wikipedia.
 - A gate that fails, a read that fails, or a run with no qualified list to
   check the names against concludes nothing: the seat keeps what it had
   (the last office result read, else the page's or the list's), and
@@ -1102,11 +1106,22 @@ for the round's date. The election is found by its date, a seat by
   missing where it had one): the three files are fetched one by one, and an
   old copy of one beside a fresh official flag would read old counts as
   official. The newer read's stamps stay the baseline, and the older ones
-  are kept beside them as `staleRead`.
+  are kept beside them as `staleRead`. So does December, where the last read
+  had its result for a seat, when a read's `ElectionDates.htm` lists no
+  December election or its December file holds no race for the seat: the
+  last read's December result and record stand.
 - Where the page also decides a seat and names someone else, neither is
   shown: the seat reads from the list, and `office-result-disagrees` says so.
   A page name that fits no filing but is the office's list name for one
-  ("Bubba Moore" for 'Patricia "Bubba" Moore') is that person.
+  ("Bubba Moore" for 'Patricia "Bubba" Moore') is that person. Where a gate
+  holds the office's round, its counts are still read against the page: a
+  page winner they do not lead, or a runoff that is not their two highest,
+  is a disagreement too, and a page's call of a seat the office holds for its
+  close margin waits for the official results (`pageHeld`). After December
+  12, a page's December winner waits for the office's December count, the
+  office's runoff standing meanwhile, unless the counts lead someone else. A
+  page mark the
+  read refuses never takes an office result away (`carry_refused`).
 - The December round is read the same way once the office posts it, between
   the first round's two only; its winner reads "Elected on December 12".
 - What each read relied on is in `data/primary_results.json` under

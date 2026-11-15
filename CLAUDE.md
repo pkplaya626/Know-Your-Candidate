@@ -229,8 +229,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3400 tests, no dependencies
-npm install && npm test                       # 5028 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3432 tests, no dependencies
+npm install && npm test                       # 5031 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1871,13 +1871,43 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     of one beside a fresh `ElectionDates.htm` would have paired old counts
     with a new official flag and released LA-6 as "official" from counts
     before the canvass (its review); the newer read stays the baseline, and
-    the older stamp is recorded beside it (`staleRead`). Where the page also
-    decides the seat and names someone else, neither is shown and the seat
-    reads from the list (`office-result-disagrees`) - a page name that fits
-    no filing but is the office's list name for one, as a page writes it
-    ('Patricia "Bubba" Moore' as "Bubba Moore", `_one_person`), is that
-    filing's person, not someone else - and a failed page never takes
-    an office result away. What each read relied on - the election's date,
+    the older stamp is recorded beside it (`staleRead`). So, where the last
+    read had December's result for a seat, does a read whose
+    `ElectionDates.htm` lists no December election or whose December file
+    holds no race for the seat: its second reader built both and saw LA-5's
+    winner read "runoff" again with nothing held or said, so December
+    concludes nothing, the last read's record and its election's stand
+    (`unlistedOn`), and the seat is held (`office-result-held`). Where the
+    page also decides the seat and names someone else, neither is shown and
+    the seat reads from the list (`office-result-disagrees`) - a page name
+    that fits no filing but is the office's list name for one, as a page
+    writes it ('Patricia "Bubba" Moore' as "Bubba Moore", `_one_person`), is
+    that filing's person, not someone else. That holds where a gate holds
+    the office's round too, its files read whole: the counts still rank the
+    seat (`la_results.ranking`), and a page whose winner they do not lead,
+    or whose runoff is not their two highest, disagrees with them
+    (`_against_ranking`) - a page marking Lauren Jewett beside the office's
+    50.4% for Scalise, or beside 100 of 522 precincts that he led, was shown,
+    credited to Wikipedia - and a page's call of a seat the office holds for
+    its close margin alone waits, agreeing or not, until the office marks
+    its results official (`pageHeld`, the held line saying so): half a point
+    is the canvass's to settle. Once December 12 is held, a page that marks
+    one of the office's two the winner before the office's December count is
+    posted or passes its gates waits as well, and the office's runoff stands
+    (`_december_call_waits`): called against it, LA-5 went back to the list,
+    its eight first-round losers "qualified" again; a page winner the
+    December counts do not lead still disagrees. A failed page never takes
+    an office result away, nor does a refused page mark: `carry_refused` leaves alone a race
+    this read took from the office's results, or a vandal's "Peter Griffin"
+    on the page would have put LA-1 back on the list and a December winner
+    back in the runoff. And the checks the refresh runs on the cache it has
+    just read hold an office-decided seat to what `resolve_race` holds it to,
+    settled once its first round is past (`open_seat`): reading it against
+    the December 12 runoff date, the unit step would have failed the first
+    refresh after the office's results were read. They are asked of a cache
+    the tests make with the office's November and December results
+    (`RealCacheChecks`, `RealBuildChecks`), not only of the committed one,
+    which holds none. What each read relied on - the election's date,
     id, official flag and write time, the addresses, each seat's names and
     codes as printed, counts, outcomes, reporting and verdict or why it
     held - is in the cache's `officeResults`, and `validate` names every
