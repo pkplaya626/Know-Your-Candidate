@@ -122,7 +122,7 @@
       // candidate's status badge.
       '      <p class="modal-meta" id="governorModalStatus" hidden></p>',
       // The person's other roles on this site, each linked to its card,
-      // and service in Congress with no card here (rule 104).
+      // and service in Congress with no card here (rule 105).
       '      <div class="modal-also" id="governorModalAlso" hidden></div>',
       // A slot the credit helper hides once it is empty (rule 87).
       '      <p class="modal-credit" id="governorModalPhotoCredit" data-credit-slot hidden></p>',

@@ -433,7 +433,7 @@ def render_governor(oid, found, host, post=False, sources=None, results=None):
                     + (f": {_link(words['results'], 'the official results')}" if words["results"] else "")
                     + ".</p>")
     # Their other roles on this site, each linked to its share page, and
-    # service in Congress with no card here (rule 104).
+    # service in Congress with no card here (rule 105).
     from .identity import congress_bio_html, share_html
     for line in (share_html(person, post), congress_bio_html(person)):
         if line:

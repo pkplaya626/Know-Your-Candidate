@@ -300,7 +300,7 @@
       '      <h2 class="modal-name" id="officialModalName"></h2>',
       '      <p class="modal-meta" id="officialModalMeta"></p>',
       // The person's other roles on this site, each linked to its card,
-      // and service in Congress with no card here (rule 104).
+      // and service in Congress with no card here (rule 105).
       '      <div class="modal-also" id="officialModalAlso" hidden></div>',
       // Whose photograph the portrait is (rule 87).
       '      <p class="modal-credit" id="officialModalPhotoCredit" hidden></p>',

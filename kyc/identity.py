@@ -1,4 +1,4 @@
-"""Who appears on this site in more than one role, joined by ids (rule 104).
+"""Who appears on this site in more than one role, joined by ids (rule 105).
 
 A person can be on several cards here: Amy Klobuchar's profile as a senator
 and her card on Minnesota's list for governor; Janet Mills's card as
@@ -368,7 +368,7 @@ def _join_by_ids(links):
                         "warn", "identity-names-disagree",
                         f"{first.kind} {first.name} and {other.kind} {other.name} share the "
                         f"{scheme} id {value} but their names disagree; neither card names the "
-                        "other (rule 104)", [first.key, other.key]))
+                        "other (rule 105)", [first.key, other.key]))
 
 
 def _join_officers(links, officers):
@@ -397,7 +397,7 @@ def _join_officers(links, officers):
                     f"{node.name} ({node.role['words']}) and {person.kind} {person.name} share a "
                     "name, but " + ("no corroborated record of theirs holds the office"
                                     if not held else "the card's name does not name them by "
-                                    "rule 56's test") + "; neither card names the other (rule 104)",
+                                    "rule 56's test") + "; neither card names the other (rule 105)",
                     [node.key, person.key]))
 
 
@@ -596,7 +596,7 @@ def _look_alikes(links):
                 links.problems.append((
                     "warn", "identity-look-alike",
                     f"{a.kind} {a.name} and {b.kind} {b.name} share a name but no id or second "
-                    "source; neither card names the other (rule 104)", [a.key, b.key]))
+                    "source; neither card names the other (rule 105)", [a.key, b.key]))
 
 
 # --------------------------------------------------------------- writing
@@ -719,14 +719,14 @@ def problems(links):
     if rows:
         out.append(("info", "identity-joined",
                     f"{len(rows)} people appear on this site in more than one role, each card "
-                    "naming the others (rule 104)",
+                    "naming the others (rule 105)",
                     [f"{name}: " + ", ".join(k for _kind, k in keys) + " (" + "; ".join(why) + ")"
                      for name, keys, why in rows]))
     pictured = photo_differences(links)
     if pictured:
         out.append(("info", "identity-photo-differs",
                     f"{len(pictured)} joined people have a photograph on one card and none on "
-                    "another; no photograph is borrowed (rule 104)", pictured))
+                    "another; no photograph is borrowed (rule 105)", pictured))
     return out
 
 

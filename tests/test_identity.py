@@ -1,4 +1,4 @@
-"""Who appears on this site in more than one role (kyc/identity.py, rule 104).
+"""Who appears on this site in more than one role (kyc/identity.py, rule 105).
 
 Each test makes the records it joins: a check of the rule, not of the day's
 data (CLAUDE.md, Conventions)."""

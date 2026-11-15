@@ -322,7 +322,7 @@
     var note = opts && typeof opts === "object" ? opts.note : "";
     var contact = contactLink(item);
     // The person's other roles on this site, each linked to its card (rule
-    // 104), outside the button as the contact link is: a link cannot sit
+    // 105), outside the button as the contact link is: a link cannot sit
     // inside one.
     var also = KYC.alsoHtml ? KYC.alsoHtml(item, { cls: "card-also" }) : "";
     var html = cardButton(item, note);

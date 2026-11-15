@@ -387,7 +387,7 @@ def _view(found, oid, courts):
 
 def render_official(oid, found, host, courts=None, post=False):
     """``o/<id>.html``; *post*: the results were read after Election Day,
-    for the tense of a role on another card (rule 104)."""
+    for the tense of a role on another card (rule 105)."""
     courts = court_names() if courts is None else courts
     words = share_words(found, courts)
     name = found["person"].get("name") or ""
@@ -409,7 +409,7 @@ def render_official(oid, found, host, courts=None, post=False):
     if words["leaving"]:
         body.append(f'<p class="share-leaving">{_e(words["leaving"])}.</p>')
     # Their other roles on this site, each linked to its share page, and
-    # service in Congress with no card here (rule 104).
+    # service in Congress with no card here (rule 105).
     from .identity import congress_bio_html, share_html
     for line in (share_html(found["person"], post), congress_bio_html(found["person"])):
         if line:

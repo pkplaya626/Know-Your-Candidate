@@ -1442,7 +1442,7 @@
       '</span> <span class="official-role">Former ' + KYC.escapeHtml(seatWords(row)) +
       ". Left during this Congress; congress-legislators ends the term on " +
       KYC.escapeHtml(KYC.dateWords(row.left)) + ". " + now + "</span>" +
-      // The office they hold now on this site, by id (rule 104): J.D.
+      // The office they hold now on this site, by id (rule 105): J.D.
       // Vance's dialog as Vice President.
       KYC.alsoHtml(row, { tag: "span", cls: "official-also" }) + "</li>";
   }
@@ -1453,7 +1453,7 @@
       return '<li class="official-row"><a class="official-name" href="' +
         KYC.escapeAttr(row.href) + '">' + KYC.escapeHtml(row.name) + "</a> " +
         '<span class="official-role">' + KYC.escapeHtml(row.role) + "</span>" +
-        // Their other roles on this site, joined by ids (rule 104).
+        // Their other roles on this site, joined by ids (rule 105).
         KYC.alsoHtml(row, { tag: "span", cls: "official-also" }) + "</li>";
     }).join("") + "</ul>";
   }

@@ -79,7 +79,7 @@ def build(historical, snapshot, sitting=None):
             row["senateClass"] = person["senateClass"]
         # The record's own Wikidata item, so another role this person holds
         # on the site (the Vice President, a Cabinet officer, a governor) is
-        # joined to this row by an id, never a name (kyc/identity.py, rule 104).
+        # joined to this row by an id, never a name (kyc/identity.py, rule 105).
         item = (entry.get("id") or {}).get("wikidata")
         if item:
             row["wikidata"] = item

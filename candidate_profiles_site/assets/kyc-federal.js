@@ -705,7 +705,7 @@
       '<p class="fed-fact"><span class="fed-fact-label">Senate vote</span> ' + senateCell(h) + "</p>" +
       '<p class="fed-fact"><span class="fed-fact-label">The office’s page</span> ' + pageCell(h) +
       "</p>" + siteLine(office) +
-      // Their other roles on this site (rule 104), and service in Congress
+      // Their other roles on this site (rule 105), and service in Congress
       // with no card here.
       KYC.alsoHtml(h) + KYC.congressBioHtml(h) + "</div></li>";
   }

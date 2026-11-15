@@ -340,10 +340,11 @@ def _build(args):
     # The summary, the state governments, the federal payload and the
     # legislatures before anything is written: who appears here in more than
     # one role is joined across all of them, by ids, and written onto each
-    # card's record (kyc/identity.py, rule 104).
+    # card's record (kyc/identity.py, rule 105).
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
-                                results=outcomes, snapshot=snapshot, root=args.root)
+                                results=outcomes, snapshot=snapshot, root=args.root,
+                                incoming=True)
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
                                           voting_dates_mod.load(args.root))
     summary["departed"] = departed_rows
@@ -422,6 +423,13 @@ def _build(args):
             if not args.json:
                 print(f"  smaller copies of heavy portraits: "
                       f"{photocopies.stats(photocopies.load(args.root), copies_shown)}")
+    # The seats elected so far to the Congress the cycle elects (rule 104):
+    # its chambers must add up, here too, where build --check is run.
+    from . import incoming as incoming_mod
+    try:
+        incoming_mod.build(profiles, race_list, results=outcomes, snapshot=snapshot)
+    except incoming_mod.IncomingError as exc:
+        issues.append(validate.Issue("error", "incoming-count", str(exc), ""))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -470,7 +478,7 @@ def _build(args):
 
     # Each state's legislature: districts and members, rewritten per state
     # only when its content changed (built above, with each member's other
-    # roles here: rule 104).
+    # roles here: rule 105).
     written_legs = emit.write_legislature(legislatures, args.root)
     leg_stats = legislature_mod.stats(legislatures)
     print(f"[ok] state legislatures: {leg_stats['states']} states, {leg_stats['districts']:,} "
@@ -523,7 +531,7 @@ def _build(args):
           f"{len(written_local)} file(s) rewritten")
 
     # Who runs each state: governors and party control, checked against NCSL
-    # (built above, with each card's other roles here: rule 104).
+    # (built above, with each card's other roles here: rule 105).
     for problem in gov_problems:
         print(f"  [warn] {problem}")
     gov_file = os.path.join(args.root, emit.STATEGOV_FILE)
@@ -590,7 +598,7 @@ def _build(args):
     # The federal executive and courts (kyc/federal_build.py): one file for
     # the hub, one per court, each rewritten only when what it says changed.
     # What is wrong with either cache is validate's to report (built above,
-    # with each card's other roles here: rule 104).
+    # with each card's other roles here: rule 105).
     # What the pages leave out and why (an office in the line of succession
     # nobody can be named for): said here as well as by validate.
     for problem in fed_problems:
@@ -830,7 +838,7 @@ def _departed(root, snapshot, profiles):
 
 def _identity(root, profiles, race_list, summary, state_gov, fed, courts, departed_rows,
               legislatures):
-    """Who appears here in more than one role (kyc/identity.py, rule 104):
+    """Who appears here in more than one role (kyc/identity.py, rule 105):
     joined by ids and corroborated records, and written onto every record a
     card is drawn from - the profiles, the departed rows, the state
     governments, the federal payload and its courts' files, and the
@@ -1742,7 +1750,7 @@ def _verify(args):
                                 committees=legislators.load_committees(args.root),
                                 results=outcomes,
                                 snapshot=legislators.load_snapshot(args.root),
-                                root=args.root)
+                                root=args.root, incoming=True)
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
                                           voting_dates_mod.load(args.root))
     summary["departed"] = _departed(args.root, legislators.load_snapshot(args.root), profiles)[0]
@@ -1752,7 +1760,7 @@ def _verify(args):
     problems = []
     # The state governments, the federal payload and the legislatures, as
     # the build makes them: each card's record with the person's other roles
-    # here (kyc/identity.py, rule 104), joined before any is compared.
+    # here (kyc/identity.py, rule 105), joined before any is compared.
     from . import stategov, federal_build
     from . import legislature as legislature_mod
     gov_built = fed = legislatures = None

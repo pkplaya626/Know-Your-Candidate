@@ -1213,7 +1213,7 @@ def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
                     f"which marks the primary&#x27;s winner (read {_e(date_words(checked) or checked)}).</span></p>")
     if seat_up(person):
         body.append(f'<p class="share-next">{_e(seat_up(person))}</p>')
-    # Their other roles on this site, each linked to its share page (rule 104).
+    # Their other roles on this site, each linked to its share page (rule 105).
     from .identity import share_html
     also = share_html(person, post)
     if also:

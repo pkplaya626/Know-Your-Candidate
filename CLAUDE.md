@@ -229,8 +229,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3447 tests, no dependencies
-npm install && npm test                       # 5085 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3461 tests, no dependencies
+npm install && npm test                       # 5151 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -4406,7 +4406,125 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     already said who they were keep their strings; "Mozilla/5.0 (compatible; ...)" is the crawlers'
     convention and names no browser.
 
-104. **A person on two cards says so on both, and only an id says it is one
+104. **The Congress an election chooses is counted as far as it has been
+    called, never projected, and is never shown as who represents anyone.**
+    From November 4 a reader asked how many seats each party had won in the
+    120th Congress, and the site counted only who sits (the owner's request
+    of 2026-11-15: "we should find a way to represent incoming
+    congress/electected on main site map also", "same for projectected 120th
+    congress count"; he took the recommendation to count the seats elected
+    so far, never a projection, rule 40). `kyc/incoming.py`
+    writes `kycBuildMeta.incoming`: the Congress it is
+    (`cycle.electing_congress`, never typed), the results' as-of day, and
+    for each chamber and each state the called winners by party - only a
+    person the results mark `elected` for that race (`raceStatusRace`, rule
+    63) or a winner the page names with no profile, by the party it gives
+    (`otherElected`, `otherParties`; one with no party, or two winners in
+    one race, stops the build) - the Senate's seats not on the 2026 ballot
+    by the party of the senator who holds each now (`record.seated`, by
+    state and class; a seat nobody holds is vacant), and the rest "not yet
+    called as of" the day the results were last read, a claim about this
+    site (rule 19), those the results send to a December round said apart
+    with its day (`rounds`: Louisiana's open primary's is its general
+    election, Georgia's a runoff). It is a count and not a forecast (rule
+    40): a projection would guess the races nobody has called. The DFL's
+    winners are Democrats; an independent is never folded into a party; the
+    delegates are apart from the House's 435 voting seats, and Puerto
+    Rico's Resident Commissioner, not up in 2026, is a seat not on the
+    ballot. A state has two Senate seats (three races for them stop the
+    build) and no more senators than its seats not on the ballot; the seats
+    not on the ballot and the Senate's races must be 100, which only a race
+    counted in no state's two can break (a place outside the fifty); the
+    House's races its 435 voting seats, and the House's squares the 2026
+    map's districts (`tile_problems`), or the build stops - in `build
+    --check` too (`incoming-count`). Each state's step in the elected view
+    (all R, a D majority, split) is worked out in the pipeline over every
+    way its uncalled seats could be decided (`decided_step`): Texas with
+    five uncalled is a Republican majority whatever they decide, and
+    Georgia with twelve, like any Senate state with a race not yet called,
+    is "not settled in the results this site read" - its key and hover say
+    the seats not yet called as of the read's day could change it, never
+    that the election is undecided (rule 19). A Senate state with a seat
+    vacant is "one seat or both vacant": one Republican beside an empty seat
+    was keyed "Both Republican" (PR review), and so is the Now view's: a
+    state's two seats, one nobody sits in vacant, are stepped by the same
+    helper (`summary.by_state`'s `senateStep`, by `incoming.senate_step`,
+    rule 12), with the same key - the Now view drew one senator beside an
+    empty seat as both of that senator's party. It is shown from the day
+    after Election Day on the reader's calendar until the Congress it counts sits (the record phase,
+    when the build sends none and the page shows none, `KYC.incoming`);
+    from then the normal view is that Congress. One count, one bar
+    (`KYC.balanceBar` with `basis: "elected"`, rules 12 and 73): the
+    sidebar's U.S. Congress block draws it under today's bars on every page
+    that carries one, with when the members-elect take office and that the
+    counts above are who sits; the map's Senate and House views - the map
+    and the House's squares - switch between "Now" and "The 120th
+    Congress, as called" at their own address (`congress=elected`,
+    `KYC.router`), and the 2026 races view stays as it is. The count is
+    titled for what it is, "The 120th Congress, as called so far" (the
+    sidebar's heading, `KYC.incomingWords.title`, and in short forms of it
+    the map's panel and hovers, and its bar, "Senate, as called so far",
+    beside the switch that names the Congress), never "Elected to the 120th
+    Congress so far": most of the Senate's count
+    is senators in seats not on the 2026 ballot, which the Senate bar's note
+    and spoken count say apart. A seat not yet called is a grid of
+    its own (`--pending-fill`, `--pending-grid`; `bb-pending`, `ht-pending`
+    and the map's `pending` pattern), never the dots of a seat on the
+    ballot, the diagonal hatch of split and none, or vacant's outline (rule
+    88, `testColourVision` in all three themes), and a state with seats not
+    yet called has a dotted outline (`is-pending`), never the special
+    election's dashes; words give every count. Both marks, and a picked
+    state's solid line, are drawn in screen pixels (`vector-effect:
+    non-scaling-stroke`, their width and dash in px), and each key draws the
+    mark's own width and dash on a 1:1 SVG: in map units the 975-wide map
+    drawn 344px wide on a phone made the dotted outline 0.7px, a hairline
+    beside the state's border, and the picked line thinner than a special's
+    dash (rule 88). On a laptop every line above the map comes out of its
+    height (PR #111), and the elected view's switch, its three lines of key
+    and the bar's long title beside the switch drew Texas 36px tall at
+    1280x800 and 1366x768, its labels heaped into callouts and the bar a
+    stub: the keys are short ("A race not yet called as of Nov. 14,
+    2026", "Seats not yet called as of ... could change it", "Dotted: some
+    seats not yet called"; the day stays in the bar's note), the bar's
+    title names the chamber, and the map page keeps the map at 300px and
+    lets its column scroll (`.map-body .map-stage`, `.map-body >
+    .app-main`; Texas 87px at 1280x800, the Now view's 89px). Measured over
+    CDP with a real wait: a virtual-time screenshot catches the map
+    mid-layout, unfilled and heaped, on main as much as here. A square's
+    title names its winner, its December round or the day the results were
+    read. The
+    state's panel leads with when its members-elect take office and that
+    until then the Now view shows who represents it (rule 27; its button is
+    the way back) - never that they "are not who represents" it now, which
+    was false over Jon Ossoff, Georgia's one senator-elect, re-elected, and
+    over 61 state-chamber panels holding a sitting member among the
+    members-elect (PR review) - and where none of its seats on the ballot is
+    called yet, that none is as of the read's day, with no members-elect
+    sentence over nobody (`electedLead`: Louisiana's House); then its
+    members-elect, its senators whose seats were not up, and its races not yet called with their people split as every race
+    view splits them (`KYC.cards.racePeople`, then `KYC.stillRunning`, as
+    Your ballot does, rules 12 and 73: a second split of its own listed
+    Mike Collins, who ran for the Senate, under GA-10's uncalled race) in
+    their status words (`KYC.standing`). A part with no seat on the 2026
+    ballot has no members-elect, and its holders do represent it now: the
+    panel and hover say its seats were not on the ballot and are counted by
+    who holds them ("Puerto Rico’s seat in the U.S. House was not on the
+    2026 ballot"), never "not who represents Puerto Rico now" over its
+    Resident Commissioner. From January 3 on the reader's calendar, while
+    this build still counts the Congress that sat (rule 66), the words are
+    the past tense and say this site has not yet read the new Congress's
+    membership, never "until then" (`KYC.incomingWords.until`). The seats
+    state by state are the map's alone, so they come with the index the map
+    loads (`incomingStates`, rule 94), and the build's figures every
+    sidebar loads keep the chamber totals. The figures' unit tests make every
+    case (a runoff, an uncalled race, a winner with no profile, the DFL, an
+    independent, a vacant seat not up, a special election, the territories,
+    a step the uncalled seats cannot change and one they can), and the
+    render suite asks the page on the post-election clock, the campaign
+    clock (none of it, and an address asking for it shows who sits) and the
+    record phase (`testIncoming`).
+
+105. **A person on two cards says so on both, and only an id says it is one
     person.** Amy Klobuchar's profile said nothing of her card on
     Minnesota's list for governor; Janet Mills's card as Maine's governor
     nothing of her profile as a candidate for the Senate; J.D. Vance's row

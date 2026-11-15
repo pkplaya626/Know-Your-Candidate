@@ -382,7 +382,7 @@
     var past = KYC.stategov.pastTermText(code, key);
     return row(link(href, title) + ":", holder + (past ? ". " + esc(past).replace(/\.$/, "") : "") +
       (full === false ? "" : ". " + ballotLine(code, key, full)) +
-      // The holder's other roles on this site, joined by ids (rule 104).
+      // The holder's other roles on this site, joined by ids (rule 105).
       (namedHolder(off) && KYC.alsoHtml ? KYC.alsoHtml(off, { tag: "span", cls: "official-also" }) : ""));
   }
 

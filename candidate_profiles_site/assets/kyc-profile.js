@@ -72,7 +72,7 @@
       "      </p>",
       '      <p class="modal-meta" id="profileModalStatus" hidden></p>',
       // The person's other roles on this site, each linked to its card
-      // (KYC.alsoHtml, rule 104).
+      // (KYC.alsoHtml, rule 105).
       '      <div class="modal-also" id="profileModalAlso" hidden></div>',
       // Whose photograph the portrait is, and on what licence (rule 87).
       '      <p class="modal-credit" id="profileModalPhotoCredit" hidden></p>',
