@@ -12,6 +12,7 @@
  *     label: function (code) { return code; },   // optional: the word drawn on a state
  *     onSelect: function (code) { ... },          // a click, Enter or Space
  *     marked: function (code) { return false; },   // optional: outline the state
+ *     pending: function (code) { return false; },  // optional: dot its outline
  *   });
  *   map.draw(); map.paint();
  *
@@ -388,6 +389,9 @@
           node.style.fill = KYC.svgFill(shown.fill);
           // A mark the caller draws as an outline (a special election).
           node.classList.toggle("is-marked", !!(opts.marked && opts.marked(code)));
+          // A state with seats not yet called (the elected Congress's view):
+          // dotted, a mark of its own (rule 88).
+          node.classList.toggle("is-pending", !!(opts.pending && opts.pending(code)));
           node.setAttribute("aria-pressed", String(code === selected));
           var title = node.querySelector("title");
           if (title) title.textContent = shown.text;
@@ -415,6 +419,7 @@
           // A grey box on the grey page needs an edge to be seen as a box.
           node.style.borderColor = surface && hatch === shown.fill ? "var(--text-faint)" : "";
           node.classList.toggle("is-selected", code === selected);
+          node.classList.toggle("is-pending", !!(opts.pending && opts.pending(code)));
         }
       );
     }

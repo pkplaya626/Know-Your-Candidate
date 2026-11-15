@@ -536,6 +536,14 @@ def people_payloads(profiles, races=None, summary=None):
                      "races": [index_race(r) for r in races]},
            "words": {"build": build, "words": list(INDEX_WORDS),
                      "people": [w for w in map(words_record, profiles) if w]}}
+    # The elected Congress's state-by-state seats (rule 104) are the map's
+    # alone: every page with a sidebar loaded them in the build's figures,
+    # some 34 KB that only the map reads (rule 94; PR review). The chamber
+    # totals stay in the figures; the states come with the index, which the
+    # map loads before it draws.
+    incoming = (summary or {}).get("incoming")
+    if incoming and "states" in incoming:
+        out["index"]["incomingStates"] = incoming["states"]
     for code in people_codes():
         out[code] = {"build": build, "state": code,
                      "people": [p for p in profiles if p.get("state") == code],
@@ -576,6 +584,8 @@ def write_people(profiles, stats, root=".", races=None, summary=None):
             "signature": data_signature(profiles, races, summary)}
     if summary:
         meta.update(summary)
+        if (summary.get("incoming") or {}).get("states") is not None:
+            meta["incoming"] = {k: v for k, v in summary["incoming"].items() if k != "states"}
     meta_path = os.path.join(root, PEOPLE_META_FILE)
     written = [(meta_path, _atomic_write(meta_path, (
         _BANNER.format(source="the roster CSVs at the repository root", built=built)

@@ -13,7 +13,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import cli, emit, fec, races as races_mod, sources, summary, validate  # noqa: E402
+from kyc import cli, emit, fec, incoming, races as races_mod, sources, summary, validate  # noqa: E402
 from kyc.profiles import build_profiles  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -159,6 +159,24 @@ class TestEmit(unittest.TestCase):
         # kyc.js takes each people file in as it is assigned (KYC.people).
         self.assertIn("window.kycPeopleFile = ", index)
         self.assertIn("window.kycPeopleFile = ", texas)
+
+    def test_the_elected_congress_states_come_with_the_index_not_the_figures(self):
+        # Every page with a sidebar loads the build's figures, and only the
+        # map reads the elected Congress's seats state by state (rule 104):
+        # they come with the index the map loads, the chamber totals stay
+        # in the figures (rule 94; PR review: 34 KB on every page).
+        incoming = {"congress": 120, "senate": {"uncalled": 1}, "house": {"uncalled": 2},
+                    "states": {"TX": {"house": {"seats": {"1": {"party": "R"}}}}}}
+        with tempfile.TemporaryDirectory() as tmp:
+            emit.write_people([member()], {}, root=tmp, races=[], summary={"incoming": incoming})
+            meta = read_people(os.path.join(tmp, emit.DATA_FILE))
+            index = read_people(os.path.join(tmp, emit.PEOPLE_INDEX_FILE))
+            texas = read_people(emit.people_file("TX", tmp))
+        self.assertEqual(meta["incoming"], {"congress": 120, "senate": {"uncalled": 1},
+                                            "house": {"uncalled": 2}})
+        self.assertEqual(index["incomingStates"], incoming["states"])
+        self.assertNotIn("incomingStates", texas)
+        self.assertIn("states", incoming, "the summary itself is not changed")
 
     def test_geo_file_assigns_its_own_global(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1453,6 +1471,46 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(by_state["TX"]["seatsUp"], 3)
         national = summary.build(people, races=races)
         self.assertEqual(national["house"]["vacant"], 1)       # the territory is not counted
+
+    def test_a_senator_beside_an_empty_seat_is_a_seat_vacant(self):
+        # The Now view drew one senator beside an empty seat as both of that
+        # senator's party (rule 104's review): a state has two seats, one
+        # nobody sits in is vacant, and its step is the elected view's, by
+        # one helper (incoming.senate_step).
+        people = [
+            member(id="S1", state="OH"),
+            member(id="S2", state="TX"),
+            member(id="S3", state="TX", party="Democrat"),
+            member(id="S4", state="VT", party="Independent"),
+            member(id="S5", state="VT", party="Independent"),
+            member(id="H1", state="NE", chamber="House", districtNum=1),
+            member(id="D1", state="GU", chamber="House", districtNum=0, party="Democrat"),
+        ]
+        by_state = summary.by_state(people, [])
+        self.assertEqual(by_state["OH"]["balance"]["senate"], {"D": 0, "R": 1, "I": 0, "vacant": 1})
+        self.assertEqual(by_state["OH"]["senateStep"], "vacant")
+        self.assertEqual(by_state["NE"]["balance"]["senate"]["vacant"], 2)
+        self.assertEqual(by_state["NE"]["senateStep"], "vacant")
+        self.assertEqual(by_state["TX"]["senateStep"], "split")
+        self.assertEqual(by_state["VT"]["senateStep"], "allI")
+        # A territory elects no senator: no seat, so none vacant.
+        self.assertEqual(by_state["GU"]["balance"]["senate"]["vacant"], 0)
+        self.assertEqual(by_state["GU"]["senateStep"], "none")
+        for code, entry in by_state.items():
+            senate = entry["balance"]["senate"]
+            with self.subTest(state=code):
+                self.assertEqual(entry["senateStep"], "none" if entry["territory"] else incoming.senate_step(
+                    senate["D"], senate["R"], senate["I"], senate["vacant"]))
+
+    def test_the_real_senate_is_two_seats_a_state(self):
+        meta = json.loads(open(os.path.join(ROOT, emit.DATA_FILE), encoding="utf-8").read()
+                          .split("window.kycBuildMeta = ", 1)[1].rstrip().rstrip(";"))
+        for code, state in meta["states"].items():
+            senate = state["balance"]["senate"]
+            with self.subTest(state=code):
+                self.assertEqual(sum(senate.values()), 0 if state["territory"] else 2)
+                self.assertIn(state["senateStep"], ("none",) if state["territory"] else
+                              ("allR", "allD", "allI", "split", "vacant"))
 
     def test_the_real_house_adds_up_to_its_seats(self):
         meta = json.loads(open(os.path.join(ROOT, emit.DATA_FILE), encoding="utf-8").read()
