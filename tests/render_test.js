@@ -24969,9 +24969,17 @@ async function testGovernorCards() {
     // their second (PR #191 review). Made: a record carrying a count.
     const saved = data.TN.governor.terms;
     data.TN.governor.terms = 1;
+    // The card's own words: its "Also on this site" line is another card's
+    // (a departed member's row says "congress-legislators ends the term on",
+    // rule 105), never a count of this governor's terms.
+    const ownWords = (c) => {
+      const who = html(sg.governorCard(c)).querySelector(".gov-who");
+      who.querySelectorAll(".also-line").forEach((n) => n.remove());
+      return who.textContent;
+    };
     check("no card counts a governor's terms, which no second source checks",
-      codes.every((c) => !/\bterms?\b/i.test(html(sg.governorCard(c)).querySelector(".gov-who").textContent)),
-      html(sg.governorCard("TN")).querySelector(".gov-who").textContent);
+      codes.every((c) => !/\bterms?\b/i.test(ownWords(c))),
+      codes.filter((c) => /\bterms?\b/i.test(ownWords(c))).map((c) => c + ": " + ownWords(c)).join(" | "));
     data.TN.governor.terms = saved;
   });
 
