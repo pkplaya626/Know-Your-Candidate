@@ -2556,11 +2556,16 @@ async function testMap() {
     const ruleFor = (sel) => (mapCss.match(new RegExp("\\n" + sel.replace(/[.[\]"=]/g, "\\$&") + "\\s*\\{([^}]*)\\}")) || ["", ""])[1];
     check("the special-election key draws the map's dash, wide enough to show it",
       !senateRaces.some((r) => r.special) || (!!specialKey && specialKey.tagName.toLowerCase() === "svg" &&
-        !!specialKey.querySelector("rect") && /stroke-dasharray:\s*5 3/.test(ruleFor(".map-legend .swatch-special rect")) &&
-        /stroke-dasharray:\s*5 3/.test(ruleFor(".state.is-marked")) && /dashed outline/.test(legend26)),
+        !!specialKey.querySelector("rect") && /stroke-dasharray:\s*5px 3px/.test(ruleFor(".map-legend .swatch-special rect")) &&
+        /stroke-dasharray:\s*5px 3px/.test(ruleFor(".state.is-marked")) && /dashed outline/.test(legend26)),
       specialKey ? specialKey.outerHTML.slice(0, 80) : "no key");
-    check("a picked state's outline is solid and thicker than a special's dash",
+    // Both lines in screen pixels (non-scaling-stroke), or the comparison is
+    // of map units against pixels: in map units the picked line was 1.2px on
+    // a phone, under the special's 2px dash (rule 104's review).
+    check("a picked state's outline is solid and thicker than a special's dash, both in screen pixels",
       /stroke-dasharray:\s*none/.test(ruleFor('.state[aria-pressed="true"]')) &&
+        [ruleFor('.state[aria-pressed="true"]'), ruleFor(".state.is-marked")].every((body) =>
+          /vector-effect:\s*non-scaling-stroke/.test(body) && /stroke-width:\s*[\d.]+px/.test(body)) &&
         parseFloat((ruleFor('.state[aria-pressed="true"]').match(/stroke-width:\s*([\d.]+)/) || [])[1]) >
         parseFloat((ruleFor(".state.is-marked").match(/stroke-width:\s*([\d.]+)/) || [])[1]),
       ruleFor('.state[aria-pressed="true"]').replace(/\s+/g, " "));
@@ -6558,7 +6563,29 @@ function testColourVision(css) {
       /"pending": \["var\(--pending-fill\)", "var\(--pending-grid\)", [\d.]+, "grid"\]/.test(js) &&
         /grid \? "" : ' patternTransform="rotate\(45\)"'/.test(js));
     check("and its outline mark is dotted, never the special election's dashes",
-      /\.state\.is-pending \{[^}]*stroke-dasharray: 0\.5 3\.5/.test(css) && /\.state\.is-marked \{[^}]*stroke-dasharray: 5 3/.test(css));
+      /\.state\.is-pending \{[^}]*stroke-dasharray: 0\.5px 4px/.test(css) && /\.state\.is-marked \{[^}]*stroke-dasharray: 5px 3px/.test(css));
+    // The marks are drawn in screen pixels, and each key draws them as the
+    // map does: in map units the dotted outline was 0.7px wide on a 360px
+    // phone, a hairline beside the state's border (rule 104's review).
+    // The keys' SVGs are drawn 1:1 (a 26x12 viewBox at 26x12px), so the
+    // same width and dash in their rules are the same pixels.
+    const body = (sel) => (css.match(new RegExp("\\n" + sel.replace(/[.[\]"=]/g, "\\$&") + "\\s*\\{([^}]*)\\}")) || ["", ""])[1];
+    const prop = (b, name) => ((b.match(new RegExp("(?:^|;|\\s)" + name + ":\\s*([^;]+);")) || [])[1] || "").trim();
+    const mapJs = fs.readFileSync(path.join(SITE, "assets", "kyc-map.js"), "utf8");
+    [[".state.is-pending", ".map-legend .swatch-pending rect", ".map-legend .swatch-pending", "swatch-pending"],
+      [".state.is-marked", ".map-legend .swatch-special rect", ".map-legend .swatch-special", "swatch-special"]]
+      .forEach(([mark, key, box, cls]) => {
+        const m = body(mark), k = body(key), b = body(box);
+        check(`${mark} is drawn in screen pixels: non-scaling, its width and dash in px`,
+          prop(m, "vector-effect") === "non-scaling-stroke" && /^[\d.]+px$/.test(prop(m, "stroke-width")) &&
+            /^[\d.]+px( [\d.]+px)+$/.test(prop(m, "stroke-dasharray")), m.replace(/\s+/g, " "));
+        check(`its key (${key}) draws the same width and dash`,
+          prop(k, "stroke-width") === prop(m, "stroke-width") && prop(k, "stroke-dasharray") === prop(m, "stroke-dasharray") &&
+            prop(k, "stroke-linecap") === prop(m, "stroke-linecap"), k.replace(/\s+/g, " "));
+        check(`and that key's SVG is drawn 1:1, so its pixels are the map's`,
+          prop(b, "width") === "26px" && prop(b, "height") === "12px" &&
+            new RegExp('class="swatch ' + cls + '"[^>]*viewBox="0 0 26 12"').test(mapJs), b.replace(/\s+/g, " "));
+      });
   });
   suite("kyc.css — legend colours under colour-vision deficiency (Machado 2009)", () => {
     for (const [name, t] of Object.entries(themes)) {
@@ -20631,8 +20658,11 @@ async function testIncoming() {
     const day = KYC.dateWords(m.resultsAsOf);
     suite("the elected Congress — the build's figures (rule 104)", () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
-      check("the Congress it is comes from the cycle, never typed", m.congress === (window.kycBuildMeta.election.year - 1786) / 2 + 1 ||
-        m.congress === 120, String(m.congress));
+      // The Congress the build reads (rule 68) and the one after it, never a
+      // typed number (rule 104's review: "|| 120" let a typed 120 pass).
+      check("the Congress it is comes from the cycle, never typed",
+        typeof window.kycBuildMeta.congress === "number" && m.congress === window.kycBuildMeta.congress + 1,
+        `${m.congress} for ${window.kycBuildMeta.congress}`);
       const s = m.senate;
       const notUp = Object.values(s.notUp).reduce((a, b) => a + b, 0);
       check("the Senate's seats not on the ballot and its races are its 100", notUp + s.races === 100,
@@ -20668,8 +20698,13 @@ async function testIncoming() {
       check("inside the U.S. Congress block, after today's House bar", !!section &&
         !!section.querySelector("#houseBalance") &&
         section.querySelector("#houseBalance").compareDocumentPosition(block) === 4);
-      check("named as the Congress it is, elected so far", !!block &&
-        block.querySelector(".incoming-head").textContent === "Elected to the 120th Congress so far");
+      // What the count is: the Senate's is mostly senators in seats not on
+      // the 2026 ballot, so never "Elected to the 120th Congress so far"
+      // (rule 104's review).
+      check("named as what it counts: the Congress it is, as called so far", !!block &&
+        block.querySelector(".incoming-head").textContent === "The " + KYC.ordinal(m.congress) +
+          " Congress, as called so far" && !/elected to the/i.test(block.querySelector(".incoming-head").textContent),
+        block && block.querySelector(".incoming-head").textContent);
       ["senate", "house"].forEach((chamber) => {
         const bar = block.querySelector(`[data-chamber="${chamber}"][data-basis="elected"]`);
         const e = m[chamber];
@@ -20722,10 +20757,18 @@ async function testIncoming() {
       const choice = balance.querySelector('[data-basis="elected"]');
       check("the Senate view offers now or the elected Congress", !!choice &&
         !!balance.querySelector('[data-basis="now"][aria-pressed="true"]'));
+      check("its two sides say plainly what each is: Now, and the Congress as called",
+        !!choice && balance.querySelector('[data-basis="now"]').textContent === "Now" &&
+          choice.textContent === "The " + KYC.ordinal(m.congress) + " Congress, as called" &&
+          !/elected to the/i.test(balance.textContent), balance.textContent);
       choice.click();
       check("its own address", /congress=elected/.test(window.location.hash), window.location.hash);
       const bar = balance.querySelector('[data-chamber="senate"][data-basis="elected"]');
       check("the bar above the map is the elected Senate's, with its counts", !!bar && !!bar.querySelector(".bb-counts"));
+      check("titled for what it counts, the seats not up among them", !!bar &&
+        bar.querySelector(".bb-title").textContent === "The " + KYC.ordinal(m.congress) + " Congress’s Senate, as called so far" &&
+        /Seats not on the 2026 ballot are counted by the party of who holds each now\./.test(bar.textContent),
+        bar && bar.textContent);
       const wrong = [], marks = [];
       D.querySelectorAll("#usMap .state").forEach((node) => {
         const code = node.getAttribute("data-state");
@@ -20770,15 +20813,19 @@ async function testIncoming() {
         D.querySelector(`#usMap .state[data-state="${called}"]`).dispatchEvent(new window.Event("click", { bubbles: true }));
         const panel = D.getElementById("delegation");
         const part = m.states[called].senate;
-        check("the panel leads with the members-elect, saying they take office in January and are not who represents the state now",
-          /The members-elect take office on Jan\. 3, 2027\. They are not who represents .+ now/.test(
-            panel.querySelector(".incoming-note").textContent), panel.querySelector(".incoming-note").textContent);
+        // True whoever the members-elect are: most were re-elected and do
+        // represent the state now (rule 104's review).
+        const lead = panel.querySelector(".incoming-note");
+        check("the panel leads with when the members-elect take office, and that the Now view shows who represents the state until then",
+          /The members-elect take office on Jan\. 3, 2027; until then the Now view shows who represents .+\.$/.test(lead.textContent) &&
+            !/not who represents/.test(lead.textContent) && !!lead.querySelector('[data-basis="now"]'), lead.textContent);
         const ids = [...panel.querySelectorAll("[data-id]")].map((b) => b.getAttribute("data-id"));
         const want = part.seats.filter((s) => s.id).map((s) => s.id).concat(part.held.map((h) => h.id));
         check("then its senators-elect and its senators whose seats were not up", want.every((id) => ids.indexOf(id) !== -1),
           `${ids} for ${want}`);
-        check("the panel's heading says which Congress", /Senate, elected to the 120th Congress so far/.test(
-          D.getElementById("panelMode").textContent));
+        check("the panel's heading says which Congress, as called so far",
+          D.getElementById("panelMode").textContent === "Senate, the " + KYC.ordinal(m.congress) + " Congress as called so far",
+          D.getElementById("panelMode").textContent);
       }
       if (open) {
         D.querySelector(`#usMap .state[data-state="${open}"]`).dispatchEvent(new window.Event("click", { bubbles: true }));
@@ -20978,6 +21025,39 @@ async function testIncoming() {
         states[off].senate.notUp.vacant += 1;
         states[off].senate.step = "vacant";
         made.off = off;
+        // A Senate state whose only member-elect is a sitting senator,
+        // re-elected (Jon Ossoff, Georgia's): never "not who represents" it.
+        const sitting = (id) => w.legislatorsData.find((p) => p.id === id && !p.isCandidate && !p.formerMember);
+        const reRace = w.kycRaces.find((r) => r.chamber === "Senate" && voting.indexOf(r.state) !== -1 &&
+          r.state !== off && states[r.state].senate.seats.length === 1 && (r.incumbentIds || []).some(sitting));
+        const reHolder = sitting(reRace.incumbentIds.find(sitting));
+        const rePart = states[reRace.state].senate;
+        const reKey = reHolder.party === "Republican" ? "R" : reHolder.party === "Democrat" ? "D" : "I";
+        if (rePart.seats[0].party) rePart.elected[rePart.seats[0].party] -= 1;
+        else rePart.uncalled -= 1;
+        rePart.elected[reKey] += 1;
+        rePart.seats[0] = { race: reRace.id, party: reKey, id: reHolder.id };
+        rePart.held = rePart.held.filter((h) => h.id !== reHolder.id);
+        rePart.step = "split";
+        reHolder.raceStatus = "elected";
+        reHolder.raceStatusRace = reRace.id;
+        reHolder.contestRaceId = reRace.id;
+        made.reElected = { code: reRace.state, holder: reHolder };
+        // A Senate state whose one race is not yet called.
+        const soloRace = w.kycRaces.find((r) => r.chamber === "Senate" && voting.indexOf(r.state) !== -1 &&
+          r.state !== off && r.state !== reRace.state && states[r.state].senate.seats.length === 1);
+        const solo = states[soloRace.state].senate;
+        if (solo.seats[0].party) { solo.elected[solo.seats[0].party] -= 1; solo.uncalled += 1; }
+        solo.seats[0] = { race: soloRace.id, status: "uncalled" };
+        solo.step = "undecided";
+        made.solo = soloRace.state;
+        // A House delegation none of whose seats is called (Louisiana's, on
+        // the data of 2026-11-14): no members-elect sentence over nobody.
+        const none = voting.find((c) => c !== race.state && c !== fixed && made.callouts.indexOf(c) === -1 &&
+          Object.keys(states[c].house.seats).length === 2);
+        Object.keys(states[none].house.seats).forEach((k) => { if (states[none].house.seats[k].party) uncall(none, k); });
+        states[none].house.step = "undecided";
+        made.none = none;
         // A place whose one House seat was not on the 2026 ballot.
         const pr = w.legislatorsData.find((p) => p.state === "PR" && !p.isCandidate && /House/.test(p.chamber || ""));
         states.PR = { house: { elected: { D: 0, R: 0, I: 0 }, notUp: { D: 0, R: 0, I: 1, vacant: 0 }, uncalled: 0,
@@ -21019,6 +21099,14 @@ async function testIncoming() {
       const key = D.getElementById("mapLegend").textContent;
       check("and its key says the same, with the day", key.indexOf("Not settled in the results this site read: seats not yet called as of " +
         KYC.dateWords(m.resultsAsOf) + " could change it") !== -1 && !/not yet decided/i.test(key), key);
+      {
+        const note = click(made.none).querySelector(".incoming-note");
+        const place = KYC.possessive(KYC.placeWords(made.none), "’");
+        check("a delegation none of whose seats is called says so as of the read's day, with no members-elect sentence",
+          note.textContent === "None of " + place + " 2 races for the U.S. House on the 2026 ballot is called as of " +
+            KYC.dateWords(m.resultsAsOf) + ", in the results this site last read: no members-elect yet. The Now view shows who represents " +
+            KYC.placeWords(made.none) + "." && !!note.querySelector('[data-basis="now"]'), note.textContent);
+      }
       const prPanel = click("PR");
       const note = prPanel.querySelector(".incoming-note").textContent;
       check("a seat not on the 2026 ballot is said to be so, and who holds it does represent the place",
@@ -21029,6 +21117,23 @@ async function testIncoming() {
       D.querySelector('[data-mode="senate"]').click();
       if (!D.querySelector('#mapBalance [data-basis="elected"][aria-pressed="true"]')) {
         D.querySelector('#mapBalance [data-basis="elected"]').click();
+      }
+      {
+        // The sentence the review found false over Jon Ossoff, re-elected:
+        // true whoever the members-elect are.
+        const panel = click(made.reElected.code);
+        const note = panel.querySelector(".incoming-note").textContent;
+        const rows = [...panel.querySelectorAll("[data-id]")].map((b) => b.getAttribute("data-id"));
+        check("a state whose only member-elect is a sitting senator, re-elected, lists them as elected",
+          rows.indexOf(made.reElected.holder.id) !== -1 && /Elected in 2026/.test(panel.textContent), rows.join(" "));
+        check("and never says they are not who represents the state now",
+          !/not who represents/.test(note) && /The members-elect take office on Jan\. 3, 2027; until then the Now view shows who represents /.test(note) &&
+            note.indexOf("who represents " + KYC.placeWords(made.reElected.code) + ".") !== -1, note);
+        const solo = click(made.solo).querySelector(".incoming-note").textContent;
+        check("a Senate race alone not yet called says so as of the read's day, with no members-elect sentence",
+          solo === KYC.possessive(KYC.placeStart(made.solo), "’") + " race for the U.S. Senate on the 2026 ballot is not yet called as of " +
+            KYC.dateWords(m.resultsAsOf) + ", in the results this site last read: no member-elect yet. The Now view shows who represents " +
+            KYC.placeWords(made.solo) + ".", solo);
       }
       const offNote = click(made.off).querySelector(".incoming-note").textContent;
       check("a state with no 2026 Senate race says neither seat was on the ballot, never members-elect",
@@ -21079,6 +21184,63 @@ async function testIncoming() {
       const bar = D.querySelector('.incoming-block [data-chamber="house"] .bb-track');
       check("awaiting its result", /1 awaiting the result of the Dec\. 12, 2026 general election/.test(
         bar.getAttribute("aria-label")), bar.getAttribute("aria-label"));
+    });
+  }
+
+  {
+    // The Now view's Senate: a state with one senator and one seat vacant
+    // is drawn by the step the build works out for it (summary.by_state's
+    // senateStep, by incoming.senate_step, the elected view's own: rule
+    // 12), never as both of that senator's party (rule 104's review).
+    const made = {};
+    const { window, D, errors } = await buildPage("map.html", {
+      data: (w, meta) => {
+        const code = Object.keys(meta.states).find((c) => !meta.states[c].territory &&
+          meta.states[c].balance.senate.D + meta.states[c].balance.senate.R === 2 &&
+          w.legislatorsData.filter((p) => p.state === c && /Senate/.test(p.chamber || "") && !p.isCandidate &&
+            !p.formerMember).length === 2);
+        const left = w.legislatorsData.find((p) => p.state === code && /Senate/.test(p.chamber || "") &&
+          !p.isCandidate && !p.formerMember);
+        left.formerMember = { left: "2026-11-10" };
+        const b = meta.states[code].balance.senate;
+        b[left.party === "Democrat" ? "D" : "R"] -= 1;
+        b.vacant += 1;
+        meta.states[code].senators -= 1;
+        meta.states[code].senateStep = "vacant";
+        made.code = code;
+      } });
+    await settle(100);
+    const KYC = window.KYC;
+    suite("the Senate now — a senator beside a vacant seat", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const node = D.querySelector(`#usMap .state[data-state="${made.code}"]`);
+      check("is drawn as a seat vacant, never as both of the senator's party",
+        node.style.fill === KYC.svgFill("var(--vacant-fill)"), node.style.fill);
+      check("its hover counts the vacant seat", /, 1 vacant$/.test(node.querySelector("title").textContent),
+        node.querySelector("title").textContent);
+      const keys = [...D.querySelectorAll("#mapLegend .key")].map((k) => k.textContent);
+      check("with the elected view's key for it", keys.indexOf("One seat or both vacant") !== -1, keys.join(" | "));
+    });
+  }
+  {
+    // On the build's own data, a key for a vacant seat only where a state is
+    // drawn so, and every state as its step.
+    const { window, D, errors } = await buildPage("map.html");
+    await settle(100);
+    const KYC = window.KYC;
+    const states = window.kycBuildMeta.states;
+    suite("the Senate now — each state is its build step", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const wrong = [];
+      D.querySelectorAll("#usMap .state").forEach((node) => {
+        const code = node.getAttribute("data-state");
+        const want = KYC.svgFill(STEP_FILL[(states[code] || {}).senateStep || "none"]);
+        if (node.style.fill !== want) wrong.push(code + " " + node.style.fill);
+      });
+      check("each state is drawn as its senateStep", wrong.length === 0, wrong.slice(0, 4).join(" | "));
+      const vacantKey = [...D.querySelectorAll("#mapLegend .key")].some((k) => k.textContent === "One seat or both vacant");
+      check("a vacant key exactly where a state is drawn vacant",
+        vacantKey === Object.keys(states).some((c) => states[c].senateStep === "vacant"));
     });
   }
 }

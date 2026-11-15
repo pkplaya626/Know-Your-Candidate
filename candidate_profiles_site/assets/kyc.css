@@ -2459,11 +2459,14 @@ a.badge-link {
   stroke-width: 2.5;
 }
 /* The picked state: a thick solid line, never the dashed one that marks
- * a special election (.is-marked), which keeps its dashes when picked. */
+ * a special election (.is-marked), which keeps its dashes when picked.
+ * In screen pixels, as the marks are: in map units it was 1.2px on a
+ * phone, thinner than a special election's 2px dash (rule 88). */
 .state[aria-pressed="true"] {
   stroke: var(--text);
-  stroke-width: 3.5;
+  stroke-width: 3.5px;
   stroke-dasharray: none;
+  vector-effect: non-scaling-stroke;
 }
 /* A state in the contiguous block is outlined by its neighbours. A
    territory in the strip below has none, so it needs a border of its own or
@@ -2510,23 +2513,28 @@ a.badge-link {
 /* A hatched fill's callout: the hatch is its edge, never behind its word. */
 .us-map-labels .map-callout.is-hatched { border: 2px solid transparent; }
 /* A state the view marks (a special election): a dashed outline, and the
- * legend's key drawn the same way (RACES-21). */
+ * legend's key drawn the same way (RACES-21). Both marks are drawn in
+ * screen pixels (non-scaling-stroke), as the key is: in map units the
+ * 975-wide map drawn 344px wide on a phone made a 2-unit line 0.7px, a
+ * hairline beside the state's own border (rule 104's review). */
 .state.is-marked {
   stroke: var(--text);
-  stroke-width: 2;
-  stroke-dasharray: 5 3;
+  stroke-width: 2px;
+  stroke-dasharray: 5px 3px;
+  vector-effect: non-scaling-stroke;
 }
-.state.is-marked[aria-pressed="true"] { stroke-width: 3.5; stroke-dasharray: 5 3; }
+.state.is-marked[aria-pressed="true"] { stroke-width: 3.5px; stroke-dasharray: 5px 3px; }
 /* A state with seats not yet called, in the elected Congress's view (rule
  * 104): a dotted outline, never the special election's dashes; its
  * callout's box dotted too, as a small state has no outline to draw. */
 .state.is-pending {
   stroke: var(--text);
-  stroke-width: 2;
-  stroke-dasharray: 0.5 3.5;
+  stroke-width: 2px;
+  stroke-dasharray: 0.5px 4px;
   stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
 }
-.state.is-pending[aria-pressed="true"] { stroke-width: 3.5; }
+.state.is-pending[aria-pressed="true"] { stroke-width: 3.5px; }
 .us-map-labels .map-callout.is-pending { outline: 2px dotted var(--text); outline-offset: 1px; }
 .us-map-labels .map-callout.is-pending.is-selected { outline-style: solid; }
 .map-legend .swatch-pending {
@@ -2536,11 +2544,14 @@ a.badge-link {
   border-radius: 0;
   overflow: visible;
 }
+/* The keys are drawn 1:1 (a 26x12 viewBox at 26x12px), so their pixels
+ * are the map's: the same width and dash as .state.is-pending and
+ * .state.is-marked, held together by the render suite. */
 .map-legend .swatch-pending rect {
   fill: none;
   stroke: var(--text);
-  stroke-width: 2;
-  stroke-dasharray: 0.5 3.5;
+  stroke-width: 2px;
+  stroke-dasharray: 0.5px 4px;
   stroke-linecap: round;
 }
 .map-legend .swatch-special {
@@ -2553,8 +2564,8 @@ a.badge-link {
 .map-legend .swatch-special rect {
   fill: none;
   stroke: var(--text);
-  stroke-width: 2;
-  stroke-dasharray: 5 3;
+  stroke-width: 2px;
+  stroke-dasharray: 5px 3px;
 }
 /* A territory's code and the strip's caption sit on the page itself. */
 .us-map-labels .territory-label {

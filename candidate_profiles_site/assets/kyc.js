@@ -4071,7 +4071,8 @@
           ]) + "</div>";
       };
       slot.innerHTML = '<h2 class="sidebar-heading">' + escapeHtml(mine.name) + "</h2>" +
-        (mine.senators ? line("Senate", mine.balance.senate) : "") +
+        // A state with both seats vacant still has a Senate line.
+        (mine.senators || mine.balance.senate.vacant ? line("Senate", mine.balance.senate) : "") +
         line("House", mine.balance.house);
       slot.hidden = false;
     }
@@ -5082,7 +5083,7 @@
       });
     if (n.vacant) counted.push(n.vacant + " vacant, not on the 2026 ballot");
     var majority = chamber === "senate" ? 51 : Math.floor(seats / 2) + 1;
-    var spoken = "The " + KYC.ordinal(m.congress) + " Congress’s " + name + ", as elected so far: " +
+    var spoken = "The " + KYC.ordinal(m.congress) + " Congress’s " + name + ", as called so far: " +
       (counted.join(", ") || "no seat called") + "; " + pendingWords(m, e) +
       ". The tick marks half the seats: " + majority + " is a majority.";
     var bar = parts.map(function (p) {
@@ -5107,6 +5108,14 @@
       "The tick marks half: " + majority + " is a majority.</p></figure>";
   }
 
+  /** "The 120th Congress, as called so far": what the elected count is,
+   *  wherever it is titled (rule 104). Never "Elected to the 120th": the
+   *  Senate's count is mostly senators in seats not on the 2026 ballot,
+   *  counted by who holds each now (PR review). */
+  function electedTitle(m) {
+    return "The " + KYC.ordinal(m.congress) + " Congress, as called so far";
+  }
+
   /** The sidebar's elected Congress, under today's bars (rule 104): each
    *  chamber's elected count in the same pills and an elected bar, the day
    *  the results were read, and when the members-elect take office - and
@@ -5127,8 +5136,7 @@
     };
     var onMap = /(^|\/)map\.html$/.test(String(global.location.pathname || ""));
     return '<div class="incoming-block" data-incoming>' +
-      '<h3 class="balance-label incoming-head">Elected to the ' + esc(KYC.ordinal(m.congress)) +
-      " Congress so far</h3>" + chamber("senate", "Senate") + chamber("house", "House") +
+      '<h3 class="balance-label incoming-head">' + esc(electedTitle(m)) + "</h3>" + chamber("senate", "Senate") + chamber("house", "House") +
       '<p class="bb-note">From the races the results this site last read' +
       (readOn(m) ? ", on " + esc(readOn(m)) + "," : "") + " mark as won. The members-elect " +
       esc(takeOffice(m)) + "; " + esc(untilWords(m)) + ". House: voting seats only." +
@@ -5268,7 +5276,7 @@
         ["pending", notCalled(m)]].filter(function (k) { return tally[k[0]]; })
         .map(function (k) { return tally[k[0]] + " " + k[1]; });
       var total = Object.keys(cells).length;
-      var label = KYC.stateName(code) + ", elected so far: " + total + (total === 1 ? " seat, " : " seats, ") +
+      var label = KYC.stateName(code) + ", as called so far: " + total + (total === 1 ? " seat, " : " seats, ") +
         said.join(", ");
       return '<button type="button" class="ht-state' + (opts.selected === code ? " is-selected" : "") +
         '" data-state="' + attr(code) + '" aria-pressed="' + String(opts.selected === code) +
@@ -5405,7 +5413,8 @@
   KYC.balanceBar = balanceBar;
   KYC.incoming = incoming;
   KYC.incomingWords = { readOn: readOn, notCalled: notCalled, rounds: roundWords,
-    takeOffice: takeOffice, due: due, until: untilWords, totals: electedTotals, pending: pendingWords };
+    takeOffice: takeOffice, due: due, until: untilWords, totals: electedTotals, pending: pendingWords,
+    title: electedTitle };
   KYC.houseTiles = houseTiles;
   KYC.houseTilesKey = houseTilesKey;
   KYC.districtTiles = districtTiles;

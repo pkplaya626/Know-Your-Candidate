@@ -112,7 +112,6 @@
    * KYC.svgFill): the page's own surface made those states black holes in
    * the dark and AMOLED themes (VISUALS-19, RACES-17). */
   var NONE_FILL = "var(--none-fill)";
-  var UNKNOWN_FILL = "var(--surface-3)";
   var SPLIT_FILL = "var(--split)";
   var I_FILL = "var(--party-i-fill)";
   // A delegation the seats not yet called could still change (rule 104):
@@ -208,6 +207,36 @@
       (vacant ? ", or as vacant." : ".");
   }
 
+  /** The elected panel's lead (rule 104), true whoever the members-elect
+   *  are: when they take office, never that they "are not who represents"
+   *  the place now - most are re-elected members who do (Jon Ossoff,
+   *  Georgia's one senator-elect; PR review) - and, where none of the
+   *  place's seats on the ballot is called yet, that none is as of the
+   *  read's day, with no members-elect sentence over nobody (Louisiana's
+   *  House). The Now view's button follows it. */
+  function electedLead(code, m, won, open, nowButton) {
+    var esc = KYC.escapeHtml;
+    var words = KYC.incomingWords;
+    var day = words.readOn(m);
+    var place = KYC.placeWords(code);
+    var chamber = mode === "house" ? "the U.S. House" : "the U.S. Senate";
+    var asOf = (day ? " as of " + day + "," : "") + " in the results this site last read";
+    var tail = words.due(m)
+      ? " This site has not yet read the new Congress’s membership: " + nowButton("the Now view") +
+        " shows who sat as it last read it."
+      : null;
+    if (!won) {
+      return esc((open === 1
+        ? KYC.possessive(KYC.placeStart(code), "’") + " race for " + chamber + " on the 2026 ballot is not yet called"
+        : "None of " + KYC.possessive(place, "’") + " " + open + " races for " + chamber +
+          " on the 2026 ballot is called") + asOf + (open === 1 ? ": no member-elect yet." : ": no members-elect yet.")) +
+        (tail || " " + nowButton("The Now view") + " shows who represents " + esc(place) + ".");
+    }
+    return esc("Elected so far, as the results this site last read" + (day ? ", on " + day + "," : "") +
+      " mark the winners. The members-elect " + words.takeOffice(m)) +
+      (tail ? "." + tail : "; until then " + nowButton("the Now view") + " shows who represents " + esc(place) + ".");
+  }
+
   /** Fill and hover text for one state in the elected Congress's view. */
   function electedLook(code) {
     var part = electedPart(code);
@@ -222,7 +251,7 @@
       ink: inkFor(fill),
       text: offBallot ? code + " " + chamber + ", " + ordinal + " Congress: not on the 2026 ballot, " +
         "counted by who holds " + (mode === "house" ? "it" : "each") + " now: " + partWords(part) :
-        code + " " + chamber + ", " + ordinal + " Congress as elected so far: " + partWords(part) +
+        code + " " + chamber + ", " + ordinal + " Congress as called so far: " + partWords(part) +
         (part.step === "undecided" ? " (" + words + ": the seats " + KYC.incomingWords.notCalled(elected()) +
             " could change it)"
           : part.uncalled ? " (" + words + " whatever the seats not yet called decide)" : ""),
@@ -237,20 +266,22 @@
 
     if (mode === "senate") {
       var s = counts.senate;
-      var seats = s.d + s.r + s.i;
-      var fill = UNKNOWN_FILL;
-      if (!seats) fill = NONE_FILL;
-      else if (s.r === seats) fill = "var(--party-r)";
-      else if (s.d === seats) fill = "var(--party-d)";
-      else if (s.i === seats) fill = I_FILL;
-      else fill = SPLIT_FILL;
+      // The step the build works out for the state's two seats
+      // (summary.by_state's senateStep, by incoming.senate_step - the
+      // elected view's own, rule 12): a senator beside an empty seat is
+      // "one seat or both vacant", never both of that senator's party.
+      var info = ((KYC.meta() || {}).states || {})[code];
+      var step = info ? info.senateStep : "none";
+      var fill = STEP_FILL[step];
+      if (!fill) throw new Error("kyc-map: no Senate step for " + code + " (" + step + ")");
       return {
         fill: fill,
         ink: inkFor(fill),
         // D.C. and the territories elect no senators: "0R, 0D" read as a
         // count of senators found.
-        text: !seats ? code + ": no senators (not a state)" :
-          code + " Senate: " + s.r + "R, " + s.d + "D" + (s.i ? ", " + s.i + "I" : ""),
+        text: step === "none" ? code + ": no senators (not a state)" :
+          code + " Senate: " + s.r + "R, " + s.d + "D" + (s.i ? ", " + s.i + "I" : "") +
+            (s.vacant ? ", " + s.vacant + " vacant" : ""),
       };
     }
 
@@ -348,6 +379,7 @@
       ["var(--party-d)", "Both Democratic"],
       [SPLIT_FILL, "Split, or one independent"],
       [I_FILL, "Both independent", "allIndependent"],
+      [VACANT_FILL, "One seat or both vacant", "senateVacant"],
       [NONE_FILL, "No senators (D.C. and territories)"],
     ],
     senate2026: [
@@ -367,6 +399,10 @@
     var want = entry[2];
     if (!want) return true;
     if (want === "allIndependent") return allIndependent("senate");
+    if (want === "senateVacant") {
+      var states = (KYC.meta() || {}).states || {};
+      return Object.keys(states).some(function (code) { return states[code].senateStep === "vacant"; });
+    }
     var races = KYC.races().filter(function (r) { return r.chamber === "Senate"; });
     if (want === "special") return races.some(function (r) { return r.special; });
     return races.some(function (r) {
@@ -677,8 +713,8 @@
 
     doc.getElementById("panelState").textContent = map.name(code);
     doc.getElementById("panelMode").textContent = elected()
-      ? (mode === "house" ? "House" : "Senate") + ", elected to the " + KYC.ordinal(elected().congress) +
-        " Congress so far" : MODE_TITLE[mode];
+      ? (mode === "house" ? "House" : "Senate") + ", the " + KYC.ordinal(elected().congress) +
+        " Congress as called so far" : MODE_TITLE[mode];
     var pageLink = doc.getElementById("panelStateLink");
     if (pageLink) {
       pageLink.hidden = false;
@@ -935,9 +971,9 @@
   /** A state's panel in the elected view (rule 104): its members-elect,
    *  its senators whose seats were not on the 2026 ballot, then its races
    *  not yet called with their people in their status words
-   *  (KYC.standing, through personRow) - and, first, that the members-elect
-   *  take office in January and are not who represents the state now
-   *  (rule 27): the Now view shows who does. */
+   *  (KYC.standing, through personRow) - and, first, when the members-elect
+   *  take office and that until then the Now view shows who represents the
+   *  state (rule 27; electedLead). */
   function electedPanel(code, list) {
     var m = elected();
     var part = electedPart(code);
@@ -955,7 +991,6 @@
     doc.getElementById("panelCounts").innerHTML = [pill(n.R, "party-r", "R"), pill(n.D, "party-d", "D"),
       pill(n.I, "party-i", "I"), pill(n.vacant, "party-vacant", "vacant"),
       pill(n.pending, "faint", "not yet called")].filter(Boolean).join(" ");
-    var place = KYC.placeWords(code);
     var seats = mode === "house"
       ? Object.keys(part.seats).sort(function (a, b) { return a - b; }).map(function (k) { return part.seats[k]; })
       : part.seats;
@@ -967,18 +1002,12 @@
     // Resident Commissioner read "They are not who represents Puerto Rico
     // now" over his own row (PR review), as did every senator of a state
     // with no 2026 race.
+    var won = seats.filter(function (seat) { return seat.party; });
+    var open = seats.filter(function (seat) { return !seat.party; });
     var html = !seats.length
       ? '<p class="panel-note incoming-note">' + esc(notOnBallot(code)) + " " + nowButton("The Now view") +
         " shows the same people.</p>"
-      : '<p class="panel-note incoming-note">Elected so far, as the results this site last read' +
-        (words.readOn(m) ? ", on " + esc(words.readOn(m)) + "," : "") + " mark the winners. The members-elect " +
-        esc(words.takeOffice(m)) + (words.due(m)
-          ? ". This site has not yet read the new Congress’s membership: " + nowButton("the Now view") +
-            " shows who sat as it last read it.</p>"
-          : ". They are not who represents " + esc(place) + " now: " + nowButton("the Now view") +
-            " shows who does.</p>");
-    var won = seats.filter(function (seat) { return seat.party; });
-    var open = seats.filter(function (seat) { return !seat.party; });
+      : '<p class="panel-note incoming-note">' + electedLead(code, m, won.length, open.length, nowButton) + "</p>";
     if (won.length) {
       html += '<p class="panel-subhead">Elected in 2026 <span>' + won.length + "</span></p>" +
         won.map(function (seat) {
@@ -1057,9 +1086,9 @@
       ? '<div class="map-layout map-basis"><span id="mapBasisLabel">Show the ' +
         (mode === "house" ? "House" : "Senate") + "</span>" +
         '<div class="segmented" role="group" aria-labelledby="mapBasisLabel">' +
-        '<button type="button" data-basis="now" aria-pressed="' + String(!shown) + '">Sitting now</button>' +
-        '<button type="button" data-basis="elected" aria-pressed="' + String(!!shown) + '">Elected to the ' +
-        KYC.escapeHtml(KYC.ordinal(m.congress)) + "</button></div></div>" : "";
+        '<button type="button" data-basis="now" aria-pressed="' + String(!shown) + '">Now</button>' +
+        '<button type="button" data-basis="elected" aria-pressed="' + String(!!shown) + '">The ' +
+        KYC.escapeHtml(KYC.ordinal(m.congress)) + " Congress, as called</button></div></div>" : "";
     box.hidden = !chamber;
     box.innerHTML = !chamber ? "" : basisChoice +
       (mode === "house" && (KYC.meta() || {}).houseTiles
@@ -1075,7 +1104,8 @@
       // beside the map and a phone has no hover for the track's title.
       (shown
         ? KYC.balanceBar(chamber, { basis: "elected", compact: true, counts: true,
-          title: "The " + (chamber === "senate" ? "Senate" : "House") + ", elected so far" })
+          title: "The " + KYC.ordinal(shown.congress) + " Congress’s " + (chamber === "senate" ? "Senate" : "House") +
+            ", as called so far" })
         : KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now",
           compact: true, counts: true }));
     stage.hidden = squares;

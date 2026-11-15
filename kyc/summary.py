@@ -434,6 +434,17 @@ def by_state(profiles, races=None):
     for code, seats in house_races.items():
         balance = out[code]["balance"]["house"]
         balance["vacant"] += max(0, seats - sum(balance.values()))
+    # A state has two Senate seats, and one nobody sits in is vacant. The
+    # Now view's step is the elected view's, by one helper (rule 12,
+    # incoming.senate_step): one senator beside an empty seat was drawn as
+    # both of that senator's party (rule 104's review).
+    from .incoming import senate_step
+    for entry in out.values():
+        senate = entry["balance"]["senate"]
+        if not entry["territory"]:
+            senate["vacant"] = max(0, 2 - senate["D"] - senate["R"] - senate["I"])
+        entry["senateStep"] = "none" if entry["territory"] else senate_step(
+            senate["D"], senate["R"], senate["I"], senate["vacant"])
     _vacancies(out, profiles)
     _delegate_seats(out)
     return out
