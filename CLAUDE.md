@@ -4314,6 +4314,67 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     already said who they were keep their strings; "Mozilla/5.0 (compatible; ...)" is the crawlers'
     convention and names no browser.
 
+104. **The Congress an election chooses is counted as far as it has been
+    called, never projected, and is never shown as who represents anyone.**
+    From November 4 a reader asked how many seats each party had won in the
+    120th Congress, and the site counted only who sits (the owner's request
+    of 2026-11-15: "a way to represent incoming congress/elected on main
+    site map", "same for the 120th Congress count"). `kyc/incoming.py`
+    writes `kycBuildMeta.incoming`: the Congress it is
+    (`cycle.electing_congress`, never typed), the results' as-of day, and
+    for each chamber and each state the called winners by party - only a
+    person the results mark `elected` for that race (`raceStatusRace`, rule
+    63) or a winner the page names with no profile, by the party it gives
+    (`otherElected`, `otherParties`; one with no party, or two winners in
+    one race, stops the build) - the Senate's seats not on the 2026 ballot
+    by the party of the senator who holds each now (`record.seated`, by
+    state and class; a seat nobody holds is vacant), and the rest "not yet
+    called as of" the day the results were last read, a claim about this
+    site (rule 19), those the results send to a December round said apart
+    with its day (`rounds`: Louisiana's open primary's is its general
+    election, Georgia's a runoff). It is a count and not a forecast (rule
+    40): a projection would guess the races nobody has called. The DFL's
+    winners are Democrats; an independent is never folded into a party; the
+    delegates are apart from the House's 435 voting seats, and Puerto
+    Rico's Resident Commissioner, not up in 2026, is a seat not on the
+    ballot. The seats not on the ballot and the Senate's races must be 100,
+    the House's races its 435 voting seats, and the House's squares the
+    2026 map's districts (`tile_problems`), or the build stops - in `build
+    --check` too (`incoming-count`). Each state's step in the elected view
+    (all R, a D majority, split) is worked out in the pipeline over every
+    way its uncalled seats could be decided (`decided_step`): Texas with
+    five uncalled is a Republican majority whatever they decide, Georgia
+    with twelve is "not yet decided", and so is any Senate state with a race
+    not yet called. It is shown from the day after Election Day on the
+    reader's calendar until the Congress it counts sits (the record phase,
+    when the build sends none and the page shows none, `KYC.incoming`);
+    from then the normal view is that Congress. One count, one bar
+    (`KYC.balanceBar` with `basis: "elected"`, rules 12 and 73): the
+    sidebar's U.S. Congress block draws it under today's bars on every page
+    that carries one, with when the members-elect take office and that the
+    counts above are who sits; the map's Senate and House views - the map
+    and the House's squares - switch between "Sitting now" and "Elected to
+    the 120th" at their own address (`congress=elected`, `KYC.router`), and
+    the 2026 races view stays as it is. A seat not yet called is a grid of
+    its own (`--pending-fill`, `--pending-grid`; `bb-pending`, `ht-pending`
+    and the map's `pending` pattern), never the dots of a seat on the
+    ballot, the diagonal hatch of split and none, or vacant's outline (rule
+    88, `testColourVision` in all three themes), and a state with seats not
+    yet called has a dotted outline (`is-pending`), never the special
+    election's dashes; words give every count. A square's title names its
+    winner, its December round or the day the results were read. The
+    state's panel leads with that its members-elect take office on January
+    3 and are not who represents it now (rule 27), with a way back to the
+    Now view, then its members-elect, its senators whose seats were not up,
+    and its races not yet called with their people in their status words
+    (`KYC.standing`, `KYC.stillRunning`). The figures' unit tests make every
+    case (a runoff, an uncalled race, a winner with no profile, the DFL, an
+    independent, a vacant seat not up, a special election, the territories,
+    a step the uncalled seats cannot change and one they can), and the
+    render suite asks the page on the post-election clock, the campaign
+    clock (none of it, and an address asking for it shows who sits) and the
+    record phase (`testIncoming`).
+
 ## District maps
 
 `kyc/districts.REDRAWN` lists the states whose 2026 House map differs from

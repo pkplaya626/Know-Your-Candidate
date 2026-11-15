@@ -5856,10 +5856,15 @@ button.local-county-link {
  * The layout choice, the bar and its title share one row; the note sits
  * under the bar. */
 @media (min-width: 1001px) {
-  .map-balance { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-2) var(--s-4) 0; }
+  .map-balance { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-4);
+    padding: var(--s-2) var(--s-4) 0; }
   .map-balance .map-layout { flex: none; }
+  /* Beside one choice on its row; under two (the House's now-or-elected and
+   * its layout), on a row of its own, never a column a word wide. */
+  .map-balance .map-basis { margin-bottom: 0; }
   .map-balance .balance-bar {
-    flex: 1 1 auto;
+    flex: 1 1 18rem;
+    min-width: 18rem;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;

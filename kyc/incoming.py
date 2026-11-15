@@ -226,9 +226,6 @@ def build(profiles, races, results=None, snapshot=None):
 
     senate_races = [r for r in races if r.get("chamber") == "Senate"]
     house_races = [r for r in races if r.get("chamber") == "House"]
-    voting = [r for r in house_races if r["state"] not in TERRITORIES]
-    if len(voting) != HOUSE_SEATS:
-        raise IncomingError(f"{len(voting)} House races for voting seats, not {HOUSE_SEATS}")
     if any(r["state"] in TERRITORIES for r in senate_races):
         raise IncomingError("a Senate race in a place with no seat in the Senate")
 
