@@ -4226,6 +4226,42 @@ def _page_beside_a_held_round(rid, page, held_round, listed, names_of, rows, ali
         f"counts do not ({why}): neither is shown")
 
 
+def _keep_last_hold(rid, page, prev_meta, why, races, calls, meta, log):
+    """A page that decides a seat for which this read of the office's results
+    concludes nothing (rule 8: the office unread, a round's file older than
+    the last read's, no qualified list to check the names against, a December
+    round held), where the last read set the page's call aside - its counts
+    contradicting it (``disagree``), or its close margin holding it until the
+    official results (``pageHeld``). The call stays set aside, as that read
+    set it aside, and the record is kept with the day of the read it is kept
+    from (``keptFrom``), so validate names it again: one failed request made
+    the call the office's counts contradicted go live, credited to Wikipedia,
+    with no warning (the last verifier of PR #265). A read that itself
+    decides - the office's result, or its counts beside a held round - never
+    comes here; nor does a page that no longer decides the seat."""
+    for kind in ("disagree", "pageHeld"):
+        item = (prev_meta.get(kind) or {}).get(rid)
+        if item:
+            break
+    else:
+        return
+    since = item.get("keptFrom") or prev_meta.get("read")
+    meta.setdefault(kind, {})[rid] = dict(item, page=page.get("page"), pageSays=_says(page),
+                                          keptFrom=since)
+    races.pop(rid, None)
+    calls.pop(rid, None)
+    base = why or "no read of the office's results was made this run"
+    if kind == "pageHeld":
+        meta["held"][rid] = (f"{base}; the page's call ({_says(page)}) waits for the office's "
+                             f"official results, as the read of {since} found")
+    else:
+        meta["held"].setdefault(rid, base)
+    log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}; this read of the Secretary "
+        f"of State's results concludes nothing for the seat ({base}), and the read of {since} "
+        + ("found its counts say otherwise: neither is shown" if kind == "disagree" else
+           "held the page's call for the official results: it still waits"))
+
+
 def apply_office_results(races, calls, office, listed, by_race, aliases, previous, today,
                          log=print):
     """Lay Louisiana's own results over its open-primary House seats (rule 64).
@@ -4250,8 +4286,12 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
     fixed = OPEN_PRIMARY_SEATS.get(("LA", "H", CYCLE))
     prev_races = (previous or {}).get("races") or {}
     prev_meta = (previous or {}).get("officeResults") or {}
+    # A seat the last read set aside - the page's call against the office's
+    # counts, or waiting for them - is asked again even with no list read:
+    # a read that concludes nothing must not let that call go live (rule 8).
     rids = sorted({rid for rid in listed if rid.startswith("H-LA-")}
-                  | {rid for rid, race in prev_races.items() if race.get("source") == OFFICE})
+                  | {rid for rid, race in prev_races.items() if race.get("source") == OFFICE}
+                  | set(prev_meta.get("disagree") or {}) | set(prev_meta.get("pageHeld") or {}))
     if not fixed or (not rids and not office):
         return None
     first_day, second_day = fixed["primary"], fixed.get("runoff")
@@ -4271,9 +4311,11 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         meta = dict(prev_meta, carried=True)
         meta.setdefault("held", {})
         meta["kept"], meta["disagree"] = [], {}
+        meta.pop("pageHeld", None)         # each seat's is carried below, or not at all
     elif unread and prev_meta:
         meta = dict(prev_meta, carried=True, unread=unread, unreadOn=today.isoformat())
         meta["held"], meta["kept"], meta["disagree"] = {}, [], {}
+        meta.pop("pageHeld", None)
 
     # A file written before the one the last read relied on concludes
     # nothing for its round (rule 8): the three files are fetched one by one,
@@ -4294,12 +4336,13 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                     "written": elections[day].get("written"),
                     "version": elections[day].get("version"), "on": today.isoformat()})
                 log(f"    [warn] the Secretary of State's {day} results conclude nothing: {why}")
-    # A December election the last read listed and this one does not is no
-    # sign it was never held: its record stays the baseline (rule 8).
-    if tried and not unread and second_day and second_day not in elections \
-            and second_day in prev_elections:
-        meta["elections"][second_day] = dict(prev_elections[second_day],
-                                             unlistedOn=today.isoformat())
+    # An election the last read listed and this one does not - December's, or
+    # the first round's once a later dates file drops it - is no sign it was
+    # never held: its record stays the baseline a later file is compared
+    # with (rule 8).
+    for day in (first_day, second_day):
+        if tried and not unread and day and day not in elections and day in prev_elections:
+            meta["elections"][day] = dict(prev_elections[day], unlistedOn=today.isoformat())
 
     def facts(race, verdict, why):
         return {"officeId": race["officeId"], "title": race["title"],
@@ -4321,8 +4364,11 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         elif rid not in listed:
             why = "the qualified list was not read this run, so no name can be checked against it"
         elif first_day not in elections:
-            why = f"the office lists no results for {first_day} yet" if first_day <= \
-                today.isoformat() else None
+            # Never "yet" of an election the last read had: it was held.
+            why = (None if first_day > today.isoformat() else
+                   f"the office lists no results for {first_day}, where its last read had them"
+                   if first_day in prev_elections else
+                   f"the office lists no results for {first_day} yet")
         elif first_day in stale:
             why = f"{first_day}: {stale[first_day]}"
         elif n not in (elections[first_day].get("races") or {}):
@@ -4386,6 +4432,12 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                     if prev.get("source") == OFFICE and prev.get("decidedIn"):
                         v1 = None          # keep the last read, which the December round decided
                         why = f"{second_day}: {why2}"
+                        if prev_december and second_day not in stale:
+                            # The record the kept result stands on stays the
+                            # record; this read's counts are kept beside it.
+                            record[second_day] = dict(
+                                prev_december, heldRead=dict(facts(r2, v2, why2),
+                                                             on=today.isoformat()))
             meta["races"][rid] = record
             if v1:
                 entry = _office_race(listed[rid], v1, v2, by_race.get(rid, []),
@@ -4419,6 +4471,8 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                 _page_beside_a_held_round(rid, page, held_round, listed[rid], names_of,
                                           by_race.get(rid, []), (aliases or {}).get(rid),
                                           races, calls, meta, log)
+            elif page_decides:
+                _keep_last_hold(rid, page, prev_meta, why, races, calls, meta, log)
             continue
         if page_decides and not _same_result(page, entry, names_of) and not (
                 second_day and second_day < today.isoformat() and _december_call_waits(

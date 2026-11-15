@@ -1109,7 +1109,11 @@ for the round's date. The election is found by its date, a seat by
   are kept beside them as `staleRead`. So does December, where the last read
   had its result for a seat, when a read's `ElectionDates.htm` lists no
   December election or its December file holds no race for the seat: the
-  last read's December result and record stand.
+  last read's December result and record stand. So does the first round
+  once a later `ElectionDates.htm` drops it ("where its last read had them",
+  never "yet"), and a December file back to partial counts beside a kept
+  December result: the record the result was decided on stays, and this
+  read's counts are kept beside it as `heldRead`.
 - Where the page also decides a seat and names someone else, neither is
   shown: the seat reads from the list, and `office-result-disagrees` says so.
   A page name that fits no filing but is the office's list name for one
@@ -1120,6 +1124,12 @@ for the round's date. The election is found by its date, a seat by
   close margin waits for the official results (`pageHeld`). After December
   12, a page's December winner waits for the office's December count, the
   office's runoff standing meanwhile, unless the counts lead someone else. A
+  read that concludes nothing for such a seat - the office unread, a round's
+  file older than the last read's, no qualified list, a December round held -
+  keeps the page's call set aside as the last read set it aside, its
+  `disagree` or `pageHeld` entry kept with the day of the read it is kept
+  from (`keptFrom`), so the warning stands; one failed request once let the
+  call the office's counts contradicted go live, credited to Wikipedia. A
   page mark the
   read refuses never takes an office result away (`carry_refused`).
 - The December round is read the same way once the office posts it, between

@@ -1311,6 +1311,9 @@ def check_results_pages(cache):
                             "until every gate passes; each line says which failed", held))
     disagree = [f"{rid}: {item.get('page')!r} says {item.get('pageSays')}; the Secretary of "
                 f"State's results say {item.get('officeSays')}"
+                + (f" (as the read of {item['keptFrom']} found: this read concluded nothing "
+                   "for the seat, and the page's call stays set aside)"
+                   if item.get("keptFrom") else "")
                 for rid, item in sorted((office.get("disagree") or {}).items())]
     if disagree:
         issues.append(Issue("warn", "office-result-disagrees",
