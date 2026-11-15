@@ -160,6 +160,24 @@ class TestEmit(unittest.TestCase):
         self.assertIn("window.kycPeopleFile = ", index)
         self.assertIn("window.kycPeopleFile = ", texas)
 
+    def test_the_elected_congress_states_come_with_the_index_not_the_figures(self):
+        # Every page with a sidebar loads the build's figures, and only the
+        # map reads the elected Congress's seats state by state (rule 104):
+        # they come with the index the map loads, the chamber totals stay
+        # in the figures (rule 94; PR review: 34 KB on every page).
+        incoming = {"congress": 120, "senate": {"uncalled": 1}, "house": {"uncalled": 2},
+                    "states": {"TX": {"house": {"seats": {"1": {"party": "R"}}}}}}
+        with tempfile.TemporaryDirectory() as tmp:
+            emit.write_people([member()], {}, root=tmp, races=[], summary={"incoming": incoming})
+            meta = read_people(os.path.join(tmp, emit.DATA_FILE))
+            index = read_people(os.path.join(tmp, emit.PEOPLE_INDEX_FILE))
+            texas = read_people(emit.people_file("TX", tmp))
+        self.assertEqual(meta["incoming"], {"congress": 120, "senate": {"uncalled": 1},
+                                            "house": {"uncalled": 2}})
+        self.assertEqual(index["incomingStates"], incoming["states"])
+        self.assertNotIn("incomingStates", texas)
+        self.assertIn("states", incoming, "the summary itself is not changed")
+
     def test_geo_file_assigns_its_own_global(self):
         with tempfile.TemporaryDirectory() as tmp:
             emit.write_geo({"states": {}, "territories": []}, root=tmp)

@@ -168,16 +168,19 @@
   /* The elected view's fills, by the step kyc/incoming.py works out for
    * each delegation over every way its uncalled seats could go: a step
    * the uncalled seats cannot change is drawn as decided, and one they
-   * could is "not yet decided". */
+   * could is "not settled in the results this site read" - a claim about
+   * this site's read (rule 19), never that the election is undecided. */
   var STEP_FILL = {
     allR: "var(--party-r)", majR: tint("r"), even: SPLIT_FILL, majD: tint("d"), allD: "var(--party-d)",
     split: SPLIT_FILL, allI: I_FILL, vacant: VACANT_FILL, none: NONE_FILL, undecided: PENDING_FILL,
   };
   var STEP_WORDS = {
     senate: { allR: "both Republican", allD: "both Democratic", split: "split, or one independent",
-      allI: "both independent", vacant: "vacant", none: "no senators", undecided: "not yet decided" },
+      allI: "both independent", vacant: "one seat or both vacant", none: "no senators",
+      undecided: "not settled in the results this site read" },
     house: { allR: "all Republican", majR: "a Republican majority", even: "even", majD: "a Democratic majority",
-      allD: "all Democratic", allI: "all independent", none: "no seats", undecided: "not yet decided" },
+      allD: "all Democratic", allI: "all independent", none: "no seats",
+      undecided: "not settled in the results this site read" },
   };
 
   /** The counts of one state's part of the elected Congress, in words. */
@@ -189,19 +192,39 @@
       .concat(n.pending ? [n.pending + " " + KYC.incomingWords.notCalled(elected())] : []).join(", ");
   }
 
+  /** A part of the elected Congress with no seat on the 2026 ballot, in
+   *  words: "Neither of Ohio’s seats in the U.S. Senate was on the 2026
+   *  ballot: they are counted by who holds each now." */
+  function notOnBallot(code) {
+    var part = electedPart(code);
+    var whose = KYC.possessive(KYC.placeStart(code), "’");
+    var vacant = part && part.notUp && part.notUp.vacant;
+    if (mode === "house") {
+      return whose + " seat in the U.S. House was not on the 2026 ballot" +
+        (vacant ? ", and it is vacant now." : ": it is counted by who holds it now.");
+    }
+    return "Neither of " + KYC.possessive(KYC.placeWords(code), "’") +
+      " seats in the U.S. Senate was on the 2026 ballot: they are counted by who holds each now" +
+      (vacant ? ", or as vacant." : ".");
+  }
+
   /** Fill and hover text for one state in the elected Congress's view. */
   function electedLook(code) {
     var part = electedPart(code);
     var chamber = mode === "house" ? "House" : "Senate";
     if (!part) return { fill: NONE_FILL, text: code + ": no senators (not a state)" };
+    var offBallot = !(mode === "house" ? Object.keys(part.seats || {}).length : (part.seats || []).length);
     var fill = STEP_FILL[part.step] || PENDING_FILL;
     var words = STEP_WORDS[mode === "house" ? "house" : "senate"][part.step] || part.step;
     var ordinal = KYC.ordinal(elected().congress);
     return {
       fill: fill,
       ink: inkFor(fill),
-      text: code + " " + chamber + ", " + ordinal + " Congress as elected so far: " + partWords(part) +
-        (part.step === "undecided" ? " (the delegation's balance is not yet decided)"
+      text: offBallot ? code + " " + chamber + ", " + ordinal + " Congress: not on the 2026 ballot, " +
+        "counted by who holds " + (mode === "house" ? "it" : "each") + " now: " + partWords(part) :
+        code + " " + chamber + ", " + ordinal + " Congress as elected so far: " + partWords(part) +
+        (part.step === "undecided" ? " (" + words + ": the seats " + KYC.incomingWords.notCalled(elected()) +
+            " could change it)"
           : part.uncalled ? " (" + words + " whatever the seats not yet called decide)" : ""),
     };
   }
@@ -384,11 +407,12 @@
    * yet called. */
   var ELECTED_KEYS = {
     senate: [["allR", "Both Republican"], ["allD", "Both Democratic"], ["split", "Split, or one independent"],
-      ["allI", "Both independent"], ["vacant", "A seat vacant"],
-      ["undecided", "Not yet decided: a race not yet called"], ["none", "No senators (D.C. and territories)"]],
+      ["allI", "Both independent"], ["vacant", "One seat or both vacant"],
+      ["undecided", "Not settled in the results this site read: a race {notCalled}"],
+      ["none", "No senators (D.C. and territories)"]],
     house: [["allR", "All R"], ["majR", "R majority"], ["even", "Even"], ["majD", "D majority"],
       ["allD", "All D"], ["allI", "All independent"],
-      ["undecided", "Not yet decided: the seats not yet called could change it"]],
+      ["undecided", "Not settled in the results this site read: seats {notCalled} could change it"]],
   };
 
   function electedLegend() {
@@ -404,7 +428,7 @@
     return ELECTED_KEYS[chamber].filter(function (k) { return drawn[k[0]]; })
       .map(function (k) {
         return '<span class="key" data-step="' + k[0] + '">' + swatch(STEP_FILL[k[0]]) +
-          KYC.escapeHtml(k[1]) + "</span>";
+          KYC.escapeHtml(k[1].replace("{notCalled}", function () { return KYC.incomingWords.notCalled(elected()); })) + "</span>";
       }).join("") + (pending ? '<span class="key" data-step="pending-outline">' + swatch("pending-outline") +
         "Dotted outline: seats " + KYC.escapeHtml(KYC.incomingWords.notCalled(elected())) + "</span>" : "");
   }
@@ -932,13 +956,27 @@
       pill(n.I, "party-i", "I"), pill(n.vacant, "party-vacant", "vacant"),
       pill(n.pending, "faint", "not yet called")].filter(Boolean).join(" ");
     var place = KYC.placeWords(code);
-    var html = '<p class="panel-note incoming-note">Elected so far, as the results this site last read' +
-      (words.readOn(m) ? ", on " + esc(words.readOn(m)) + "," : "") + " mark the winners. The members-elect " +
-      esc(words.takeOffice(m)) + ". They are not who represents " + esc(place) +
-      ' now: <button type="button" class="link-button" data-basis="now">the Now view</button> shows who does.</p>';
     var seats = mode === "house"
       ? Object.keys(part.seats).sort(function (a, b) { return a - b; }).map(function (k) { return part.seats[k]; })
       : part.seats;
+    var nowButton = function (words) {
+      return '<button type="button" class="link-button" data-basis="now">' + words + "</button>";
+    };
+    // A part with no seat on the 2026 ballot has no members-elect: its
+    // holders keep counting, and they do represent it now - Puerto Rico's
+    // Resident Commissioner read "They are not who represents Puerto Rico
+    // now" over his own row (PR review), as did every senator of a state
+    // with no 2026 race.
+    var html = !seats.length
+      ? '<p class="panel-note incoming-note">' + esc(notOnBallot(code)) + " " + nowButton("The Now view") +
+        " shows the same people.</p>"
+      : '<p class="panel-note incoming-note">Elected so far, as the results this site last read' +
+        (words.readOn(m) ? ", on " + esc(words.readOn(m)) + "," : "") + " mark the winners. The members-elect " +
+        esc(words.takeOffice(m)) + (words.due(m)
+          ? ". This site has not yet read the new Congress’s membership: " + nowButton("the Now view") +
+            " shows who sat as it last read it.</p>"
+          : ". They are not who represents " + esc(place) + " now: " + nowButton("the Now view") +
+            " shows who does.</p>");
     var won = seats.filter(function (seat) { return seat.party; });
     var open = seats.filter(function (seat) { return !seat.party; });
     if (won.length) {
@@ -967,12 +1005,17 @@
         '<div class="incoming-open">' + open.map(function (seat) {
           var race = KYC.races().filter(function (r) { return r.id === seat.race; })[0];
           if (!race) return "";
-          var people = race.incumbentIds.concat(race.candidateIds).filter(function (id, i, all) {
-            return all.indexOf(id) === i;
-          }).map(KYC.byId).filter(function (p) {
-            if (!p) return false;
-            var contest = p.isCandidate ? p.raceId : (p.raceStatusRace || p.contestRaceId || p.raceId);
-            return contest === race.id && KYC.stillRunning(race, p);
+          // The race's people split as every race view splits them (rules
+          // 12 and 73: KYC.cards.racePeople, as Your ballot does): a holder
+          // running for another seat is not in this race, however their
+          // status reads - Mike Collins, who ran for the Senate, was listed
+          // under GA-10's uncalled race (PR review) - and only those the
+          // lookup's answer would list are (KYC.stillRunning).
+          var all = race.incumbentIds.concat(race.candidateIds).filter(function (id, i, ids) {
+            return ids.indexOf(id) === i;
+          }).map(KYC.byId).filter(Boolean);
+          var people = KYC.cards.racePeople(race, all).running.filter(function (p) {
+            return KYC.stillRunning(race, p);
           }).sort(function (a, b) { return KYC.racePosition(a) - KYC.racePosition(b); });
           var round = seat.status === "runoff" ? KYC.runoffWords(race) : null;
           return '<p class="panel-seat">' + esc(race.label || race.id) +

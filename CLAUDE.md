@@ -229,8 +229,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3385 tests, no dependencies
-npm install && npm test                       # 5089 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3390 tests, no dependencies
+npm install && npm test                       # 5110 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -4318,8 +4318,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     called, never projected, and is never shown as who represents anyone.**
     From November 4 a reader asked how many seats each party had won in the
     120th Congress, and the site counted only who sits (the owner's request
-    of 2026-11-15: "a way to represent incoming congress/elected on main
-    site map", "same for the 120th Congress count"). `kyc/incoming.py`
+    of 2026-11-15: "we should find a way to represent incoming
+    congress/electected on main site map also", "same for projectected 120th
+    congress count"; he took the recommendation to count the seats elected
+    so far, never a projection, rule 40). `kyc/incoming.py`
     writes `kycBuildMeta.incoming`: the Congress it is
     (`cycle.electing_congress`, never typed), the results' as-of day, and
     for each chamber and each state the called winners by party - only a
@@ -4337,15 +4339,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     winners are Democrats; an independent is never folded into a party; the
     delegates are apart from the House's 435 voting seats, and Puerto
     Rico's Resident Commissioner, not up in 2026, is a seat not on the
-    ballot. The seats not on the ballot and the Senate's races must be 100,
-    the House's races its 435 voting seats, and the House's squares the
-    2026 map's districts (`tile_problems`), or the build stops - in `build
+    ballot. A state has two Senate seats (three races for them stop the
+    build) and no more senators than its seats not on the ballot; the seats
+    not on the ballot and the Senate's races must be 100, which only a race
+    counted in no state's two can break (a place outside the fifty); the
+    House's races its 435 voting seats, and the House's squares the 2026
+    map's districts (`tile_problems`), or the build stops - in `build
     --check` too (`incoming-count`). Each state's step in the elected view
     (all R, a D majority, split) is worked out in the pipeline over every
     way its uncalled seats could be decided (`decided_step`): Texas with
-    five uncalled is a Republican majority whatever they decide, Georgia
-    with twelve is "not yet decided", and so is any Senate state with a race
-    not yet called. It is shown from the day after Election Day on the
+    five uncalled is a Republican majority whatever they decide, and
+    Georgia with twelve, like any Senate state with a race not yet called,
+    is "not settled in the results this site read" - its key and hover say
+    the seats not yet called as of the read's day could change it, never
+    that the election is undecided (rule 19). A Senate state with a seat
+    vacant is "one seat or both vacant": one Republican beside an empty seat
+    was keyed "Both Republican" (PR review). It is shown from the day after Election Day on the
     reader's calendar until the Congress it counts sits (the record phase,
     when the build sends none and the page shows none, `KYC.incoming`);
     from then the normal view is that Congress. One count, one bar
@@ -4366,8 +4375,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     state's panel leads with that its members-elect take office on January
     3 and are not who represents it now (rule 27), with a way back to the
     Now view, then its members-elect, its senators whose seats were not up,
-    and its races not yet called with their people in their status words
-    (`KYC.standing`, `KYC.stillRunning`). The figures' unit tests make every
+    and its races not yet called with their people split as every race
+    view splits them (`KYC.cards.racePeople`, then `KYC.stillRunning`, as
+    Your ballot does, rules 12 and 73: a second split of its own listed
+    Mike Collins, who ran for the Senate, under GA-10's uncalled race) in
+    their status words (`KYC.standing`). A part with no seat on the 2026
+    ballot has no members-elect, and its holders do represent it now: the
+    panel and hover say its seats were not on the ballot and are counted by
+    who holds them ("Puerto Rico’s seat in the U.S. House was not on the
+    2026 ballot"), never "not who represents Puerto Rico now" over its
+    Resident Commissioner. From January 3 on the reader's calendar, while
+    this build still counts the Congress that sat (rule 66), the words are
+    the past tense and say this site has not yet read the new Congress's
+    membership, never "until then" (`KYC.incomingWords.until`). The seats
+    state by state are the map's alone, so they come with the index the map
+    loads (`incomingStates`, rule 94), and the build's figures every
+    sidebar loads keep the chamber totals. The figures' unit tests make every
     case (a runoff, an uncalled race, a winner with no profile, the DFL, an
     independent, a vacant seat not up, a special election, the territories,
     a step the uncalled seats cannot change and one they can), and the

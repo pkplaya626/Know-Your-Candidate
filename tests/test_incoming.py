@@ -189,6 +189,28 @@ class TestElectedSoFar(unittest.TestCase):
         with self.assertRaises(incoming.IncomingError):
             c.build()
 
+    def test_a_senate_race_outside_the_fifty_states_breaks_the_100(self):
+        # Each state's seats not up are two less its races, so only a race
+        # counted in no state's two can break the sum: the 100 check is what
+        # stops it (PR review: the check had no test that reached it).
+        c = Chamber()
+        stray = senate_race("XX", 1)
+        c.races.append(stray)
+        c.profiles.append(winner(stray))
+        with self.assertRaisesRegex(incoming.IncomingError, "not 100"):
+            c.build()
+
+    def test_three_senate_races_for_a_states_two_seats_stop_the_build(self):
+        c = Chamber()
+        code = STATES[0]
+        for cls, name in ((1, "special"), (3, "third")):
+            race = senate_race(code, cls, special=True)
+            race["id"] += "-" + name
+            c.races.append(race)
+            c.profiles.append(winner(race))
+        with self.assertRaisesRegex(incoming.IncomingError, "Senate races for its two seats"):
+            c.build()
+
     def test_the_house_must_be_435_voting_seats(self):
         c = Chamber()
         c.races = [r for r in c.races if r["id"] != "H-CA-435-2026"]
@@ -238,6 +260,22 @@ class TestSteps(unittest.TestCase):
         c.person_in(f"S-{code}-2026")["raceStatus"] = "nominee"
         self.assertEqual(c.build()["states"][code]["senate"]["step"], "undecided")
         self.assertEqual(c.build()["states"][code]["senate"]["uncalled"], 1)
+
+    def test_a_senator_beside_a_vacant_seat_is_never_both_of_a_party(self):
+        # One Republican and an empty seat drew "Both Republican" while the
+        # hover said "1R, 1 vacant" (PR review).
+        self.assertEqual(incoming.senate_step(1, 0, 0, 1), "vacant")
+        self.assertEqual(incoming.senate_step(0, 0, 1, 1), "vacant")
+        self.assertEqual(incoming.senate_step(0, 0, 0, 2), "vacant")
+        self.assertEqual(incoming.senate_step(0, 0, 0, 0), "none")
+        c = Chamber()
+        code = STATES[-1]  # no race in its state
+        c.profiles.remove(next(p for p in c.profiles if p["id"] == f"S-{code}-1"))
+        self.assertEqual(c.build()["states"][code]["senate"]["step"], "vacant")
+
+    def test_a_race_not_called_beside_a_vacant_seat_is_not_decided(self):
+        self.assertEqual(incoming.decided_step({"D": 0, "R": 0, "I": 0, "vacant": 1}, 1, "senate"),
+                         "undecided")
 
     def test_an_independent_is_its_own_step(self):
         self.assertEqual(incoming.house_step(0, 0, 1, 1), "allI")

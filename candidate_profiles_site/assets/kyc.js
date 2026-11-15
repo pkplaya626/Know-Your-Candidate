@@ -265,6 +265,10 @@
       return;
     }
     if (file.index ? indexIn : fullStates[what]) return;
+    // The elected Congress's seats state by state come with the index (only
+    // the map reads them, rule 94), beside the chamber totals in the figures.
+    var elect = (global.kycBuildMeta || {}).incoming;
+    if (file.index && file.incomingStates && elect && !elect.states) elect.states = file.incomingStates;
     var list = global.legislatorsData || (global.legislatorsData = []);
     var raceList = global.kycRaces || (global.kycRaces = []);
     var held = {};
@@ -5002,11 +5006,25 @@
     });
   }
 
+  /** Whether the day the members-elect take office has come on the
+   *  reader's calendar while this build still counts the Congress that sat
+   *  (a build before its record of the new Congress, rule 66). */
+  function due(m) {
+    return !!(m && m.termStart && m.termStart <= KYC.localDay(new Date()));
+  }
+
   /** "take office on Jan. 3, 2027", in the tense the reader's day gives. */
   function takeOffice(m) {
-    var day = KYC.dateWords(m.termStart);
-    return (m.termStart && m.termStart <= KYC.localDay(new Date()) ? "were due to take office on "
-      : "take office on ") + day;
+    return (due(m) ? "were due to take office on " : "take office on ") + KYC.dateWords(m.termStart);
+  }
+
+  /** What the counts of who sits are, beside the elected ones: "until then"
+   *  before the day, and after it what this site's record still holds - it
+   *  has not read the new Congress's membership, so "until then" would be
+   *  a day already past. */
+  function untilWords(m) {
+    return due(m) ? "the counts above are who sat as this site last read Congress’s membership, " +
+      "which it has not yet read for the new Congress" : "until then the counts above are who sits";
   }
 
   /** One chamber's elected count by party: the winners, and in the Senate
@@ -5113,7 +5131,7 @@
       " Congress so far</h3>" + chamber("senate", "Senate") + chamber("house", "House") +
       '<p class="bb-note">From the races the results this site last read' +
       (readOn(m) ? ", on " + esc(readOn(m)) + "," : "") + " mark as won. The members-elect " +
-      esc(takeOffice(m)) + "; until then the counts above are who sits. House: voting seats only." +
+      esc(takeOffice(m)) + "; " + esc(untilWords(m)) + ". House: voting seats only." +
       (onMap ? "" : ' <a href="' + attr(KYC.siteRoot() + "map.html#/?congress=elected") +
         '">On the map ›</a>') + "</p></div>";
   }
@@ -5387,7 +5405,7 @@
   KYC.balanceBar = balanceBar;
   KYC.incoming = incoming;
   KYC.incomingWords = { readOn: readOn, notCalled: notCalled, rounds: roundWords,
-    takeOffice: takeOffice, totals: electedTotals, pending: pendingWords };
+    takeOffice: takeOffice, due: due, until: untilWords, totals: electedTotals, pending: pendingWords };
   KYC.houseTiles = houseTiles;
   KYC.houseTilesKey = houseTilesKey;
   KYC.districtTiles = districtTiles;

@@ -20688,6 +20688,23 @@ async function testIncoming() {
             ? " seat" : " seats") + " not yet called as of " + day) !== -1 || !n.pending,
           bar.querySelector(".bb-track").getAttribute("aria-label"));
       });
+      {
+        // "53 D" is never 53 Democrats elected: the Senate's bar says how many
+        // were elected in 2026 and how many hold seats not on the ballot, and
+        // its note says how those are counted (PR review).
+        const sen = block.querySelector('[data-chamber="senate"][data-basis="elected"]');
+        const aria = sen ? sen.querySelector(".bb-track").getAttribute("aria-label") : "";
+        const words = { R: ["Republican", "Republicans"], D: ["Democrat", "Democrats"], I: ["independent", "independents"] };
+        const n = incomingTotals(m.senate);
+        const parts = ["R", "D", "I"].filter((k) => m.senate.notUp[k]);
+        check("the Senate's bar says, party by party, how many were elected in 2026 and how many hold seats not on the ballot",
+          parts.length > 0 && parts.every((k) => aria.indexOf(n[k] + " " + words[k][n[k] === 1 ? 0 : 1] + " (" +
+            m.senate.elected[k] + " elected in 2026, " + m.senate.notUp[k] + " in seats not on the 2026 ballot)") !== -1),
+          aria);
+        check("and its note how the seats not on the ballot are counted",
+          !!sen && /Seats not on the 2026 ballot are counted by the party of who holds each now\./.test(
+            sen.querySelector(".bb-note").textContent), sen && sen.querySelector(".bb-note").textContent);
+      }
       check("it says when they take office and that the counts above are who sits (rule 27)", !!block &&
         /The members-elect take office on Jan\. 3, 2027; until then the counts above are who sits/.test(block.textContent),
         block && block.textContent);
@@ -20719,7 +20736,7 @@ async function testIncoming() {
       });
       check("each state is drawn as the step its senators-elect and its seats not up give", wrong.length === 0,
         wrong.slice(0, 4).join(" | "));
-      check("a state with a race not yet called is not yet decided", Object.keys(m.states).every((c) => {
+      check("a state with a race not yet called is not settled in this site's read", Object.keys(m.states).every((c) => {
         const part = m.states[c].senate;
         return !part || !part.uncalled || part.step === "undecided";
       }));
@@ -20734,6 +20751,11 @@ async function testIncoming() {
         keys.indexOf("pending-outline") !== -1 === (m.senate.uncalled > 0));
       check("the footer says what the view counts from", !D.querySelector('[data-sources="elected"]').hidden &&
         D.querySelector('[data-sources="senate senate2026 house"]').hidden);
+      // A certified list says who is on the ballot and marks no winner
+      // (rules 64, 77): the count credits the results alone (PR review).
+      const sources = D.querySelector('[data-sources="elected"]').textContent.replace(/\s+/g, " ");
+      check("and credits no certified list with a winner", /a state's certified list says who is on its ballot, never who won/.test(sources) &&
+        !/where a state certified its ballot, its election office's list/.test(sources), sources);
       // A state with a race not yet called (Alaska's ranked-choice count, on
       // the data of 2026-11-14), or whichever the data holds.
       const open = Object.keys(m.states).find((c) => m.states[c].senate && m.states[c].senate.uncalled);
@@ -20826,10 +20848,16 @@ async function testIncoming() {
   }
 
   for (const page of ["index.html", "states/tx.html", "districts/tx.html"]) {
-    const { D, errors } = await buildPage(page, { now: AFTER_ELECTION });
+    const { window, D, errors } = await buildPage(page, { now: AFTER_ELECTION });
     await settle(50);
     suite(`the elected Congress — the sidebar on ${page}`, () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
+      if (page !== "index.html") {
+        // The seats state by state come with the index, which these pages
+        // do not load (rule 94): the sidebar draws from the totals alone.
+        check("the page loads no state-by-state seats it does not draw",
+          !!window.kycBuildMeta.incoming && !window.kycBuildMeta.incoming.states);
+      }
       const block = D.querySelector(".incoming-block");
       check("carries it", !!block && block.querySelectorAll('[data-basis="elected"]').length === 2);
       const link = block && block.querySelector('a[href$="map.html#/?congress=elected"]');
@@ -20897,6 +20925,148 @@ async function testIncoming() {
           /1 independent[,;]/.test(bar.getAttribute("aria-label")));
       check("its square is the independents' and names them", !!D.querySelector('#mapTiles .ht-i[title*="Pat Made-Up (Independent), elected in 2026"]'));
     });
+  }
+
+  {
+    // Made states (PR review), each the case it tests, whatever the day's
+    // data holds.
+    const made = {};
+    const { window, D, errors } = await buildPage("map.html", { now: AFTER_ELECTION,
+      hash: "#/?mode=house&congress=elected",
+      data: (w, meta) => {
+        if (!meta.incoming) return;
+        const states = meta.incoming.states;
+        const voting = Object.keys(states).filter((c) => !/^(AS|DC|GU|MP|PR|VI)$/.test(c));
+        const raceFor = (code, n) => w.kycRaces.find((r) => r.chamber === "House" && r.state === code &&
+          String(r.district || 0) === String(n));
+        const uncall = (code, n) => {
+          const part = states[code].house;
+          const seat = part.seats[n];
+          if (seat.party) part.elected[seat.party] -= 1;
+          if (!seat.status) part.uncalled += 1;
+          part.seats[n] = { race: raceFor(code, n).id, status: "uncalled" };
+        };
+        // A holder who runs for another seat, in their own seat's uncalled
+        // race: Mike Collins (GA-10, for the Senate) was listed in it.
+        const race = w.kycRaces.find((r) => r.chamber === "House" && voting.indexOf(r.state) !== -1 &&
+          (r.incumbentIds || []).some((id) => w.legislatorsData.some((p) => p.id === id && !p.isCandidate)) &&
+          w.kycRaces.some((o) => o.chamber === "Senate" && o.state === r.state));
+        const holder = w.legislatorsData.find((p) => p.id === race.incumbentIds.find((id) =>
+          w.legislatorsData.some((q) => q.id === id && !q.isCandidate)));
+        const senateRace = w.kycRaces.find((o) => o.chamber === "Senate" && o.state === race.state);
+        holder.contestRaceId = senateRace.id;
+        holder.raceStatusRace = race.id;
+        holder.raceStatus = "nominee";
+        const n = String(race.district || 0);
+        uncall(race.state, n);
+        states[race.state].house.step = "undecided";
+        made.moved = { code: race.state, race, holder };
+        // Every state the map may draw as a callout carries a seat not yet
+        // called, so a callout's dotted mark is asked whatever the width.
+        made.callouts = ["RI", "DE", "CT", "NJ", "MA", "MD", "VT", "NH"].filter((c) => states[c]);
+        made.callouts.forEach((c) => { if (!states[c].house.uncalled) uncall(c, Object.keys(states[c].house.seats)[0]); });
+        // A state whose uncalled seats cannot change its step, and one whose can.
+        const fixed = voting.find((c) => c !== race.state && made.callouts.indexOf(c) === -1 &&
+          Object.keys(states[c].house.seats).length > 3);
+        uncall(fixed, Object.keys(states[fixed].house.seats)[0]);
+        states[fixed].house.step = "majR";
+        made.fixed = fixed;
+        // A Senate state with no 2026 race: one senator beside a vacant seat.
+        const off = voting.find((c) => !states[c].senate.seats.length && states[c].senate.held.length === 2);
+        const left = states[off].senate.held.shift();
+        states[off].senate.notUp[left.party] -= 1;
+        states[off].senate.notUp.vacant += 1;
+        states[off].senate.step = "vacant";
+        made.off = off;
+        // A place whose one House seat was not on the 2026 ballot.
+        const pr = w.legislatorsData.find((p) => p.state === "PR" && !p.isCandidate && /House/.test(p.chamber || ""));
+        states.PR = { house: { elected: { D: 0, R: 0, I: 0 }, notUp: { D: 0, R: 0, I: 1, vacant: 0 }, uncalled: 0,
+          runoff: 0, seats: {}, held: pr ? [{ id: pr.id, party: "I" }] : [], step: "allI" } };
+        made.pr = pr;
+      } });
+    await settle(100);
+    const KYC = window.KYC;
+    const m = window.kycBuildMeta.incoming;
+    const click = (code) => {
+      D.querySelector(`#usMap .state[data-state="${code}"]`).dispatchEvent(new window.Event("click", { bubbles: true }));
+      return D.getElementById("delegation");
+    };
+    suite("the elected Congress — made cases on the map and its panel", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const panel = click(made.moved.code);
+      const block = [...panel.querySelectorAll(".panel-seat")].find((h) =>
+        h.textContent.indexOf(made.moved.race.label || made.moved.race.id) === 0);
+      const listed = [];
+      for (let el = block && block.nextElementSibling; el && !el.classList.contains("panel-seat"); el = el.nextElementSibling) {
+        if (el.getAttribute("data-id")) listed.push(el.getAttribute("data-id"));
+      }
+      check("its race is listed not yet called", !!block, panel.textContent.slice(0, 200));
+      check("a holder running for another seat is not listed in their own seat's race (KYC.cards.racePeople)",
+        !!block && listed.indexOf(made.moved.holder.id) === -1, listed.join(" "));
+      const callouts = [...D.querySelectorAll("#mapLabels .map-callout")];
+      const asked = callouts.filter((c) => made.callouts.indexOf(c.getAttribute("data-state")) !== -1);
+      check("a callout of a state with seats not yet called is dotted too", asked.length > 0 &&
+        asked.every((c) => c.classList.contains("is-pending")), callouts.map((c) => c.getAttribute("data-state")).join(" "));
+      check("and no other callout", callouts.filter((c) => c.classList.contains("is-pending"))
+        .every((c) => ((m.states[c.getAttribute("data-state")] || {}).house || {}).uncalled > 0));
+      const title = (code) => D.querySelector(`#usMap .state[data-state="${code}"] title`).textContent;
+      check("a step the seats not yet called cannot change says so in its hover",
+        /\(a Republican majority whatever the seats not yet called decide\)$/.test(title(made.fixed)), title(made.fixed));
+      check("a step they could change is not settled in this site's read, never \"not yet decided\"",
+        title(made.moved.code).indexOf("(not settled in the results this site read: the seats not yet called as of " +
+          KYC.dateWords(m.resultsAsOf) + " could change it)") !== -1 && !/not yet decided/i.test(title(made.moved.code)),
+        title(made.moved.code));
+      const key = D.getElementById("mapLegend").textContent;
+      check("and its key says the same, with the day", key.indexOf("Not settled in the results this site read: seats not yet called as of " +
+        KYC.dateWords(m.resultsAsOf) + " could change it") !== -1 && !/not yet decided/i.test(key), key);
+      const prPanel = click("PR");
+      const note = prPanel.querySelector(".incoming-note").textContent;
+      check("a seat not on the 2026 ballot is said to be so, and who holds it does represent the place",
+        /^Puerto Rico’s seat in the U\.S\. House was not on the 2026 ballot: it is counted by who holds it now\. The Now view shows the same people\.$/.test(note) &&
+          !/members-elect|not who represents/.test(note), note);
+      check("its hover too", /^PR House, 120th Congress: not on the 2026 ballot, counted by who holds it now: 1I$/.test(title("PR")),
+        title("PR"));
+      D.querySelector('[data-mode="senate"]').click();
+      if (!D.querySelector('#mapBalance [data-basis="elected"][aria-pressed="true"]')) {
+        D.querySelector('#mapBalance [data-basis="elected"]').click();
+      }
+      const offNote = click(made.off).querySelector(".incoming-note").textContent;
+      check("a state with no 2026 Senate race says neither seat was on the ballot, never members-elect",
+        /^Neither of .+’s seats in the U\.S\. Senate was on the 2026 ballot: they are counted by who holds each now, or as vacant\. The Now view shows the same people\.$/.test(offNote) &&
+          !/members-elect|not who represents/.test(offNote), offNote);
+      const node = D.querySelector(`#usMap .state[data-state="${made.off}"]`);
+      check("a senator beside a vacant seat is drawn as a seat vacant, never as both of a party",
+        node.style.fill === KYC.svgFill("var(--vacant-fill)"), node.style.fill);
+      const keys = [...D.querySelectorAll("#mapLegend [data-step]")];
+      const vkey = keys.find((k) => k.getAttribute("data-step") === "vacant");
+      check("whose key says one seat or both", !!vkey && vkey.textContent === "One seat or both vacant",
+        keys.map((k) => k.textContent).join(" | "));
+    });
+  }
+
+  {
+    // The day the members-elect take office has come, but this build has
+    // not read the new Congress (rule 66): the past tense, and never "until
+    // then" or "not who represents ... now" over a day gone by.
+    const { window, D, errors } = await buildPage("map.html", { now: "2027-01-04T12:00:00",
+      data: (w, meta) => { if (meta.incoming) meta.election.phase = "results"; } });
+    await settle(100);
+    if (window.kycBuildMeta.incoming) {
+      suite("the elected Congress — after Jan. 3, before this site has read the new Congress", () => {
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const block = D.querySelector(".incoming-block");
+        check("the sidebar says they were due to take office, and what the counts above are",
+          !!block && /The members-elect were due to take office on Jan\. 3, 2027; the counts above are who sat as this site last read Congress’s membership, which it has not yet read for the new Congress\./.test(block.textContent) &&
+            !/until then/.test(block.textContent), block && block.textContent);
+        D.querySelector('#mapBalance [data-basis="elected"]').click();
+        const code = Object.keys(window.kycBuildMeta.incoming.states).find((c) =>
+          ((window.kycBuildMeta.incoming.states[c].senate || {}).seats || []).some((s) => s.id));
+        D.querySelector(`#usMap .state[data-state="${code}"]`).dispatchEvent(new window.Event("click", { bubbles: true }));
+        const note = D.querySelector("#delegation .incoming-note").textContent;
+        check("and the panel", /were due to take office on Jan\. 3, 2027\. This site has not yet read the new Congress’s membership/.test(note) &&
+          !/not who represents/.test(note), note);
+      });
+    }
   }
 
   {

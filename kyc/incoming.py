@@ -130,11 +130,15 @@ def house_step(d, r, i, total):
 
 
 def senate_step(d, r, i, vacant):
-    """A Senate delegation's step, as the map's Senate view draws it: the
-    seats held, an empty one aside."""
+    """A Senate delegation's step in the elected view. A state with a seat
+    vacant is "vacant", one seat or both: one Republican beside an empty
+    seat read "Both Republican" (PR review), while its hover said "1R, 1
+    vacant"."""
     held = d + r + i
+    if vacant:
+        return "vacant"
     if not held:
-        return "vacant" if vacant else "none"
+        return "none"
     if r == held:
         return "allR"
     if d == held:
@@ -155,6 +159,10 @@ def decided_step(known, uncalled, chamber):
     """The step a delegation has whatever its *uncalled* seats decide, over
     every completion; ``undecided`` where two completions differ. *known* is
     the decided seats by party (with "vacant" in the Senate)."""
+    if chamber == "senate" and uncalled:
+        # A Senate state whose race is not yet called is not settled, even
+        # where every way it could go draws the same (a seat vacant beside it).
+        return "undecided"
     steps = set()
     vacant = known.get("vacant", 0)
     for d, r, i in completions(uncalled):
@@ -284,6 +292,8 @@ def build(profiles, races, results=None, snapshot=None):
     for code in voting_states:
         entry = state(code)["senate"]
         not_up = 2 - sum(1 for r in senate_races if r["state"] == code)
+        if not_up < 0:
+            raise IncomingError(f"{code}: {2 - not_up} Senate races for its two seats")
         held = sum(entry["notUp"][k] for k in PARTIES)
         if held > not_up:
             raise IncomingError(f"{code}: {held} senators hold seats not on the ballot, "
