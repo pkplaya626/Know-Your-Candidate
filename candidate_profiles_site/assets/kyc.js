@@ -5236,15 +5236,6 @@
     });
   });
 
-  /* A link in an "Also on this site" line (rule 104) goes where it says:
-   * the click stops here, before a card's delegated listener opens the card
-   * the line sits on (a profile card's, a race row's), and the browser
-   * follows the link. */
-  doc.addEventListener("click", function (event) {
-    var link = event.target && event.target.closest && event.target.closest("a.also-link");
-    if (link) event.stopPropagation();
-  }, true);
-
   KYC.balanceBar = balanceBar;
   KYC.houseTiles = houseTiles;
   KYC.houseTilesKey = houseTilesKey;

@@ -76,7 +76,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (5031 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (5085 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2013,6 +2013,32 @@ What an agreement on office and years cannot check is checked on its own:
   3 "since 1985". A seated member whose record holds no current seat is
   reported (`history-behind`).
 
+## Also on this site
+
+A person can be on several cards here: a senator's profile and her card on
+her state's list for governor, a governor's card and his profile as a
+candidate for the Senate, a former member's row and the Vice President's
+dialog, a lieutenant governor's line and her profile as the state's Senate
+nominee, a candidate for governor's card and his seat on the legislature
+page. Every card that shows such a person says "Also on this site:" and
+names each other role in that role's own card's words, linked to that card
+(`KYC.alsoHtml`, one helper; the share pages say it in plain text). The
+joins are `kyc/identity.py`'s (rule 104):
+
+| Join | By |
+|---|---|
+| An id both records hold | A bioguide id (a member's profile, a departed member's row, a candidate's `member`, the history cache's `bioguide` for the record's own Wikidata item), a Wikidata item (a record's corroborated offices, a governor's NGA cross-check, a departed member's from legislators-historical, a judge's FJC-carrying item) or an FEC candidate id - only where the two names agree (same surname and first initial); otherwise withheld and warned (`identity-names-disagree`) |
+| An office no id ties | A state officer's card naming the person by rule 56's test, and the person's corroborated record of offices (rule 69) holding that office open in that state |
+| A state legislator | Rule 24's legislature join (`nominee_photos.legislator_for`) |
+
+Two records of one name in one state that nothing ties are reported
+(`identity-look-alike`) and link nothing. A governor's own entry on their
+office's list, and a member's own candidacy profile, are one card and are
+not named twice. Each card keeps its own sources, words and photograph; the
+build's info line `identity-photo-differs` lists the people one of whose
+cards is pictured and another not, for a later decision. Nobody becomes a
+profile, and no count changes.
+
 ## Election flags and races
 
 Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
@@ -2041,6 +2067,8 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `appointed` | The record says this incumbent was appointed to the seat on the ballot. Never "re-elected" or "renominated": they were not elected to it | Florida, Ohio, Oklahoma and South Carolina's appointed senators |
 | `politicalHistory` | `{wikidata, wikipedia, rows, withheld}`: the public offices the person has held, newest first. A row is `{office, where, district, from, to, current}`; a seat in Congress adds `congress` and `terms` (`district` 0 is at large); another office adds `agree` - `year-off` where the sources differ by a year, `start` where the end year is the article's alone. `withheld` counts offices Wikidata lists that the article does not confirm. See [Public offices held](#public-offices-held) | Members, and challengers whose election page links their article |
 | `otherIds` | A curated candidate's profile id (`CAND_n`) folded into the member they became, by the FEC id Congress's record lists for them; a link or market label saved under it opens the member | Curated candidates since seated |
+| `also` | The person's other roles on this site (`kyc/identity.py`, rule 104), each `{kind, id, state, words, after, href, view, share, link, court}`: `kind` is `profile`, `departed`, `official`, `judge`, `governor`, `candidate` (on the election office's list for governor), `officer` (a lieutenant governor, attorney general or secretary of state) or `legislator`; `words` the role as its own card says it, `after` from the day after Election Day where the card's words change; `href` that card's address from the site's root, `view` the route that opens it on a page that draws it, `share` its share page. Joined by a bioguide id, a Wikidata item or an FEC id both records hold, where their names agree; by an officer's card naming a person whose corroborated record holds that office; or by rule 24's legislature join. Never a name alone. The same field is on the governors', candidates' and officers' records in `data/stategov.js`, the federal officials' and judges' in `data/federal.js` and the courts' files, the members' in `data/legislature/*.js` and the departed members' rows in `kycBuildMeta.departed` | People in more than one role here |
+| `congressBio` | On an official's, a governor's or a candidate for governor's record: the bioguide id congress-legislators gives for the record's own Wikidata item, where their service in Congress has no card here; the cards link its Biographical Directory page | Officials and governors who served in Congress |
 
 Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:
 

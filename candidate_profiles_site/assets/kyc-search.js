@@ -381,7 +381,9 @@
     // it (KYC.stategov.pastTermText).
     var past = KYC.stategov.pastTermText(code, key);
     return row(link(href, title) + ":", holder + (past ? ". " + esc(past).replace(/\.$/, "") : "") +
-      (full === false ? "" : ". " + ballotLine(code, key, full)));
+      (full === false ? "" : ". " + ballotLine(code, key, full)) +
+      // The holder's other roles on this site, joined by ids (rule 104).
+      (namedHolder(off) && KYC.alsoHtml ? KYC.alsoHtml(off, { tag: "span", cls: "official-also" }) : ""));
   }
 
   /** Every state's holder of *key*, compactly: an acting officer, or an

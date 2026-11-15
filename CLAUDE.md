@@ -229,8 +229,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3432 tests, no dependencies
-npm install && npm test                       # 5031 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3447 tests, no dependencies
+npm install && npm test                       # 5085 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -4405,6 +4405,77 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Chrome's own headless string and pose as nothing else. The readers that
     already said who they were keep their strings; "Mozilla/5.0 (compatible; ...)" is the crawlers'
     convention and names no browser.
+
+104. **A person on two cards says so on both, and only an id says it is one
+    person.** Amy Klobuchar's profile said nothing of her card on
+    Minnesota's list for governor; Janet Mills's card as Maine's governor
+    nothing of her profile as a candidate for the Senate; J.D. Vance's row
+    among the members who left this Congress nothing of his dialog as Vice
+    President; Peggy Flanagan's line as Minnesota's lieutenant governor
+    nothing of her profile as its Senate nominee; Gina Hinojosa's card for
+    Texas's governorship nothing of her seat on the legislature page. Each
+    card was drawn from its own source and a reader on one did not learn of
+    the rest (the owner's request of 2026-11-15, "overlap cards for people
+    who have both congress and governor, cabinet, judge, info"). So
+    `kyc/identity.py` makes every card a node - a profile, a departed
+    member's row, the President, the Vice President, a Cabinet officer or
+    one who left this term, a federal judge (by the Wikidata item carrying
+    their FJC id, rule 82), a governor, a candidate on the election office's
+    list for governor, a lieutenant governor, attorney general or secretary
+    of state, a state legislator - and joins two only by:
+    - an id both records hold: a bioguide id (a member's profile, a departed
+      row, a candidate's `member` from an evidenced `OTHER_OFFICE_NOMINEES`
+      entry, the history cache's `bioguide`, which congress-legislators
+      gives for the record's own Wikidata item), a Wikidata item (the item a
+      record's corroborated offices were read from, a governor's NGA
+      cross-check, a departed member's from legislators-historical, which
+      `departed.build` now keeps) or an FEC candidate id - and only where the
+      two names agree (`names_agree`: surname and first initial). An id whose
+      records name two people is withheld and warned
+      (`identity-names-disagree`), never shown;
+    - for an office no id ties, two sources: the state officer's card names
+      the person by rule 56's test (`officers.names_holder`) and the
+      person's corroborated record of offices (rule 69) holds that very
+      office open in that state;
+    - for a legislator, rule 24's legislature join
+      (`nominee_photos.legislator_for`), the one test (rule 12).
+    A name alone joins nobody (rules 3, 17, 25): two cards of one name in
+    one state that nothing ties are a warning (`identity-look-alike`) - on
+    2026-11-15 Jocelyn Benson, Christi Jacobsen and Marty Jackley, whose
+    records do not hold the office their officer card names - and link
+    nothing. A governor's own entry on their office's list is the same card
+    (rule 91), and a member's candidacy profile cross-links itself (rule
+    30): neither names the other twice. Each record gets `also`: the other
+    roles in their own cards' words, written here and never on the page
+    (rules 1, 12) - a profile's seat in words and where they stand
+    (`share`'s mirror of `KYC.standing`, rule 96), a governor's office and
+    since when, a candidate for governor's "On the Nov 3, 2026 ballot for
+    Governor of Minnesota" and from the day after Election Day "Was on ...",
+    never a winner (rules 63, 91), an officer's title and place in its own
+    words (rule 75), a departed member's "Left the U.S. Senate on Jan. 9,
+    2025, as the member for Ohio" (`date_words`) - each with the address
+    that opens that card from the site's root, the view that opens it in
+    place on a page that draws it, and its share page. `KYC.alsoHtml` draws
+    the line on the profile card (outside its button, as the contact link
+    is) and dialog, the governor's card, race and overlay (the state page,
+    the map's panel, the Governors view), the officers' rows, the federal
+    page's cards and the officials' dialog, a legislator's card, and the
+    search's rows and answers, choosing the tense on the reader's day; the
+    share pages say it in plain text (`identity.share_html`). A profile
+    link is the only one a governor's card holds, and only in this line
+    (rule 27): the card is still no profile and is counted nowhere (rule
+    73). A profile's dialog closed because its line opened a governor's
+    overlay leaves that address standing (`KYC.router.clearProfile("profile")`):
+    clearing any dialog's address, it took the reader Back to the profile.
+    An official's or a governor's service in Congress that no card here
+    holds (Sean Duffy, Kelly Ayotte) links its Biographical Directory page
+    by the bioguide id congress-legislators gives for the record's own item
+    (`congressBio`), never a name. Each card keeps its own sources, words
+    and photograph: none is borrowed, and the build's info line
+    `identity-photo-differs` lists the joined people pictured on one card
+    and not another, for a decision. State justices and the candidates for
+    the other statewide offices are names in a list with no record of their
+    own, and are joined to nobody until they have one.
 
 ## District maps
 

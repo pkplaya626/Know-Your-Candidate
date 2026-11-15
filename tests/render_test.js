@@ -13610,7 +13610,9 @@ async function testSearchAndFilters() {
     const unknown = cards().some((p) => KYC.ageOf(p) === null);
     check("and says where the unknown ages start", !unknown ||
       (!!divider && /No birthdate on record \([\d,]+\)/.test(divider.textContent)));
-    const after = [...D.querySelectorAll("#results .grid-divider ~ .card")]
+    // A card with an "Also on this site" line or a contact link is wrapped
+    // in a cell (rule 104): the cell is the divider's sibling, the card in it.
+    const after = [...D.querySelectorAll("#results .grid-divider ~ .card, #results .grid-divider ~ .card-cell > .card")]
       .map((c) => KYC.byId(c.getAttribute("data-id")));
     check("everyone after it has no age, and everyone before it one", !divider ||
       (after.length > 0 && after.every((p) => KYC.ageOf(p) === null) &&
@@ -25742,7 +25744,7 @@ async function testTheJanuaryPage() {
         if (sentence && shareText.indexOf(sentence) === -1) bad.share.push(`${race.id}: "${sentence}" not on its share page`);
         // Never among the seat's people: no card, no "Elected:" in its row,
         // no item in its share page's list.
-        if (section && section.querySelector('.card-grid > .card[data-id="' + p.id + '"]')) {
+        if (section && section.querySelector('.card-grid .card[data-id="' + p.id + '"]')) {
           bad.section.push(`${race.id}: ${p.name}'s card among the people`);
         }
         const groups = row ? [...row.querySelectorAll(".race-row-ballot")].map(text) : [];
@@ -26806,6 +26808,24 @@ async function testAlsoLines() {
             a.getAttribute("href") === "federal/index.html#/official/x-made"), box ? box.textContent.slice(0, 300) : "");
       });
       row.also = keep;
+    }
+    // An office's answer names its holder's other roles too.
+    loadAnswers(W);
+    const states = W.kycStateGov.states;
+    const code = Object.keys(states).find((c) => states[c].lt && states[c].lt.name && !states[c].lt.none &&
+      !states[c].lt.disputed && !states[c].lt.vacant);
+    if (code) {
+      const keep = states[code].lt.also;
+      states[code].lt.also = [role({ words: "A made-up candidacy for Congress", after: undefined })];
+      typeInto(W, D, K.stateName(code) + " lieutenant governor");
+      await settle(250);
+      const answers = D.getElementById("searchAnswers");
+      suite("also on this site — the search's answers (rule 104)", () => {
+        check("an office's answer draws its holder's other roles", !!answers &&
+          lineText(answers).indexOf("A made-up candidacy for Congress") !== -1,
+          answers ? answers.textContent.slice(0, 300) : "no box");
+      });
+      states[code].lt.also = keep;
     }
   }
 
