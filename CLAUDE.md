@@ -4646,7 +4646,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     vanished on January 3, each pair reported as a look-alike the build had
     settled the day before: a row open when read for that very office joins
     while the officer card, read every day, still names them, the role
-    keeping its `ends`, and such a pair is never a look-alike. A winner
+    keeping its `ends`, and such a pair is never a look-alike. A curated
+    row's id (`otherIds`) is one of the filings folded into a seated
+    winner's profile (`record.filing_ids`), or Juliana Stratton, Illinois's
+    Senate winner from the curated row CAND_33, lost her record of offices
+    on January 3 and her line with it; and the history cache's bioguide is
+    read under those filings too, or Colin Allred's TX-33 profile and his
+    Senate filing, sharing only an item, became a pair to warn. A winner
     seated since Election Day whom the roster still lists in the seat rule
     24 tied them to as a candidate is the roster's lag (rules 16, 51, 100),
     said apart and linked to nothing (`identity-legislator-roster-behind`),
