@@ -617,7 +617,13 @@
     // A run for another seat is the seat's badge, its result in it
     // (contestSeat).
     var elsewhere = !item.isCandidate && item.contestLabel;
-    return [
+    // The person's other roles on this site, each linked to its card (rule
+    // 105), by the one helper and outside the row's button, as a card's is:
+    // a link cannot sit inside one. The Senate panel's row for Amy
+    // Klobuchar said nothing of Minnesota's list for governor, which the
+    // governor's-race panel beside it did.
+    var also = KYC.alsoHtml(item, { cls: "row-also" });
+    var row = [
       '<button type="button" class="person-row" data-id="',
       KYC.escapeAttr(item.id), '">',
       KYC.portraitThumb(item, "38px"),
@@ -631,6 +637,7 @@
       KYC.icon("chevron"),
       "</button>",
     ].join("");
+    return also ? '<div class="person-cell">' + row + also + "</div>" : row;
   }
 
   /** The 2026 Senate view of a state with no Senate race: said, with when

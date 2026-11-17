@@ -1245,6 +1245,16 @@ a.badge-link {
 .also-label { font-weight: 600; color: var(--text); }
 .also-link { overflow-wrap: anywhere; }
 .card-cell .card-also { padding: 0 var(--s-1); }
+/* Under a member's row in the map's state panel (kyc-map.js personRow): the
+ * row's button, then the line, in one cell no wider than the panel. */
+.person-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+  max-width: 100%;
+}
+.person-cell .row-also { padding: 0 var(--s-3) var(--s-1); }
 .official-also { display: block; margin-top: var(--s-1); }
 
 /* Public offices held (KYC.officesHeld): newest first, the years beside the
@@ -5085,6 +5095,19 @@ button.local-county-link {
 }
 .gcard-writein .gcard-holder { grid-template-columns: minmax(0, 1fr); }
 .gcard .gov-name { font-size: var(--t-md); overflow-wrap: anywhere; }
+/* A candidate's badge (KYC.stategov.candidateBadge: "Was on the Nov 3, 2026
+ * ballot") wraps, no wider than its line, wherever it is drawn (rule 44): a
+ * candidate's card in the map's governor's-race panel, a row of the
+ * overlay's race panel and the overlay's status line. On one line it was
+ * 193px in a 167px column of a 280px phone, and the panel scrolled
+ * sideways. */
+.gcard-status { margin: 0; min-width: 0; }
+.gcard-status .badge,
+#governorModalBody .race-mate-meta .badge,
+#governorModalStatus .badge {
+  max-width: 100%;
+  white-space: normal;
+}
 .gcard-mate { font-size: var(--t-sm); color: var(--text); }
 .gcard-credit { margin-top: var(--s-1) !important; }
 .gov-portrait-none {

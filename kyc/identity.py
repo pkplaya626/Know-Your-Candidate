@@ -198,9 +198,20 @@ def profile_role(person, by_id, races_by_id, post):
     from .record import seated
 
     def lead_of(when):
-        parts = share._seat_parts(person.get("officeLabel"))
+        label = person.get("officeLabel")
+        parts = share._seat_parts(label)
         if parts and person.get("isCandidate"):
             body, where = parts
+            if str(label).endswith("-AL"):
+                # An at-large seat in rule 96's seat words, as every sentence
+                # writes it: "the U.S. House in WY-AL", and the District's or
+                # a territory's one seat in the place's own words - never "in
+                # Wyoming (at large)", an unfurl's form (the second review of
+                # PR #267: Chuck Gray's line on Wyoming's officers' row).
+                seat = share.seat_in_words(label)
+                code = str(label).partition(" • ")[2]
+                tail = f"the {body} in {seat}" if seat == code else seat
+                return f"2026 race for {tail}" if when else f"Candidate for {tail}"
             # After Election Day the race is named, not the person's place in
             # it: "In the 2026 race for ...: Withdrew from the 2026 race" read
             # as though they were still in it (the review of PR #267).
@@ -397,13 +408,18 @@ def officer_role(code, key, off, item=None):
 _DISTRICT_NUMBER = re.compile(r"^\d+[A-Z]?$")
 
 
-def legislator_role(code, member, title):
+def legislator_role(code, member, title, name=None):
     """"Member of the Texas House of Representatives, district 49": the
-    legislature page's chamber, named with its state, and the district the
-    roster gives - a number as "district 49", a district a legislature
+    legislature page's chamber, named with its state as that page's title
+    names it - or by the chamber's own name where the legislature page
+    carries one (*name*, ``legislature.chamber_name``: "New York State
+    Assembly", never "New York Assembly", rule 75) - and the district the
+    roster gives: a number as "district 49", a district a legislature
     names as a place in its own words, "for the 18th Essex district" and
     "for the Strafford 4 district" (the first read "district 18th
-    Essex")."""
+    Essex"). Its share page's link opens the member's district on the
+    legislature page, as the card's does (the first led to the page's
+    top)."""
     from .pages import short_name
 
     district = str(member.get("district") or "").strip()
@@ -411,13 +427,13 @@ def legislator_role(code, member, title):
     if district:
         where = (f", district {district}" if _DISTRICT_NUMBER.match(district)
                  else f", for the {district} district")
-    words = f"Member of the {short_name(code)} {title}{where}"
+    words = f"Member of the {name or short_name(code) + ' ' + title}{where}"
     d = member.get("districtId") or ""
     chamber = member.get("chamber")
     query = ("chamber=lower&" if chamber == "lower" else "") + f"d={d}"
+    href = f"legislature/{code.lower()}.html#/?{query}"
     return {"kind": "legislator", "id": member.get("id"), "state": code, "words": words,
-            "href": f"legislature/{code.lower()}.html#/?{query}",
-            "share": f"legislature/{code.lower()}.html"}
+            "href": href, "share": href}
 
 
 def _named_officer(off):
@@ -452,6 +468,9 @@ class Links:
         self.problems = []
         self.joined_by = {}       # frozenset of two keys -> why
         self.settled_pairs = {}   # frozenset of two keys -> an IDENTITY_JOINS entry
+        self.item_pairs = set()   # two profiles one Wikidata item is on, and no other id
+        self.item_settled = set()  # those an entry says are one person
+        self.chamber_names = {}   # (state, chamber) -> a chamber's own name, where recorded
         self.history_cache = {}
         self.legislators = {}
         self.titles = {}
@@ -503,10 +522,30 @@ class Links:
         return out
 
 
+def cross_linked(a, b):
+    """Two profiles the profile dialog itself cross-links
+    (``kyc-profile.js`` renderCrossLink): a member and their own candidacy
+    for another seat, by the fields that dialog reads - the member's
+    ``alsoRunningId`` and the filing's ``incumbentId`` (kyc/profiles.py,
+    rules 30 and 68). *a* and *b* are the profiles' records."""
+    a, b = a or {}, b or {}
+    return bool(a.get("id") and b.get("id") and (
+        b["id"] in (a.get("alsoRunningId"), a.get("incumbentId"))
+        or a["id"] in (b.get("alsoRunningId"), b.get("incumbentId"))))
+
+
 def _same_card(a, b):
+    """Two nodes whose cards already say the other: a governor on their own
+    office's list (rule 91), and the two profiles the profile dialog
+    cross-links (:func:`cross_linked`) - only those. Any other two profiles
+    of one person (two filings an id or a person's evidenced entry ties,
+    which no dialog links) name each other like any two cards: "one card,
+    no line" was said of every pair of profiles, so Colin Allred's race for
+    the House said nothing of his Senate filing (the second review of PR
+    #267)."""
     kinds = {a.kind, b.kind}
     if kinds == {"profile"}:
-        return True
+        return cross_linked(a.record, b.record)
     if kinds == {"governor", "candidate"} and a.state == b.state:
         return True                 # the holder on their own office's list
     return False
@@ -518,9 +557,37 @@ def _same_card(a, b):
 STATE_KINDS = ("governor", "candidate", "officer", "legislator")
 
 
+def states_disagree(a, b):
+    """A state's card and a card of another state: another state's card, a
+    profile or a departed member's row. Whatever id they share, one is not
+    the other's role (two states' lists for governor, Minnesota's governor
+    on Wisconsin's list, an Ohio legislator and a Texas filer): refused and
+    warned, for a person to settle."""
+    return bool(a.state and b.state and a.state != b.state
+                and (a.kind in STATE_KINDS or b.kind in STATE_KINDS))
+
+
+def _share_an_id(a, b):
+    return bool(a.ids["bioguide"] & b.ids["bioguide"] or a.ids["fec"] & b.ids["fec"])
+
+
 def _join_by_ids(links):
     """Join every two nodes that hold one id, where their names agree and,
-    for two of a state's cards, their states do."""
+    for a state's card, their states do. Every pair of an id's holders is
+    asked: compared only with the first, a first holder whose name
+    disagreed (a spouse's article on a challenger's ballot page) kept two
+    true holders apart and pointed both warnings at itself.
+
+    A Wikidata item two *profiles* hold is not enough for them: a
+    challenger's item is their ballot page's article's (rule 33), a
+    namesake's article passes that rule's surname test, and two filings
+    that share an article are a look-alike to report (rule 25), never one
+    person on the item's word - the namesake would take on every role the
+    member's item is on. Two profiles are joined by an item only where
+    they also share a bioguide or an FEC id; otherwise the pair is warned
+    (``identity-item-shared``) and the item joins neither of them to
+    anything until an evidenced ``overrides.IDENTITY_JOINS`` entry says
+    they are one person."""
     for scheme in ("bioguide", "wikidata", "fec"):
         holders = {}
         for node in links.nodes.values():
@@ -529,29 +596,59 @@ def _join_by_ids(links):
         for value, nodes in sorted(holders.items()):
             if len(nodes) < 2:
                 continue
-            first = nodes[0]
-            for other in nodes[1:]:
-                if (first.kind in STATE_KINDS and other.kind in STATE_KINDS and first.state
-                        and other.state and first.state != other.state):
-                    links.problems.append((
-                        "warn", "identity-states-disagree",
-                        f"{first.kind} {first.name} ({first.state}) and {other.kind} {other.name} "
-                        f"({other.state}) share the {scheme} id {value}, but one person is not on "
-                        "two states' cards: neither card names the other (rule 105)",
-                        [first.key, other.key]))
-                elif names_agree(first.forms, other.forms):
-                    links._union(first.key, other.key, f"{scheme} {value}")
-                else:
-                    links.problems.append((
-                        "warn", "identity-names-disagree",
-                        f"{first.kind} {first.name} and {other.kind} {other.name} share the "
-                        f"{scheme} id {value} but their names disagree; neither card names the "
-                        "other (rule 105)", [first.key, other.key]))
+            barred = set()
+            if scheme == "wikidata":
+                profiles = [n for n in nodes if n.kind == "profile"]
+                for i, a in enumerate(profiles):
+                    for b in profiles[i + 1:]:
+                        if _share_an_id(a, b):
+                            continue
+                        pair = frozenset((a.key, b.key))
+                        entry = links.settled_pairs.get(pair)
+                        if entry and entry["same"]:
+                            # A person's word that the item is both filings'.
+                            links.item_settled.add(pair)
+                            continue
+                        links.item_pairs.add(pair)
+                        barred.update(pair)
+                        if not entry:
+                            links.problems.append((
+                                "warn", "identity-item-shared",
+                                f"profile {a.name} ({a.record.get('id')}, {a.state}) and profile "
+                                f"{b.name} ({b.record.get('id')}, {b.state}) both carry the Wikidata "
+                                f"item {value} and share no bioguide or FEC id: one article on two "
+                                "filings' ballot pages, which a namesake's can be (rules 25, 33). The "
+                                "item joins neither to any card until an evidenced "
+                                "overrides.IDENTITY_JOINS entry settles the pair (rule 105)",
+                                [a.key, b.key]))
+            for i, first in enumerate(nodes):
+                for other in nodes[i + 1:]:
+                    if first.key in barred or other.key in barred:
+                        continue
+                    if states_disagree(first, other):
+                        links.problems.append((
+                            "warn", "identity-states-disagree",
+                            f"{first.kind} {first.name} ({first.state}) and {other.kind} "
+                            f"{other.name} ({other.state}) share the {scheme} id {value}, but a "
+                            "state's card is not a role of someone on another state's card: "
+                            "neither card names the other (rule 105)", [first.key, other.key]))
+                    elif names_agree(first.forms, other.forms):
+                        links._union(first.key, other.key, f"{scheme} {value}")
+                    else:
+                        links.problems.append((
+                            "warn", "identity-names-disagree",
+                            f"{first.kind} {first.name} and {other.kind} {other.name} share the "
+                            f"{scheme} id {value} but their names disagree; neither card names the "
+                            "other (rule 105)", [first.key, other.key]))
 
 
-def office_in_state(row, key, code):
+def office_in_state(row, key, code, when_read=False):
     """Whether a corroborated row of offices (rule 69) is the officer card's
-    office in *code*: open, the office's words and none of another office's
+    office in *code*: open (*when_read*: or found open when the record was
+    read, ``openWhenRead``, as the record phase writes a candidate's and a
+    seated winner's open offices - ``history.for_page``'s *before_seat*; the
+    officer card is then the current source and the record the second), the
+    office's words and none of another office's
     (a deputy's, an assistant's, an acting one's, the U.S. one), and the
     state in its place - the row's ``where``, or with none, the label itself
     naming the state in the office's slot ("Texas Attorney General",
@@ -561,8 +658,8 @@ def office_in_state(row, key, code):
     from .pages import short_name
 
     office = row.get("office") or ""
-    if not row.get("current") or not OFFICE_WORDS[key].search(office) \
-            or _NOT_THE_OFFICE.search(office):
+    is_open = row.get("current") or (when_read and row.get("openWhenRead"))
+    if not is_open or not OFFICE_WORDS[key].search(office) or _NOT_THE_OFFICE.search(office):
         return False
     state = short_name(code)
     if row.get("where"):
@@ -576,19 +673,37 @@ def office_in_state(row, key, code):
 
 def _join_officers(links, officers):
     """Each officer card to the people whose corroborated record holds that
-    office open in that state, where the card's name names them (rule 56)."""
+    office open in that state, where the card's name names them (rule 56).
+
+    Once the Congress the cycle elects sits, a candidate's and a seated
+    winner's record says an office was open *when it was read*
+    (``openWhenRead``), no longer that it is current (rules 69 and 86). The
+    officer card is read from the office's roster every day, so while it
+    still names the person the two sources still agree: the join stands,
+    and the role ends on its own card's clock (``ends``, :func:`term_end`).
+    On the first January rehearsal Phil Weiser's, Aaron D. Ford's, Alan
+    Wilson's, Juliana Stratton's and Chuck Gray's lines vanished on January
+    3 and each pair was reported as a look-alike to settle, a day after the
+    build had settled it. A pair whose record holds the office open when
+    read is never a look-alike."""
     people = [n for n in links.nodes.values() if n.kind in ("profile", "candidate", "governor")]
     for node in officers:
         code, key = node.state, node.key.rsplit(":", 1)[-1]
         for person in people:
             if person.state != code:
                 continue
-            held = [r for r in _history_rows(person.record) if office_in_state(r, key, code)]
+            held = [r for r in _history_rows(person.record)
+                    if office_in_state(r, key, code, when_read=True)]
+            read_open = [r for r in held if not r.get("current")]
             named = office_names(person.name, node.name)
             if held and named:
-                links._union(node.key, person.key,
-                             f"{held[0]['office']} in the record; the officer card names them")
-            elif look_alike(person.name, node.name) and not links.settled(node.key, person.key):
+                row = next((r for r in held if r.get("current")), held[0])
+                links._union(node.key, person.key, f"{row['office']} in the record"
+                             + ("" if row.get("current")
+                                else f", open when it was read on {row['openWhenRead']}")
+                             + "; the officer card names them")
+            elif (look_alike(person.name, node.name) and not read_open
+                  and not links.settled(node.key, person.key)):
                 links.problems.append((
                     "warn", "identity-look-alike",
                     f"{node.name} ({node.role['words']}) and {person.kind} {person.name} share a "
@@ -603,8 +718,29 @@ def _legislator_node(links, code, member, chamber_titles):
     if key in links.nodes:
         return links.nodes[key]
     title = chamber_titles.get((code, member.get("chamber"))) or "Legislature"
+    name = (links.chamber_names or {}).get((code, member.get("chamber")))
     return links.add(Node(key, "legislator", member.get("name"), code, member,
-                          legislator_role(code, member, title), photo=_photo(member, "image")))
+                          legislator_role(code, member, title, name),
+                          photo=_photo(member, "image")))
+
+
+def _seat_while_a_candidate(record, person, history, legislators):
+    """For a member seated since Election Day for a race they won (rule 67's
+    ``record.seated_winner``), the legislator rule 24's own test ties to the
+    filing folded into their profile (``record.filing_ids``, where the
+    history cache still holds the record read while they ran, rule 86): the
+    seat they held as a candidate, which the legislature's roster still
+    lists. None for anyone else."""
+    from .nominee_photos import legislator_for
+    from .record import filing_ids, seated_winner
+
+    if not seated_winner(record):
+        return None
+    for pid in [record.get("id")] + filing_ids(record):
+        member, _why = legislator_for(dict(person, id=pid), history, legislators)
+        if member:
+            return member
+    return None
 
 
 def _join_legislators(links, legislators, chamber_titles):
@@ -612,11 +748,20 @@ def _join_legislators(links, legislators, chamber_titles):
     legislature, by rule 24's join (``nominee_photos.legislator_for``); and
     each who shares their first and last name with a member of their own
     state's legislature that the join did not tie, reported in one line
-    (``identity-legislator-look-alike``) and linked to nobody (rule 25)."""
+    (``identity-legislator-look-alike``) and linked to nobody (rule 25).
+
+    A winner seated in Congress since Election Day whom the roster still
+    lists in the seat the join tied them to as a candidate is neither: they
+    are one person, and it is the roster that is behind (rules 16, 51 and
+    100: Open States seats whom a legislature has replaced). They are said
+    in a line of their own (``identity-legislator-roster-behind``) and
+    linked to nothing - a member of Congress is not shown as sitting in a
+    legislature on a roster's word. On the first January rehearsal fourteen
+    of them were listed among the look-alikes for a person to settle."""
     from .nominee_photos import held_seats, legislator_for, same_name
 
     history = links.history_cache or {}
-    unsettled = []
+    unsettled, behind = [], []
     for node in list(links.nodes.values()):
         if node.kind not in ("profile", "candidate"):
             continue
@@ -634,6 +779,8 @@ def _join_legislators(links, legislators, chamber_titles):
             leg = _legislator_node(links, node.state, member, chamber_titles)
             links._union(leg.key, node.key, "legislature join (rule 24)")
             continue
+        was = (None if joinable or node.kind != "profile"
+               else _seat_while_a_candidate(record, person, history, legislators))
         roster = ((legislators or {}).get("states") or {}).get(node.state) or []
         # A corroborated seat whose member the roster writes another way
         # ("Shev Jones" for "Shevrin \"Shev\" Jones"): the same surname in
@@ -648,11 +795,25 @@ def _join_legislators(links, legislators, chamber_titles):
             key = f"legislator:{node.state}:{seat.get('id')}"
             if links.settled(key, node.key):
                 continue
-            unsettled.append(f"{node.kind} {node.name} ({record.get('id')}) and "
-                             f"{seat.get('name')} ({node.state} {seat.get('chamber')} "
-                             f"{seat.get('district')}, {seat.get('id')}): "
+            pair = (f"{node.kind} {node.name} ({record.get('id')}) and "
+                    f"{seat.get('name')} ({node.state} {seat.get('chamber')} "
+                    f"{seat.get('district')}, {seat.get('id')})")
+            if was is not None and seat.get("id") == was.get("id"):
+                behind.append(pair)
+                continue
+            unsettled.append(pair + ": "
                              + (why if alike else "their corroborated record holds a seat in that "
                                 "chamber, but the roster writes the name another way"))
+    if behind:
+        fetched = str((legislators or {}).get("fetched") or "")[:10]
+        links.problems.append((
+            "warn", "identity-legislator-roster-behind",
+            f"{len(behind)} member{'' if len(behind) == 1 else 's'} seated in Congress since "
+            f"Election Day {'is' if len(behind) == 1 else 'are'} still listed by "
+            "their state legislature's roster" + (f" (Open States, read {fetched})" if fetched else "")
+            + " in the seat rule 24's join tied them to as candidates: the roster is behind (rules "
+            "16, 51, 100), not a look-alike to settle. Neither card names the other (rule 105)",
+            sorted(behind)))
     if unsettled:
         links.problems.append((
             "warn", "identity-legislator-look-alike",
@@ -661,6 +822,20 @@ def _join_legislators(links, legislators, chamber_titles):
             "holds a seat in - and rule 24's join does not tie them; neither card names the other "
             "until a corroborated record does, or an evidenced "
             "overrides.IDENTITY_JOINS entry settles the pair (rule 105)", sorted(unsettled)))
+
+
+def _profile_alias(links, key):
+    """The node a profile's key answers to once its filing is folded into
+    another profile: ``profile:FEC_<id>`` is the profile that holds that FEC
+    candidate id (its own or a merged one, ``otherFecIds``; rule 96's
+    ``share.aliases``), so an entry keyed on a winner's filing still settles
+    their pair on January 3, when they are a member under their bioguide id
+    (Marty Jackley's, elected in SD-AL). None where no one profile holds it."""
+    if key in links.nodes or not key.startswith("profile:FEC_"):
+        return None
+    fec = key[len("profile:FEC_"):]
+    held = [n for n in links.nodes.values() if n.kind == "profile" and fec in n.ids["fec"]]
+    return held[0] if len(held) == 1 else None
 
 
 def _apply_settled(links):
@@ -680,7 +855,10 @@ def _apply_settled(links):
                 f"overrides.IDENTITY_JOINS {pair!r} needs both cards' keys, \"same\", the "
                 "evidence and the day it was read; it settles nothing (rule 105)", [str(pair)]))
             continue
-        links.settled_pairs[frozenset(pair)] = dict(entry, pair=pair)
+        # The keys as this build's nodes carry them (a folded filing's
+        # profile), and as the entry writes them, for what is said of it.
+        now = tuple(getattr(_profile_alias(links, key), "key", key) for key in pair)
+        links.settled_pairs[frozenset(now)] = dict(entry, pair=now, written=pair)
 
 
 def _node_for(links, key):
@@ -705,31 +883,35 @@ def _join_settled(links):
         if not a or not b:
             links.problems.append((
                 "warn", "stale-identity-join",
-                f"overrides.IDENTITY_JOINS {entry['pair']!r}: "
-                + ", ".join(k for k, n in ((a_key, a), (b_key, b)) if not n)
-                + " is no card this build makes; the entry settles nothing", list(entry["pair"])))
+                f"overrides.IDENTITY_JOINS {entry['written']!r}: "
+                + ", ".join(w for w, n in zip(entry["written"], (a, b)) if not n)
+                + " is no card this build makes; the entry settles nothing", list(entry["written"])))
             continue
         together = links._find(a.key) == links._find(b.key)
         if entry["same"]:
-            if together:
+            if together and pair in links.item_settled:
+                # Joined by the item, on this entry's word.
+                links.joined_by[pair] = "an evidenced overrides.IDENTITY_JOINS entry"
+            elif together:
                 links.problems.append((
                     "warn", "stale-identity-join",
-                    f"overrides.IDENTITY_JOINS {entry['pair']!r}: the two cards are joined by "
+                    f"overrides.IDENTITY_JOINS {entry['written']!r}: the two cards are joined by "
                     f"ids or a second source already ({links.joined_by.get(pair) or 'joined'}); "
-                    "the entry is no longer needed", list(entry["pair"])))
+                    "the entry is no longer needed", list(entry["written"])))
             else:
                 links._union(a.key, b.key, "an evidenced overrides.IDENTITY_JOINS entry")
         elif together:
             links.problems.append((
                 "warn", "identity-join-contradicted",
-                f"overrides.IDENTITY_JOINS {entry['pair']!r} says two people, but the build joins "
+                f"overrides.IDENTITY_JOINS {entry['written']!r} says two people, but the build joins "
                 f"the two cards ({links.joined_by.get(pair) or 'through another card'}): a person "
-                "must look again", list(entry["pair"])))
-        elif not look_alike(a.name, b.name):
+                "must look again", list(entry["written"])))
+        elif not look_alike(a.name, b.name) and pair not in links.item_pairs:
             links.problems.append((
                 "warn", "stale-identity-join",
-                f"overrides.IDENTITY_JOINS {entry['pair']!r}: {a.name} and {b.name} no longer "
-                "share a name, so there is no look-alike to settle", list(entry["pair"])))
+                f"overrides.IDENTITY_JOINS {entry['written']!r}: {a.name} and {b.name} no longer "
+                "share a name or a Wikidata item, so there is no look-alike to settle",
+                list(entry["written"])))
 
 
 def build(profiles, races=None, summary=None, stategov=None, federal=None, courts=None,
@@ -902,6 +1084,8 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
     for code, payload in (legislatures or {}).items():
         for chamber, info in ((payload or {}).get("chambers") or {}).items():
             titles[(code, chamber)] = info.get("title")
+            if info.get("name"):
+                links.chamber_names[(code, chamber)] = info["name"]
     links.legislators = legislators or {}
     links.titles = titles
     _apply_settled(links)

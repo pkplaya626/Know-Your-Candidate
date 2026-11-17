@@ -374,23 +374,38 @@ class TestTheGuards(unittest.TestCase):
     def test_an_officer_is_joined_only_in_its_own_state(self):
         self.assertEqual(self.joined([self.held("Texas Attorney General")], state="OK"), [])
 
-    def test_two_profiles_of_one_person_name_no_one(self):
-        # A member's profile and their candidacy's, folded by the profiles
-        # themselves (rule 30): one card, no line between them.
-        a = member("B000001", "Andy Example", state="KY", fecCandidateId="H0KY06104")
-        b = filer("FEC_S6KY00001", "Andy Example", state="KY", otherFecIds=["H0KY06104"])
+    def test_two_profiles_the_dialog_cross_links_name_no_one(self):
+        # A member's profile and their candidacy's, which the profile dialog
+        # cross-links itself (alsoRunningId, incumbentId; rule 30): one
+        # card, no line between them.
+        a = member("B000001", "Andy Example", state="KY", fecCandidateId="H0KY06104",
+                   alsoRunningId="FEC_S6KY00001")
+        b = filer("FEC_S6KY00001", "Andy Example", state="KY", otherFecIds=["H0KY06104"],
+                  incumbentId="B000001")
         links = identity.build([a, b])
         identity.attach(links)
         self.assertEqual(roles(a), [])
         self.assertEqual(roles(b), [])
+        # Either field alone is the dialog's link.
+        a.pop("alsoRunningId")
+        identity.attach(identity.build([a, b]))
+        self.assertEqual(roles(a), [])
+        # Two profiles an id ties that no dialog links name each other, as
+        # any two cards do: "one card, no line" was said of every pair.
+        b.pop("incumbentId")
+        links = identity.build([a, b])
+        identity.attach(links)
+        self.assertEqual(roles(a), [("profile", "FEC_S6KY00001")])
+        self.assertEqual(roles(b), [("profile", "B000001")])
 
     def test_an_fec_id_joins(self):
         # A member's profile and their candidacy's share the FEC id; the
         # candidacy's article's item is a governor list's card's. The member's
         # card names the list through the FEC id alone.
-        a = member("B000002", "Andy Example", state="KY", fecCandidateId="H0KY06105")
+        a = member("B000002", "Andy Example", state="KY", fecCandidateId="H0KY06105",
+                   alsoRunningId="FEC_S6KY00002")
         b = filer("FEC_S6KY00002", "Andy Example", state="KY", otherFecIds=["H0KY06105"],
-                  politicalHistory={"wikidata": "Q70", "rows": []})
+                  incumbentId="B000002", politicalHistory={"wikidata": "Q70", "rows": []})
         candidate = {"id": "gov-KY-andy-example", "name": "Andy Example",
                      "politicalHistory": {"wikidata": "Q70", "rows": []}}
         links = identity.build([a, b], stategov=stategov("KY", candidates=[candidate]))
@@ -715,6 +730,597 @@ class TestRoleWords(unittest.TestCase):
         role = identity.profile_role(challenger, {}, {}, "2026-11-13")
         self.assertEqual(role["words"], "Candidate for the U.S. Senate in Maine")
         self.assertEqual(role["after"], "2026 race for the U.S. Senate in Maine")
+
+
+class SettledEntries(unittest.TestCase):
+    """A base that puts ``overrides.IDENTITY_JOINS`` back."""
+
+    def setUp(self):
+        from kyc import overrides
+        self.overrides = overrides
+        self.saved = dict(overrides.IDENTITY_JOINS)
+        overrides.IDENTITY_JOINS.clear()
+
+    def tearDown(self):
+        self.overrides.IDENTITY_JOINS.clear()
+        self.overrides.IDENTITY_JOINS.update(self.saved)
+
+    def settle(self, pair, **entry):
+        self.overrides.IDENTITY_JOINS[pair] = dict({"evidence": "made up", "read": "2026-11-15"},
+                                                   **entry)
+
+
+def term(day="2027-01-12"):
+    return {"from": day, "day": day, "kind": "on", "cite": "Made-up Const.",
+            "source": "https://example.gov/", "words": "", "counted": False}
+
+
+def outgoing(name):
+    return {"holder": name, "why": "not-listed", "roster": "a roster", "read": "2026-11-10"}
+
+
+class TestTheRecordPhase(SettledEntries):
+    """January 3: a candidate's and a seated winner's open offices are said
+    to have been open when the record was read (``openWhenRead``,
+    ``history.for_page``'s *before_seat*), and no longer ``current``."""
+
+    def officer(self, name="Phil Example"):
+        return {"name": name, "title": "Attorney General", "party": "D", "partyKey": "D"}
+
+    def payload(self, candidate, off):
+        entry = {"ag": off, "ballot2026": {"offices": {
+            "governor": {"up": True, "candidates": {"candidates": [candidate]}},
+            "ag": {"up": True, "termBegins": term(), "outgoing": outgoing(off["name"])}}}}
+        return {"states": {"CO": entry}}
+
+    def candidate(self, **row):
+        row = dict({"office": "Colorado Attorney General", "where": "Colorado", "from": "2019"}, **row)
+        return {"id": "gov-CO-phil-example", "name": "Phil Example",
+                "politicalHistory": {"wikidata": "Q4", "rows": [row]}}
+
+    def test_an_office_open_when_read_still_joins_while_the_card_names_them(self):
+        off, candidate = self.officer(), self.candidate(openWhenRead="2026-11-14")
+        links = identity.build([], stategov=self.payload(candidate, off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [("candidate", "gov-CO-phil-example")])
+        self.assertNotIn("identity-look-alike", codes(links))
+        # The role keeps its end on the card's own clock.
+        role = candidate["also"][0]
+        self.assertEqual((role["words"], role["ends"]), ("Attorney General of Colorado", "2027-01-12"))
+        self.assertTrue(role["ended"].startswith("Was Attorney General of Colorado, until the term"))
+        why = [w for _name, _keys, whys in identity.joined(links) for w in whys]
+        self.assertEqual(why, ["Colorado Attorney General in the record, open when it was read on "
+                               "2026-11-14; the officer card names them"])
+        # A row that ended, or one read open for another office, is no second source.
+        for row in ({"to": "2023"}, {"office": "Colorado Secretary of State",
+                                     "openWhenRead": "2026-11-14"}):
+            off, candidate = self.officer(), self.candidate(**row)
+            links = identity.build([], stategov=self.payload(candidate, off))
+            identity.attach(links)
+            self.assertEqual(roles(off), [], row)
+            self.assertIn("identity-look-alike", codes(links), row)
+
+    def test_the_join_ends_when_the_card_names_someone_else(self):
+        off, candidate = self.officer("Mia Other"), self.candidate(openWhenRead="2026-11-14")
+        links = identity.build([], stategov=self.payload(candidate, off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [])
+        self.assertEqual(roles(candidate), [])
+        self.assertNotIn("identity-look-alike", codes(links))
+
+    def test_an_office_open_when_read_is_never_a_look_alike(self):
+        # The card's name is theirs to a reader, though not by rule 56's test
+        # (three words between first and last).
+        name = "Phil Alpha Beta Gamma Example"
+        self.assertFalse(identity.office_names("Phil Example", name))
+        self.assertTrue(identity.look_alike("Phil Example", name))
+        off, candidate = self.officer(name), self.candidate(openWhenRead="2026-11-14")
+        links = identity.build([], stategov=self.payload(candidate, off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [])
+        self.assertNotIn("identity-look-alike", codes(links))
+        # While the record calls the office current, the same pair is said.
+        off, candidate = self.officer(name), self.candidate(current=True)
+        links = identity.build([], stategov=self.payload(candidate, off))
+        self.assertIn("identity-look-alike", codes(links))
+
+    def seated(self, **extra):
+        # A winner seated since Election Day (record.seated_winner), their
+        # filing folded into the member's profile.
+        row = member("E000001", "Gina Example", state="TX", chamber="House",
+                     officeLabel="House • TX-37", raceRole="winner", fecCandidateId="H6TX00001",
+                     wikipedia="Gina Example")
+        row.update(extra)
+        return row
+
+    def roster(self):
+        history = {"people": {"FEC_H6TX00001": {"asked": "Gina Example", "wikipedia": "Gina Example",
+                                                "offices": [
+            {"office": "Member of the Texas House of Representatives", "where": "Texas",
+             "open": True, "agree": "exact"}]}}}
+        seat = {"id": "ocd-person/1", "name": "Gina Example", "chamber": "lower", "district": "49",
+                "districtId": "049", "state": "TX"}
+        return history, {"fetched": "2026-11-14T14:48:44+00:00", "states": {"TX": [seat]}}
+
+    def test_a_seated_winner_the_roster_still_lists_is_no_look_alike(self):
+        history, legislators = self.roster()
+        winner = self.seated()
+        links = identity.build([winner], history=history, legislators=legislators)
+        identity.attach(links)
+        self.assertEqual(roles(winner), [])              # nothing is linked
+        found = {p[1]: p for p in identity.problems(links)}
+        self.assertNotIn("identity-legislator-look-alike", found)
+        behind = found["identity-legislator-roster-behind"]
+        self.assertEqual(behind[0], "warn")
+        self.assertIn("1 member seated in Congress since Election Day is still listed", behind[2])
+        self.assertIn("read 2026-11-14", behind[2])
+        self.assertEqual(behind[3], ["profile Gina Example (E000001) and Gina Example (TX lower 49, "
+                                     "ocd-person/1)"])
+        # As a candidate the very same records were joined (rule 24).
+        running = filer("FEC_H6TX00001", "Gina Example", state="TX", label="House • TX-37",
+                        wikipedia="Gina Example")
+        links = identity.build([running], history=history, legislators=legislators)
+        identity.attach(links)
+        self.assertEqual(roles(running), [("legislator", "ocd-person/1")])
+
+    def test_only_the_seat_rule_24_would_tie_is_the_rosters_lag(self):
+        history, legislators = self.roster()
+        # A member who was not just seated for a race they won: a namesake
+        # in the legislature is a look-alike, as before.
+        links = identity.build([self.seated(raceRole=None)], history=history,
+                               legislators=legislators)
+        self.assertEqual([c for c in codes(links) if c.startswith("identity-leg")],
+                         ["identity-legislator-look-alike"])
+        # A winner whose record holds no seat there (read from another
+        # article than the profile links): a look-alike too.
+        links = identity.build([self.seated(wikipedia="Gina Example (singer)")], history=history,
+                               legislators=legislators)
+        self.assertEqual([c for c in codes(links) if c.startswith("identity-leg")],
+                         ["identity-legislator-look-alike"])
+        # A second member of the name in the other chamber stays a look-alike
+        # beside the seat that is behind.
+        twin = {"id": "ocd-person/2", "name": "Gina Example", "chamber": "upper", "district": "14",
+                "state": "TX"}
+        legislators["states"]["TX"].append(twin)
+        links = identity.build([self.seated()], history=history, legislators=legislators)
+        found = {p[1]: p for p in identity.problems(links)}
+        self.assertEqual(len(found["identity-legislator-roster-behind"][3]), 1)
+        self.assertEqual(len(found["identity-legislator-look-alike"][3]), 1)
+        self.assertIn("ocd-person/2", found["identity-legislator-look-alike"][3][0])
+
+    def test_an_entry_keyed_on_a_filing_follows_it_into_the_members_profile(self):
+        off = {"name": "Marty Example", "title": "Attorney General", "party": "R", "partyKey": "R"}
+        self.settle(("officer:SD:ag", "profile:FEC_H6SD00001"), same=True)
+        running = filer("FEC_H6SD00001", "Marty Example", state="SD", label="House • SD-AL")
+        links = identity.build([running], stategov=stategov("SD", ag=off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [("profile", "FEC_H6SD00001")])
+        # January 3: the same person under their bioguide id, the filing's
+        # FEC id folded in.
+        winner = member("J000001", "Marty Example", state="SD", chamber="House",
+                        officeLabel="House • SD-AL", raceRole="winner", fecCandidateId="H6SD00001")
+        links = identity.build([winner], stategov=stategov("SD", ag=off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [("profile", "J000001")])
+        self.assertEqual([c for c in codes(links) if "identity" in c], ["identity-joined"])
+        # Nobody holds the filing: the entry is stale, in the words it was written in.
+        links = identity.build([member("J000001", "Marty Example", state="SD")],
+                               stategov=stategov("SD", ag=off))
+        stale = [p for p in identity.problems(links) if p[1] == "stale-identity-join"]
+        self.assertEqual(len(stale), 1)
+        self.assertIn("profile:FEC_H6SD00001 is no card this build makes", stale[0][2])
+
+
+class TestAnItemOnTwoProfiles(SettledEntries):
+    def people(self):
+        incumbent = member("J000307", "John James", state="MI", chamber="House",
+                           officeLabel="House • MI-10",
+                           politicalHistory={"wikidata": "Q1", "rows": []})
+        challenger = filer("FEC_H6MI13999", "John James", state="MI", label="House • MI-13",
+                           politicalHistory={"wikidata": "Q1", "rows": []})
+        return incumbent, challenger
+
+    def test_a_namesake_whose_article_is_the_members_takes_on_none_of_their_roles(self):
+        incumbent, challenger = self.people()
+        card = {"id": "gov-MI-john-james", "name": "John James", "member": "J000307"}
+        links = identity.build([incumbent, challenger], stategov=stategov("MI", candidates=[card]))
+        identity.attach(links)
+        self.assertEqual(roles(challenger), [])
+        self.assertEqual(roles(incumbent), [("candidate", "gov-MI-john-james")])
+        self.assertEqual(roles(card), [("profile", "J000307")])
+        shared = [p for p in identity.problems(links) if p[1] == "identity-item-shared"]
+        self.assertEqual(len(shared), 1)
+        for word in ("J000307", "FEC_H6MI13999", "Q1"):
+            self.assertIn(word, shared[0][2])
+        self.assertEqual(shared[0][3], ["profile:J000307", "profile:FEC_H6MI13999"])
+
+    def test_the_item_joins_neither_profile_to_a_third_card(self):
+        # A card that holds only the item: whose it is, no record says.
+        incumbent, challenger = self.people()
+        card = {"id": "gov-MI-john-james", "name": "John James",
+                "politicalHistory": {"wikidata": "Q1", "rows": []}}
+        links = identity.build([incumbent, challenger], stategov=stategov("MI", candidates=[card]))
+        identity.attach(links)
+        self.assertEqual((roles(incumbent), roles(challenger), roles(card)), ([], [], []))
+        # With the challenger gone, the item is the member's again.
+        links = identity.build([incumbent], stategov=stategov("MI", candidates=[card]))
+        identity.attach(links)
+        self.assertEqual(roles(card), [("profile", "J000307")])
+
+    def test_two_filings_that_share_an_id_are_joined_by_their_item(self):
+        a = filer("FEC_H6NJ07001", "Rand Example", state="NJ", label="House • NJ-7",
+                  politicalHistory={"wikidata": "Q2", "rows": []})
+        b = filer("FEC_H6VA07001", "Rand Example", state="VA", label="House • VA-7",
+                  otherFecIds=["H6NJ07001"], politicalHistory={"wikidata": "Q2", "rows": []})
+        links = identity.build([a, b])
+        identity.attach(links)
+        self.assertEqual(roles(a), [("profile", "FEC_H6VA07001")])
+        self.assertNotIn("identity-item-shared", codes(links))
+
+    def two_filings(self):
+        a = filer("FEC_H6NJ07001", "Rand Example", state="NJ", label="House • NJ-7",
+                  politicalHistory={"wikidata": "Q2", "rows": []})
+        b = filer("FEC_H6VA07001", "Rand Example", state="VA", label="House • VA-7",
+                  politicalHistory={"wikidata": "Q2", "rows": []})
+        return a, b
+
+    def test_only_an_evidenced_entry_settles_them_and_then_they_name_each_other(self):
+        a, b = self.two_filings()
+        links = identity.build([a, b])
+        identity.attach(links)
+        self.assertEqual((roles(a), roles(b)), ([], []))
+        self.assertIn("identity-item-shared", codes(links))
+        pair = ("profile:FEC_H6NJ07001", "profile:FEC_H6VA07001")
+        self.settle(pair, same=True)
+        links = identity.build([a, b])
+        identity.attach(links)
+        self.assertEqual(roles(a), [("profile", "FEC_H6VA07001")])
+        self.assertEqual(roles(b), [("profile", "FEC_H6NJ07001")])
+        self.assertEqual(b["also"][0]["words"], "Candidate for the U.S. House in NJ-7")
+        self.assertEqual([c for c in codes(links) if "identity" in c], ["identity-joined"])
+        self.assertEqual(identity.joined(links)[0][2], ["an evidenced overrides.IDENTITY_JOINS entry"])
+        # The item is then both filings', and ties them to a third card that
+        # holds it; unsettled, it ties that card to neither.
+        fed, holder = official("x-rand-example", "Rand Example", "Administrator", item="Q2")
+        links = identity.build([a, b], federal=fed)
+        identity.attach(links)
+        self.assertEqual(roles(holder), [("profile", "FEC_H6NJ07001"), ("profile", "FEC_H6VA07001")])
+        self.overrides.IDENTITY_JOINS.clear()
+        links = identity.build([a, b], federal=fed)
+        identity.attach(links)
+        self.assertEqual(roles(holder), [])
+        # Two people, by a person's word: silent, joined by nothing, not stale.
+        self.settle(pair, same=False)
+        links = identity.build([a, b])
+        identity.attach(links)
+        self.assertEqual((roles(a), roles(b)), ([], []))
+        self.assertEqual([c for c in codes(links) if "identity" in c], [])
+        # Two forms of a name are still a pair to settle while the item is
+        # on both; once it is on one only, the entry settles nothing.
+        b["name"] = "Randall Example"
+        self.assertFalse(identity.look_alike(a["name"], b["name"]))
+        self.assertEqual([c for c in codes(identity.build([a, b])) if "identity" in c], [])
+        b["politicalHistory"] = {"rows": []}
+        self.assertIn("stale-identity-join", codes(identity.build([a, b])))
+
+    def test_a_card_of_another_state_is_refused_whatever_the_id(self):
+        texan = filer("FEC_H6TX00002", "Pat Example", state="TX", label="House • TX-3",
+                      politicalHistory={"wikidata": "Q5", "rows": []})
+        card = {"id": "gov-OK-pat-example", "name": "Pat Example",
+                "politicalHistory": {"wikidata": "Q5", "rows": []}}
+        links = identity.build([texan], stategov=stategov("OK", candidates=[card]))
+        identity.attach(links)
+        self.assertEqual((roles(texan), roles(card)), ([], []))
+        found = [p for p in identity.problems(links) if p[1] == "identity-states-disagree"]
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0][3], ["profile:FEC_H6TX00002", "candidate:gov-OK-pat-example"])
+        # A bioguide id, and a departed member's row: the same.
+        senator = member("E000002", "Pat Example", state="TX")
+        card = {"id": "gov-OK-pat-example", "name": "Pat Example", "member": "E000002"}
+        links = identity.build([senator], stategov=stategov("OK", candidates=[card]))
+        identity.attach(links)
+        self.assertEqual(roles(senator), [])
+        self.assertIn("identity-states-disagree", codes(links))
+        row = {"id": "E000003", "name": "Pat Example", "chamber": "House", "state": "OH",
+               "district": 2, "left": "2025-01-03"}
+        governor = {"id": "gov-IN", "name": "Pat Example", "wikidata": "Q6"}
+        links = identity.build([], departed=[row],
+                               departed_cache={"members": [{"bioguide": "E000003", "wikidata": "Q6"}]},
+                               stategov=stategov("IN", governor=governor))
+        identity.attach(links)
+        self.assertEqual(roles(row), [])
+        self.assertIn("identity-states-disagree", codes(links))
+        # The same state joins; so do a profile and a departed row of two
+        # states (a member who moved), neither being a state's card.
+        governor = {"id": "gov-OH", "name": "Pat Example", "wikidata": "Q6"}
+        links = identity.build([], departed=[row],
+                               departed_cache={"members": [{"bioguide": "E000003", "wikidata": "Q6"}]},
+                               stategov=stategov("OH", governor=governor))
+        identity.attach(links)
+        self.assertEqual(roles(row), [("governor", "gov-OH")])
+        mover = filer("FEC_S6TX00009", "Pat Example", state="TX",
+                      politicalHistory={"wikidata": "Q6", "rows": []})
+        links = identity.build([mover], departed=[row],
+                               departed_cache={"members": [{"bioguide": "E000003", "wikidata": "Q6"}]})
+        identity.attach(links)
+        self.assertEqual(roles(mover), [("departed", "E000003")])
+        self.assertNotIn("identity-states-disagree", codes(links))
+
+
+class TestEveryPairOfHolders(unittest.TestCase):
+    def test_a_first_holder_who_disagrees_does_not_block_the_others(self):
+        # One item on three records: a challenger named Jane James, whose
+        # ballot page links her husband's article, comes first.
+        jane = filer("FEC_H6MI13001", "Jane James", state="MI", label="House • MI-13",
+                     politicalHistory={"wikidata": "Q1", "rows": []})
+        fed, john = official("x-john-james", "John James", "Secretary of Commerce", item="Q1")
+        card = {"id": "gov-MI-john-james", "name": "John James",
+                "politicalHistory": {"wikidata": "Q1", "rows": []}}
+        links = identity.build([jane], federal=fed, stategov=stategov("MI", candidates=[card]))
+        identity.attach(links)
+        self.assertEqual(roles(john), [("candidate", "gov-MI-john-james")])
+        self.assertEqual(roles(card), [("official", "x-john-james")])
+        self.assertEqual(roles(jane), [])
+        disagree = [p[3] for p in identity.problems(links) if p[1] == "identity-names-disagree"]
+        self.assertEqual(disagree, [["profile:FEC_H6MI13001", "official:x-john-james"],
+                                    ["profile:FEC_H6MI13001", "candidate:gov-MI-john-james"]])
+
+
+class TestMoreGuards(SettledEntries):
+    def officer(self, name="Ken Example", title="Attorney General"):
+        return {"name": name, "title": title, "party": "R", "partyKey": "R"}
+
+    def test_a_label_with_no_where_is_the_whole_office_never_words_around_it(self):
+        row = {"current": True}
+        for office, held in (("Minnesota Attorney General", True),
+                             ("Attorney General of Minnesota", True),
+                             ("Former Minnesota Attorney General", False),
+                             ("Minnesota Attorney General's chief of staff", False),
+                             ("Solicitor to the Attorney General of Minnesota", False)):
+            self.assertEqual(identity.office_in_state(dict(row, office=office), "ag", "MN"), held,
+                             office)
+        person = filer("CAND_7", "Ken Example", state="MN", politicalHistory={"rows": [
+            dict(row, office="Former Minnesota Attorney General")]})
+        off = self.officer()
+        links = identity.build([person], stategov=stategov("MN", ag=off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [])
+
+    def test_a_governor_on_another_states_list_is_not_their_own_card(self):
+        # Only a person's entry can tie two states' cards; tied, they name
+        # each other: "the holder on their own list" is of one state.
+        governor = {"id": "gov-MN", "name": "Pat Example"}
+        card = {"id": "gov-WI-pat-example", "name": "Pat Example"}
+        payload = {"states": {"MN": stategov("MN", governor=governor)["states"]["MN"],
+                              "WI": stategov("WI", candidates=[card])["states"]["WI"]}}
+        self.settle(("governor:gov-MN", "candidate:gov-WI-pat-example"), same=True)
+        links = identity.build([], stategov=payload)
+        identity.attach(links)
+        self.assertEqual(roles(governor), [("candidate", "gov-WI-pat-example")])
+        self.assertEqual(roles(card), [("governor", "gov-MN")])
+
+    def test_a_role_ends_only_where_the_office_is_on_the_ballot(self):
+        role = {"words": "Attorney General of Texas"}
+        item = {"up": True, "termBegins": term("2027-01-01"), "outgoing": outgoing("Ken Example")}
+        self.assertEqual(identity.term_end(dict(role), item, role["words"])["ends"], "2027-01-01")
+        for without in ("up", "termBegins", "outgoing"):
+            less = {k: v for k, v in item.items() if k != without}
+            self.assertNotIn("ends", identity.term_end(dict(role), less, role["words"]), without)
+        self.assertNotIn("ends", identity.term_end(dict(role), dict(item, up=False), role["words"]))
+
+    def test_an_entrys_day_is_a_day(self):
+        off = {"name": "Jo Example", "title": "Secretary of State", "party": "D", "partyKey": "D"}
+        card = {"id": "gov-MI-jo-example", "name": "Jo Example"}
+        payload = stategov("MI", candidates=[card], sos=off)
+        for read in ("Nov. 15, 2026", "2026-11", "15/11/2026", ""):
+            self.overrides.IDENTITY_JOINS.clear()
+            self.settle(("officer:MI:sos", "candidate:gov-MI-jo-example"), same=True, read=read)
+            links = identity.build([], stategov=payload)
+            identity.attach(links)
+            self.assertEqual(roles(off), [], read)
+            self.assertIn("identity-join-unevidenced", codes(links), read)
+            self.assertEqual([p[0] for p in identity.problems(links)
+                              if p[1] == "identity-join-unevidenced"], ["error"])
+
+    def test_a_write_in_candidates_role_says_so(self):
+        # The cards' badge's words (KYC.stategov.candidateBadge) and the
+        # office; the render suite holds the page to the same strings.
+        listed = identity.candidate_role("MN", {"id": "gov-MN-a", "name": "A B"})
+        self.assertEqual((listed["words"], listed["after"]),
+                         ("On the Nov 3, 2026 ballot for Governor of Minnesota",
+                          "Was on the Nov 3, 2026 ballot for Governor of Minnesota"))
+        write_in = identity.candidate_role("MN", {"id": "gov-MN-b", "name": "C D", "writeIn": True})
+        self.assertEqual((write_in["words"], write_in["after"]),
+                         ("Write-in candidate for Governor of Minnesota",
+                          "Was a write-in candidate for Governor of Minnesota"))
+        # On a joined record, with its tense on the share page.
+        challenger = filer("FEC_S6MN00007", "Cy Example", state="MN",
+                           politicalHistory={"wikidata": "Q8", "rows": []})
+        card = {"id": "gov-MN-cy-example", "name": "Cy Example", "writeIn": True,
+                "politicalHistory": {"wikidata": "Q8", "rows": []}}
+        links = identity.build([challenger], stategov=stategov("MN", candidates=[card]))
+        identity.attach(links)
+        self.assertEqual(challenger["also"][0]["words"], "Write-in candidate for Governor of Minnesota")
+        self.assertIn(">Was a write-in candidate for Governor of Minnesota<",
+                      identity.share_html(challenger, post="2026-11-13"))
+
+    def joined_legislator(self):
+        challenger = filer("FEC_H6NH00001", "Gina Example", state="NH", label="House • NH-1",
+                           wikipedia="Gina Example")
+        history = {"people": {"FEC_H6NH00001": {"wikipedia": "Gina Example", "offices": [
+            {"office": "Member of the New Hampshire House of Representatives",
+             "where": "New Hampshire", "open": True, "agree": "exact"}]}}}
+        seat = {"id": "ocd-person/3", "name": "Gina Example", "chamber": "lower",
+                "district": "Strafford 4", "state": "NH"}
+        return challenger, history, {"states": {"NH": [seat]}}
+
+    def test_a_member_the_map_cannot_place_carries_the_line_too(self):
+        challenger, history, legislators = self.joined_legislator()
+        unplaced = {"id": "ocd-person/3", "name": "Gina Example", "chamber": "lower"}
+        other = {"id": "ocd-person/4", "name": "Someone Else", "chamber": "lower", "also": ["stale"]}
+        legislatures = {"NH": {"chambers": {"lower": {"title": "House of Representatives",
+                                                      "members": {}}},
+                               "unplaced": [unplaced, other]}}
+        links = identity.build([challenger], history=history, legislators=legislators,
+                               legislatures=legislatures)
+        identity.attach(links)
+        identity.attach_legislatures(links, legislatures)
+        self.assertEqual(roles(unplaced), [("profile", "FEC_H6NH00001")])
+        self.assertNotIn("also", other)
+
+    def test_a_judge_listed_as_retired_in_another_courts_file_carries_the_line(self):
+        judge = {"id": "fjc-9", "name": "Pat Example", "seats": [{"court": "ca5", "title": "Judge"}]}
+        retired = dict(judge)
+        courts = {"ca5": {"name": "U.S. Court of Appeals for the Fifth Circuit", "judges": [judge]},
+                  "txnd": {"name": "U.S. District Court for the Northern District of Texas",
+                           "judges": [], "retired": [retired, {"id": "fjc-10", "also": ["stale"]}]}}
+        card = {"id": "gov-TX-pat-example", "name": "Pat Example",
+                "politicalHistory": {"wikidata": "Q9", "rows": []}}
+        links = identity.build([], courts=courts, judge_links={"judges": {"9": {"wikidata": "Q9"}}},
+                               stategov=stategov("TX", candidates=[card]))
+        identity.attach(links)
+        identity.attach_courts(links, courts)
+        self.assertEqual(roles(retired), [("candidate", "gov-TX-pat-example")])
+        self.assertNotIn("also", courts["txnd"]["retired"][1])
+
+    def test_a_departed_members_link_is_labelled_as_the_congress_biography(self):
+        row = {"id": "V000002", "name": "J.D. Example", "chamber": "Senate", "state": "OH",
+               "left": "2025-01-09"}
+        role = identity.departed_role(row)
+        self.assertEqual(role["link"], "Congress biography")
+        self.assertEqual(role["href"], "https://bioguide.congress.gov/search/bio/V000002")
+        text = identity.share_html({"also": [role]})
+        self.assertIn("Jan. 9, 2025 (Congress biography)</a>", text)
+        self.assertIn('href="https://bioguide.congress.gov/search/bio/V000002"', text)
+
+    def test_only_candidates_are_asked_of_the_legislature_never_a_governor_or_an_official(self):
+        office = {"office": "Member of the Texas Senate", "where": "Texas", "open": True,
+                  "agree": "exact"}
+        history = {"people": {
+            "gov-TX": {"wikipedia": "Pat Example", "wikidata": "Q3", "offices": [office]},
+            "x-pat-example": {"wikipedia": "Pat Example", "wikidata": "Q3", "offices": [office]}}}
+        seat = {"id": "ocd-person/5", "name": "Pat Example", "chamber": "upper", "district": "14",
+                "state": "TX"}
+        governor = {"id": "gov-TX", "name": "Pat Example", "wikidata": "Q3",
+                    "wikipedia": "Pat Example", "isCandidate": True}
+        fed, holder = official("x-pat-example", "Pat Example", "Secretary of Energy", item="Q3",
+                               state="TX", wikipedia="Pat Example", isCandidate=True)
+        links = identity.build([], history=history, legislators={"states": {"TX": [seat]}},
+                               stategov=stategov("TX", governor=governor), federal=fed)
+        identity.attach(links)
+        self.assertNotIn(("legislator", "ocd-person/5"), roles(governor) + roles(holder))
+        self.assertFalse([c for c in codes(links) if c.startswith("identity-legislator")])
+        self.assertFalse([k for k in links.nodes if k.startswith("legislator:")])
+
+    def test_two_cards_of_one_kind_and_one_name_are_not_this_reports(self):
+        # Two filers of one name in one state are rule 25's own report
+        # (validate.check_duplicate_people), not a pair of roles.
+        a = filer("FEC_H6FL19001", "Michael Example", state="FL", label="House • FL-19")
+        b = filer("FEC_H6FL22001", "Michael Example", state="FL", label="House • FL-22")
+        self.assertNotIn("identity-look-alike", codes(identity.build([a, b])))
+        card = {"id": "gov-FL-michael-example", "name": "Michael Example"}
+        links = identity.build([a, b], stategov=stategov("FL", candidates=[card]))
+        self.assertEqual([p[3] for p in identity.problems(links) if p[1] == "identity-look-alike"],
+                         [["profile:FEC_H6FL19001", "candidate:gov-FL-michael-example"],
+                          ["profile:FEC_H6FL22001", "candidate:gov-FL-michael-example"]])
+
+    def test_a_governor_who_holds_an_officers_office_is_joined_to_its_card(self):
+        # A lieutenant governor who became governor, while the association's
+        # roster still names them.
+        governor = {"id": "gov-XX", "name": "Pat Example", "politicalHistory": {"rows": [
+            {"office": "Lieutenant Governor of Iowa", "where": "Iowa", "current": True}]}}
+        off = self.officer("Pat Example", "Lieutenant Governor")
+        links = identity.build([], stategov=stategov("IA", governor=governor, lt=off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [("governor", "gov-XX")])
+        self.assertEqual(governor["also"][0]["words"], "Lieutenant Governor of Iowa")
+
+    def test_a_lists_candidates_are_cards_only_where_the_office_is_on_the_ballot(self):
+        senator = member("K000009", "Ann Example")
+        card = {"id": "gov-MN-ann-example", "name": "Ann Example", "member": "K000009"}
+        payload = stategov("MN", candidates=[card])
+        payload["states"]["MN"]["ballot2026"]["offices"]["governor"]["up"] = False
+        links = identity.build([senator], stategov=payload)
+        identity.attach(links)
+        self.assertEqual(roles(senator), [])
+        self.assertNotIn("candidate:gov-MN-ann-example", links.nodes)
+        payload["states"]["MN"]["ballot2026"]["offices"]["governor"]["up"] = True
+        links = identity.build([senator], stategov=payload)
+        identity.attach(links)
+        self.assertEqual(roles(senator), [("candidate", "gov-MN-ann-example")])
+
+
+class TestSeatAndChamberWords(unittest.TestCase):
+    def test_a_chamber_by_its_own_name_where_its_own_site_gives_one(self):
+        from kyc import legislature
+        self.assertEqual(identity.legislator_role("NY", {"district": "73"}, "Assembly",
+                                                  "New York State Assembly")["words"],
+                         "Member of the New York State Assembly, district 73")
+        self.assertEqual(identity.legislator_role("NV", {"district": "3"}, "Assembly")["words"],
+                         "Member of the Nevada Assembly, district 3")
+        # The legislature page's payload carries the name, and the join reads it.
+        challenger = filer("FEC_H6NY12001", "Alex Example", state="NY", label="House • NY-12",
+                           wikipedia="Alex Example")
+        history = {"people": {"FEC_H6NY12001": {"wikipedia": "Alex Example", "offices": [
+            {"office": "Member of the New York State Assembly", "where": "New York",
+             "open": True, "agree": "exact"}]}}}
+        seat = {"id": "ocd-person/6", "name": "Alex Example", "chamber": "lower", "district": "73",
+                "districtId": "073", "state": "NY"}
+        chamber = {"title": legislature.chamber_title("NY", "lower"), "members": {}}
+        name = legislature.chamber_name("NY", "lower")
+        if name:
+            chamber["name"] = name
+        links = identity.build([challenger], history=history,
+                               legislators={"states": {"NY": [seat]}},
+                               legislatures={"NY": {"chambers": {"lower": chamber}}})
+        identity.attach(links)
+        self.assertEqual(challenger["also"][0]["words"],
+                         "Member of the New York State Assembly, district 73")
+        self.assertEqual(legislature.chamber_name("TX", "lower"), None)
+
+    def test_every_recorded_chamber_name_is_its_own_sites_words(self):
+        from kyc import legislature
+        self.assertEqual(legislature.chamber_name_problems(), [])
+        saved = dict(legislature.CHAMBER_NAMES)
+        try:
+            legislature.CHAMBER_NAMES[("TX", "upper")] = (
+                "Texas State Senate", "https://senate.texas.gov/", "The Texas Senate", "2026-11-15")
+            legislature.CHAMBER_NAMES[("NV", "lower")] = (
+                "Nevada Assembly", "https://asm.leg.state.nv.us/", "Nevada Assembly", "2026-11-15")
+            legislature.CHAMBER_NAMES[("OH", "upper")] = ("Ohio State Senate", "", "", "")
+            found = legislature.chamber_name_problems()
+            self.assertEqual(len(found), 3, found)
+        finally:
+            legislature.CHAMBER_NAMES.clear()
+            legislature.CHAMBER_NAMES.update(saved)
+
+    def test_a_legislators_share_link_opens_their_district(self):
+        role = identity.legislator_role("VA", {"district": "2", "districtId": "002",
+                                               "chamber": "lower", "id": "ocd-person/7"},
+                                        "House of Delegates")
+        self.assertEqual(role["href"], "legislature/va.html#/?chamber=lower&d=002")
+        self.assertEqual(role["share"], role["href"])
+        self.assertIn('href="../legislature/va.html#/?chamber=lower&amp;d=002"',
+                      identity.share_html({"also": [role]}))
+
+    def test_an_at_large_seat_in_the_sites_seat_words(self):
+        for label, words, after in (
+                ("House • WY-AL", "Candidate for the U.S. House in WY-AL",
+                 "2026 race for the U.S. House in WY-AL"),
+                ("House • TX-37", "Candidate for the U.S. House in TX-37",
+                 "2026 race for the U.S. House in TX-37"),
+                ("House • VI-AL", "Candidate for the U.S. Virgin Islands’ seat in the U.S. House",
+                 "2026 race for the U.S. Virgin Islands’ seat in the U.S. House"),
+                ("House • DC-AL", "Candidate for the District of Columbia’s seat in the U.S. House",
+                 "2026 race for the District of Columbia’s seat in the U.S. House"),
+                ("Senate • WY", "Candidate for the U.S. Senate in Wyoming",
+                 "2026 race for the U.S. Senate in Wyoming")):
+            state = label.partition(" • ")[2][:2]
+            person = filer("FEC_H6XX00001", "Chuck Example", state=state, label=label,
+                           chamber=label.partition(" • ")[0])
+            role = identity.profile_role(person, {}, {}, "2026-11-13")
+            self.assertEqual((role["words"], role["after"]), (words, after), label)
+            self.assertNotIn("at large", role["words"] + role["after"])
 
 
 if __name__ == "__main__":
