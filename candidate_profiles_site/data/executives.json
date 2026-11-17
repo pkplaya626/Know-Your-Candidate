@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-14T14:42:37+00:00",
+ "fetched": "2026-11-16T17:42:16+00:00",
  "governors": {
   "AK": {
    "address": "Office of the Governor, P.O. Box 110001, Juneau, AK 99811-0001",
@@ -27,11 +27,7 @@
     "December 3, 2018 - December 5, 2022",
     "December 5, 2022 - Current"
    ],
-   "website": "https://gov.alaska.gov/",
-   "wikidata": "Q16209663",
-   "wikidataStarts": [
-    "2018-12-03"
-   ]
+   "website": "https://gov.alaska.gov/"
   },
   "AL": {
    "address": "600 Dexter Avenue, Montgomery, AL 36130",

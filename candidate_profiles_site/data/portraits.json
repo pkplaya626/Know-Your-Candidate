@@ -7319,7 +7319,7 @@
   "name": "Adrian Boafo",
   "original": "https://mgaleg.maryland.gov/2026RS/images/boafo01.jpg",
   "page": "https://mgaleg.maryland.gov/mgawebsite/Members/Details/boafo01",
-  "read": "2026-11-14",
+  "read": "2026-11-17",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/0/09/Adrian_Boafo_Feb2023.jpg"
   ],
@@ -7979,39 +7979,39 @@
  "person:annie andrews|SC|S": {
   "credit": {
    "attribution": false,
-   "by": "Stimpus1",
-   "file": "https://commons.wikimedia.org/wiki/File:Annie_Andrews_Greenville_(cropped_2).jpg",
+   "by": "U.S. House of Representatives",
+   "file": "https://commons.wikimedia.org/wiki/File:Jim_Clyburn_and_Annie_Andrews_in_November_2026_(cropped_2).jpg",
    "form": 4,
-   "licence": "CC0",
-   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+   "licence": "Public domain",
+   "licenceUrl": null,
    "nonFree": false,
    "year": 2026
   },
-  "height": 1253,
+  "height": 1365,
+  "linked": "Annie Andrews",
   "name": "Annie Andrews",
   "set": [
    [
     120,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Annie_Andrews_Greenville_%28cropped_2%29.jpg/120px-Annie_Andrews_Greenville_%28cropped_2%29.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg/120px-Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg"
    ],
    [
     250,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Annie_Andrews_Greenville_%28cropped_2%29.jpg/250px-Annie_Andrews_Greenville_%28cropped_2%29.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg/250px-Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg"
    ],
    [
     330,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Annie_Andrews_Greenville_%28cropped_2%29.jpg/330px-Annie_Andrews_Greenville_%28cropped_2%29.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg/330px-Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg"
    ],
    [
     500,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Annie_Andrews_Greenville_%28cropped_2%29.jpg/500px-Annie_Andrews_Greenville_%28cropped_2%29.jpg"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg/500px-Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg"
    ]
   ],
-  "title": "Annie Andrews (pediatrician)",
-  "unverified": true,
-  "url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Annie_Andrews_Greenville_%28cropped_2%29.jpg",
+  "title": "Annie Andrews",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg/960px-Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg",
   "via": "wikipedia",
-  "width": 956
+  "width": 1024
  },
  "person:anthony sabatini|FL|H": {
   "credit": {
@@ -9115,7 +9115,7 @@
    "width": 2964
   },
   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
-  "read": "2026-11-14",
+  "read": "2026-11-17",
   "state": "NV",
   "url": "https://i0.wp.com/leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg?w=500&ssl=1",
   "via": "state-legislature",
@@ -11114,6 +11114,11 @@
   "via": "wikipedia",
   "width": 700
  },
+ "person:eric jones|CA|H": {
+  "name": "Eric Jones",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:eric pratt|MN|H": {
   "credit": {
    "attribution": true,
@@ -11338,7 +11343,7 @@
   "name": "Fred Wellman",
   "original": "https://upload.wikimedia.org/wikipedia/commons/4/40/Fred_Wellman%2C_August_2025.png",
   "page": "https://www.wikidata.org/wiki/Q131344046",
-  "read": "2026-11-14",
+  "read": "2026-11-16",
   "set": [
    [
     120,
@@ -12013,7 +12018,7 @@
   "name": "Jacqui V Irwin",
   "original": "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_42.jpg",
   "page": "https://www.assembly.ca.gov/assemblymembers/42",
-  "read": "2026-11-14",
+  "read": "2026-11-17",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg"
   ],
@@ -12180,7 +12185,7 @@
   "name": "James Talarico",
   "original": "https://house.texas.gov/images/members/3685.jpg?v=1",
   "page": "https://house.texas.gov/members/3685",
-  "read": "2026-11-14",
+  "read": "2026-11-17",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/7/70/James_Talarico_Press_Conference_(cropped).jpg",
    "https://upload.wikimedia.org/wikipedia/commons/8/8b/James_Talarico_Press_Conference.jpg"
@@ -12804,7 +12809,7 @@
    "width": 1500
   },
   "page": "https://senatedems.com/moss",
-  "read": "2026-11-14",
+  "read": "2026-11-17",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/2/22/Michigan_Senator_Jeremy_Moss_2019.jpg"
   ],
@@ -13262,7 +13267,7 @@
   "name": "John Andrew Williams",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/66/John_Drew_Williams_Headshot.jpg",
   "page": "https://www.wikidata.org/wiki/Q136086044",
-  "read": "2026-11-14",
+  "read": "2026-11-16",
   "set": [
    [
     120,
@@ -15421,7 +15426,7 @@
   "name": "Martin R Zamora",
   "original": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO",
-  "read": "2026-11-14",
+  "read": "2026-11-17",
   "state": "NM",
   "url": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "via": "state-legislature",
@@ -17537,7 +17542,7 @@
   "name": "Rebecca Bennett",
   "original": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Rebecca_Bennett_and_Andy_Kim_Nov_2026_%28cropped1%29.jpeg",
   "page": "https://www.wikidata.org/wiki/Q141373045",
-  "read": "2026-11-14",
+  "read": "2026-11-16",
   "set": [
    [
     120,
@@ -17779,7 +17784,7 @@
   "name": "Rick Brattin",
   "original": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "page": "https://www.senate.mo.gov/Senators/Member?id=5",
-  "read": "2026-11-14",
+  "read": "2026-11-17",
   "state": "MO",
   "url": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "via": "state-legislature",
@@ -18695,7 +18700,7 @@
   "name": "Sean McCann",
   "original": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "page": "https://senatedems.com/mccann",
-  "read": "2026-11-14",
+  "read": "2026-11-17",
   "state": "MI",
   "url": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "via": "state-legislature",
@@ -19530,6 +19535,35 @@
   "via": "wikipedia",
   "width": 396
  },
+ "person:tom sell|TX|H": {
+  "credit": {
+   "attribution": false,
+   "by": "Rep. Debbie Wasserman Schultz",
+   "file": "https://commons.wikimedia.org/wiki/File:Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_(cropped).jpg",
+   "form": 4,
+   "licence": "Public domain",
+   "licenceUrl": null,
+   "nonFree": false,
+   "year": 2026
+  },
+  "height": 232,
+  "linked": "Tom Sell",
+  "name": "Tom Sell",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_%28cropped%29.jpg/120px-Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_%28cropped%29.jpg"
+   ],
+   [
+    207,
+    "https://upload.wikimedia.org/wikipedia/commons/c/c6/Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_%28cropped%29.jpg"
+   ]
+  ],
+  "title": "Tom Sell",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_%28cropped%29.jpg",
+  "via": "wikipedia",
+  "width": 207
+ },
  "person:tom willis|WV|S": {
   "name": "Tom Willis",
   "url": null,
@@ -20026,7 +20060,7 @@
   "name": "Yolanda Rena Prince",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/65/Yolanda_Prince.jpg",
   "page": "https://www.wikidata.org/wiki/Q139698851",
-  "read": "2026-11-14",
+  "read": "2026-11-16",
   "set": [
    [
     120,
