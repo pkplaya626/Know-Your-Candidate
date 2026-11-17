@@ -1019,6 +1019,42 @@ class TestAPersonsChoice(unittest.TestCase):
             self.assertIn("note of the heavy file",
                           validate.check_photo_evidence([p], cache)[0].detail[0])
 
+    def test_a_wide_choice_is_asked_for_a_card_of_500_pixels_high(self):
+        # At 500 wide, Charlie Hatcher's 2560x1439 file left his card's 4:5
+        # crop 224x281 pixels of picture (the sweep's review): a frame wider
+        # than tall is asked for first at the width giving it 500 of height,
+        # and only where that is over the caps at 500.
+        tall = self.PHOTON.replace("w=500", "w=890")
+        light = {"bytes": 280_000, "width": 890, "height": 500}
+        asked = []
+        _entry, _p, _cache, record = self.heavy_record(
+            lambda u: asked.append(u) or (light if u == tall else None))
+        self.assertEqual(asked[0], tall)
+        self.assertEqual(record["url"], tall)
+        self.assertEqual(record["height"], 500)
+        # Over the caps at that width, 500 wide stands.
+        fallback = {"bytes": 121_896, "width": 500, "height": 281}
+        _entry, _p, _cache, record = self.heavy_record(
+            lambda u: {"bytes": 385_000, "width": 890, "height": 500} if u == tall
+            else fallback if u == self.PHOTON else None)
+        self.assertEqual(record["url"], self.PHOTON)
+        # A portrait-shaped frame is asked for nothing taller.
+        from kyc import photos
+        self.assertEqual(photos.card_tall_forms(self.HEAVY, {"width": 900, "height": 1000}), [])
+
+    def test_a_wix_file_is_resized_by_wix(self):
+        # Patrick Forbes's chosen file is a Wix rendition, w_2048,h_1365:
+        # Wix's own service draws it smaller (rule 87: its host's resizer
+        # before Photon), at the same proportions.
+        from kyc import photos
+        wix = ("https://static.wixstatic.com/media/637d7a_a~mv2.jpg/v1/fill/w_2048,h_1365,"
+               "al_c,q_90,enc_auto/637d7a_a~mv2.jpg")
+        self.assertEqual(photos.smaller_form(wix, 500), wix.replace("w_2048,h_1365", "w_500,h_333"))
+        self.assertEqual(photos.card_tall_forms(wix, {"width": 2048, "height": 1365}),
+                         [(wix.replace("w_2048,h_1365", "w_750,h_500"), 750)])
+        # Never wider than the rendition the address draws.
+        self.assertIsNone(photos.host_resized(wix.replace("w_2048,h_1365", "w_400,h_267"), 500))
+
     def test_a_heavy_choice_no_resizer_serves_is_shown_as_it_is_and_said(self):
         entry, p, cache, record = self.heavy_record(lambda u: None)
         self.assertEqual(record["url"], self.HEAVY)

@@ -448,6 +448,10 @@ SMALLER_WIDTH = 500
 SMALLER_WIDTHS = (500, 330)
 PHOTON_HOSTS = ("i0.wp.com", "i1.wp.com", "i2.wp.com", "i3.wp.com")
 SQUARESPACE_WIDTHS = (100, 300, 500, 750, 1000, 1500, 2500)
+# Wix's own image service: a "/v1/fill/w_<w>,h_<h>,..." segment after the
+# upload's media id draws the upload at that size (Patrick Forbes's chosen
+# file is one, w_2048,h_1365).
+_WIX_FILL = re.compile(r"(/v1/(?:fill|fit)/)w_(\d+),h_(\d+)(?=[,/])")
 
 
 def host_resized(url, width=SMALLER_WIDTH):
@@ -472,6 +476,17 @@ def host_resized(url, width=SMALLER_WIDTH):
         query = [(k, v) for k, v in query if k != "format"] + [("format", f"{width}w")]
     elif host.endswith(".imgix.net") or host in PHOTON_HOSTS:
         query = [(k, v) for k, v in query if k not in ("w", "resize", "fit")] + [("w", str(width))]
+    elif host == "static.wixstatic.com" and parts.path.startswith("/media/"):
+        # The same rendition at the width asked, its height in proportion,
+        # so the same picture as the address drew: never wider than it.
+        match = _WIX_FILL.search(parts.path)
+        if not match or int(match.group(2)) <= width or not int(match.group(3)):
+            return None
+        height = round(width * int(match.group(3)) / int(match.group(2)))
+        path = (parts.path[:match.start()] + f"{match.group(1)}w_{width},h_{height}"
+                + parts.path[match.end():])
+        smaller = urllib.parse.urlunsplit(parts._replace(path=path))
+        return smaller if smaller != url else None
     else:
         return None
     smaller = urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(query)))
@@ -535,6 +550,24 @@ def same_shape(original, smaller):
     except (KeyError, TypeError, ZeroDivisionError):
         return False
     return smaller["width"] < original["width"] and abs(scaled - ratio) <= 0.02 * ratio
+
+
+def card_tall_forms(url, weight):
+    """``[(form, width)]``: *url* at the width that gives a frame wider than
+    tall :data:`SMALLER_WIDTH` pixels of height, for a 4:5 card that crops
+    its middle (:func:`smaller_form`), or ``[]`` for a frame no wider than
+    tall. At 500 wide a 3:2 file left the card 266x333 pixels of picture,
+    soft on a 2x or 3x screen (the photo sweep's review, 2026-11-17). Never
+    wider than :data:`MAX_PORTRAIT_PX`; weighed like any other form."""
+    try:
+        wide, tall = int(weight["width"]), int(weight["height"])
+    except (KeyError, TypeError, ValueError):
+        return []
+    if not tall or wide <= tall:
+        return []
+    width = min(MAX_PORTRAIT_PX, round(SMALLER_WIDTH * wide / tall))
+    form = smaller_form(url, width) if width > SMALLER_WIDTH else None
+    return [(form, width)] if form else []
 
 
 def lighter_form(url, weight, weigh):

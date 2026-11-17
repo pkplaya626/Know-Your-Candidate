@@ -577,7 +577,7 @@ def lighten_curated(cache, log=print, weigh=None):
     Never copied (rule 101 copies no campaign's file). Returns how many
     records changed."""
     from .photocopies import is_hosted
-    from .photos import CURATED, lighter_rendition, too_heavy
+    from .photos import CURATED, card_tall_forms, lighter_rendition, too_heavy
 
     weigh = weigh or weigh_as_shown
     changed = kept = 0
@@ -591,7 +591,9 @@ def lighten_curated(cache, log=print, weigh=None):
         if not why:
             continue
         time.sleep(_measure_gap)
-        found = lighter_rendition(url, weight, weigh)
+        # A frame wider than tall is asked for first at the width that
+        # leaves its card's crop 500 pixels of height.
+        found = lighter_rendition(url, weight, weigh, offered=card_tall_forms(url, weight))
         if found:
             form, light = found
             record.update(url=form, original=url, originalWeight=weight,

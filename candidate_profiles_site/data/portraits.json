@@ -8499,14 +8499,14 @@
   "width": 2352
  },
  "person:bob brooks|PA|H": {
-  "bytes": 24254,
+  "bytes": 43624,
   "credit": {
    "by": "the campaign's website (brooksforcongress.com)",
    "page": "https://www.brooksforcongress.com/"
   },
   "evidence": "the image's alt text \"Bob Brooks petting his bulldog\" (on the Meet Bob page the same file is \"Bob Brooks petting Aspen, the family bulldog\"), on \"Bob Brooks for Congress | Put the fire out in Washington\"",
   "heavy": "572 KB, over 300 KB; shown smaller from the same file",
-  "height": 333,
+  "height": 500,
   "name": "Bob Brooks",
   "original": "https://www.brooksforcongress.com/wp-content/uploads/2026/07/1326-JR3B5401-scaled.jpg",
   "originalWeight": {
@@ -8516,9 +8516,9 @@
   },
   "page": "https://www.brooksforcongress.com/",
   "read": "2026-11-17",
-  "url": "https://i0.wp.com/www.brooksforcongress.com/wp-content/uploads/2026/07/1326-JR3B5401-scaled.jpg?w=500&ssl=1",
+  "url": "https://i0.wp.com/www.brooksforcongress.com/wp-content/uploads/2026/07/1326-JR3B5401-scaled.jpg?w=750&ssl=1",
   "via": "curated",
-  "width": 500
+  "width": 750
  },
  "person:bob harvie|PA|H": {
   "bytes": 17322,
@@ -17512,14 +17512,14 @@
   "via": "unresolved"
  },
  "person:patrick wayne forbes|LA|H": {
-  "bytes": 17466,
+  "bytes": 45551,
   "credit": {
    "by": "the campaign's website (patforbes.com)",
    "page": "https://www.patforbes.com/"
   },
   "evidence": "the home page's Wix image record for it: name \"Pat_Forbes_WEB_Shoot-9.jpg\", alt \"Pat Forbes smiling in park with trees in background\", on \"Pat Forbes for U.S. Congress | Louisiana | Official Campaign Site\" beside \"Meet Pat Forbes, running for US Congress in Louisiana's 6th District\"",
   "heavy": "2048x1365px, over 1200px; shown smaller from the same file",
-  "height": 333,
+  "height": 500,
   "name": "Patrick Wayne Forbes",
   "original": "https://static.wixstatic.com/media/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg/v1/fill/w_2048,h_1365,al_c,q_90,enc_auto/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg",
   "originalWeight": {
@@ -17529,9 +17529,9 @@
   },
   "page": "https://www.patforbes.com/",
   "read": "2026-11-17",
-  "url": "https://i0.wp.com/static.wixstatic.com/media/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg/v1/fill/w_2048,h_1365,al_c,q_90,enc_auto/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg?w=500&ssl=1",
+  "url": "https://static.wixstatic.com/media/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg/v1/fill/w_750,h_500,al_c,q_90,enc_auto/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg",
   "via": "curated",
-  "width": 500
+  "width": 750
  },
  "person:patty garcia|IL|H": {
   "credit": {
@@ -19454,14 +19454,14 @@
   "width": 4782
  },
  "person:shawn harris|GA|H": {
-  "bytes": 31056,
+  "bytes": 57128,
   "credit": {
    "by": "the campaign's website (shawnforgeorgia.com)",
    "page": "https://www.shawnforgeorgia.com/"
   },
   "evidence": "alt text \"Shawn Harris seated on a porch in Georgia\", file name \"Porch-alone-side.JPG.jpg\", on the home page titled \"Shawn Harris for Georgia | Democrat for Georgia's 14th District\"",
   "heavy": "573 KB, over 300 KB; shown smaller from the same file",
-  "height": 333,
+  "height": 499,
   "name": "Shawn Harris",
   "original": "https://www.shawnforgeorgia.com/html/assets/photos/Porch-alone-side.JPG.jpg",
   "originalWeight": {
@@ -19471,9 +19471,9 @@
   },
   "page": "https://www.shawnforgeorgia.com/",
   "read": "2026-11-17",
-  "url": "https://i0.wp.com/www.shawnforgeorgia.com/html/assets/photos/Porch-alone-side.JPG.jpg?w=500&ssl=1",
+  "url": "https://i0.wp.com/www.shawnforgeorgia.com/html/assets/photos/Porch-alone-side.JPG.jpg?w=750&ssl=1",
   "via": "curated",
-  "width": 500
+  "width": 750
  },
  "person:shenna bellows|ME|S": {
   "credit": {
@@ -20179,14 +20179,14 @@
   "width": 396
  },
  "person:tom sell|TX|H": {
-  "bytes": 8888,
+  "bytes": 15258,
   "credit": {
    "by": "the campaign's website (selltexastrue.com)",
    "page": "https://www.selltexastrue.com/"
   },
   "evidence": "file name \"tom-sell-cattle.jpg\" (alt text \"West Texas landscape background\"), the home page's first image, in the section \"Tom Sell for Texas\": \"West Texas is home - it's where my roots run deep\"; the page is titled \"Conservative Tom Sell - Standing Up For West Texas Values. Running for Congress\"",
   "heavy": "1600x1067px, over 1200px; shown smaller from the same file",
-  "height": 333,
+  "height": 500,
   "name": "Tom Sell",
   "original": "https://www.selltexastrue.com/tom-sell-cattle.jpg",
   "originalWeight": {
@@ -20196,9 +20196,9 @@
   },
   "page": "https://www.selltexastrue.com/",
   "read": "2026-11-17",
-  "url": "https://i0.wp.com/www.selltexastrue.com/tom-sell-cattle.jpg?w=500&ssl=1",
+  "url": "https://i0.wp.com/www.selltexastrue.com/tom-sell-cattle.jpg?w=750&ssl=1",
   "via": "curated",
-  "width": 500
+  "width": 750
  },
  "person:tom willis|WV|S": {
   "name": "Tom Willis",
