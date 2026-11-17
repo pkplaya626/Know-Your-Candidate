@@ -922,6 +922,19 @@ class TestAFoldedCuratedRow(unittest.TestCase):
             {"office": "Lieutenant Governor of Illinois", "where": "Illinois", "open": True,
              "agree": "exact", "from": "2019"}]}}
         self.assertIs(history.folded(winner, people), people["CAND_33"])
+        # The history cache's bioguide is read under it too: the seated
+        # winner and their other filing, the item and that id shared, are one
+        # person and name each other, as they did while the winner ran.
+        senate = filer("FEC_S4IL00001", "Jan Example", state="IL", wikipedia="Jan Example",
+                       politicalHistory={"wikidata": "Q7", "rows": []})
+        seated = dict(winner, politicalHistory={"wikidata": "Q7", "rows": []})
+        cache = {"people": {"CAND_33": {"asked": "Jan Example", "wikidata": "Q7", "bioguide": "J000999"},
+                            "FEC_S4IL00001": {"asked": "Jan Example", "wikidata": "Q7",
+                                              "bioguide": "J000999"}}}
+        links = identity.build([seated, senate], history=cache)
+        identity.attach(links)
+        self.assertEqual(roles(seated), [("profile", "FEC_S4IL00001")])
+        self.assertNotIn("identity-item-shared", codes(links))
         # Its own id is never one of them, nor one twice.
         self.assertEqual(record.filing_ids(dict(winner, id="CAND_33")), ["FEC_S6IL00001"])
         self.assertEqual(record.filing_ids(dict(winner, otherIds=["CAND_33", "CAND_33"])),

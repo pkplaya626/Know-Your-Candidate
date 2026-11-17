@@ -1011,7 +1011,14 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
         node.add("wikidata", _wikidata(person))
         for fec in [person.get("fecCandidateId")] + list(person.get("otherFecIds") or []):
             node.add("fec", fec)
-        from_history(node, person["id"], _wikidata(person), article=person.get("wikipedia"))
+        # A seated winner's record was read under the filing folded into
+        # their profile (record.filing_ids, history.folded): on January 3
+        # Colin Allred's TX-33 profile lost the bioguide id his item gives,
+        # and his Senate filing, sharing only the item, became a pair to warn.
+        from .record import filing_ids, seated_winner
+        keys = [person["id"]] + (filing_ids(person) if seated_winner(person) else [])
+        from_history(node, next((k for k in keys if hist.get(k)), person["id"]), _wikidata(person),
+                     article=person.get("wikipedia"))
 
     items = {}
     for row in ((departed_cache or {}).get("members") or []) + \
