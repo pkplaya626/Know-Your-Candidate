@@ -153,6 +153,7 @@ CI asserts that a rebuild changes nothing.
 | `voteview.py` | DW-NOMINATE ideology scores: the first dimension, worded on its own left-right scale (never a party's name) with the Congress the score is from |
 | `profiles.py` | Assemble profiles; derive 2026 election flags and field provenance |
 | `races.py` | Group profiles into the seats they contest |
+| `election_law.py` | Who is elected to each office and how its candidates reach the ballot, keyed on the state and the office (`ELECTION_LAWS`: plurality where no entry says otherwise, a majority or a runoff with its day, ranked choice, the all-party primaries), each provision quoted; the results reader asks it by office (rule 63) |
 | `legislators.py` | The authoritative membership, and reconciliation against it |
 | `candidates.py` | The FEC's register of who is running in 2026 |
 | `disclosures.py` | Links to members' filed financial disclosures (House Clerk, Senate eFD) |
@@ -826,7 +827,12 @@ every filer as a live challenger was wrong about most of them: 858 of the
 people it showed as running had already been eliminated.
 
 `python build_profile_site.py results` reads each state's Wikipedia election
-page and writes `data/primary_results.json`. Three things keep it honest:
+page and writes `data/primary_results.json`. Each race is read by one
+function, `results.read_race`, from its section of the page, its people as the
+caller knows them (`RacePeople`: the FEC's filings, the roster's names, the
+state's certified or qualified list) and the law that elects the office
+(`RaceLaw`, from `kyc/election_law.py`); `results.build` calls it for every
+race and stores what it returns. Three things keep it honest:
 
 - **A calendar gate.** The FEC's election calendar says when each state's
   primary (and runoff) is. Nothing is read for a race whose primary has not
@@ -1195,10 +1201,10 @@ result.
   ballot is `defeated`. No marked winner, or two, changes nothing: the count
   is continuing, or the page is mid-edit. `validate` fails a race with more
   than one person elected (`multiple-elected`).
-- **Georgia's December runoff.** `overrides.GENERAL_RUNOFFS` lists the states
-  whose general election goes to a runoff without a majority, with the
-  statute and the date (Georgia: December 1, O.C.G.A. 21-2-501). There, a
-  runoff table that names no party is the general runoff only if everyone in
+- **Georgia's December runoff.** `kyc/election_law.py` (`ELECTION_LAWS`, keyed
+  on the state and the office) lists the offices whose general election goes
+  to a runoff without a majority, with the statute and the date (Georgia:
+  December 1, O.C.G.A. 21-2-501). There, a runoff table that names no party is the general runoff only if everyone in
   it was on the November ballot — a party runoff's loser never was. Its two
   are `runoff`, the rest of the ballot `defeated`, and after the runoff date
   its marked winner is `elected`. Until that winner is marked, from the day
