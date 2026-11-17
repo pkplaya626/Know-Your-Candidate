@@ -696,7 +696,10 @@ def _join_officers(links, officers):
             held = [r for r in _history_rows(person.record)
                     if office_in_state(r, key, code, when_read=True)]
             read_open = [r for r in held if not r.get("current")]
-            named = office_names(person.name, node.name)
+            # Any form of the name the record's own sources write (a member's
+            # congress-legislators aliases, the FEC's filed name, the list's
+            # printed form), each by rule 56's test, never a nickname table.
+            named = any(office_names(form, node.name) for form in person.forms if form)
             if held and named:
                 row = next((r for r in held if r.get("current")), held[0])
                 links._union(node.key, person.key, f"{row['office']} in the record"
@@ -711,6 +714,23 @@ def _join_officers(links, officers):
                     "name, but " + ("no corroborated record of theirs holds the office"
                                     if not held else "the card's name does not name them by "
                                     "rule 56's test") + "; neither card names the other (rule 105)",
+                    [node.key, person.key]))
+            elif (held and _forms([node.name])[2] & _forms(person.forms)[2]
+                  and not links.settled(node.key, person.key)):
+                # The record holds the very office and the card names someone
+                # of that surname under another given name: one person under
+                # a name the card does not write (the January rehearsal's
+                # "Margaret Flanagan", Minnesota's Senate winner, beside the
+                # card's "Peggy Flanagan"), or a stale record beside a
+                # namesake holder. A person's evidenced entry settles it; it
+                # was silent, the pair neither joined nor said.
+                links.problems.append((
+                    "warn", "identity-names-disagree",
+                    f"{node.name} ({node.role['words']}) and {person.kind} {person.name} "
+                    f"({person.record.get('id')}): their corroborated record holds the office, "
+                    "but the card names a given name none of the record's forms of the name "
+                    "writes (rule 56); neither card names the other until an evidenced "
+                    "overrides.IDENTITY_JOINS entry settles the pair (rule 105)",
                     [node.key, person.key]))
 
 

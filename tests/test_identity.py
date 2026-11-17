@@ -800,6 +800,27 @@ class TestTheRecordPhase(SettledEntries):
             self.assertEqual(roles(off), [], row)
             self.assertIn("identity-look-alike", codes(links), row)
 
+    def test_a_record_holding_the_office_under_another_given_name_is_said(self):
+        # The record phase names a seated winner from Congress's record
+        # ("Margaret Example"); the card writes the name they go by.
+        off = self.officer("Peggy Example")
+        candidate = dict(self.candidate(openWhenRead="2026-11-14"), name="Margaret Example")
+        links = identity.build([], stategov=self.payload(candidate, off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [])
+        found = [p for p in identity.problems(links) if p[1] == "identity-names-disagree"]
+        self.assertEqual([p[3] for p in found], [["officer:CO:ag", "candidate:gov-CO-phil-example"]])
+        # A form of the name the record's own sources write joins them.
+        candidate = dict(candidate, aliases=["Peggy Example"])
+        links = identity.build([], stategov=self.payload(candidate, off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [("candidate", "gov-CO-phil-example")])
+        self.assertNotIn("identity-names-disagree", codes(links))
+        # Another surname altogether says nothing.
+        links = identity.build([], stategov=self.payload(dict(candidate, aliases=[]),
+                                                         self.officer("Mia Other")))
+        self.assertNotIn("identity-names-disagree", codes(links))
+
     def test_the_join_ends_when_the_card_names_someone_else(self):
         off, candidate = self.officer("Mia Other"), self.candidate(openWhenRead="2026-11-14")
         links = identity.build([], stategov=self.payload(candidate, off))
