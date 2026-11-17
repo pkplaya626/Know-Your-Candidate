@@ -1020,6 +1020,20 @@
    "route": "wikipedia",
    "width": 250
   },
+  "AR|governor|State Senator Fred Love": {
+   "by": "Arkansas State Legislature (Arkansas General Assembly)",
+   "bytes": 100745,
+   "chosen": "https://arkleg.state.ar.us/Content/photos/2027/Senate/640_sm.jpg",
+   "evidence": "alt text \"Photo of Senator Love\", under the page's heading \"Senator Fredrick J. Love (D)\", followed by \"Email: fred.love@senate.ar.gov ... District: 15\"; page title \"Senator Fredrick J. Love (D) - Arkansas State Legislature\"",
+   "height": 536,
+   "page": "https://arkleg.state.ar.us/Legislators/Detail?member=F.+Love",
+   "photo": "https://arkleg.state.ar.us/Content/photos/2027/Senate/640_sm.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "A studio head-and-shoulders portrait of one man alone, smiling, bald, grey beard, grey plaid suit and striped tie, plain grey mottled backdrop; nobody else in the frame. The same man as the Commons file in his article (Rep Fredrick J Love.jpg). Not a logo or graphic. A second reader looked again and measured: brow at about band 3.6, chin at about band 6.3 on the card: about 2.6 tenths (about 133 of 536 source px; one band = 53.6 px)",
+   "tie": "Route 1(d). The article the race's own article links for him ('Fredrick Love', recorded in statewide_photos.json articles for AR|governor|State Senator Fred Love) says in its own words: \"Fredrick J. Love is an American politician representing the 15th district in the Arkansas Senate since 2023 ... He was the Democratic nominee in the 2026 Arkansas gubernatorial election.\" The election office's list (Pulaski County notice, p. 3) prints him as \"State Senator Fred Love-DEM\". The Arkansas General Assembly's own member page for him (one of the links Open States lists for this member, ocd-person/b35d0a49..., district 15) names Senator Fredrick J. Love (D), District 15, beside the photograph. The file is keyed by the legislature's member number 640, not by seat (the same number as his senate.arkansas.gov/senators/640 page), so it is not a seat file.",
+   "width": 429
+  },
   "AR|lt|Lieutenant Governor Leslie Rutledge": {
    "article": "Leslie Rutledge",
    "by": "Gage Skidmore from Peoria, AZ, United States of America",
@@ -1326,6 +1340,30 @@
    "route": "wikipedia",
    "width": 250
   },
+  "CO|governor|Greg Lopez": {
+   "by": "Office of the Clerk, U.S. House of Representatives",
+   "bytes": 55073,
+   "chosen": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Greg_Lopez_118th_Congress_portrait.jpg",
+   "credit": {
+    "basis": "PD US Congress",
+    "by": "Office of the Clerk, U.S. House of Representatives",
+    "licence": "Public domain",
+    "licenceUrl": null,
+    "page": "https://commons.wikimedia.org/wiki/File:Greg_Lopez_118th_Congress_portrait.jpg",
+    "via": "Wikimedia Commons",
+    "year": 2024,
+    "yearForm": 4
+   },
+   "evidence": "file description \"A portrait of Rep. Greg Lopez (R-CO) for the 118th U.S. Congress.\"; file name \"Greg Lopez 118th Congress portrait.jpg\"; in Category:Greg Lopez and used in the article 'Greg Lopez'",
+   "height": 410,
+   "page": "https://commons.wikimedia.org/wiki/File:Greg_Lopez_118th_Congress_portrait.jpg",
+   "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Greg_Lopez_118th_Congress_portrait.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "The House's official studio portrait of one man alone: grey hair, smiling, dark suit, white shirt, red tie, on the plain blue backdrop of the Congress portraits; nobody else in the frame, no words or graphics. A second reader looked again and measured: brow at about band 4.0, chin at about band 7.8 on the card: about 3.8 tenths (one band = 41 source px)",
+   "tie": "Route 1(c). The 2026 Colorado gubernatorial election article links 'Greg Lopez' for him (statewide_photos.json articles for CO|governor|Greg Lopez); that article's Wikidata item Q126910689 has Commons category 'Category:Greg Lopez' (P373), which holds this file, and the article itself uses it. The file page gives the author as the Office of the Clerk, U.S. House of Representatives, a government office, source https://clerk.house.gov/members/L000604, licence public domain (PD US Congress). Not the article's lead (File:Greg Lopez in 2024.jpg, refused as public-domain-unsupported) and not in NOT_A_PORTRAIT or PORTRAIT_LICENCE_DOUBTS.",
+   "width": 335
+  },
   "CO|governor|Victor Marx": {
    "article": "Victor Marx",
    "by": "Gage Skidmore from Surprise, AZ, United States of America",
@@ -1601,6 +1639,34 @@
    "route": "wikipedia",
    "width": 250
   },
+  "GU|governor|ADA, Vicente A.": {
+   "by": "Guam Legislature",
+   "bytes": 57877,
+   "chosen": "https://guamlegislature.gov/wp-content/uploads/2025/02/VAA-768x960.jpg",
+   "evidence": "alt text \"Vice Speaker V. Anthony Ada\", under the page's heading \"About – Vice Speaker V. Anthony Ada\", followed by \"6th Guam Legislative Term Legislative Years of Service 30th – 33rd (2009 – 2016) 36th (2021 – 2022) 38th (2025 – present)\"; page title \"About – Vice Speaker V. Anthony Ada » Guam Legislature\"",
+   "height": 960,
+   "page": "https://guamlegislature.gov/about-vaa/",
+   "photo": "https://guamlegislature.gov/wp-content/uploads/2025/02/VAA-768x960.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "A studio portrait of one man alone: short dark hair, smiling, dark suit, white shirt, red tie, plain mottled grey-brown backdrop; nobody else in the frame, no words or graphics. The same man as the Commons crops of him (Joint Region Marianas, 2025 and 2026). A second reader looked again and measured: brow at about band 2.8, chin at about band 5.0 on the card: about 2.2 tenths (one band = 96 source px)",
+   "tie": "Route 1(d). The article the race's own article links for him ('Vicente Ada', recorded in statewide_photos.json articles for GU|governor|ADA, Vicente A.) says in its own words: \"Vicente Anthony \\\"Tony\\\" Ada ... A member of the Republican Party, he has served in the Guam Legislature from 2009 to 2017, from 2021 to 2023 and since 2025.\" and links this very page (https://guamlegislature.gov/about-vaa/). The Guam Legislature's own page names \"Vice Speaker V. Anthony Ada\" beside the photograph, \"38th (2025 – present)\", and its biography \"Vicente Anthony Ada, or 'Tony' as he is known\". The file is named for his initials (VAA), not a seat. Offered in the 768w rendition the page's srcset lists (58 KB, 768x960), within the caps. (His article also calls him governor-elect; the legislature page is the office he holds now.)",
+   "width": 768
+  },
+  "GU|governor|TERLAJE, Therese Maria": {
+   "by": "Guam Legislature",
+   "bytes": 64215,
+   "chosen": "https://guamlegislature.gov/wp-content/uploads/2025/02/TMT-768x960.jpg",
+   "evidence": "alt text \"Senator Therese M. Terlaje\", under the page's heading \"About – Senator Therese M. Terlaje\", followed by \"5th Guam Legislative Term Legislative Years of Service 34th – 38th (2017 – present) Village Party Democrat\"; page title \"About – Senator Therese M. Terlaje » Guam Legislature\"",
+   "height": 960,
+   "page": "https://guamlegislature.gov/about-tmt/",
+   "photo": "https://guamlegislature.gov/wp-content/uploads/2025/02/TMT-768x960.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "A studio portrait of one woman alone: long dark wavy hair, smiling, black wrap jacket with a pin, orange bead necklace, plain mottled brown-grey backdrop; nobody else in the frame, no words or graphics. The same woman as the Commons files of her (2018 and 2024). A second reader looked again and measured: brow at about band 2.6, chin at about band 4.4 on the card: about 1.8 tenths (one band = 96 source px)",
+   "tie": "Route 1(d). The article the race's own article links for her ('Therese Terlaje', recorded in statewide_photos.json articles for GU|governor|TERLAJE, Therese Maria) says in its own words: \"Terlaje has served as a member of the Legislature of Guam since 2017 ... having served in the 35th (2019–2021), 36th (2021–2023), 37th (2023–2025), and 38th (2025-present) sessions of the legislature. Terlaje is running for Governor of Guam.\" and links this very page (https://guamlegislature.gov/about-tmt/). The Guam Legislature's own page for her names \"Senator Therese M. Terlaje\" beside the photograph, \"34th – 38th (2017 – present)\". The file is named for her initials (TMT), not a seat. Offered in the 768w rendition the page's srcset lists (64 KB, 768x960), within the caps.",
+   "width": 768
+  },
   "HI|governor|Josh Green": {
    "article": "Josh Green (politician)",
    "by": "Aloha102",
@@ -1748,6 +1814,29 @@
    "read": "2026-11-16",
    "route": "wikipedia",
    "width": 250
+  },
+  "IL|governor|Darren Bailey": {
+   "by": "Cobiblair",
+   "bytes": 60172,
+   "chosen": "https://upload.wikimedia.org/wikipedia/commons/d/d0/Darren_Bailey_at_a_2022_Campaign_Event.jpg",
+   "credit": {
+    "by": "Cobiblair",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Darren_Bailey_at_a_2022_Campaign_Event.jpg",
+    "via": "Wikimedia Commons",
+    "year": 2022,
+    "yearForm": 4
+   },
+   "evidence": "File:Darren Bailey at a 2022 Campaign Event.jpg, described \"Republican nominee for Illinois Governor Darren Bailey at a campaign event, 2022.\"; in Category:Darren Bailey; the Wikidata item's image (P18)",
+   "height": 462,
+   "page": "https://commons.wikimedia.org/wiki/File:Darren_Bailey_at_a_2022_Campaign_Event.jpg",
+   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Darren_Bailey_at_a_2022_Campaign_Event.jpg/330px-Darren_Bailey_at_a_2022_Campaign_Event.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "him alone, smiling, glasses, checked shirt, before a brick wall and a white railing; nobody else anywhere in the frame (a grey box and a shrub at the right edge). The automatic route refused the article's lead (a crop of this file) for the words 'Campaign Event' in its name; the photograph itself is no scene A second reader looked again and measured: My own count on the card: brow at about band 3.6 (source y ~165), chin at about band 6.5 (source y ~345): about 180 source px at 62.5 px a band, about 2.9 tenths of the card; the card keeps x 0-500, y 0-625, only the lower shirt cut",
+   "tie": "the article 'Darren Bailey', which the race's own article (2026 Illinois gubernatorial election) links for him (statewide_photos.json articles); its item Q59781882 names this file as its image (P18) and its Commons sitelink is Category:Darren Bailey, which holds the file. Author Cobiblair is the uploader, own work, CC BY-SA 4.0: no licence doubt (the two crops of it, uploaded by others, are doubts and not offered)",
+   "width": 330
   },
   "IL|governor|JB Pritzker": {
    "article": "JB Pritzker",
@@ -2426,6 +2515,20 @@
    "route": "wikipedia",
    "width": 250
   },
+  "NV|governor|Ford, Aaron D.": {
+   "by": "Office of the Nevada Attorney General",
+   "bytes": 39455,
+   "chosen": "https://ag.nv.gov/uploadedImages/agnvgov/Content/About/20210324_AGPic.jpg",
+   "evidence": "under the heading \"Nevada Attorney General Aaron Ford\", the image's alt text \"Attorney General Aaron Ford\", followed by \"Attorney General Aaron D. Ford, Nevada's 34th Attorney General, took office on January 7, 2019\"",
+   "height": 480,
+   "page": "https://ag.nv.gov/About/AG_Aaron_Ford/",
+   "photo": "https://ag.nv.gov/uploadedImages/agnvgov/Content/About/20210324_AGPic.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "a studio-lit office portrait, him alone, seated, smiling, dark suit and blue tie, a window and wooden shutters behind; nobody else in the frame A second reader looked again and measured: My own count on the card: brow at about band 3.0 (source y ~135), chin at about band 5.3 (source y ~245): about 110 source px at 48 px a band, about 2.3 tenths of the card; the card keeps x 48-432, y 0-480: head and shoulders whole",
+   "tie": "route 1(d): the article his race's own article links for him (Aaron Ford, via 2026 Nevada gubernatorial election; statewide_photos.json articles) says \"A member of the Democratic Party, Ford has served since 2019 as the 34th attorney general of Nevada\" (its infobox: \"34th Attorney General of Nevada Incumbent Assumed office January 7, 2019\"); this is that office's own page for its holder. This site's Nevada attorney general card (statewide_officers.json ag/NV, confirmed 2026-11-16) already shows this very file from this page (39,455 bytes, 480x480)",
+   "width": 480
+  },
   "NV|governor|Lombardo, Joseph": {
    "article": "Joe Lombardo",
    "by": "Gage Skidmore",
@@ -2665,6 +2768,29 @@
    "route": "wikipedia",
    "width": 250
   },
+  "RI|governor|HELENA BUONANNO FOULKES": {
+   "by": "Digitas Photos",
+   "bytes": 31399,
+   "chosen": "https://upload.wikimedia.org/wikipedia/commons/0/0f/HelenaFoulkes_CROP.jpg",
+   "credit": {
+    "by": "Digitas Photos",
+    "licence": "CC BY 2.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by/2.0",
+    "page": "https://commons.wikimedia.org/wiki/File:HelenaFoulkes_CROP.jpg",
+    "via": "Wikimedia Commons",
+    "year": 2014,
+    "yearForm": 4
+   },
+   "evidence": "the file's description \"Helena Foulkes, EVP CVS Caremark & President CVS/Pharmacy\", its name \"HelenaFoulkes CROP.jpg\"; the lead image of the article 'Helena Foulkes' and the image (P18) of its item Q21067177, filed in Category:Helena Foulkes",
+   "height": 421,
+   "page": "https://commons.wikimedia.org/wiki/File:HelenaFoulkes_CROP.jpg",
+   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/HelenaFoulkes_CROP.jpg/330px-HelenaFoulkes_CROP.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "a 2014 conference photograph: she alone, seated, speaking, headset microphone at her cheek, blue jacket, white top, hands raised before her chest; behind her only a red and teal geometric stage backdrop and the edge of a clear acrylic chair. I also looked at the uncropped original (File:HelenaFoulkes.jpg): nobody else anywhere in the frame. Not a studio portrait, but a likeness of her alone, face unobscured A second reader looked again and measured: on the 960x1225 rendition the card keeps y 0-1200 (one band = 120 px): brow near y 185, chin near y 440, about 2.1 tenths; on the helper's 500px card brow near band 1.8, chin near band 3.3, about 1.5-2 tenths: above a tenth",
+   "tie": "route 1(c): the race's own article '2026 Rhode Island gubernatorial election' links [[Helena Foulkes]] for the Rhode Island Department of State's 'Helena Buonanno Foulkes' (statewide_photos.json articles); that article leads with this file, which is in the person's own Commons category. The automatic reader passed it over as 'file-name' only because the surname is run together in 'HelenaFoulkes'; no person's list refuses it. Licence: Flickr import from the Digitas account (author Digitas Photos), CC BY 2.0, extracted from File:HelenaFoulkes.jpg; not an own-work claim, and the helper's licence test raised no doubt",
+   "width": 330
+  },
   "RI|lt|JOHN J LOUGHLIN": {
    "article": "John J. Loughlin Jr.",
    "by": "John McDaid",
@@ -2750,6 +2876,20 @@
    "route": "wikipedia",
    "width": 250
   },
+  "SC|governor|Jermaine Johnson": {
+   "by": "South Carolina General Assembly",
+   "bytes": 30501,
+   "chosen": "https://www.scstatehouse.gov/images/members/0943181705.jpg",
+   "evidence": "under the heading \"Representative Jermaine L. Johnson, Sr.\" (directly above it), the image's alt text \"Representative Jermaine L. Johnson, Sr. photo\", the words after it \"Democrat - Richland District 52 - Kershaw & Richland Counties\"; the page's personal information \"Born July 4, 1985\"; the file is keyed by the member's own code 0943181705 (the page's ?code=), not by a seat",
+   "height": 175,
+   "page": "https://www.scstatehouse.gov/member?code=0943181705",
+   "photo": "https://www.scstatehouse.gov/images/members/0943181705.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "an official studio portrait: he alone, head and shoulders, smiling, in a navy suit, white shirt and floral tie, a round pin on the lapel, before a plain grey backdrop; nobody else in the frame. The file is small (125x175) and soft but plainly a face A second reader looked again and measured: on the helper's card (one band = 15.6 source px) brow near band 2.5, chin near band 6.4: about 3.9 tenths",
+   "tie": "route 1(d): the article the race's own article '2026 South Carolina gubernatorial election' links for the list's 'Jermaine Johnson' ('Jermaine Johnson (politician)', statewide_photos.json articles) says \"A member of the Democratic Party, he is a member for South Carolina House of Representatives, representing the 52nd district\" and its infobox \"Member of the South Carolina House of Representatives Incumbent ... 52nd district (2024–present)\", born \"July 4, 1985\"; the South Carolina Legislature's own member page for District 52 names \"Representative Jermaine L. Johnson, Sr.\" beside this image and gives the same birth date, July 4, 1985 (a second tie beyond the name). This site's own legislature roster (data/legislature/sc.js) already shows this very file on his card, credited to the South Carolina General Assembly. NOTE for the reviewer: the article says he did not run for re-election to the House in 2026 and its infobox already names a successor ('Succeeded by Malcolm Taylor'); the Legislature's page still names him for District 52 today, 2026-11-17",
+   "width": 125
+  },
   "SC|sos|Mark Hammond": {
    "article": "Mark Hammond (American politician)",
    "by": "Zach Pippin, Office of the Governor of South Carolina",
@@ -2803,6 +2943,20 @@
    "read": "2026-11-17",
    "route": "member",
    "width": 180
+  },
+  "TX|governor|GINA HINOJOSA": {
+   "by": "Texas House of Representatives",
+   "bytes": 33335,
+   "chosen": "https://house.texas.gov/images/members/3210.jpg?v=1",
+   "evidence": "alt \"Representative Hinojosa, Gina\" on the member page headed \"Rep. Hinojosa, Gina - District 49\" (title \"Official Home Page of the Texas House of Representatives Website for Rep. Hinojosa, Gina.\"); file 3210.jpg is her member id, the same id as the article's State House link house.texas.gov/members/3210",
+   "height": 175,
+   "page": "https://house.texas.gov/members/49",
+   "photo": "https://house.texas.gov/images/members/3210.jpg?v=1",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "An official studio head-and-shoulders portrait of Gina Hinojosa alone on a grey backdrop: dark jacket, striped collar, smiling at the camera. Nobody else in the frame, no words, no graphic. Small file (125x175) but sharp enough for the card. A second reader looked again and measured: On the card: brow (eyebrows) at about band 4.0, chin at about band 6.7: about 2.7 tenths of the card's height (one band = 15.6 source px; the face spans roughly 42 source px), well over the tenth required. (The first reader wrote 3.7 to 7.4; my reading of the ruler puts the brow and chin higher, but either way it passes.)",
+   "tie": "Route 1(d). The article her race's own article links for her (statewide_photos.json articles: 'Gina Hinojosa', from '2026 Texas gubernatorial election', read 2026-11-03) says in its own words that she holds the seat now: \"she has represented the 49th district in the Texas House of Representatives since 2017\", infobox \"Member of the Texas House of Representatives from the 49th district Incumbent Assumed office January 10, 2017\", and links \"house.texas.gov/members/3210\" as her State House website. The Texas House's own member page for District 49 names her beside the photograph; the file is keyed by her member id 3210, not by the seat.",
+   "width": 125
   },
   "TX|governor|GREG ABBOTT": {
    "article": "Greg Abbott",
@@ -3007,6 +3161,20 @@
    "read": "2026-11-02",
    "route": "wikipedia",
    "width": 250
+  },
+  "WY|governor|Eric Barlow": {
+   "by": "Wyoming Legislature",
+   "bytes": 26451,
+   "chosen": "https://wyoleg.gov/LegislatorSummary/Photos/68th-BarlowEric.jpg",
+   "evidence": "The Wyoming Legislature's own record for this member page (legID 1995, read from https://api.wyoleg.gov/v1/Legislator/1995, the address the page's own script reads): \"name\":\"Senator Eric Barlow\", \"district\":\"Senate District 23\", \"senateYears\":\"Senate: 2023-Present\", \"legPhoto\":\"68th-BarlowEric.jpg\", \"address\":\"1625 A Buffalo Cut Across Road\", \"city\":\"Gillette\"; the page draws the file as <img src=\"https://wyoleg.gov/LegislatorSummary/Photos/\" + legPhoto alt=\"Photograph of \" + name>, i.e. alt \"Photograph of Senator Eric Barlow\". File name: 68th-BarlowEric.jpg.",
+   "height": 285,
+   "page": "https://www.wyoleg.gov/Legislators/2025/S/1995",
+   "photo": "https://wyoleg.gov/LegislatorSummary/Photos/68th-BarlowEric.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "A studio head-and-shoulders portrait of one man alone (grey beard, dark suit, red paisley tie) on a mottled grey backdrop; nobody else in the frame or at its edges, no text over him. The card keeps him whole-faced; the circle crop too. A second reader looked again and measured: face brow to chin: brow at about band 2.7, chin (beard line under the lip/jaw) at about band 5.5 of the card: about 2.8 tenths of the card (one band = 26.8 source px)",
+   "tie": "Route 1(d). The race's own article links 'Eric Barlow' (statewide_photos.json articles: race page '2026 Wyoming gubernatorial election', read 2026-11-03); that article says in its own words \"Member of the Wyoming Senate from the 23rd district Incumbent\" (and \"Governor-elect of Wyoming Assuming office January 4, 2027\"). The Wyoming Legislature's member record legID 1995 names him \"Senator Eric Barlow\", Senate District 23, \"Senate: 2023-Present\", with legPhoto 68th-BarlowEric.jpg, and its home address (1625 A Buffalo Cut Across Road, Gillette) is the one the Wyoming Secretary of State's 2026 general election candidate list prints in his GOVERNOR row (\"Republican Eric Barlow 1625 A Buffalo Cut Across Rd ... Gillette, WY 82718\"). This site's own legislature page already shows this file on his Senate District 23 card, credited to the Wyoming Legislature. The file is keyed by name, not by seat.",
+   "width": 214
   }
  },
  "racesRead": {

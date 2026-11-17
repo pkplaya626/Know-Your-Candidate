@@ -462,7 +462,25 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     profile's, what a person saw (the person alone) and the day; it stands
     ahead of the automatic routes as the portrait cache's `curated` route:
     Ken Paxton, left a silhouette when the background-people sweep refused
-    his Commons photograph, shows his office's portrait this way. A ballot link
+    his Commons photograph, shows his office's portrait this way. The
+    photo sweep of 2026-11-17 (the owner's request of 2026-11-15, "lets try
+    and fill those photos and any other missing from non eliminated
+    canidates") added 43 such entries for members-elect, nominees and
+    Louisiana's qualified candidates every route had left a silhouette: each
+    file found by one reader on a page tied to the person (the campaign site
+    their committee filed, or one whose disclaimer names that committee
+    exactly; their legislature's page; the article their ballot page links
+    and its Commons files), re-opened and confirmed by a second who fetched
+    it again as this project (the same bytes, pixel size and sha256) and
+    measured the face on the card, and looked at again on a contact sheet.
+    A chosen file over the caps is shown smaller from the same file through
+    its host's resizer or Photon, weighed and the same shape, the entry's
+    file kept as its `original`, else as it is, and said either way
+    (`heavy`, `portraits.lighten_curated`, rule 87; twelve were, Charlie
+    Hatcher's a 4.4 MB PNG), and a chosen file is weighed as a page is
+    served it (`portraits.weigh_as_shown`): Wix sent Elizabeth Fitzgibbon's
+    24 KB AVIF as a 379 KB PNG to a request that accepted nothing in
+    particular. A ballot link
     withheld as leading elsewhere is withheld before any portrait is taken
     from it (`enrich.withhold_links`).
     `title_is_about` rejects a resolved title that does not contain the
@@ -3371,7 +3389,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     pamphlet (JPEG 2000 inside PDFs) - picture a candidate none of those
     routes reaches, kept here as copies by the owner's decision of
     2026-10-25 (`kyc/guide_photos.py`, rules 24 and 101), joined on the
-    list's own words for that office. A heavy photograph is shown and said, as rule 87 says. A Commons
+    list's own words for that office. A fifth route stands behind all of
+    them (the owner's request of 2026-11-15, as rule 24's curated route is
+    for profiles): a photograph a person chose, by an evidenced
+    `overrides.STATEWIDE_PHOTOS` entry keyed on the cache's own key for the
+    candidate (`ST|office|<the list's name>`, `statewide_photos.key`), with
+    the fields and checks of a `CANDIDATE_PHOTOS` entry - the file, the page
+    naming them beside it, its words, whose it is, why that page is theirs,
+    what a person saw and measured, the day, and a seat-keyed file's seat,
+    withheld once the roster seats someone else
+    (`statewide_photos.curated_problems`). `ballotphotos` reads it as route
+    `curated` (`--curated-only` alone), weighed and shaped as every route's,
+    a Commons file credited from its own page and held to the licence test
+    but not the file-name test (a person looked at the picture, not its
+    name); `NOT_A_PORTRAIT` and `PORTRAIT_LICENCE_DOUBTS` withhold it, and so
+    does an entry that no longer names the cached file. It is shown only
+    where every route leaves the candidate none, the guide's hosted
+    photograph and the holder's office photograph included
+    (`statewide_photos.attach`, which names an entry they stand ahead of to
+    the build); `validate` fails an entry without its fields or naming a
+    refused file (`statewide-photo-curated-unevidenced`) and warns of one
+    that stands for nothing: a name no list prints, a candidate another
+    route pictures, an entry the cache has not read
+    (`stale-statewide-photo-override`). The sweep of 2026-11-17 gave it its
+    first eleven, candidates for governor every route had left a
+    silhouette, found, confirmed and looked at as rule 24's 43 were. A heavy photograph is shown and said, as rule 87 says. A Commons
     file is held to rule 82's one licence test, at the read and again at
     every build (`statewide_photos.licence_doubt`): one whose page names no
     author, public domain on an uploader's word alone ("PD-author", or no

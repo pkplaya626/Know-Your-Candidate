@@ -1018,5 +1018,254 @@ class TestWhatThePullRequestsReviewFound(unittest.TestCase):
                                  "2026 Alaska gubernatorial election"])
 
 
+class TestAPersonsChoice(unittest.TestCase):
+    """Rule 91's fifth route (the owner's request of 2026-11-15): a photograph
+    a person chose for a candidate the four routes leave with none, by an
+    evidenced overrides.STATEWIDE_PHOTOS entry - eleven candidates for
+    governor after the sweep of 2026-11-17 - with the same fields and checks
+    as a profile's CANDIDATE_PHOTOS entry, standing behind every route."""
+
+    K = "XX|governor|Pat Doe"
+    URL = "https://legis.example.gov/photos/doe.jpg"
+    LISTS = {"XX": {"governor": [{"name": "Pat Doe"}, {"name": "Lee Roe"}]}}
+    DATA = {"states": {"XX": {"offices": {"governor": {"candidates": [
+        {"name": "Pat Doe"}, {"name": "Lee Roe"}]}}}}}
+    ENTRY = {"url": URL, "page": "https://legis.example.gov/members/doe",
+             "words": "alt text \"Senator Pat Doe\" under the heading \"Senator Pat Doe\"",
+             "by": "Example Legislature",
+             "tie": "the article the race's article links for her says she sits in it",
+             "seen": "her alone, a studio portrait; face about 2.6 tenths of the card",
+             "read": "2026-11-17"}
+
+    def choose(self, entries, measure=None, **kw):
+        from kyc import overrides
+        with mock.patch.dict(overrides.STATEWIDE_PHOTOS, entries, clear=True):
+            return sp.read_curated(self.LISTS, measure=measure or measure_from(
+                {self.URL: SMALL}), **kw)
+
+    def shown(self, cache, entries=None, status=None, holder=None, guide=None, legislators=None):
+        from kyc import guide_photos, overrides
+        rows = [{"name": "Pat Doe"}, {"name": "Lee Roe"}]
+        shadowed = []
+        found = {"photo": "photos/abc.png"} if guide else None
+        with mock.patch.dict(overrides.STATEWIDE_PHOTOS,
+                             {self.K: self.ENTRY} if entries is None else entries, clear=True), \
+                mock.patch.object(guide_photos, "for_row", return_value=found), \
+                mock.patch.object(guide_photos, "credit", return_value={"by": "The guide"}):
+            sp.attach("XX", "governor", rows, {"candidates": [{"name": "Pat Doe"},
+                                                              {"name": "Lee Roe"}]},
+                      holder, status, cache, guides={"photos": {}} if guide else None,
+                      legislators=legislators, shadowed=shadowed)
+        return rows[0], shadowed
+
+    def test_an_entry_is_read_as_a_whole_record_of_its_own_route(self):
+        records, problems, unknown = self.choose({self.K: self.ENTRY})
+        self.assertEqual((problems, unknown), ([], set()))
+        rec = records[self.K]
+        self.assertEqual((rec["route"], rec["photo"], rec["chosen"]), ("curated", self.URL,
+                                                                       self.URL))
+        self.assertEqual(rec["by"], "Example Legislature")
+        self.assertEqual((rec["tie"], rec["seen"], rec["read"]),
+                         (self.ENTRY["tie"], self.ENTRY["seen"], "2026-11-17"))
+        self.assertEqual(sp.problems({"photos": records}), [])
+        # A record of this route without what its entry gave is not whole.
+        self.assertTrue(sp.problems({"photos": {self.K: dict(rec, tie="")}}))
+
+    def test_an_entry_that_cannot_stand_gives_nothing(self):
+        from kyc import overrides
+        # A name no list prints (the list's own words, never another form).
+        records, problems, _ = self.choose({"XX|governor|Patricia Doe": self.ENTRY})
+        self.assertEqual(records, {})
+        self.assertIn("no list prints", problems[0])
+        # Without its fields, like a CANDIDATE_PHOTOS entry.
+        records, problems, _ = self.choose({self.K: dict(self.ENTRY, tie="")})
+        self.assertEqual(records, {})
+        self.assertIn("no tie", problems[0])
+        records, problems, _ = self.choose({self.K: dict(self.ENTRY, by="")})
+        self.assertIn("no credit (by)", problems[0])
+        # A file a person refused.
+        with mock.patch.dict(overrides.NOT_A_PORTRAIT, {self.URL: ("2026-11-17", "x")}):
+            records, problems, _ = self.choose({self.K: self.ENTRY})
+        self.assertEqual(records, {})
+        self.assertIn("withheld by a person's list", problems[0])
+        # Wider than tall, like every route's statewide photograph.
+        records, problems, _ = self.choose({self.K: self.ENTRY}, measure=measure_from(
+            {self.URL: {"bytes": 9000, "width": 600, "height": 300}}))
+        self.assertEqual(records, {})
+        # A file that could not be read concludes nothing (rule 8).
+        records, problems, unknown = self.choose({self.K: self.ENTRY},
+                                                 measure=measure_from({self.URL: None}))
+        self.assertEqual((records, unknown), ({}, {self.K}))
+
+    def test_a_heavy_choice_is_shown_and_said(self):
+        with mock.patch("kyc.photos.lighter_form", no_lighter):
+            records, _, _ = self.choose({self.K: self.ENTRY}, measure=measure_from(
+                {self.URL: HEAVY}))
+        self.assertTrue(official_photos.heavy_of(records[self.K])["kept"])
+        self.assertEqual(sp.problems({"photos": records}), [])
+
+    def test_it_stands_only_where_every_route_leaves_none(self):
+        records, _, _ = self.choose({self.K: self.ENTRY})
+        cache = {"photos": records}
+        row, shadowed = self.shown(cache)
+        self.assertEqual(row["photo"], self.URL)
+        self.assertEqual(row["photoCredit"], {"by": "Example Legislature",
+                                              "page": self.ENTRY["page"]})
+        self.assertEqual(shadowed, [])
+        # The election office's guide's photograph, hosted here, stands ahead.
+        row, shadowed = self.shown(cache, guide=True)
+        self.assertEqual(row["photo"], "photos/abc.png")
+        self.assertEqual(shadowed, [f"{self.K}: the election office's guide's photograph"])
+        # So does the holder's office photograph.
+        holder = {"name": "Pat Doe", "headshot": "https://nga.example/doe.jpg",
+                  "headshotBy": "National Governors Association"}
+        row, shadowed = self.shown(cache, status={"why": "listed", "name": "Pat Doe"},
+                                   holder=holder)
+        self.assertEqual(row["photo"], "https://nga.example/doe.jpg")
+        self.assertEqual(shadowed, [f"{self.K}: the holder's office photograph"])
+        # And a route the reader read: the record is not merged over it.
+        wiki = official_photos.record("https://upload.wikimedia.org/x.jpg", "https://w.example",
+                                      "words", SMALL, route="wikipedia")
+        merged, problems = {self.K: wiki}, []
+        sp.merge_curated(merged, records, problems)
+        self.assertEqual(merged[self.K]["route"], "wikipedia")
+        self.assertIn("now pictures them", problems[0])
+
+    def test_a_record_its_entry_no_longer_names_is_withheld(self):
+        records, _, _ = self.choose({self.K: self.ENTRY})
+        cache = {"photos": records}
+        self.assertNotIn("photo", self.shown(cache, entries={})[0])
+        moved = dict(self.ENTRY, url="https://legis.example.gov/photos/doe-2027.jpg")
+        self.assertNotIn("photo", self.shown(cache, entries={self.K: moved})[0])
+        from kyc import overrides
+        with mock.patch.dict(overrides.STATEWIDE_PHOTOS, {}, clear=True):
+            self.assertIn("no longer names", sp.withheld_why(self.K, records[self.K]))
+
+    def test_a_commons_choice_is_credited_from_its_page_and_held_to_the_licence_test(self):
+        upload = sp.upload_of("Pat Doe official.jpg")
+        thumb = upload.replace("/commons/", "/commons/thumb/") + "/330px-Pat_Doe_official.jpg"
+        page = "https://commons.wikimedia.org/wiki/File:Pat_Doe_official.jpg"
+        entry = dict(self.ENTRY, url=upload, page=page, by="")
+        credit = {"by": "Office of the Clerk, U.S. House of Representatives",
+                  "licence": "Public domain", "basis": "PD US Congress", "page": page,
+                  "via": "Wikimedia Commons"}
+        asked = []
+
+        def commons(file_name, *a):
+            asked.append(file_name)
+            return (thumb, SMALL, dict(credit), None, {"width": 335, "height": 410}), ""
+
+        records, problems, _ = self.choose({self.K: entry}, commons=commons)
+        self.assertEqual((asked, problems), (["Pat Doe official.jpg"], []))
+        rec = records[self.K]
+        self.assertEqual((rec["photo"], rec["chosen"]), (thumb, upload))
+        self.assertTrue(sp.from_commons(rec))
+        self.assertEqual(sp.problems({"photos": records}), [])
+        row, _ = self.shown({"photos": records}, entries={self.K: entry})
+        self.assertEqual(row["photoCredit"]["licence"], "Public domain")
+        # A file whose page names no author is doubted, whoever chose it.
+        doubted = dict(rec, credit=dict(credit, by=None))
+        from kyc import overrides
+        with mock.patch.dict(overrides.STATEWIDE_PHOTOS, {self.K: entry}, clear=True):
+            # The file-name test is the article's, not a person's choice:
+            # a name that says a scene withholds nothing a person looked at.
+            scene = dict(rec, credit=dict(credit, page=page.replace(
+                "Pat_Doe_official", "Pat_Doe_at_a_2022_Campaign_Event")),
+                chosen=upload)
+            self.assertEqual(sp.withheld_why(self.K, rec), "")
+            self.assertEqual(sp.withheld_why(self.K, scene), "")
+            self.assertIn("names no author", sp.withheld_why(self.K, doubted))
+            # A doubt a person keeps withholds it by its upload address.
+            with mock.patch.dict(overrides.PORTRAIT_LICENCE_DOUBTS,
+                                 {upload: ("2026-11-17", "x")}):
+                self.assertTrue(sp.withheld_why(self.K, rec))
+
+    def test_a_seat_keyed_choice_stands_only_while_its_member_holds_the_seat(self):
+        seat = {"state": "XX", "chamber": "upper", "district": "22",
+                "legislator": "ocd-person/1", "name": "Pat Doe"}
+        entry = dict(self.ENTRY, url="https://legis.example.gov/SenPics/Sen22.jpg", seat=seat)
+
+        def roster(who, name):
+            return {"states": {"XX": [{"id": who, "name": name, "chamber": "upper",
+                                       "district": "22", "state": "XX"}]}}
+
+        seated, successor = roster("ocd-person/1", "Pat Doe"), roster("ocd-person/2", "Lee Roe")
+        measure = measure_from({entry["url"]: SMALL})
+        records, problems, _ = self.choose({self.K: entry}, measure=measure,
+                                           legislators=seated)
+        self.assertEqual(problems, [])
+        cache = {"photos": records}
+        entries = {self.K: entry}
+        self.assertEqual(self.shown(cache, entries, legislators=seated)[0]["photo"],
+                         entry["url"])
+        self.assertNotIn("photo", self.shown(cache, entries, legislators=successor)[0])
+        records, problems, _ = self.choose({self.K: entry}, measure=measure,
+                                           legislators=successor)
+        self.assertEqual(records, {})
+        self.assertIn("no longer holds", problems[0])
+
+    def test_curated_only_reads_the_choices_and_nothing_else(self):
+        from kyc import overrides
+        wiki = official_photos.record("https://upload.wikimedia.org/x.jpg", "https://w.example",
+                                      "words", SMALL, route="wikipedia")
+        old = official_photos.record("https://legis.example.gov/photos/roe.jpg",
+                                     "https://legis.example.gov/members/roe", "words", SMALL,
+                                     by="X", route="curated", tie="t", seen="s",
+                                     chosen="https://legis.example.gov/photos/roe.jpg")
+        cache = {"read": "2026-11-16", "photos": {"XX|governor|Lee Roe": old,
+                                                  "YY|governor|Al Poe": wiki}}
+        with mock.patch.dict(overrides.STATEWIDE_PHOTOS, {self.K: self.ENTRY}, clear=True), \
+                mock.patch.object(official_photos, "weigh", measure_from({self.URL: SMALL})):
+            out, problems = sp.with_curated(cache, self.LISTS, log=None)
+        self.assertEqual(sorted(out["photos"]), ["XX|governor|Pat Doe", "YY|governor|Al Poe"])
+        self.assertIs(out["photos"]["YY|governor|Al Poe"], wiki)
+        self.assertEqual(out["read"], "2026-11-16")
+        # One whose file could not be read keeps its last read.
+        with mock.patch.dict(overrides.STATEWIDE_PHOTOS, {self.K: self.ENTRY}, clear=True), \
+                mock.patch.object(official_photos, "weigh", measure_from({self.URL: None})):
+            again, problems = sp.with_curated(out, self.LISTS, log=None)
+        self.assertEqual(again["photos"][self.K], out["photos"][self.K])
+        self.assertIn("could not be read; the last read is kept", problems[0])
+
+    def test_validate_names_an_entry_unevidenced_refused_or_standing_for_nothing(self):
+        from kyc import overrides, validate
+        records, _, _ = self.choose({self.K: self.ENTRY})
+        cache = {"photos": records}
+
+        def codes(entries, photo_cache=cache):
+            with mock.patch.dict(overrides.STATEWIDE_PHOTOS, entries, clear=True):
+                return [i.code for i in validate.check_statewide_photo_choices(self.DATA,
+                                                                                photo_cache)]
+
+        self.assertEqual(codes({self.K: self.ENTRY}), [])
+        self.assertEqual(codes({self.K: dict(self.ENTRY, seen="")}),
+                         ["statewide-photo-curated-unevidenced"])
+        with mock.patch.dict(overrides.NOT_A_PORTRAIT, {self.URL: ("2026-11-17", "x")}):
+            self.assertEqual(codes({self.K: self.ENTRY}), ["statewide-photo-curated-unevidenced"])
+        # Standing for nothing: a name no list prints, an entry the cache
+        # holds no record of, and one another route now pictures.
+        self.assertEqual(codes({"XX|governor|Patricia Doe": self.ENTRY}),
+                         ["stale-statewide-photo-override"])
+        self.assertEqual(codes({self.K: self.ENTRY}, {"photos": {}}),
+                         ["stale-statewide-photo-override"])
+        wiki = official_photos.record("https://upload.wikimedia.org/x.jpg", "https://w.example",
+                                      "words", SMALL, route="wikipedia")
+        self.assertEqual(codes({self.K: self.ENTRY}, {"photos": {self.K: wiki}}),
+                         ["stale-statewide-photo-override"])
+
+    def test_the_committed_entries_are_whole_and_read(self):
+        from kyc import overrides, statewide
+        data = statewide.load(".")
+        if data is None:
+            self.skipTest("no statewide lists")
+        lists = sp.lists_of(data)
+        for k, entry in overrides.STATEWIDE_PHOTOS.items():
+            self.assertEqual(sp.curated_problems(entry), [], k)
+        cache = sp.load_cache(".") or {}
+        self.assertEqual(sp.stale_curated(cache, lists), [])
+        for k in overrides.STATEWIDE_PHOTOS:
+            self.assertEqual(sp.withheld_why(k, cache["photos"][k]), "", k)
+
+
 if __name__ == "__main__":
     unittest.main()

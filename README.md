@@ -73,7 +73,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_lookup_maps.py` | Rebuild `lookup_maps/`: every ZIP code area's share of each district and county, and the finer boundaries a location is placed on, for "Find who represents you" (network) |
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
-| `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
+| `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article, and last a person's evidenced choice, `overrides.STATEWIDE_PHOTOS`); `--curated-only` reads the choices alone and changes no other photograph; `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
 | `npm install && npm test` | Render every page in jsdom and drive the UI (5151 checks) |
@@ -1454,7 +1454,7 @@ URL, and `validate` fails a `photoSet` that names another file.
 | Field | What it holds |
 |---|---|
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
-| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile), `campaign-site` (the campaign's own site, its About page or the page as a browser draws it), `wikidata-fec` (the Wikidata item carrying the person's own FEC candidate id), `state-legislature` (the legislature's own page for a nominee who sits in it), `election-guide` (the election office's own guide, the file hosted here: the first entry is then `photos/<hash>.jpg` or `.png`, from the site's root) or `curated` (a photograph a person chose and looked at, `overrides.CANDIDATE_PHOTOS`, keyed on the profile's id: a government office's or the campaign's own file, an office's photograph its page draws only inline, hosted here unmodified (`photos/<hash>.png`, Brent Taylor's), or a Commons file in the person's own category, with the page naming them, why it is theirs and what was seen; a file a legislature keys by seat stands only while its member holds the seat) |
+| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile), `campaign-site` (the campaign's own site, its About page or the page as a browser draws it), `wikidata-fec` (the Wikidata item carrying the person's own FEC candidate id), `state-legislature` (the legislature's own page for a nominee who sits in it), `election-guide` (the election office's own guide, the file hosted here: the first entry is then `photos/<hash>.jpg` or `.png`, from the site's root) or `curated` (a photograph a person chose and looked at, `overrides.CANDIDATE_PHOTOS`, keyed on the profile's id: a government office's or the campaign's own file, an office's photograph its page draws only inline, hosted here unmodified (`photos/<hash>.png`, Brent Taylor's), or a Commons file in the person's own category, with the page naming them, why it is theirs and what was seen; a file a legislature keys by seat stands only while its member holds the seat; one over the caps is shown smaller from the same file through its host's resizer or Photon, its `original` kept, else as it is, and said either way, `heavy`: the sweep of 2026-11-17 added 43, twelve of them so) |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
 | `photoCopy` | `{src, of, ofBytes}`: the smaller copy this site made of the first entry, `of` being that entry's address and `ofBytes` its weight, `src` the copy under `photos/` from the site's root, stamped with its hash. Only for a credited portrait over 300 KB or 1,200px, and only for the person the copy was made for; the page loads it in the first entry's place and falls back to the original (rule 101) |
 | `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?, year?, caucus?, converted?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one), with the year the page dates the file to where it gives a single four-digit one plainly (`year`, printed "Photo (1981): ..."; never guessed, and never an upload date, an estimate or a span); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the page the image was on); a state legislature's (`by: "New Mexico Legislature"`, `page` the member's page), or the member's own party caucus's (`by: "Michigan Senate Democrats"`, `caucus: true`, `page` their page on its site); an election office's guide's, by where it was found (`by: "from the Washington Secretary of State's voters' guide"`, `page` the candidate's page in it), with `converted` where this site decoded the file (Oregon's JPEG 2000, as PNG). Absent for the silhouette |
@@ -2956,6 +2956,29 @@ the day, its bytes and size):
    Wikimedia does not answer for keeps the last record of the same file
    (never another width of it); a file new to the candidate is taken at
    whichever width answers.
+5. a photograph a person chose, where every route above leaves the
+   candidate none (the owner's request of 2026-11-15, and the photo sweep
+   of 2026-11-17): an evidenced `overrides.STATEWIDE_PHOTOS` entry keyed on
+   the cache's own key for the candidate (`ST|office|<the list's name>`),
+   with the same fields and checks as a profile's `CANDIDATE_PHOTOS` entry
+   (the file, the page naming them beside it, its words, whose it is, why
+   that page is theirs, what a person saw and measured on the card, the day;
+   a file a legislature keys by its seat stands only while its member holds
+   the seat). `ballotphotos` reads it as route `curated` (`--curated-only`
+   reads these alone), weighed and shaped as every route's photograph is,
+   a Commons file credited from its own page and held to the licence test;
+   `NOT_A_PORTRAIT` and `PORTRAIT_LICENCE_DOUBTS` withhold it. The guide's
+   hosted photograph and the holder's office photograph stand ahead of it,
+   and the build names an entry they do; `validate` fails an entry without
+   its fields or a refused file (`statewide-photo-curated-unevidenced`) and
+   warns of one that stands for nothing - a name no list prints, a
+   candidate another route pictures, an entry the cache has not read
+   (`stale-statewide-photo-override`). Its first eleven entries picture
+   candidates for governor every route had left with the silhouette: four
+   state legislators' and an attorney general's official photographs from
+   their offices' own pages, the Guam Legislature's two, and four Commons
+   files (two House portraits, Darren Bailey's own upload, Helena Foulkes's
+   lead, refused by the reader only for its run-together file name).
 
 A photograph its source offers only above 300 KB or 1,200px is shown all the
 same (rule 87): smaller from its host's resizer or Photon where the same
