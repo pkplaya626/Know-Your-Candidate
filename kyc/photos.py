@@ -74,6 +74,46 @@ CURATED = "curated"
 # What every CANDIDATE_PHOTOS entry must say (``curated_problems``).
 CURATED_FIELDS = ("url", "page", "words", "tie", "seen", "read")
 
+# A person's contact details have no place in an entry's evidence: the
+# entry is committed and its words are published in the caches (rule 64
+# keeps no address, phone or email from a list). The Wyoming Legislature's
+# record and the Secretary of State's list both print Eric Barlow's home
+# address, and the first entry quoted it to tie the two together.
+_CONTACT = (
+    ("an email address", re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")),
+    ("a street address", re.compile(
+        r"\b\d{1,6}\s+(?:[A-Z]\s+)?(?:[A-Z][\w'.-]*\s+){1,5}"
+        r"(?:Road|Rd|Street|St|Avenue|Ave|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct|"
+        r"Way|Highway|Hwy|Place|Pl|Parkway|Pkwy|Circle|Cir|Terrace|Trail|Trl)\b")),
+    ("a phone number", re.compile(r"(?<!\d)\(?\d{3}\)?[-. ]\d{3}[-. ]\d{4}(?!\d)")),
+)
+
+
+def contact_details(text):
+    """``[kind]``: the contact details *text* holds (an email address, a
+    street address, a phone number), in the order :data:`_CONTACT` names
+    them."""
+    return [kind for kind, rx in _CONTACT if rx.search(str(text or ""))]
+
+
+def commons_name(address):
+    """The file name a Commons *address* names - an upload's (original or
+    thumbnail) or a ``/wiki/File:`` description page's - with its percent
+    escapes and underscores read as the file's own name, or ``None``."""
+    import urllib.parse
+
+    from .portraits import wikimedia_file
+
+    address = str(address or "")
+    if "/wiki/File:" in address:
+        name = address.split("/wiki/File:", 1)[1].split("#", 1)[0].split("?", 1)[0]
+    else:
+        parts = wikimedia_file(address)
+        if not parts:
+            return None
+        name = parts[3]
+    return urllib.parse.unquote(name).replace("_", " ").strip() or None
+
 
 def curated(profile):
     """The ``overrides.CANDIDATE_PHOTOS`` entry for *profile*, by its id
@@ -135,8 +175,17 @@ def curated_problems(entry, manifest=None):
     if wikimedia_file(url):
         if "commons.wikimedia.org/wiki/File:" not in page:
             out.append("a Commons file whose page is not its description page")
+        elif commons_name(url) != commons_name(page):
+            # The statewide reader shows the file its page names, and the
+            # portrait cache the one the address names: both must be one.
+            out.append(f"a Commons address ({commons_name(url)}) and description page "
+                       f"({commons_name(page)}) that name different files")
     elif not str(entry.get("by") or "").strip():
         out.append("no credit (by)")
+    for field in ("words", "tie", "seen", "by"):
+        kinds = contact_details(entry.get(field))
+        if kinds:
+            out.append(f"{' and '.join(kinds)} in its {field}, which an entry never quotes")
     return out
 
 

@@ -780,7 +780,9 @@ CANDIDATE_PHOTOS = {
                 "tall; the card's crop (x 373-1227) keeps him whole-faced at its left. "
                 "Measured: Brow (under the brim) at about y 325, chin at about y 450 of "
                 "the 1067 px file: about 125 px against a 106.7 px band, about 1.2 "
-                "tenths.",
+                "tenths. It stands ahead of his article's lead, File:Tom Sell "
+                "119th-120th Congress Veterans Day tribute (cropped).jpg (207x232), a "
+                "crop of a group photograph nobody had looked at.",
         "read": "2026-11-17",
     },
     # Chuck Hubbard
@@ -2952,8 +2954,8 @@ STATEWIDE_PHOTOS = {
         "url": "https://arkleg.state.ar.us/Content/photos/2027/Senate/640_sm.jpg",
         "page": "https://arkleg.state.ar.us/Legislators/Detail?member=F.+Love",
         "words": "alt text \"Photo of Senator Love\", under the page's heading \"Senator "
-                 "Fredrick J. Love (D)\", followed by \"Email: fred.love@senate.ar.gov ... "
-                 "District: 15\"; page title \"Senator Fredrick J. Love (D) - Arkansas "
+                 "Fredrick J. Love (D)\", followed by \"District: 15\"; "
+                 "page title \"Senator Fredrick J. Love (D) - Arkansas "
                  "State Legislature\"",
         "by": "Arkansas State Legislature (Arkansas General Assembly)",
         "tie": "Route 1(d). The article the race's own article links for him "
@@ -3259,8 +3261,7 @@ STATEWIDE_PHOTOS = {
                  "read from https://api.wyoleg.gov/v1/Legislator/1995, the address the "
                  "page's own script reads): \"name\":\"Senator Eric Barlow\", "
                  "\"district\":\"Senate District 23\", \"senateYears\":\"Senate: 2023-Present\", "
-                 "\"legPhoto\":\"68th-BarlowEric.jpg\", \"address\":\"1625 A Buffalo Cut Across "
-                 "Road\", \"city\":\"Gillette\"; the page draws the file as <img "
+                 "\"legPhoto\":\"68th-BarlowEric.jpg\"; the page draws the file as <img "
                  "src=\"https://wyoleg.gov/LegislatorSummary/Photos/\" + legPhoto "
                  "alt=\"Photograph of \" + name>, i.e. alt \"Photograph of Senator Eric "
                  "Barlow\". File name: 68th-BarlowEric.jpg.",
@@ -3272,11 +3273,9 @@ STATEWIDE_PHOTOS = {
                "\"Governor-elect of Wyoming Assuming office January 4, 2027\"). The "
                "Wyoming Legislature's member record legID 1995 names him \"Senator Eric "
                "Barlow\", Senate District 23, \"Senate: 2023-Present\", with legPhoto "
-               "68th-BarlowEric.jpg, and its home address (1625 A Buffalo Cut Across "
-               "Road, Gillette) is the one the Wyoming Secretary of State's 2026 "
-               "general election candidate list prints in his GOVERNOR row "
-               "(\"Republican Eric Barlow 1625 A Buffalo Cut Across Rd ... Gillette, WY "
-               "82718\"). This site's own legislature page already shows this file on "
+               "68th-BarlowEric.jpg; the Wyoming Secretary of State's 2026 general "
+               "election candidate list prints \"Republican Eric Barlow\" in its "
+               "GOVERNOR row. This site's own legislature page already shows this file on "
                "his Senate District 23 card, credited to the Wyoming Legislature. The "
                "file is keyed by name, not by seat.",
         "seen": "A studio head-and-shoulders portrait of one man alone (grey beard, "

@@ -466,8 +466,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     photo sweep of 2026-11-17 (the owner's request of 2026-11-15, "lets try
     and fill those photos and any other missing from non eliminated
     canidates") added 43 such entries for members-elect, nominees and
-    Louisiana's qualified candidates every route had left a silhouette: each
-    file found by one reader on a page tied to the person (the campaign site
+    Louisiana's qualified candidates: 42 every route had left a silhouette,
+    and Tom Sell, whose article's lead was a crop of a group tribute nobody
+    had looked at (his campaign's photograph of him alone stands ahead of
+    it, as a curated entry does): each file found by one reader on a page tied to the person (the campaign site
     their committee filed, or one whose disclaimer names that committee
     exactly; their legislature's page; the article their ballot page links
     and its Commons files), re-opened and confirmed by a second who fetched
@@ -480,7 +482,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Hatcher's a 4.4 MB PNG), and a chosen file is weighed as a page is
     served it (`portraits.weigh_as_shown`): Wix sent Elizabeth Fitzgibbon's
     24 KB AVIF as a 379 KB PNG to a request that accepted nothing in
-    particular. A ballot link
+    particular. An entry names one file: a Commons address and a
+    description page naming two are refused (the statewide reader showed
+    the page's while its record said the address's), and so is an entry
+    whose words, tie, seen or credit quote an email address, a street
+    address or a phone number (`photos.contact_details`): the first
+    Wyoming entry quoted the home address the legislature's record and the
+    Secretary of State's list both print, to be committed and published in
+    the cache's evidence (rule 64 keeps no contact details either). A ballot link
     withheld as leading elsewhere is withheld before any portrait is taken
     from it (`enrich.withhold_links`).
     `title_is_about` rejects a resolved title that does not contain the
@@ -3413,7 +3422,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     route pictures, an entry the cache has not read
     (`stale-statewide-photo-override`). The sweep of 2026-11-17 gave it its
     first eleven, candidates for governor every route had left a
-    silhouette, found, confirmed and looked at as rule 24's 43 were. A heavy photograph is shown and said, as rule 87 says. A Commons
+    silhouette, found, confirmed and looked at as rule 24's 43 were, held
+    to its one Commons file and its words free of contact details. A heavy photograph is shown and said, as rule 87 says. A Commons
     file is held to rule 82's one licence test, at the read and again at
     every build (`statewide_photos.licence_doubt`): one whose page names no
     author, public domain on an uploader's word alone ("PD-author", or no

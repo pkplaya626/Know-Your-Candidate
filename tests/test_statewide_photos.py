@@ -1270,6 +1270,11 @@ class TestAPersonsChoice(unittest.TestCase):
             if rec.get("route") == sp.CURATED:
                 self.assertEqual(sp.withheld_why(k, rec), "", k)
                 self.assertEqual(sp.problems({"photos": {k: rec}}), [], k)
+                # A record keeps its entry's words: none quotes a person's
+                # address, email or phone (photos.contact_details).
+                from kyc.photos import contact_details
+                for field in ("evidence", "tie", "seen"):
+                    self.assertEqual(contact_details(rec.get(field)), [], (k, field))
 
 
 if __name__ == "__main__":

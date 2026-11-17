@@ -2979,6 +2979,10 @@ the day, its bytes and size):
    their offices' own pages, the Guam Legislature's two, and four Commons
    files (two House portraits, Darren Bailey's own upload, Helena Foulkes's
    lead, refused by the reader only for its run-together file name).
+   An entry, statewide or a profile's, names one Commons file (its address
+   and its description page the same file) and quotes no email address,
+   street address or phone number in its words, tie, seen or credit
+   (`photos.contact_details`).
 
 A photograph its source offers only above 300 KB or 1,200px is shown all the
 same (rule 87): smaller from its host's resizer or Photon where the same
