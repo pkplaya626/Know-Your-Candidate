@@ -15197,6 +15197,27 @@ async function testLongBadgesWrap() {
     await until(() => !!index.D.querySelector(".leadership-posts .badge"), 4000);
     post = index.D.querySelector(".leadership-posts .badge");
   }
+  // A candidate's badge for governor (KYC.stategov.candidateBadge: "Was on
+  // the Nov 3, 2026 ballot"), wherever it is drawn: a card in the map's
+  // governor's-race panel, and the overlay's status line and race rows. On
+  // one line it was 193px in a 167px column of a 280px phone, and the
+  // panel scrolled sideways (Minnesota's and Nebraska's, rule 44).
+  const govBadges = [];
+  for (const now of [undefined, "2026-11-13T12:00:00"]) {
+    const opts = Object.assign({ hash: "#/?state=MN&mode=governor2026", setup: (w) => phoneWidth(w, true) },
+      now ? { now } : {});
+    const gmap = await buildPage("map.html", opts);
+    await until(() => !!gmap.D.querySelector(".gcard-status .badge"), 4000);
+    gmap.D.querySelectorAll(".gcard-status .badge").forEach((el) => govBadges.push({ at: "map card", el }));
+    const listed = ((gmap.window.kycStateGov.states.MN.ballot2026.offices.governor.candidates || {}).candidates || [])
+      .filter((p) => !p.writeIn);
+    if (listed.length) {
+      gmap.window.KYC.governor.open(listed[0].id);
+      await until(() => !gmap.D.getElementById("governorModalStatus").hidden, 4000);
+      gmap.D.querySelectorAll("#governorModalStatus .badge").forEach((el) => govBadges.push({ at: "overlay status", el }));
+      gmap.D.querySelectorAll("#governorModalBody .race-mate-meta .badge").forEach((el) => govBadges.push({ at: "overlay row", el }));
+    }
+  }
   suite("kyc.css — a badge that names an office wraps inside its line on a phone", () => {
     check("a badge is one line unless a rule says otherwise", !!base && base.ws === "nowrap", JSON.stringify(base));
     // A race's head and a card draw it while its member sits: in January
@@ -15222,6 +15243,12 @@ async function testLongBadgesWrap() {
       rowBadges.length > 0 && rowBadges.every(wraps) && rowCss,
       rowBadges.length + " badges on Florida's rows" + (rowCss ? "" : "; .race-row-main sets no minmax(0, 1fr) column") +
         "; " + rowBadges.filter((b) => !wraps(b)).map((b) => b.textContent).slice(0, 3).join(" | "));
+    const govStuck = govBadges.filter((b) => !wraps(b.el));
+    check("a candidate for governor's badge wraps, in the map's cards and the overlay's status line and rows",
+      ["map card", "overlay status", "overlay row"].every((at) => govBadges.some((b) => b.at === at)) &&
+        govStuck.length === 0,
+      govBadges.length + " badges (" + [...new Set(govBadges.map((b) => b.at))].join(", ") + "); " +
+        govStuck.map((b) => b.at + ": " + b.el.textContent).slice(0, 3).join(" | "));
     // The rule is the test's own: a badge nothing lets wrap is caught.
     const loose = index.D.createElement("span");
     loose.className = "badge badge-neutral other-office";
