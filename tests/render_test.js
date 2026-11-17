@@ -27396,6 +27396,28 @@ async function testAlsoLines() {
       check("every role the build ends draws its ended words once its term has begun",
         !notEnded.length && ends.every(([, r]) => /^Was /.test(r.ended)),
         notEnded.map(([rec, r]) => rec.name + ": " + r.words).slice(0, 4).join(" | ") || `${ends.length} roles`);
+      // A write-in candidate for governor is one in their role's words as on
+      // their card's badge (KYC.stategov.candidateBadge), never "On the ...
+      // ballot", which a write-in's name is not printed on: the pipeline's
+      // words (identity.candidate_role, pinned in tests/test_identity.py)
+      // open with the badge's, on each clock.
+      const badgeText = (person) => html(K.stategov.candidateBadge(person)).textContent;
+      const writeInWords = post ? "Was a write-in candidate for Governor of Minnesota"
+        : "Write-in candidate for Governor of Minnesota";
+      const writeIns = new Set();
+      Object.keys(gov).forEach((code) => {
+        const item = ((gov[code].ballot2026 || {}).offices || {}).governor;
+        ((item && item.candidates && item.candidates.candidates) || []).forEach((c) => { if (c.writeIn && c.id) writeIns.add(c.id); });
+      });
+      const builtWriteIns = [];
+      people.forEach((p) => (p.also || []).forEach((r) => { if (r.kind === "candidate" && writeIns.has(r.id)) builtWriteIns.push(r); }));
+      check("a write-in candidate's role is in the words of their card's badge, on this clock",
+        writeInWords.indexOf(badgeText({ writeIn: true })) === 0 &&
+          wordsOf({ words: "Write-in candidate for Governor of Minnesota",
+            after: "Was a write-in candidate for Governor of Minnesota" }, post) === writeInWords &&
+          builtWriteIns.every((r) => wordsOf(r, post).indexOf(badgeText({ writeIn: true })) === 0) &&
+          badgeText({}).indexOf("ballot") !== -1 && writeInWords.indexOf("ballot") === -1,
+        badgeText({ writeIn: true }) + " / " + builtWriteIns.length + " built");
       // The governor's card, a candidate's card and an officer's row.
       const mn = gov.MN;
       const keepGov = mn.governor.also;
