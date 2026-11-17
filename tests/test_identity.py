@@ -912,6 +912,22 @@ class TestTheRecordPhase(SettledEntries):
         self.assertIn("profile:FEC_H6SD00001 is no card this build makes", stale[0][2])
 
 
+class TestAFoldedCuratedRow(unittest.TestCase):
+    def test_a_seated_winners_record_is_read_under_their_curated_rows_id_too(self):
+        from kyc import history, record
+        winner = member("Z900115", "Jan Example", state="IL", raceRole="winner",
+                        fecCandidateId="S6IL00001", otherIds=["CAND_33"], wikipedia="Jan Example")
+        self.assertEqual(record.filing_ids(winner), ["FEC_S6IL00001", "CAND_33"])
+        people = {"CAND_33": {"asked": "Jan Example", "offices": [
+            {"office": "Lieutenant Governor of Illinois", "where": "Illinois", "open": True,
+             "agree": "exact", "from": "2019"}]}}
+        self.assertIs(history.folded(winner, people), people["CAND_33"])
+        # Its own id is never one of them, nor one twice.
+        self.assertEqual(record.filing_ids(dict(winner, id="CAND_33")), ["FEC_S6IL00001"])
+        self.assertEqual(record.filing_ids(dict(winner, otherIds=["CAND_33", "CAND_33"])),
+                         ["FEC_S6IL00001", "CAND_33"])
+
+
 class TestARosterBehindItsLegislature(SettledEntries):
     """A person's evidenced word that a legislator card is theirs but no
     current role: their legislature's own pages seat someone else, while
