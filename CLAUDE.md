@@ -4652,7 +4652,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Senate winner from the curated row CAND_33, lost her record of offices
     on January 3 and her line with it; and the history cache's bioguide is
     read under those filings too, or Colin Allred's TX-33 profile and his
-    Senate filing, sharing only an item, became a pair to warn. A winner
+    Senate filing, sharing only an item, became a pair to warn. An officer
+    card names a person by any form of the name their record's sources
+    write (rule 56's test of each), and a record holding the office beside
+    a card of that surname under another given name is warned
+    (`identity-names-disagree`): the rehearsal's "Margaret Flanagan",
+    Minnesota's Senate winner, beside the card's "Peggy Flanagan" was
+    silent, neither joined nor said. A winner
     seated since Election Day whom the roster still lists in the seat rule
     24 tied them to as a candidate is the roster's lag (rules 16, 51, 100),
     said apart and linked to nothing (`identity-legislator-roster-behind`),
