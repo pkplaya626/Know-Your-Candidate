@@ -899,6 +899,13 @@ class TestTheRecordPhase(SettledEntries):
                                legislators=legislators)
         self.assertEqual([c for c in codes(links) if c.startswith("identity-leg")],
                          ["identity-legislator-look-alike"])
+        # Said for what it is: a seated winner with no corroborated seat
+        # there, never "not a candidate".
+        line = [p for p in identity.problems(links) if p[1] == "identity-legislator-look-alike"]
+        self.assertEqual(line[0][3], [
+            "profile Gina Example (E000001) and Gina Example (TX lower 49, ocd-person/1): seated in "
+            "Congress since Election Day, and no corroborated seat of theirs while they ran is "
+            "this one"])
         # A second member of the name in the other chamber stays a look-alike
         # beside the seat that is behind.
         twin = {"id": "ocd-person/2", "name": "Gina Example", "chamber": "upper", "district": "14",
@@ -909,6 +916,41 @@ class TestTheRecordPhase(SettledEntries):
         self.assertEqual(len(found["identity-legislator-roster-behind"][3]), 1)
         self.assertEqual(len(found["identity-legislator-look-alike"][3]), 1)
         self.assertIn("ocd-person/2", found["identity-legislator-look-alike"][3][0])
+        self.assertTrue(found["identity-legislator-look-alike"][3][0].endswith(
+            "seated in Congress since Election Day; the seat rule 24's join tied them to as a "
+            "candidate is another"))
+
+    def test_a_seated_winner_named_otherwise_by_congresss_record_is_still_the_rosters_lag(self):
+        # Congress's record writes "Christopher M. Rabb"; the candidate, their
+        # article and the roster "Chris Rabb".
+        history = {"people": {"FEC_H6PA03001": {"asked": "Chris Rabb", "wikipedia": "Chris Rabb",
+                                                "offices": [
+            {"office": "Member of the Pennsylvania House of Representatives",
+             "where": "Pennsylvania", "open": True, "agree": "exact"}]}}}
+        seat = {"id": "ocd-person/9", "name": "Chris Rabb", "chamber": "lower", "district": "200",
+                "state": "PA"}
+        legislators = {"fetched": "2026-11-14", "states": {"PA": [seat]}}
+        winner = member("Z000081", "Christopher M. Rabb", state="PA", chamber="House",
+                        officeLabel="House • PA-3", raceRole="winner", fecCandidateId="H6PA03001",
+                        wikipedia="Chris Rabb")
+        links = identity.build([winner], history=history, legislators=legislators)
+        identity.attach(links)
+        self.assertEqual(roles(winner), [])
+        found = {p[1]: p for p in identity.problems(links)}
+        self.assertNotIn("identity-legislator-look-alike", found)
+        self.assertEqual(found["identity-legislator-roster-behind"][3], [
+            "profile Christopher M. Rabb (Z000081) and Chris Rabb (PA lower 200, ocd-person/9): "
+            "seated in Congress since Election Day, in the seat rule 24's join tied them to as a "
+            "candidate"])
+        # A member who was not just seated for a race they won says nothing of
+        # a legislator of another given name.
+        links = identity.build([dict(winner, raceRole=None)], history=history,
+                               legislators=legislators)
+        self.assertFalse([c for c in codes(links) if c.startswith("identity-leg")])
+        # Another article than the one the record was read from ties nothing.
+        links = identity.build([dict(winner, wikipedia="Chris Rabb (author)")], history=history,
+                               legislators=legislators)
+        self.assertFalse([c for c in codes(links) if c.startswith("identity-leg")])
 
     def test_an_entry_keyed_on_a_filing_follows_it_into_the_members_profile(self):
         off = {"name": "Marty Example", "title": "Attorney General", "party": "R", "partyKey": "R"}

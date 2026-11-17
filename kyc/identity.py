@@ -794,22 +794,36 @@ def _legislator_node(links, code, member, chamber_titles):
                           photo=_photo(member, "image")))
 
 
-def _seat_while_a_candidate(record, person, history, legislators):
+def _seat_while_a_candidate(record, person, history, legislators, forms=()):
     """For a member seated since Election Day for a race they won (rule 67's
     ``record.seated_winner``), the legislator rule 24's own test ties to the
     filing folded into their profile (``record.filing_ids``, where the
     history cache still holds the record read while they ran, rule 86): the
     seat they held as a candidate, which the legislature's roster still
-    lists. None for anyone else."""
+    lists. None for anyone else.
+
+    The test is asked of every form of the name the record's sources write
+    (*forms*: its aliases, the FEC's filed name) and of the title of the
+    article it links, which ``held_seats`` reads the seat from (rule 33's
+    article, whose title carries the name the candidate ran under): on
+    January 3 the profile is named from Congress's record, "Christopher M.
+    Rabb" and "Joshua Turek", where the candidate and the roster wrote
+    "Chris Rabb" and "Josh Turek", and asked under that name alone neither
+    seat was found. Only a report rests on it: nothing is linked by it."""
     from .nominee_photos import legislator_for
     from .record import filing_ids, seated_winner
 
     if not seated_winner(record):
         return None
+    names = []
+    for name in [person.get("name"), *forms, record.get("wikipedia")]:
+        if name and name not in names:
+            names.append(name)
     for pid in [record.get("id")] + filing_ids(record):
-        member, _why = legislator_for(dict(person, id=pid), history, legislators)
-        if member:
-            return member
+        for name in names:
+            member, _why = legislator_for(dict(person, id=pid, name=name), history, legislators)
+            if member:
+                return member
     return None
 
 
@@ -851,7 +865,7 @@ def _join_legislators(links, legislators, chamber_titles):
             links._union(leg.key, node.key, "legislature join (rule 24)")
             continue
         was = (None if joinable or node.kind != "profile"
-               else _seat_while_a_candidate(record, person, history, legislators))
+               else _seat_while_a_candidate(record, person, history, legislators, node.forms))
         if not joinable and node.kind == "profile" and seated_winner(record):
             # A winner seated since Election Day is asked of the roster-behind
             # test, not the join: say why that test did not hold, never "not a
