@@ -471,6 +471,7 @@ class Links:
         self.item_pairs = set()   # two profiles one Wikidata item is on, and no other id
         self.item_settled = set()  # those an entry says are one person
         self.chamber_names = {}   # (state, chamber) -> a chamber's own name, where recorded
+        self.roster_behind = []   # legislator cards that are no current role, and why
         self.history_cache = {}
         self.legislators = {}
         self.titles = {}
@@ -761,7 +762,7 @@ def _join_legislators(links, legislators, chamber_titles):
     from .nominee_photos import held_seats, legislator_for, same_name
 
     history = links.history_cache or {}
-    unsettled, behind = [], []
+    unsettled = []
     for node in list(links.nodes.values()):
         if node.kind not in ("profile", "candidate"):
             continue
@@ -799,21 +800,13 @@ def _join_legislators(links, legislators, chamber_titles):
                     f"{seat.get('name')} ({node.state} {seat.get('chamber')} "
                     f"{seat.get('district')}, {seat.get('id')})")
             if was is not None and seat.get("id") == was.get("id"):
-                behind.append(pair)
+                links.roster_behind.append(
+                    pair + ": seated in Congress since Election Day, in the seat rule 24's join "
+                    "tied them to as a candidate")
                 continue
             unsettled.append(pair + ": "
                              + (why if alike else "their corroborated record holds a seat in that "
                                 "chamber, but the roster writes the name another way"))
-    if behind:
-        fetched = str((legislators or {}).get("fetched") or "")[:10]
-        links.problems.append((
-            "warn", "identity-legislator-roster-behind",
-            f"{len(behind)} member{'' if len(behind) == 1 else 's'} seated in Congress since "
-            f"Election Day {'is' if len(behind) == 1 else 'are'} still listed by "
-            "their state legislature's roster" + (f" (Open States, read {fetched})" if fetched else "")
-            + " in the seat rule 24's join tied them to as candidates: the roster is behind (rules "
-            "16, 51, 100), not a look-alike to settle. Neither card names the other (rule 105)",
-            sorted(behind)))
     if unsettled:
         links.problems.append((
             "warn", "identity-legislator-look-alike",
@@ -822,6 +815,32 @@ def _join_legislators(links, legislators, chamber_titles):
             "holds a seat in - and rule 24's join does not tie them; neither card names the other "
             "until a corroborated record does, or an evidenced "
             "overrides.IDENTITY_JOINS entry settles the pair (rule 105)", sorted(unsettled)))
+
+
+def _report_roster_behind(links):
+    """One line for the legislator cards that are no current role though
+    they are the person's (rules 16, 51, 100): a winner seated in Congress
+    since Election Day whom the roster still lists in the seat rule 24's
+    join tied them to as a candidate, and a pair an evidenced
+    ``overrides.IDENTITY_JOINS`` entry says is one person whose legislature
+    now seats someone else (``behind``: Florida's Senate gives Shevrin
+    Jones's District 34 to Ashley Gantt for 2026-2028, its House Angie
+    Nixon's District 13 to Audrey Gibson, while Open States still seats
+    both). Neither card names the other: a roster's word is not shown as a
+    seat the legislature has given away."""
+    if not links.roster_behind:
+        return
+    fetched = str((links.legislators or {}).get("fetched") or "")[:10]
+    n = len(links.roster_behind)
+    links.problems.append((
+        "warn", "identity-legislator-roster-behind",
+        f"{n} state legislator card{'' if n == 1 else 's'} of someone on this site "
+        f"{'is' if n == 1 else 'are'} no current role: their legislature's roster"
+        + (f" (Open States, read {fetched})" if fetched else "")
+        + " still seats them, but they sit in Congress now or the legislature's own pages "
+        "give the seat to someone else. The roster is behind (rules 16, 51, 100), not a "
+        "look-alike to settle; neither card names the other (rule 105)",
+        sorted(links.roster_behind)))
 
 
 def _profile_alias(links, key):
@@ -847,9 +866,14 @@ def _apply_settled(links):
 
     for pair, entry in sorted(getattr(overrides, "IDENTITY_JOINS", {}).items()):
         entry = entry or {}
+        # "behind": one person, whose legislator card is no current role -
+        # only of a pair one of whose keys is a legislator's, said "same".
+        behind_ok = "behind" not in entry or (
+            entry.get("same") is True and str(entry.get("behind") or "").strip()
+            and isinstance(pair, tuple) and any(str(k).startswith("legislator:") for k in pair))
         if (not isinstance(pair, tuple) or len(pair) != 2 or "same" not in entry
-                or not entry.get("evidence") or not re.match(r"^\d{4}-\d{2}-\d{2}$",
-                                                              str(entry.get("read") or ""))):
+                or not entry.get("evidence") or not behind_ok
+                or not re.match(r"^\d{4}-\d{2}-\d{2}$", str(entry.get("read") or ""))):
             links.problems.append((
                 "error", "identity-join-unevidenced",
                 f"overrides.IDENTITY_JOINS {pair!r} needs both cards' keys, \"same\", the "
@@ -888,6 +912,22 @@ def _join_settled(links):
                 + " is no card this build makes; the entry settles nothing", list(entry["written"])))
             continue
         together = links._find(a.key) == links._find(b.key)
+        if entry.get("behind"):
+            if together:
+                links.problems.append((
+                    "warn", "stale-identity-join",
+                    f"overrides.IDENTITY_JOINS {entry['written']!r} says the legislator card is no "
+                    "current role, but the records join the two cards "
+                    f"({links.joined_by.get(pair) or 'through another card'}): a person must look "
+                    "at the legislature's roster again", list(entry["written"])))
+            else:
+                leg, other = (a, b) if a.kind == "legislator" else (b, a)
+                links.roster_behind.append(
+                    f"{other.kind} {other.name} ({other.record.get('id')}) and {leg.name} "
+                    f"({leg.state} {leg.record.get('chamber')} {leg.record.get('district')}, "
+                    f"{leg.record.get('id')}): {entry['behind']} (overrides.IDENTITY_JOINS, read "
+                    f"{entry['read']})")
+            continue
         if entry["same"]:
             if together and pair in links.item_settled:
                 # Joined by the item, on this entry's word.
@@ -1094,6 +1134,7 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
     if legislators:
         _join_legislators(links, legislators, titles)
     _join_settled(links)
+    _report_roster_behind(links)
     _look_alikes(links)
     return links
 

@@ -852,10 +852,11 @@ class TestTheRecordPhase(SettledEntries):
         self.assertNotIn("identity-legislator-look-alike", found)
         behind = found["identity-legislator-roster-behind"]
         self.assertEqual(behind[0], "warn")
-        self.assertIn("1 member seated in Congress since Election Day is still listed", behind[2])
+        self.assertIn("1 state legislator card of someone on this site is no current role", behind[2])
         self.assertIn("read 2026-11-14", behind[2])
         self.assertEqual(behind[3], ["profile Gina Example (E000001) and Gina Example (TX lower 49, "
-                                     "ocd-person/1)"])
+                                     "ocd-person/1): seated in Congress since Election Day, in the "
+                                     "seat rule 24's join tied them to as a candidate"])
         # As a candidate the very same records were joined (rule 24).
         running = filer("FEC_H6TX00001", "Gina Example", state="TX", label="House • TX-37",
                         wikipedia="Gina Example")
@@ -909,6 +910,70 @@ class TestTheRecordPhase(SettledEntries):
         stale = [p for p in identity.problems(links) if p[1] == "stale-identity-join"]
         self.assertEqual(len(stale), 1)
         self.assertIn("profile:FEC_H6SD00001 is no card this build makes", stale[0][2])
+
+
+class TestARosterBehindItsLegislature(SettledEntries):
+    """A person's evidenced word that a legislator card is theirs but no
+    current role: their legislature's own pages seat someone else, while
+    the roster (Open States) still seats them - Florida's Senate District
+    34 and House District 13 on 2026-11-17."""
+
+    def records(self):
+        running = filer("FEC_H6FL00001", "Shev Example", state="FL", label="House • FL-24",
+                        wikipedia="Shevrin Example")
+        seat = {"id": "ocd-person/9", "name": "Shev Example", "chamber": "upper", "district": "34",
+                "districtId": "034", "state": "FL"}
+        return running, {"fetched": "2026-11-14T14:48:44+00:00", "states": {"FL": [seat]}}
+
+    def test_one_person_whose_card_is_behind_is_joined_to_nothing_and_said(self):
+        running, legislators = self.records()
+        pair = ("profile:FEC_H6FL00001", "legislator:FL:ocd-person/9")
+        links = identity.build([running], legislators=legislators)
+        self.assertIn("identity-legislator-look-alike", codes(links))
+        self.settle(pair, same=True, behind="the Florida Senate's page for District 34 names "
+                    "Senator Ann Other for 2026-2028")
+        links = identity.build([running], legislators=legislators)
+        identity.attach(links)
+        self.assertEqual(roles(running), [])
+        found = {p[1]: p for p in identity.problems(links)}
+        self.assertNotIn("identity-legislator-look-alike", found)
+        self.assertNotIn("identity-joined", found)
+        self.assertNotIn("stale-identity-join", found)
+        line = found["identity-legislator-roster-behind"]
+        self.assertEqual(line[3], [
+            "profile Shev Example (FEC_H6FL00001) and Shev Example (FL upper 34, ocd-person/9): "
+            "the Florida Senate's page for District 34 names Senator Ann Other for 2026-2028 "
+            "(overrides.IDENTITY_JOINS, read 2026-11-15)"])
+        # The same entry without "behind" joins them, as any "same" entry does.
+        self.settle(pair, same=True)
+        links = identity.build([running], legislators=legislators)
+        identity.attach(links)
+        self.assertEqual(roles(running), [("legislator", "ocd-person/9")])
+        self.assertNotIn("identity-legislator-roster-behind", codes(links))
+
+    def test_a_behind_entry_must_be_one_persons_and_name_a_legislator(self):
+        running, legislators = self.records()
+        for pair, entry in (
+                (("profile:FEC_H6FL00001", "legislator:FL:ocd-person/9"),
+                 {"same": False, "behind": "seats another"}),
+                (("profile:FEC_H6FL00001", "legislator:FL:ocd-person/9"),
+                 {"same": True, "behind": " "}),
+                (("profile:FEC_H6FL00001", "officer:FL:ag"), {"same": True, "behind": "x"})):
+            self.overrides.IDENTITY_JOINS.clear()
+            self.settle(pair, **entry)
+            links = identity.build([running], legislators=legislators)
+            self.assertIn("identity-join-unevidenced", codes(links), entry)
+            self.assertNotIn("identity-legislator-roster-behind", codes(links), entry)
+
+    def test_a_behind_entry_the_roster_has_caught_up_with_is_stale(self):
+        running, legislators = self.records()
+        self.settle(("profile:FEC_H6FL00001", "legislator:FL:ocd-person/9"), same=True,
+                    behind="seats another")
+        legislators["states"]["FL"] = [dict(legislators["states"]["FL"][0], id="ocd-person/10",
+                                            name="Ann Other")]
+        links = identity.build([running], legislators=legislators)
+        self.assertIn("stale-identity-join", codes(links))
+        self.assertNotIn("identity-legislator-roster-behind", codes(links))
 
 
 class TestAnItemOnTwoProfiles(SettledEntries):
@@ -1266,10 +1331,11 @@ class TestSeatAndChamberWords(unittest.TestCase):
              "open": True, "agree": "exact"}]}}}
         seat = {"id": "ocd-person/6", "name": "Alex Example", "chamber": "lower", "district": "73",
                 "districtId": "073", "state": "NY"}
-        chamber = {"title": legislature.chamber_title("NY", "lower"), "members": {}}
-        name = legislature.chamber_name("NY", "lower")
-        if name:
-            chamber["name"] = name
+        # The payload's head, as legislature.build_state writes it.
+        chamber = dict(legislature.chamber_head("NY", "lower"), members={})
+        self.assertEqual(chamber["name"], "New York State Assembly")
+        self.assertNotIn("name", legislature.chamber_head("NV", "lower"))
+        self.assertEqual(legislature.chamber_head("NV", "lower"), {"title": "Assembly"})
         links = identity.build([challenger], history=history,
                                legislators={"states": {"NY": [seat]}},
                                legislatures={"NY": {"chambers": {"lower": chamber}}})

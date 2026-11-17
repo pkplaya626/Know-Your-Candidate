@@ -83,17 +83,18 @@ def chamber_title(code, chamber):
 # Assembly and the California State Assembly. Only chambers whose own page
 # this project's reader opened are here; any other keeps the page's general
 # form until a person reads its own (nysenate.gov answered the reader a
-# challenge page that day, which concludes nothing: rule 8).
+# challenge page, "Just a moment...", on 2026-11-15 and 2026-11-17, which
+# concludes nothing: rule 8). Each title was read again on 2026-11-17.
 CHAMBER_NAMES = {
     ("CA", "lower"): ("California State Assembly", "https://www.assembly.ca.gov/",
                       "Welcome to the California State Assembly | California State Assembly",
-                      "2026-11-15"),
+                      "2026-11-17"),
     ("CA", "upper"): ("California State Senate", "https://www.senate.ca.gov/",
-                      "Homepage | California State Senate", "2026-11-15"),
+                      "Homepage | California State Senate", "2026-11-17"),
     ("NY", "lower"): ("New York State Assembly", "https://nyassembly.gov/",
-                      "Assembly Home | New York State Assembly", "2026-11-15"),
+                      "Assembly Home | New York State Assembly", "2026-11-17"),
     ("WI", "lower"): ("Wisconsin State Assembly", "https://legis.wisconsin.gov/assembly",
-                      "Wisconsin State Assembly", "2026-11-15"),
+                      "Wisconsin State Assembly", "2026-11-17"),
 }
 
 
@@ -103,6 +104,16 @@ def chamber_name(code, chamber):
     None: the page then writes the general form."""
     entry = CHAMBER_NAMES.get((code, chamber))
     return entry[0] if entry else None
+
+
+def chamber_head(code, chamber):
+    """A chamber's names as its legislature page's payload carries them:
+    its ``title`` ("Assembly") and, only where its own site gives another
+    than the state's name and that title (:data:`CHAMBER_NAMES`, rule 75),
+    its ``name`` ("New York State Assembly"), which the page's panel and the
+    "Also on this site" lines read."""
+    name = chamber_name(code, chamber)
+    return {"title": chamber_title(code, chamber), **({"name": name} if name else {})}
 
 
 def chamber_name_problems():
@@ -1053,10 +1064,7 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         for district_id in on_special:
             found[district_id]["special"] = True
         out_chambers[chamber] = {
-            "title": chamber_title(code, chamber),
-            # The chamber's own name, only where its own site gives another
-            # than the state's and the title (CHAMBER_NAMES, rule 75).
-            **({"name": chamber_name(code, chamber)} if chamber_name(code, chamber) else {}),
+            **chamber_head(code, chamber),
             "seats": seats,
             "listed": count["listed"],
             # The same count as the state page's (stategov.chamber), and
