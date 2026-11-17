@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3475 tests, no dependencies
+python -m unittest discover tests             # 3479 tests, no dependencies
 npm install && npm test                       # 5153 real-DOM checks (needs jsdom)
 ```
 
@@ -479,7 +479,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     its host's resizer or Photon, weighed and the same shape, the entry's
     file kept as its `original`, else as it is, and said either way
     (`heavy`, `portraits.lighten_curated`, rule 87; twelve were, Charlie
-    Hatcher's a 4.4 MB PNG), and a chosen file is weighed as a page is
+    Hatcher's a 4.4 MB PNG). A frame wider than tall is asked first for the
+    width that leaves the 4:5 card's crop 500 pixels of height
+    (`photos.card_tall_forms`, never over 1,200 wide; at 500 wide a 3:2
+    file left the card 266x333 pixels, soft on a phone), else at 500, and a
+    Wix rendition is drawn smaller by Wix's own service, its `/v1/fill/`
+    width and height in proportion, before Photon (`photos.host_resized`:
+    Patrick Forbes's). A chosen file is weighed as a page is
     served it (`portraits.weigh_as_shown`): Wix sent Elizabeth Fitzgibbon's
     24 KB AVIF as a 379 KB PNG to a request that accepted nothing in
     particular. An entry names one file: a Commons address and a
