@@ -15209,6 +15209,10 @@ async function testLongBadgesWrap() {
     const gmap = await buildPage("map.html", opts);
     await until(() => !!gmap.D.querySelector(".gcard-status .badge"), 4000);
     gmap.D.querySelectorAll(".gcard-status .badge").forEach((el) => govBadges.push({ at: "map card", el }));
+    // And the panel head's own ("Governor's election Nov 3", beside the
+    // state's name): 2px past a 280px phone beside "Minnesota".
+    const head = gmap.D.getElementById("panelCounts");
+    if (head && head.textContent.trim()) govBadges.push({ at: "panel head", el: head });
     const listed = ((gmap.window.kycStateGov.states.MN.ballot2026.offices.governor.candidates || {}).candidates || [])
       .filter((p) => !p.writeIn);
     if (listed.length) {
@@ -15244,8 +15248,8 @@ async function testLongBadgesWrap() {
       rowBadges.length + " badges on Florida's rows" + (rowCss ? "" : "; .race-row-main sets no minmax(0, 1fr) column") +
         "; " + rowBadges.filter((b) => !wraps(b)).map((b) => b.textContent).slice(0, 3).join(" | "));
     const govStuck = govBadges.filter((b) => !wraps(b.el));
-    check("a candidate for governor's badge wraps, in the map's cards and the overlay's status line and rows",
-      ["map card", "overlay status", "overlay row"].every((at) => govBadges.some((b) => b.at === at)) &&
+    check("a candidate for governor's badge wraps, in the map's cards and panel head and the overlay's status line and rows",
+      ["map card", "panel head", "overlay status", "overlay row"].every((at) => govBadges.some((b) => b.at === at)) &&
         govStuck.length === 0,
       govBadges.length + " badges (" + [...new Set(govBadges.map((b) => b.at))].join(", ") + "); " +
         govStuck.map((b) => b.at + ": " + b.el.textContent).slice(0, 3).join(" | "));

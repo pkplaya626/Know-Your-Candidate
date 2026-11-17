@@ -2626,9 +2626,17 @@ a.badge-link {
 }
 .detail-title {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--s-2);
   justify-content: space-between;
+}
+/* The panel head's badge beside the state's name ("Governor's election Nov
+ * 3" beside "Minnesota" ran 2px past a 280px phone): it wraps under the
+ * name, no wider than its line (rule 44). */
+.detail-title > .badge {
+  max-width: 100%;
+  white-space: normal;
 }
 .detail-title h2 {
   display: flex;
