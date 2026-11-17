@@ -644,10 +644,6 @@
   "AR|sos|Kelly Grappe": "not-linked",
   "AR|sos|Michael Pakko": "not-linked",
   "AR|sos|Senator Kim Hammer": "no-image",
-  "AZ|governor|HOURIHAN, TERI ANN": "not-linked",
-  "AZ|governor|LOMBARDO, RISA": "not-linked",
-  "AZ|lt|Castillo, Lisa": "not-linked",
-  "AZ|lt|Harrolle Mohan, Angela": "not-linked",
   "AZ|sos|COLLIER, DUWAYNE": "not-linked",
   "CA|ag|Michael E. Gates": "not-linked",
   "CO|ag|Michael J. Allen": "licence-doubt-listed",
@@ -956,7 +952,7 @@
    "height": 250,
    "page": "https://bioguide.congress.gov/search/bio/T000278",
    "photo": "https://www.congress.gov/img/member/t000278_200.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "member",
    "width": 200
   },
@@ -1052,7 +1048,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2292",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 800
   },
@@ -1063,7 +1059,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2427",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 799
   },
@@ -1075,7 +1071,7 @@
    "height": 263,
    "page": "https://bioguide.congress.gov/search/bio/B001302",
    "photo": "https://www.congress.gov/img/member/b001302_200.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "member",
    "width": 175
   },
@@ -1086,7 +1082,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2343",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 800
   },
@@ -1097,7 +1093,7 @@
    "height": 832,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2366",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 666
   },
@@ -1108,7 +1104,7 @@
    "height": 370,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2460",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 296
   },
@@ -1119,7 +1115,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2635",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 752
   },
@@ -1130,7 +1126,7 @@
    "height": 894,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2640",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 715
   },
@@ -1141,7 +1137,7 @@
    "height": 870,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2634",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 696
   },
@@ -1152,7 +1148,7 @@
    "height": 955,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2642",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 764
   },
@@ -1163,7 +1159,7 @@
    "height": 832,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2451",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 666
   },
@@ -1174,7 +1170,7 @@
    "height": 291,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2302",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 233
   },
@@ -1250,7 +1246,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/lt-governor-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/lt-governor/ma.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 207
   },
@@ -1283,7 +1279,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/sos-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/sos/wagner.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "guide",
    "width": 207
   },
@@ -1494,7 +1490,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/D000032",
    "photo": "https://www.congress.gov/img/member/d000032_200.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "member",
    "width": 175
   },
@@ -2064,7 +2060,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/J000307",
    "photo": "https://www.congress.gov/img/member/j000307_200.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "member",
    "width": 175
   },
@@ -2125,7 +2121,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/K000367",
    "photo": "https://www.congress.gov/img/member/k000367_200.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "member",
    "width": 180
   },
@@ -2804,7 +2800,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/B001243",
    "photo": "https://www.congress.gov/img/member/b001243_200.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "member",
    "width": 180
   },
@@ -2880,7 +2876,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/P000610",
    "photo": "https://www.congress.gov/img/member/p000610_200.jpg",
-   "read": "2026-11-16",
+   "read": "2026-11-17",
    "route": "member",
    "width": 175
   },
@@ -3116,5 +3112,5 @@
   "RI|governor": "2026-11-16",
   "RI|lt": "2026-11-16"
  },
- "read": "2026-11-16"
+ "read": "2026-11-17"
 }
