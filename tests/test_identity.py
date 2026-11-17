@@ -976,6 +976,28 @@ class TestARosterBehindItsLegislature(SettledEntries):
         self.assertNotIn("identity-legislator-roster-behind", codes(links))
 
 
+class TestTheRecordedEntries(unittest.TestCase):
+    def test_every_entry_is_evidenced_dated_and_copies_no_phone_or_address(self):
+        import re
+        from kyc import overrides
+        phone = re.compile(r"\(\d{3}\)\s*\d{3}-\d{4}|\b\d{3}[-.]\d{3}[-.]\d{4}\b|\b\d{10}\b")
+        box = re.compile(r"\b(?:P\.?\s*O\.?\s*Box|Box:?)\s*\d", re.I)
+        street = re.compile(r"\b\d{2,6}\s+(?:[NSEW]\.?\s+)?(?:[A-Z][a-z]+\.?\s+){1,3}(?:St|Street|Ave|"
+                            r"Avenue|Blvd|Road|Rd|Drive|Dr|Hwy|Highway)\b")
+        for pair, entry in overrides.IDENTITY_JOINS.items():
+            self.assertEqual(len(pair), 2, pair)
+            self.assertIn(entry.get("same"), (True, False), pair)
+            self.assertRegex(entry.get("read") or "", r"^\d{4}-\d{2}-\d{2}$", pair)
+            words = entry.get("evidence", "") + " " + entry.get("behind", "")
+            self.assertTrue(entry.get("evidence"), pair)
+            for test in (phone, box, street):
+                self.assertIsNone(test.search(words), (pair, test.pattern))
+        # The tests themselves catch what they look for.
+        self.assertTrue(phone.search("call (318) 487-5377"))
+        self.assertTrue(box.search("PO BOX 485, HELENA"))
+        self.assertTrue(street.search("1040 W. Bryn Mawr Ave."))
+
+
 class TestAnItemOnTwoProfiles(SettledEntries):
     def people(self):
         incumbent = member("J000307", "John James", state="MI", chamber="House",
