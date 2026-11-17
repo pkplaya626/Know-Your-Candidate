@@ -27370,6 +27370,12 @@ async function testAlsoLines() {
       check("an official opens on the federal page, from a state's", K.alsoHref(role({ kind: "official",
         id: "x-a", view: "#/official/x-a", href: "federal/index.html#/official/x-a" })) ===
         "../federal/index.html#/official/x-a");
+      // A role's words and link label are text, never markup (rule 13).
+      const odd = "Made-up <b>role</b> & \"words\" <img src=x onerror=1>";
+      const escBox = html(K.alsoHtml({ also: [role({ words: odd, after: odd, link: "<i>x</i> & y" })] }));
+      check("a role's words are escaped, never drawn as markup",
+        lineText(escBox)[0] === odd + " (<i>x</i> & y)" && !escBox.querySelector("b, i, img"),
+        escBox.innerHTML.slice(0, 200));
       check("a Congress biography is linked as it is", K.alsoHref(role({ kind: "departed", view: undefined,
         href: "https://bioguide.congress.gov/search/bio/X000000", link: "Congress biography" })) ===
         "https://bioguide.congress.gov/search/bio/X000000");
@@ -27563,6 +27569,13 @@ async function testAlsoLines() {
       check("a profile's link from the federal page goes to the person's state page",
         [...D.querySelectorAll(".fed-leader a.also-link")].some((a) => a.getAttribute("href") ===
           "../states/mn.html#/profile/X000000"));
+      check("on the federal page an official and a justice open in place, a court's judge at its page",
+        K.alsoHref(role({ kind: "official", id: "x-a", view: "#/official/x-a",
+          href: "federal/index.html#/official/x-a" })) === "#/official/x-a" &&
+        K.alsoHref(role({ kind: "judge", id: "fjc-1", court: "scotus", view: "#/official/fjc-1",
+          href: "federal/index.html#/official/fjc-1" })) === "#/official/fjc-1" &&
+        K.alsoHref(role({ kind: "judge", id: "fjc-2", court: "ca5", view: "#/official/fjc-2",
+          href: "courts/ca5.html#/official/fjc-2" })) === "../courts/ca5.html#/official/fjc-2");
       const slot = D.getElementById("officialModalAlso");
       check("the officials' dialog draws them", !!slot && !slot.hidden &&
         lineText(slot).indexOf(wordsOf(fedRole, post)) !== -1, slot ? slot.textContent : "no slot");
@@ -27599,6 +27612,32 @@ async function testAlsoLines() {
         lineText(card).indexOf("A made-up candidacy") !== -1 &&
         card.querySelector("a.also-link").getAttribute("href") === "../states/tx.html#/profile/X000000",
         card ? card.innerHTML.slice(0, 200) : "none");
+    });
+  }
+
+  // A court's page: a judge of that court opens in place, a federal official
+  // and another court's judge at their own pages (KYC.alsoInPlace): a court
+  // page loads the officials' dialog and data/federal.js, so "the federal
+  // page" is the court attribute's absence, never the data's presence.
+  {
+    const court = await buildPage("courts/ca5.html", { hash: "" });
+    const K = court.window.KYC;
+    suite("also on this site — a court's page (rule 105)", () => {
+      check("no page errors", !court.errors.length, court.errors.join(" | "));
+      const box = court.D.getElementById("federalContent");
+      check("the page is a court's, with the dialog and the federal data",
+        !!box && box.getAttribute("data-court") === "ca5" && !!K.official && !!court.window.kycFederal);
+      check("a federal official opens on the federal page, never in place on a court's",
+        K.alsoHref(role({ kind: "official", id: "x-a", view: "#/official/x-a",
+          href: "federal/index.html#/official/x-a" })) === "../federal/index.html#/official/x-a");
+      check("a justice opens on the federal page, never in place on a court's",
+        K.alsoHref(role({ kind: "judge", id: "fjc-1", court: "scotus", view: "#/official/fjc-1",
+          href: "federal/index.html#/official/fjc-1" })) === "../federal/index.html#/official/fjc-1");
+      check("this court's judge opens in place; another court's at that court's page",
+        K.alsoHref(role({ kind: "judge", id: "fjc-2", court: "ca5", view: "#/official/fjc-2",
+          href: "courts/ca5.html#/official/fjc-2" })) === "#/official/fjc-2" &&
+        K.alsoHref(role({ kind: "judge", id: "fjc-3", court: "ca9", view: "#/official/fjc-3",
+          href: "courts/ca9.html#/official/fjc-3" })) === "../courts/ca9.html#/official/fjc-3");
     });
   }
 

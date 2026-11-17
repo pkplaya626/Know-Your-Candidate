@@ -3881,11 +3881,18 @@
       return !!(KYCg.governor && KYCg.stategov && KYCg.stategov.state &&
                 KYCg.stategov.state(role.state));
     }
-    if (role.kind === "official") return !!(KYCg.official && global.kycFederal && !doc.body.getAttribute("data-court"));
+    // A court's page carries its id on its container, as kyc-federal.js and
+    // the officials' dialog read it, never on the body: read off the body, a
+    // court's page counted as the federal page (it loads data/federal.js
+    // too), and its own judges never opened in place.
+    var box = doc.getElementById("federalContent");
+    var court = (box && box.getAttribute("data-court")) || "";
+    var hub = !!box && box.getAttribute("data-federal") === "hub";
+    if (role.kind === "official") return !!(KYCg.official && global.kycFederal && hub);
     if (role.kind === "judge") {
       return !!KYCg.official && (role.court === "scotus"
-        ? !!global.kycFederal && !doc.body.getAttribute("data-court")
-        : doc.body.getAttribute("data-court") === role.court);
+        ? !!global.kycFederal && hub
+        : !!court && court === role.court);
     }
     return false;
   }
