@@ -2299,7 +2299,15 @@ def _ballotphotos(args):
             return 2
         with open(os.path.join(args.root, "congress_snapshot.json"), encoding="utf-8") as handle:
             snapshot = _json.load(handle)
-        if args.articles_only:
+        from . import statelegs
+        legislators = statelegs.load_cache(args.root) or None
+        if args.curated_only:
+            # Only the photographs a person chose (overrides.STATEWIDE_PHOTOS),
+            # where no other route pictures the candidate: nothing else is
+            # read, changed or dropped.
+            cache, problems = statewide_photos.with_curated(
+                previous or {}, statewide_photos.lists_of(lists), legislators=legislators)
+        elif args.articles_only:
             # Only the candidates' own articles, as the races' articles link
             # them (rule 33), whatever route pictures them: no photograph is
             # read, changed or dropped.
@@ -2313,7 +2321,7 @@ def _ballotphotos(args):
         else:
             cache, problems = statewide_photos.fetch(lists, snapshot, previous,
                                                      wikipedia=not args.no_wikipedia,
-                                                     budget=budget)
+                                                     budget=budget, legislators=legislators)
         recorded = (cache.get("articles") or {}).values()
         print(f"  candidates' own articles: {sum('article' in r for r in recorded)} linked, "
               f"{sum(r.get('none') == 'not-linked' for r in recorded)} not linked, "
@@ -3121,6 +3129,9 @@ def build_parser():
     photos_cmd.add_argument("--articles-only", action="store_true",
                             help="read only the article each race's Wikipedia article links for "
                                  "a candidate for governor; change no photograph")
+    photos_cmd.add_argument("--curated-only", action="store_true",
+                            help="read only the photographs a person chose "
+                                 "(overrides.STATEWIDE_PHOTOS); change no other photograph")
     photos_cmd.add_argument("--max-minutes", type=float, default=None,
                             help="begin no race's article after this many minutes, then save "
                                  "and stop, keeping the last read of every race not reached "

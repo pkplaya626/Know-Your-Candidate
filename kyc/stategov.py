@@ -650,6 +650,9 @@ def build(root="."):
     except cycle.CycleError:
         record = False
     candidates_heavy = 0
+    # The photographs a person chose that another route stands ahead of
+    # (statewide_photos.attach): their entries stand for nothing.
+    shadowed = []
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
                                  (ncsl, NCSL_CACHE, "executives"),
@@ -730,7 +733,8 @@ def build(root="."):
                     else None)
                 candidates_heavy += statewide_photos.attach(
                     code, key, item["candidates"]["candidates"], listed, holder, status,
-                    photo_cache, guide_cache, copies_manifest)
+                    photo_cache, guide_cache, copies_manifest, legislators=leg_cache,
+                    shadowed=shadowed)
         return record
 
     states = {}
@@ -782,6 +786,11 @@ def build(root="."):
                         "size: their source offers them only above the caps")
     problems.extend(statewide_photos.withheld(photo_cache))
     problems.extend(statewide_photos.stale_looks(photo_cache))
+    # validate names the entries the cache or the lists leave standing for
+    # nothing (stale-statewide-photo-override); the build, those a route
+    # applied here stands ahead of.
+    problems.extend(f"overrides.STATEWIDE_PHOTOS {line} stands ahead of it; remove the entry"
+                    for line in sorted(shadowed))
     problems.extend(court_photo_problems(court_cache))
     problems.extend(stale_name_forms(states))
     payload = {

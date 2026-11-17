@@ -537,15 +537,73 @@ def measure_all(cache, log=print):
     if not todo:
         return 0
     log(f"    weights: measuring {len(todo)} portrait(s) ...")
+    from .photos import CURATED
     done = 0
     for record in todo:
         time.sleep(_measure_gap)
-        found = measure(record["url"])
+        found = (weigh_as_shown if record.get("via") == CURATED else measure)(record["url"])
         if found:
             record.update(found)
             done += 1
     log(f"    weights: {done} measured, {len(todo) - done} could not be")
     return done
+
+
+def weigh_as_shown(url):
+    """``{"bytes", "width", "height"}`` of the file at *url* as a page is
+    served it, or ``None`` (rule 8): asked as every other route weighs a
+    photograph (``official_photos.weigh``: the image types a browser
+    accepts, a body read where the server gives no length). A host that
+    chooses the format by what the request accepts - a site builder's CDN -
+    sends a request that accepts nothing in particular another file: Wix
+    sent Elizabeth Fitzgibbon's 24 KB AVIF as a 379 KB PNG, and Framer
+    Chris Gober's with no length at all (the sweep of 2026-11-17), so a
+    photograph a person chose was weighed as no reader receives it."""
+    from . import official_photos
+    verdict, weight = official_photos.weigh(url)
+    return weight if verdict and weight else None
+
+
+def lighten_curated(cache, log=print, weigh=None):
+    """Show each photograph a person chose (``overrides.CANDIDATE_PHOTOS``)
+    that is over the caps smaller from the same file, as every other route
+    does (rule 87): a rendition its host's own resizer serves, or Photon's
+    (``photos.lighter_rendition``), weighed and found the same shape. The
+    record then shows that form and keeps the entry's file as its
+    ``original`` (with ``originalWeight``); where none serves it, it is shown
+    as it is. Either way it says so (``heavy``), and the build counts them.
+    A Commons file is drawn at Wikimedia's standard sizes (rule 42) and a
+    file hosted here was weighed from the manifest; neither is asked.
+    Never copied (rule 101 copies no campaign's file). Returns how many
+    records changed."""
+    from .photocopies import is_hosted
+    from .photos import CURATED, lighter_rendition, too_heavy
+
+    weigh = weigh or weigh_as_shown
+    changed = kept = 0
+    for record in cache.values():
+        url = record.get("url")
+        if (record.get("via") != CURATED or not url or wikimedia_file(url) or is_hosted(url)
+                or record.get("heavy") or record.get("original")):
+            continue
+        weight = {k: record.get(k) for k in ("bytes", "width", "height")}
+        why = too_heavy(weight) if all(weight.values()) else ""
+        if not why:
+            continue
+        time.sleep(_measure_gap)
+        found = lighter_rendition(url, weight, weigh)
+        if found:
+            form, light = found
+            record.update(url=form, original=url, originalWeight=weight,
+                          heavy=f"{why}; shown smaller from the same file", **light)
+        else:
+            record["heavy"] = why
+            kept += 1
+        changed += 1
+    if changed:
+        log(f"    chosen photographs over the caps: {changed - kept} shown smaller from the "
+            f"same file, {kept} shown as they are (rule 87)")
+    return changed
 
 
 def _render(url):
@@ -861,6 +919,7 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
         changed = size_all(cache, log=log)
         changed += credit_all(cache, log=log)
         changed += measure_all(cache, log=log)
+        changed += lighten_curated(cache, log=log)
         if changed or synced:
             save_cache(cache, root)
         return cache, {"resolved": 0, "cached": len(cache)}
@@ -986,6 +1045,7 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     size_all(cache, log=log)
     credit_all(cache, log=log)
     measure_all(cache, log=log)
+    lighten_curated(cache, log=log)
     shared = inherit_cross_links(profiles, cache)
     if shared:
         log(f"    cross-link inheritance: {shared}")
@@ -1066,11 +1126,16 @@ def sync_curated(profiles, cache, manifest=None):
         key = profile_key(profile)
         old = cache.get(key) or {}
         new = curated_record(profile, entry, old, manifest)
-        if old.get("via") == new["via"] and old.get("url") == new["url"]:
+        if old.get("via") == new["via"] and new["url"] in (old.get("url"), old.get("original")):
+            # The same file, read before: its sizes, weight and credit, and
+            # the lighter rendition of it shown in its place where it is
+            # over the caps (:func:`lighten_curated`).
             kept = {k: v for k, v in old.items() if k not in new and k != "credit"}
             if wikimedia_file(new["url"]) and old.get("credit"):
                 kept["credit"] = old["credit"]
             new.update(kept)
+            if old.get("original") == new["url"]:
+                new["url"] = old["url"]
         if new != old:
             cache[key] = new
             changed += 1
@@ -1139,8 +1204,10 @@ def route_ok(profile, record, legislators=None, legislator_photos=None):
         # and, for a file a legislature keys by seat, while the roster still
         # seats the member it was read for (photos.curated_seated).
         from .photos import curated_seated
+        # The file shown may be a lighter rendition of the entry's own
+        # (``original``, :func:`lighten_curated`).
         entry = curated(profile)
-        return (bool(entry) and entry["url"] == record.get("url")
+        return (bool(entry) and entry["url"] in (record.get("url"), record.get("original"))
                 and curated_seated(entry, legislators))
     if record.get(nominee_photos.REFUSALS_ONLY):
         # A record that only holds what a person refused resolves nothing:
