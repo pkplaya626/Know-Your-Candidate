@@ -1261,10 +1261,15 @@ class TestAPersonsChoice(unittest.TestCase):
         lists = sp.lists_of(data)
         for k, entry in overrides.STATEWIDE_PHOTOS.items():
             self.assertEqual(sp.curated_problems(entry), [], k)
+            self.assertTrue(sp.printed(lists, k), k)
+        # Whatever the cache has read of them stands (a read Wikimedia
+        # answered 429 concludes nothing, and validate says it is unread:
+        # the day's data, not the rule).
         cache = sp.load_cache(".") or {}
-        self.assertEqual(sp.stale_curated(cache, lists), [])
-        for k in overrides.STATEWIDE_PHOTOS:
-            self.assertEqual(sp.withheld_why(k, cache["photos"][k]), "", k)
+        for k, rec in (cache.get("photos") or {}).items():
+            if rec.get("route") == sp.CURATED:
+                self.assertEqual(sp.withheld_why(k, rec), "", k)
+                self.assertEqual(sp.problems({"photos": {k: rec}}), [], k)
 
 
 if __name__ == "__main__":
