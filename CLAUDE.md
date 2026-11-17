@@ -1023,7 +1023,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     dialog's edge. In a card, a race's "Held by" line, a dialog's status
     line and the leadership posts a badge wraps, no wider than its line
     (`testLongBadgesWrap` reads the stylesheet for every place the page
-    code draws one; measured in headless Chrome at 320, 360 and 390px on
+    code draws one, a candidate for governor's too: "Was on the Nov 3, 2026
+    ballot" was 193px in a 167px column of a 280px phone, and the map's
+    governor's-race panel scrolled sideways; measured in headless Chrome at 320, 360 and 390px on
     both clocks, with no badge changed at 1280px). So does a folded race
     row's (rule 99), in a text column the row's own width: from Election
     Day "No challenger was on the ballot · 2 out" on one line widened the
@@ -4568,13 +4570,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     A name alone joins nobody (rules 3, 17, 25): two cards of one name in
     one state that nothing ties are a warning (`identity-look-alike`) - on
     2026-11-15 Jocelyn Benson, Christi Jacobsen and Marty Jackley, whose
-    records do not hold the office their officer card names - and link
-    nothing; so is everyone who looks like a member of their own state's
-    legislature that rule 24's join does not tie, in one line
-    (`identity-legislator-look-alike`: 54 that day, the Speaker and
-    Louisiana's Representative Mike Johnson among them, and Shevrin "Shev"
-    Jones, whose record holds the Florida Senate seat the roster gives
-    "Shev Jones"). A person settles a pair either way in
+    records do not hold the office their officer card names (a person's
+    entries settle them now) - and link nothing; so is everyone who looks
+    like a member of their own state's legislature that rule 24's join does
+    not tie, in one line (`identity-legislator-look-alike`: 54 that day, the
+    Speaker and Louisiana's Representative Mike Johnson among them, and
+    Shevrin "Shev" Jones, whose record holds the Florida Senate seat the
+    roster gives "Shev Jones"). A person settles a pair either way in
     `overrides.IDENTITY_JOINS`, keyed on both cards' keys as the warnings
     name them, with the evidence and the day: one person joins, a namesake
     is silenced; an entry with neither is an error, and one naming a card
@@ -4636,6 +4638,55 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     election chose began on Jan. 1, 2027"), read on the reader's day by
     `KYC.alsoHtml` and on the share pages' day as the governor's share page
     reads its own.
+    Its re-read found more, each now refused or said, each with a check made
+    by undoing it. In the record phase a candidate's open offices are said
+    to have been open when the record was read (`openWhenRead`, rule 69),
+    no longer `current`, and on the January rehearsal Phil Weiser's, Aaron
+    D. Ford's, Alan Wilson's, Juliana Stratton's and Chuck Gray's lines
+    vanished on January 3, each pair reported as a look-alike the build had
+    settled the day before: a row open when read for that very office joins
+    while the officer card, read every day, still names them, the role
+    keeping its `ends`, and such a pair is never a look-alike. A winner
+    seated since Election Day whom the roster still lists in the seat rule
+    24 tied them to as a candidate is the roster's lag (rules 16, 51, 100),
+    said apart and linked to nothing (`identity-legislator-roster-behind`),
+    and so is a pair an evidenced entry says is one person whose
+    legislature now seats someone else (`behind`, in the legislature's
+    words). A Wikidata item alone joined two profiles: a challenger's item
+    is their ballot page's article's (rule 33), which a namesake's can be,
+    and the namesake took on every role of the member's item. Two profiles
+    are joined by an item only where they share a bioguide or an FEC id as
+    well; otherwise the pair is warned (`identity-item-shared`: Randall
+    Terry's NJ-7 and VA-7 filings) and the item joins neither to anything
+    until an entry says they are one person, and then they name each other:
+    "one card, no line" is only for the two profiles the dialog cross-links
+    itself (`cross_linked`: `alsoRunningId`, `incumbentId`). An id shared by
+    a state's card and a card of another state, a profile's or a departed
+    row's, is refused whatever the id (`identity-states-disagree`). Each
+    holder of an id was compared only with the first, so a first holder
+    whose name disagreed kept two true holders apart; every pair is asked.
+    A legislator's role names the chamber as it names itself where its own
+    site gives another name than the state's and the chamber's
+    (`legislature.CHAMBER_NAMES`, the page, its title's words and the day:
+    "New York State Assembly", "California State Assembly"; the legislature
+    page's panel reads the same name, `chamber_head`), an at-large seat is
+    rule 96's seat words ("the U.S. House in WY-AL", never "in Wyoming (at
+    large)"), and a legislator's share link opens their district. The map's
+    Senate and House panels draw the line under a member's own row, outside
+    its button (Klobuchar's row said nothing of Minnesota's list). On
+    2026-11-17 a person's sources, opened again by this project's reader,
+    settled eight pairs in `IDENTITY_JOINS`: Jocelyn Benson (her card's own
+    item and its article give the office the item labels "Michigan
+    Department of State"), Christi Jacobsen (the state's candidate list
+    prints the site her FEC committee pays for), Marty Jackley and Mike
+    Simmons (the sites their committees filed, and the office's or the
+    General Assembly's own page) are one person each; Shevrin Jones and
+    Angie Nixon are, but Florida's Senate and House now seat Ashley Gantt
+    and Audrey Gibson (`behind`); the Speaker and Louisiana's Representative
+    Michael T. Johnson, and Rep. Robert Garcia and Assemblymember Robert
+    Garcia, are two people each. An entry copies no telephone number or
+    mailing address (a test holds every one to that). The build joins 97
+    people, and 49 legislator look-alikes wait for a person.
 
 ## District maps
 
