@@ -918,13 +918,19 @@ class TestTheRecordPhase(SettledEntries):
         identity.attach(links)
         self.assertEqual(roles(off), [("profile", "FEC_H6SD00001")])
         # January 3: the same person under their bioguide id, the filing's
-        # FEC id folded in.
+        # FEC id folded in - the entry follows it, and the officer card still
+        # naming a member of Congress sitting now is the roster's lag, said
+        # apart (TestAnOfficerCardBehindASeatInCongress).
         winner = member("J000001", "Marty Example", state="SD", chamber="House",
                         officeLabel="House • SD-AL", raceRole="winner", fecCandidateId="H6SD00001")
         links = identity.build([winner], stategov=stategov("SD", ag=off))
         identity.attach(links)
-        self.assertEqual(roles(off), [("profile", "J000001")])
-        self.assertEqual([c for c in codes(links) if "identity" in c], ["identity-joined"])
+        self.assertEqual(roles(off), [])
+        self.assertEqual([c for c in codes(links) if "identity" in c],
+                         ["identity-officer-roster-behind"])
+        self.assertIn("profile Marty Example (J000001)",
+                      [p for p in identity.problems(links)
+                       if p[1] == "identity-officer-roster-behind"][0][3][0])
         # Nobody holds the filing: the entry is stale, in the words it was written in.
         links = identity.build([member("J000001", "Marty Example", state="SD")],
                                stategov=stategov("SD", ag=off))
@@ -1459,6 +1465,97 @@ class TestSeatAndChamberWords(unittest.TestCase):
             role = identity.profile_role(person, {}, {}, "2026-11-13")
             self.assertEqual((role["words"], role["after"]), (words, after), label)
             self.assertNotIn("at large", role["words"] + role["after"])
+
+
+class TestAnOfficerCardBehindASeatInCongress(SettledEntries):
+    """From January 3 a member of Congress sitting now is never shown as a
+    state officer on the officer roster's word alone: the card is the
+    roster's lag, said apart (``identity-officer-roster-behind``)."""
+
+    def officer(self, name="Marty Example"):
+        return {"name": name, "title": "Attorney General", "party": "R", "partyKey": "R"}
+
+    def winner(self, **extra):
+        row = member("J000001", "Marty Example", state="SD", chamber="House",
+                     officeLabel="House • SD-AL", raceRole="winner", fecCandidateId="H6SD00001",
+                     term_start="2027-01-03 - 2029-01-03")
+        row.update(extra)
+        return row
+
+    def payload(self, off, ends=None):
+        entry = stategov("SD", ag=off)
+        if ends:
+            entry["states"]["SD"]["ballot2026"] = {"offices": {"ag": {
+                "up": True, "termBegins": term(ends), "outgoing": outgoing(off["name"])}}}
+        return entry
+
+    def behind(self, links):
+        return [p for p in identity.problems(links) if p[1] == "identity-officer-roster-behind"]
+
+    def test_an_entry_for_a_seated_member_beside_a_card_with_no_end_links_nothing(self):
+        self.settle(("officer:SD:ag", "profile:FEC_H6SD00001"), same=True)
+        off, winner = self.officer(), self.winner()
+        links = identity.build([winner], stategov=self.payload(off))
+        identity.attach(links)
+        self.assertEqual(roles(off), [])
+        self.assertEqual(roles(winner), [])
+        found = self.behind(links)
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0][0], "warn")
+        self.assertEqual(found[0][3], [
+            "profile Marty Example (J000001) and Marty Example (Attorney General of South Dakota): "
+            "seated in Congress since 2027-01-03, but the officer card still names them, its term "
+            "carrying no end this site reads (joined by an evidenced overrides.IDENTITY_JOINS "
+            "entry)"])
+        # Not a stale entry, and not a look-alike: one person, a roster behind.
+        self.assertFalse({"stale-identity-join", "identity-look-alike"} & set(codes(links)))
+        # While they ran, the same entry joins them.
+        running = filer("FEC_H6SD00001", "Marty Example", state="SD", label="House • SD-AL")
+        links = identity.build([running], stategov=self.payload(self.officer()))
+        identity.attach(links)
+        self.assertEqual(roles(running), [("officer", "SD-ag")])
+        self.assertEqual(self.behind(links), [])
+
+    def test_a_term_that_ends_after_the_seat_began_is_behind_one_that_ended_before_is_not(self):
+        self.settle(("officer:SD:ag", "profile:FEC_H6SD00001"), same=True)
+        for ends, joined in (("2027-01-04", False), ("2027-01-11", False),
+                             ("2027-01-03", True), ("2027-01-01", True)):
+            off, winner = self.officer(), self.winner()
+            links = identity.build([winner], stategov=self.payload(off, ends=ends))
+            identity.attach(links)
+            self.assertEqual(roles(winner), [("officer", "SD-ag")] if joined else [], ends)
+            self.assertEqual(bool(self.behind(links)), not joined, ends)
+            if joined:
+                self.assertEqual(winner["also"][0]["ends"], ends)
+            else:
+                self.assertIn(f"its term ending on {ends}", self.behind(links)[0][3][0])
+        # A member whose profile gives no term's day is behind whatever the end.
+        off, winner = self.officer(), self.winner(term_start="N/A")
+        links = identity.build([winner], stategov=self.payload(off, ends="2027-01-01"))
+        identity.attach(links)
+        self.assertEqual(roles(winner), [])
+        self.assertTrue(self.behind(links))
+
+    def test_a_corroborated_record_beside_a_card_with_no_end_links_nothing(self):
+        # The record's own row (open when read) and the card naming them: the
+        # second-source join, which held for Weiser, holds for no seated member.
+        off = self.officer()
+        winner = self.winner(politicalHistory={"wikidata": "Q9", "rows": [
+            {"office": "South Dakota Attorney General", "where": "South Dakota",
+             "openWhenRead": "2026-11-14"}]})
+        links = identity.build([winner], stategov=self.payload(off))
+        identity.attach(links)
+        self.assertEqual(roles(winner), [])
+        self.assertEqual(roles(off), [])
+        self.assertIn("South Dakota Attorney General in the record, open when it was read on "
+                      "2026-11-14", self.behind(links)[0][3][0])
+        self.assertNotIn("identity-look-alike", codes(links))
+        # A candidate who is not seated keeps the join (Weiser's).
+        running = filer("FEC_H6SD00001", "Marty Example", state="SD", label="House • SD-AL",
+                        politicalHistory=winner["politicalHistory"])
+        links = identity.build([running], stategov=self.payload(self.officer()))
+        identity.attach(links)
+        self.assertEqual(roles(running), [("officer", "SD-ag")])
 
 
 if __name__ == "__main__":

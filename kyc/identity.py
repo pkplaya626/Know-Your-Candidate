@@ -472,6 +472,7 @@ class Links:
         self.item_settled = set()  # those an entry says are one person
         self.chamber_names = {}   # (state, chamber) -> a chamber's own name, where recorded
         self.roster_behind = []   # legislator cards that are no current role, and why
+        self.officer_behind = []  # officer cards naming a sitting member of Congress, and why
         self.history_cache = {}
         self.legislators = {}
         self.titles = {}
@@ -672,6 +673,49 @@ def office_in_state(row, key, code, when_read=False):
     return bool(shape.fullmatch(office.strip()))
 
 
+def _seat_day(record):
+    """The day a sitting member's term began, from the profile's own term
+    (``term_start``, "2027-01-03 - 2029-01-03"); "" where it gives none."""
+    found = re.match(r"\s*(\d{4}-\d{2}-\d{2})", str((record or {}).get("term_start") or ""))
+    return found.group(1) if found else ""
+
+
+def _officer_behind(links, officer, other):
+    """The member of Congress sitting now (``record.seated``) among the
+    cards *other* is one person with, whom the state officer's card still
+    names as holding its office after they took their seat in Congress -
+    its role carrying no end (``ends``, :func:`term_end`) or one after the
+    day their term began - or None. Such a card is the roster's lag, never
+    a current role: on the January rehearsal Marty Jackley, seated for
+    SD-AL, read "Also on this site: Attorney General of South Dakota" with
+    no end, while the legislator cards of seated winners were said apart
+    and linked to nothing (rule 105). One day is enough: Wyoming's
+    secretary of state's term ends on January 4, a day after Chuck Gray's
+    seat in the House began."""
+    from .record import seated
+
+    root = links._find(other.key)
+    ends = officer.role.get("ends") or ""
+    for node in links.nodes.values():
+        if node.kind != "profile" or links._find(node.key) != root or not seated(node.record):
+            continue
+        day = _seat_day(node.record)
+        if not ends or not day or ends > day:
+            return node
+    return None
+
+
+def _say_officer_behind(links, officer, member, why):
+    day = _seat_day(member.record)
+    ends = officer.role.get("ends")
+    links.officer_behind.append(
+        f"{member.kind} {member.name} ({member.record.get('id')}) and {officer.name} "
+        f"({officer.role['words']}): seated in Congress"
+        + (f" since {day}" if day else "") + ", but the officer card still names them, "
+        + (f"its term ending on {ends}" if ends else "its term carrying no end this site reads")
+        + f" (joined by {why})")
+
+
 def _join_officers(links, officers):
     """Each officer card to the people whose corroborated record holds that
     office open in that state, where the card's name names them (rule 56).
@@ -702,10 +746,15 @@ def _join_officers(links, officers):
             named = any(office_names(form, node.name) for form in person.forms if form)
             if held and named:
                 row = next((r for r in held if r.get("current")), held[0])
-                links._union(node.key, person.key, f"{row['office']} in the record"
-                             + ("" if row.get("current")
-                                else f", open when it was read on {row['openWhenRead']}")
-                             + "; the officer card names them")
+                why = (f"{row['office']} in the record"
+                       + ("" if row.get("current")
+                          else f", open when it was read on {row['openWhenRead']}")
+                       + "; the officer card names them")
+                behind = _officer_behind(links, node, person)
+                if behind:
+                    _say_officer_behind(links, node, behind, why)
+                    continue
+                links._union(node.key, person.key, why)
             elif (look_alike(person.name, node.name) and not read_open
                   and not links.settled(node.key, person.key)):
                 links.problems.append((
@@ -780,6 +829,7 @@ def _join_legislators(links, legislators, chamber_titles):
     legislature on a roster's word. On the first January rehearsal fourteen
     of them were listed among the look-alikes for a person to settle."""
     from .nominee_photos import held_seats, legislator_for, same_name
+    from .record import seated_winner
 
     history = links.history_cache or {}
     unsettled = []
@@ -802,6 +852,14 @@ def _join_legislators(links, legislators, chamber_titles):
             continue
         was = (None if joinable or node.kind != "profile"
                else _seat_while_a_candidate(record, person, history, legislators))
+        if not joinable and node.kind == "profile" and seated_winner(record):
+            # A winner seated since Election Day is asked of the roster-behind
+            # test, not the join: say why that test did not hold, never "not a
+            # candidate" (the January rehearsal's Houston Gaines, Wes Climer).
+            why = ("seated in Congress since Election Day, and no corroborated seat of theirs "
+                   "while they ran is this one" if was is None else
+                   "seated in Congress since Election Day; the seat rule 24's join tied them to "
+                   "as a candidate is another")
         roster = ((legislators or {}).get("states") or {}).get(node.state) or []
         # A corroborated seat whose member the roster writes another way
         # ("Shev Jones" for "Shevrin \"Shev\" Jones"): the same surname in
@@ -809,9 +867,16 @@ def _join_legislators(links, legislators, chamber_titles):
         seats = held_seats(person, history) if joinable else set()
         surname = (_words(node.name) or [""])[-1]
         for seat in roster:
+            # The very seat rule 24's join tied a seated winner to as a
+            # candidate is the roster's lag whatever the names say: Congress's
+            # record writes "Christopher M. Rabb" and "Joshua Turek", the
+            # roster "Chris Rabb" and "Josh Turek", and the first version asked
+            # the name first and said nothing of either.
+            was_seat = was is not None and seat.get("id") == was.get("id")
             alike = same_name(node.name, seat.get("name"))
-            if not alike and not ((node.state, seat.get("chamber")) in seats and surname
-                                  and surname in _words(seat.get("name"))):
+            if not was_seat and not alike and not (
+                    (node.state, seat.get("chamber")) in seats and surname
+                    and surname in _words(seat.get("name"))):
                 continue
             key = f"legislator:{node.state}:{seat.get('id')}"
             if links.settled(key, node.key):
@@ -819,7 +884,7 @@ def _join_legislators(links, legislators, chamber_titles):
             pair = (f"{node.kind} {node.name} ({record.get('id')}) and "
                     f"{seat.get('name')} ({node.state} {seat.get('chamber')} "
                     f"{seat.get('district')}, {seat.get('id')})")
-            if was is not None and seat.get("id") == was.get("id"):
+            if was_seat:
                 links.roster_behind.append(
                     pair + ": seated in Congress since Election Day, in the seat rule 24's join "
                     "tied them to as a candidate")
@@ -847,7 +912,21 @@ def _report_roster_behind(links):
     Jones's District 34 to Ashley Gantt for 2026-2028, its House Angie
     Nixon's District 13 to Audrey Gibson, while Open States still seats
     both). Neither card names the other: a roster's word is not shown as a
-    seat the legislature has given away."""
+    seat the legislature has given away.
+
+    And one line for the officer cards that still name a member of Congress
+    sitting now after their seat began (:func:`_officer_behind`,
+    ``identity-officer-roster-behind``): the office's roster is behind, or
+    the term this site reads for it is, for a person to check."""
+    if links.officer_behind:
+        n = len(links.officer_behind)
+        links.problems.append((
+            "warn", "identity-officer-roster-behind",
+            f"{n} state officer card{'' if n == 1 else 's'} still name{'s' if n == 1 else ''} "
+            "someone who sits in Congress now as holding the office after their seat in Congress "
+            "began: the office's roster, or the term this site reads for the office (termBegins, "
+            "rule 84), is behind; neither card names the other until it is checked (rule 105)",
+            sorted(links.officer_behind)))
     if not links.roster_behind:
         return
     fetched = str((links.legislators or {}).get("fetched") or "")[:10]
@@ -959,7 +1038,14 @@ def _join_settled(links):
                     f"ids or a second source already ({links.joined_by.get(pair) or 'joined'}); "
                     "the entry is no longer needed", list(entry["written"])))
             else:
-                links._union(a.key, b.key, "an evidenced overrides.IDENTITY_JOINS entry")
+                why = "an evidenced overrides.IDENTITY_JOINS entry"
+                officer, other = (a, b) if a.kind == "officer" else (b, a)
+                behind = (_officer_behind(links, officer, other) if officer.kind == "officer"
+                          else None)
+                if behind:
+                    _say_officer_behind(links, officer, behind, why)
+                else:
+                    links._union(a.key, b.key, why)
         elif together:
             links.problems.append((
                 "warn", "identity-join-contradicted",
