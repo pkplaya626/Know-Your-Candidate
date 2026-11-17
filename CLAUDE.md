@@ -4697,8 +4697,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     and Audrey Gibson (`behind`); the Speaker and Louisiana's Representative
     Michael T. Johnson, and Rep. Robert Garcia and Assemblymember Robert
     Garcia, are two people each. An entry copies no telephone number or
-    mailing address (a test holds every one to that). The build joins 97
-    people, and 49 legislator look-alikes wait for a person.
+    mailing address (a test holds every one to that); the 49 legislator
+    look-alikes the build reports that day wait for a person.
+    Its third reading found more, each now refused or said, each with a
+    check made by undoing it. From January 3 Marty Jackley, seated for
+    SD-AL, read "Also on this site: Attorney General of South Dakota" with
+    no end, by his entry, and Juliana Stratton's and Chuck Gray's lines
+    named offices whose terms end on January 11 and 4, after their seats in
+    Congress began, while a seated winner's legislator card was the
+    roster's lag: a member of Congress sitting now (`record.seated`) whom
+    a state officer's card still names, its role carrying no end or one
+    after the day their term began (`term_start`), is the officer roster's
+    lag in the same way, said apart (`identity-officer-roster-behind`) and
+    linked to nothing, whether the join was the record's or a person's
+    entry. A seated winner Congress's record names otherwise ("Christopher
+    M. Rabb", "Joshua Turek", where the roster writes "Chris Rabb" and "Josh
+    Turek") was in neither report: the seat they held as candidates is
+    asked under every form of the name their record's sources write and the
+    title of the article it links, and that very seat is the roster's lag
+    whatever the names say; a seated winner no such seat ties is a
+    look-alike for that reason, never "not a candidate". And a court's page
+    is known by its container (`#federalContent`'s `data-court`, as the
+    officials' dialog reads it), never the body, which carries none: read
+    off the body, a court's page counted as the federal page, so an
+    official or a justice opened in place there and the court's own judges
+    never did.
 
 ## District maps
 

@@ -359,10 +359,16 @@ IDENTITY_JOINS = {
             "https://www.flsenate.gov/Senators/2024-2026/S34 : \"2024-2026 Senator Shevrin D. "
             "\"Shev\" Jones Party: Democrat District 34\". The profile's FEC id H6FL24087 has "
             "the principal campaign committee C00952556 \"SHEVRIN FOR CONGRESS\", website "
-            "WWW.SHEVRINJONES.COM (OpenFEC); https://shevrinjones.com/about/ : \"Florida State "
-            "Senator Shevrin “Shev” Jones\", \"Today, Jones proudly serves Florida’s 34th "
-            "Senate District\", \"Paid for by Shevrin Jones for Congress\". One person; the "
-            "card's seat is now Senator Gantt's (\"behind\")."),
+            "WWW.SHEVRINJONES.COM (OpenFEC). That site's https://shevrinjones.com/about/ was "
+            "read on 2026-11-15 (\"Florida State Senator Shevrin “Shev” Jones\", \"Today, Jones "
+            "proudly serves Florida’s 34th Senate District\", \"Paid for by Shevrin Jones for "
+            "Congress\"), and on 2026-11-17 answered 404 (\"404 — Shevrin Jones for State "
+            "Senate\"); its front page, https://shevrinjones.com/ , now titled \"Shevrin Jones "
+            "for State Senate\": \"Shevrin “Shev” Jones is an educator ... Elected to the "
+            "Florida House in 2012 and the Florida Senate in 2020, he is running to bring that "
+            "record to District 37\", \"paid for and approved by Shevrin Jones, Democrat, for "
+            "State Senate, District 37\" - the same person, on the site his FEC committee "
+            "filed. One person; the card's seat is now Senator Gantt's (\"behind\")."),
         "read": "2026-11-17",
     },
     ("profile:FEC_S6FL00830", "legislator:FL:ocd-person/66c3a112-3008-4332-a6b0-8990a7d992d5"): {

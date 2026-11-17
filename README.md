@@ -2039,7 +2039,16 @@ join does not tie (`identity-legislator-look-alike`). A legislator card
 that is no current role - a winner seated in Congress since Election Day whom
 the roster still lists in the seat rule 24 tied them to, or a pair a person's
 entry marks `behind` - is said apart (`identity-legislator-roster-behind`)
-and links nothing. A legislator's role names the chamber by its own name where
+and links nothing; the very seat rule 24 tied them to is asked under every
+form of the name the record's sources write and the title of the article it
+links, so a winner Congress's record names otherwise ("Christopher M. Rabb")
+is still said. A state officer's card that still names a member of Congress
+sitting now after their seat began - its role carrying no end, or one after
+that day - is the officer roster's lag in the same way
+(`identity-officer-roster-behind`) and links nothing. A role opens in place
+on the page that draws its card: a federal official or a justice on the
+federal page, a judge on their court's page, known by the page's
+`#federalContent` container (`data-federal`, `data-court`). A legislator's role names the chamber by its own name where
 its own site gives one (`legislature.CHAMBER_NAMES`: "New York State
 Assembly"), and its share link opens the district; an at-large seat is the
 site's seat words ("the U.S. House in WY-AL"). The map's Senate and House
