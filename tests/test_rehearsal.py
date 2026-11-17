@@ -224,6 +224,63 @@ class TestTheFictionalMemberships(unittest.TestCase):
             self.assertEqual((after[bid[rid]]["state"], after[bid[rid]]["district"]),
                              (race["state"], race["district"]), rid)
 
+    def test_january_seats_a_december_round_never_a_loser(self):
+        # The first refresh to read Louisiana's own results (2026-11-15) put
+        # LA-5's two in the December round and the rest "defeated"; the
+        # fiction took the best-funded filer, whom the results had defeated,
+        # and the strict check failed every refresh from that day. The state
+        # is made here: an open seat whose best-funded filer is defeated and
+        # whose two least-funded filers are in a December round.
+        from unittest import mock
+        from kyc import candidates, fec, results
+        from kyc.profiles import build_profiles
+        raw = sources.load_all(ROOT)
+        snap = legislators.load_snapshot(ROOT)
+        if cycle.phase(snap) == "record":
+            self.skipTest("the new Congress is sitting: the committed data is the case")
+        field = candidates.load_cache(ROOT)
+        profiles, _ = build_profiles(raw, snapshot=snap, field=field, finance=fec.load_cache(ROOT))
+        record = raw["record"]
+        member_ids = {i for p in snap["legislators"] for i in p.get("fecAll") or []}
+        members = {p["id"]: p for p in profiles if not p["isCandidate"]}
+        targets = {p.get("contestRaceId") for p in members.values()}
+        filers = {}
+        for row in field["candidates"]:
+            rid = candidates.race_id(row)
+            if rid in record["races"] and row["candidate_id"] not in member_ids \
+                    and row.get("incumbent_challenge") != "I":
+                filers.setdefault(rid, []).append(row)
+        ordered = sorted(record["races"])
+        # A seat no holder keeps (its holder is not running for it) and no
+        # member runs for, with three filers or more of different money, not
+        # on the rehearsal's every fifth, unlinked, newcomer.
+        seat = next(rid for rid in ordered
+                    if rid.startswith("H-") and ordered.index(rid) % 5 != 0
+                    and rid not in targets
+                    and not members.get((record["incumbents"].get(rid) or {}).get("bioguide"),
+                                        {}).get("seekingReelection2026")
+                    and len({r.get("receipts") or 0 for r in filers.get(rid) or []}) >= 3)
+        rows = sorted(filers[seat], key=lambda r: (-(r.get("receipts") or 0), r["candidate_id"]))
+        richest, two = rows[0], rows[-2:]
+        status = {seat: {r["candidate_id"]: "defeated" for r in rows}}
+        status[seat].update({r["candidate_id"]: "runoff" for r in two})
+        holder = (record["incumbents"].get(seat) or {}).get("bioguide")
+        if holder:
+            status[seat].update({holder: "withdrawn"})
+        with mock.patch.object(results, "load_cache",
+                               return_value={"races": {r: {"status": st} for r, st in status.items()}}):
+            snapshot, _gone, _log = rehearsal.january()
+        race = record["races"][seat]
+        sitting = [p for p in snapshot["legislators"]
+                   if p["chamber"] == race["chamber"] and p["state"] == race["state"]
+                   and p.get("district") == race["district"]]
+        self.assertEqual(len(sitting), 1, seat)
+        linked = set(sitting[0].get("fecAll") or [])
+        self.assertTrue(linked & {r["candidate_id"] for r in two},
+                        f"{seat}: one of the December round's two is seated")
+        self.assertNotIn(richest["candidate_id"], linked,
+                         f"{seat}: never the best-funded filer the results defeated")
+
     def test_december_replaces_one_appointee(self):
         for label in ("december-loses", "december-wins"):
             made = rehearsal.december(label)
