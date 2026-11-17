@@ -125,7 +125,15 @@ def december(label, root=REPO):
 
 NEW_TERM = "2027-01-03"
 HOUSE_END, SENATE_END, SPECIAL_END = "2029-01-03", "2033-01-03", "2029-01-03"
-WINS = ("elected", "nominee", "advanced", "qualified")
+# Who can have won a record seat by January: whoever the results elected, a
+# November nominee, and the two in a December round (Louisiana's open
+# primary's December general election, Georgia's runoff), whose ballot is
+# still to be decided when the data is read. Without "runoff" here the first
+# refresh to read Louisiana's own results (2026-11-15) put LA-5's two in the
+# December round and everyone else "defeated", and the fiction seated the
+# best-funded filer the results had defeated: the strict check failed every
+# refresh from that day (result-contradicts-seating).
+WINS = ("elected", "nominee", "advanced", "qualified", "runoff")
 
 
 def january(root=REPO):
