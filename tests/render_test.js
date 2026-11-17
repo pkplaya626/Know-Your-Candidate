@@ -27618,6 +27618,58 @@ async function testAlsoLines() {
 
   // The share pages say the same roles in plain text (rule 96), each linked
   // to its own share page, in the tense of the day the results were read.
+  // The map's Senate and House panels: a member's own row draws the line
+  // too, outside the row's button (a link cannot sit inside one), by the one
+  // helper. The Senate panel's row for Amy Klobuchar said nothing of
+  // Minnesota's list for governor, which the governor's-race panel beside
+  // it did (the re-read of PR #267).
+  for (const [clock, post] of [[CAMPAIGN_NOW, false], [POST, true]]) {
+    const when = post ? "after Election Day" : "on the campaign clock";
+    const seatedWith = (chamber) => joinedPeople.find((p) => p.chamber === chamber && !p.isCandidate &&
+      /^(?:Senate|House) • /.test(p.officeLabel || "") && !p.formerMember);
+    const asked = [];
+    for (const [mode, chamber] of [["senate", "Senate"], ["house", "House"]]) {
+      const who = seatedWith(chamber);
+      if (!who) continue;
+      const m = await buildPage("map.html", { now: clock, hash: "#/?state=" + who.state + "&mode=" + mode });
+      await until(() => !!m.D.querySelector('#mapPanel .person-row[data-id="' + who.id + '"], ' +
+        '.person-row[data-id="' + who.id + '"]'), 4000);
+      const btn = m.D.querySelector('.person-row[data-id="' + who.id + '"]');
+      const cell = btn && btn.parentElement && btn.parentElement.classList.contains("person-cell") ? btn.parentElement : null;
+      const line = cell && cell.querySelector(":scope > .also-line");
+      const want = (m.window.KYC.byId(who.id) || who).also || who.also;
+      // A made-up role on a member with none: the row draws it; and none, none.
+      const bare = [...m.D.querySelectorAll(".person-row[data-id]")].map((b) => m.window.KYC.byId(b.getAttribute("data-id")))
+        .find((p) => p && !(p.also || []).length);
+      asked.push({ mode, who, m, btn, cell, line, want, bare });
+    }
+    suite(`also on this site — the map's Senate and House panels, ${when} (rule 105)`, () => {
+      check("the data holds a sitting senator and a House member with another role here",
+        asked.length === 2, asked.map((a) => a.mode + ": " + a.who.name).join(", "));
+      asked.forEach(({ mode, who, m, btn, cell, line, want }) => {
+        check(`${mode}: no page errors`, !m.errors.length, m.errors.join(" | "));
+        check(`${mode}: ${who.name}'s own row draws the line, beside the row's button and not inside it`,
+          !!btn && !!cell && !!line && !btn.querySelector(".also-line"),
+          btn ? (cell ? (line ? "drawn: " + line.textContent.slice(0, 80) : "no line") : "the row stands alone") : "no row");
+        check(`${mode}: each role in its own card's words, in the clock's tense, linked`,
+          !!line && lineText(cell).join("|") === want.map((r) => wordsOf(r, post)).join("|") &&
+            [...line.querySelectorAll("a.also-link")].every((a) => !!a.getAttribute("href")),
+          line ? lineText(cell).join("|") : "");
+      });
+      const first = asked[0];
+      if (first && first.bare) {
+        const W = first.m.window;
+        const keep = first.bare.also;
+        first.bare.also = [role({ words: "A made-up role on the map", after: undefined })];
+        const made = W.KYC.alsoHtml(first.bare, { cls: "row-also" });
+        first.bare.also = keep;
+        const rows = first.m.D.querySelectorAll('.person-row[data-id="' + first.bare.id + '"]');
+        check("a member with no other role draws a bare row, no cell and no line",
+          [...rows].every((b) => !b.parentElement.classList.contains("person-cell")) && /made-up role/.test(made));
+      }
+    });
+  }
+
   suite("also on this site — the share pages (rule 105)", () => {
     const share = (file) => { try { return fs.readFileSync(path.join(SITE, file), "utf8"); } catch (e) { return ""; } };
     const said = (text, r) => text.indexOf(">" + (r.words + (r.link ? " (" + r.link + ")" : ""))
