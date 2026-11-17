@@ -28,7 +28,7 @@ import os
 from datetime import date, timedelta
 from urllib.parse import urlparse
 
-from . import overrides
+from . import election_law, overrides
 
 PROFILE_DIR = "p"
 RACE_DIR = "r"
@@ -139,7 +139,7 @@ def _open_round(date, held=False):
 
 def _held_runoff(date):
     """KYC.raceStatus's heldRunoff: the long words of a general election
-    runoff (``overrides.GENERAL_RUNOFFS``: Georgia's, Guam's and the Virgin
+    runoff (``kyc/election_law.py``: Georgia's, Guam's and the Virgin
     Islands') once results read
     after its day still mark no winner - in the past tense and awaiting
     one, as an open primary's December round is (rule 63)."""
@@ -184,7 +184,7 @@ def december_round(race):
 def general_runoff(race):
     """The date of *race*'s general election runoff (Georgia's December 1,
     the territories' November 17: ``generalRunoff`` from
-    ``overrides.GENERAL_RUNOFFS``) when it is not an
+    ``kyc/election_law.py``) when it is not an
     open primary's December round, else None."""
     race = race or {}
     return race.get("generalRunoff") if race.get("primaryKind") != "open" else None
@@ -423,10 +423,11 @@ _FILERS = (
 # in December does, the cycle's own (overrides.OPEN_PRIMARY_SEATS) reads best.
 _TABLE_ROUND = "2026-12-12"
 # The general election runoff the table's other rows are asked about:
-# Georgia's, from the one table the results reader and the calendar read.
-_TABLE_RUNOFF = overrides.GENERAL_RUNOFFS["GA"][0]
+# Georgia's, from the one table the results reader and the calendar read
+# (kyc/election_law.py).
+_TABLE_RUNOFF = election_law.general_runoff("GA", "S")[0]
 # Every day the table holds one: the words name the day, so each is asked.
-_TABLE_RUNOFF_DAYS = sorted({day for day, _why in overrides.GENERAL_RUNOFFS.values()})
+_TABLE_RUNOFF_DAYS = election_law.runoff_days()
 # A result each kind of December round decided (_decided_round): an open
 # primary's general election, and a general election runoff (Georgia's).
 _TABLE_DECIDED = ({"date": _TABLE_ROUND, "open": True}, {"date": _TABLE_RUNOFF, "open": False})

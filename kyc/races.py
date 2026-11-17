@@ -151,11 +151,11 @@ def ballot_kind(race):
     the rule only in a hover title (audit 2026-10-17, RACES-11), and
     Georgia's and Louisiana's December rounds appeared on no state page
     (PERSONA-06). Every value comes from a table that cites the statute:
-    ``results.ALL_PARTY_PRIMARIES``, ``overrides.OPEN_PRIMARY_SEATS`` and
-    ``overrides.GENERAL_RUNOFFS``; nothing is typed here.
+    ``kyc/election_law.py`` (keyed on the state and the office) and
+    ``overrides.OPEN_PRIMARY_SEATS``; nothing is typed here.
     """
-    from .overrides import GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS
-    from .results import ALL_PARTY_PRIMARIES
+    from . import election_law
+    from .overrides import OPEN_PRIMARY_SEATS
 
     out = {}
     code = race["state"]
@@ -164,10 +164,10 @@ def ballot_kind(race):
     if open_seat:
         out["primaryKind"] = "open"
         out["generalRunoff"] = open_seat.get("runoff")
-    elif code in ALL_PARTY_PRIMARIES:
-        out["primaryKind"] = ALL_PARTY_PRIMARIES[code][0]
-    if code in GENERAL_RUNOFFS and "generalRunoff" not in out:
-        out["generalRunoff"] = GENERAL_RUNOFFS[code][0]
+    elif election_law.all_party_primary(code, office):
+        out["primaryKind"] = election_law.all_party_primary(code, office)[0]
+    if election_law.general_runoff(code, office) and "generalRunoff" not in out:
+        out["generalRunoff"] = election_law.general_runoff(code, office)[0]
     return out
 
 
