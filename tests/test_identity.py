@@ -1743,15 +1743,17 @@ class TestTheWholePersonBesideASeatInCongress(SettledEntries):
         self.assertIn("state officer or governor card still names", line[0][2])
         # The pair is said once, never also a look-alike.
         self.assertNotIn("identity-look-alike", codes(links))
-        # A governor's term that ended by the day the seat began is a past role.
-        payload = stategov("SD", governor=dict(gov))
-        payload["states"]["SD"]["ballot2026"] = {"offices": {"governor": {
-            "up": True, "termBegins": term("2027-01-03"), "outgoing": outgoing("Marty Example")}}}
-        winner = self.winner(politicalHistory={"wikidata": "Q77", "rows": []})
-        links = identity.build([winner], stategov=payload)
-        identity.attach(links)
-        self.assertEqual(roles(winner), [("governor", "gov-SD")])
-        self.assertFalse(self.found(links, "identity-officer-roster-behind"))
+        # A governor's term that ended by the day the seat began is a past
+        # role; one ending a day after it is the roster's lag.
+        for ends, joined in (("2027-01-03", True), ("2027-01-04", False)):
+            payload = stategov("SD", governor=dict(gov))
+            payload["states"]["SD"]["ballot2026"] = {"offices": {"governor": {
+                "up": True, "termBegins": term(ends), "outgoing": outgoing("Marty Example")}}}
+            winner = self.winner(politicalHistory={"wikidata": "Q77", "rows": []})
+            links = identity.build([winner], stategov=payload)
+            identity.attach(links)
+            self.assertEqual(roles(winner), [("governor", "gov-SD")] if joined else [], ends)
+            self.assertEqual(bool(self.found(links, "identity-officer-roster-behind")), not joined)
 
     def test_an_officer_joined_through_a_card_an_entry_joins_to_a_seated_member(self):
         off = {"name": "Marty Example", "title": "Attorney General", "party": "R", "partyKey": "R"}
