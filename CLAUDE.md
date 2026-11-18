@@ -4686,8 +4686,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     large)"), and a legislator's share link opens their district. The map's
     Senate and House panels draw the line under a member's own row, outside
     its button (Klobuchar's row said nothing of Minnesota's list). On
-    2026-11-17 a person's sources, opened again by this project's reader,
-    settled eight pairs in `IDENTITY_JOINS`: Jocelyn Benson (her card's own
+    2026-11-15 this project's reader (the owner's agents, kyc/agent.py's
+    `USER_AGENT`) researched eight pairs, and on 2026-11-17 opened every
+    source again and settled them in `IDENTITY_JOINS` - an agent's reading on
+    its day, quoted, which no person has yet looked at; an entry is "a
+    person's word" only where a person read it, and says so: Jocelyn Benson (her card's own
     item and its article give the office the item labels "Michigan
     Department of State"), Christi Jacobsen (the state's candidate list
     prints the site her FEC committee pays for), Marty Jackley and Mike
@@ -4722,6 +4725,47 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     off the body, a court's page counted as the federal page, so an
     official or a justice opened in place there and the court's own judges
     never did.
+    Its final review found more, each now refused or said, each with a
+    check made by undoing it. The seated test was asked of the pair a join
+    made, not of the person, and three paths went past it: an evidenced
+    entry joining a seated winner to a legislator's card, a governor's card
+    joined by an item to a seated member (a governor's role has no `ends`
+    where `terms_begin` keeps a gap), and an officer joined by its record
+    to a candidate for governor whom an entry then joined to a seated
+    member. So after every join one pass asks each person holding a seat
+    in Congress now (`record.seated`): every governor's, officer's and
+    legislator's card of theirs whose role carries no end, or one after the
+    day their term began, is withheld - its joins undone, the rest of the
+    person still joined - and said in `identity-officer-roster-behind` (a
+    governor's or an officer's) or `identity-legislator-roster-behind` (a
+    legislator's), with the joins that made it, never also a look-alike. A
+    legislator's role has no end at all: this site records no legislature's
+    day its new term begins. Mike McGuire's California Senate seat (its
+    district on the 2026 ballot; he won CA-1) would read "Member of the
+    California State Senate, district 2" after December 7, when California's
+    new term begins, and Jasmeet Bains, who lost her race for CA-22, "Member of the California
+    State Assembly" for as long as Open States lists her - the legislature
+    page's own lag, copied onto profiles, governor cards and share pages.
+    Until a sourced table of each legislature's term-start day gives the
+    role an end (its own branch, which serves the legislature pages' lag
+    too), the limit is said: each joined legislator whose district the
+    legislature page marks on the 2026 ballot (`districts[d].up`) while
+    another of their cards shows a 2026 run for another office, a filing
+    for Congress or the list for governor, is a warning
+    (`identity-legislator-term-ending`, with the chamber and district), for
+    a person to check once that chamber's new term has begun. A district
+    of more seats than one up (West Virginia's Senate) may not be theirs.
+    Janet Mills's governor role keeps its gap: Maine's day is a
+    `terms_begin` GAP (maine.gov answered this project's reader CloudFront's
+    "Request blocked"), so her profile's "Governor of Maine" carries no end
+    and would stand after Maine's inauguration until the NGA's roster
+    changes, as her governor card does - unless she is seated in Congress,
+    when the pass above withholds it; a person reading Me. Const. art. V,
+    pt. 1, s. 2 into `terms_begin` gives it `ends`. And Back from a profile
+    a governor's overlay's line opened left both dialogs open on the grid
+    and the map (main's too): the overlay's own route handler, and theirs,
+    close an open profile first (`KYC.profile.close({ routed: true })`),
+    leaving the history as it stands and the overlay's scroll lock held.
 
 ## District maps
 

@@ -259,7 +259,7 @@ MEMBER_STATUS_BY_ID = {
                 "https://www.thegreenpapers.com/G26/LA"),
 }
 
-# Two cards a person has looked at and settled (kyc/identity.py, rule 105):
+# Two cards an evidenced entry settles (kyc/identity.py, rule 105):
 # keyed on both cards' keys exactly as the build's identity warnings name
 # them ("officer:MI:sos", "candidate:gov-MI-jocelyn-benson",
 # "profile:FEC_...", "legislator:GA:ocd-person/..."), each {"same": True
@@ -277,9 +277,11 @@ MEMBER_STATUS_BY_ID = {
 # them - in the legislature's words: the pair joins nothing and is said in
 # identity-legislator-roster-behind until the roster drops the card, when
 # the entry is stale. Each source below was opened by this project's reader
-# (kyc/agent.py's USER_AGENT) on the day given, a second read of the
-# research of 2026-11-15; a page that refused it concludes nothing (rule 8)
-# and is named as such. No telephone number or mailing address is copied.
+# (its agents, kyc/agent.py's USER_AGENT) on the day given, a second read of
+# the research of 2026-11-15; no person has yet looked at these entries, and
+# one a person has read says so. A page that refused the reader concludes
+# nothing (rule 8) and is named as such. No telephone number or mailing
+# address is copied.
 IDENTITY_JOINS = {
     ("officer:MI:sos", "candidate:gov-MI-jocelyn-benson"): {
         "same": True,

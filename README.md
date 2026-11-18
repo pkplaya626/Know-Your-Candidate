@@ -2027,9 +2027,9 @@ joins are `kyc/identity.py`'s (rule 105):
 
 | Join | By |
 |---|---|
-| An id both records hold | A bioguide id (a member's profile, a departed member's row, a candidate's `member`, the history cache's `bioguide`, only where the entry's item is the record's own and, for a profile, was read from the article it links, else `identity-history-stale`), a Wikidata item (a record's corroborated offices, a governor's NGA cross-check, a departed member's from legislators-historical, a judge's FJC-carrying item) or an FEC candidate id - only where the two names agree (a surname in common and one form's first given name among the other's given names, in any form the records' sources write); otherwise withheld and warned (`identity-names-disagree`), as is one id on a state's card and a card of another state, a profile's or a departed row's included (`identity-states-disagree`). Every pair of an id's holders is asked. A Wikidata item joins two *profiles* only where they share a bioguide or an FEC id too; otherwise the pair is warned (`identity-item-shared`) and the item joins neither to anything until a person's entry says they are one person |
+| An id both records hold | A bioguide id (a member's profile, a departed member's row, a candidate's `member`, the history cache's `bioguide`, only where the entry's item is the record's own and, for a profile, was read from the article it links, else `identity-history-stale`), a Wikidata item (a record's corroborated offices, a governor's NGA cross-check, a departed member's from legislators-historical, a judge's FJC-carrying item) or an FEC candidate id - only where the two names agree (a surname in common and one form's first given name among the other's given names, in any form the records' sources write); otherwise withheld and warned (`identity-names-disagree`), as is one id on a state's card and a card of another state, a profile's or a departed row's included (`identity-states-disagree`). Every pair of an id's holders is asked. A Wikidata item joins two *profiles* only where they share a bioguide or an FEC id too; otherwise the pair is warned (`identity-item-shared`) and the item joins neither to anything until an evidenced entry says they are one person |
 | An office no id ties | A state officer's card naming the person by rule 56's test, and the person's corroborated record of offices (rule 69) holding that office open in that state - current, or in the record phase open when the record was read (`openWhenRead`) for that very office, which is then never a look-alike (its `where`, or with none the whole label naming the state in the office's slot; never a deputy's, an assistant's, an acting or the U.S. office) |
-| A person's word | An evidenced `overrides.IDENTITY_JOINS` entry on both cards' keys (`same`: one person, or namesakes), with the evidence and the day; `behind` beside `same` says the legislator card is no current role (the legislature seats someone else), joining nothing; stale-checked (`stale-identity-join`, `identity-join-contradicted`); a profile key on an FEC id follows the filing into a member's profile. No entry copies a telephone number or a mailing address |
+| An evidenced entry | An `overrides.IDENTITY_JOINS` entry on both cards' keys (`same`: one person, or namesakes), with the evidence and the day (the eight of 2026-11-17 were read by this project's reader, its agents, not by a person); `behind` beside `same` says the legislator card is no current role (the legislature seats someone else), joining nothing; stale-checked (`stale-identity-join`, `identity-join-contradicted`); a profile key on an FEC id follows the filing into a member's profile. No entry copies a telephone number or a mailing address |
 | A state legislator | Rule 24's legislature join (`nominee_photos.legislator_for`) |
 
 Two records of one name in one state that nothing ties are reported
@@ -2045,7 +2045,21 @@ links, so a winner Congress's record names otherwise ("Christopher M. Rabb")
 is still said. A state officer's card that still names a member of Congress
 sitting now after their seat began - its role carrying no end, or one after
 that day - is the officer roster's lag in the same way
-(`identity-officer-roster-behind`) and links nothing. A role opens in place
+(`identity-officer-roster-behind`) and links nothing. And once every join is
+made, one pass asks the person as a whole: wherever a member of Congress
+sitting now is among one person's cards, every governor's, officer's and
+legislator's card of theirs whose role carries no end, or one after the day
+their term began, is withheld and said in the same two lines, with the joins
+that made it, however the join came (an entry, an item, another card). A
+legislator's role has no end at all: this site records no legislature's day
+its new term begins, so the line names the seat for as long as the roster
+lists them, and a joined legislator whose district the legislature page
+marks on the 2026 ballot while another of their cards shows a 2026 run for
+another office (they leave that seat when the chamber's new term begins:
+California's on the first Monday in December) is a warning
+(`identity-legislator-term-ending`), for a person to check each once its
+chamber's new term has begun. The role ends only when a sourced day of each
+legislature's term exists. A role opens in place
 on the page that draws its card: a federal official or a justice on the
 federal page, a judge on their court's page, known by the page's
 `#federalContent` container (`data-federal`, `data-court`). A legislator's role names the chamber by its own name where
