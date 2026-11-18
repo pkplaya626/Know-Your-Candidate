@@ -1729,8 +1729,10 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
         elif source == "curated":
             # A photograph a person chose (overrides.CANDIDATE_PHOTOS): its
             # page, words and day, and its size as read - a Commons file's
-            # standard sizes, another file's bytes and pixels, within the
-            # caps (an entry is a person's look, not a reason to send 5 MB).
+            # standard sizes, another file's bytes and pixels. One over the
+            # caps is shown smaller from the same file where a resizer
+            # serves it, else as it is, and says so either way (``heavy``,
+            # rule 87: the sweep of 2026-11-17's campaign photographs).
             from .portraits import wikimedia_file
             record = portraits.get(profile_key(p)) or {}
             missing = [f for f in ("page", "evidence", "read") if not record.get(f)]
@@ -1739,8 +1741,11 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
                     missing.append("sizes")
             elif not all(record.get(k) for k in ("bytes", "width", "height")):
                 missing.append("weight")
-            elif too_heavy(record):
-                missing.append("weight within the caps")
+            elif too_heavy(record) and not record.get("heavy"):
+                missing.append("note that it is over the caps")
+            elif record.get("original") and not (record.get("heavy")
+                                                 and record.get("originalWeight")):
+                missing.append("note of the heavy file it was made smaller from")
             if missing:
                 found.append(f"{p['name']} (curated): no {', '.join(missing)}")
         if source != "curated" and p.get("isCandidate") and not p.get("bioguide") \
@@ -2352,6 +2357,9 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         issues += check_voting_dates(voting_dates)
     if statewide is not None:
         issues += check_statewide_candidates(statewide, snapshot)
+        from . import statewide_photos
+        issues += check_statewide_photo_choices(statewide,
+                                                statewide_photos.load_cache(root) or {})
     if measures is not None:
         issues += check_ballot_measures(measures)
     if local_measures is not None:
@@ -2401,6 +2409,43 @@ def check_ballot_measures(data):
         return [Issue("error", "ballot-measures", f"{len(found)} problems in the ballot measures "
                       "(kyc/ballot_measures.py)", found)]
     return []
+
+
+def check_statewide_photo_choices(data, photo_cache=None):
+    """Every ``overrides.STATEWIDE_PHOTOS`` entry (rule 91's fifth route) says
+    what file, page, words, tie and look it rests on, as a
+    ``CANDIDATE_PHOTOS`` entry must (``statewide_photos.curated_problems``),
+    and is not a photograph a person refused (``NOT_A_PORTRAIT``,
+    ``PORTRAIT_LICENCE_DOUBTS``): an error, as the profiles' is. One that
+    stands for nothing - a name no list prints, a candidate another route
+    pictures, an entry the cache (*photo_cache*, data/statewide_photos.json)
+    holds no record of - is a warning, as every stale override's is."""
+    from . import overrides, statewide_photos
+    from .photos import refused
+
+    bad = []
+    for k, entry in sorted(getattr(overrides, "STATEWIDE_PHOTOS", {}).items()):
+        problems = statewide_photos.curated_problems(entry)
+        if not problems:
+            upload = statewide_photos.upload_of(
+                entry["page"].split("/wiki/File:", 1)[-1]) if "/wiki/File:" in entry["page"] \
+                else None
+            why = refused(*[u for u in (entry["url"], upload) if u])
+            if why:
+                problems.append(why)
+        if problems:
+            bad.append(f"{k}: {'; '.join(problems)}")
+    issues = []
+    if bad:
+        issues.append(Issue("error", "statewide-photo-curated-unevidenced",
+                            f"{len(bad)} overrides.STATEWIDE_PHOTOS entries do not say what "
+                            "they rest on, or name a refused photograph", bad))
+    stale = statewide_photos.stale_curated(photo_cache, statewide_photos.lists_of(data))
+    if stale:
+        issues.append(Issue("warn", "stale-statewide-photo-override",
+                            f"{len(stale)} overrides.STATEWIDE_PHOTOS entries stand for no "
+                            "photograph shown", stale))
+    return issues
 
 
 def check_statewide_candidates(data, snapshot=None):
