@@ -473,6 +473,7 @@ class Links:
         self.chamber_names = {}   # (state, chamber) -> a chamber's own name, where recorded
         self.roster_behind = []   # legislator cards that are no current role, and why
         self.officer_behind = []  # officer cards naming a sitting member of Congress, and why
+        self.withheld_pairs = set()  # a card withheld beside a seat in Congress, and its person's
         self.history_cache = {}
         self.legislators = {}
         self.titles = {}
@@ -711,7 +712,7 @@ def _say_officer_behind(links, officer, member, why):
     links.officer_behind.append(
         f"{member.kind} {member.name} ({member.record.get('id')}) and {officer.name} "
         f"({officer.role['words']}): seated in Congress"
-        + (f" since {day}" if day else "") + ", but the officer card still names them, "
+        + (f" since {day}" if day else "") + f", but the {officer.kind} card still names them, "
         + (f"its term ending on {ends}" if ends else "its term carrying no end this site reads")
         + f" (joined by {why})")
 
@@ -936,7 +937,8 @@ def _report_roster_behind(links):
         n = len(links.officer_behind)
         links.problems.append((
             "warn", "identity-officer-roster-behind",
-            f"{n} state officer card{'' if n == 1 else 's'} still name{'s' if n == 1 else ''} "
+            f"{n} state officer or governor card{'' if n == 1 else 's'} still "
+            f"name{'s' if n == 1 else ''} "
             "someone who sits in Congress now as holding the office after their seat in Congress "
             "began: the office's roster, or the term this site reads for the office (termBegins, "
             "rule 84), is behind; neither card names the other until it is checked (rule 105)",
@@ -1261,9 +1263,117 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
     if legislators:
         _join_legislators(links, legislators, titles)
     _join_settled(links)
+    _withhold_behind_seats(links)
     _report_roster_behind(links)
+    _report_term_ending(links, legislatures)
     _look_alikes(links)
     return links
+
+
+# The cards of a state office whose holder a member of Congress sitting now
+# cannot be: the governor's, a state officer's, a legislator's.
+STATE_OFFICE_KINDS = ("governor", "officer", "legislator")
+
+
+def _withhold_behind_seats(links):
+    """One pass over the person as a whole, after every join: in each
+    component holding a member of Congress sitting now (``record.seated``),
+    every governor's, officer's and legislator's card whose role carries no
+    end (``ends``, :func:`term_end`; a legislator's never does) or one later
+    than the day the member's term began is withheld - its joins undone, so
+    it names nobody and nobody names it - and said, in
+    ``identity-officer-roster-behind`` (a governor's or an officer's card)
+    or ``identity-legislator-roster-behind`` (a legislator's), with the
+    joins that made it. The joins' own checks (:func:`_officer_behind`) are
+    asked of the pair a join makes, and three paths went past them: an
+    evidenced entry joining a seated winner to a legislator's card; a
+    governor's card joined by an item to a seated member; and an officer
+    joined by its record to a candidate for governor whom an entry then
+    joined to a seated member (the final review of PR #267)."""
+    from .record import seated
+
+    withheld = {}
+    for group in links.components():
+        members = [n for n in group if n.kind == "profile" and seated(n.record)]
+        for node in group:
+            if node.kind not in STATE_OFFICE_KINDS:
+                continue
+            ends = node.role.get("ends") or ""
+            for person in members:
+                day = _seat_day(person.record)
+                if not ends or not day or ends > day:
+                    withheld[node.key] = (person, {n.key for n in group})
+                    break
+    if not withheld:
+        return
+    for key, (person, _group) in sorted(withheld.items()):
+        node = links.nodes[key]
+        why = "; ".join(sorted({w for pair, w in links.joined_by.items() if key in pair}))
+        if node.kind == "legislator":
+            day = _seat_day(person.record)
+            rec = node.record
+            links.roster_behind.append(
+                f"{person.kind} {person.name} ({person.record.get('id')}) and {node.name} "
+                f"({node.state} {rec.get('chamber')} {rec.get('district')}, {rec.get('id')}): "
+                "seated in Congress" + (f" since {day}" if day else "")
+                + f", but joined to the legislator card, whose seat carries no end this site "
+                f"reads (joined by {why})")
+        else:
+            _say_officer_behind(links, node, person, why)
+        links.withheld_pairs.update(frozenset((key, other)) for other in _group if other != key)
+    # The joins again, less every one a withheld card is in.
+    kept = [(pair, why) for pair, why in links.joined_by.items() if not (set(pair) & set(withheld))]
+    links.parent = {key: key for key in links.nodes}
+    links.joined_by = {}
+    for pair, why in kept:
+        a, b = sorted(pair)
+        links._union(a, b, why)
+
+
+def _report_term_ending(links, legislatures):
+    """One line (``identity-legislator-term-ending``) for each joined
+    legislator whose district the legislature page marks on the 2026
+    ballot (``districts[d].up``, kyc/legislature.py ``seats_up``) while
+    another of their cards shows a 2026 run for another office - a filing
+    for Congress or the election office's list for governor. The seat they
+    hold is one that election filled (or, in a district of more seats, may
+    be), and they leave it when the chamber's new term begins: California's
+    on the first Monday in December, Pennsylvania's House on December 1. A
+    legislator's role carries no end, because this site records no
+    legislature's day its new term begins; until a sourced day does, the
+    line names the seat for as long as the roster lists them, and this
+    warning is the limit said, for a person to check once each chamber's new
+    term has begun (rule 105)."""
+    rows = []
+    for group in links.components():
+        runs = [n for n in group if (n.kind == "profile" and n.record.get("isCandidate"))
+                or n.kind == "candidate"]
+        if not runs:
+            continue
+        for node in group:
+            if node.kind != "legislator":
+                continue
+            rec = node.record
+            chamber = (((legislatures or {}).get(node.state) or {}).get("chambers") or {}).get(
+                rec.get("chamber")) or {}
+            district = (chamber.get("districts") or {}).get(rec.get("districtId")) or {}
+            if district.get("up") is not True:
+                continue
+            run = runs[0]
+            rows.append(
+                f"{node.name} ({node.role['words']}; {node.state} {rec.get('chamber')} "
+                f"{rec.get('district')}, {rec.get('id')}) and {run.kind} {run.name} "
+                f"({run.role.get('words')})")
+    if rows:
+        n = len(rows)
+        links.problems.append((
+            "warn", "identity-legislator-term-ending",
+            f"{n} joined state legislator card{'' if n == 1 else 's'} {'is' if n == 1 else 'are'} "
+            "in a district the legislature page marks on the 2026 ballot while another of the "
+            "person's cards shows a 2026 run for another office: they leave that seat when the "
+            "chamber's new term begins, a day this site does not record, so the line names the "
+            "seat for as long as the roster lists them; check each once its chamber's new term "
+            "has begun (rule 105)", sorted(rows)))
 
 
 def _look_alikes(links):
@@ -1282,7 +1392,8 @@ def _look_alikes(links):
         for i, a in enumerate(nodes):
             for b in nodes[i + 1:]:
                 if (a.kind == b.kind or links._find(a.key) == links._find(b.key)
-                        or _same_card(a, b) or links.settled(a.key, b.key)):
+                        or _same_card(a, b) or links.settled(a.key, b.key)
+                        or frozenset((a.key, b.key)) in links.withheld_pairs):
                     continue
                 if a.state and b.state and a.state != b.state:
                     continue
