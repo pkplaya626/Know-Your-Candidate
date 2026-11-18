@@ -1312,15 +1312,38 @@ def check_results_pages(cache):
     disagree = [f"{rid}: {item.get('page')!r} says {item.get('pageSays')}; the Secretary of "
                 f"State's results say {item.get('officeSays')}"
                 + (f" (as the read of {item['keptFrom']} found: this read concluded nothing "
-                   "for the seat, and the page's call stays set aside)"
+                   "for the seat, and the page's call stays set aside"
+                   + ("; the page now agrees with the office's last result, and its call "
+                      "stays set aside until a read of those results concludes"
+                      if item.get("pageAgrees") else "") + ")"
                    if item.get("keptFrom") else "")
-                for rid, item in sorted((office.get("disagree") or {}).items())]
+                for rid, item in sorted((office.get("disagree") or {}).items())
+                if not item.get("pageSilentOn")]
     if disagree:
         issues.append(Issue("warn", "office-result-disagrees",
                             f"{len(disagree)} Louisiana House seats where the results page and "
                             "the Secretary of State's own results name different people (rule "
                             "64): neither is shown, and the seat reads from the qualified list "
                             "until a person looks", disagree))
+    # A hold carried while the page makes no call (``pageSilentOn``): no call
+    # is set aside this run, so nothing is warned as a live disagreement, but
+    # a person is told the hold stands until a read decides the seat.
+    silent = [f"{rid}: {item.get('page')!r} said {item.get('pageSays')}, which the read of "
+              f"{item.get('keptFrom')} "
+              + (f"found the Secretary of State's results contradict ({item.get('officeSays')})"
+                 if kind == "disagree" else
+                 "held for the Secretary of State's official results"
+                 + (f" ({item['seatWhy']})" if item.get("seatWhy") else ""))
+              + f"; it makes no call of the seat since {item['pageSilentOn']}"
+              for kind in ("disagree", "pageHeld")
+              for rid, item in sorted((office.get(kind) or {}).items())
+              if item.get("pageSilentOn")]
+    if silent:
+        issues.append(Issue("info", "office-result-set-aside",
+                            f"{len(silent)} Louisiana House seats whose results page makes no "
+                            "call now, where a read of the Secretary of State's results set its "
+                            "last call aside (rule 64): the call stays set aside until a read of "
+                            "those results decides the seat", sorted(silent)))
     if office.get("unread"):
         issues.append(Issue("warn", "office-results-unread",
                             f"Louisiana's Secretary of State's results could not be read on "
