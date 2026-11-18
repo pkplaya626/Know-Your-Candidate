@@ -997,7 +997,7 @@ def date_credits(cache, info_of=None, log=print):
     from .portraits import CREDIT_FORM, credit_of, file_info
     info_of = info_of or file_info
     todo = {k: rec for k, rec in ((cache or {}).get("photos") or {}).items()
-            if rec.get("route") == "wikipedia" and official_photos.commons_upload(rec)
+            if from_commons(rec)
             and (rec.get("credit") or {}).get("yearForm") != CREDIT_FORM}
     if not todo:
         return 0
@@ -1088,6 +1088,182 @@ def read_wikipedia(lists, refused=None, measure=None, log=print, passed_over=Non
 
 # -------------------------------------------------------------- the run
 
+# ------------------------------------------------------ a person's choice
+
+# The fifth route (the owner's request of 2026-11-15): a photograph a person
+# chose for a candidate the four routes leave with none, by an evidenced
+# ``overrides.STATEWIDE_PHOTOS`` entry, as ``overrides.CANDIDATE_PHOTOS`` is
+# for a profile (rule 24's curated route). It stands behind every other
+# route, the guide's hosted photograph included (:func:`attach`).
+CURATED = "curated"
+
+
+def from_commons(rec):
+    """Whether a cached record shows a Commons file credited from its own
+    page: the race's article's (``wikipedia``) or one a person chose."""
+    return (rec or {}).get("route") in ("wikipedia", CURATED) \
+        and bool(official_photos.commons_upload(rec))
+
+
+def curated_entry(k):
+    """The ``overrides.STATEWIDE_PHOTOS`` entry for the cache's key *k*, or
+    ``None``."""
+    from . import overrides
+    entry = getattr(overrides, "STATEWIDE_PHOTOS", {}).get(k)
+    return entry if isinstance(entry, dict) and entry.get("url") else None
+
+
+def _seated(entry, legislators):
+    """Whether a chosen file a legislature keys by its seat may still stand
+    (``photos.curated_seated``: while the roster seats its member there)."""
+    from .photos import curated_seated
+    return bool(entry) and curated_seated(entry, legislators)
+
+
+def printed(lists, k):
+    """Whether the cache's key *k* names a candidate the election office's
+    list prints for that office (a write-in is not printed, rule 77)."""
+    code, office, name = (k.split("|", 2) + ["", ""])[:3]
+    return any(c.get("name") == name and not c.get("writeIn")
+               for c in ((lists or {}).get(code) or {}).get(office) or ())
+
+
+def curated_problems(entry):
+    """What a ``STATEWIDE_PHOTOS`` *entry* lacks, as words: the fields every
+    ``CANDIDATE_PHOTOS`` entry must carry (``photos.curated_problems``). A
+    file this site hosts is not this route's (the guides' are hosted by
+    ``guidephotos``)."""
+    from .photocopies import is_hosted
+    from .photos import curated_problems as fields
+    out = fields(entry)
+    if isinstance(entry, dict) and is_hosted(entry.get("url")):
+        out.append("a file hosted here, which this route does not read")
+    return out
+
+
+def read_curated(lists, before=None, measure=None, legislators=None, refused=None,
+                 passed_over=None, doubted=None, commons=None):
+    """``(records, problems, unknown)`` for every ``STATEWIDE_PHOTOS`` entry
+    whose candidate a list prints: the file weighed as every route's is
+    (``official_photos.choose``: portrait-shaped, shown smaller where over
+    the caps and said), a Commons file read with its author, licence and
+    year from its own page and held to the licence test
+    (:func:`_commons_photo`), and refused where a person's lists withhold it.
+    An entry for a name no list prints, one that lacks its fields, and one
+    whose seat its member no longer holds is a problem and gives nothing;
+    one whose file could not be read is in *unknown* (rule 8: the last
+    record of it is kept). *commons* stands in for :func:`_commons_photo` in
+    a test."""
+    from . import overrides
+    from .portraits import wikimedia_file
+    commons = commons or _commons_photo
+    measure = measure or official_photos.weigh
+    records, problems, unknown = {}, [], set()
+    for k, entry in sorted(getattr(overrides, "STATEWIDE_PHOTOS", {}).items()):
+        if not printed(lists, k):
+            problems.append(f"{k}: overrides.STATEWIDE_PHOTOS names a candidate no list prints "
+                            "under that name; not used")
+            continue
+        bad = curated_problems(entry)
+        if bad:
+            problems.append(f"{k}: overrides.STATEWIDE_PHOTOS entry: {'; '.join(bad)}; not used")
+            continue
+        if not _seated(entry, legislators):
+            problems.append(f"{k}: {entry['url']} is keyed by a seat its member no longer "
+                            "holds; not used")
+            continue
+        more = {"by": entry.get("by"), "route": CURATED, "tie": entry["tie"],
+                "seen": entry["seen"], "chosen": entry["url"], "seat": entry.get("seat")}
+        if wikimedia_file(entry["url"]):
+            file_name = urllib.parse.unquote(
+                entry["page"].split("/wiki/File:", 1)[-1]).replace("_", " ")
+            last = (before or {}).get(k)
+            found, why = commons(file_name, refused, measure, _bucket(passed_over or {}, k),
+                                 _bucket(doubted or {}, k), last)
+            if why == official_photos.UNKNOWN:
+                unknown.add(k)
+                continue
+            if not found:
+                problems.append(f"{k}: the chosen Commons file {file_name}: {why}; not used")
+                continue
+            chosen, weight, credit, heavy, _size = found
+            more.update(by=credit.get("by"), credit=credit)
+        else:
+            why = listed([entry["url"]], refused, _bucket(passed_over or {}, k),
+                         _bucket(doubted or {}, k))
+            if why:
+                problems.append(f"{k}: the chosen file {entry['url']} is withheld by a person's "
+                                f"list ({why}); not used")
+                continue
+            chosen, weight, why, heavy = official_photos.choose(
+                [(0, entry["url"])], measure, widest=1.0, strict=True)
+            if not chosen:
+                if why == official_photos.UNKNOWN:
+                    unknown.add(k)
+                else:
+                    problems.append(f"{k}: the chosen file {entry['url']}: {why}; not used")
+                continue
+        records[k] = official_photos.record(chosen, entry["page"], entry["words"], weight,
+                                            read=entry["read"], portraitHeavy=heavy, **more)
+    return records, problems, unknown
+
+
+def merge_curated(records, chosen, problems):
+    """Put each record a person chose (*chosen*) in *records*, in place,
+    where no other route pictures the candidate: one another route now
+    pictures is said in *problems* (its entry stands for nothing)."""
+    for k, rec in sorted(chosen.items()):
+        other = records.get(k)
+        if other and "photo" in other and other.get("route") != CURATED:
+            problems.append(f"{k}: the {other.get('route')} route now pictures them; the "
+                            "overrides.STATEWIDE_PHOTOS entry is not used (remove it)")
+            continue
+        records[k] = rec
+
+
+def with_curated(cache, lists, legislators=None, log=print, **readers):
+    """``(cache, problems)``: *cache* with every ``STATEWIDE_PHOTOS`` entry
+    read again (:func:`read_curated`) and nothing else - the whole of
+    ``ballotphotos --curated-only``. A chosen record whose entry is gone is
+    dropped; one whose file could not be read keeps its last read (rule 8)."""
+    out = dict(cache or {})
+    photos = dict(out.get("photos") or {})
+    chosen, problems, unknown = read_curated(lists, photos, legislators=legislators, **readers)
+    for k in [k for k, rec in photos.items()
+              if rec.get("route") == CURATED and k not in chosen and k not in unknown]:
+        del photos[k]
+    merge_curated(photos, chosen, problems)
+    for k in sorted(unknown):
+        problems.append(f"{k}: the chosen file could not be read"
+                        + ("; the last read is kept" if k in photos else ""))
+    date_credits({"photos": photos}, log=log)
+    out["photos"] = {k: photos[k] for k in sorted(photos)}
+    return out, problems
+
+
+def stale_curated(cache, lists, shadowed=()):
+    """``[sentence]``: every ``STATEWIDE_PHOTOS`` entry that stands for
+    nothing - its candidate's name no list prints any more, another route
+    pictures them (in the cache, or at build time: *shadowed*, from
+    :func:`attach`), or the cache holds no record of it (``ballotphotos
+    --curated-only`` has not read it)."""
+    from . import overrides
+    photos = (cache or {}).get("photos") or {}
+    out = []
+    behind = {s.split(": ", 1)[0]: s.split(": ", 1)[1] for s in shadowed}
+    for k, entry in sorted(getattr(overrides, "STATEWIDE_PHOTOS", {}).items()):
+        rec = photos.get(k) or {}
+        if not printed(lists, k):
+            out.append(f"{k}: no list prints this candidate under that name")
+        elif k in behind:
+            out.append(f"{k}: {behind[k]} stands ahead of it")
+        elif "photo" in rec and rec.get("route") != CURATED:
+            out.append(f"{k}: the {rec.get('route')} route now pictures them")
+        elif rec.get("route") != CURATED or rec.get("chosen") != (entry or {}).get("url"):
+            out.append(f"{k}: not in data/statewide_photos.json; run 'ballotphotos --curated-only'")
+    return out
+
+
 def lists_of(statewide_cache):
     """``{code: {office: [candidate]}}`` from the statewide cache."""
     out = {}
@@ -1097,7 +1273,8 @@ def lists_of(statewide_cache):
     return out
 
 
-def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print, budget=None):
+def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print, budget=None,
+          legislators=None):
     """``(cache, problems)``: every route read again. A photograph a read
     concluded nothing about keeps the last one read for the same
     candidate (rule 8), and so does every race the races' articles' read
@@ -1133,6 +1310,12 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print, b
         unknown |= unknown_w
         for k, rec in wiki.items():
             records.setdefault(k, rec)
+    # Last, a person's choice, where none of the routes above pictures the
+    # candidate (overrides.STATEWIDE_PHOTOS).
+    chosen, more, unknown_c = read_curated(lists, before, legislators=legislators,
+                                           passed_over=passed_over, doubted=doubts)
+    problems += more
+    unknown |= unknown_c
     unreached = set(progress.get("unreached") or ())
     if unreached:
         problems.append(f"the races' articles: {len(unreached)} race(s) not reached within the "
@@ -1175,6 +1358,9 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print, b
         records[k] = rec
         if held and k not in cut:
             problems.append(f"{k}: could not be read; the last photograph read is kept")
+    # A person's choice last, where nothing above - read now or kept from the
+    # last read - pictures the candidate.
+    merge_curated(records, chosen, problems)
     # Everyone a read concluded nothing about is said, kept or not: a
     # candidate with no earlier photograph who read unknown was named
     # nowhere (the PR #213 review).
@@ -1326,6 +1512,21 @@ def _refused_why(k, rec):
     held = official_photos.held_back(rec)
     if held:
         return held
+    if rec.get("route") == CURATED:
+        # A person's choice stands only while their entry names this very
+        # file for this very candidate, and a Commons file is held to the
+        # licence test as the article's are (never to the file-name test: a
+        # person looked at the photograph, not at its name).
+        entry = curated_entry(k)
+        if not entry or entry["url"] != rec.get("chosen"):
+            return "overrides.STATEWIDE_PHOTOS no longer names this file for them"
+        if from_commons(rec):
+            file_title = urllib.parse.unquote(
+                ((rec.get("credit") or {}).get("page") or "").split("/wiki/File:", 1)[-1])
+            doubt = licence_doubt(rec.get("credit"), file_title.replace("_", " "))
+            if doubt:
+                return f"licence in doubt: {doubt}"
+        return ""
     if rec.get("route") == "wikipedia":
         file_title = ((rec.get("credit") or {}).get("page") or "").split("/wiki/File:", 1)[-1]
         file_title = urllib.parse.unquote(file_title).replace("_", " ")
@@ -1385,11 +1586,15 @@ def problems(cache):
         # A Commons file's credit is its licence, its author where the file
         # page names one, and "author not recorded on Commons" where it
         # does not (rule 87); anything else names whose it is in ``by``.
-        if not (rec.get("by") or (rec.get("route") == "wikipedia"
+        if not (rec.get("by") or (from_commons(rec)
                                   and (rec.get("credit") or {}).get("licence"))):
             out.append(f"statewide_photos {k}: the photograph does not say whose it is")
-        if rec.get("route") == "wikipedia" and not (rec.get("credit") or {}).get("licence"):
+        if from_commons(rec) and not (rec.get("credit") or {}).get("licence"):
             out.append(f"statewide_photos {k}: a Commons photograph with no recorded licence")
+        if rec.get("route") == CURATED:
+            # What a person's choice rests on, as its entry gave it.
+            out.extend(f"statewide_photos {k}: the chosen photograph has no {f}"
+                       for f in ("tie", "seen", "chosen") if not rec.get(f))
     return out
 
 
@@ -1418,7 +1623,8 @@ def holder_photo(office, holder):
     return holder[field], {"by": by, "page": holder.get(field + "Page") or ""}
 
 
-def attach(code, office, rows, listed, holder, status, cache, guides=None, manifest=None):
+def attach(code, office, rows, listed, holder, status, cache, guides=None, manifest=None,
+           legislators=None, shadowed=None):
     """Give each of the page's candidate *rows* (``statewide.for_page``)
     its photograph, in place, by the routes in order: ``photo`` and
     ``photoCredit`` (``KYC.photoCreditHtml``'s shape: whose it is, and the
@@ -1431,8 +1637,13 @@ def attach(code, office, rows, listed, holder, status, cache, guides=None, manif
     A candidate none of these routes pictures is given the election
     office's own guide's photograph, hosted here unmodified, where *guides*
     (``kyc/guide_photos.py``'s cache) joins one to them (the owner's
-    decision of 2026-10-25). Returns how many of those shown are at full
-    size though heavy."""
+    decision of 2026-10-25). A photograph a person chose
+    (``overrides.STATEWIDE_PHOTOS``, route ``curated``) stands only where
+    every other route leaves them none, the guide's hosted photograph
+    included, and a file keyed by a seat only while *legislators* (the
+    roster) seats its member there; an entry another route now stands ahead
+    of is appended to *shadowed*, for the build to say. Returns how many of
+    those shown are at full size though heavy."""
     from .statewide import display_name
     photos = (cache or {}).get("photos") or {}
     by_shown = {}
@@ -1447,25 +1658,37 @@ def attach(code, office, rows, listed, holder, status, cache, guides=None, manif
             continue
         # 1. The holder's office photograph, for the one candidate the
         # holder line settled as the holder (surname and given name).
+        k = key(code, office, name)
+        rec = photos.get(k)
+        chosen = bool(rec) and rec.get("route") == CURATED
         if status and status.get("why") == "listed" and status.get("name") == name:
             photo, credit = holder_photo(office, holder)
             if photo:
                 row["photo"], row["photoCredit"] = photo, credit
+                if chosen and shadowed is not None:
+                    shadowed.append(f"{k}: the holder's office photograph")
                 continue
-        k = key(code, office, name)
-        rec = photos.get(k)
-        if not rec or "photo" not in rec or _problems_of({"photos": {name: rec}}) \
-                or withheld_why(k, rec):
+        usable = bool(rec) and "photo" in rec and not _problems_of({"photos": {name: rec}}) \
+            and not withheld_why(k, rec) \
+            and not (chosen and not _seated(curated_entry(k), legislators))
+        if not usable or chosen:
+            # The guide's photograph, hosted here, for a candidate the other
+            # routes leave with none - and ahead of a person's choice, which
+            # stands only where every route leaves them none.
+            found = None
             if guides:
                 from . import guide_photos
                 found = guide_photos.for_row(guides, code, office, dict(row, printed=name),
                                              manifest)
                 if found:
                     row["photo"], row["photoCredit"] = found["photo"], guide_photos.credit(found)
-            continue
+            if found and chosen and shadowed is not None:
+                shadowed.append(f"{k}: the election office's guide's photograph")
+            if found or not usable:
+                continue
         heavy += bool((official_photos.heavy_of(rec) or {}).get("kept"))
         row["photo"] = rec["photo"]
-        if rec.get("route") == "wikipedia":
+        if from_commons(rec):
             row["photoCredit"] = rec.get("credit")
         else:
             row["photoCredit"] = {"by": rec["by"], "page": rec["page"]}

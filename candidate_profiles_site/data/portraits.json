@@ -7863,9 +7863,19 @@
   "width": 1350
  },
  "person:angela gonzales-torres|CA|H": {
+  "bytes": 46479,
+  "credit": {
+   "by": "the campaign's website (angela4congress.com)",
+   "page": "https://www.angela4congress.com/about"
+  },
+  "evidence": "the About page's hero image (alt text \"hero image\", the srcset's 640w form, signed by the site's image host), under the heading \"Rooted in LA. Ready for change.\" and directly before \"Angela Gonzales-Torres is a democratic socialist running to represent California's 34th Congressional District.\"",
+  "height": 640,
   "name": "Angela Gonzales-Torres",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://www.angela4congress.com/about",
+  "read": "2026-11-17",
+  "url": "https://run.imgix.net/06be24b2-0f79-4e8b-946c-e788fb89576f/134d35b9-7cff-4c3f-a6e3-153a3ab62b30/134d35b9-7cff-4c3f-a6e3-153a3ab62b30.jpg?ixlib=js-3.8.0&bri=4&con=0&sat=0&high=0&shad=0&usm=25&rect=482%2C0%2C2036%2C2036&auto=compress%2Cformat&fit=fillmax&w=640&q=75&s=8101cd6eab2cc2f88d70dcb773dc2841",
+  "via": "curated",
+  "width": 640
  },
  "person:angela nixon|FL|S": {
   "credit": {
@@ -8012,6 +8022,21 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg/960px-Jim_Clyburn_and_Annie_Andrews_in_November_2026_%28cropped_2%29.jpg",
   "via": "wikipedia",
   "width": 1024
+ },
+ "person:anthony lawrence kozycki|GA|H": {
+  "bytes": 157955,
+  "credit": {
+   "by": "the campaign's website (kozyckiforcongress.com)",
+   "page": "https://kozyckiforcongress.com"
+  },
+  "evidence": "alt text \"Tony Kozycki - International Diplomacy\", file name \"Tony_Kozycki_7115_Wide.jpg\", in the section \"Service in Defense of this Nation\" before \"Working with Allies, Strengthening Security\"",
+  "height": 1200,
+  "name": "Anthony Lawrence Kozycki",
+  "page": "https://kozyckiforcongress.com",
+  "read": "2026-11-17",
+  "url": "https://kozyckiforcongress.com/img/Tony_Kozycki_7115_Wide.jpg",
+  "via": "curated",
+  "width": 1200
  },
  "person:anthony sabatini|FL|H": {
   "credit": {
@@ -8204,6 +8229,21 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Congresswoman_Ashley_Hinson_Official_portrait.jpg/960px-Congresswoman_Ashley_Hinson_Official_portrait.jpg",
   "via": "wikipedia",
   "width": 1365
+ },
+ "person:austin magee|LA|H": {
+  "bytes": 171348,
+  "credit": {
+   "by": "the campaign's website (austinmageeforcongress.com)",
+   "page": "https://www.austinmageeforcongress.com/"
+  },
+  "evidence": "the background photograph (file \"IMG_6622.jpg\", no alt text; the page's 1000w rendition) of the home page section whose headings read \"Austin Magee\" and \"Candidate for Louisiana’s Congressional District 5\", under the banner \"I can't do any worse than the rest of 'em!\"",
+  "height": 562,
+  "name": "Austin Magee",
+  "page": "https://www.austinmageeforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://images.squarespace-cdn.com/content/v1/699c7b79fe93a070441bd9b0/fb6a9c08-7817-446e-a48e-6f636730d574/IMG_6622.jpg?format=1000w",
+  "via": "curated",
+  "width": 1000
  },
  "person:austin rogers|FL|H": {
   "credit": {
@@ -8406,6 +8446,21 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:blake miguez|LA|H": {
+  "bytes": 67033,
+  "credit": {
+   "by": "Louisiana State Senate",
+   "page": "https://senate.la.gov/smembers?ID=22"
+  },
+  "evidence": "the page's only portrait, directly before \"State Senator Blake Miguez Republican District 22\" (no alt text)",
+  "height": 325,
+  "name": "Blake Miguez",
+  "page": "https://senate.la.gov/smembers?ID=22",
+  "read": "2026-11-17",
+  "url": "https://senate.la.gov/SenPics/Sen22.jpg",
+  "via": "curated",
+  "width": 260
+ },
  "person:bo biteman|WY|H": {
   "credit": {
    "attribution": true,
@@ -8444,14 +8499,48 @@
   "width": 2352
  },
  "person:bob brooks|PA|H": {
+  "bytes": 43624,
+  "credit": {
+   "by": "the campaign's website (brooksforcongress.com)",
+   "page": "https://www.brooksforcongress.com/"
+  },
+  "evidence": "the image's alt text \"Bob Brooks petting his bulldog\" (on the Meet Bob page the same file is \"Bob Brooks petting Aspen, the family bulldog\"), on \"Bob Brooks for Congress | Put the fire out in Washington\"",
+  "heavy": "572 KB, over 300 KB; shown smaller from the same file",
+  "height": 500,
   "name": "Bob Brooks",
-  "url": null,
-  "via": "unresolved"
+  "original": "https://www.brooksforcongress.com/wp-content/uploads/2026/07/1326-JR3B5401-scaled.jpg",
+  "originalWeight": {
+   "bytes": 572068,
+   "height": 1707,
+   "width": 2560
+  },
+  "page": "https://www.brooksforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/www.brooksforcongress.com/wp-content/uploads/2026/07/1326-JR3B5401-scaled.jpg?w=750&ssl=1",
+  "via": "curated",
+  "width": 750
  },
  "person:bob harvie|PA|H": {
+  "bytes": 17322,
+  "credit": {
+   "by": "the campaign's website (bobharvieforcongress.com)",
+   "page": "https://bobharvieforcongress.com/"
+  },
+  "evidence": "the file \"harvie_redshirt_squ.jpg\" (alt text \"Copyright©gerrihernandez\", the photographer's credit), directly above \"About Bob\": \"Bob Harvie was elected to the Board of Bucks County Commissioners in November 2019\", on \"Home - Bob Harvie for Congress\"",
+  "heavy": "2531 KB, over 300 KB; shown smaller from the same file",
+  "height": 500,
   "name": "Bob Harvie",
-  "url": null,
-  "via": "unresolved"
+  "original": "https://bobharvieforcongress.com/wp-content/uploads/2026/08/harvie_redshirt_squ.jpg",
+  "originalWeight": {
+   "bytes": 2531133,
+   "height": 2181,
+   "width": 2180
+  },
+  "page": "https://bobharvieforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/bobharvieforcongress.com/wp-content/uploads/2026/08/harvie_redshirt_squ.jpg?w=500&ssl=1",
+  "via": "curated",
+  "width": 499
  },
  "person:bobby hanig|NC|H": {
   "credit": {
@@ -8764,9 +8853,19 @@
   "via": "unresolved"
  },
  "person:brian poindexter|OH|H": {
+  "bytes": 88959,
+  "credit": {
+   "by": "the campaign's website (poindexterforcongress.com)",
+   "page": "https://poindexterforcongress.com/"
+  },
+  "evidence": "on \"Brian Poindexter for Congress | Ready to Work for Working Families\", under \"Ready to work for working families in congress\" and directly before \"Why I'm Running for Congress: When times get tough, working people are always asked to do more with less\"; the file is \"bp-hardhat-4-5\" (his initials; the srcset's 1024px form; no alt text)",
+  "height": 819,
   "name": "Brian Poindexter",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://poindexterforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://poindexterforcongress.com/wp-content/uploads/2025/12/bp-hardhat-4-5-1024x819.jpg",
+  "via": "curated",
+  "width": 1024
  },
  "person:bridget brink|MI|H": {
   "credit": {
@@ -9021,6 +9120,21 @@
   "via": "wikipedia",
   "width": 185
  },
+ "person:carlos de la cruz jr.|TX|H": {
+  "bytes": 25107,
+  "credit": {
+   "by": "the campaign's website (carlosforcongress.com)",
+   "page": "https://www.carlosforcongress.com"
+  },
+  "evidence": "the photograph in the home page's section headed \"Air Force Veteran & Political Outsider | CARLOS | DE LA CRUZ\", directly after \"Carlos served 20 years in the U.S. Air Force ... Carlos has spent his life delivering results\" (file \"photo sep 25 2025, 8 21 46 am (10)_edite.jpg\", the rendition the page draws, 554x510)",
+  "height": 510,
+  "name": "Carlos de la Cruz Jr.",
+  "page": "https://www.carlosforcongress.com",
+  "read": "2026-11-17",
+  "url": "https://static.wixstatic.com/media/34bf2f_571e35cfe9664926bcf5582cad2621e7~mv2.jpg/v1/crop/x_0,y_47,w_1191,h_1097/fill/w_554,h_510,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/photo%20sep%2025%202025%2C%208%2021%2046%20am%20(10)_edite.jpg",
+  "via": "curated",
+  "width": 554
+ },
  "person:carmela conroy|WA|H": {
   "credit": {
    "attribution": false,
@@ -9163,9 +9277,26 @@
   "width": 1492
  },
  "person:charlie hatcher|TN|H": {
+  "bytes": 121896,
+  "credit": {
+   "by": "the campaign's website (charliehatcher.com)",
+   "page": "https://charliehatcher.com/about/"
+  },
+  "evidence": "the file \"133-EXTRA_Portrait-of-Charlie-CU-2-scaled.png\", a background picture of the page \"About – Charlie Hatcher\" (no alt text), whose words open \"ABOUT CHARLIE ... Charlie Hatcher is a farmer, veterinarian, businessman, and public servant\"",
+  "heavy": "4462 KB, over 300 KB; shown smaller from the same file",
+  "height": 281,
   "name": "Charlie Hatcher",
-  "url": null,
-  "via": "unresolved"
+  "original": "https://charliehatcher.com/wp-content/uploads/2026/08/133-EXTRA_Portrait-of-Charlie-CU-2-scaled.png",
+  "originalWeight": {
+   "bytes": 4462079,
+   "height": 1439,
+   "width": 2560
+  },
+  "page": "https://charliehatcher.com/about/",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/charliehatcher.com/wp-content/uploads/2026/08/133-EXTRA_Portrait-of-Charlie-CU-2-scaled.png?w=500&ssl=1",
+  "via": "curated",
+  "width": 500
  },
  "person:charlie mcclintock|IA|H": {
   "credit": {
@@ -9323,9 +9454,34 @@
   "width": 2381
  },
  "person:chris gober|TX|H": {
+  "bytes": 231670,
+  "credit": {
+   "by": "the campaign's website (chrisgober.com)",
+   "page": "https://chrisgober.com/"
+  },
+  "evidence": "on \"Chris Gober\" (\"Chris Gober Running for Congress to represent Texas's 10th District\"), the photograph directly before the section \"Meet Chris Gober\": \"Chris Gober is a seventh-generation Texan, proud Texas A&M Aggie, husband of 18 years, and father to two ...\" (its alt text is the site template's placeholder \"Photo-of-the-Designer\"; the srcset's 512px form)",
+  "height": 341,
   "name": "Chris Gober",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://chrisgober.com/",
+  "read": "2026-11-17",
+  "url": "https://framerusercontent.com/images/qcPVXzbsxz7ZpcrGPh6h7i7N4.jpg?scale-down-to=512&lossless=1&width=5472&height=3648",
+  "via": "curated",
+  "width": 512
+ },
+ "person:chris harden|GA|H": {
+  "bytes": 11082,
+  "credit": {
+   "by": "the campaign's website (electharden.com)",
+   "page": "https://www.electharden.com/"
+  },
+  "evidence": "the home page's first image, file name \"Chris-Harden-Headshot.jpg\", alt text \"Professional headshot of Chris Harden in dark suit and light blue tie sitting on stool against dark studio background\" (the page draws it at 147x184 through Wix's own resizer, .../v1/fill/w_147,h_184,...; this is the same file through the same resizer at 440x550, since 147px is too small for the card)",
+  "height": 550,
+  "name": "Chris Harden",
+  "page": "https://www.electharden.com/",
+  "read": "2026-11-17",
+  "url": "https://static.wixstatic.com/media/17a715_318a9891ee8b44f38b32442ae7bb0b8e~mv2.jpg/v1/fill/w_440,h_550,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Chris-Harden-Headshot.jpg",
+  "via": "curated",
+  "width": 440
  },
  "person:chris jones|AR|H": {
   "credit": {
@@ -9638,9 +9794,19 @@
   "width": 2250
  },
  "person:chuck hubbard|NC|H": {
+  "bytes": 44912,
+  "credit": {
+   "by": "the campaign's website (hubbardforcongress.com)",
+   "page": "https://hubbardforcongress.com/about"
+  },
+  "evidence": "the About page's photograph (file \"chuckatappstate-683x1024.webp\"), directly above the heading \"About Chuck Hubbard\" and \"Meet your candidate for Congress, Chuck Hubbard\", on the page titled \"Meet Chuck Hubbard - Chuck Hubbard for Congress\"",
+  "height": 1024,
   "name": "Chuck Hubbard",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://hubbardforcongress.com/about",
+  "read": "2026-11-17",
+  "url": "https://hubbardforcongress.com/wp-content/uploads/2024/04/chuckatappstate-683x1024.webp",
+  "via": "curated",
+  "width": 683
  },
  "person:claire valdez|NY|H": {
   "credit": {
@@ -9822,6 +9988,21 @@
   "via": "wikipedia",
   "width": 1049
  },
+ "person:conrad roberts cable|LA|H": {
+  "bytes": 130096,
+  "credit": {
+   "by": "the campaign's website (conrad4congress2026.com)",
+   "page": "https://www.conrad4congress2026.com/meet-conrad"
+  },
+  "evidence": "the image's alt text \"Louisiana 4th District congressional candidate Conrad Cable smiling outdoors in a straw hat, blue checkered shirt, and brown overalls, standing in a green rural landscape.\", file name \"07292025-ConradCable-Portrait-007.jpg\", the first image of the page titled \"Meet Conrad | Conrad 4 Congress\" (the 1000w rendition its srcset lists)",
+  "height": 667,
+  "name": "Conrad Roberts Cable",
+  "page": "https://www.conrad4congress2026.com/meet-conrad",
+  "read": "2026-11-17",
+  "url": "https://images.squarespace-cdn.com/content/v1/68a876e549ee746bc353d307/7633d1e3-dad7-477f-8abf-e808f346560c/07292025-ConradCable-Portrait-007.jpg?format=1000w",
+  "via": "curated",
+  "width": 1000
+ },
  "person:cori bush|MO|H": {
   "credit": {
    "attribution": false,
@@ -9869,9 +10050,42 @@
   "via": "unresolved"
  },
  "person:cyril jefferson|NC|H": {
+  "credit": {
+   "attribution": false,
+   "by": "Ike Hayman, House Creative Services",
+   "file": "https://commons.wikimedia.org/wiki/File:US_Representative_Cyril_Jefferson.jpg",
+   "form": 4,
+   "licence": "Public domain",
+   "licenceUrl": null,
+   "nonFree": false,
+   "year": 2026
+  },
+  "evidence": "\"US Representative Cyril Jefferson\" (the file page's description), in Category:Cyril Jefferson; the lead image of the article Cyril Jefferson; author \"Ike Hayman, House Creative Services\", public domain (PD-USGov), dated November 9, 2026",
+  "height": 4200,
   "name": "Cyril Jefferson",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://commons.wikimedia.org/wiki/File:US_Representative_Cyril_Jefferson.jpg",
+  "read": "2026-11-17",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/US_Representative_Cyril_Jefferson.jpg/120px-US_Representative_Cyril_Jefferson.jpg"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/US_Representative_Cyril_Jefferson.jpg/250px-US_Representative_Cyril_Jefferson.jpg"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/US_Representative_Cyril_Jefferson.jpg/330px-US_Representative_Cyril_Jefferson.jpg"
+   ],
+   [
+    500,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/US_Representative_Cyril_Jefferson.jpg/500px-US_Representative_Cyril_Jefferson.jpg"
+   ]
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/6/61/US_Representative_Cyril_Jefferson.jpg",
+  "via": "curated",
+  "width": 3360
  },
  "person:dale romans|KY|S": {
   "credit": {
@@ -10750,9 +10964,19 @@
   "width": 884
  },
  "person:don ralph leonard|OH|H": {
+  "bytes": 85712,
+  "credit": {
+   "by": "the campaign's website (donforohio.com)",
+   "page": "https://donforohio.com/bio"
+  },
+  "evidence": "on \"Bio — Don Leonard for US Congress\", under \"Meet Don Leonard\", the photograph directly before \"My name is Don Leonard, and I am running to represent everyone in Ohio's 15th Congressional District\" (file DSC02163.jpg, no alt text; the srcset's 1000w form, on the site builder's CDN)",
+  "height": 750,
   "name": "Don Ralph Leonard",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://donforohio.com/bio",
+  "read": "2026-11-17",
+  "url": "https://images.squarespace-cdn.com/content/v1/687eb236d4e3d45f11da2aa6/b53dd593-9c08-4fd4-8192-f41c2b4977cb/DSC02163.jpg?format=1000w",
+  "via": "curated",
+  "width": 1000
  },
  "person:don tracy|IL|S": {
   "name": "Don Tracy",
@@ -11040,6 +11264,21 @@
   "name": "Eliott Rodriguez",
   "url": null,
   "via": "unresolved"
+ },
+ "person:elizabeth fitzgibbon|WI|H": {
+  "bytes": 24222,
+  "credit": {
+   "by": "the campaign's website (fitzgibbonforcongress.com)",
+   "page": "https://www.fitzgibbonforcongress.com/"
+  },
+  "evidence": "the home page's opening photograph (its only portrait; file and alt text a generated name, 'bcfdfe36-8d58-49c1-8608-ac840758886a.png'), in the hero of the page titled \"Elizabeth Fitzgibbon for Congress | Wisconsin Congressional District 6\", beside \"Elizabeth is a mother, advocate, and independent candidate for Wisconsin's 6th Congressional District\" (the page's 1x rendition, 426x559; its srcset's 2x is 852x1118)",
+  "height": 559,
+  "name": "Elizabeth Fitzgibbon",
+  "page": "https://www.fitzgibbonforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://static.wixstatic.com/media/821665_f849b4f500f24015b5b657d7e07a1d58~mv2.png/v1/fill/w_426,h_559,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/bcfdfe36-8d58-49c1-8608-ac840758886a.png",
+  "via": "curated",
+  "width": 426
  },
  "person:elizabeth guzman|VA|H": {
   "credit": {
@@ -11545,6 +11784,21 @@
   "via": "wikipedia",
   "width": 2494
  },
+ "person:gordon brian heslop|LA|H": {
+  "bytes": 6355,
+  "credit": {
+   "by": "the campaign's website (heslopforcongress.com)",
+   "page": "https://heslopforcongress.com"
+  },
+  "evidence": "the home page's only photograph, file \"gordon-3-30-...png\" (no alt text), in the section under the headings \"Gordon Heslop\" / \"Republican Candidate 4th Congressional District of Louisiana\" and \"I'M AN ANTI TRUMP REPUBLICAN\" (the srcset's w=768 form; the file's full resolution is 221x301, which the host serves at that request)",
+  "height": 301,
+  "name": "Gordon Brian Heslop",
+  "page": "https://heslopforcongress.com",
+  "read": "2026-11-17",
+  "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=1037,fit=crop/7nq3YslSVIcSZlff/gordon-3-30-1NNSewD4szHQgvdn.png",
+  "via": "curated",
+  "width": 221
+ },
  "person:graham platner|ME|S": {
   "credit": {
    "attribution": true,
@@ -11930,6 +12184,21 @@
   "via": "curated",
   "width": 600
  },
+ "person:jace yarbrough|TX|H": {
+  "bytes": 80926,
+  "credit": {
+   "by": "the campaign's website (jaceforcongress.com)",
+   "page": "https://www.jaceforcongress.com/media-kit"
+  },
+  "evidence": "alt text \"Jace Yarbrough wearing blue suit.\" on the campaign's \"Media Kit - Jace Yarbrough for Congress\" page (the srcset's 800w form of 5P7A0044)",
+  "height": 578,
+  "name": "Jace Yarbrough",
+  "page": "https://www.jaceforcongress.com/media-kit",
+  "read": "2026-11-17",
+  "url": "https://cdn.prod.website-files.com/693c3a90305739817374e10a/693c42031c56573a565aaddf_5P7A0044%20(1)-p-800.jpg",
+  "via": "curated",
+  "width": 800
+ },
  "person:jack schlossberg|NY|H": {
   "credit": {
    "attribution": false,
@@ -12268,9 +12537,19 @@
   "width": 3167
  },
  "person:jamie ager|NC|H": {
+  "bytes": 90970,
+  "credit": {
+   "by": "the campaign's website (agerforcongress.com)",
+   "page": "https://agerforcongress.com/about"
+  },
+  "evidence": "on \"Meet Jamie Ager | Ager for Congress\", under the heading \"Meet Jamie Ager\", the file \"jamie-pigs\" (the srcset's 768px form of jamie-pigs.webp; no alt text), directly before \"I know firsthand the stress many small business owners and families face - navigating health insurance, making payroll, managing cash flow\"",
+  "height": 512,
   "name": "Jamie Ager",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://agerforcongress.com/about",
+  "read": "2026-11-17",
+  "url": "https://agerforcongress.com/nitropack_static/nDWggFDzPwYfEWVodLHJgkYjRcowLtaf/assets/images/optimized/rev-7fa717c/agerforcongress.com/wp-content/uploads/2025/07/jamie-pigs-768x512.webp",
+  "via": "curated",
+  "width": 768
  },
  "person:jamie davis|LA|S": {
   "name": "Jamie Davis",
@@ -12928,9 +13207,19 @@
   "width": 704
  },
  "person:jessica killin|CO|H": {
+  "bytes": 46985,
+  "credit": {
+   "by": "the campaign's website (killinforcolorado.com)",
+   "page": "https://www.killinforcolorado.com/about"
+  },
+  "evidence": "the About page's opening photograph (alt text \"hero image\") under \"About Jessica Killin\", on \"About — Jessica Killin for Congress\": \"A proud fourth-generation Coloradan, Jessica is a ... Army veteran, and public servant running for Congress\" (the srcset's 640px form, signed by the site)",
+  "height": 622,
   "name": "Jessica Killin",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://www.killinforcolorado.com/about",
+  "read": "2026-11-17",
+  "url": "https://run.imgix.net/0cdc1c93-4d9e-4c61-b29f-a8691a56ce6f/18371d67-0344-4012-bd58-9b91eb195a9c/18371d67-0344-4012-bd58-9b91eb195a9c.jpeg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=3256%2C636%2C4018%2C3903&auto=compress%2Cformat&fit=fillmax&w=640&q=75&s=124e36879db8a6d51a5621a65c1672bd",
+  "via": "curated",
+  "width": 640
  },
  "person:jillian balow|WY|H": {
   "credit": {
@@ -13401,9 +13690,48 @@
   "width": 527
  },
  "person:john cowan|GA|H": {
+  "bytes": 166874,
+  "credit": {
+   "by": "the campaign's website (cowanforcongress.com)",
+   "page": "https://cowanforcongress.com"
+  },
+  "evidence": "the home page's first image, alt text \"Dr. John Cowan\", file name \"Cowanscrubs.png\", followed by \"I'm Dr. John Cowan - As a doctor and a small business owner...\"; his white coat is embroidered \"John A. Cowan, Jr. MD Neurosurgery\"",
+  "heavy": "1909 KB, over 300 KB; shown smaller from the same file",
+  "height": 444,
   "name": "John Cowan",
-  "url": null,
-  "via": "unresolved"
+  "original": "https://cowanforcongress.com/images/Cowanscrubs.png",
+  "originalWeight": {
+   "bytes": 1909960,
+   "height": 1116,
+   "width": 1254
+  },
+  "page": "https://cowanforcongress.com",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/cowanforcongress.com/images/Cowanscrubs.png?w=500&ssl=1",
+  "via": "curated",
+  "width": 499
+ },
+ "person:john david day|LA|H": {
+  "bytes": 193786,
+  "credit": {
+   "by": "the campaign's website (johndayforcongress.com)",
+   "page": "https://johndayforcongress.com/about-john-day-for-congress/"
+  },
+  "evidence": "alt text \"John Day for Congress\", file \"John-Day-for-Congress-ProfileImage-Hereo.png\", directly above the heading \"About John Day\" and \"Meet your candidate! Steady. Principled. Present. John Day was born in Shreveport, raised in Lake Charles\"; the home page draws the same file above \"I'm John Day, a Veteran running for Congress in the 3rd District of Louisiana.\"",
+  "heavy": "740 KB, over 300 KB; shown smaller from the same file",
+  "height": 512,
+  "name": "John David Day",
+  "original": "https://johndayforcongress.com/wp-content/uploads/2026/03/John-Day-for-Congress-ProfileImage-Hereo.png",
+  "originalWeight": {
+   "bytes": 740668,
+   "height": 961,
+   "width": 936
+  },
+  "page": "https://johndayforcongress.com/about-john-day-for-congress/",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/johndayforcongress.com/wp-content/uploads/2026/03/John-Day-for-Congress-ProfileImage-Hereo.png?w=500&ssl=1",
+  "via": "curated",
+  "width": 499
  },
  "person:john deaton|MA|S": {
   "credit": {
@@ -14202,6 +14530,21 @@
   "via": "curated",
   "width": 262
  },
+ "person:kevin eugene martin|GA|H": {
+  "bytes": 70110,
+  "credit": {
+   "by": "the campaign's website (kevinmartinforcongress.com)",
+   "page": "https://kevinmartinforcongress.com/"
+  },
+  "evidence": "the image's alt text \"Kevin Martin, candidate for Congress in Georgia's 6th District\", file name \"kevin-hero.jpg\", under the heading \"We Work for You, So It's Time We Start Listening\"",
+  "height": 1000,
+  "name": "Kevin Eugene Martin",
+  "page": "https://kevinmartinforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://kevinmartinforcongress.com/assets/kevin-hero.jpg",
+  "via": "curated",
+  "width": 800
+ },
  "person:kevin hern|OK|S": {
   "credit": {
    "attribution": false,
@@ -14380,6 +14723,21 @@
   "via": "wikipedia",
   "width": 614
  },
+ "person:kim hardy|NC|H": {
+  "bytes": 298360,
+  "credit": {
+   "by": "the campaign's website (kimberlyhardyforcongress.com)",
+   "page": "https://www.kimberlyhardyforcongress.com/"
+  },
+  "evidence": "alt text \"Dr. Kimberly Hardy\" (file \"Transparent+Background.png\", Squarespace's 500w form) on the home page titled \"Kimberly Hardy for US Congress\"",
+  "height": 625,
+  "name": "Kim Hardy",
+  "page": "https://www.kimberlyhardyforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://images.squarespace-cdn.com/content/v1/685d6ecae0e5cc62fa1d93ac/1627beeb-f441-49f8-a735-a35d0e692ba6/Transparent+Background.png?format=500w",
+  "via": "curated",
+  "width": 500
+ },
  "person:kina i collins|IL|H": {
   "credit": {
    "attribution": true,
@@ -14418,9 +14776,26 @@
   "width": 420
  },
  "person:kristina knickerbocker|OH|H": {
+  "bytes": 254700,
+  "credit": {
+   "by": "the campaign's website (kristinaknickerbocker.com)",
+   "page": "https://kristinaknickerbocker.com/meet-kristina/"
+  },
+  "evidence": "the \"Meet Kristina\" page's hero image (alt text \"Meet Page Hero Image\", file \"meet_cutout.png\"), under the heading \"A Life Dedicated to Service\" and directly before \"U.S. Air Force Veteran, Oncology Nurse Practitioner, and mom of two - Kristina Knickerbocker's life has been dedicated to serving our country and our community\"; her white coat is embroidered \"Kristina Knickerbocker MS, APRN-CNP\"",
+  "heavy": "1726 KB, over 300 KB; shown smaller from the same file",
+  "height": 730,
   "name": "Kristina Knickerbocker",
-  "url": null,
-  "via": "unresolved"
+  "original": "https://kristinaknickerbocker.com/wp-content/themes/blueprintinteractive/images/meet_cutout.png",
+  "originalWeight": {
+   "bytes": 1726919,
+   "height": 1516,
+   "width": 1037
+  },
+  "page": "https://kristinaknickerbocker.com/meet-kristina/",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/kristinaknickerbocker.com/wp-content/themes/blueprintinteractive/images/meet_cutout.png?w=500&ssl=1",
+  "via": "curated",
+  "width": 499
  },
  "person:kshama sawant|WA|H": {
   "credit": {
@@ -14640,6 +15015,43 @@
   "via": "wikipedia",
   "width": 1499
  },
+ "person:lauren b. pena|TX|H": {
+  "bytes": 11584,
+  "credit": {
+   "by": "the campaign's website (lauren4congress.com)",
+   "page": "https://www.lauren4congress.com/"
+  },
+  "evidence": "the page's og:image (its own share picture, file name \"BJQRmbhGNXZEirYx.jpg\", no alt text), on the page titled \"Lauren B. Peña for Congress | Texas CD-37\", whose words read \"Lauren B. Peña — Republican nominee for Texas CD-37. Trafficking survivor, mother of six, conservative. General Election November 3, 2026.\" The page lists no other image and no other rendition; the page's twitter:image:alt for this very file is \"Lauren B. Peña — Republican candidate for U.S. Congress, Texas CD-37\", and its schema.org Person (\"Lauren B. Peña\", \"Congressional Candidate — Texas CD-37\") names it as her image",
+  "heavy": "1319x1312px, over 1200px; shown smaller from the same file",
+  "height": 497,
+  "name": "Lauren B. Pena",
+  "original": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663450394445/BJQRmbhGNXZEirYx.jpg",
+  "originalWeight": {
+   "bytes": 85409,
+   "height": 1312,
+   "width": 1319
+  },
+  "page": "https://www.lauren4congress.com/",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/files.manuscdn.com/user_upload_by_module/session_file/310519663450394445/BJQRmbhGNXZEirYx.jpg?w=500&ssl=1",
+  "via": "curated",
+  "width": 500
+ },
+ "person:lauren jewett|LA|H": {
+  "bytes": 18824,
+  "credit": {
+   "by": "the campaign's website (laurenjewett.com)",
+   "page": "https://www.laurenjewett.com/about"
+  },
+  "evidence": "the image's alt text \"Lauren Jewett\", file name \"07_Jewett_Headshots_2026.jpg\", on the page titled \"Meet Lauren Jewett | Congressional Candidate LA-01 | Lauren Jewett for Congress\" (the site's own 640px rendition through its image optimizer, as its srcset lists)",
+  "height": 902,
+  "name": "Lauren Jewett",
+  "page": "https://www.laurenjewett.com/about",
+  "read": "2026-11-17",
+  "url": "https://www.laurenjewett.com/_next/image?url=%2Fimages%2Fportraits%2F07_Jewett_Headshots_2026.jpg&w=640&q=75&dpl=dpl_H3ozFSWCbechM5W34THw1ybmrQo5",
+  "via": "curated",
+  "width": 640
+ },
  "person:laurie buckhout|NC|H": {
   "credit": {
    "attribution": false,
@@ -14740,6 +15152,21 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Lily_Tang_Williams_by_Gage_Skidmore.jpg/960px-Lily_Tang_Williams_by_Gage_Skidmore.jpg",
   "via": "wikipedia",
   "width": 2189
+ },
+ "person:lindsay garcia|LA|H": {
+  "bytes": 16844,
+  "credit": {
+   "by": "the campaign's website (rubiagarcia.com)",
+   "page": "https://www.rubiagarcia.com/meet-lindsay"
+  },
+  "evidence": "the Meet page's first photograph (file and alt text \"SV-0092.jpg\"), on \"Meet Rubia | Rubia Garcia For Congress | Louisiana 6th District\", directly above the heading \"Meet Rubia\" and \"Lindsay “Rubia” Garcia isn’t a career politician. She’s a daughter of Louisiana\"",
+  "height": 556,
+  "name": "Lindsay Garcia",
+  "page": "https://www.rubiagarcia.com/meet-lindsay",
+  "read": "2026-11-17",
+  "url": "https://static.wixstatic.com/media/efbd32_e67486738c5642dcbde522b7c787cd5c~mv2.jpg/v1/fill/w_453,h_556,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/SV-0092.jpg",
+  "via": "curated",
+  "width": 453
  },
  "person:lindsay james|IA|H": {
   "credit": {
@@ -15834,6 +16261,21 @@
   "via": "wikipedia",
   "width": 2687
  },
+ "person:matthew gromlich|LA|H": {
+  "bytes": 89710,
+  "credit": {
+   "by": "the campaign's website (mattgromlichforcongress.com)",
+   "page": "https://www.mattgromlichforcongress.com/"
+  },
+  "evidence": "alt text \"Matt Gromlich, running for congress in Louisiana's 4th district, wearing a black blazer with a small American flag pin, a white textured sweater, and dark pants. He is outdoors with a modern building and trees in the background.\"; file \"Profile Pic - MGFC - March 2026 - 009.jpg\", above the heading \"Matt Gromlich\" (the srcset's 750w form)",
+  "height": 1125,
+  "name": "Matthew Gromlich",
+  "page": "https://www.mattgromlichforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://images.squarespace-cdn.com/content/v1/69df20822a2d50664859f4d7/ae16ec47-1b70-4b45-997c-42bf157356ab/Profile+Pic+-+MGFC+-+March+2026+-+009.jpg?format=750w",
+  "via": "curated",
+  "width": 750
+ },
  "person:maura corby sullivan|NH|H": {
   "credit": {
    "attribution": false,
@@ -15870,6 +16312,21 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/8/88/Maura_C._Sullivan_150625-A-DZ999-922.jpg",
   "via": "wikipedia",
   "width": 360
+ },
+ "person:maura keller|GA|H": {
+  "bytes": 31070,
+  "credit": {
+   "by": "the campaign's website (maurakeller.com)",
+   "page": "https://maurakeller.com/"
+  },
+  "evidence": "the file name \"MK Homepage Gold Border Square Headshot.jpg\" (her initials and \"Headshot\"; no alt text), on the home page titled \"Maura Keller for Congress | US Army Veteran and VA Health Worker\" (the 500w rendition its srcset lists)",
+  "height": 500,
+  "name": "Maura Keller",
+  "page": "https://maurakeller.com/",
+  "read": "2026-11-17",
+  "url": "https://images.squarespace-cdn.com/content/v1/65babf991018d92de237b77e/37086b63-ea7e-4136-b2f7-12db3be71528/MK+Homepage+Gold+Border+Square+Headshot.jpg?format=500w",
+  "via": "curated",
+  "width": 500
  },
  "person:mayra nohemi flores|TX|H": {
   "credit": {
@@ -16198,6 +16655,21 @@
   "via": "wikipedia",
   "width": 1013
  },
+ "person:michael charles echols|LA|H": {
+  "bytes": 268394,
+  "credit": {
+   "by": "the campaign's website (michaelechols.com)",
+   "page": "https://www.michaelechols.com"
+  },
+  "evidence": "the image's alt text \"Michael Echols in a professional suit, candidate for Congress.\", file name \"MECHOLS52-809x1024.png\", the page's first image, followed by \"Michael Echols State Representative | Business Leader | Conservative Reformer\" (the 768w rendition its srcset lists, within the caps)",
+  "height": 972,
+  "name": "Michael Charles Echols",
+  "page": "https://www.michaelechols.com",
+  "read": "2026-11-17",
+  "url": "https://www.michaelechols.com/wp-content/uploads/2026/02/MECHOLS52-768x972.png",
+  "via": "curated",
+  "width": 768
+ },
  "person:michael j rogers|MI|S": {
   "credit": {
    "attribution": false,
@@ -16239,6 +16711,21 @@
   "name": "Michael S Katz",
   "url": null,
   "via": "unresolved"
+ },
+ "person:michael thurow|WI|H": {
+  "bytes": 44934,
+  "credit": {
+   "by": "the campaign's website (thurowforcongress.com)",
+   "page": "https://www.thurowforcongress.com/about"
+  },
+  "evidence": "alt text \"A portrait of Mike Thurow, Independent candidate for Wisconsin's Sixth Congressional District.\", file \"ThurowforCongress_HeroPhoto.jpg\" (the srcset's 1000w form), the About page's opening photograph above \"Meet Mike Thurow\" / \"Mike Thurow grew up in Mequon, Wi\"",
+  "height": 563,
+  "name": "Michael Thurow",
+  "page": "https://www.thurowforcongress.com/about",
+  "read": "2026-11-17",
+  "url": "https://images.squarespace-cdn.com/content/v1/6949e25a449b6734bccf9382/e2370e3b-a273-437e-8d01-64e4efe74564/ThurowforCongress_HeroPhoto.jpg?format=1000w",
+  "via": "curated",
+  "width": 1000
  },
  "person:michael whatley|NC|S": {
   "credit": {
@@ -16913,6 +17400,28 @@
   "via": "wikipedia",
   "width": 1591
  },
+ "person:pamela delancy|GA|H": {
+  "bytes": 213908,
+  "credit": {
+   "by": "the campaign's website (votepamdelancy.com)",
+   "page": "https://votepamdelancy.com"
+  },
+  "evidence": "the page's og:image, file name \"Candidate.png\", on the page titled \"Pamela DeLancy for Congress District 10 | Georgia\" (\"Pamela DeLancy is running for Congress District 10 in Georgia\"); the same photograph is the home page's opening background picture, file name \"candidate_90388824d65a4c65accefc4557e331ba_PD_Campaign_Photo.png\" (her initials), at 3.3 MB; this is the lighter of the two the page lists",
+  "heavy": "2125 KB, over 300 KB; shown smaller from the same file",
+  "height": 500,
+  "name": "Pamela Delancy",
+  "original": "https://content.campaignpartner.net/images/149430/Candidate.png",
+  "originalWeight": {
+   "bytes": 2125710,
+   "height": 1500,
+   "width": 1500
+  },
+  "page": "https://votepamdelancy.com",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/content.campaignpartner.net/images/149430/Candidate.png?w=500&ssl=1",
+  "via": "curated",
+  "width": 500
+ },
  "person:pamela stevenson|KY|S": {
   "credit": {
    "attribution": true,
@@ -17002,6 +17511,28 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:patrick wayne forbes|LA|H": {
+  "bytes": 45551,
+  "credit": {
+   "by": "the campaign's website (patforbes.com)",
+   "page": "https://www.patforbes.com/"
+  },
+  "evidence": "the home page's Wix image record for it: name \"Pat_Forbes_WEB_Shoot-9.jpg\", alt \"Pat Forbes smiling in park with trees in background\", on \"Pat Forbes for U.S. Congress | Louisiana | Official Campaign Site\" beside \"Meet Pat Forbes, running for US Congress in Louisiana's 6th District\"",
+  "heavy": "2048x1365px, over 1200px; shown smaller from the same file",
+  "height": 500,
+  "name": "Patrick Wayne Forbes",
+  "original": "https://static.wixstatic.com/media/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg/v1/fill/w_2048,h_1365,al_c,q_90,enc_auto/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg",
+  "originalWeight": {
+   "bytes": 190957,
+   "height": 1365,
+   "width": 2048
+  },
+  "page": "https://www.patforbes.com/",
+  "read": "2026-11-17",
+  "url": "https://static.wixstatic.com/media/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg/v1/fill/w_750,h_500,al_c,q_90,enc_auto/637d7a_8cc2a2562383408f9ba5064535a3f412~mv2.jpg",
+  "via": "curated",
+  "width": 750
+ },
  "person:patty garcia|IL|H": {
   "credit": {
    "attribution": true,
@@ -17040,9 +17571,19 @@
   "width": 1599
  },
  "person:paul barringer|NC|H": {
+  "bytes": 36322,
+  "credit": {
+   "by": "the campaign's website (paulbarringer.com)",
+   "page": "https://paulbarringer.com/"
+  },
+  "evidence": "the home page's first image, file name \"Paul-Barringer2025-12-23-6360.webp\" (srcset 400w form), above the heading \"Common sense. North Carolina values. Paul Barringer, Democrat for Congress.\"",
+  "height": 500,
   "name": "Paul Barringer",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://paulbarringer.com/",
+  "read": "2026-11-17",
+  "url": "https://paulbarringer.com/wp-content/uploads/2026/01/Paul-Barringer2025-12-23-6360-400x500.webp",
+  "via": "curated",
+  "width": 400
  },
  "person:paul dans|SC|S": {
   "name": "Paul Dans",
@@ -18338,9 +18879,26 @@
   "width": 2384
  },
  "person:ryan elijah|FL|H": {
+  "bytes": 24450,
+  "credit": {
+   "by": "the campaign's website (elijahforcongress.com)",
+   "page": "https://www.elijahforcongress.com"
+  },
+  "evidence": "the home page's first image, alt text \"Ryan Elijah, candidate for Congress in Florida's 7th District\", file name \"hero-ryan-headshot.jpg\"",
+  "heavy": "1334x1768px, over 1200px; shown smaller from the same file",
+  "height": 662,
   "name": "Ryan Elijah",
-  "url": null,
-  "via": "unresolved"
+  "original": "https://www.elijahforcongress.com/assets/img/hero-ryan-headshot.jpg",
+  "originalWeight": {
+   "bytes": 245563,
+   "height": 1768,
+   "width": 1334
+  },
+  "page": "https://www.elijahforcongress.com",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/www.elijahforcongress.com/assets/img/hero-ryan-headshot.jpg?w=500&ssl=1",
+  "via": "curated",
+  "width": 500
  },
  "person:s. marshall wilson|WV|S": {
   "name": "S. Marshall Wilson",
@@ -18607,9 +19165,42 @@
   "width": 1367
  },
  "person:scott colom|MS|S": {
+  "credit": {
+   "attribution": true,
+   "by": "The Contrarian",
+   "file": "https://commons.wikimedia.org/wiki/File:Scott_Colom_2_(cropped).png",
+   "form": 4,
+   "licence": "CC BY 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+   "nonFree": false,
+   "year": 2026
+  },
+  "evidence": "\"Scott Colom is the 2026 Democratic nominee for U.S. Senate in Mississippi\" (the file's description), File:Scott Colom 2 (cropped).png, in Category:Scott Colom and the lead image of the article Scott Colom; CC BY 4.0, author \"The Contrarian\", dated 2026-10-12, source named as the video \"Can a Democrat win in Mississippi? (w/ Scott Colom)\"",
+  "height": 684,
   "name": "Scott Colom",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://commons.wikimedia.org/wiki/File:Scott_Colom_2_(cropped).png",
+  "read": "2026-11-17",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Scott_Colom_2_%28cropped%29.png/120px-Scott_Colom_2_%28cropped%29.png"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Scott_Colom_2_%28cropped%29.png/250px-Scott_Colom_2_%28cropped%29.png"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Scott_Colom_2_%28cropped%29.png/330px-Scott_Colom_2_%28cropped%29.png"
+   ],
+   [
+    500,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Scott_Colom_2_%28cropped%29.png/500px-Scott_Colom_2_%28cropped%29.png"
+   ]
+  ],
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Scott_Colom_2_%28cropped%29.png",
+  "via": "curated",
+  "width": 502
  },
  "person:scott p. brown|NH|S": {
   "credit": {
@@ -18862,6 +19453,28 @@
   "via": "wikipedia",
   "width": 4782
  },
+ "person:shawn harris|GA|H": {
+  "bytes": 57128,
+  "credit": {
+   "by": "the campaign's website (shawnforgeorgia.com)",
+   "page": "https://www.shawnforgeorgia.com/"
+  },
+  "evidence": "alt text \"Shawn Harris seated on a porch in Georgia\", file name \"Porch-alone-side.JPG.jpg\", on the home page titled \"Shawn Harris for Georgia | Democrat for Georgia's 14th District\"",
+  "heavy": "573 KB, over 300 KB; shown smaller from the same file",
+  "height": 499,
+  "name": "Shawn Harris",
+  "original": "https://www.shawnforgeorgia.com/html/assets/photos/Porch-alone-side.JPG.jpg",
+  "originalWeight": {
+   "bytes": 573373,
+   "height": 1333,
+   "width": 2000
+  },
+  "page": "https://www.shawnforgeorgia.com/",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/www.shawnforgeorgia.com/html/assets/photos/Porch-alone-side.JPG.jpg?w=750&ssl=1",
+  "via": "curated",
+  "width": 750
+ },
  "person:shenna bellows|ME|S": {
   "credit": {
    "attribution": true,
@@ -19032,6 +19645,21 @@
   "name": "Stefany Shaheen",
   "url": null,
   "via": "unresolved"
+ },
+ "person:stephen wagley|LA|H": {
+  "bytes": 15095,
+  "credit": {
+   "by": "the campaign's website (wagleyforcongress.com)",
+   "page": "https://www.wagleyforcongress.com/"
+  },
+  "evidence": "the image's alt text \"Stephen-Wagley-Headshot-Tie.jpg\", after the heading \"Meet Stephen Wagley\" on the home page titled \"HOME | Stephen Wagley for Congress\"; the page declares it 323x484 and its static markup draws an 81x54 placeholder through Wix's own resizer (.../v1/fill/w_81,h_54,...): this is the same file through the same resizer at the declared 323x484",
+  "height": 484,
+  "name": "Stephen Wagley",
+  "page": "https://www.wagleyforcongress.com/",
+  "read": "2026-11-17",
+  "url": "https://static.wixstatic.com/media/70755c_c916a22f8a07481d8a86cc21bf72c27d~mv2.jpg/v1/fill/w_323,h_484,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/70755c_c916a22f8a07481d8a86cc21bf72c27d~mv2.jpg",
+  "via": "curated",
+  "width": 323
  },
  "person:steve marshall|AL|S": {
   "credit": {
@@ -19330,6 +19958,21 @@
   "via": "wikipedia",
   "width": 3200
  },
+ "person:tessa lynn hodge|CA|H": {
+  "bytes": 43204,
+  "credit": {
+   "by": "the campaign's website (tessaforca.com)",
+   "page": "https://www.tessaforca.com/"
+  },
+  "evidence": "the home page's opening photograph (alt text \"hero image\", the 640w rendition its srcset lists, signed by the site), directly under the site's logo (alt \"Tessa for CA\") on the page titled \"Tessa Lynn Hodge for Congress\", whose words open \"Tessa is fighting to lower the cost of living\". No alt text or caption names her: the same woman is at the centre of the About page's photographs under the heading \"About Tessa Lynn Hodge\" and \"Tessa's Story\". A person should weigh that before showing it",
+  "height": 427,
+  "name": "Tessa Lynn Hodge",
+  "page": "https://www.tessaforca.com/",
+  "read": "2026-11-17",
+  "url": "https://run.imgix.net/3d168e21-fedf-4224-a39e-27cd57192ee3/76d9d749-bb4a-445f-a579-23e30c082a3f/76d9d749-bb4a-445f-a579-23e30c082a3f.png?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C0%2C1000%2C667&auto=compress%2Cformat&fit=fillmax&w=640&q=75&s=4e1bdbad5673669dac2ae99e4bcd078e",
+  "via": "curated",
+  "width": 640
+ },
  "person:thomas edward willis ii|WV|S": {
   "name": "Thomas Edward Willis II",
   "url": null,
@@ -19536,33 +20179,26 @@
   "width": 396
  },
  "person:tom sell|TX|H": {
+  "bytes": 15258,
   "credit": {
-   "attribution": false,
-   "by": "Rep. Debbie Wasserman Schultz",
-   "file": "https://commons.wikimedia.org/wiki/File:Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_(cropped).jpg",
-   "form": 4,
-   "licence": "Public domain",
-   "licenceUrl": null,
-   "nonFree": false,
-   "year": 2026
+   "by": "the campaign's website (selltexastrue.com)",
+   "page": "https://www.selltexastrue.com/"
   },
-  "height": 232,
-  "linked": "Tom Sell",
+  "evidence": "file name \"tom-sell-cattle.jpg\" (alt text \"West Texas landscape background\"), the home page's first image, in the section \"Tom Sell for Texas\": \"West Texas is home - it's where my roots run deep\"; the page is titled \"Conservative Tom Sell - Standing Up For West Texas Values. Running for Congress\"",
+  "heavy": "1600x1067px, over 1200px; shown smaller from the same file",
+  "height": 500,
   "name": "Tom Sell",
-  "set": [
-   [
-    120,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_%28cropped%29.jpg/120px-Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_%28cropped%29.jpg"
-   ],
-   [
-    207,
-    "https://upload.wikimedia.org/wikipedia/commons/c/c6/Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_%28cropped%29.jpg"
-   ]
-  ],
-  "title": "Tom Sell",
-  "url": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Tom_Sell_119th-120th_Congress_Veterans_Day_tribute_%28cropped%29.jpg",
-  "via": "wikipedia",
-  "width": 207
+  "original": "https://www.selltexastrue.com/tom-sell-cattle.jpg",
+  "originalWeight": {
+   "bytes": 73129,
+   "height": 1067,
+   "width": 1600
+  },
+  "page": "https://www.selltexastrue.com/",
+  "read": "2026-11-17",
+  "url": "https://i0.wp.com/www.selltexastrue.com/tom-sell-cattle.jpg?w=750&ssl=1",
+  "via": "curated",
+  "width": 750
  },
  "person:tom willis|WV|S": {
   "name": "Tom Willis",
@@ -19838,6 +20474,21 @@
   "via": "wikipedia",
   "width": 1061
  },
+ "person:vincent matrisciano|NJ|H": {
+  "bytes": 65822,
+  "credit": {
+   "by": "the campaign's website (vincentmatriscianoforcongress.com)",
+   "page": "https://vincentmatriscianoforcongress.com/about/"
+  },
+  "evidence": "the About page's first photograph (file 260420-Cuppek-018..., no alt text; the srcset's 768w form, and the page's og:image), under \"About Vincent\" / \"Who is Vincent Matrisciano?\" and \"Vincent brings a career of public service and real-world problem-solving to his campaign for New Jersey's 11th Congressional District\", on \"About - Vincent Matrisciano\"",
+  "height": 832,
+  "name": "Vincent Matrisciano",
+  "page": "https://vincentmatriscianoforcongress.com/about/",
+  "read": "2026-11-17",
+  "url": "https://vincentmatriscianoforcongress.com/wp-content/uploads/2026/05/260420-Cuppek-018-scaled-e1779207272511-768x832.jpg",
+  "via": "curated",
+  "width": 768
+ },
  "person:wanda james|CO|H": {
   "name": "Wanda James",
   "url": null,
@@ -19849,9 +20500,19 @@
   "via": "unresolved"
  },
  "person:wes climer|SC|H": {
+  "bytes": 79562,
+  "credit": {
+   "by": "the campaign's website (wesclimer.com)",
+   "page": "https://wesclimer.com/about/"
+  },
+  "evidence": "the About page's only portrait, in the section headed \"Meet wes climer\", beside \"Wes Climer is a husband, father of five, business owner and public servant ... now representing York County in the State Senate\" and \"Now he's running for Congress because the job isn't done\" (srcset 768w form)",
+  "height": 925,
   "name": "Wes Climer",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://wesclimer.com/about/",
+  "read": "2026-11-17",
+  "url": "https://wesclimer.com/wp-content/uploads/2025/08/P1027884-scaled-e1756392467361-768x925.jpg",
+  "via": "curated",
+  "width": 768
  },
  "person:wesley hunt|TX|S": {
   "credit": {

@@ -462,7 +462,40 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     profile's, what a person saw (the person alone) and the day; it stands
     ahead of the automatic routes as the portrait cache's `curated` route:
     Ken Paxton, left a silhouette when the background-people sweep refused
-    his Commons photograph, shows his office's portrait this way. A ballot link
+    his Commons photograph, shows his office's portrait this way. The
+    photo sweep of 2026-11-17 (the owner's request of 2026-11-15, "lets try
+    and fill those photos and any other missing from non eliminated
+    canidates") added 43 such entries for members-elect, nominees and
+    Louisiana's qualified candidates: 42 every route had left a silhouette,
+    and Tom Sell, whose article's lead was a crop of a group tribute nobody
+    had looked at (his campaign's photograph of him alone stands ahead of
+    it, as a curated entry does): each file found by one reader on a page tied to the person (the campaign site
+    their committee filed, or one whose disclaimer names that committee
+    exactly; their legislature's page; the article their ballot page links
+    and its Commons files), re-opened and confirmed by a second who fetched
+    it again as this project (the same bytes, pixel size and sha256) and
+    measured the face on the card, and looked at again on a contact sheet.
+    A chosen file over the caps is shown smaller from the same file through
+    its host's resizer or Photon, weighed and the same shape, the entry's
+    file kept as its `original`, else as it is, and said either way
+    (`heavy`, `portraits.lighten_curated`, rule 87; twelve were, Charlie
+    Hatcher's a 4.4 MB PNG). A frame wider than tall is asked first for the
+    width that leaves the 4:5 card's crop 500 pixels of height
+    (`photos.card_tall_forms`, never over 1,200 wide; at 500 wide a 3:2
+    file left the card 266x333 pixels, soft on a phone), else at 500, and a
+    Wix rendition is drawn smaller by Wix's own service, its `/v1/fill/`
+    width and height in proportion, before Photon (`photos.host_resized`:
+    Patrick Forbes's). A chosen file is weighed as a page is
+    served it (`portraits.weigh_as_shown`): Wix sent Elizabeth Fitzgibbon's
+    24 KB AVIF as a 379 KB PNG to a request that accepted nothing in
+    particular. An entry names one file: a Commons address and a
+    description page naming two are refused (the statewide reader showed
+    the page's while its record said the address's), and so is an entry
+    whose words, tie, seen or credit quote an email address, a street
+    address or a phone number (`photos.contact_details`): the first
+    Wyoming entry quoted the home address the legislature's record and the
+    Secretary of State's list both print, to be committed and published in
+    the cache's evidence (rule 64 keeps no contact details either). A ballot link
     withheld as leading elsewhere is withheld before any portrait is taken
     from it (`enrich.withhold_links`).
     `title_is_about` rejects a resolved title that does not contain the
@@ -3421,7 +3454,32 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     pamphlet (JPEG 2000 inside PDFs) - picture a candidate none of those
     routes reaches, kept here as copies by the owner's decision of
     2026-10-25 (`kyc/guide_photos.py`, rules 24 and 101), joined on the
-    list's own words for that office. A heavy photograph is shown and said, as rule 87 says. A Commons
+    list's own words for that office. A fifth route stands behind all of
+    them (the owner's request of 2026-11-15, as rule 24's curated route is
+    for profiles): a photograph a person chose, by an evidenced
+    `overrides.STATEWIDE_PHOTOS` entry keyed on the cache's own key for the
+    candidate (`ST|office|<the list's name>`, `statewide_photos.key`), with
+    the fields and checks of a `CANDIDATE_PHOTOS` entry - the file, the page
+    naming them beside it, its words, whose it is, why that page is theirs,
+    what a person saw and measured, the day, and a seat-keyed file's seat,
+    withheld once the roster seats someone else
+    (`statewide_photos.curated_problems`). `ballotphotos` reads it as route
+    `curated` (`--curated-only` alone), weighed and shaped as every route's,
+    a Commons file credited from its own page and held to the licence test
+    but not the file-name test (a person looked at the picture, not its
+    name); `NOT_A_PORTRAIT` and `PORTRAIT_LICENCE_DOUBTS` withhold it, and so
+    does an entry that no longer names the cached file. It is shown only
+    where every route leaves the candidate none, the guide's hosted
+    photograph and the holder's office photograph included
+    (`statewide_photos.attach`, which names an entry they stand ahead of to
+    the build); `validate` fails an entry without its fields or naming a
+    refused file (`statewide-photo-curated-unevidenced`) and warns of one
+    that stands for nothing: a name no list prints, a candidate another
+    route pictures, an entry the cache has not read
+    (`stale-statewide-photo-override`). The sweep of 2026-11-17 gave it its
+    first eleven, candidates for governor every route had left a
+    silhouette, found, confirmed and looked at as rule 24's 43 were, held
+    to its one Commons file and its words free of contact details. A heavy photograph is shown and said, as rule 87 says. A Commons
     file is held to rule 82's one licence test, at the read and again at
     every build (`statewide_photos.licence_doubt`): one whose page names no
     author, public domain on an uploader's word alone ("PD-author", or no
