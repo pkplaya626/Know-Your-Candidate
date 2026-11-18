@@ -1115,7 +1115,10 @@ for the round's date. The election is found by its date, a seat by
   one, beside a December result the last read had, whether it was shown or
   set aside beside a page that named someone else: the last read stands,
   the record the result was decided on stays, and this read's counts are
-  kept beside it as `heldRead`. A round a read writes no record of for a
+  kept beside it as `heldRead`. So does a first-round file back to partial
+  counts where the last read's first round had a verdict: its record stays,
+  this read's counts beside it as `heldRead`, and any hold that stood on it
+  stands. A round a read writes no record of for a
   seat keeps the last read's record, marked with the day of the read that
   wrote it (`keptFrom`), so a later read still knows what the office had
   counted.
@@ -1136,10 +1139,15 @@ for the round's date. The election is found by its date, a seat by
   from (`keptFrom`: the read that found it, however many reads have
   concluded nothing since), so the warning stands; one failed request once
   let the call the office's counts contradicted go live, credited to
-  Wikipedia. A hold that stood on December's verdict stands while a gate
+  Wikipedia. A run whose page makes no call carries the hold too, marked
+  `pageSilentOn` and listed apart (`office-result-set-aside`, an info line,
+  not a live disagreement), and a hold clears only on a read that decides
+  the seat. A hold that stood on December's verdict stands while a gate
   holds the first round, whose counts say nothing of the runoff. With no
   read made at all, a held line says a page's call waits only while the page
-  still makes that call. A
+  still makes that call. A kept close-margin hold's line keeps the seat's
+  own reason beside this read's (`seatWhy`), and a kept disagreement the
+  page now agrees with says so (`pageAgrees`). A
   page mark the
   read refuses never takes an office result away (`carry_refused`).
 - The December round is read the same way once the office posts it, between
