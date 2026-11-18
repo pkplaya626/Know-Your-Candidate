@@ -4743,9 +4743,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     day its new term begins. Mike McGuire's California Senate seat (its
     district on the 2026 ballot; he won CA-1) would read "Member of the
     California State Senate, district 2" after December 7, when California's
-    new term begins, and Jasmeet Bains, who lost her race for CA-22, "Member of the California
-    State Assembly" for as long as Open States lists her - the legislature
-    page's own lag, copied onto profiles, governor cards and share pages.
+    new term begins, and Jasmeet Bains, who lost her race for CA-22,
+    "Member of the California State Assembly" for as long as Open States
+    lists her - the legislature page's own lag, copied onto profiles,
+    governor cards and share pages.
     Until a sourced table of each legislature's term-start day gives the
     role an end (its own branch, which serves the legislature pages' lag
     too), the limit is said: each joined legislator whose district the
