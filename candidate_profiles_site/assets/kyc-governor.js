@@ -773,6 +773,9 @@
   function applyRoute() {
     var route = KYC.router.read();
     if (route.view === "official" && owns(route.id)) {
+      // Back from a profile its "Also on this site" line opened: the
+      // profile closes first, leaving the history as it stands (rule 105).
+      if (KYC.profile && KYC.profile.isOpen()) KYC.profile.close({ routed: true });
       open(route.id, { fromRoute: true });
     } else if (isOpen()) {
       routed = true;

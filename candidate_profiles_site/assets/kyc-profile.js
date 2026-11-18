@@ -1776,8 +1776,22 @@
     return true;
   }
 
-  function close() {
-    if (dialog) dialog.close();
+  /* *opts.routed*: the address has already moved on (Back to a governor's
+   * overlay or an official's dialog, #/official/), so the dialog closes and
+   * leaves the history alone - cleared, it would step back again or rewrite
+   * the entry the reader returned to. On the grid and the map the profile
+   * opened from an overlay's "Also on this site" line stayed open under the
+   * overlay after Back (the final review of PR #267). */
+  var closingRouted = false;
+
+  function close(opts) {
+    if (!dialog) return;
+    closingRouted = !!(opts && opts.routed);
+    try {
+      dialog.close();
+    } finally {
+      closingRouted = false;
+    }
   }
 
   function isOpen() {
@@ -1794,7 +1808,7 @@
         current = null;
         waitingFor = null;
         if (baseTitle !== null) doc.title = baseTitle;
-        KYC.router.clearProfile("profile");
+        if (!closingRouted) KYC.router.clearProfile("profile");
       },
     });
 

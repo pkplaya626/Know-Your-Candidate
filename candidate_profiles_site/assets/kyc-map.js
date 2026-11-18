@@ -1301,7 +1301,12 @@
       }
       // A governor's overlay (kyc-governor.js) over the map as it stands:
       // read as a list route, it reset the mode and rewrote the address.
-      if (route.view === "official") return;
+      // A profile opened from its "Also on this site" line closes on Back to
+      // it, leaving the history as it is (rule 105).
+      if (route.view === "official") {
+        if (KYC.profile.isOpen()) KYC.profile.close({ routed: true });
+        return;
+      }
       if (KYC.profile.isOpen()) KYC.profile.close();
       var wanted = route.params.mode || "senate";
       var shape = route.params.layout === "tiles" ? "tiles" : "map";

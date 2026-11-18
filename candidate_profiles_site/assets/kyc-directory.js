@@ -2067,7 +2067,10 @@
     }
     // A governor's overlay (kyc-governor.js) opens over the list as it
     // stands: redrawing it here reset the Governors view under the dialog.
+    // A profile opened from that overlay's "Also on this site" line closes
+    // on Back to it, leaving the history as it is (rule 105).
     if (route.view === "official") {
+      if (KYC.profile.isOpen()) KYC.profile.close({ routed: true });
       if (!listDrawn) applyParams({}, { quiet: true });
       return;
     }

@@ -27679,6 +27679,45 @@ async function testAlsoLines() {
       });
       states[code].lt.also = keep;
     }
+    // Back from a profile a governor's overlay opened by its line: the
+    // overlay alone stands, the profile closed and the history left as it
+    // is. On the grid (and the map) the profile stayed open under the
+    // overlay (the final review of PR #267).
+    const listedMN = ((states.MN && states.MN.ballot2026 || {}).offices || {}).governor;
+    const candMN = listedMN && listedMN.candidates && listedMN.candidates.candidates.find((c) => c.id);
+    const target = [...everyone().values()].find((p) => p.state === "MN" && K.byId(p.id));
+    if (candMN && target) {
+      const keep = candMN.also;
+      candMN.also = [role({ id: target.id, view: "#/profile/" + target.id,
+        href: "states/mn.html#/profile/" + target.id })];
+      W.location.hash = "#/official/" + candMN.id;
+      await until(() => K.governor && K.governor.isOpen(), 3000);
+      await settle(60);
+      const alsoLink = D.querySelector("#governorModalAlso a.also-link");
+      if (alsoLink) alsoLink.click();
+      await until(() => K.profile.isOpen(), 3000);
+      await settle(60);
+      const profileHash = W.location.hash;
+      const onProfile = K.profile.isOpen() && !K.governor.isOpen() &&
+        profileHash === "#/profile/" + target.id;
+      const backs = W.__backCalls;
+      W.history.back();
+      await until(() => K.governor.isOpen() && !K.profile.isOpen(), 3000);
+      await settle(60);
+      suite("also on this site — Back from a profile an overlay's line opened (rule 105)", () => {
+        check("the overlay's line opens the profile in its place", !!alsoLink && onProfile,
+          `${!!alsoLink} ${profileHash}`);
+        check("Back leaves the overlay alone, the profile closed, at the overlay's address",
+          K.governor.isOpen() && !K.profile.isOpen() && W.location.hash === "#/official/" + candMN.id,
+          `${K.governor.isOpen()} ${K.profile.isOpen()} ${W.location.hash}`);
+        check("and the history is left as it stands: no step Back of the page's own, the page's scroll " +
+          "still held by the overlay", W.__backCalls === backs + 1 && D.body.style.overflow === "hidden",
+          `${W.__backCalls - backs} ${JSON.stringify(D.body.style.overflow)}`);
+      });
+      candMN.also = keep;
+      K.governor.close();
+      await settle(30);
+    }
   }
 
   // The share pages say the same roles in plain text (rule 96), each linked
