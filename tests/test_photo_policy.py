@@ -969,6 +969,127 @@ class TestAPersonsChoice(unittest.TestCase):
         self.assertEqual(portraits.apply_cache([q], cache), 0)
         self.assertEqual(q["photos"], ["placeholder"])
 
+    # The sweep of 2026-11-17: twelve campaign photographs chosen were over
+    # the caps (Charlie Hatcher's a 4.4 MB PNG for a 165px card).
+    HEAVY = "https://www.patdoeforcongress.com/wp-content/uploads/2026/08/doe-portrait.png"
+    PHOTON = ("https://i0.wp.com/www.patdoeforcongress.com/wp-content/uploads/2026/08/"
+              "doe-portrait.png?w=500&ssl=1")
+
+    def heavy_record(self, weigh):
+        entry = dict(self.ENTRY, url=self.HEAVY, page="https://www.patdoeforcongress.com/about",
+                     by="the campaign's website (patdoeforcongress.com)")
+        p = self.profile()
+        cache = {}
+        with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": entry},
+                                      clear=True):
+            portraits.sync_curated([p], cache)
+            record = cache[portraits.profile_key(p)]
+            record.update(bytes=4_462_079, width=2560, height=1439)
+            with unittest.mock.patch.object(portraits.time, "sleep"):
+                portraits.lighten_curated(cache, log=lambda *_: None, weigh=weigh)
+        return entry, p, cache, record
+
+    def test_a_heavy_choice_is_shown_smaller_from_the_same_file_and_said(self):
+        light = {"bytes": 121_896, "width": 500, "height": 281}
+        entry, p, cache, record = self.heavy_record(
+            lambda u: light if u == self.PHOTON else None)
+        self.assertEqual(record["url"], self.PHOTON)
+        self.assertEqual(record["original"], self.HEAVY)
+        self.assertEqual(record["originalWeight"]["bytes"], 4_462_079)
+        self.assertEqual(record["bytes"], 121_896)
+        self.assertIn("shown smaller from the same file", record["heavy"])
+        with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": entry},
+                                      clear=True):
+            # Read again, the entry's file is the record's original: kept as
+            # it was, never weighed and lightened again.
+            self.assertEqual(portraits.sync_curated([p], cache), 0)
+            self.assertEqual(cache[portraits.profile_key(p)]["url"], self.PHOTON)
+            self.assertTrue(portraits.route_ok(p, record))
+            self.assertEqual(portraits.apply_cache([p], cache), 1)
+            self.assertEqual(p["photos"][0], self.PHOTON)
+            self.assertEqual(p["photoCredit"]["by"], entry["by"])
+            self.assertEqual(validate.check_photo_evidence([p], cache), [])
+            # The heavy file a person refuses withholds its lighter form.
+            with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT,
+                                          {self.HEAVY: ("2026-11-17", "x")}):
+                q = self.profile()
+                self.assertEqual(portraits.apply_cache([q], cache), 0)
+            # A lighter form that does not say what it was made from fails.
+            del record["originalWeight"]
+            self.assertIn("note of the heavy file",
+                          validate.check_photo_evidence([p], cache)[0].detail[0])
+
+    def test_a_wide_choice_is_asked_for_a_card_of_500_pixels_high(self):
+        # At 500 wide, Charlie Hatcher's 2560x1439 file left his card's 4:5
+        # crop 224x281 pixels of picture (the sweep's review): a frame wider
+        # than tall is asked for first at the width giving it 500 of height,
+        # and only where that is over the caps at 500.
+        tall = self.PHOTON.replace("w=500", "w=890")
+        light = {"bytes": 280_000, "width": 890, "height": 500}
+        asked = []
+        _entry, _p, _cache, record = self.heavy_record(
+            lambda u: asked.append(u) or (light if u == tall else None))
+        self.assertEqual(asked[0], tall)
+        self.assertEqual(record["url"], tall)
+        self.assertEqual(record["height"], 500)
+        # Over the caps at that width, 500 wide stands.
+        fallback = {"bytes": 121_896, "width": 500, "height": 281}
+        _entry, _p, _cache, record = self.heavy_record(
+            lambda u: {"bytes": 385_000, "width": 890, "height": 500} if u == tall
+            else fallback if u == self.PHOTON else None)
+        self.assertEqual(record["url"], self.PHOTON)
+        # A portrait-shaped frame is asked for nothing taller.
+        from kyc import photos
+        self.assertEqual(photos.card_tall_forms(self.HEAVY, {"width": 900, "height": 1000}), [])
+
+    def test_a_wix_file_is_resized_by_wix(self):
+        # Patrick Forbes's chosen file is a Wix rendition, w_2048,h_1365:
+        # Wix's own service draws it smaller (rule 87: its host's resizer
+        # before Photon), at the same proportions.
+        from kyc import photos
+        wix = ("https://static.wixstatic.com/media/637d7a_a~mv2.jpg/v1/fill/w_2048,h_1365,"
+               "al_c,q_90,enc_auto/637d7a_a~mv2.jpg")
+        self.assertEqual(photos.smaller_form(wix, 500), wix.replace("w_2048,h_1365", "w_500,h_333"))
+        self.assertEqual(photos.card_tall_forms(wix, {"width": 2048, "height": 1365}),
+                         [(wix.replace("w_2048,h_1365", "w_750,h_500"), 750)])
+        # Never wider than the rendition the address draws.
+        self.assertIsNone(photos.host_resized(wix.replace("w_2048,h_1365", "w_400,h_267"), 500))
+
+    def test_a_heavy_choice_no_resizer_serves_is_shown_as_it_is_and_said(self):
+        entry, p, cache, record = self.heavy_record(lambda u: None)
+        self.assertEqual(record["url"], self.HEAVY)
+        self.assertNotIn("original", record)
+        self.assertEqual(record["heavy"], "4462 KB, over 300 KB")
+        with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": entry},
+                                      clear=True):
+            self.assertEqual(portraits.apply_cache([p], cache), 1)
+            self.assertEqual(validate.check_photo_evidence([p], cache), [])
+            # Over the caps and not said: the build names it.
+            del record["heavy"]
+            self.assertIn("note that it is over the caps",
+                          validate.check_photo_evidence([p], cache)[0].detail[0])
+
+    def test_a_choice_is_weighed_as_a_page_is_served_it(self):
+        # Wix sent Elizabeth Fitzgibbon's 24 KB AVIF as a 379 KB PNG to a
+        # request that accepted nothing in particular, and Framer Chris
+        # Gober's with no length: a chosen file is weighed as every other
+        # route weighs a photograph (official_photos.weigh).
+        from kyc import official_photos
+        cache = {"a": {"via": "curated", "url": "https://static.wixstatic.com/media/a.png"},
+                 "b": {"via": "campaign-site", "url": "https://example.com/b.jpg"}}
+        asked = []
+        with unittest.mock.patch.object(portraits.time, "sleep"), \
+                unittest.mock.patch.object(
+                    official_photos, "weigh",
+                    lambda u: (asked.append(("weigh", u)) or
+                               (True, {"bytes": 24_222, "width": 426, "height": 559}))), \
+                unittest.mock.patch.object(portraits, "measure",
+                                           lambda u: asked.append(("measure", u)) or None):
+            portraits.measure_all(cache, log=lambda *_: None)
+        self.assertIn(("weigh", "https://static.wixstatic.com/media/a.png"), asked)
+        self.assertIn(("measure", "https://example.com/b.jpg"), asked)
+        self.assertEqual(cache["a"]["bytes"], 24_222)
+
     def test_it_is_one_profile_by_id_never_a_namesake(self):
         p, namesake = self.profile("CAND_1"), self.profile("FEC_H6TX01001")
         with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": self.ENTRY}):

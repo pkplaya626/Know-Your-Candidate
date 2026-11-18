@@ -74,6 +74,46 @@ CURATED = "curated"
 # What every CANDIDATE_PHOTOS entry must say (``curated_problems``).
 CURATED_FIELDS = ("url", "page", "words", "tie", "seen", "read")
 
+# A person's contact details have no place in an entry's evidence: the
+# entry is committed and its words are published in the caches (rule 64
+# keeps no address, phone or email from a list). The Wyoming Legislature's
+# record and the Secretary of State's list both print Eric Barlow's home
+# address, and the first entry quoted it to tie the two together.
+_CONTACT = (
+    ("an email address", re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")),
+    ("a street address", re.compile(
+        r"\b\d{1,6}\s+(?:[A-Z]\s+)?(?:[A-Z][\w'.-]*\s+){1,5}"
+        r"(?:Road|Rd|Street|St|Avenue|Ave|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct|"
+        r"Way|Highway|Hwy|Place|Pl|Parkway|Pkwy|Circle|Cir|Terrace|Trail|Trl)\b")),
+    ("a phone number", re.compile(r"(?<!\d)\(?\d{3}\)?[-. ]\d{3}[-. ]\d{4}(?!\d)")),
+)
+
+
+def contact_details(text):
+    """``[kind]``: the contact details *text* holds (an email address, a
+    street address, a phone number), in the order :data:`_CONTACT` names
+    them."""
+    return [kind for kind, rx in _CONTACT if rx.search(str(text or ""))]
+
+
+def commons_name(address):
+    """The file name a Commons *address* names - an upload's (original or
+    thumbnail) or a ``/wiki/File:`` description page's - with its percent
+    escapes and underscores read as the file's own name, or ``None``."""
+    import urllib.parse
+
+    from .portraits import wikimedia_file
+
+    address = str(address or "")
+    if "/wiki/File:" in address:
+        name = address.split("/wiki/File:", 1)[1].split("#", 1)[0].split("?", 1)[0]
+    else:
+        parts = wikimedia_file(address)
+        if not parts:
+            return None
+        name = parts[3]
+    return urllib.parse.unquote(name).replace("_", " ").strip() or None
+
 
 def curated(profile):
     """The ``overrides.CANDIDATE_PHOTOS`` entry for *profile*, by its id
@@ -135,8 +175,17 @@ def curated_problems(entry, manifest=None):
     if wikimedia_file(url):
         if "commons.wikimedia.org/wiki/File:" not in page:
             out.append("a Commons file whose page is not its description page")
+        elif commons_name(url) != commons_name(page):
+            # The statewide reader shows the file its page names, and the
+            # portrait cache the one the address names: both must be one.
+            out.append(f"a Commons address ({commons_name(url)}) and description page "
+                       f"({commons_name(page)}) that name different files")
     elif not str(entry.get("by") or "").strip():
         out.append("no credit (by)")
+    for field in ("words", "tie", "seen", "by"):
+        kinds = contact_details(entry.get(field))
+        if kinds:
+            out.append(f"{' and '.join(kinds)} in its {field}, which an entry never quotes")
     return out
 
 
@@ -399,6 +448,10 @@ SMALLER_WIDTH = 500
 SMALLER_WIDTHS = (500, 330)
 PHOTON_HOSTS = ("i0.wp.com", "i1.wp.com", "i2.wp.com", "i3.wp.com")
 SQUARESPACE_WIDTHS = (100, 300, 500, 750, 1000, 1500, 2500)
+# Wix's own image service: a "/v1/fill/w_<w>,h_<h>,..." segment after the
+# upload's media id draws the upload at that size (Patrick Forbes's chosen
+# file is one, w_2048,h_1365).
+_WIX_FILL = re.compile(r"(/v1/(?:fill|fit)/)w_(\d+),h_(\d+)(?=[,/])")
 
 
 def host_resized(url, width=SMALLER_WIDTH):
@@ -423,6 +476,17 @@ def host_resized(url, width=SMALLER_WIDTH):
         query = [(k, v) for k, v in query if k != "format"] + [("format", f"{width}w")]
     elif host.endswith(".imgix.net") or host in PHOTON_HOSTS:
         query = [(k, v) for k, v in query if k not in ("w", "resize", "fit")] + [("w", str(width))]
+    elif host == "static.wixstatic.com" and parts.path.startswith("/media/"):
+        # The same rendition at the width asked, its height in proportion,
+        # so the same picture as the address drew: never wider than it.
+        match = _WIX_FILL.search(parts.path)
+        if not match or int(match.group(2)) <= width or not int(match.group(3)):
+            return None
+        height = round(width * int(match.group(3)) / int(match.group(2)))
+        path = (parts.path[:match.start()] + f"{match.group(1)}w_{width},h_{height}"
+                + parts.path[match.end():])
+        smaller = urllib.parse.urlunsplit(parts._replace(path=path))
+        return smaller if smaller != url else None
     else:
         return None
     smaller = urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(query)))
@@ -486,6 +550,24 @@ def same_shape(original, smaller):
     except (KeyError, TypeError, ZeroDivisionError):
         return False
     return smaller["width"] < original["width"] and abs(scaled - ratio) <= 0.02 * ratio
+
+
+def card_tall_forms(url, weight):
+    """``[(form, width)]``: *url* at the width that gives a frame wider than
+    tall :data:`SMALLER_WIDTH` pixels of height, for a 4:5 card that crops
+    its middle (:func:`smaller_form`), or ``[]`` for a frame no wider than
+    tall. At 500 wide a 3:2 file left the card 266x333 pixels of picture,
+    soft on a 2x or 3x screen (the photo sweep's review, 2026-11-17). Never
+    wider than :data:`MAX_PORTRAIT_PX`; weighed like any other form."""
+    try:
+        wide, tall = int(weight["width"]), int(weight["height"])
+    except (KeyError, TypeError, ValueError):
+        return []
+    if not tall or wide <= tall:
+        return []
+    width = min(MAX_PORTRAIT_PX, round(SMALLER_WIDTH * wide / tall))
+    form = smaller_form(url, width) if width > SMALLER_WIDTH else None
+    return [(form, width)] if form else []
 
 
 def lighter_form(url, weight, weigh):
