@@ -2514,6 +2514,39 @@ def check_terms_begun(root=".", today=None, payload=None):
                          f"provision here gives, while the roster names a holder who was not on "
                          f"the ballot for it: read the jurisdiction's own law into "
                          f"kyc/terms_begin.py", gaps))
+    out.extend(check_legislative_terms(payload, today))
+    return out
+
+
+def check_legislative_terms(payload, today, roster_read=None):
+    """A legislative chamber whose new term has begun by the build's day,
+    from the state's own law (kyc/legislative_terms.py), while the roster
+    this site reads (Open States) may still list members whose terms ended
+    then (``legislature-roster-behind``), and every chamber on the 2026
+    ballot whose day no provision here gives (``legislature-term-unknown``):
+    warnings, never errors (rule 8), since the page already says so on the
+    reader's day (rule 105)."""
+    from . import legislative_terms
+    if roster_read is None:
+        roster_read = (((payload or {}).get("sources") or {}).get("openstates")
+                       or ["", "", ""])[2]
+    out = []
+    behind = legislative_terms.lagging(payload, today, roster_read or "")
+    if behind:
+        out.append(Issue("warning", "legislature-roster-behind",
+                         f"{len(behind)} legislative chamber(s) whose new term has begun, by the "
+                         "state's own law, while the Open States roster may still list members "
+                         "whose terms ended then: the pages say so beside the chamber, mark the "
+                         "seats on that ballot and state no control",
+                         [words for _code, _which, words in behind]))
+    gaps = legislative_terms.unknown(payload)
+    if gaps:
+        out.append(Issue("warning", "legislature-term-unknown",
+                         f"{len(gaps)} legislative chamber(s) on the 2026 ballot whose new term's "
+                         "first day no provision here gives: read the state's own law into "
+                         "kyc/legislative_terms.py (until then no page can say when its roster "
+                         "falls behind)",
+                         [f"{code} {which}: {why}" for code, which, why in gaps]))
     return out
 
 

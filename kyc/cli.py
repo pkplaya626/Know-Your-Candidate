@@ -545,6 +545,12 @@ def _build(args):
     print(f"[ok] terms begin: {len(terms_mod.up_offices()) - len(term_gaps)} offices on the 2026 "
           f"ballot dated from their jurisdiction's own law; {len(term_gaps)} with no day: " +
           ", ".join(f"{c} {k}" for c, k, _why in term_gaps))
+    from . import legislative_terms as legterms_mod
+    leg_terms = legterms_mod.stats()
+    print(f"[ok] legislative terms begin: {leg_terms['on'] + leg_terms['by']} chambers on the "
+          f"2026 ballot dated from their state's own law ({leg_terms['on']} on a day, "
+          f"{leg_terms['by']} by a day); {leg_terms['gaps']} with no day: " +
+          ", ".join(f"{c} {w}" for c, w, _why in legterms_mod.unknown(None)))
     listed = statewide_mod.stats(statewide_mod.load(args.root))
     print(f"[ok] statewide candidates: {listed['candidates']} on the ballot and "
           f"{listed['writeIns']} write-ins for {listed['offices']} offices; "

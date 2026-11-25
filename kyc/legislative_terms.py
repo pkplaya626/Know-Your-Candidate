@@ -112,7 +112,7 @@ TERMS = {
                        "Their terms begin on the fourth Monday of the January following election "
                        "unless otherwise provided by law.",)))),),
     "AL": (_record(BOTH, DAY_AFTER,
-                   "on the day after the general election at which they are elected",
+                   "the day after the general election at which they are elected",
                    "2026-11-04", "Ala. Const. (2022) art. IV, s.46",
                    ((AL_CONST, (
                        "The terms of office of the senators and representatives shall commence on "
@@ -142,7 +142,7 @@ TERMS = {
                        "election until the Wednesday after the first Monday of the third January "
                        "next succeeding their election, and until their successors are duly "
                        "qualified.",)),)),),
-    "DE": (_record(BOTH, DAY_AFTER, "on the day next after their election",
+    "DE": (_record(BOTH, DAY_AFTER, "the day next after their election",
                    "2026-11-04", "Del. Const. art. II, s.3(e)",
                    ((DE_2, (
                        "The terms of Senators and Representatives begin on the day next after their "
@@ -155,7 +155,7 @@ TERMS = {
                        "Members of the legislature shall take office upon election.",)),),
                    note="The provision ties the term to the election and to no calendar day or "
                         "hour."),),
-    "HI": (_record(BOTH, ELECTION_DAY, "on the day of the general election at which elected",
+    "HI": (_record(BOTH, ELECTION_DAY, "the day of the general election at which elected",
                    "2026-11-03", "Haw. Const. art. III, s.4",
                    ((HI_CONST, (
                        "The term of a member of the legislature shall begin on the day of the "
@@ -263,7 +263,7 @@ TERMS = {
                        "Such legislative appointments as provided in this section shall be for a "
                        "term ending on December 31, subsequent to the next succeeding general "
                        "election.")),)),),
-    "NV": (_record(BOTH, DAY_AFTER, "from the day next after their election",
+    "NV": (_record(BOTH, DAY_AFTER, "the day next after their election",
                    "2026-11-04", "Nev. Const. art. 4, ss.3 and 4",
                    ((NV_CONST, (
                        "their term of Office shall be two years from the day next after their "

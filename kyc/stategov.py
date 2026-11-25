@@ -604,10 +604,17 @@ def holder_line(code, key, holder, terms, listed, after=False):
 def build(root="."):
     """``(payload, problems)``: what ``data/stategov.js`` holds, and every
     disagreement between the sources."""
-    from . import ballot2026, courts, executives, officers, statelegs, statewide, terms_begin
+    from . import (ballot2026, courts, executives, legislative_terms, officers, statelegs,
+                   statewide, terms_begin)
     unfit = terms_begin.problems()
     if unfit:
         raise StateGovError("kyc/terms_begin.py: " + "; ".join(unfit))
+    # The legislative chambers' days, and a person's word that a roster has
+    # caught up with one (rule 105): a table or an entry that breaks its own
+    # rules stops the build.
+    unfit = legislative_terms.problems() + legislative_terms.current_problems()
+    if unfit:
+        raise StateGovError("kyc/legislative_terms.py: " + "; ".join(unfit))
     exec_cache, leg_cache, ncsl, officer_cache = (
         executives.load_cache(root), statelegs.load_cache(root), load_ncsl(root),
         officers.load_cache(root))
@@ -761,7 +768,8 @@ def build(root="."):
                        as_of, sitting, record)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
-                                      entry["governor"]["partyKey"], problems))
+                                      entry["governor"]["partyKey"], problems,
+                                      leg_cache.get("fetched", "")[:10]))
             theirs = (ncsl["states"].get(code) or {}).get("governor", "")
             if theirs and theirs != entry["governor"]["partyKey"]:
                 problems.append(f"{code}: the NGA lists a {entry['governor']['party']} governor; "
@@ -836,13 +844,35 @@ def filled_where_vacant(code, which, ours, theirs):
     return []
 
 
-def _legislature(code, records, theirs, governor_key, problems):
+def legislative_term(code, which, roster_read):
+    """What the page needs to say, on the reader's day, that a chamber's new
+    term has begun while the roster may still list members whose terms ended
+    then (rule 105): its seats on the 2026 ballot (``upSeats``), the day the
+    term of the members elected on November 3 began (``termBegins``, from
+    kyc/legislative_terms.py; none for a gap) and whether the roster, read
+    on *roster_read*, may be behind it (``rosterBehind``: until a person
+    records it caught up). ``{}`` for a chamber not on that ballot."""
+    from . import ballot2026, legislative_terms
+    entry = (ballot2026.STATES.get(code) or {}).get(which)
+    if not entry or not entry[2]:
+        return {}
+    out = {"upSeats": entry[2]}
+    term = legislative_terms.for_page(code, which)
+    if term:
+        out["termBegins"] = term
+        out["rosterBehind"] = legislative_terms.roster_behind(code, which, term, roster_read)
+    return out
+
+
+def _legislature(code, records, theirs, governor_key, problems, roster_read=""):
     upper_seats, lower_seats = SEATS[code]
     out = {"upper": dict(chamber(records, "upper", upper_seats),
-                         title="Legislature" if code == "NE" else "Senate")}
+                         title="Legislature" if code == "NE" else "Senate",
+                         **legislative_term(code, "upper", roster_read))}
     if lower_seats:
         out["lower"] = dict(chamber(records, "lower", lower_seats),
-                            title=LOWER_CHAMBER.get(code, "House of Representatives"))
+                            title=LOWER_CHAMBER.get(code, "House of Representatives"),
+                            **legislative_term(code, "lower", roster_read))
     if code == "NE":
         out["legislature"] = "nonpartisan"
         out["trifecta"] = "nonpartisan"
