@@ -209,5 +209,52 @@ class TheRosterBehind(unittest.TestCase):
                 self.assertIn(record["kind"], terms_begin.KINDS)
 
 
+class ThePipeline(unittest.TestCase):
+    def test_a_chamber_on_the_ballot_carries_its_day_and_the_roster_behind(self):
+        from kyc import stategov
+        fl = stategov.legislative_term("FL", "upper", "2026-11-17")
+        self.assertEqual(fl["upSeats"], 20)
+        self.assertEqual(fl["termBegins"]["day"], "2026-11-03")
+        self.assertTrue(fl["rosterBehind"])
+        # A gap: its seats on the ballot, and no day to say anything from.
+        ca = stategov.legislative_term("CA", "lower", "2026-11-17")
+        self.assertEqual(ca, {"upSeats": 80})
+        # A chamber not on the 2026 ballot carries nothing.
+        self.assertEqual(stategov.legislative_term("LA", "lower", "2026-11-17"), {})
+        self.assertEqual(stategov.legislative_term("KS", "upper", "2026-11-17"), {})
+
+    def test_a_person_recorded_caught_up_reads_as_caught_up(self):
+        from kyc import overrides, stategov
+        saved = dict(overrides.LEGISLATURE_ROSTERS_CURRENT)
+        try:
+            overrides.LEGISLATURE_ROSTERS_CURRENT[("FL", "upper")] = {
+                "rosterRead": "2026-11-20", "seen": "made up", "source": "https://www.flsenate.gov/",
+                "day": "2026-11-21"}
+            self.assertFalse(stategov.legislative_term("FL", "upper", "2026-11-20")["rosterBehind"])
+            self.assertTrue(stategov.legislative_term("FL", "upper", "2026-11-17")["rosterBehind"])
+        finally:
+            overrides.LEGISLATURE_ROSTERS_CURRENT.clear()
+            overrides.LEGISLATURE_ROSTERS_CURRENT.update(saved)
+
+    def test_validate_warns_never_errs(self):
+        from kyc import validate
+        payload = {"sources": {"openstates": ["Open States", "https://openstates.org/", "2026-11-17"]},
+                   "states": {"FL": {"upper": dict(title="Senate", seats=40, upSeats=20,
+                                                   rosterBehind=True,
+                                                   termBegins=L.for_page("FL", "upper"))}}}
+        before = validate.check_legislative_terms(payload, datetime.date(2026, 11, 3))
+        after = validate.check_legislative_terms(payload, datetime.date(2026, 11, 4))
+        self.assertEqual([i.code for i in before], ["legislature-term-unknown"])
+        self.assertEqual([i.code for i in after], ["legislature-roster-behind",
+                                                   "legislature-term-unknown"])
+        self.assertTrue(all(i.level == "warning" for i in after))
+        self.assertEqual(len(after[1].detail), len(L.GAPS))
+        self.assertIn("FL Senate", after[0].detail[0])
+        caught = copy.deepcopy(payload)
+        caught["states"]["FL"]["upper"]["rosterBehind"] = False
+        self.assertEqual([i.code for i in validate.check_legislative_terms(caught, datetime.date(2026, 12, 1))],
+                         ["legislature-term-unknown"])
+
+
 if __name__ == "__main__":
     unittest.main()
