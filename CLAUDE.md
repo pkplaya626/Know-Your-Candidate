@@ -4587,6 +4587,70 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     clock (none of it, and an address asking for it shows who sits) and the
     record phase (`testIncoming`).
 
+105. **A legislature's new term begins on its state's day, and a roster
+    that has not caught up is said to be behind, never shown as who sits.**
+    The legislators this site shows - the legislature pages, the state
+    pages' chamber counts and control (rule 54), Your ballot's seats, Find
+    who represents you, the search - are Open States' (`statelegs`), which
+    seats members-elect only when it next updates, often weeks late, and
+    nothing on the site knew when any chamber's new term began. On
+    2026-11-15 the Florida Senate listed "Senator Ashley Viola Gantt" in
+    District 34 and the Florida House's 2026-2028 list held Audrey Gibson in
+    District 13, while this site, its roster read 2026-11-17, still showed
+    Shevrin Jones and Angie Nixon there as sitting: Florida's members "take
+    office upon election" (Fla. Const. art. III, s.15(d)). Alabama's,
+    Delaware's and Nevada's begin the day after the election, South
+    Carolina's House the Monday after it, Idaho's, North Dakota's and
+    Pennsylvania's on December 1, Alaska's on the third Tuesday in January
+    (AS 24.05.080, the law the constitution's "unless otherwise provided by
+    law" leaves room for), most in January. `kyc/legislative_terms.py` is
+    `kyc/terms_begin.py`'s table for every chamber `ballot2026` puts on the
+    ballot, in its shape: the provision quoted from the state's own
+    publication (never Cornell, Justia or a compilation, rules 48 and 50),
+    read as this project (rule 103) on its day, the rule counted on the
+    calendar and counted again by `check` (`("election", 0)`, the election
+    day itself, begun for certain only from the next day as a noon term is;
+    `("election", 1)`, the day after), "on" or "by" (Colorado's term begins
+    with a session that meets "no later than the second Wednesday of
+    January"); a hold-over clause gives no day; a staggered chamber's record
+    is of the seats on that ballot. The build fails on an entry without its
+    words, address or day, words that are not a quote's, a day the rule does
+    not count, a compiled host, and a chamber on the ballot with neither a
+    day nor a gap (`stategov.build`). Read 2026-11-25: 55 chambers dated (53
+    on a day, 2 by a day) and 33 gaps, each with why and the address a
+    person should read - refusals and pages drawn by script (California's
+    Cloudflare challenge, Georgia's, Indiana's, Maine's, New Hampshire's,
+    Oklahoma's Sucuri check, Tennessee's, West Virginia's timeout,
+    Arkansas's missing official copy) and provisions that name no day
+    (Arizona, Illinois, Missouri, Nebraska, South Dakota, Vermont,
+    Wisconsin, Wyoming). Nothing in Open States' records dates a member's
+    term (its people carry no dates), so a later read is no proof of a
+    caught-up one: a chamber's roster is behind (`rosterBehind`) until a
+    person records that the roster read on or after the term's day lists
+    the new term's members (`overrides.LEGISLATURE_ROSTERS_CURRENT`, with
+    what they saw, the chamber's own roster and the day; `current_problems`
+    refuses one without them or of an earlier read). From the term's first
+    certain day on the reader's calendar (rule 84), every page that shows
+    the chamber says, beside its counts and members, that members elected on
+    Nov. 3, 2026 took office then, citing the law, and that the roster this
+    site reads (Open States, read on its day) may still list members whose
+    terms ended then, and how many of its seats were on that ballot
+    (`KYC.legislatureLagText`, one implementation for the state page, the
+    legislature page, Your ballot and Find who represents you); each member
+    of a seat on that ballot is marked as listed from before the new term
+    (`KYC.legislatureSeatLag`; "may have been on" where the record names no
+    district), never as who sits now; and no majority, trifecta, coalition
+    note or map colour is stated from it (`legislatureControlWithheld`; the
+    map's Legislatures and Trifectas views draw it "not stated" in the
+    vacant grey, with a legend key). Nothing names a winner: this site reads
+    no state legislative result. `validate` warns of each chamber past its
+    day with its roster behind (`legislature-roster-behind`, eleven on
+    2026-11-25) and of every gap (`legislature-term-unknown`), never an
+    error (rule 8). The overlap cards' "Also on this site" lines
+    (`kyc/identity.py`) were not on main when this was written and are not
+    yet taught the day. Tests make the chambers they test, on four clocks
+    (`testLegislativeTerms`), and each check was undone in turn and failed.
+
 ## District maps
 
 `kyc/districts.REDRAWN` lists the states whose 2026 House map differs from
