@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3479 tests, no dependencies
+python -m unittest discover tests             # 3480 tests, no dependencies
 npm install && npm test                       # 5153 real-DOM checks (needs jsdom)
 ```
 
@@ -2607,7 +2607,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     list is the future: "Will take senior status", "Nominated to the Fifth
     Circuit" - never "Took senior status" or "Appointed to another court"
     for three district judges who were only nominees. A confirmed judge
-    with no commission is listed apart and counted nowhere. A judge's
+    with no commission is listed apart and counted nowhere on that court;
+    one confirmed from another court they still sit on is that court's
+    judge until the new commission (Anna St. John, confirmed to the Fifth
+    Circuit from the Eastern District of Louisiana in November 2026: a
+    check that asked for her name nowhere in the judges' search held every
+    refresh from 2026-11-18 to 24). A judge's
     portrait and article come only through the FJC's own canonical slug
     for their `nid` and the Wikidata item carrying it (P2736), the item's
     label and the article's title checked for the surname and its year of
