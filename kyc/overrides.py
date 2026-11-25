@@ -3808,6 +3808,20 @@ COURT_ROSTERS = {
            "Cloudflare answers a headless Chrome 'Just a moment...'."),
 }
 
+# Legislative chambers whose Open States roster a person has seen list the
+# members of the term the November 3, 2026 election chose (rule 105). Keyed
+# (state, "upper" or "lower"); each is {"rosterRead": the Open States read
+# (data/state_legislators.json's "fetched" day) the person looked at, on or
+# after the term's first certain day in kyc/legislative_terms.py; "seen":
+# what they saw, quoted - a seat on that ballot listing the member the
+# chamber's own roster names for the new term; "source": the chamber's own
+# roster they compared it with; "day": the day they looked}. Until a
+# chamber is here, every page that shows it says, once its new term has
+# begun on the reader's day, that the roster may still list members whose
+# terms ended then (kyc/legislative_terms.roster_behind): nothing in the
+# roster's own records dates a member's term.
+LEGISLATURE_ROSTERS_CURRENT = {}
+
 # Statewide officers the office's own page names, read by hand in a person's
 # browser (rule 57's way), where kyc/officers.py's own read concludes
 # nothing (rule 8; each entry records what its reader saw) - or the
