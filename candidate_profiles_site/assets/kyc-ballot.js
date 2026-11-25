@@ -1271,9 +1271,12 @@
       }
       // A chamber with no seat of the reader's up is not a contest on this
       // ballot, and is drawn as the other offices not on it are.
+      // Once the chamber's new term has begun and the roster may be behind
+      // it, said as the legislature page says it (rule 105).
       return contest("ballot-legislature" + (maybe ? "" : " ballot-off"), title, "", lead +
         (unknown ? chamberBallot(c) : "") + rows.join("") +
-        (notes.length ? '<p class="ballot-note">' + notes.join(" ") + "</p>" : ""));
+        (notes.length ? '<p class="ballot-note">' + notes.join(" ") + "</p>" : "") +
+        (maybe ? KYC.legislatureLagNote(c, (leg.sources || {}).peopleDate || "") : ""));
     });
     cards.anyUp = anyUp;
     return cards;
@@ -1767,6 +1770,8 @@
     chamberBallot: chamberBallot,
     seatBallot: seatBallot,
     seatUp: seatUp,
+    // Your ballot's cards for the reader's legislative seats.
+    legislatureCards: legislatureCards,
     // What a ballot may hold that the site does not list.
     unlisted: UNLISTED,
     dcContests: dcContests,

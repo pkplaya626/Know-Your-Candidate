@@ -4810,6 +4810,15 @@ html.has-zip .ballot-result { min-height: 100vh; }
  * 434px (TECH-07). */
 .leg-ballot { overflow-wrap: anywhere; }
 .leg-lines { font-size: var(--t-xs); color: var(--text-muted); }
+/* A chamber's new term has begun and the roster may be behind it (rule
+ * 105): said beside the counts and over the members, in the page's ink,
+ * never in a party's colour or a warning's alarm. */
+.leg-term-lag,
+.leg-seat-lag { font-size: var(--t-sm); color: var(--text); border-left: 3px solid var(--border);
+  padding-left: var(--s-2); margin: var(--s-1) 0; max-width: 70ch; overflow-wrap: anywhere; }
+.leg-term-lag a { color: var(--accent); }
+.gov-chamber .leg-term-lag { display: block; }
+.leg-row-lag { font-weight: 400; white-space: normal; }
 .gov-chamber .seat-strip { margin: var(--s-1) 0; }
 /* The picked district: outlined over every fill. */
 .region-shape.is-focus { stroke: var(--text); stroke-width: 2.4; }

@@ -171,10 +171,25 @@
 
   function districtBallot(id) { return KYC.ballot.seatBallot(current(), id); }
 
+  /** Whether either chamber's new term has begun while the roster may be
+   *  behind it (rule 105). */
+  function lagging() {
+    return !!(KYC.legislatureTermBegun(state.chambers.upper) ||
+              KYC.legislatureTermBegun(state.chambers.lower));
+  }
+
+  /** One district's members, marked as listed from before the new term
+   *  where its seat was on the ballot and the term has begun (rule 105). */
+  function seatLag(id) {
+    var c = current();
+    var words = KYC.legislatureSeatLag(c, (c.districts[id] || {}).up, state.sources.peopleDate);
+    return words ? '<p class="leg-seat-lag">' + KYC.escapeHtml(words) + "</p>" : "";
+  }
+
   function showDistrict(id) {
     var people = current().members[id] || [];
     el("legPanelTitle").textContent = current().title + " district " + districtName(id);
-    el("legPanelBody").innerHTML = (people.length
+    el("legPanelBody").innerHTML = (people.length ? seatLag(id) : "") + (people.length
       ? people.map(personCard).join("")
       : '<p class="faint">Open States lists nobody for this seat. It may be vacant, or the record ' +
         "may be behind a special election.</p>") + districtBallot(id);
@@ -192,11 +207,15 @@
   /** Who runs the chamber, in the state page's words. */
   function holds(c) {
     var n = c.count;
+    // A majority is not stated from a roster known to be behind the new
+    // term (rule 105).
+    var withheld = KYC.legislatureControlWithheld(c);
     var text = code === "NE" ? "Elected without party labels"
+      : withheld ? withheld
       : n.majority ? PARTY[n.majority] + " majority of the seats"
       : "No party holds a majority of the seats";
     return '<p class="leg-holds">' + KYC.escapeHtml(text) +
-      (n.ncsl ? ' <span class="badge badge-warn">NCSL: ' +
+      (n.ncsl && !withheld ? ' <span class="badge badge-warn">NCSL: ' +
         KYC.escapeHtml(n.ncsl === "none" ? "no majority" : PARTY[n.ncsl] + " majority") + "</span>" : "") +
       "</p>";
   }
@@ -214,9 +233,10 @@
       "<p>" + KYC.escapeHtml(c.seats + " seats" + (c.parties.length ? ": " + partyCounts(c) : "")) +
         (missing > 0 ? KYC.escapeHtml("; " + missing + " with nobody listed") : "") + ".</p>" +
       holds(c) +
+      KYC.legislatureLagNote(c, state.sources.peopleDate) +
       // The coalition note, where the majority of seats does not run the
-      // chamber (rule 54, STATEGOV-05).
-      (state.note ? '<p class="gov-note">' + KYC.escapeHtml(state.note) + " " +
+      // chamber (rule 54, STATEGOV-05), and not over a new term's roster.
+      (state.note && !lagging() ? '<p class="gov-note">' + KYC.escapeHtml(state.note) + " " +
         link(state.noteSource, "Legislature's roster") + "</p>" : "") +
       (missing > 0 ? '<p class="faint">Open States lists nobody for ' + missing +
         (missing === 1 ? " seat" : " seats") + ". They may be vacant, or the record may be behind a special election.</p>" : "") +
@@ -248,7 +268,9 @@
         '<span class="leg-row-people">' + (people.length ? people.map(function (p) {
           return '<span class="' + ({ D: "party-d", R: "party-r", I: "party-i" }[p.partyKey] || "") + '">' +
             KYC.escapeHtml(p.name) + "</span>";
-        }).join(", ") : '<span class="faint">Nobody listed</span>') + "</span></button>";
+        }).join(", ") + (KYC.legislatureSeatLag(c, c.districts[id].up, state.sources.peopleDate)
+          ? ' <span class="badge leg-row-lag">Listed from before the new term</span>' : "")
+          : '<span class="faint">Nobody listed</span>') + "</span></button>";
     }).join("");
   }
 

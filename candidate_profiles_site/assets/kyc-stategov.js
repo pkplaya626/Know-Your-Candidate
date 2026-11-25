@@ -907,7 +907,20 @@
     } else if (mode !== "governor" && any(function (s) { return s.legislature === "disputed"; })) {
       rows.push([FILL.disputed, "Sources disagree"]);
     }
+    if ((mode === "legislature" || mode === "trifecta") && any(function (s) { return lagging(s); })) {
+      rows.push([FILL.vacant, "Not stated: a chamber's new term has begun and the roster may be behind it"]);
+    }
     return rows;
+  }
+
+  /** Whether any chamber of a state's legislature has begun its new term
+   *  on the reader's day while the roster may be behind it (rule 105). */
+  function lagging(s, now) {
+    return !!(s && (KYC.legislatureTermBegun(s.upper, now) || KYC.legislatureTermBegun(s.lower, now)));
+  }
+
+  function rosterRead() {
+    return (gd().sources.openstates || [])[2] || "";
   }
 
   function partyName(letter) {
@@ -987,6 +1000,12 @@
     if (!s.legislature) {
       return { fill: FILL.none, text: name + ": its legislature is not covered here" };
     }
+    if (lagging(s)) {
+      return { fill: FILL.vacant, text: name + ": " + (mode === "legislature" ? "which party holds the " +
+        "legislature" : "whether one party holds the governorship and the legislature") +
+        " is not stated here: the roster may still list members whose terms ended when a chamber's " +
+        "new term began" };
+    }
     if (mode === "legislature") {
       var key = s.legislature === "coalition" ? "split" : s.legislature;
       return { fill: FILL[key] || FILL.split, text: name + " legislature: " + control(s.legislature) };
@@ -1023,6 +1042,7 @@
         KYC.escapeHtml(partyName(off.party)) + "</span>";
     }
     if (!s.legislature) return '<span class="faint">Legislature not covered</span>';
+    if (lagging(s)) return "Not stated: a new term has begun";
     if (mode === "trifecta") {
       return KYC.escapeHtml(s.trifecta === "R" || s.trifecta === "D" ? PARTY[s.trifecta] + " trifecta"
         : s.trifecta === "nonpartisan" ? "Nonpartisan legislature"
@@ -1046,7 +1066,9 @@
 
   function chamberRow(c, code, mark) {
     var unlisted = c.seats - c.listed;
+    var withheld = KYC.legislatureControlWithheld(c);
     var holds = code === "NE" ? "Elected without party labels"
+      : withheld ? withheld
       : c.majority ? PARTY[c.majority] + " majority of the seats"
       : "No party holds a majority of the seats";
     return '<li class="gov-chamber">' +
@@ -1056,9 +1078,10 @@
       // One square per seat, as on the legislature page (KYC.seatStrip).
       (KYC.seatStrip ? KYC.seatStrip(c) : "") +
       '<span class="gov-chamber-holds">' + KYC.escapeHtml(holds) +
-      (c.ncsl ? ' <span class="badge badge-warn">NCSL: ' +
+      (c.ncsl && !withheld ? ' <span class="badge badge-warn">NCSL: ' +
         KYC.escapeHtml(c.ncsl === "none" ? "no majority" : PARTY[c.ncsl] + " majority") + "</span>" : "") +
-      "</span>" + (mark ? '<span class="gov-chamber-ballot">' + mark + "</span>" : "") + "</li>";
+      "</span>" + (mark ? '<span class="gov-chamber-ballot">' + mark + "</span>" : "") +
+      KYC.legislatureLagNote(c, rosterRead()) + "</li>";
   }
 
   function source(key) {
@@ -1370,11 +1393,17 @@
         chamberRow(s.upper, code, chamberMark(code, "upper")) +
         (s.lower ? chamberRow(s.lower, code, chamberMark(code, "lower")) : "") + "</ul>" +
         (KYC.seatKey ? KYC.seatKey([s.upper, s.lower]) : "");
-      if (s.note) {
+      // A coalition note is about the legislature its roster lists, and a
+      // count is not stated from a roster known to be behind a new term
+      // (rule 105).
+      if (s.note && !lagging(s)) {
         html += '<p class="gov-note">' + KYC.escapeHtml(s.note) + " " +
           link(s.noteSource, "Legislature's roster") + "</p>";
       }
-      html += '<p class="gov-trifecta">' + KYC.escapeHtml(trifectaText(s.trifecta)) + ".</p>";
+      html += '<p class="gov-trifecta">' + KYC.escapeHtml(lagging(s)
+        ? "Whether one party holds the governorship and both chambers is not stated here: the " +
+          "roster may still list members whose terms ended when a chamber's new term began"
+        : trifectaText(s.trifecta)) + ".</p>";
     }
     html += courtBlock(s.court, code) + courtBlock(s.criminalCourt, code) + federalCourtsBlock(s.federalCourts, code);
     if (opts && opts.links && s.upper) {

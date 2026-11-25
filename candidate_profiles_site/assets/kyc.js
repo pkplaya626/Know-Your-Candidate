@@ -2260,6 +2260,78 @@
     return date.getFullYear() + "-" + two(date.getMonth() + 1) + "-" + two(date.getDate());
   }
 
+  /* ------------------------------------------------ a legislature's new term */
+
+  /* The day the term of the members elected on Nov. 3, 2026 began, from the
+   * state's own law (kyc/legislative_terms.py), and the roster this site
+   * reads, Open States, which seats members-elect only when it next updates
+   * (rule 105: Florida's members "take office upon election", and on
+   * Nov. 15 the roster still held two senators' predecessors). One
+   * implementation for the state page, the map, the legislature page, Your
+   * ballot and "Find who represents you" (rule 12). *c*: a chamber's record
+   * (stategov.legislative_term's fields: termBegins, rosterBehind, upSeats,
+   * seats). The page decides on the reader's own day (rule 84). */
+  function legislatureTermBegun(c, now) {
+    var t = c && c.termBegins;
+    if (!t || !c.rosterBehind || localDay(now || new Date()) < t.from) return null;
+    return t;
+  }
+
+  /** "took office on Dec. 1, 2026", counted where the law gives a rule. */
+  function tookOfficeWords(t) {
+    return "took office " + (t.kind === "by" ? "no later than " : "on ") + dateWords(t.day) +
+      (t.counted ? ", counted from “" + t.words + "”" : "");
+  }
+
+  /** The sentence beside a chamber's counts and members once its new term
+   *  has begun and the roster may be behind it; "" otherwise. *read*: the
+   *  roster's day read. It names no one elected: this site reads no state
+   *  legislative result. */
+  function legislatureLagText(c, read, now) {
+    var t = legislatureTermBegun(c, now);
+    if (!t) return "";
+    var seats = c.upSeats === c.seats ? "all " + c.seats + " of its seats were"
+      : c.upSeats + " of its " + c.seats + " seats were";
+    return "Members elected on Nov. 3, 2026 " + tookOfficeWords(t) + " (" + t.cite + "). " +
+      "The roster this site reads (Open States, read " + dateWords(read) + ") may still list " +
+      "members whose terms ended then: " + seats + " on that ballot. This site reads no state " +
+      "legislative result, so it names no one elected.";
+  }
+
+  /** The same sentence as a paragraph, the law cited and linked. */
+  function legislatureLagNote(c, read, now) {
+    var text = legislatureLagText(c, read, now);
+    if (!text) return "";
+    var t = c.termBegins;
+    var cite = "(" + t.cite + ")";
+    var at = text.indexOf(cite);
+    return '<p class="leg-term-lag">' + escapeHtml(text.slice(0, at)) + '(<a href="' +
+      escapeAttr(t.source) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(t.cite) +
+      "</a>)" + escapeHtml(text.slice(at + cite.length)) + "</p>";
+  }
+
+  /** In place of a majority: why none is stated (rule 54 from a roster
+   *  known to be behind is no count of who governs). */
+  function legislatureControlWithheld(c, now) {
+    var t = legislatureTermBegun(c, now);
+    return t ? "Which party holds a majority is not stated here: the roster may still list members " +
+      "whose terms ended when the new term began " + (t.kind === "by" ? "no later than " : "on ") +
+      dateWords(t.day) : "";
+  }
+
+  /** One district's members, marked as the roster's listing from before
+   *  the new term, never as who sits now; "" where the seat was not on the
+   *  ballot or the term has not begun. *up*: the district's `up` (true,
+   *  false, or undefined where the state's record names no district). */
+  function legislatureSeatLag(c, up, read, now) {
+    var t = legislatureTermBegun(c, now);
+    if (!t || up === false) return "";
+    return (up ? "This seat was on the Nov. 3, 2026 ballot" : "This seat may have been on the " +
+      "Nov. 3, 2026 ballot") + ", and its new term began " + (t.kind === "by" ? "no later than " : "on ") +
+      dateWords(t.day) + ": Open States’ roster, read " + dateWords(read) + ", may still list " +
+      "the member whose term ended then.";
+  }
+
   /* --------------------------------------------------------- report a problem */
 
   /* The public repository, where a reader reports an error: an issue form
@@ -4776,6 +4848,11 @@
     resultsSourceHtml: resultsSourceHtml,
     dateWords: dateWords,
     localDay: localDay,
+    legislatureTermBegun: legislatureTermBegun,
+    legislatureLagText: legislatureLagText,
+    legislatureLagNote: legislatureLagNote,
+    legislatureControlWithheld: legislatureControlWithheld,
+    legislatureSeatLag: legislatureSeatLag,
     REPO_URL: REPO_URL,
     reportUrl: reportUrl,
     offBallot: offBallot,
