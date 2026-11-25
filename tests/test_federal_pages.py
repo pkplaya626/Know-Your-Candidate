@@ -391,7 +391,17 @@ class TestWhoSits(unittest.TestCase):
             listed = courts[row["court"]].get("pending") or []
             self.assertIn(row["name"], [p["name"] for p in listed])
             self.assertNotIn(row["name"], [j["name"] for j in courts[row["court"]]["judges"]])
-            self.assertNotIn(row["name"], [r[1] for r in search])
+            # The search lists a judge on the courts they sit on, never on the
+            # court whose commission is still awaited. A judge confirmed to a
+            # court from another they still sit on is found on that one alone:
+            # Anna St. John, confirmed to the Fifth Circuit from the Eastern
+            # District of Louisiana in November 2026, is a sitting district
+            # judge until her new commission. Asked for her name nowhere in
+            # the search, this check failed every refresh from 2026-11-18 to
+            # 2026-11-24. A judge with no other seat is found nowhere.
+            nid = str(row.get("fjc") or "").rstrip("/").rsplit("/", 1)[-1]
+            for found in [r for r in search if r[0] == f"fjc-{nid}" or r[1] == row["name"]]:
+                self.assertNotIn(row["court"], found[2], found)
 
     def test_the_hub_lists_every_vacancy_with_its_court(self):
         payload, _courts, _, _ = built()
