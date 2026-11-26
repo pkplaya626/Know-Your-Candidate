@@ -71,6 +71,9 @@
       '        <span id="profileModalCrossLink" hidden></span>',
       "      </p>",
       '      <p class="modal-meta" id="profileModalStatus" hidden></p>',
+      // The person's other roles on this site, each linked to its card
+      // (KYC.alsoHtml, rule 105).
+      '      <div class="modal-also" id="profileModalAlso" hidden></div>',
       // Whose photograph the portrait is, and on what licence (rule 87).
       '      <p class="modal-credit" id="profileModalPhotoCredit" hidden></p>',
       "    </div>",
@@ -1606,6 +1609,9 @@
 
     renderStatus(item);
     renderCrossLink(item);
+    var also = el("profileModalAlso");
+    also.innerHTML = KYC.alsoHtml(item);
+    also.hidden = !also.innerHTML;
     renderPlatform(item);
     /* A sitting member's filing for another seat is the same person: their
      * voting record and committees are the member's, not "(not a sitting
@@ -1770,8 +1776,22 @@
     return true;
   }
 
-  function close() {
-    if (dialog) dialog.close();
+  /* *opts.routed*: the address has already moved on (Back to a governor's
+   * overlay or an official's dialog, #/official/), so the dialog closes and
+   * leaves the history alone - cleared, it would step back again or rewrite
+   * the entry the reader returned to. On the grid and the map the profile
+   * opened from an overlay's "Also on this site" line stayed open under the
+   * overlay after Back (the final review of PR #267). */
+  var closingRouted = false;
+
+  function close(opts) {
+    if (!dialog) return;
+    closingRouted = !!(opts && opts.routed);
+    try {
+      dialog.close();
+    } finally {
+      closingRouted = false;
+    }
   }
 
   function isOpen() {
@@ -1788,7 +1808,7 @@
         current = null;
         waitingFor = null;
         if (baseTitle !== null) doc.title = baseTitle;
-        KYC.router.clearProfile();
+        if (!closingRouted) KYC.router.clearProfile("profile");
       },
     });
 

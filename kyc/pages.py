@@ -1852,7 +1852,9 @@ def render_legislature_page(code, host, summary=None, dates=None):
                 f"senators, each elected from a district on a nonpartisan ballot.")
         chambers = ""
     else:
-        lede = (f"The {name} Senate has {senate} members and the {lower} {house}. Pick a "
+        from .legislature import chamber_name
+        lede = (f"The {chamber_name(code, 'upper') or name + ' Senate'} has {senate} members "
+                f"and the {lower} {house}. Pick a "
                 f"district on the map to see who sits for it.")
         chambers = "\n".join([
             '                    <div class="segmented" role="group" aria-label="Chamber">',

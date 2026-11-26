@@ -13656,7 +13656,9 @@ async function testSearchAndFilters() {
     const unknown = cards().some((p) => KYC.ageOf(p) === null);
     check("and says where the unknown ages start", !unknown ||
       (!!divider && /No birthdate on record \([\d,]+\)/.test(divider.textContent)));
-    const after = [...D.querySelectorAll("#results .grid-divider ~ .card")]
+    // A card with an "Also on this site" line or a contact link is wrapped
+    // in a cell (rule 105): the cell is the divider's sibling, the card in it.
+    const after = [...D.querySelectorAll("#results .grid-divider ~ .card, #results .grid-divider ~ .card-cell > .card")]
       .map((c) => KYC.byId(c.getAttribute("data-id")));
     check("everyone after it has no age, and everyone before it one", !divider ||
       (after.length > 0 && after.every((p) => KYC.ageOf(p) === null) &&
@@ -15195,6 +15197,31 @@ async function testLongBadgesWrap() {
     await until(() => !!index.D.querySelector(".leadership-posts .badge"), 4000);
     post = index.D.querySelector(".leadership-posts .badge");
   }
+  // A candidate's badge for governor (KYC.stategov.candidateBadge: "Was on
+  // the Nov 3, 2026 ballot"), wherever it is drawn: a card in the map's
+  // governor's-race panel, and the overlay's status line and race rows. On
+  // one line it was 193px in a 167px column of a 280px phone, and the
+  // panel scrolled sideways (Minnesota's and Nebraska's, rule 44).
+  const govBadges = [];
+  for (const now of [undefined, "2026-11-13T12:00:00"]) {
+    const opts = Object.assign({ hash: "#/?state=MN&mode=governor2026", setup: (w) => phoneWidth(w, true) },
+      now ? { now } : {});
+    const gmap = await buildPage("map.html", opts);
+    await until(() => !!gmap.D.querySelector(".gcard-status .badge"), 4000);
+    gmap.D.querySelectorAll(".gcard-status .badge").forEach((el) => govBadges.push({ at: "map card", el }));
+    // And the panel head's own ("Governor's election Nov 3", beside the
+    // state's name): 2px past a 280px phone beside "Minnesota".
+    const head = gmap.D.getElementById("panelCounts");
+    if (head && head.textContent.trim()) govBadges.push({ at: "panel head", el: head });
+    const listed = ((gmap.window.kycStateGov.states.MN.ballot2026.offices.governor.candidates || {}).candidates || [])
+      .filter((p) => !p.writeIn);
+    if (listed.length) {
+      gmap.window.KYC.governor.open(listed[0].id);
+      await until(() => !gmap.D.getElementById("governorModalStatus").hidden, 4000);
+      gmap.D.querySelectorAll("#governorModalStatus .badge").forEach((el) => govBadges.push({ at: "overlay status", el }));
+      gmap.D.querySelectorAll("#governorModalBody .race-mate-meta .badge").forEach((el) => govBadges.push({ at: "overlay row", el }));
+    }
+  }
   suite("kyc.css — a badge that names an office wraps inside its line on a phone", () => {
     check("a badge is one line unless a rule says otherwise", !!base && base.ws === "nowrap", JSON.stringify(base));
     // A race's head and a card draw it while its member sits: in January
@@ -15220,6 +15247,12 @@ async function testLongBadgesWrap() {
       rowBadges.length > 0 && rowBadges.every(wraps) && rowCss,
       rowBadges.length + " badges on Florida's rows" + (rowCss ? "" : "; .race-row-main sets no minmax(0, 1fr) column") +
         "; " + rowBadges.filter((b) => !wraps(b)).map((b) => b.textContent).slice(0, 3).join(" | "));
+    const govStuck = govBadges.filter((b) => !wraps(b.el));
+    check("a candidate for governor's badge wraps, in the map's cards and panel head and the overlay's status line and rows",
+      ["map card", "panel head", "overlay status", "overlay row"].every((at) => govBadges.some((b) => b.at === at)) &&
+        govStuck.length === 0,
+      govBadges.length + " badges (" + [...new Set(govBadges.map((b) => b.at))].join(", ") + "); " +
+        govStuck.map((b) => b.at + ": " + b.el.textContent).slice(0, 3).join(" | "));
     // The rule is the test's own: a badge nothing lets wrap is caught.
     const loose = index.D.createElement("span");
     loose.className = "badge badge-neutral other-office";
@@ -24893,8 +24926,11 @@ async function testTermsBegun() {
 }
 
 async function testGovernorCards() {
+  // A profile is linked only from the "Also on this site" line, which names
+  // the person's own profile by id (rule 105); the card itself is none.
   const noProfile = (root) => !root.querySelector("[data-id]") &&
-    ![...root.querySelectorAll("a[href]")].some((a) => /#\/profile\//.test(a.getAttribute("href")));
+    ![...root.querySelectorAll("a[href]")].some((a) => /#\/profile\//.test(a.getAttribute("href")) &&
+      !a.closest(".also-line"));
   const photoProblems = (root) => [...root.querySelectorAll(".gcard")].filter((card) => {
     const img = card.querySelector("img.gov-portrait");
     const credit = card.querySelector(".gcard-credit");
@@ -24964,9 +25000,17 @@ async function testGovernorCards() {
     // their second (PR #191 review). Made: a record carrying a count.
     const saved = data.TN.governor.terms;
     data.TN.governor.terms = 1;
+    // The card's own words: its "Also on this site" line is another card's
+    // (a departed member's row says "congress-legislators ends the term on",
+    // rule 105), never a count of this governor's terms.
+    const ownWords = (c) => {
+      const who = html(sg.governorCard(c)).querySelector(".gov-who");
+      who.querySelectorAll(".also-line").forEach((n) => n.remove());
+      return who.textContent;
+    };
     check("no card counts a governor's terms, which no second source checks",
-      codes.every((c) => !/\bterms?\b/i.test(html(sg.governorCard(c)).querySelector(".gov-who").textContent)),
-      html(sg.governorCard("TN")).querySelector(".gov-who").textContent);
+      codes.every((c) => !/\bterms?\b/i.test(ownWords(c))),
+      codes.filter((c) => /\bterms?\b/i.test(ownWords(c))).map((c) => c + ": " + ownWords(c)).join(" | "));
     data.TN.governor.terms = saved;
   });
 
@@ -25278,8 +25322,11 @@ async function testGovernorCards() {
  * constructed, a market under another race's id, a governor with and
  * without an agreed date of birth and a linked record. */
 async function testGovernorOverlays() {
+  // A profile is linked only from the "Also on this site" line, which names
+  // the person's own profile by id (rule 105); the card itself is none.
   const noProfile = (root) => !root.querySelector("[data-id]") &&
-    ![...root.querySelectorAll("a[href]")].some((a) => /#\/profile\//.test(a.getAttribute("href")));
+    ![...root.querySelectorAll("a[href]")].some((a) => /#\/profile\//.test(a.getAttribute("href")) &&
+      !a.closest(".also-line"));
   const key = (window, node, k) => node.dispatchEvent(new window.KeyboardEvent("keydown", { key: k, bubbles: true }));
   const esc = (window) => window.document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   const RACE = "G-GA-2026";
@@ -26461,7 +26508,7 @@ async function testTheJanuaryPage() {
         if (sentence && shareText.indexOf(sentence) === -1) bad.share.push(`${race.id}: "${sentence}" not on its share page`);
         // Never among the seat's people: no card, no "Elected:" in its row,
         // no item in its share page's list.
-        if (section && section.querySelector('.card-grid > .card[data-id="' + p.id + '"]')) {
+        if (section && section.querySelector('.card-grid .card[data-id="' + p.id + '"]')) {
           bad.section.push(`${race.id}: ${p.name}'s card among the people`);
         }
         const groups = row ? [...row.querySelectorAll(".race-row-ballot")].map(text) : [];
@@ -27269,6 +27316,490 @@ async function testTheJanuaryWords() {
   });
 }
 
+/* ================================================================ also on this site */
+
+/* Rule 105: a person on this site in more than one role says so on every
+ * card that shows them, each other role in its own card's words, linked to
+ * that card. The roles are the pipeline's (kyc/identity.py); the checks
+ * make the records they test (a role written onto a card's record here) and
+ * walk whatever the build joined, on the campaign clock and after Election
+ * Day, as the January rehearsal runs them on its own data. */
+async function testAlsoLines() {
+  const POST = "2026-11-10T12:00:00";
+  const role = (over) => Object.assign({ kind: "profile", id: "X000000", state: "MN",
+    words: "Made-up role words", after: "Made-up past words",
+    href: "states/mn.html#/profile/X000000", view: "#/profile/X000000", share: "p/X000000.html" }, over || {});
+  const wordsOf = (r, post) => (post && r.after ? r.after : r.words) + (r.link ? " (" + r.link + ")" : "");
+  const lineText = (box) => [...box.querySelectorAll(".also-line a.also-link")].map((a) => a.textContent);
+  const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+  const people = [...everyone().values()];
+  const joinedPeople = people.filter((p) => (p.also || []).length);
+
+  for (const [clock, post] of [[CAMPAIGN_NOW, false], [POST, true]]) {
+    const when = post ? "after Election Day" : "on the campaign clock";
+    const st = await buildPage("states/mn.html", { now: clock });
+    const W = st.window, K = W.KYC, D = st.D;
+    const html = (s) => { const d = D.createElement("div"); d.innerHTML = s; return d; };
+    W.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
+    const gov = W.kycStateGov.states;
+
+    suite(`also on this site — the cards, ${when} (rule 105)`, () => {
+      check("no page errors", !st.errors.length, st.errors.join(" | "));
+      check("one helper draws the line", typeof K.alsoHtml === "function" && typeof K.alsoHref === "function");
+      // A made-up record: no role, no line; a role, its words in the clock's tense.
+      const bare = { id: "X000001", name: "Made Up", chamber: "Senate", state: "MN", officeLabel: "Senate • MN",
+        party: "Democratic", isCandidate: false, seatUp2026: false, photos: ["placeholder"] };
+      check("a record with no other role draws no line", K.alsoHtml(bare) === "" &&
+        !html(K.cards.card(bare)).querySelector(".also-line"));
+      const made = Object.assign({}, bare, { also: [role(), role({ kind: "officer", id: "MN-lt",
+        words: "Lieutenant Governor of Minnesota", after: undefined, view: undefined,
+        href: "states/mn.html#state-government" })] });
+      const box = html(K.cards.card(made));
+      check("a profile card draws each role, in the clock's tense, outside the card's button",
+        lineText(box).join("|") === [wordsOf(made.also[0], post), wordsOf(made.also[1], post)].join("|") &&
+        !box.querySelector("button .also-line") && !!box.querySelector(".card-cell > .also-line"),
+        lineText(box).join("|"));
+      const hrefs = [...box.querySelectorAll("a.also-link")].map((a) => a.getAttribute("href"));
+      check("a profile opens in place where the page has the dialog; another card at its own page",
+        hrefs[0] === "#/profile/X000000" && hrefs[1] === "../states/mn.html#state-government", hrefs.join(" "));
+      check("a candidate for governor opens in place only where this page holds their state",
+        K.alsoHref(role({ kind: "candidate", id: "gov-MN-x", view: "#/official/gov-MN-x",
+          href: "states/mn.html#/official/gov-MN-x" })) === "#/official/gov-MN-x" &&
+        K.alsoHref(role({ kind: "candidate", id: "gov-ZZ-x", state: "ZZ", view: "#/official/gov-ZZ-x",
+          href: "states/zz.html#/official/gov-ZZ-x" })) === "../states/zz.html#/official/gov-ZZ-x");
+      check("an official opens on the federal page, from a state's", K.alsoHref(role({ kind: "official",
+        id: "x-a", view: "#/official/x-a", href: "federal/index.html#/official/x-a" })) ===
+        "../federal/index.html#/official/x-a");
+      // A role's words and link label are text, never markup (rule 13).
+      const odd = "Made-up <b>role</b> & \"words\" <img src=x onerror=1>";
+      const escBox = html(K.alsoHtml({ also: [role({ words: odd, after: odd, link: "<i>x</i> & y" })] }));
+      check("a role's words are escaped, never drawn as markup",
+        lineText(escBox)[0] === odd + " (<i>x</i> & y)" && !escBox.querySelector("b, i, img"),
+        escBox.innerHTML.slice(0, 200));
+      check("a Congress biography is linked as it is", K.alsoHref(role({ kind: "departed", view: undefined,
+        href: "https://bioguide.congress.gov/search/bio/X000000", link: "Congress biography" })) ===
+        "https://bioguide.congress.gov/search/bio/X000000");
+      // A governor's or an officer's role ends on its own card's clock (the
+      // review of PR #267: "Attorney General of Texas" on Ken Paxton's
+      // dialog in January, beside the row saying the new term had begun).
+      const ending = { also: [role({ kind: "officer", id: "TX-ag", words: "Attorney General of Texas",
+        after: undefined, view: undefined, href: "states/tx.html#state-government", ends: "2027-01-01",
+        ended: "Was Attorney General of Texas, until the term the 2026 election chose began on Jan. 1, 2027" })] };
+      const at = (y, m, d) => lineText(html(K.alsoHtml(ending, { now: new Date(y, m, d, 12) }))).join("|");
+      check("an officer's role reads in office until its new term begins on the reader's day, and in the " +
+        "past tense from that day, never in the present after it",
+        at(2026, 11, 31) === "Attorney General of Texas" && at(2027, 0, 1).indexOf("Was Attorney General") === 0 &&
+        at(2027, 0, 20).indexOf("Was Attorney General") === 0, [at(2026, 11, 31), at(2027, 0, 20)].join(" / "));
+      const ends = [];
+      people.concat(Object.keys(gov).reduce((all, code) => {
+        const e = gov[code];
+        const item = ((e.ballot2026 || {}).offices || {}).governor;
+        return all.concat([e.governor, e.lt, e.ag, e.sos],
+          (item && item.candidates && item.candidates.candidates) || []);
+      }, [])).forEach((rec) => ((rec && rec.also) || []).forEach((r) => {
+        if (r.ends) ends.push([rec, r]);
+      }));
+      const notEnded = ends.filter(([rec, r]) => {
+        const late = new Date(+r.ends.slice(0, 4), +r.ends.slice(5, 7) - 1, +r.ends.slice(8, 10) + 19, 12);
+        return lineText(html(K.alsoHtml({ also: [r] }, { now: late })))[0] !== r.ended;
+      });
+      check("every role the build ends draws its ended words once its term has begun",
+        !notEnded.length && ends.every(([, r]) => /^Was /.test(r.ended)),
+        notEnded.map(([rec, r]) => rec.name + ": " + r.words).slice(0, 4).join(" | ") || `${ends.length} roles`);
+      // A write-in candidate for governor is one in their role's words as on
+      // their card's badge (KYC.stategov.candidateBadge), never "On the ...
+      // ballot", which a write-in's name is not printed on: the pipeline's
+      // words (identity.candidate_role, pinned in tests/test_identity.py)
+      // open with the badge's, on each clock.
+      const badgeText = (person) => html(K.stategov.candidateBadge(person)).textContent;
+      const writeInWords = post ? "Was a write-in candidate for Governor of Minnesota"
+        : "Write-in candidate for Governor of Minnesota";
+      const writeIns = new Set();
+      Object.keys(gov).forEach((code) => {
+        const item = ((gov[code].ballot2026 || {}).offices || {}).governor;
+        ((item && item.candidates && item.candidates.candidates) || []).forEach((c) => { if (c.writeIn && c.id) writeIns.add(c.id); });
+      });
+      const builtWriteIns = [];
+      people.forEach((p) => (p.also || []).forEach((r) => { if (r.kind === "candidate" && writeIns.has(r.id)) builtWriteIns.push(r); }));
+      check("a write-in candidate's role is in the words of their card's badge, on this clock",
+        writeInWords.indexOf(badgeText({ writeIn: true })) === 0 &&
+          wordsOf({ words: "Write-in candidate for Governor of Minnesota",
+            after: "Was a write-in candidate for Governor of Minnesota" }, post) === writeInWords &&
+          builtWriteIns.every((r) => wordsOf(r, post).indexOf(badgeText({ writeIn: true })) === 0) &&
+          badgeText({}).indexOf("ballot") !== -1 && writeInWords.indexOf("ballot") === -1,
+        badgeText({ writeIn: true }) + " / " + builtWriteIns.length + " built");
+      // The governor's card, a candidate's card and an officer's row.
+      const mn = gov.MN;
+      const keepGov = mn.governor.also;
+      mn.governor.also = [role()];
+      const govLine = lineText(html(K.stategov.governorCard("MN")));
+      mn.governor.also = keepGov;
+      check("the governor's card draws the line", govLine.indexOf(wordsOf(role(), post)) === 0, govLine.join("|"));
+      const listed = ((mn.ballot2026 || {}).offices || {}).governor;
+      const first = listed && listed.candidates && listed.candidates.candidates.find((c) => c.id);
+      if (first) {
+        const keep = first.also;
+        first.also = [role()];
+        const raceBox = html(K.stategov.governorRace("MN"));
+        first.also = keep;
+        check("a candidate's card for governor draws the line", lineText(raceBox).indexOf(wordsOf(role(), post)) !== -1,
+          lineText(raceBox).join("|"));
+      }
+      const office = ["lt", "ag", "sos"].find((k) => mn[k] && mn[k].name && !mn[k].none && !mn[k].disputed &&
+        !mn[k].unconfirmed && !mn[k].unlisted && !mn[k].vacant && !mn[k].notMember);
+      if (office) {
+        const keep = mn[office].also;
+        mn[office].also = [role({ words: "An officer's made-up role", after: undefined })];
+        const rows = html(K.stategov.render("MN"));
+        mn[office].also = keep;
+        check("an officer's row draws the line", lineText(rows).indexOf("An officer's made-up role") !== -1);
+      }
+      // Every role the build joined, drawn on its cards.
+      const govMissing = [];
+      Object.keys(gov).forEach((code) => {
+        const g = gov[code].governor;
+        if (g && (g.also || []).length) {
+          const text = lineText(html(K.stategov.governorCard(code)));
+          if (g.also.some((r) => text.indexOf(wordsOf(r, post)) === -1)) govMissing.push(code + " governor");
+        }
+        const item = ((gov[code].ballot2026 || {}).offices || {}).governor;
+        ((item && item.up && item.candidates && item.candidates.candidates) || []).forEach((c) => {
+          if (!(c.also || []).length) return;
+          const text = lineText(html(K.stategov.governorRace(code)));
+          if (c.also.some((r) => text.indexOf(wordsOf(r, post)) === -1)) govMissing.push(c.id);
+        });
+        ["lt", "ag", "sos"].forEach((k) => {
+          const o = gov[code][k];
+          if (!o || !(o.also || []).length) return;
+          const text = lineText(html(K.stategov.render(code)));
+          if (o.also.some((r) => text.indexOf(wordsOf(r, post)) === -1)) govMissing.push(code + " " + k);
+        });
+      });
+      check("every governor, candidate for governor and officer the build joined draws each role", !govMissing.length,
+        govMissing.join(" "));
+      const profMissing = joinedPeople.filter((p) => {
+        const text = lineText(html(K.cards.card(p)));
+        return p.also.some((r) => text.indexOf(wordsOf(r, post)) === -1);
+      });
+      check("every profile the build joined draws each role on its card", !profMissing.length,
+        profMissing.map((p) => p.name).slice(0, 5).join(" | "));
+      check("no role on a card is a profile's id outside the line (rule 27): governors' cards carry no data-id",
+        Object.keys(gov).every((code) => !html(K.stategov.governorCard(code) + K.stategov.governorRace(code))
+          .querySelector("[data-id]")));
+      check("the line wraps inside its own width on a phone (rule 44)",
+        /\.also-line\s*\{[^}]*overflow-wrap:\s*anywhere/.test(css) && /\.also-link\s*\{[^}]*overflow-wrap:\s*anywhere/.test(css));
+    });
+
+    // The profile dialog, and a link in it that opens a governor's overlay
+    // in its place: the profile closes without taking the reader Back.
+    const someone = K.byId((W.legislatorsData || [])[0] && W.legislatorsData[0].id) ||
+      [...D.querySelectorAll("[data-id]")].map((c) => K.byId(c.getAttribute("data-id"))).find(Boolean);
+    const listed = ((gov.MN.ballot2026 || {}).offices || {}).governor;
+    const cand = listed && listed.candidates && listed.candidates.candidates.find((c) => c.id);
+    if (someone && cand) {
+      const keep = someone.also;
+      someone.also = [role({ kind: "candidate", id: cand.id, words: "On the made-up ballot", after: undefined,
+        view: "#/official/" + cand.id, href: "states/mn.html#/official/" + cand.id })];
+      K.profile.open(someone.id);
+      await settle(60);
+      const slot = D.getElementById("profileModalAlso");
+      const shown = slot && !slot.hidden && lineText(slot).join("|");
+      const backs = W.__backCalls;
+      const link = slot && slot.querySelector("a.also-link");
+      if (link) link.click();
+      await until(() => K.governor && K.governor.isOpen(), 3000);
+      suite(`also on this site — the profile dialog, ${when} (rule 105)`, () => {
+        check("the dialog draws the line", shown === "On the made-up ballot", String(shown));
+        check("its link opens the governor's overlay in place, the profile closed, nobody sent Back",
+          K.governor.isOpen() && !K.profile.isOpen() && W.location.hash === "#/official/" + cand.id &&
+          W.__backCalls === backs, `${K.governor.isOpen()} ${K.profile.isOpen()} ${W.location.hash} ${W.__backCalls - backs}`);
+        check("the overlay draws the person's own roles", (cand.also || []).every((r) =>
+          lineText(D.getElementById("governorModalAlso")).indexOf(wordsOf(r, post)) !== -1));
+      });
+      someone.also = keep;
+      K.governor.close();
+      await settle(30);
+      // A link in a card's line goes where it says: the card's own listener
+      // does not open the card it sits on.
+      const other = [...everyone().values()].find((p) => p.state === "MN" && p.id !== someone.id && K.byId(p.id));
+      if (other) {
+        const fake = Object.assign({}, someone, { also: [role({ id: other.id, view: "#/profile/" + other.id,
+          href: "states/mn.html#/profile/" + other.id })] });
+        const holder = D.getElementById("stateContent");
+        holder.insertAdjacentHTML("beforeend", '<div id="alsoTest">' + K.cards.card(fake) + "</div>");
+        D.querySelector("#alsoTest a.also-link").click();
+        await until(() => K.profile.isOpen(), 3000);
+        await settle(60);
+        suite(`also on this site — a card's link, ${when} (rule 105)`, () => {
+          check("opens the role it names, not the card it sits on",
+            K.profile.isOpen() && W.location.hash === "#/profile/" + other.id &&
+            D.getElementById("profileModalName").textContent === other.name,
+            W.location.hash + " " + D.getElementById("profileModalName").textContent);
+        });
+        D.getElementById("alsoTest").remove();
+      }
+    }
+  }
+
+  // The federal page: a leader's card, a Cabinet officer's card, and the
+  // officials' dialog, with a role written onto the payload as it loads.
+  for (const [clock, post] of [[CAMPAIGN_NOW, false], [POST, true]]) {
+    const when = post ? "after Election Day" : "on the campaign clock";
+    const fedRole = role({ words: "A made-up profile role", after: "A made-up past role" });
+    const hub = await buildPage("federal/index.html", { now: clock, federal: (fed) => {
+      if (fed.vicePresident) { fed.vicePresident.also = [fedRole]; fed.vicePresident.congressBio = "X000009"; }
+      const office = (fed.offices || []).find((o) => o.holder);
+      if (office) office.holder.also = [fedRole];
+    } });
+    const K = hub.window.KYC, D = hub.D;
+    const vp = hub.window.kycFederal.vicePresident;
+    if (vp) {
+      K.official.open(vp.id);
+      await settle(60);
+    }
+    suite(`also on this site — the federal page and the officials' dialog, ${when} (rule 105)`, () => {
+      check("no page errors", !hub.errors.length, hub.errors.join(" | "));
+      const leader = [...D.querySelectorAll(".fed-leader")].find((c) => c.textContent.indexOf(vp.name) !== -1);
+      check("the Vice President's card draws the role and the Congress biography", !!leader &&
+        lineText(leader).indexOf(wordsOf(fedRole, post)) !== -1 &&
+        !!leader.querySelector('a[href="https://bioguide.congress.gov/search/bio/X000009"]'),
+        leader ? lineText(leader).join("|") : "no card");
+      check("a Cabinet officer's card draws it", [...D.querySelectorAll(".fed-officer")].some((c) =>
+        lineText(c).indexOf(wordsOf(fedRole, post)) !== -1));
+      check("a profile's link from the federal page goes to the person's state page",
+        [...D.querySelectorAll(".fed-leader a.also-link")].some((a) => a.getAttribute("href") ===
+          "../states/mn.html#/profile/X000000"));
+      check("on the federal page an official and a justice open in place, a court's judge at its page",
+        K.alsoHref(role({ kind: "official", id: "x-a", view: "#/official/x-a",
+          href: "federal/index.html#/official/x-a" })) === "#/official/x-a" &&
+        K.alsoHref(role({ kind: "judge", id: "fjc-1", court: "scotus", view: "#/official/fjc-1",
+          href: "federal/index.html#/official/fjc-1" })) === "#/official/fjc-1" &&
+        K.alsoHref(role({ kind: "judge", id: "fjc-2", court: "ca5", view: "#/official/fjc-2",
+          href: "courts/ca5.html#/official/fjc-2" })) === "../courts/ca5.html#/official/fjc-2");
+      const slot = D.getElementById("officialModalAlso");
+      check("the officials' dialog draws them", !!slot && !slot.hidden &&
+        lineText(slot).indexOf(wordsOf(fedRole, post)) !== -1, slot ? slot.textContent : "no slot");
+    });
+  }
+
+  // A legislator's card on the legislature page.
+  {
+    let picked = null;
+    const leg = await buildPage("legislature/tx.html", { setup: (window) => {
+      let held;
+      Object.defineProperty(window, "kycLegislature", { configurable: true, enumerable: true,
+        get() { return held; },
+        set(value) {
+          held = value;
+          const lower = ((value.TX || {}).chambers || {}).lower;
+          const key = lower && Object.keys(lower.members || {})[0];
+          if (key) {
+            picked = key;
+            const m = [].concat(lower.members[key])[0];
+            m.also = [role({ words: "A made-up candidacy", view: undefined, href: "states/tx.html#/profile/X000000" })];
+          }
+        } });
+    }, hash: "" });
+    const W = leg.window, D = leg.D;
+    if (picked) {
+      W.location.hash = "#/?chamber=lower&d=" + picked;
+      await settle(120);
+    }
+    suite("also on this site — a legislator's card (rule 105)", () => {
+      check("no page errors", !leg.errors.length, leg.errors.join(" | "));
+      const card = [...D.querySelectorAll(".leg-person")].find((c) => c.querySelector(".also-line"));
+      check("the picked district's member draws the line, linked to the other card's page", !!card &&
+        lineText(card).indexOf("A made-up candidacy") !== -1 &&
+        card.querySelector("a.also-link").getAttribute("href") === "../states/tx.html#/profile/X000000",
+        card ? card.innerHTML.slice(0, 200) : "none");
+    });
+  }
+
+  // A court's page: a judge of that court opens in place, a federal official
+  // and another court's judge at their own pages (KYC.alsoInPlace): a court
+  // page loads the officials' dialog and data/federal.js, so "the federal
+  // page" is the court attribute's absence, never the data's presence.
+  {
+    const court = await buildPage("courts/ca5.html", { hash: "" });
+    const K = court.window.KYC;
+    suite("also on this site — a court's page (rule 105)", () => {
+      check("no page errors", !court.errors.length, court.errors.join(" | "));
+      const box = court.D.getElementById("federalContent");
+      check("the page is a court's, with the dialog and the federal data",
+        !!box && box.getAttribute("data-court") === "ca5" && !!K.official && !!court.window.kycFederal);
+      check("a federal official opens on the federal page, never in place on a court's",
+        K.alsoHref(role({ kind: "official", id: "x-a", view: "#/official/x-a",
+          href: "federal/index.html#/official/x-a" })) === "../federal/index.html#/official/x-a");
+      check("a justice opens on the federal page, never in place on a court's",
+        K.alsoHref(role({ kind: "judge", id: "fjc-1", court: "scotus", view: "#/official/fjc-1",
+          href: "federal/index.html#/official/fjc-1" })) === "../federal/index.html#/official/fjc-1");
+      check("this court's judge opens in place; another court's at that court's page",
+        K.alsoHref(role({ kind: "judge", id: "fjc-2", court: "ca5", view: "#/official/fjc-2",
+          href: "courts/ca5.html#/official/fjc-2" })) === "#/official/fjc-2" &&
+        K.alsoHref(role({ kind: "judge", id: "fjc-3", court: "ca9", view: "#/official/fjc-3",
+          href: "courts/ca9.html#/official/fjc-3" })) === "../courts/ca9.html#/official/fjc-3");
+    });
+  }
+
+  // The grid's search: a former member's row names the office they hold.
+  {
+    const grid = await buildPage("index.html");
+    const W = grid.window, D = grid.D, K = W.KYC;
+    loadOfficials(W);
+    const row = (K.meta().departed || [])[0];
+    if (row) {
+      const keep = row.also;
+      row.also = [role({ kind: "official", id: "x-made", words: "A made-up federal office",
+        view: "#/official/x-made", href: "federal/index.html#/official/x-made" })];
+      typeInto(W, D, row.name);
+      await settle(250);
+      const box = D.getElementById("officialResults");
+      suite("also on this site — the search's rows (rule 105)", () => {
+        check("a former member's row draws the role, linked to the federal page", !!box && !box.hidden &&
+          [...box.querySelectorAll("a.also-link")].some((a) => a.textContent === "A made-up federal office" &&
+            a.getAttribute("href") === "federal/index.html#/official/x-made"), box ? box.textContent.slice(0, 300) : "");
+      });
+      row.also = keep;
+    }
+    // An office's answer names its holder's other roles too.
+    loadAnswers(W);
+    const states = W.kycStateGov.states;
+    const code = Object.keys(states).find((c) => states[c].lt && states[c].lt.name && !states[c].lt.none &&
+      !states[c].lt.disputed && !states[c].lt.vacant);
+    if (code) {
+      const keep = states[code].lt.also;
+      states[code].lt.also = [role({ words: "A made-up candidacy for Congress", after: undefined })];
+      typeInto(W, D, K.stateName(code) + " lieutenant governor");
+      await settle(250);
+      const answers = D.getElementById("searchAnswers");
+      suite("also on this site — the search's answers (rule 105)", () => {
+        check("an office's answer draws its holder's other roles", !!answers &&
+          lineText(answers).indexOf("A made-up candidacy for Congress") !== -1,
+          answers ? answers.textContent.slice(0, 300) : "no box");
+      });
+      states[code].lt.also = keep;
+    }
+    // Back from a profile a governor's overlay opened by its line: the
+    // overlay alone stands, the profile closed and the history left as it
+    // is. On the grid (and the map) the profile stayed open under the
+    // overlay (the final review of PR #267).
+    const listedMN = ((states.MN && states.MN.ballot2026 || {}).offices || {}).governor;
+    const candMN = listedMN && listedMN.candidates && listedMN.candidates.candidates.find((c) => c.id);
+    const target = [...everyone().values()].find((p) => p.state === "MN" && K.byId(p.id));
+    if (candMN && target) {
+      const keep = candMN.also;
+      candMN.also = [role({ id: target.id, view: "#/profile/" + target.id,
+        href: "states/mn.html#/profile/" + target.id })];
+      W.location.hash = "#/official/" + candMN.id;
+      await until(() => K.governor && K.governor.isOpen(), 3000);
+      await settle(60);
+      const alsoLink = D.querySelector("#governorModalAlso a.also-link");
+      if (alsoLink) alsoLink.click();
+      await until(() => K.profile.isOpen(), 3000);
+      await settle(60);
+      const profileHash = W.location.hash;
+      const onProfile = K.profile.isOpen() && !K.governor.isOpen() &&
+        profileHash === "#/profile/" + target.id;
+      const backs = W.__backCalls;
+      W.history.back();
+      await until(() => K.governor.isOpen() && !K.profile.isOpen(), 3000);
+      await settle(60);
+      suite("also on this site — Back from a profile an overlay's line opened (rule 105)", () => {
+        check("the overlay's line opens the profile in its place", !!alsoLink && onProfile,
+          `${!!alsoLink} ${profileHash}`);
+        check("Back leaves the overlay alone, the profile closed, at the overlay's address",
+          K.governor.isOpen() && !K.profile.isOpen() && W.location.hash === "#/official/" + candMN.id,
+          `${K.governor.isOpen()} ${K.profile.isOpen()} ${W.location.hash}`);
+        check("and the history is left as it stands: no step Back of the page's own, the page's scroll " +
+          "still held by the overlay", W.__backCalls === backs + 1 && D.body.style.overflow === "hidden",
+          `${W.__backCalls - backs} ${JSON.stringify(D.body.style.overflow)}`);
+      });
+      candMN.also = keep;
+      K.governor.close();
+      await settle(30);
+    }
+  }
+
+  // The share pages say the same roles in plain text (rule 96), each linked
+  // to its own share page, in the tense of the day the results were read.
+  // The map's Senate and House panels: a member's own row draws the line
+  // too, outside the row's button (a link cannot sit inside one), by the one
+  // helper. The Senate panel's row for Amy Klobuchar said nothing of
+  // Minnesota's list for governor, which the governor's-race panel beside
+  // it did (the re-read of PR #267).
+  for (const [clock, post] of [[CAMPAIGN_NOW, false], [POST, true]]) {
+    const when = post ? "after Election Day" : "on the campaign clock";
+    const seatedWith = (chamber) => joinedPeople.find((p) => p.chamber === chamber && !p.isCandidate &&
+      /^(?:Senate|House) • /.test(p.officeLabel || "") && !p.formerMember);
+    const asked = [];
+    for (const [mode, chamber] of [["senate", "Senate"], ["house", "House"]]) {
+      const who = seatedWith(chamber);
+      if (!who) continue;
+      const m = await buildPage("map.html", { now: clock, hash: "#/?state=" + who.state + "&mode=" + mode });
+      await until(() => !!m.D.querySelector('#mapPanel .person-row[data-id="' + who.id + '"], ' +
+        '.person-row[data-id="' + who.id + '"]'), 4000);
+      const btn = m.D.querySelector('.person-row[data-id="' + who.id + '"]');
+      const cell = btn && btn.parentElement && btn.parentElement.classList.contains("person-cell") ? btn.parentElement : null;
+      const line = cell && cell.querySelector(":scope > .also-line");
+      const want = (m.window.KYC.byId(who.id) || who).also || who.also;
+      // A made-up role on a member with none: the row draws it; and none, none.
+      const bare = [...m.D.querySelectorAll(".person-row[data-id]")].map((b) => m.window.KYC.byId(b.getAttribute("data-id")))
+        .find((p) => p && !(p.also || []).length);
+      asked.push({ mode, who, m, btn, cell, line, want, bare });
+    }
+    suite(`also on this site — the map's Senate and House panels, ${when} (rule 105)`, () => {
+      check("the data holds a sitting senator and a House member with another role here",
+        asked.length === 2, asked.map((a) => a.mode + ": " + a.who.name).join(", "));
+      asked.forEach(({ mode, who, m, btn, cell, line, want }) => {
+        check(`${mode}: no page errors`, !m.errors.length, m.errors.join(" | "));
+        check(`${mode}: ${who.name}'s own row draws the line, beside the row's button and not inside it`,
+          !!btn && !!cell && !!line && !btn.querySelector(".also-line"),
+          btn ? (cell ? (line ? "drawn: " + line.textContent.slice(0, 80) : "no line") : "the row stands alone") : "no row");
+        check(`${mode}: each role in its own card's words, in the clock's tense, linked`,
+          !!line && lineText(cell).join("|") === want.map((r) => wordsOf(r, post)).join("|") &&
+            [...line.querySelectorAll("a.also-link")].every((a) => !!a.getAttribute("href")),
+          line ? lineText(cell).join("|") : "");
+      });
+      const first = asked[0];
+      if (first && first.bare) {
+        const W = first.m.window;
+        const keep = first.bare.also;
+        first.bare.also = [role({ words: "A made-up role on the map", after: undefined })];
+        const made = W.KYC.alsoHtml(first.bare, { cls: "row-also" });
+        first.bare.also = keep;
+        const rows = first.m.D.querySelectorAll('.person-row[data-id="' + first.bare.id + '"]');
+        check("a member with no other role draws a bare row, no cell and no line",
+          [...rows].every((b) => !b.parentElement.classList.contains("person-cell")) && /made-up role/.test(made));
+      }
+    });
+  }
+
+  suite("also on this site — the share pages (rule 105)", () => {
+    const share = (file) => { try { return fs.readFileSync(path.join(SITE, file), "utf8"); } catch (e) { return ""; } };
+    const said = (text, r) => text.indexOf(">" + (r.words + (r.link ? " (" + r.link + ")" : ""))
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "<") !== -1 ||
+      (r.after && text.indexOf(">" + r.after.replace(/&/g, "&amp;") + "<") !== -1);
+    const wrong = joinedPeople.filter((p) => !p.formerMember || true).filter((p) => {
+      const text = share("p/" + p.id + ".html");
+      return text && (p.also.some((r) => !said(text, r)) || !/class="share-also"/.test(text));
+    });
+    check("every joined profile's share page names each role", !wrong.length,
+      wrong.map((p) => p.id).slice(0, 5).join(" "));
+    const sg = {};
+    new Function("window", fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"))(sg);
+    const govWrong = [];
+    Object.entries(sg.kycStateGov.states).forEach(([code, entry]) => {
+      const records = [entry.governor].concat(((((entry.ballot2026 || {}).offices || {}).governor || {}).candidates || {})
+        .candidates || []);
+      records.filter((r) => r && r.id && (r.also || []).length).forEach((r) => {
+        const text = share("o/" + r.id + ".html");
+        if (text && r.also.some((x) => !said(text, x))) govWrong.push(r.id);
+      });
+    });
+    check("every joined governor's and candidate's share page names each role", !govWrong.length, govWrong.join(" "));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
@@ -27363,6 +27894,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "share" || only === "governors") await testGovernorSharePages();
   if (!only || only === "share" || only === "january") await testTheJanuaryPage();
   if (!only || only === "january") await testTheJanuaryWords();
+  if (!only || only === "also") await testAlsoLines();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;
