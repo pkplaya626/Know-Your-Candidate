@@ -2051,15 +2051,18 @@ sitting now is among one person's cards, every governor's, officer's and
 legislator's card of theirs whose role carries no end, or one after the day
 their term began, is withheld and said in the same two lines, with the joins
 that made it, however the join came (an entry, an item, another card). A
-legislator's role has no end at all: this site records no legislature's day
-its new term begins, so the line names the seat for as long as the roster
-lists them, and a joined legislator whose district the legislature page
-marks on the 2026 ballot while another of their cards shows a 2026 run for
-another office (they may leave that seat when the chamber's new term begins:
-California's on the first Monday in December) is a warning
-(`identity-legislator-term-ending`), for a person to check each once its
-chamber's new term has begun. The role ends only when a sourced day of each
-legislature's term exists. A role opens in place
+legislator's role ends on the day its chamber's new term began, by the
+state's own law (rule 106, `kyc/legislative_terms.py`), where the member's
+district was on the 2026 ballot and no person has recorded the chamber's
+roster caught up: from that day on the reader's calendar the line reads "Was
+a member of the California State Assembly, district 32, for the term that
+ended when the new term began on Dec. 7, 2026 ...; the seat was on the Nov.
+3, 2026 ballot" (`identity.legislator_term_end`: `ends`, `endsRead`,
+`ended`), naming no winner. In a chamber whose day is a gap the line names
+the seat for as long as the roster lists them, and a joined legislator whose
+district is on that ballot while another of their cards shows a 2026 run for
+another office is a warning (`identity-legislator-term-unknown`), for a
+person to read the state's law into the table. A role opens in place
 on the page that draws its card: a federal official or a justice on the
 federal page, a judge on their court's page, known by the page's
 `#federalContent` container (`data-federal`, `data-court`). A legislator's role names the chamber by its own name where

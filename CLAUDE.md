@@ -4802,23 +4802,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     joins kept - and said in `identity-officer-roster-behind` (a
     governor's or an officer's) or `identity-legislator-roster-behind` (a
     legislator's), with the joins that made it, never also a look-alike. A
-    legislator's role has no end at all: this site records no legislature's
-    day its new term begins. Mike McGuire's California Senate seat (its
-    district on the 2026 ballot; he won CA-1) would read "Member of the
-    California State Senate, district 2" after December 7, when California's
-    new term begins, and Jasmeet Bains, who lost her race for CA-22,
-    "Member of the California State Assembly" for as long as Open States
-    lists her - the legislature page's own lag, copied onto profiles,
-    governor cards and share pages.
-    Until a sourced table of each legislature's term-start day gives the
-    role an end (its own branch, which serves the legislature pages' lag
-    too), the limit is said: each joined legislator whose district the
-    legislature page marks on the 2026 ballot (`districts[d].up`) while
-    another of their cards shows a 2026 run for another office, a filing
-    for Congress or the list for governor, is a warning
-    (`identity-legislator-term-ending`, with the chamber and district), for
-    a person to check once that chamber's new term has begun. A district
-    of more seats than one up (West Virginia's Senate) may not be theirs.
+    legislator's role had no end at all, since this site recorded no
+    legislature's day its new term begins: Mike McGuire's California Senate
+    seat (its district on the 2026 ballot; he won CA-1) would have read
+    "Member of the California State Senate, district 2" after December 7,
+    when California's new term begins, and Jasmeet Bains, who lost her race
+    for CA-22, "Member of the California State Assembly" for as long as
+    Open States lists her - the legislature page's own lag, copied onto
+    profiles, governor cards and share pages. Rule 106's table now gives it
+    one (`identity.legislator_term_end`): where the member's district was on
+    the 2026 ballot (`districts[d].up`), the chamber has a day
+    (`termBegins`) and no person has recorded its roster caught up
+    (`rosterBehind`), the role carries `ends` (the term's first certain
+    day), `endsRead` (the roster's read) and `ended`, "Was a member of the
+    California State Senate, district 2, for the term that ended when the
+    new term began on Dec. 7, 2026 ...; the seat was on the Nov. 3, 2026
+    ballot", read on the reader's day as a governor's is: it says the term
+    the roster's listing was for, never that a re-elected member left or
+    who won. Where the chamber's day is a gap the limit is said: each joined
+    legislator whose district is on that ballot while another of their
+    cards shows a 2026 run for another office, a filing for Congress or the
+    list for governor, is a warning (`identity-legislator-term-unknown`,
+    with the chamber and district; it replaced
+    `identity-legislator-term-ending`, which named every chamber's), for a
+    person to read the state's law into the table. A district of more seats
+    than one up (West Virginia's Senate) may not be theirs.
     Janet Mills's governor role keeps its gap: Maine's day is a
     `terms_begin` GAP (maine.gov answered this project's reader CloudFront's
     "Request blocked"), so her profile's "Governor of Maine" carries no end
@@ -4899,9 +4907,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     no state legislative result. `validate` warns of each chamber past its
     day with its roster behind (`legislature-roster-behind`, eleven on
     2026-11-25) and of every gap (`legislature-term-unknown`), never an
-    error (rule 8). The overlap cards' "Also on this site" lines
-    (`kyc/identity.py`, rule 105's branch) were not on main when this was
-    merged and are not yet taught the day. Tests make the chambers they
+    error (rule 8). The overlap cards' "Also on this site" lines (rule 105)
+    take the same day: a legislator's role whose seat was on that ballot
+    ends on it (`identity.legislator_term_end`, its words in the past tense
+    from then on the reader's day, naming no winner), and a joined
+    legislator in a chamber whose day is a gap is
+    `identity-legislator-term-unknown`. Tests make the chambers they
     test - a term the day after the election, one in December, a "by" day
     in January, a gap, a roster behind and one recorded caught up - on four
     clocks (`testLegislativeTerms`), and each check was undone in turn and
