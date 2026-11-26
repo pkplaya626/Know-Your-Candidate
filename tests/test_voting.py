@@ -211,7 +211,7 @@ class TestOpenedByHand(unittest.TestCase):
         with mock.patch.dict(overrides.VOTING_LINKS_BY_HAND, self.ENTRIES, clear=True):
             return (voting.for_page(cache),
                     voting.by_hand_problems(cache, today or datetime.date(2026, 10, 27)),
-                    validate.check_voting_links(cache))
+                    validate.check_voting_links(cache, today or datetime.date(2026, 10, 27)))
 
     def unknown(self, **status):
         cache = cache_of()
