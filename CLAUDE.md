@@ -4587,7 +4587,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     clock (none of it, and an address asking for it shows who sits) and the
     record phase (`testIncoming`).
 
-105. **A legislature's new term begins on its state's day, and a roster
+106. **A legislature's new term begins on its state's day, and a roster
     that has not caught up is said to be behind, never shown as who sits.**
     The legislators this site shows - the legislature pages, the state
     pages' chamber counts and control (rule 54), Your ballot's seats, Find
@@ -4601,7 +4601,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     office upon election" (Fla. Const. art. III, s.15(d)). Alabama's,
     Delaware's and Nevada's begin the day after the election, South
     Carolina's House the Monday after it, Idaho's, North Dakota's and
-    Pennsylvania's on December 1, Alaska's on the third Tuesday in January
+    Pennsylvania's on December 1, California's on the first Monday in
+    December (art. IV, s.2(a)(3)), Alaska's on the third Tuesday in January
     (AS 24.05.080, the law the constitution's "unless otherwise provided by
     law" leaves room for), most in January. `kyc/legislative_terms.py` is
     `kyc/terms_begin.py`'s table for every chamber `ballot2026` puts on the
@@ -4616,14 +4617,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     is of the seats on that ballot. The build fails on an entry without its
     words, address or day, words that are not a quote's, a day the rule does
     not count, a compiled host, and a chamber on the ballot with neither a
-    day nor a gap (`stategov.build`). Read 2026-11-25: 55 chambers dated (53
-    on a day, 2 by a day) and 33 gaps, each with why and the address a
-    person should read - refusals and pages drawn by script (California's
-    Cloudflare challenge, Georgia's, Indiana's, Maine's, New Hampshire's,
-    Oklahoma's Sucuri check, Tennessee's, West Virginia's timeout,
-    Arkansas's missing official copy) and provisions that name no day
-    (Arizona, Illinois, Missouri, Nebraska, South Dakota, Vermont,
-    Wisconsin, Wyoming). Nothing in Open States' records dates a member's
+    day nor a gap (`stategov.build`). Read 2026-11-25, and every quote found
+    again on its page by a second read that day (the PDFs through their own
+    text): 57 chambers dated (55 on a day, 2 by a day) and 31 gaps, each
+    with why and the address a person should read - refusals and pages
+    drawn by script (Georgia's Cloudflare challenge, Indiana's, Maine's,
+    New Hampshire's, Oklahoma's Sucuri check, Tennessee's, West Virginia's
+    timeout, Arkansas's missing official copy) and provisions that name no
+    day (Arizona, Illinois, Missouri, Nebraska, South Dakota, Vermont,
+    Wisconsin, Wyoming). California's leginfo answered one read and a
+    Cloudflare challenge the next. A gap is no day, and no claim either way:
+    from the day after the election its chamber says only that this site
+    has not read the day, so it cannot say whether the roster still lists
+    members whose terms have ended (`termUnknown`,
+    `KYC.legislatureTermUnknownText`, linked to the provision to read where
+    the gap names one), and its majority stands, since nothing shows the
+    roster behind. Nothing in Open States' records dates a member's
     term (its people carry no dates), so a later read is no proof of a
     caught-up one: a chamber's roster is behind (`rosterBehind`) until a
     person records that the roster read on or after the term's day lists
@@ -4647,9 +4656,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     day with its roster behind (`legislature-roster-behind`, eleven on
     2026-11-25) and of every gap (`legislature-term-unknown`), never an
     error (rule 8). The overlap cards' "Also on this site" lines
-    (`kyc/identity.py`) were not on main when this was written and are not
-    yet taught the day. Tests make the chambers they test, on four clocks
-    (`testLegislativeTerms`), and each check was undone in turn and failed.
+    (`kyc/identity.py`, rule 105's branch) were not on main when this was
+    merged and are not yet taught the day. Tests make the chambers they
+    test - a term the day after the election, one in December, a "by" day
+    in January, a gap, a roster behind and one recorded caught up - on four
+    clocks (`testLegislativeTerms`), and each check was undone in turn and
+    failed.
 
 ## District maps
 
