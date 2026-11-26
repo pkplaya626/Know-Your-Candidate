@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3577 tests, no dependencies
+python -m unittest discover tests             # 3608 tests, no dependencies
 npm install && npm test                       # 5242 real-DOM checks (needs jsdom)
 ```
 
@@ -1879,7 +1879,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     holds no race for the seat: its second reader built both and saw LA-5's
     winner read "runoff" again with nothing held or said, so December
     concludes nothing, the last read's record and its election's stand
-    (`unlistedOn`), and the seat is held (`office-result-held`). Where the
+    (`unlistedOn`), and the seat is held (`office-result-held`); a first
+    round a later dates file drops is held the same way, "where its last read
+    had them", never "yet", and a December file back to partial counts, or an
+    older one, beside a December result the last read had - shown, or set
+    aside beside a page that named someone else - leaves the last read
+    standing and the record it was decided on, this read's counts beside it
+    (`heldRead`): such a file made a call the office's December count had
+    contradicted a runoff that call merely waited on. So does a first-round
+    file back to partial counts (or held by any other gate) where the last
+    read's first round had a verdict: its full record stays, this read's
+    counts beside it as `heldRead`, and a hold that stood on it stands -
+    asked of the partial counts, a page call the full count had contradicted
+    went live wherever they led it. A round a read writes
+    no record of for a seat (no list, an older first round, a first round
+    the dates file dropped, no race for its district, a December the read
+    never reached behind a first round a gate held) keeps the last read's,
+    said to be kept and from which read (`keptFrom`): dropped, the next read
+    said "the office has posted no December count for the seat yet" of a
+    seat whose page its own December count had contradicted (the reader of
+    the fix that keeps a hold, below). Where the
     page also decides the seat and names someone else, neither is shown and
     the seat reads from the list (`office-result-disagrees`) - a page name
     that fits no filing but is the office's list name for one, as a page
@@ -1898,7 +1917,38 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     posted or passes its gates waits as well, and the office's runoff stands
     (`_december_call_waits`): called against it, LA-5 went back to the list,
     its eight first-round losers "qualified" again; a page winner the
-    December counts do not lead still disagrees. A failed page never takes
+    December counts do not lead still disagrees. A read that concludes
+    nothing for a seat the last read set the page's call aside for - the
+    office unread or none made, a round's file older than the last read's,
+    no qualified list, a December round held - keeps it set aside as that
+    read did (`_keep_last_hold`: the race and call popped, the `disagree` or
+    `pageHeld` entry kept with the day of the read it is kept from,
+    `keptFrom`, and validate naming it again); a read that itself decides
+    resets both. So does a run whose page makes no call (an editor blanked
+    the table, or its fetch failed with the office's): nothing is set aside
+    that run, but the hold is carried, from the read that found it, marked
+    `pageSilentOn`, and said apart as what it is (`office-result-set-aside`,
+    an info line), never as a live disagreement - dropped, a page silent for
+    one run and calling again on a run whose read concluded nothing let the
+    contradicted call go live with no warning, and with no list read, with
+    no line at all. A hold clears only on a read that decides the seat.
+    `keptFrom` is the day of the read that found it, through
+    any number of reads that conclude nothing, never the day of the last of
+    those. A first round a gate holds says nothing of December: a hold that
+    stood on December's verdict stands beside it, never asked of the first
+    round's counts, which led the page's December winner over the December
+    count that had contradicted the call. And with no read made, a held
+    line's clause about a page's call that waits is said only while the page
+    still makes the call (the `pageHeld` record keeps the seat's line apart,
+    `why`): kept whole, it spoke of a call the page had stopped making. A
+    kept `pageHeld` seat's line keeps the seat's own reason - the close
+    margin, as the read that held the call found it (`seatWhy`) - beside this
+    read's, which alone had dropped it; and a kept disagreement the page has
+    come to agree with says so (`pageAgrees`), its call still set aside until
+    a read concludes. PR #265's last verifier
+    made LA-1's page mark Lauren Jewett over the office's count for Scalise,
+    and the next read, ElectionDates.htm answering 403, showed her "elected",
+    credited to Wikipedia, with no warning. A failed page never takes
     an office result away, nor does a refused page mark: `carry_refused` leaves alone a race
     this read took from the office's results, or a vandal's "Peter Griffin"
     on the page would have put LA-1 back on the list and a December winner

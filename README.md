@@ -1109,7 +1109,19 @@ for the round's date. The election is found by its date, a seat by
   are kept beside them as `staleRead`. So does December, where the last read
   had its result for a seat, when a read's `ElectionDates.htm` lists no
   December election or its December file holds no race for the seat: the
-  last read's December result and record stand.
+  last read's December result and record stand. So does the first round
+  once a later `ElectionDates.htm` drops it ("where its last read had them",
+  never "yet"), and a December file back to partial counts, or an older
+  one, beside a December result the last read had, whether it was shown or
+  set aside beside a page that named someone else: the last read stands,
+  the record the result was decided on stays, and this read's counts are
+  kept beside it as `heldRead`. So does a first-round file back to partial
+  counts where the last read's first round had a verdict: its record stays,
+  this read's counts beside it as `heldRead`, and any hold that stood on it
+  stands. A round a read writes no record of for a
+  seat keeps the last read's record, marked with the day of the read that
+  wrote it (`keptFrom`), so a later read still knows what the office had
+  counted.
 - Where the page also decides a seat and names someone else, neither is
   shown: the seat reads from the list, and `office-result-disagrees` says so.
   A page name that fits no filing but is the office's list name for one
@@ -1120,6 +1132,22 @@ for the round's date. The election is found by its date, a seat by
   close margin waits for the official results (`pageHeld`). After December
   12, a page's December winner waits for the office's December count, the
   office's runoff standing meanwhile, unless the counts lead someone else. A
+  read that concludes nothing for such a seat - the office unread, a round's
+  file older than the last read's, no qualified list, a December round held -
+  keeps the page's call set aside as the last read set it aside, its
+  `disagree` or `pageHeld` entry kept with the day of the read it is kept
+  from (`keptFrom`: the read that found it, however many reads have
+  concluded nothing since), so the warning stands; one failed request once
+  let the call the office's counts contradicted go live, credited to
+  Wikipedia. A run whose page makes no call carries the hold too, marked
+  `pageSilentOn` and listed apart (`office-result-set-aside`, an info line,
+  not a live disagreement), and a hold clears only on a read that decides
+  the seat. A hold that stood on December's verdict stands while a gate
+  holds the first round, whose counts say nothing of the runoff. With no
+  read made at all, a held line says a page's call waits only while the page
+  still makes that call. A kept close-margin hold's line keeps the seat's
+  own reason beside this read's (`seatWhy`), and a kept disagreement the
+  page now agrees with says so (`pageAgrees`). A
   page mark the
   read refuses never takes an office result away (`carry_refused`).
 - The December round is read the same way once the office posts it, between
