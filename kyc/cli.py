@@ -333,7 +333,7 @@ def _build(args):
         issues.append(validate.Issue(level, code, message, detail))
     for level, code, message, detail in members_mod.problems(profiles, member_sources):
         issues.append(validate.Issue(level, code, message, detail))
-    issues.extend(validate.check_terms_begun(args.root))
+    issues.extend(validate.check_state_terms(args.root))
     departed_rows, departed_problems = _departed(args.root, snapshot, profiles)
     for level, code, message, detail in departed_problems + money_problems:
         issues.append(validate.Issue(level, code, message, detail))

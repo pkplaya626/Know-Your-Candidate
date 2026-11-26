@@ -332,7 +332,7 @@ class OnEachClock(unittest.TestCase):
         self.assertEqual(validate.check_terms_begun(today=CAMPAIGN, payload=data), [])
         issues = validate.check_terms_begun(today=JANUARY, payload=data)
         self.assertEqual([(i.level, i.code) for i in issues],
-                         [("warning", "holder-past-inauguration")])
+                         [("warn", "holder-past-inauguration")])
         self.assertEqual(len(issues[0].detail), 4)
 
     def test_the_page_sentence_waits_for_the_day_and_says_the_roster_read(self):
@@ -426,10 +426,10 @@ class OnEachClock(unittest.TestCase):
             "governor", data["states"]["EE"]["ballot2026"]["offices"]["governor"], "2027-02-01"), "")
         issues = validate.check_terms_begun(today=JANUARY, payload=data)
         self.assertEqual([(i.level, i.code) for i in issues],
-                         [("warning", "holder-past-inauguration"), ("warning", "term-day-unread")])
+                         [("warn", "holder-past-inauguration"), ("warn", "term-day-unread")])
         self.assertEqual([(i.level, i.code) for i in
                           validate.check_terms_begun(today=DECEMBER, payload=data)],
-                         [("warning", "holder-past-inauguration")])
+                         [("warn", "holder-past-inauguration")])
 
     def test_a_gap_says_what_was_read(self):
         # Oregon's constitution was readable: its gap says what it holds.
