@@ -76,7 +76,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article, and last a person's evidenced choice, `overrides.STATEWIDE_PHOTOS`); `--curated-only` reads the choices alone and changes no other photograph; `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (5225 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (5242 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2013,6 +2013,70 @@ What an agreement on office and years cannot check is checked on its own:
   3 "since 1985". A seated member whose record holds no current seat is
   reported (`history-behind`).
 
+## Also on this site
+
+A person can be on several cards here: a senator's profile and her card on
+her state's list for governor, a governor's card and his profile as a
+candidate for the Senate, a former member's row and the Vice President's
+dialog, a lieutenant governor's line and her profile as the state's Senate
+nominee, a candidate for governor's card and his seat on the legislature
+page. Every card that shows such a person says "Also on this site:" and
+names each other role in that role's own card's words, linked to that card
+(`KYC.alsoHtml`, one helper; the share pages say it in plain text). The
+joins are `kyc/identity.py`'s (rule 105):
+
+| Join | By |
+|---|---|
+| An id both records hold | A bioguide id (a member's profile, a departed member's row, a candidate's `member`, the history cache's `bioguide`, only where the entry's item is the record's own and, for a profile, was read from the article it links, else `identity-history-stale`), a Wikidata item (a record's corroborated offices, a governor's NGA cross-check, a departed member's from legislators-historical, a judge's FJC-carrying item) or an FEC candidate id - only where the two names agree (a surname in common and one form's first given name among the other's given names, in any form the records' sources write); otherwise withheld and warned (`identity-names-disagree`), as is one id on a state's card and a card of another state, a profile's or a departed row's included (`identity-states-disagree`). Every pair of an id's holders is asked. A Wikidata item joins two *profiles* only where they share a bioguide or an FEC id too; otherwise the pair is warned (`identity-item-shared`) and the item joins neither to anything until an evidenced entry says they are one person |
+| An office no id ties | A state officer's card naming the person by rule 56's test, and the person's corroborated record of offices (rule 69) holding that office open in that state - current, or in the record phase open when the record was read (`openWhenRead`) for that very office, which is then never a look-alike (its `where`, or with none the whole label naming the state in the office's slot; never a deputy's, an assistant's, an acting or the U.S. office) |
+| An evidenced entry | An `overrides.IDENTITY_JOINS` entry on both cards' keys (`same`: one person, or namesakes), with the evidence and the day (the eight of 2026-11-17 were read by this project's reader, its agents, not by a person); `behind` beside `same` says the legislator card is no current role (the legislature seats someone else), joining nothing; stale-checked (`stale-identity-join`, `identity-join-contradicted`); a profile key on an FEC id follows the filing into a member's profile. No entry copies a telephone number or a mailing address |
+| A state legislator | Rule 24's legislature join (`nominee_photos.legislator_for`) |
+
+Two records of one name in one state that nothing ties are reported
+(`identity-look-alike`) and link nothing, and so, in one line, is everyone
+who looks like a member of their own state's legislature that rule 24's
+join does not tie (`identity-legislator-look-alike`). A legislator card
+that is no current role - a winner seated in Congress since Election Day whom
+the roster still lists in the seat rule 24 tied them to, or a pair a person's
+entry marks `behind` - is said apart (`identity-legislator-roster-behind`)
+and links nothing; the very seat rule 24 tied them to is asked under every
+form of the name the record's sources write and the title of the article it
+links, so a winner Congress's record names otherwise ("Christopher M. Rabb")
+is still said. A state officer's card that still names a member of Congress
+sitting now after their seat began - its role carrying no end, or one after
+that day - is the officer roster's lag in the same way
+(`identity-officer-roster-behind`) and links nothing. And once every join is
+made, one pass asks the person as a whole: wherever a member of Congress
+sitting now is among one person's cards, every governor's, officer's and
+legislator's card of theirs whose role carries no end, or one after the day
+their term began, is withheld and said in the same two lines, with the joins
+that made it, however the join came (an entry, an item, another card). A
+legislator's role has no end at all: this site records no legislature's day
+its new term begins, so the line names the seat for as long as the roster
+lists them, and a joined legislator whose district the legislature page
+marks on the 2026 ballot while another of their cards shows a 2026 run for
+another office (they may leave that seat when the chamber's new term begins:
+California's on the first Monday in December) is a warning
+(`identity-legislator-term-ending`), for a person to check each once its
+chamber's new term has begun. The role ends only when a sourced day of each
+legislature's term exists. A role opens in place
+on the page that draws its card: a federal official or a justice on the
+federal page, a judge on their court's page, known by the page's
+`#federalContent` container (`data-federal`, `data-court`). A legislator's role names the chamber by its own name where
+its own site gives one (`legislature.CHAMBER_NAMES`: "New York State
+Assembly"), and its share link opens the district; an at-large seat is the
+site's seat words ("the U.S. House in WY-AL"). The map's Senate and House
+panels draw the line under a member's own row, outside its button. A governor's or an
+officer's role ends on its card's clock: once the term the 2026 election
+chose has begun and the roster's holder was not on the ballot for it, it
+reads its `ended` words. A governor's own entry on their
+office's list, and a member's own candidacy profile (the two profiles the
+dialog cross-links), are one card and are not named twice; any other two
+profiles of one person name each other. Each card keeps its own sources, words and photograph; the
+build's info line `identity-photo-differs` lists the people one of whose
+cards is pictured and another not, for a later decision. Nobody becomes a
+profile, and no count changes.
+
 ## Election flags and races
 
 Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
@@ -2041,6 +2105,8 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `appointed` | The record says this incumbent was appointed to the seat on the ballot. Never "re-elected" or "renominated": they were not elected to it | Florida, Ohio, Oklahoma and South Carolina's appointed senators |
 | `politicalHistory` | `{wikidata, wikipedia, rows, withheld}`: the public offices the person has held, newest first. A row is `{office, where, district, from, to, current}`; a seat in Congress adds `congress` and `terms` (`district` 0 is at large); another office adds `agree` - `year-off` where the sources differ by a year, `start` where the end year is the article's alone. `withheld` counts offices Wikidata lists that the article does not confirm. See [Public offices held](#public-offices-held) | Members, and challengers whose election page links their article |
 | `otherIds` | A curated candidate's profile id (`CAND_n`) folded into the member they became, by the FEC id Congress's record lists for them; a link or market label saved under it opens the member | Curated candidates since seated |
+| `also` | The person's other roles on this site (`kyc/identity.py`, rule 105), each `{kind, id, state, words, after, ends, endsRead, ended, href, view, share, link, court}`: `kind` is `profile`, `departed`, `official`, `judge`, `governor`, `candidate` (on the election office's list for governor), `officer` (a lieutenant governor, attorney general or secretary of state) or `legislator`; `words` the role as its own card says it, `after` from the day after Election Day where the card's words change; `ends` the first day of the term the 2026 election chose for a governor's or an officer's office whose holder was not on the ballot for it, `endsRead` the roster's day read and `ended` the words from that day ("Was Attorney General of Texas, until the term ..."); `href` that card's address from the site's root, `view` the route that opens it on a page that draws it, `share` its share page. Joined by a bioguide id, a Wikidata item or an FEC id both records hold, where their names agree; by an officer's card naming a person whose corroborated record holds that office; or by rule 24's legislature join. Never a name alone. The same field is on the governors', candidates' and officers' records in `data/stategov.js`, the federal officials' and judges' in `data/federal.js` and the courts' files, the members' in `data/legislature/*.js` and the departed members' rows in `kycBuildMeta.departed` | People in more than one role here |
+| `congressBio` | On an official's, a governor's or a candidate for governor's record: the bioguide id congress-legislators gives for the record's own Wikidata item, where their service in Congress has no card here; the cards link its Biographical Directory page | Officials and governors who served in Congress |
 
 Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:
 

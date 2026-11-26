@@ -139,6 +139,9 @@
       // (rule 87: kyc/legphotos.py).
       (p.image && p.imageCredit ? '<p class="leg-credit">' +
         KYC.photoCreditHtml(KYC.copyCredit(p.imageCredit, p.image, p.photoCopy)) + "</p>" : "") +
+      // Their other roles on this site, each linked to its card (rule 105):
+      // a member running for Congress or governor.
+      KYC.alsoHtml(p, { cls: "leg-also" }) +
       "</div></article>";
   }
 
@@ -224,7 +227,9 @@
     var c = current();
     var missing = c.seats - c.listed;
     var unplaced = state.unplaced.filter(function (p) { return p.chamber === chamber; });
-    el("legPanelTitle").textContent = state.name + " " + c.title;
+    // The chamber's own name where its own site gives one ("New York State
+    // Assembly", legislature.CHAMBER_NAMES; rule 75), else the general form.
+    el("legPanelTitle").textContent = c.name || state.name + " " + c.title;
     // A member the map cannot draw (New Hampshire's floterial seats) still
     // holds a seat and counts in the chamber's parties, as the state page
     // counts them; a non-voting tribal representative holds none of its
@@ -279,7 +284,7 @@
   function draw() {
     var c = current();
     map = KYC.regionmap.create(el("legMap"), {
-      title: state.name + " " + c.title + " districts",
+      title: (c.name || state.name + " " + c.title) + " districts",
       viewBox: state.viewBox,
       regions: c.districts,
       insets: c.insets,

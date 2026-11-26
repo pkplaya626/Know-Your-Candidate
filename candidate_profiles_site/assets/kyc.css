@@ -1229,6 +1229,34 @@ a.badge-link {
   .district-fact .card-cell .card-contact { margin-left: calc(64px + var(--s-3)); }
 }
 
+/* "Also on this site" (KYC.alsoHtml, rule 105): the person's other roles
+ * here, each linked to its card. Page text that wraps inside its line at
+ * any width (rule 44): a role's words are long ("On the Nov 3, 2026 ballot
+ * for Governor of the U.S. Virgin Islands"). */
+.also-line {
+  margin: 0;
+  font-size: var(--t-sm);
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  min-width: 0;
+  max-width: 100%;
+}
+.also-label { font-weight: 600; color: var(--text); }
+.also-link { overflow-wrap: anywhere; }
+.card-cell .card-also { padding: 0 var(--s-1); }
+/* Under a member's row in the map's state panel (kyc-map.js personRow): the
+ * row's button, then the line, in one cell no wider than the panel. */
+.person-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+  max-width: 100%;
+}
+.person-cell .row-also { padding: 0 var(--s-3) var(--s-1); }
+.official-also { display: block; margin-top: var(--s-1); }
+
 /* Public offices held (KYC.officesHeld): newest first, the years beside the
  * office, the place under it. */
 .held-list {
@@ -2598,9 +2626,17 @@ a.badge-link {
 }
 .detail-title {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--s-2);
   justify-content: space-between;
+}
+/* The panel head's badge beside the state's name ("Governor's election Nov
+ * 3" beside "Minnesota" ran 2px past a 280px phone): it wraps under the
+ * name, no wider than its line (rule 44). */
+.detail-title > .badge {
+  max-width: 100%;
+  white-space: normal;
 }
 .detail-title h2 {
   display: flex;
@@ -5076,6 +5112,19 @@ button.local-county-link {
 }
 .gcard-writein .gcard-holder { grid-template-columns: minmax(0, 1fr); }
 .gcard .gov-name { font-size: var(--t-md); overflow-wrap: anywhere; }
+/* A candidate's badge (KYC.stategov.candidateBadge: "Was on the Nov 3, 2026
+ * ballot") wraps, no wider than its line, wherever it is drawn (rule 44): a
+ * candidate's card in the map's governor's-race panel, a row of the
+ * overlay's race panel and the overlay's status line. On one line it was
+ * 193px in a 167px column of a 280px phone, and the panel scrolled
+ * sideways. */
+.gcard-status { margin: 0; min-width: 0; }
+.gcard-status .badge,
+#governorModalBody .race-mate-meta .badge,
+#governorModalStatus .badge {
+  max-width: 100%;
+  white-space: normal;
+}
 .gcard-mate { font-size: var(--t-sm); color: var(--text); }
 .gcard-credit { margin-top: var(--s-1) !important; }
 .gov-portrait-none {

@@ -91,6 +91,16 @@ class TestBuild(unittest.TestCase):
         row = self.build(rows)["members"][0]
         self.assertEqual(row["name"], "Gerry Example")
 
+    def test_the_records_own_wikidata_item_is_kept(self):
+        # The id another role of theirs is joined by (kyc/identity.py, rule 105).
+        rows = [entry("V000001", "Jay", "Example", "sen", "ZZ", "2023-01-03", "2025-01-10",
+                      klass=3)]
+        rows[0]["id"]["wikidata"] = "Q123"
+        self.assertEqual(self.build(rows)["members"][0]["wikidata"], "Q123")
+        # A record with no item gives none.
+        rows[0]["id"].pop("wikidata")
+        self.assertNotIn("wikidata", self.build(rows)["members"][0])
+
 
 class TestTheListAcrossTheChangeover(unittest.TestCase):
     """The FEC goes on flagging a departed member's filing as an incumbent's

@@ -479,7 +479,7 @@
       '<p class="fed-name">' + person(p.id, p.name) + "</p>" +
       '<p class="faint">' + esc(p.party) +
       (shared ? "" : "; since " + day(p.since) + ", term ends " + day(p.until)) +
-      "</p></div></li>";
+      "</p>" + KYC.alsoHtml(p) + KYC.congressBioHtml(p) + "</div></li>";
   }
 
   function sameTerm(a, b) {
@@ -704,7 +704,10 @@
       tenureLine(office) +
       '<p class="fed-fact"><span class="fed-fact-label">Senate vote</span> ' + senateCell(h) + "</p>" +
       '<p class="fed-fact"><span class="fed-fact-label">The office’s page</span> ' + pageCell(h) +
-      "</p>" + siteLine(office) + "</div></li>";
+      "</p>" + siteLine(office) +
+      // Their other roles on this site (rule 105), and service in Congress
+      // with no card here.
+      KYC.alsoHtml(h) + KYC.congressBioHtml(h) + "</div></li>";
   }
 
   /** The agency's own website, as USA.gov's directory lists it: always
