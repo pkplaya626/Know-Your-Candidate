@@ -24884,6 +24884,21 @@ async function testLegislativeTerms() {
         jan ? !!jl && /took office no later than Jan\. 11, 2027, counted from “the second Monday in January”/.test(jl.textContent) &&
           /99 of its 120 seats were on that ballot/.test(jl.textContent)
           : !jl, jl && jl.textContent);
+      // An "Also on this site" legislator role (kyc/identity.py
+      // legislator_term_end): its ended words from the chamber's day on the
+      // reader's own, its own words before it; never a winner's.
+      const legRole = { kind: "legislator", id: "ocd-person/1", state: "FL",
+        words: "Member of the Made House of Representatives, district 4",
+        ends: DEC.from, endsRead: READ, href: "legislature/fl.html#/?d=4",
+        share: "legislature/fl.html#/?d=4",
+        ended: "Was a member of the Made House of Representatives, district 4, for the term " +
+          "that ended when the new term began on Dec. 7, 2026; the seat was on the Nov. 3, 2026 ballot" };
+      const also = box(K.alsoHtml({ also: [legRole] })).textContent;
+      check(dec ? "a legislator's Also line reads its ended words from the chamber's day"
+        : "before the chamber's day, a legislator's Also line reads the seat's own words",
+        dec ? also.indexOf("Was a member of the Made House of Representatives, district 4, for the term that ended") !== -1
+          : also.indexOf("Member of the Made House of Representatives, district 4") !== -1 &&
+            also.indexOf("Was a member") === -1, also);
     });
 
     // The legislature page: the counts, the district panel and the rows.
