@@ -209,9 +209,9 @@ class TestOpenedByHand(unittest.TestCase):
         import datetime
         from unittest import mock
         with mock.patch.dict(overrides.VOTING_LINKS_BY_HAND, self.ENTRIES, clear=True):
-            return (voting.for_page(cache),
-                    voting.by_hand_problems(cache, today or datetime.date(2026, 10, 27)),
-                    validate.check_voting_links(cache, today or datetime.date(2026, 10, 27)))
+            day = today or datetime.date(2026, 10, 27)
+            return (voting.for_page(cache), voting.by_hand_problems(cache, day),
+                    validate.check_voting_links(cache, day))
 
     def unknown(self, **status):
         cache = cache_of()
@@ -265,9 +265,16 @@ class TestOpenedByHand(unittest.TestCase):
     def test_an_old_reading_is_reported_and_listed_unchecked_again(self):
         import datetime
         late = datetime.date(2026, 10, 26) + datetime.timedelta(days=voting.BY_HAND_DAYS + 1)
-        _, problems, _ = self.run_with(self.unknown(), late)
+        _, problems, issues = self.run_with(self.unknown(), late)
         self.assertEqual(len(problems), 2)
         self.assertTrue(all("the page no longer counts it" in p for p in problems))
+        # validate asks on the same day: listed unchecked again, and stale.
+        # It once asked on the machine's own day whatever the test gave, so
+        # the check above it held only until the 31st day after its entries.
+        unchecked = [d for i in issues if i.code == "voting-links-unchecked" for d in i.detail]
+        self.assertTrue(any(d.startswith("AZ polling") for d in unchecked))
+        self.assertTrue(any(d.startswith("NH polling") for d in unchecked))
+        self.assertIn("voting-by-hand-stale", [i.code for i in issues])
 
     def test_the_committed_entries_fit_the_links_shown(self):
         # research/by-hand-2026-10-26/NOTES.md: thirty-three opened in two
