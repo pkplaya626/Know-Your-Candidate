@@ -2146,7 +2146,7 @@ def check_registrations(profiles, field):
     return issues
 
 
-def check_voting_links(cache):
+def check_voting_links(cache, today=None):
     """Every state and D.C. has its four official voting pages.
 
     The state page tells a reader where to check their registration, find
@@ -2202,7 +2202,10 @@ def check_voting_links(cache):
     # A link a person opened by hand (overrides.VOTING_LINKS_BY_HAND) is
     # listed apart, while its reading counts; one it no longer counts is
     # listed again here and below.
-    stale_by_hand = voting.by_hand_problems(cache)
+    # The reader's day decides whether a reading by hand still counts; a test
+    # gives its own, or a check written in October fails on the 31st day
+    # after its entries (every refresh from 2026-11-26 would have).
+    stale_by_hand = voting.by_hand_problems(cache, today)
     counted = {(code, kind) for code, kinds in voting.by_hand(cache).items() for kind in kinds
                if not any(p.startswith(f"{code} {kind}: opened by hand") for p in stale_by_hand)}
     unchecked = sorted(f"{code} {kind}: {link['url']} "

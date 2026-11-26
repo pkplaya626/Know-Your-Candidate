@@ -2657,7 +2657,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     list is the future: "Will take senior status", "Nominated to the Fifth
     Circuit" - never "Took senior status" or "Appointed to another court"
     for three district judges who were only nominees. A confirmed judge
-    with no commission is listed apart and counted nowhere. A judge's
+    with no commission is listed apart and counted nowhere on that court;
+    one confirmed from another court they still sit on is that court's
+    judge until the new commission (Anna St. John, confirmed to the Fifth
+    Circuit from the Eastern District of Louisiana in November 2026: a
+    check that asked for her name nowhere in the judges' search held every
+    refresh from 2026-11-18 to 24). A judge's
     portrait and article come only through the FJC's own canonical slug
     for their `nid` and the Wikidata item carrying it (P2736), the item's
     label and the article's title checked for the surname and its year of
