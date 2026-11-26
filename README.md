@@ -2055,7 +2055,7 @@ legislator's role has no end at all: this site records no legislature's day
 its new term begins, so the line names the seat for as long as the roster
 lists them, and a joined legislator whose district the legislature page
 marks on the 2026 ballot while another of their cards shows a 2026 run for
-another office (they leave that seat when the chamber's new term begins:
+another office (they may leave that seat when the chamber's new term begins:
 California's on the first Monday in December) is a warning
 (`identity-legislator-term-ending`), for a person to check each once its
 chamber's new term has begun. The role ends only when a sourced day of each

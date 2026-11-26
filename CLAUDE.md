@@ -2576,7 +2576,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     list is the future: "Will take senior status", "Nominated to the Fifth
     Circuit" - never "Took senior status" or "Appointed to another court"
     for three district judges who were only nominees. A confirmed judge
-    with no commission is listed apart and counted nowhere. A judge's
+    with no commission is listed apart and counted nowhere on that court;
+    one confirmed from another court they still sit on is that court's
+    judge until the new commission (Anna St. John, confirmed to the Fifth
+    Circuit from the Eastern District of Louisiana in November 2026: a
+    check that asked for her name nowhere in the judges' search held every
+    refresh from 2026-11-18 to 24). A judge's
     portrait and article come only through the FJC's own canonical slug
     for their `nid` and the Wikidata item carrying it (P2736), the item's
     label and the article's title checked for the surname and its year of
@@ -4735,8 +4740,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     member. So after every join one pass asks each person holding a seat
     in Congress now (`record.seated`): every governor's, officer's and
     legislator's card of theirs whose role carries no end, or one after the
-    day their term began, is withheld - its joins undone, the rest of the
-    person still joined - and said in `identity-officer-roster-behind` (a
+    day their term began, is withheld - its joins undone, the person's other
+    joins kept - and said in `identity-officer-roster-behind` (a
     governor's or an officer's) or `identity-legislator-roster-behind` (a
     legislator's), with the joins that made it, never also a look-alike. A
     legislator's role has no end at all: this site records no legislature's

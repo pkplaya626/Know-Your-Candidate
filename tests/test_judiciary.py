@@ -143,6 +143,24 @@ class TestRecordsThatNeedReading(unittest.TestCase):
         self.assertTrue(seat["chiefUnsettled"])
         self.assertEqual(len(conflicts), 1)
 
+    def test_a_judge_confirmed_to_another_court_still_sits_on_their_own(self):
+        # Anna St. John's rows in November 2026: commissioned to the Eastern
+        # District of Louisiana, and confirmed to the Fifth Circuit with no
+        # commission yet. She sits on the district court alone until the new
+        # commission, and the Fifth Circuit lists her apart as confirmed.
+        rows = [service_row(**{
+                    "Court Name": "U.S. District Court for the Eastern District of Louisiana",
+                    "Commission Date": "2025-12-01"}),
+                service_row(**{
+                    "Court Name": "U.S. Court of Appeals for the Fifth Circuit",
+                    "Commission Date": "", "Nomination Date": "2026-07-14",
+                    "Confirmation Date": "2026-11-18"})]
+        judges, pending, _problems, conflicts = judiciary.sitting(rows, {}, TODAY)
+        self.assertEqual([s["court"] for s in judges["1"]["seats"]], ["la-e"])
+        self.assertEqual([(p["court"], p["confirmed"]) for p in pending], [("ca5", "2026-11-18")])
+        self.assertTrue(pending[0]["fjc"].endswith("/1"))
+        self.assertEqual(conflicts, [])
+
     def test_a_reassignment_carries_the_appointment(self):
         # Gerald Tjoflat: commissioned to the Fifth Circuit in 1975 and
         # reassigned by statute to the Eleventh when it was created in 1981.

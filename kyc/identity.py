@@ -1370,8 +1370,8 @@ def _report_term_ending(links, legislatures):
             "warn", "identity-legislator-term-ending",
             f"{n} joined state legislator card{'' if n == 1 else 's'} {'is' if n == 1 else 'are'} "
             "in a district the legislature page marks on the 2026 ballot while another of the "
-            "person's cards shows a 2026 run for another office: they leave that seat when the "
-            "chamber's new term begins, a day this site does not record, so the line names the "
+            "person's cards shows a 2026 run for another office: they may leave that seat when "
+            "the chamber's new term begins, a day this site does not record, so the line names the "
             "seat for as long as the roster lists them; check each once its chamber's new term "
             "has begun (rule 105)", sorted(rows)))
 
