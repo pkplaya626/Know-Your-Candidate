@@ -1028,8 +1028,8 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         if years:
             out_chambers[chamber]["termYears"] = years
         # The day the new term began and whether the roster may be behind it
-        # (rule 105), in the state page's record (stategov.legislative_term).
-        for key in ("upSeats", "termBegins", "rosterBehind"):
+        # (rule 106), in the state page's record (stategov.legislative_term).
+        for key in ("upSeats", "termBegins", "rosterBehind", "termUnknown"):
             if key in ((control or {}).get(chamber) or {}):
                 out_chambers[chamber][key] = control[chamber][key]
 

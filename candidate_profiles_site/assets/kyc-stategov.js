@@ -914,7 +914,7 @@
   }
 
   /** Whether any chamber of a state's legislature has begun its new term
-   *  on the reader's day while the roster may be behind it (rule 105). */
+   *  on the reader's day while the roster may be behind it (rule 106). */
   function lagging(s, now) {
     return !!(s && (KYC.legislatureTermBegun(s.upper, now) || KYC.legislatureTermBegun(s.lower, now)));
   }
@@ -1395,7 +1395,7 @@
         (KYC.seatKey ? KYC.seatKey([s.upper, s.lower]) : "");
       // A coalition note is about the legislature its roster lists, and a
       // count is not stated from a roster known to be behind a new term
-      // (rule 105).
+      // (rule 106).
       if (s.note && !lagging(s)) {
         html += '<p class="gov-note">' + KYC.escapeHtml(s.note) + " " +
           link(s.noteSource, "Legislature's roster") + "</p>";

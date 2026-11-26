@@ -1272,7 +1272,7 @@
       // A chamber with no seat of the reader's up is not a contest on this
       // ballot, and is drawn as the other offices not on it are.
       // Once the chamber's new term has begun and the roster may be behind
-      // it, said as the legislature page says it (rule 105).
+      // it, said as the legislature page says it (rule 106).
       return contest("ballot-legislature" + (maybe ? "" : " ballot-off"), title, "", lead +
         (unknown ? chamberBallot(c) : "") + rows.join("") +
         (notes.length ? '<p class="ballot-note">' + notes.join(" ") + "</p>" : "") +

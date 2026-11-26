@@ -610,7 +610,7 @@ def build(root="."):
     if unfit:
         raise StateGovError("kyc/terms_begin.py: " + "; ".join(unfit))
     # The legislative chambers' days, and a person's word that a roster has
-    # caught up with one (rule 105): a table or an entry that breaks its own
+    # caught up with one (rule 106): a table or an entry that breaks its own
     # rules stops the build.
     unfit = legislative_terms.problems() + legislative_terms.current_problems()
     if unfit:
@@ -847,11 +847,12 @@ def filled_where_vacant(code, which, ours, theirs):
 def legislative_term(code, which, roster_read):
     """What the page needs to say, on the reader's day, that a chamber's new
     term has begun while the roster may still list members whose terms ended
-    then (rule 105): its seats on the 2026 ballot (``upSeats``), the day the
+    then (rule 106): its seats on the 2026 ballot (``upSeats``), the day the
     term of the members elected on November 3 began (``termBegins``, from
-    kyc/legislative_terms.py; none for a gap) and whether the roster, read
-    on *roster_read*, may be behind it (``rosterBehind``: until a person
-    records it caught up). ``{}`` for a chamber not on that ballot."""
+    kyc/legislative_terms.py) and whether the roster, read on *roster_read*,
+    may be behind it (``rosterBehind``: until a person records it caught
+    up); for a gap, ``termUnknown`` (the provision to read, where the gap
+    names one). ``{}`` for a chamber not on that ballot."""
     from . import ballot2026, legislative_terms
     entry = (ballot2026.STATES.get(code) or {}).get(which)
     if not entry or not entry[2]:
@@ -861,6 +862,13 @@ def legislative_term(code, which, roster_read):
     if term:
         out["termBegins"] = term
         out["rosterBehind"] = legislative_terms.roster_behind(code, which, term, roster_read)
+    else:
+        # A gap: the page says, after the election, that this site has not
+        # read the day, so it cannot say whether the roster is behind (rule
+        # 19), linking the provision a person should read where there is one.
+        gap = legislative_terms.gap_for(code, which)
+        if gap:
+            out["termUnknown"] = {"source": gap["source"]} if gap["source"] else {}
     return out
 
 

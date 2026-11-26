@@ -2265,7 +2265,7 @@
   /* The day the term of the members elected on Nov. 3, 2026 began, from the
    * state's own law (kyc/legislative_terms.py), and the roster this site
    * reads, Open States, which seats members-elect only when it next updates
-   * (rule 105: Florida's members "take office upon election", and on
+   * (rule 106: Florida's members "take office upon election", and on
    * Nov. 15 the roster still held two senators' predecessors). One
    * implementation for the state page, the map, the legislature page, Your
    * ballot and "Find who represents you" (rule 12). *c*: a chamber's record
@@ -2298,10 +2298,30 @@
       "legislative result, so it names no one elected.";
   }
 
-  /** The same sentence as a paragraph, the law cited and linked. */
+  /** For a chamber on the ballot whose new term's day this site has not
+   *  read (a gap in kyc/legislative_terms.py), from the day after the
+   *  election: that it cannot say whether the roster is behind, never that
+   *  it is or is not (rule 19). "" otherwise. */
+  function legislatureTermUnknownText(c, read, now) {
+    if (!c || !c.termUnknown || c.termBegins ||
+        electionStatus(2026, now || new Date()).phase !== "post-election") return "";
+    return "This site has not read the day the term of the members elected on Nov. 3, 2026 begins " +
+      "in this chamber, so it cannot say whether the roster it reads (Open States, read " +
+      dateWords(read) + ") still lists members whose terms have ended.";
+  }
+
+  /** The same sentence as a paragraph, the law cited and linked; or, for a
+   *  chamber whose day is not read, that sentence, linking the provision a
+   *  person should read where there is one. */
   function legislatureLagNote(c, read, now) {
     var text = legislatureLagText(c, read, now);
-    if (!text) return "";
+    if (!text) {
+      var unknown = legislatureTermUnknownText(c, read, now);
+      var src = unknown && c.termUnknown.source;
+      return unknown ? '<p class="leg-term-lag leg-term-unknown">' + escapeHtml(unknown) +
+        (src ? ' <a href="' + escapeAttr(src) + '" target="_blank" rel="noopener noreferrer">' +
+          "The state’s law</a>" : "") + "</p>" : "";
+    }
     var t = c.termBegins;
     var cite = "(" + t.cite + ")";
     var at = text.indexOf(cite);
@@ -4850,6 +4870,7 @@
     localDay: localDay,
     legislatureTermBegun: legislatureTermBegun,
     legislatureLagText: legislatureLagText,
+    legislatureTermUnknownText: legislatureTermUnknownText,
     legislatureLagNote: legislatureLagNote,
     legislatureControlWithheld: legislatureControlWithheld,
     legislatureSeatLag: legislatureSeatLag,

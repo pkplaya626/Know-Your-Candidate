@@ -24755,7 +24755,7 @@ async function testLazyStateData() {
 async function testLegislativeTerms() {
   /* The day each legislative chamber's new term begins (kyc/legislative_terms.py,
    * from the state's own law) and the roster this site reads, Open States,
-   * which seats members-elect only when it next updates (rule 105: Florida's
+   * which seats members-elect only when it next updates (rule 106: Florida's
    * members "take office upon election", and on Nov. 15 the roster still held
    * two senators' predecessors). Made-up chambers, on each clock: one whose
    * term begins the day after the election, one on the first Monday of
@@ -24826,10 +24826,23 @@ async function testLegislativeTerms() {
       const caught = rows()[0];
       check("a roster recorded caught up says nothing and states the majority",
         !caught.querySelector(".leg-term-lag") && !/not stated/.test(caught.textContent), caught.textContent);
-      // A gap: no day read, nothing said on any clock.
+      // A gap: no day read. After the election the row says this site
+      // cannot tell whether the roster is behind (rule 19), and still
+      // states the majority, since nothing shows it is behind.
       s.upper.rosterBehind = true;
       delete s.upper.termBegins;
-      check("a chamber with no day read says nothing of a new term", !rows()[0].querySelector(".leg-term-lag"));
+      s.upper.termUnknown = { source: "https://law.example.gov/gap" };
+      const gapRow = rows()[0], gapNote = gapRow.querySelector(".leg-term-lag");
+      check(nov ? "a chamber with no day read says, after the election, that this site cannot say whether its roster is behind"
+        : "before the election, a chamber with no day read says nothing of a new term",
+        nov ? !!gapNote && gapNote.textContent.indexOf("This site has not read the day the term of the members " +
+          "elected on Nov. 3, 2026 begins in this chamber, so it cannot say whether the roster it reads " +
+          "(Open States, read Nov. 17, 2026) still lists members whose terms have ended.") === 0 &&
+          !!gapNote.querySelector('a[href="https://law.example.gov/gap"]') &&
+          !/not stated/.test(gapRow.querySelector(".gov-chamber-holds").textContent)
+          : !gapNote, gapRow.textContent);
+      delete s.upper.termUnknown;
+      check("a chamber not on that ballot says nothing of a new term", !rows()[0].querySelector(".leg-term-lag"));
       // A January chamber (a "by" day): only from the day after it.
       made(s.lower, JAN, 99, true);
       const jl = rows()[1].querySelector(".leg-term-lag");
@@ -24883,6 +24896,22 @@ async function testLegislativeTerms() {
       check(nov ? "Find who represents you marks the member the same way" : "and says nothing before it",
         nov ? frText.indexOf(LK.escapeHtml(LK.legislatureSeatLag(leg.chambers.upper, true, READ))) !== -1
           : !/may still list the member/.test(frText), frText.slice(0, 300));
+      // A gap: the summary says this site cannot tell, and marks no seat.
+      const gapC = leg.chambers.upper, kept = gapC.termBegins;
+      delete gapC.termBegins;
+      gapC.termUnknown = {};
+      LD.querySelector('.segmented [data-chamber="lower"]').click();
+      LD.querySelector('.segmented [data-chamber="upper"]').click();
+      const gapNote = LD.querySelector("#legPanelBody .leg-term-lag");
+      check(nov ? "a chamber with no day read: its summary says this site cannot say whether the roster is behind, states the majority and marks no seat"
+        : "before the election, a chamber with no day read says nothing",
+        nov ? !!gapNote && /^This site has not read the day/.test(gapNote.textContent) &&
+          !gapNote.querySelector("a") &&
+          !/not stated/.test(LD.querySelector("#legPanelBody .leg-holds").textContent) &&
+          !row(upId).querySelector(".leg-row-lag")
+          : !gapNote, gapNote && gapNote.textContent);
+      delete gapC.termUnknown;
+      gapC.termBegins = kept;
     });
 
     // Your ballot: the reader's chamber card says when the term began.
@@ -24898,6 +24927,16 @@ async function testLegislativeTerms() {
         nov ? html.indexOf("Members elected on Nov. 3, 2026 took office on Nov. 4, 2026") !== -1 &&
           html.indexOf("may still list members whose terms ended then") !== -1
           : html.indexOf("may still list members") === -1, html.slice(0, 400));
+      const gleg = JSON.parse(JSON.stringify(leg));
+      delete gleg.chambers.upper.termBegins;
+      gleg.chambers.upper.termUnknown = { source: "https://law.example.gov/gap" };
+      const ghtml = BK.ballot.legislatureCards("FL", { leg: gleg, upper: [upId], lower: [] })
+        .map((c) => typeof c === "string" ? c : (c.html || c.body || JSON.stringify(c))).join("");
+      check(nov ? "a chamber with no day read: the card says this site cannot say whether the roster is behind"
+        : "before the election, a chamber with no day read: nothing",
+        nov ? ghtml.indexOf("This site has not read the day the term of the members elected on Nov. 3, 2026 begins") !== -1 &&
+          ghtml.indexOf("took office on Nov. 4, 2026") === -1
+          : ghtml.indexOf("This site has not read the day") === -1, ghtml.slice(0, 400));
     });
   }
 }

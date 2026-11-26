@@ -3809,7 +3809,7 @@ COURT_ROSTERS = {
 }
 
 # Legislative chambers whose Open States roster a person has seen list the
-# members of the term the November 3, 2026 election chose (rule 105). Keyed
+# members of the term the November 3, 2026 election chose (rule 106). Keyed
 # (state, "upper" or "lower"); each is {"rosterRead": the Open States read
 # (data/state_legislators.json's "fetched" day) the person looked at, on or
 # after the term's first certain day in kyc/legislative_terms.py; "seen":

@@ -172,14 +172,14 @@
   function districtBallot(id) { return KYC.ballot.seatBallot(current(), id); }
 
   /** Whether either chamber's new term has begun while the roster may be
-   *  behind it (rule 105). */
+   *  behind it (rule 106). */
   function lagging() {
     return !!(KYC.legislatureTermBegun(state.chambers.upper) ||
               KYC.legislatureTermBegun(state.chambers.lower));
   }
 
   /** One district's members, marked as listed from before the new term
-   *  where its seat was on the ballot and the term has begun (rule 105). */
+   *  where its seat was on the ballot and the term has begun (rule 106). */
   function seatLag(id) {
     var c = current();
     var words = KYC.legislatureSeatLag(c, (c.districts[id] || {}).up, state.sources.peopleDate);
@@ -208,7 +208,7 @@
   function holds(c) {
     var n = c.count;
     // A majority is not stated from a roster known to be behind the new
-    // term (rule 105).
+    // term (rule 106).
     var withheld = KYC.legislatureControlWithheld(c);
     var text = code === "NE" ? "Elected without party labels"
       : withheld ? withheld

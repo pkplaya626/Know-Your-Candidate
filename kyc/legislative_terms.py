@@ -49,6 +49,8 @@ AK_CONST = "https://ltgov.alaska.gov/information/alaskas-constitution/"
 AK_24_05 = ("https://www.akleg.gov/basis/statutes.asp?media=print&secStart=24.05.080"
             "&secEnd=24.05.100")
 AL_CONST = terms_begin.AL_CONST
+CA_4_2 = ("https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CONS&"
+          "sectionNum=SEC.%202.&article=IV")
 CO_CONST = terms_begin.CO_CONST
 CT_CONST = terms_begin.CT_CONST
 DE_2 = "https://delcode.delaware.gov/constitution/constitution-03.html"
@@ -121,6 +123,16 @@ TERMS = {
                        "election, except as otherwise provided in this Constitution.",)),),
                    note="The Legislature's printing of the recompiled Constitution of 2022 as "
                         "proposed (ratified November 8, 2022)."),),
+    # Twenty of the Senate's forty seats were on the 2026 ballot (s.2(a)(1)):
+    # the record is theirs and the Assembly's.
+    "CA": (_record(BOTH, ("nth", 1, "Monday", 12), "the first Monday in December next following her or "
+                   "his election",
+                   "2026-12-07", "Cal. Const. art. IV, s.2(a)(3)",
+                   ((CA_4_2, (
+                       "The terms of a Senator or a Member of the Assembly shall commence on the first "
+                       "Monday in December next following her or his election.",
+                       "The Senate has a membership of 40 Senators elected for 4-year terms, 20 to "
+                       "begin every 2 years.")),)),),
     # The session that begins the term meets "no later than" the day: a "by"
     # record, begun for certain only from the next day.
     "CO": (_record(BOTH, ("nth", 2, "Wednesday", 1), "no later than the second Wednesday of January",
@@ -364,11 +376,6 @@ _AZ = ("Ariz. Const. art. 4, pt. 2, s.21 gives the members two-year terms and no
        "legislature held office \"until the first Monday in January, 1913\"), and A.R.S. 41-1101 "
        "sets only the session's day; this read found no provision that starts the term",
        "https://www.azleg.gov/const/4/21.p2.htm")
-_CA = ("leginfo.legislature.ca.gov answered this site's request for Article IV with a Cloudflare "
-       "challenge page (\"Just a moment...\", HTTP 403). A person should read Cal. Const. art. IV, "
-       "s.2 there",
-       "https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=CONS&division=&"
-       "title=&part=&chapter=&article=IV")
 _GA = ("sos.ga.gov answered this site's request for the constitution with a Cloudflare challenge "
        "page on 2026-11-11 (kyc/terms_begin.py), the General Assembly's legis.ga.gov is drawn by "
        "script, and the Official Code of Georgia is on a commercial host. A person should read Ga. "
@@ -420,7 +427,7 @@ _WY = ("Wyo. Const. art. 3, s.2 and Title 28 name no day for the members' terms;
        "Wyo. Stat. 22-2-107 seat \"all state and county officers elected at a general election\" on "
        "the first Monday in January, and this read does not take those words to cover legislators",
        "https://wyoleg.gov/statutes/compress/title28.pdf")
-_GAPS_BY_STATE = {"AR": _AR, "AZ": _AZ, "CA": _CA, "GA": _GA, "IL": _IL, "IN": _IN, "ME": _ME,
+_GAPS_BY_STATE = {"AR": _AR, "AZ": _AZ, "GA": _GA, "IL": _IL, "IN": _IN, "ME": _ME,
                   "MO": _MO, "NE": _NE, "NH": _NH, "OK": _OK, "SD": _SD, "TN": _TN, "VT": _VT,
                   "WI": _WI, "WV": _WV, "WY": _WY}
 
