@@ -1176,7 +1176,9 @@ general-election candidates, its list is the ballot (rule 77):
   page draws from: an accepted declaration in the general election is
   printed, a rejected one never was). A list published only as a PDF is
   transcribed in `overrides.CERTIFIED_BALLOTS` with its document and the day
-  it was read (Iowa, Nebraska). Only an election office's list is a ballot: a
+  it was read (Iowa, Nebraska; Mississippi's Secretary of State's sample official
+  ballot for the federal races, which prints every district's candidates). Only an
+  election office's list is a ballot: a
   party's list of its convention nominees is not, since the state may still
   refuse them.
 - The name a profile shows comes from its source's authority: a name settled
