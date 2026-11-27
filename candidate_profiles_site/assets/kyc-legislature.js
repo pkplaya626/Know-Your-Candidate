@@ -185,7 +185,7 @@
    *  where its seat was on the ballot and the term has begun (rule 106). */
   function seatLag(id) {
     var c = current();
-    var words = KYC.legislatureSeatLag(c, c.districts[id] || {}, state.sources.peopleDate);
+    var words = KYC.legislatureSeatLag(c, id, state.sources.peopleDate);
     return words ? '<p class="leg-seat-lag">' + KYC.escapeHtml(words) + "</p>" : "";
   }
 
@@ -268,7 +268,7 @@
     });
     el("legRoster").innerHTML = ids.map(function (id) {
       var people = c.members[id] || [];
-      var lag = KYC.legislatureSeatLagBadge(c, c.districts[id]);
+      var lag = KYC.legislatureSeatLagBadge(c, id);
       return '<button type="button" class="leg-row" data-region="' + KYC.escapeAttr(id) + '">' +
         '<span class="leg-row-district">' + KYC.escapeHtml(c.districts[id].name) + "</span>" +
         '<span class="leg-row-people">' + (people.length ? people.map(function (p) {

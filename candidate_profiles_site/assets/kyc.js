@@ -2351,8 +2351,15 @@
       dateWords(t.day) + "." : "";
   }
 
-  /** A district's record, or its bare `up` as some callers hold it. */
-  function seatRecord(district) {
+  /** A district's record: from its id in the chamber *c*, with how many
+   *  members the roster lists there (`members`); or the record itself; or
+   *  its bare `up`, as some callers hold it. */
+  function seatRecord(c, district) {
+    if (typeof district === "string") {
+      var d = ((c && c.districts) || {})[district] || {};
+      return { up: d.up, special: d.special,
+               members: (((c && c.members) || {})[district] || []).length };
+    }
     return district && typeof district === "object" ? district : { up: district };
   }
 
@@ -2368,26 +2375,38 @@
   function legislatureSeatLag(c, district, read, now) {
     var kind = seatLagKind(c, district, now);
     if (!kind) return "";
+    var d = seatRecord(c, district);
     var t = legislatureTermBegun(c, now);
     var roster = "Open States’ roster, read " + dateWords(read);
     var began = (t.kind === "by" ? "no later than " : "on ") + dateWords(t.day);
+    // A district of several members, where its id says how many the roster
+    // lists: one of its seats was up (West Virginia's Senate), or a special
+    // election filled one of them, or all of them were up (North Dakota's
+    // House, two a district: its verification found the special's words
+    // over both of a district's members, 2026-11-27).
+    var several = d.members > 1, oneOf = several && c.districtSeats === "one-of-several";
+    var all = several && !oneOf;
     if (kind === "up") {
-      return "This seat was on the Nov. 3, 2026 ballot, and its new term began " + began + ": " +
-        roster + ", may still list the member whose term ended then.";
+      return (all ? "This district’s seats were" : oneOf ? "One of this district’s seats was" : "This seat was") +
+        " on the Nov. 3, 2026 ballot, and " + (all ? "their" : "its") + " new term began " + began + ": " +
+        roster + ", may still list the " + (all ? "members whose terms" : "member whose term") + " ended then.";
     }
     if (kind === "special") {
-      return "This seat was on the Nov. 3, 2026 ballot in a special election for the rest of its " +
-        "term: " + roster + ", may still list the member from before that election.";
+      return (several ? "One of this district’s seats was" : "This seat was") + " on the Nov. 3, 2026 " +
+        "ballot in a special election for the rest of its term: " + roster + ", may still list the " +
+        "member from before that election.";
     }
-    return "This seat may have been on the Nov. 3, 2026 ballot; if it was, its new term began " +
-      began + ", and " + roster + ", may still list the member whose term ended then.";
+    return (several ? "This district’s seats may have been" : "This seat may have been") + " on the " +
+      "Nov. 3, 2026 ballot; if " + (several ? "they were, their" : "it was, its") + " new term began " +
+      began + ", and " + roster + ", may still list the " +
+      (several ? "members whose terms" : "member whose term") + " ended then.";
   }
 
   /** Which of the seat's sentences is said, on the reader's day: "up" (on
    *  that ballot for a regular term), "special" (for the rest of a term
    *  only), "maybe" (the record names no district), or "". */
   function seatLagKind(c, district, now) {
-    var d = seatRecord(district);
+    var d = seatRecord(c, district);
     if (!legislatureTermBegun(c, now)) return "";
     return d.up ? "up" : d.special ? "special" : d.up === false ? "" : "maybe";
   }
@@ -2397,8 +2416,11 @@
    *  that ballot for a regular term; "" where no sentence is said. */
   function legislatureSeatLagBadge(c, district, now) {
     var kind = seatLagKind(c, district, now);
-    return kind === "up" ? "Listed from before the new term"
-      : kind === "special" ? "May be listed from before the special election"
+    var several = seatRecord(c, district).members > 1;
+    return kind === "up" ? (several && c.districtSeats === "one-of-several"
+        ? "One may be listed from before the new term" : "Listed from before the new term")
+      : kind === "special" ? (several ? "One may be listed from before the special election"
+        : "May be listed from before the special election")
       : kind === "maybe" ? "May be listed from before the new term" : "";
   }
 

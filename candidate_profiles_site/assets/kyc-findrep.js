@@ -714,7 +714,7 @@
           encodeURIComponent(id);
         // Listed from before the new term where its seat was on the ballot
         // and the term has begun, never as who sits now (rule 106).
-        var lag = members.length ? KYC.legislatureSeatLag(c, c.districts[id] || {},
+        var lag = members.length ? KYC.legislatureSeatLag(c, id,
           (leg.sources || {}).peopleDate || "") : "";
         return '<a href="' + KYC.escapeAttr(href) + '">' + KYC.escapeHtml(districtName(c, id)) +
           "</a>: " + (members.length ? members.map(memberWords).join(", ") : "nobody listed") +

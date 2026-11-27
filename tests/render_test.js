@@ -25114,6 +25114,38 @@ async function testLegislativeTerms() {
           "ended then." && LK.legislatureSeatLagBadge(up, maybe) === "May be listed from before the new term"
           : maybeWords === "" && LK.legislatureSeatLagBadge(up, maybe) === "", maybeWords);
       maybe.up = wasUp;
+      // A district of two members: all its seats up (North Dakota's House),
+      // one of them up (West Virginia's Senate), or a special election for
+      // one of them - its verification found the special's words over both
+      // of a North Dakota district's members (2026-11-27).
+      const second = (id) => up.members[id].push(Object.assign({}, up.members[id][0], { name: "Made Second" }));
+      second(upId);
+      const two = LK.legislatureSeatLag(up, upId, READ), twoBadge = LK.legislatureSeatLagBadge(up, upId);
+      check(nov ? "a district of two members whose seats were up: their seats, the members"
+        : "before its day, nothing of it",
+        nov ? two === "This district’s seats were on the Nov. 3, 2026 ballot, and their new term began on " +
+          "Nov. 4, 2026: Open States’ roster, read Nov. 17, 2026, may still list the members whose terms ended " +
+          "then." && twoBadge === "Listed from before the new term" : two === "" && twoBadge === "", two);
+      const keptSeats = up.districtSeats;
+      up.districtSeats = "one-of-several";
+      const oneOf = LK.legislatureSeatLag(up, upId, READ);
+      check(nov ? "one of a district's seats up: one of its seats, the member" : "before its day, nothing of one",
+        nov ? oneOf === "One of this district’s seats was on the Nov. 3, 2026 ballot, and its new term began on " +
+          "Nov. 4, 2026: Open States’ roster, read Nov. 17, 2026, may still list the member whose term ended then." &&
+          LK.legislatureSeatLagBadge(up, upId) === "One may be listed from before the new term" : oneOf === "", oneOf);
+      up.districtSeats = keptSeats;
+      up.members[upId].pop();
+      sp.special = true;
+      second(offId);
+      const spTwo = LK.legislatureSeatLag(up, offId, READ);
+      check(nov ? "a special election in a district of two members: one of its seats"
+        : "before its day, nothing of a special",
+        nov ? spTwo === "One of this district’s seats was on the Nov. 3, 2026 ballot in a special election for " +
+          "the rest of its term: Open States’ roster, read Nov. 17, 2026, may still list the member from before " +
+          "that election." && LK.legislatureSeatLagBadge(up, offId) === "One may be listed from before the special " +
+          "election" : spTwo === "", spTwo);
+      up.members[offId].pop();
+      delete sp.special;
     });
 
     // Your ballot: the reader's chamber card says when the term began.
