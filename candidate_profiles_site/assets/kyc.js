@@ -2292,10 +2292,22 @@
     if (!t) return "";
     var seats = c.upSeats === c.seats ? "all " + c.seats + " of its seats were"
       : c.upSeats + " of its " + c.seats + " seats were";
-    return "Members elected on Nov. 3, 2026 " + tookOfficeWords(t) + " (" + t.cite + "). " +
+    // A seat on that ballot in a special election for the rest of a term
+    // has no new term, and this law does not say when its winner took
+    // office: Hawaii's Senate read "13 of its 25 seats" beside a district
+    // whose special election was on that ballot (the branch's review,
+    // 2026-11-27), so the regular seats say what they are, and the specials
+    // are counted apart, in words that give them no day.
+    var n = c.specialSeats || 0;
+    var regular = n ? (c.upSeats === 1 ? " for a regular term" : " for regular terms") : "";
+    var special = n ? " " + (n === 1 ? "One more seat was" : n + " more seats were") + " on it in a " +
+      "special election for the rest of a term, and the roster may still list the member from " +
+      "before " + (n === 1 ? "that election" : "each") + " too." : "";
+    return "Members elected on Nov. 3, 2026" + (n ? " to regular terms" : "") + " " + tookOfficeWords(t) +
+      " (" + t.cite + "). " +
       "The roster this site reads (Open States, read " + dateWords(read) + ") may still list " +
-      "members whose terms ended then: " + seats + " on that ballot. This site reads no state " +
-      "legislative result, so it names no one elected.";
+      "members whose terms ended then: " + seats + " on that ballot" + regular + "." + special +
+      " This site reads no state legislative result, so it names no one elected.";
   }
 
   /** For a chamber on the ballot whose new term's day this site has not
@@ -2336,20 +2348,58 @@
     var t = legislatureTermBegun(c, now);
     return t ? "Which party holds a majority is not stated here: the roster may still list members " +
       "whose terms ended when the new term began " + (t.kind === "by" ? "no later than " : "on ") +
-      dateWords(t.day) : "";
+      dateWords(t.day) + "." : "";
+  }
+
+  /** A district's record, or its bare `up` as some callers hold it. */
+  function seatRecord(district) {
+    return district && typeof district === "object" ? district : { up: district };
   }
 
   /** One district's members, marked as the roster's listing from before
    *  the new term, never as who sits now; "" where the seat was not on the
-   *  ballot or the term has not begun. *up*: the district's `up` (true,
-   *  false, or undefined where the state's record names no district). */
-  function legislatureSeatLag(c, up, read, now) {
+   *  ballot or the term has not begun. *district*: the legislature file's
+   *  record of it (`up`: true, false, or undefined where the state's record
+   *  names no district; `special`: an election for the rest of a term was
+   *  on that ballot there), or its `up` alone. A seat that may not have
+   *  been on the ballot (Montana's Senate, whose record names no district)
+   *  says its new term began only if it was; a special seat says no day,
+   *  since this law does not say when its winner took office. */
+  function legislatureSeatLag(c, district, read, now) {
+    var kind = seatLagKind(c, district, now);
+    if (!kind) return "";
     var t = legislatureTermBegun(c, now);
-    if (!t || up === false) return "";
-    return (up ? "This seat was on the Nov. 3, 2026 ballot" : "This seat may have been on the " +
-      "Nov. 3, 2026 ballot") + ", and its new term began " + (t.kind === "by" ? "no later than " : "on ") +
-      dateWords(t.day) + ": Open States’ roster, read " + dateWords(read) + ", may still list " +
-      "the member whose term ended then.";
+    var roster = "Open States’ roster, read " + dateWords(read);
+    var began = (t.kind === "by" ? "no later than " : "on ") + dateWords(t.day);
+    if (kind === "up") {
+      return "This seat was on the Nov. 3, 2026 ballot, and its new term began " + began + ": " +
+        roster + ", may still list the member whose term ended then.";
+    }
+    if (kind === "special") {
+      return "This seat was on the Nov. 3, 2026 ballot in a special election for the rest of its " +
+        "term: " + roster + ", may still list the member from before that election.";
+    }
+    return "This seat may have been on the Nov. 3, 2026 ballot; if it was, its new term began " +
+      began + ", and " + roster + ", may still list the member whose term ended then.";
+  }
+
+  /** Which of the seat's sentences is said, on the reader's day: "up" (on
+   *  that ballot for a regular term), "special" (for the rest of a term
+   *  only), "maybe" (the record names no district), or "". */
+  function seatLagKind(c, district, now) {
+    var d = seatRecord(district);
+    if (!legislatureTermBegun(c, now)) return "";
+    return d.up ? "up" : d.special ? "special" : d.up === false ? "" : "maybe";
+  }
+
+  /** The badge beside a district's members in a list, in its sentence's own
+   *  measure: "Listed from before the new term" only where the seat was on
+   *  that ballot for a regular term; "" where no sentence is said. */
+  function legislatureSeatLagBadge(c, district, now) {
+    var kind = seatLagKind(c, district, now);
+    return kind === "up" ? "Listed from before the new term"
+      : kind === "special" ? "May be listed from before the special election"
+      : kind === "maybe" ? "May be listed from before the new term" : "";
   }
 
   /* --------------------------------------------------------- report a problem */
@@ -4965,6 +5015,7 @@
     legislatureLagNote: legislatureLagNote,
     legislatureControlWithheld: legislatureControlWithheld,
     legislatureSeatLag: legislatureSeatLag,
+    legislatureSeatLagBadge: legislatureSeatLagBadge,
     REPO_URL: REPO_URL,
     reportUrl: reportUrl,
     offBallot: offBallot,

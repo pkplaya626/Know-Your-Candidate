@@ -24916,8 +24916,23 @@ async function testLegislativeTerms() {
         nov ? /^Which party holds a majority is not stated here: the roster may still list members whose terms ended when the new term began on Nov\. 4, 2026/.test(uh)
           : /majority of the seats|Elected without party labels/.test(uh), uh);
       const tri = box(K.stategov.render("FL")).querySelector(".gov-trifecta").textContent;
-      check(nov ? "nor whether one party holds the governorship and both chambers"
-        : "before it, the trifecta line stands", nov ? /is not stated here/.test(tri) : !/not stated/.test(tri), tri);
+      check(nov ? "nor whether one party holds the governorship and the legislature"
+        : "before it, the trifecta line stands", nov
+        ? /^Whether one party holds the governorship and the legislature is not stated here: the roster may still list members whose terms ended when a chamber's new term began\.$/.test(tri)
+        : !/not stated/.test(tri), tri);
+      // The glance box above the section, and a coalition note: the branch's
+      // review found it saying "Republican trifecta" under a section that
+      // stated none (2026-11-27).
+      const keep = [s.legislature, s.note];
+      s.legislature = "coalition";
+      s.note = "Made coalition note.";
+      const glance = box(K.stategov.glance("FL"));
+      const gc = (glance.querySelector(".glance-control") || {}).textContent;
+      check(nov ? "the glance box states no trifecta and no coalition note"
+        : "before it, the glance box states the trifecta and the coalition note",
+        nov ? gc === "Not stated: a new term has begun" && glance.textContent.indexOf("Made coalition note.") === -1
+          : !/Not stated/.test(gc) && glance.textContent.indexOf("Made coalition note.") !== -1, gc);
+      [s.legislature, s.note] = keep;
       const look = K.stategov.look("FL", "legislature");
       check(nov ? "the map's legislature view draws it as not stated, in the vacant grey, and says why"
         : "before it, the map draws the party's control",
@@ -24970,6 +24985,28 @@ async function testLegislativeTerms() {
         dec ? also.indexOf("Was a member of the Made House of Representatives, district 4, for the term that ended") !== -1
           : also.indexOf("Member of the Made House of Representatives, district 4") !== -1 &&
             also.indexOf("Was a member") === -1, also);
+    });
+
+    // The directory of legislatures: each state's chambers and its control,
+    // in the state page's words (the branch's review found Florida's cell
+    // ending "Republican majority in both chambers." under rows that stated
+    // no majority).
+    const dir = await buildPage("legislature/index.html", { now, loaded: (w) => {
+      const fl = w.kycStateGov.states.FL;
+      made(fl.upper, NOV, 20, true);
+      made(fl.lower, DEC, fl.lower.seats, true);
+      fl.legislature = "R";
+    } });
+    await settle(30);
+    suite(`legislative terms in the directory of legislatures, ${clock}`, () => {
+      check("no page errors", dir.errors.length === 0, dir.errors.join(" | "));
+      const cell = dir.D.querySelector('[data-facts="FL"]');
+      const text = cell ? cell.textContent : "";
+      check(nov ? "Florida's cell states no party's control, and says why"
+        : "before its day, Florida's cell states the party's control",
+        nov ? text.indexOf("Which party holds the legislature is not stated here: the roster may still list " +
+          "members whose terms ended when a chamber's new term began.") !== -1 && !/majority in both chambers/.test(text)
+          : /Republican majority in both chambers\./.test(text) && !/not stated/.test(text), text.slice(0, 400));
     });
 
     // The legislature page: the counts, the district panel and the rows.
@@ -25031,6 +25068,52 @@ async function testLegislativeTerms() {
           : !gapNote, gapNote && gapNote.textContent);
       delete gapC.termUnknown;
       gapC.termBegins = kept;
+      // A seat on that ballot in a special election for the rest of a term,
+      // and a seat the record names no district for: the branch's review
+      // found Hawaii's Senate counting 13 of its 25 seats beside a special
+      // district left unmarked, and Montana's Senate telling every seat its
+      // new term had begun (2026-11-27).
+      const up = leg.chambers.upper, sp = up.districts[offId];
+      sp.special = true;
+      up.specialSeats = 1;
+      LD.querySelector('.segmented [data-chamber="lower"]').click();
+      LD.querySelector('.segmented [data-chamber="upper"]').click();
+      const spText = LK.legislatureLagText(up, READ);
+      check(nov ? "the summary counts a special seat apart, and gives it no day"
+        : "before its day, nothing of it",
+        nov ? spText.indexOf("Members elected on Nov. 3, 2026 to regular terms took office on Nov. 4, 2026") === 0 &&
+          spText.indexOf("20 of its 40 seats were on that ballot for regular terms. One more seat was on it " +
+            "in a special election for the rest of a term, and the roster may still list the member from " +
+            "before that election too.") !== -1
+          : spText === "", spText);
+      const spBadge = row(offId).querySelector(".leg-row-lag");
+      check(nov ? "the special seat's row: maybe listed from before the special election"
+        : "before its day, the special seat's row is unmarked",
+        nov ? !!spBadge && spBadge.textContent === "May be listed from before the special election" : !spBadge,
+        row(offId).textContent);
+      check(nov ? "a regular seat's row still reads listed from before the new term" : "nor a regular seat's",
+        nov ? (row(upId).querySelector(".leg-row-lag") || {}).textContent === "Listed from before the new term"
+          : !row(upId).querySelector(".leg-row-lag"));
+      pick(LD, LW, offId);
+      const spMark = LD.querySelector("#legPanelBody .leg-seat-lag");
+      check(nov ? "its panel says the special election was on that ballot, and names no new term"
+        : "before its day, its panel marks nothing",
+        nov ? !!spMark && spMark.textContent === "This seat was on the Nov. 3, 2026 ballot in a special election " +
+          "for the rest of its term: Open States’ roster, read Nov. 17, 2026, may still list the member from " +
+          "before that election."
+          : !spMark, spMark && spMark.textContent);
+      delete sp.special;
+      delete up.specialSeats;
+      const maybe = up.districts[upId], wasUp = maybe.up;
+      delete maybe.up;
+      const maybeWords = LK.legislatureSeatLag(up, maybe, READ);
+      check(nov ? "a seat that may have been on that ballot says its new term began only if it was"
+        : "before its day, nothing of it",
+        nov ? maybeWords === "This seat may have been on the Nov. 3, 2026 ballot; if it was, its new term began " +
+          "on Nov. 4, 2026, and Open States’ roster, read Nov. 17, 2026, may still list the member whose term " +
+          "ended then." && LK.legislatureSeatLagBadge(up, maybe) === "May be listed from before the new term"
+          : maybeWords === "" && LK.legislatureSeatLagBadge(up, maybe) === "", maybeWords);
+      maybe.up = wasUp;
     });
 
     // Your ballot: the reader's chamber card says when the term began.

@@ -854,10 +854,18 @@ def legislative_term(code, which, roster_read):
     up); for a gap, ``termUnknown`` (the provision to read, where the gap
     names one). ``{}`` for a chamber not on that ballot."""
     from . import ballot2026, legislative_terms
+    from .legislature import special_numbers
     entry = (ballot2026.STATES.get(code) or {}).get(which)
     if not entry or not entry[2]:
         return {}
     out = {"upSeats": entry[2]}
+    # Seats on that ballot for the rest of a term, beside the regular ones:
+    # Hawaii's Senate had 13 regular seats and a special in district 19 (the
+    # review of the branch, 2026-11-27), and "13 of its 25 seats" left the
+    # special out while its district said a special election was there.
+    specials = len(special_numbers(code, which))
+    if specials:
+        out["specialSeats"] = specials
     term = legislative_terms.for_page(code, which)
     if term:
         out["termBegins"] = term

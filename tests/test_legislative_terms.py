@@ -234,6 +234,34 @@ class ThePipeline(unittest.TestCase):
         self.assertEqual(stategov.legislative_term("LA", "lower", "2026-11-17"), {})
         self.assertEqual(stategov.legislative_term("KS", "upper", "2026-11-17"), {})
 
+    def test_a_chamber_counts_its_special_seats_apart(self):
+        # The state's record names a special election for the rest of a term
+        # in two districts beside its regular seats: the chamber counts them
+        # apart (``specialSeats``), from the clauses the map's district marks
+        # read (legislature.special_numbers, rule 12). Hawaii's Senate read
+        # "13 of its 25 seats" beside a district whose special was on that
+        # ballot (the branch's review, 2026-11-27). A chamber with none has no
+        # count, and one whose record names no district for a special fails.
+        from kyc import legislature, stategov
+        saved = ballot2026.STATES["FL"]["upper"]
+        try:
+            entry = list(saved)
+            entry[2] = 20
+            entry[3] = "the even-numbered districts (made record; special elections in districts 7 and 9)"
+            ballot2026.STATES["FL"]["upper"] = tuple(entry)
+            self.assertEqual(legislature.special_numbers("FL", "upper"), ["7", "9"])
+            term = stategov.legislative_term("FL", "upper", "2026-11-17")
+            self.assertEqual((term["upSeats"], term["specialSeats"]), (20, 2))
+            entry[3] = "the even-numbered districts (made record)"
+            ballot2026.STATES["FL"]["upper"] = tuple(entry)
+            self.assertNotIn("specialSeats", stategov.legislative_term("FL", "upper", "2026-11-17"))
+            entry[3] = "the even-numbered districts (made record; a special election to fill a vacancy)"
+            ballot2026.STATES["FL"]["upper"] = tuple(entry)
+            with self.assertRaises(legislature.LegislatureError):
+                stategov.legislative_term("FL", "upper", "2026-11-17")
+        finally:
+            ballot2026.STATES["FL"]["upper"] = saved
+
     def test_a_person_recorded_caught_up_reads_as_caught_up(self):
         from kyc import overrides, stategov
         saved = dict(overrides.LEGISLATURE_ROSTERS_CURRENT)
