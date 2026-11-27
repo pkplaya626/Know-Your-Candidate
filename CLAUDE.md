@@ -1920,8 +1920,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     December counts do not lead still disagrees. Nor, once the office's
     December count decides the seat, is a page that still marks only the
     first round's runoff, of exactly the office's two, with or without an
-    unmarked December box an editor prepared, a disagreement: it says nothing
-    of December, the office's result is shown as beside a silent page, and
+    unmarked December box an editor prepared, a disagreement: it marks no
+    December result (no mark is no call, whatever an unmarked table counts),
+    the office's result is shown as beside a silent page, and
     the page is noted (`pageBehind`, `office-result-page-behind`, an info
     line) - read against the office, a refresh on the night of December 12,
     between the office's count and an editor's mark, sent LA-5 back to the

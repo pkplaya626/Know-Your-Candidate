@@ -1046,7 +1046,7 @@ class TestAPageCallOfDecemberWaitsForTheOffice(NoGap):
 class TestAPageBehindDecemberLeavesTheOfficesResult(NoGap):
     """Once the office's December count elects one of LA-5's two, a page that
     still marks only November's runoff - both in "runoff", with or without an
-    unmarked December box an editor prepared - says nothing of December. It
+    unmarked December box an editor prepared - marks no December result. It
     was a disagreement: LA-5 went back to the qualified list, its eight
     first-round losers "qualified" again, on the night between the office's
     count and an editor's mark. The office's result is shown, with a note; a
@@ -1104,7 +1104,7 @@ class TestAPageBehindDecemberLeavesTheOfficesResult(NoGap):
         self.assertEqual(alone["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "runoff")
         self.assert_office(self.decide(page))
 
-    def test_an_unmarked_december_box_says_nothing_of_december_either(self):
+    def test_an_unmarked_december_box_marks_no_december_result_either(self):
         page = self.page(december=[("Gabe Firment", "Republican", "", False),
                                    ("Patricia Moore", "Democratic", "", False)])
         self.assert_office(self.decide(page))
@@ -1149,6 +1149,19 @@ class TestAPageBehindDecemberLeavesTheOfficesResult(NoGap):
         entry["office"]["rounds"] = ["2026-11-03"]
         self.assertFalse(results._page_behind_december(page, entry, verdict, "2026-12-12",
                                                        rows, None, {}))
+
+    def test_with_no_list_this_run_the_last_reads_first_round_tells_a_page_behind(self):
+        # A run with no qualified list writes no first-round record of its
+        # own, so the page's runoff is compared with the last read's
+        # first-round verdict (_first_round_verdict). Its review found no
+        # test asking it: limited to this read's record, LA-5 left the cache
+        # on such a run (2026-11-27).
+        decided = self.decide(self.page())
+        for office in (read(self.DECEMBER, today=DECEMBER_AFTER), {"unread": "HTTP 403"}):
+            with self.subTest(office="read" if "unread" not in office else "unread"):
+                later = self.build(office, page=self.page(), today=DECEMBER_AFTER,
+                                   previous=decided, lists=None)
+                self.assert_office(later)
 
     def test_a_runoff_that_is_not_the_offices_two_still_disagrees(self):
         page = self.page(runoff=("Gabe Firment", "Michael Echols"))

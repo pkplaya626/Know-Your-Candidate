@@ -4228,8 +4228,8 @@ def _first_round_verdict(rid, first_day, meta, prev_meta):
 
 
 def _page_behind_december(page, entry, first_verdict, second_day, rows, aliases, names_of):
-    """Whether a page that disagrees with the office's December result says
-    nothing about December at all (rule 64): the office's entry was decided
+    """Whether a page that disagrees with the office's December result marks
+    no December result at all (rule 64): the office's entry was decided
     in its December round, and the page's only call is the first round's
     runoff, of exactly the two the office's first round sent to December -
     the page as it stood before December 12, or with an unmarked December

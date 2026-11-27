@@ -1345,8 +1345,8 @@ def check_results_pages(cache):
                             "last call aside (rule 64): the call stays set aside until a read of "
                             "those results decides the seat", sorted(silent)))
     # A page that still marks only the first round's runoff of the two the
-    # office's December round decided between (``pageBehind``): it says
-    # nothing of December, so the office's result is shown; a person is told
+    # office's December round decided between (``pageBehind``): it marks no
+    # December result, so the office's result is shown; a person is told
     # the page has not caught up.
     behind = [f"{rid}: {item.get('page')!r} still says {item.get('pageSays')}, the first "
               f"round's runoff; the Secretary of State's results say {item.get('officeSays')}"
@@ -1355,8 +1355,9 @@ def check_results_pages(cache):
         issues.append(Issue("info", "office-result-page-behind",
                             f"{len(behind)} Louisiana House seats whose results page marks only "
                             "the first round's runoff where the Secretary of State's December "
-                            "results decide the seat (rule 64): the page says nothing of "
-                            "December, and the office's result is shown", behind))
+                            "results decide the seat (rule 64): the page marks no December "
+                            "result, whatever an unmarked December table of its counts, and the "
+                            "office's result is shown", behind))
     if office.get("unread"):
         issues.append(Issue("warn", "office-results-unread",
                             f"Louisiana's Secretary of State's results could not be read on "

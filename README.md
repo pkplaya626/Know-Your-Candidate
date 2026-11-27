@@ -1134,7 +1134,7 @@ for the round's date. The election is found by its date, a seat by
   office's runoff standing meanwhile, unless the counts lead someone else.
   Once the office's December count decides the seat, a page still marking
   only the first round's runoff of the same two (an unmarked December box
-  beside it or not) says nothing of December: the office's result is shown
+  beside it or not) marks no December result: the office's result is shown
   and the page is noted (`pageBehind`, `office-result-page-behind`, an info
   line); a runoff of two others still disagrees. A
   read that concludes nothing for such a seat - the office unread, a round's
