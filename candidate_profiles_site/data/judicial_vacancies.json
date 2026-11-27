@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-17",
+ "asOf": "2026-11-27",
  "current": [
   {
    "code": "01 - MA",
@@ -56,19 +56,6 @@
    "nominated": null,
    "nominee": null,
    "reason": "Senior",
-   "since": "2025-01-07",
-   "vacatedBy": {
-    "listedAs": "Caproni,Valerie E.",
-    "name": "Valerie E. Caproni"
-   }
-  },
-  {
-   "code": "02 - NY-S",
-   "court": "ny-s",
-   "emergency": true,
-   "nominated": null,
-   "nominee": null,
-   "reason": "Senior",
    "since": "2024-12-31",
    "vacatedBy": {
     "listedAs": "Schofield,Lorna G.",
@@ -88,11 +75,27 @@
    }
   },
   {
-   "code": "04 - SC",
-   "court": "sc",
+   "code": "02 - NY-S",
+   "court": "ny-s",
    "emergency": true,
    "nominated": null,
    "nominee": null,
+   "reason": "Senior",
+   "since": "2025-01-07",
+   "vacatedBy": {
+    "listedAs": "Caproni,Valerie E.",
+    "name": "Valerie E. Caproni"
+   }
+  },
+  {
+   "code": "04 - SC",
+   "court": "sc",
+   "emergency": true,
+   "nominated": "2026-11-16",
+   "nominee": {
+    "listedAs": "Lambert,William Grayson",
+    "name": "William Grayson Lambert"
+   },
    "reason": "Senior",
    "since": "2026-10-01",
    "vacatedBy": {
@@ -131,8 +134,11 @@
    "code": "05 - TX-N",
    "court": "tx-n",
    "emergency": true,
-   "nominated": null,
-   "nominee": null,
+   "nominated": "2026-11-16",
+   "nominee": {
+    "listedAs": "Gaiser,T. Elliot",
+    "name": "T. Elliot Gaiser"
+   },
    "reason": "Senior",
    "since": "2025-10-01",
    "vacatedBy": {
@@ -141,43 +147,14 @@
    }
   },
   {
-   "code": "05 - TX-N",
-   "court": "tx-n",
-   "emergency": true,
-   "nominated": "2026-09-14",
-   "nominee": {
-    "listedAs": "Coker,Courtney Leigh",
-    "name": "Courtney Leigh Coker"
-   },
-   "reason": "Senior",
-   "since": "2025-09-17",
-   "vacatedBy": {
-    "listedAs": "Godbey,David C.",
-    "name": "David C. Godbey"
-   }
-  },
-  {
-   "code": "05 - TX-S",
-   "court": "tx-s",
-   "emergency": true,
-   "nominated": "2026-09-14",
-   "nominee": {
-    "listedAs": "Bennett,Richard Wesley",
-    "name": "Richard Wesley Bennett"
-   },
-   "reason": "Senior",
-   "since": "2025-01-02",
-   "vacatedBy": {
-    "listedAs": "Hanen,Andrew S.",
-    "name": "Andrew S. Hanen"
-   }
-  },
-  {
    "code": "05 - TX-W",
    "court": "tx-w",
    "emergency": true,
-   "nominated": null,
-   "nominee": null,
+   "nominated": "2026-11-16",
+   "nominee": {
+    "listedAs": "Sullivan,James P.",
+    "name": "James P. Sullivan"
+   },
    "reason": "Resigned",
    "since": "2026-08-31",
    "vacatedBy": {
@@ -371,8 +348,10 @@
    }
   }
  ],
- "emergenciesUnmatched": [],
- "fetched": "2026-11-17T18:02:37+00:00",
+ "emergenciesUnmatched": [
+  "10 - CO: Domenico,Daniel D. (3000-01-01)"
+ ],
+ "fetched": "2026-11-27T19:52:34+00:00",
  "future": [
   {
    "announced": "2026-07-15",
@@ -433,22 +412,6 @@
    "vacatedBy": {
     "listedAs": "Southwick,Leslie H.",
     "name": "Leslie H. Southwick"
-   }
-  },
-  {
-   "announced": "2026-06-09",
-   "code": "05 - CCA",
-   "court": "ca5",
-   "nominated": "2026-07-14",
-   "nominee": {
-    "listedAs": "St. John,Anna",
-    "name": "Anna St. John"
-   },
-   "reason": "Senior",
-   "vacancyDate": null,
-   "vacatedBy": {
-    "listedAs": "Engelhardt,Kurt D.",
-    "name": "Kurt D. Engelhardt"
    }
   },
   {
@@ -558,23 +521,7 @@
    }
   },
   {
-   "announced": "2026-02-24",
-   "code": "10 - CCA",
-   "court": "ca10",
-   "nominated": "2026-05-12",
-   "nominee": {
-    "listedAs": "Domenico,Daniel Desmond",
-    "name": "Daniel Desmond Domenico"
-   },
-   "reason": "Senior",
-   "vacancyDate": null,
-   "vacatedBy": {
-    "listedAs": "Tymkovich,Timothy M.",
-    "name": "Timothy M. Tymkovich"
-   }
-  },
-  {
-   "announced": "2026-05-12",
+   "announced": "2026-11-16",
    "code": "10 - CO",
    "court": "co",
    "nominated": null,
@@ -587,15 +534,15 @@
    }
   }
  ],
- "read": "2026-11-17",
+ "read": "2026-11-27",
  "sources": {
   "current": "https://www.uscourts.gov/data-news/judicial-vacancies/current-judicial-vacancies",
   "emergencies": "https://www.uscourts.gov/data-news/judicial-vacancies/judicial-emergencies",
   "future": "https://www.uscourts.gov/data-news/judicial-vacancies/future-judicial-vacancies"
  },
  "totals": {
-  "nominees": 10,
-  "vacancies": 27
+  "nominees": 11,
+  "vacancies": 25
  },
  "unplaced": []
 }

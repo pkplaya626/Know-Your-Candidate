@@ -639,7 +639,6 @@
   "AL|sos|CAROLEENE DOBSON": "not-linked",
   "AL|sos|WAYNE ROGERS": "not-linked",
   "AR|governor|Colt Shelby": "not-linked",
-  "AR|governor|State Senator Fred Love": "shape",
   "AR|lt|Michael Kalagias": "not-linked",
   "AR|sos|Kelly Grappe": "not-linked",
   "AR|sos|Michael Pakko": "not-linked",
@@ -649,7 +648,6 @@
   "CO|ag|Michael J. Allen": "licence-doubt-listed",
   "CO|governor|Eric Mulder": "not-linked",
   "CO|governor|Erik Underwood": "not-linked",
-  "CO|governor|Greg Lopez": "public-domain-unsupported",
   "CO|governor|Jeff Peckman": "no-image",
   "CO|governor|Phil Weiser": "public-domain-unsupported",
   "CO|governor|Stephen T. Hamilton": "not-linked",
@@ -672,7 +670,6 @@
   "DC|ag|Manuel Rivera": "not-linked",
   "DE|ag|David C. \"Dave\" Graham": "not-linked",
   "FL|governor|Charles Burkett": "not-linked",
-  "FL|governor|David Jolly": "licence-doubt",
   "FL|governor|Dean Ocean Abrams": "not-linked",
   "FL|governor|Frank J. Russo": "not-linked",
   "FL|governor|Jeffrey Peter \"Dr. Jeff\" Datto": "not-linked",
@@ -694,8 +691,6 @@
   "GU|ag|PAULUHN, Jordan Lawrence Evangelista": "not-linked",
   "GU|ag|SANTOS, Peter John": "not-linked",
   "GU|ag|TYDINGCO, Phillip James": "article-not-theirs",
-  "GU|governor|ADA, Vicente A.": "file-name",
-  "GU|governor|TERLAJE, Therese Maria": "file-name",
   "GU|lt|CALVO, Edward John": "no-image",
   "GU|lt|PEREZ, Sabina Eileen": "file-name",
   "HI|governor|Gary Cordery": "not-linked",
@@ -717,7 +712,6 @@
   "ID|sos|Shawn Keenan": "not-linked",
   "IL|ag|Robert W. Fioretti": "not-linked",
   "IL|governor|Collin Corbett": "not-linked",
-  "IL|governor|Darren Bailey": "file-name",
   "IL|lt|Aaron B. Del Mar": "not-linked",
   "IL|lt|Carolyn Schofield": "not-linked",
   "IL|lt|Christian Mitchell": "file-name",
@@ -799,7 +793,6 @@
   "NM|sos|RAMONA L GOOLSBY": "not-linked",
   "NV|ag|Cannizzaro, Nicole Jeanette": "no-image",
   "NV|ag|Guzmán Fralick, Adriana": "not-linked",
-  "NV|governor|Ford, Aaron D.": "file-name",
   "NV|governor|Ford, Danielle": "not-linked",
   "NV|lt|Hansen, Janine": "not-linked",
   "NV|sos|Aguilar, Francisco \"Cisco\"": "not-linked",
@@ -837,12 +830,10 @@
   "RI|ag|KIMBERLY RENEE AHERN": "no-image",
   "RI|governor|AARON CHRISTOPHER GUCKIAN": "not-linked",
   "RI|governor|C D REYNOLDS": "not-linked",
-  "RI|governor|HELENA BUONANNO FOULKES": "file-name",
   "RI|governor|JASJIT S GOTRA": "not-linked",
   "RI|governor|KENNETH J BLOCK": "file-name",
   "SC|ag|David Stumbo": "not-linked",
   "SC|ag|Richard Hricik": "not-linked",
-  "SC|governor|Jermaine Johnson": "file-name",
   "SC|governor|Michael Addison": "not-linked",
   "SC|governor|Walid Hakim": "not-linked",
   "SC|lt|Arnold E Karr": "not-linked",
@@ -873,7 +864,6 @@
   "TN|governor|Wendell Jackson": "not-linked",
   "TX|ag|NATHAN JOHNSON": "public-domain-unsupported",
   "TX|ag|TOM OXFORD": "not-linked",
-  "TX|governor|GINA HINOJOSA": "file-name",
   "TX|governor|PAT DIXON": "not-linked",
   "TX|lt|ANTHONY CRISTO": "not-linked",
   "TX|lt|KEVIN MCCORMICK": "not-linked",
@@ -900,7 +890,6 @@
   "WI|lt|Sarah Godlewski": "shape",
   "WI|sos|Jay Schroeder": "not-linked",
   "WI|sos|Pete Karas": "not-linked",
-  "WY|governor|Eric Barlow": "no-image",
   "WY|governor|Kenneth R. Casner": "not-linked",
   "WY|governor|Rebecca Bextel": "not-linked",
   "WY|sos|Bryan McCarty": "not-linked",
@@ -952,7 +941,7 @@
    "height": 250,
    "page": "https://bioguide.congress.gov/search/bio/T000278",
    "photo": "https://www.congress.gov/img/member/t000278_200.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "member",
    "width": 200
   },
@@ -1062,7 +1051,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2292",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 800
   },
@@ -1073,7 +1062,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2427",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 799
   },
@@ -1085,7 +1074,7 @@
    "height": 263,
    "page": "https://bioguide.congress.gov/search/bio/B001302",
    "photo": "https://www.congress.gov/img/member/b001302_200.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "member",
    "width": 175
   },
@@ -1096,7 +1085,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2343",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 800
   },
@@ -1107,7 +1096,7 @@
    "height": 832,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2366",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 666
   },
@@ -1118,7 +1107,7 @@
    "height": 370,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2460",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 296
   },
@@ -1129,7 +1118,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2635",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 752
   },
@@ -1140,7 +1129,7 @@
    "height": 894,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2640",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 715
   },
@@ -1151,7 +1140,7 @@
    "height": 870,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2634",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 696
   },
@@ -1162,7 +1151,7 @@
    "height": 955,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2642",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 764
   },
@@ -1173,7 +1162,7 @@
    "height": 832,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2451",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 666
   },
@@ -1184,7 +1173,7 @@
    "height": 291,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2302",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 233
   },
@@ -1260,7 +1249,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/lt-governor-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/lt-governor/ma.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 207
   },
@@ -1293,7 +1282,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/sos-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/sos/wagner.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "guide",
    "width": 207
   },
@@ -1342,7 +1331,7 @@
   },
   "CO|governor|Greg Lopez": {
    "by": "Office of the Clerk, U.S. House of Representatives",
-   "bytes": 55073,
+   "bytes": 22659,
    "chosen": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Greg_Lopez_118th_Congress_portrait.jpg",
    "credit": {
     "basis": "PD US Congress",
@@ -1355,14 +1344,14 @@
     "yearForm": 4
    },
    "evidence": "file description \"A portrait of Rep. Greg Lopez (R-CO) for the 118th U.S. Congress.\"; file name \"Greg Lopez 118th Congress portrait.jpg\"; in Category:Greg Lopez and used in the article 'Greg Lopez'",
-   "height": 410,
+   "height": 306,
    "page": "https://commons.wikimedia.org/wiki/File:Greg_Lopez_118th_Congress_portrait.jpg",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Greg_Lopez_118th_Congress_portrait.jpg",
+   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Greg_Lopez_118th_Congress_portrait.jpg/250px-Greg_Lopez_118th_Congress_portrait.jpg",
    "read": "2026-11-17",
    "route": "curated",
    "seen": "The House's official studio portrait of one man alone: grey hair, smiling, dark suit, white shirt, red tie, on the plain blue backdrop of the Congress portraits; nobody else in the frame, no words or graphics. A second reader looked again and measured: brow at about band 4.0, chin at about band 7.8 on the card: about 3.8 tenths (one band = 41 source px)",
    "tie": "Route 1(c). The 2026 Colorado gubernatorial election article links 'Greg Lopez' for him (statewide_photos.json articles for CO|governor|Greg Lopez); that article's Wikidata item Q126910689 has Commons category 'Category:Greg Lopez' (P373), which holds this file, and the article itself uses it. The file page gives the author as the Office of the Clerk, U.S. House of Representatives, a government office, source https://clerk.house.gov/members/L000604, licence public domain (PD US Congress). Not the article's lead (File:Greg Lopez in 2024.jpg, refused as public-domain-unsupported) and not in NOT_A_PORTRAIT or PORTRAIT_LICENCE_DOUBTS.",
-   "width": 335
+   "width": 250
   },
   "CO|governor|Victor Marx": {
    "article": "Victor Marx",
@@ -1528,9 +1517,33 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/D000032",
    "photo": "https://www.congress.gov/img/member/d000032_200.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "member",
    "width": 175
+  },
+  "FL|governor|David Jolly": {
+   "by": "U.S. House of Representatives",
+   "bytes": 18682,
+   "chosen": "https://upload.wikimedia.org/wikipedia/commons/1/1f/David_Jolly.jpg",
+   "credit": {
+    "basis": "PD US Congress",
+    "by": "U.S. House of Representatives",
+    "licence": "Public domain",
+    "licenceUrl": null,
+    "page": "https://commons.wikimedia.org/wiki/File:David_Jolly.jpg",
+    "via": "Wikimedia Commons",
+    "year": 2014,
+    "yearForm": 4
+   },
+   "evidence": "file description \"Official portrait of David Jolly, the U.S. representative for Florida's 13th congressional district.\"; file name \"David Jolly.jpg\"; in Category:David Jolly",
+   "height": 376,
+   "page": "https://commons.wikimedia.org/wiki/File:David_Jolly.jpg",
+   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/David_Jolly.jpg/250px-David_Jolly.jpg",
+   "read": "2026-11-17",
+   "route": "curated",
+   "seen": "The House's official studio portrait of one man alone: dark hair greying at the sides, smiling, pinstriped suit with the House member's pin, white shirt, silver tie, plain blue backdrop; nobody else in the frame, no words or graphics. A second reader looked again and measured: brow at about band 4.0, chin at about band 6.2 on the card: about 2.2 tenths (one band = 62.5 px of the 500px rendition); comfortably over a tenth",
+   "tie": "Route 1(c). The 2026 Florida gubernatorial election article links 'David Jolly' for him (statewide_photos.json articles for FL|governor|David Jolly); that article's Wikidata item Q15963996 has Commons category 'Category:David Jolly' (P373), which holds this file, the item's own image (P18). The file page gives the author as the U.S. House of Representatives, licence public domain (PD US Congress), source https://bioguide.congress.gov/search/bio/J000296. It is not the article's lead (File:David Jolly (3x4).jpg, refused as a licence doubt for naming no author) and not in NOT_A_PORTRAIT or PORTRAIT_LICENCE_DOUBTS. A person should know: the file page's source line also names a 'Hi-res file' on orlandoweekly.com beside the Biographical Directory's 'Low-res file with metadata' (https://bioguide.congress.gov/photo/67f56dbbfddc8a66d43f6b02.jpg); I fetched the Directory's file as this project and it is the same official portrait (same pose, pin, tie and blue backdrop, the Directory's a tighter crop), so the photograph is the House's work whatever copy the uploader took the larger bytes from.",
+   "width": 250
   },
   "FL|governor|Moliere \"Moe\" Dimanche": {
    "article": "Moliere Dimanche",
@@ -2149,7 +2162,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/J000307",
    "photo": "https://www.congress.gov/img/member/j000307_200.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "member",
    "width": 175
   },
@@ -2210,7 +2223,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/K000367",
    "photo": "https://www.congress.gov/img/member/k000367_200.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "member",
    "width": 180
   },
@@ -2940,7 +2953,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/B001243",
    "photo": "https://www.congress.gov/img/member/b001243_200.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "member",
    "width": 180
   },
@@ -3030,7 +3043,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/P000610",
    "photo": "https://www.congress.gov/img/member/p000610_200.jpg",
-   "read": "2026-11-17",
+   "read": "2026-11-27",
    "route": "member",
    "width": 175
   },
@@ -3280,5 +3293,5 @@
   "RI|governor": "2026-11-16",
   "RI|lt": "2026-11-16"
  },
- "read": "2026-11-17"
+ "read": "2026-11-27"
 }

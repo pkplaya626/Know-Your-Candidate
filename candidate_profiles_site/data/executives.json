@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-16T17:42:16+00:00",
+ "fetched": "2026-11-27T18:00:53+00:00",
  "governors": {
   "AK": {
    "address": "Office of the Governor, P.O. Box 110001, Juneau, AK 99811-0001",
@@ -56,11 +56,7 @@
     "January 14, 2019 - January 16, 2023",
     "January 16, 2023 - Current"
    ],
-   "website": "https://governor.alabama.gov/",
-   "wikidata": "Q6380211",
-   "wikidataStarts": [
-    "2017-04-10"
-   ]
+   "website": "https://governor.alabama.gov/"
   },
   "AR": {
    "address": "500 Woodlane St., Little Rock, AR 72201",
@@ -160,11 +156,7 @@
     "January 7, 2019 - January 6, 2023",
     "January 6, 2023 - Current"
    ],
-   "website": "https://www.gov.ca.gov/",
-   "wikidata": "Q461391",
-   "wikidataStarts": [
-    "2019-01-07"
-   ]
+   "website": "https://www.gov.ca.gov/"
   },
   "CO": {
    "address": "State Capitol Bldg, 200 E. Colfax Ave., Rm. 136, Denver, CO 80203",
@@ -271,11 +263,7 @@
     "January 8, 2019 - January 3, 2023",
     "January 3, 2023 - Current"
    ],
-   "website": "https://www.flgov.com/",
-   "wikidata": "Q3105215",
-   "wikidataStarts": [
-    "2019-01-08"
-   ]
+   "website": "https://www.flgov.com/"
   },
   "GA": {
    "address": "206 Washington Street Suite 203, State Capitol, Atlanta, GA 30334",
@@ -297,11 +285,7 @@
     "January 14, 2019 - January 9, 2023",
     "January 9, 2023 - Current"
    ],
-   "website": "https://gov.georgia.gov/",
-   "wikidata": "Q4964973",
-   "wikidataStarts": [
-    "2019-01-14"
-   ]
+   "website": "https://gov.georgia.gov/"
   },
   "GU": {
    "address": "Ricardo J Bordallo Governor’s Complex, 513 West Marine Corps Drive, Hagatna, GU 96910",
@@ -490,11 +474,7 @@
     "January 14, 2019 - January 9, 2023",
     "January 9, 2023 - Current"
    ],
-   "website": "https://governor.kansas.gov/",
-   "wikidata": "Q6499080",
-   "wikidataStarts": [
-    "2019-01-14"
-   ]
+   "website": "https://governor.kansas.gov/"
   },
   "KY": {
    "address": "700 Capitol Avenue, Suite 100, Frankfort, Kentucky 40601",
@@ -641,11 +621,7 @@
     "January 2, 2019 - January 4, 2023",
     "January 4, 2023 - Current"
    ],
-   "website": "https://www.maine.gov/governor/mills/",
-   "wikidata": "Q6153618",
-   "wikidataStarts": [
-    "2019-01-02"
-   ]
+   "website": "https://www.maine.gov/governor/mills/"
   },
   "MI": {
    "address": "P.O. Box 30013, Lansing, Michigan 48909",
@@ -673,11 +649,7 @@
     "January 1, 2019 - January 1, 2023",
     "January 1, 2023 - Current"
    ],
-   "website": "https://www.michigan.gov/whitmer/",
-   "wikidata": "Q5607720",
-   "wikidataStarts": [
-    "2019-01-01"
-   ]
+   "website": "https://www.michigan.gov/whitmer/"
   },
   "MN": {
    "address": "130 State Capitol, 75 Rev Dr. Martin Luther King Jr. Blvd., St. Paul, MN 55155",
@@ -705,11 +677,7 @@
     "January 7, 2019 - January 2, 2023",
     "January 2, 2023 - Current"
    ],
-   "website": "https://mn.gov/governor/",
-   "wikidata": "Q2434360",
-   "wikidataStarts": [
-    "2019-01-07"
-   ]
+   "website": "https://mn.gov/governor/"
   },
   "MO": {
    "address": "P.O. Box 720, Jefferson City, MO 65102",
@@ -968,11 +936,7 @@
     "January 1, 2019 - January 1, 2023",
     "January 1, 2023 - Current"
    ],
-   "website": "http://www.governor.state.nm.us/",
-   "wikidata": "Q3917203",
-   "wikidataStarts": [
-    "2019-01-01"
-   ]
+   "website": "http://www.governor.state.nm.us/"
   },
   "NV": {
    "address": "State Capitol Building, 101 N. Carson Street, Carson City, NV 89701",
@@ -999,11 +963,7 @@
    "terms": [
     "January 2, 2023 - Current"
    ],
-   "website": "https://gov.nv.gov/",
-   "wikidata": "Q28033703",
-   "wikidataStarts": [
-    "2023-01-02"
-   ]
+   "website": "https://gov.nv.gov/"
   },
   "NY": {
    "address": "NYS State Capitol Building, Albany, NY 12224",
@@ -1057,11 +1017,7 @@
     "January 14, 2019 - January 8, 2023",
     "January 8, 2023 - Current"
    ],
-   "website": "http://governor.ohio.gov/",
-   "wikidata": "Q1363468",
-   "wikidataStarts": [
-    "2019-01-14"
-   ]
+   "website": "http://governor.ohio.gov/"
   },
   "OK": {
    "address": "2300 N. Lincoln Blvd., Suite 212, Oklahoma City, OK 73105",
@@ -1089,11 +1045,7 @@
     "January 14, 2019 - January 9, 2023",
     "January 9, 2023 - Current"
    ],
-   "website": "http://www.gov.ok.gov/",
-   "wikidata": "Q58322517",
-   "wikidataStarts": [
-    "2019-01-14"
-   ]
+   "website": "http://www.gov.ok.gov/"
   },
   "OR": {
    "address": "900 Court Street, Suite 254, Salem, OR 97301-4047",
@@ -1198,11 +1150,7 @@
     "March 2, 2021 - January 3, 2023",
     "January 3, 2023 - Current"
    ],
-   "website": "https://governor.ri.gov/",
-   "wikidata": "Q5218111",
-   "wikidataStarts": [
-    "2021-03-02"
-   ]
+   "website": "https://governor.ri.gov/"
   },
   "SC": {
    "address": "State House, 1100 Gervais Street, Columbia, South Carolina 29201",
@@ -1231,11 +1179,7 @@
     "January 8, 2019 - January 11, 2023",
     "January 11, 2023 - Current"
    ],
-   "website": "http://governor.sc.gov/",
-   "wikidata": "Q5725737",
-   "wikidataStarts": [
-    "2017-01-24"
-   ]
+   "website": "http://governor.sc.gov/"
   },
   "SD": {
    "address": "500 East Capitol Avenue, Pierre, SD 57501",
@@ -1293,11 +1237,7 @@
    "terms": [
     "January 19, 2019 - Current"
    ],
-   "website": "https://www.tn.gov/content/tn/governor.html",
-   "wikidata": "Q58321685",
-   "wikidataStarts": [
-    "2019-01-19"
-   ]
+   "website": "https://www.tn.gov/content/tn/governor.html"
   },
   "TX": {
    "address": "P.O. Box 12428 Austin, TX 78711",
@@ -1490,11 +1430,7 @@
     "January 7, 2019 - January 3, 2023",
     "January 3, 2023 - Current"
    ],
-   "website": "https://evers.wi.gov/",
-   "wikidata": "Q7822309",
-   "wikidataStarts": [
-    "2019-01-07"
-   ]
+   "website": "https://evers.wi.gov/"
   },
   "WV": {
    "address": "1900 Kanawha Street, Charleston, WV 25305",
@@ -1547,11 +1483,7 @@
     "January 7, 2019 - January 2, 2023",
     "January 2, 2023 - Current"
    ],
-   "website": "http://governor.wy.gov/",
-   "wikidata": "Q6767775",
-   "wikidataStarts": [
-    "2019-01-07"
-   ]
+   "website": "http://governor.wy.gov/"
   }
  },
  "source": "National Governors Association, current governors",
