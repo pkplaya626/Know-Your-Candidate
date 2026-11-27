@@ -1,6 +1,6 @@
 {
  "congress": 119,
- "fetched": "2026-11-17T16:56:35+00:00",
+ "fetched": "2026-11-26T17:46:23+00:00",
  "members": [
   {
    "aliases": [
@@ -194,6 +194,6 @@
    "wikidata": "Q22212"
   }
  ],
- "membershipRead": "2026-11-17",
+ "membershipRead": "2026-11-26",
  "source": "https://unitedstates.github.io/congress-legislators/legislators-historical.json"
 }

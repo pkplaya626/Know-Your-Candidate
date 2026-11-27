@@ -7319,7 +7319,7 @@
   "name": "Adrian Boafo",
   "original": "https://mgaleg.maryland.gov/2026RS/images/boafo01.jpg",
   "page": "https://mgaleg.maryland.gov/mgawebsite/Members/Details/boafo01",
-  "read": "2026-11-17",
+  "read": "2026-11-26",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/0/09/Adrian_Boafo_Feb2023.jpg"
   ],
@@ -9229,7 +9229,7 @@
    "width": 2964
   },
   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
-  "read": "2026-11-17",
+  "read": "2026-11-26",
   "state": "NV",
   "url": "https://i0.wp.com/leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg?w=500&ssl=1",
   "via": "state-legislature",
@@ -11582,7 +11582,7 @@
   "name": "Fred Wellman",
   "original": "https://upload.wikimedia.org/wikipedia/commons/4/40/Fred_Wellman%2C_August_2025.png",
   "page": "https://www.wikidata.org/wiki/Q131344046",
-  "read": "2026-11-16",
+  "read": "2026-11-26",
   "set": [
    [
     120,
@@ -12287,7 +12287,7 @@
   "name": "Jacqui V Irwin",
   "original": "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_42.jpg",
   "page": "https://www.assembly.ca.gov/assemblymembers/42",
-  "read": "2026-11-17",
+  "read": "2026-11-26",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg"
   ],
@@ -12454,7 +12454,7 @@
   "name": "James Talarico",
   "original": "https://house.texas.gov/images/members/3685.jpg?v=1",
   "page": "https://house.texas.gov/members/3685",
-  "read": "2026-11-17",
+  "read": "2026-11-26",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/7/70/James_Talarico_Press_Conference_(cropped).jpg",
    "https://upload.wikimedia.org/wikipedia/commons/8/8b/James_Talarico_Press_Conference.jpg"
@@ -13088,7 +13088,7 @@
    "width": 1500
   },
   "page": "https://senatedems.com/moss",
-  "read": "2026-11-17",
+  "read": "2026-11-26",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/2/22/Michigan_Senator_Jeremy_Moss_2019.jpg"
   ],
@@ -13556,7 +13556,7 @@
   "name": "John Andrew Williams",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/66/John_Drew_Williams_Headshot.jpg",
   "page": "https://www.wikidata.org/wiki/Q136086044",
-  "read": "2026-11-16",
+  "read": "2026-11-26",
   "set": [
    [
     120,
@@ -13897,6 +13897,31 @@
   "name": "Johnny Garrett",
   "url": null,
   "via": "unresolved"
+ },
+ "person:jon bonck|TX|H": {
+  "credit": {
+   "attribution": false,
+   "by": "House Creative Services",
+   "file": "https://commons.wikimedia.org/wiki/File:Jon_Bonck_120th_(cropped).jpg",
+   "form": 4,
+   "licence": "Public domain",
+   "licenceUrl": null,
+   "nonFree": false,
+   "year": 2026
+  },
+  "height": 108,
+  "linked": "Jon Bonck",
+  "name": "Jon Bonck",
+  "set": [
+   [
+    100,
+    "https://upload.wikimedia.org/wikipedia/commons/8/8c/Jon_Bonck_120th_%28cropped%29.jpg"
+   ]
+  ],
+  "title": "Jon Bonck",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Jon_Bonck_120th_%28cropped%29.jpg",
+  "via": "wikipedia",
+  "width": 100
  },
  "person:jonathan michael nez|AZ|H": {
   "credit": {
@@ -15853,7 +15878,7 @@
   "name": "Martin R Zamora",
   "original": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO",
-  "read": "2026-11-17",
+  "read": "2026-11-26",
   "state": "NM",
   "url": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "via": "state-legislature",
@@ -18083,7 +18108,7 @@
   "name": "Rebecca Bennett",
   "original": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Rebecca_Bennett_and_Andy_Kim_Nov_2026_%28cropped1%29.jpeg",
   "page": "https://www.wikidata.org/wiki/Q141373045",
-  "read": "2026-11-16",
+  "read": "2026-11-26",
   "set": [
    [
     120,
@@ -18325,7 +18350,7 @@
   "name": "Rick Brattin",
   "original": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "page": "https://www.senate.mo.gov/Senators/Member?id=5",
-  "read": "2026-11-17",
+  "read": "2026-11-26",
   "state": "MO",
   "url": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "via": "state-legislature",
@@ -19291,7 +19316,7 @@
   "name": "Sean McCann",
   "original": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "page": "https://senatedems.com/mccann",
-  "read": "2026-11-17",
+  "read": "2026-11-26",
   "state": "MI",
   "url": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "via": "state-legislature",
@@ -20721,7 +20746,7 @@
   "name": "Yolanda Rena Prince",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/65/Yolanda_Prince.jpg",
   "page": "https://www.wikidata.org/wiki/Q139698851",
-  "read": "2026-11-16",
+  "read": "2026-11-26",
   "set": [
    [
     120,
