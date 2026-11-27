@@ -286,8 +286,18 @@ def seated_winner(profile):
 
 def filing_ids(profile):
     """The profile ids of the filings folded into *profile* (``FEC_`` and
-    each FEC id it holds: its own and the merged, ``otherFecIds``), which
-    caches keyed while they ran still hold their reads under, as
-    ``share.aliases`` resolves them; never its own id."""
+    each FEC id it holds: its own and the merged, ``otherFecIds``; and a
+    curated row's own id, ``otherIds``, rules 61 and 68), which caches keyed
+    while they ran still hold their reads under, as ``share.aliases``
+    resolves them; never its own id. Without the curated row's id Juliana
+    Stratton, Illinois's Senate winner from the curated row CAND_33, lost
+    her record of offices on January 3 - the Lieutenant Governor of
+    Illinois read under CAND_33 - and with it the "Also on this site" line
+    her officer card's join rests on (rule 105; the January rehearsal of
+    2026-11-17)."""
     ids = [profile.get("fecCandidateId"), *(profile.get("otherFecIds") or [])]
-    return [f"FEC_{fid}" for fid in ids if fid and f"FEC_{fid}" != profile.get("id")]
+    out = [f"FEC_{fid}" for fid in ids if fid and f"FEC_{fid}" != profile.get("id")]
+    for curated in profile.get("otherIds") or []:
+        if curated and str(curated) != profile.get("id") and str(curated) not in out:
+            out.append(str(curated))
+    return out

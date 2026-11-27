@@ -1470,6 +1470,164 @@ MEMBER_STATUS_BY_ID = {
                 "https://www.thegreenpapers.com/G26/LA"),
 }
 
+# Two cards an evidenced entry settles (kyc/identity.py, rule 105):
+# keyed on both cards' keys exactly as the build's identity warnings name
+# them ("officer:MI:sos", "candidate:gov-MI-jocelyn-benson",
+# "profile:FEC_...", "legislator:GA:ocd-person/..."), each {"same": True
+# where they are one person, False where they are namesakes, "evidence":
+# the pages that tie or part them - the office's own page naming the person
+# beside the other role, never a news story - and "read": the day}. An id
+# and a second source join people without an entry; an entry is for a pair
+# no record ties (identity-look-alike, identity-legislator-look-alike) or
+# whose names an id cannot settle (identity-names-disagree). The build
+# warns on an entry naming a card it no longer makes, one the records now
+# join themselves, and a "two people" entry the records join
+# (stale-identity-join, identity-join-contradicted). "behind" beside "same":
+# True says the legislator card of the pair is no current role - the
+# legislature's own pages seat someone else while Open States still seats
+# them - in the legislature's words: the pair joins nothing and is said in
+# identity-legislator-roster-behind until the roster drops the card, when
+# the entry is stale. Each source below was opened by this project's reader
+# (its agents, kyc/agent.py's USER_AGENT) on the day given, a second read of
+# the research of 2026-11-15; no person has yet looked at these entries, and
+# one a person has read says so. A page that refused the reader concludes
+# nothing (rule 8) and is named as such. No telephone number or mailing
+# address is copied.
+IDENTITY_JOINS = {
+    ("officer:MI:sos", "candidate:gov-MI-jocelyn-benson"): {
+        "same": True,
+        "evidence": (
+            "The candidate card's own Wikidata item, Q13562375 (its record's item; enwiki "
+            "\"Jocelyn Benson\", the article Michigan's race article links for the list's "
+            "name: \"| nominee1 = '''[[Jocelyn Benson]]'''\"), holds P39 Q16147324, series "
+            "ordinal 43, start 2019-01-01, replaces Q7383055 (Ruth Johnson); Q16147324 is "
+            "labelled \"Michigan Department of State\", alias \"Michigan Secretary of "
+            "State\", \"elected office and department within the government of the State of "
+            "Michigan\". The article's infobox: \"office1 = 43rd [[Michigan Secretary of "
+            "State|Secretary of State of Michigan]]\", \"term_start1 = January 1, 2019\", "
+            "term_end1 blank, \"predecessor1 = [[Ruth Johnson]]\": rule 69's two sources, "
+            "which the build withheld only for the item's label. The campaign site the item "
+            "gives (P856), https://www.jocelynbenson.com/ : \"Secretary of State and "
+            "Democratic nominee for Governor Jocelyn Benson joined the rest of the Democratic "
+            "ticket\". The office's own page, "
+            "https://www.michigan.gov/sos/resources/the-secretary-of-state, answered this "
+            "reader 403 \"Access Denied\" and concludes nothing."),
+        "read": "2026-11-17",
+    },
+    ("officer:MT:sos", "profile:FEC_H6MT01160"): {
+        "same": True,
+        "evidence": (
+            "The profile's FEC id H6MT01160 has the principal campaign committee C00941583 "
+            "\"CHRISTI JACOBSEN FOR CONGRESS\" (OpenFEC /candidate/H6MT01160/committees/, first "
+            "filed 2026-03-03). The Montana Secretary of State's \"FEDERAL PRIMARY 2026 "
+            "Candidate List\", https://candidatefiling.mt.gov/candidatefiling/CandidateList."
+            "aspx?e=450002928 , prints for \"1ST CONGRESSIONAL UNITED STATES REPRESENTATIVE "
+            "... CHRISTI JACOBSEN\" the website \"CHRISTIJACOBSEN.COM\", filed \"3/3/2026 "
+            "11:23:45 AM REP\" (its post office box, the committee's too, is not copied). "
+            "That site, https://christijacobsen.com/about/ : \"Christi Jacobsen is running "
+            "for Congress ... She currently serves as Montana’s Secretary of State\", and "
+            "\"PAID FOR BY CHRISTI JACOBSEN FOR CONGRESS\", the committee's name. The "
+            "office's own site, https://sosmt.gov/, answered this reader 403 \"Just a "
+            "moment...\", a challenge page that concludes nothing."),
+        "read": "2026-11-17",
+    },
+    ("officer:SD:ag", "profile:FEC_H6SD01109"): {
+        "same": True,
+        "evidence": (
+            "The profile's FEC id H6SD01109 has the principal campaign committee C00909689 "
+            "\"MARTY JACKLEY FOR CONGRESS\", whose filed website is WWW.MARTYJACKLEY.COM "
+            "(data/campaigns.json; rule 32). https://martyjackley.com/about : \"2009–2019, "
+            "2023–PRESENT Attorney General of South Dakota Appointed in 2009, then reelected "
+            "three times.\", the photograph captioned \"Attorney General Marty Jackley\", "
+            "\"Paid for by Marty Jackley for Congress\". The office's own page, the officer "
+            "card's, https://atg.sd.gov/OurOffice/bio.aspx : \"Attorney General Marty J. "
+            "Jackley Marty was raised in Sturgis and graduated from the South Dakota School of "
+            "Mines ...\", \"In 2022 Marty was elected for a fourth term as the South Dakota "
+            "Attorney General.\" - the life the campaign's About page tells."),
+        "read": "2026-11-17",
+    },
+    ("profile:FEC_H6IL09293", "legislator:IL:ocd-person/0125b0ac-65ba-443e-b418-53cdf42b9f85"): {
+        "same": True,
+        "evidence": (
+            "The profile's FEC id H6IL09293 has the principal campaign committee C00910976 "
+            "\"MIKE SIMMONS FOR CONGRESS\", website WWW.MIKESIMMONS.ORG (OpenFEC "
+            "/candidate/H6IL09293/committees/). https://www.mikesimmons.org (\"Mike Simmons | "
+            "Illinois State Senator | District 7\"): \"state Senator for the 7th Senate "
+            "District of Illinois ... On February 6, 2021, Mike was sworn in to represent the "
+            "7th District\". The General Assembly's own page for the member the card links, "
+            "https://www.ilga.gov/Senate/Members/Details/3398 : \"Senate Member Mike Simmons "
+            "(D) - 104th General Assembly (2025-2026) Mike Simmons (D) Senator 2021 - Present "
+            "7th District\". The card's \"Mike Simmons-Gessesse\" is Open States' form; the "
+            "legislature writes \"Mike Simmons\"."),
+        "read": "2026-11-17",
+    },
+    ("profile:FEC_H6FL24087", "legislator:FL:ocd-person/a8a2eaa4-449b-441f-96bb-d8a3e8191479"): {
+        "same": True,
+        "behind": ("the Florida Senate's own page for District 34, "
+                   "https://www.flsenate.gov/Senators/S34, names \"2026-2028 Senator Ashley "
+                   "Viola Gantt ... District 34\", \"Elected to the Senate in 2026\"; its list "
+                   "of 2026-2028 senators holds no Jones"),
+        "evidence": (
+            "The Florida Senate's page for the last term, "
+            "https://www.flsenate.gov/Senators/2024-2026/S34 : \"2024-2026 Senator Shevrin D. "
+            "\"Shev\" Jones Party: Democrat District 34\". The profile's FEC id H6FL24087 has "
+            "the principal campaign committee C00952556 \"SHEVRIN FOR CONGRESS\", website "
+            "WWW.SHEVRINJONES.COM (OpenFEC). That site's https://shevrinjones.com/about/ was "
+            "read on 2026-11-15 (\"Florida State Senator Shevrin “Shev” Jones\", \"Today, Jones "
+            "proudly serves Florida’s 34th Senate District\", \"Paid for by Shevrin Jones for "
+            "Congress\"), and on 2026-11-17 answered 404 (\"404 — Shevrin Jones for State "
+            "Senate\"); its front page, https://shevrinjones.com/ , now titled \"Shevrin Jones "
+            "for State Senate\": \"Shevrin “Shev” Jones is an educator ... Elected to the "
+            "Florida House in 2012 and the Florida Senate in 2020, he is running to bring that "
+            "record to District 37\", \"paid for and approved by Shevrin Jones, Democrat, for "
+            "State Senate, District 37\" - the same person, on the site his FEC committee "
+            "filed. One person; the card's seat is now Senator Gantt's (\"behind\")."),
+        "read": "2026-11-17",
+    },
+    ("profile:FEC_S6FL00830", "legislator:FL:ocd-person/66c3a112-3008-4332-a6b0-8990a7d992d5"): {
+        "same": True,
+        "behind": ("the Florida House's \"Representatives for 2026 - 2028\", "
+                   "https://www.flhouse.gov/Sections/Representatives/representatives.aspx, "
+                   "lists \"Gibson, Audrey Democrat — District: 13 ... 11/04/26 - 11/07/28\" "
+                   "and no Nixon"),
+        "evidence": (
+            "The profile's FEC id S6FL00830 has the committee \"ANGIE FOR FLORIDA\", whose "
+            "filed website is ANGIENIXON.COM (data/campaigns.json; rule 32). "
+            "https://angienixon.com : \"Angie is a former Florida State Representative, union "
+            "organizer, and mother born and raised in Jacksonville\", \"Paid for by Angie for "
+            "Florida\". The profile's record of offices (Wikidata Q98690818) gives \"Member of "
+            "the Florida House of Representatives\", 2020 to 2026. One person; the card's "
+            "seat, District 13, is now Representative Gibson's (\"behind\")."),
+        "read": "2026-11-17",
+    },
+    ("profile:J000299", "legislator:LA:ocd-person/0e901294-3718-49df-9922-0ac4503acee2"): {
+        "same": False,
+        "evidence": (
+            "Two people. The Louisiana House's own page for the district, "
+            "https://house.louisiana.gov/H_Reps/members?ID=27 : \"State Representative Michael "
+            "T. Johnson Republican District 27\", \"Representing Parishes: Rapides\", \"Year "
+            "Elected: 2019\", \"Education: Pineville High School, 1977; B.A., Public "
+            "Administration, Louisiana College, 1981; J.D., Southern University Law Center, "
+            "1984\". The profile is the Speaker, Mike Johnson, who sits in Congress for LA-4 "
+            "on the term 2025-01-03 to 2027-01-03 (congress-legislators, bioguide J000299), "
+            "born 1972-01-30."),
+        "read": "2026-11-17",
+    },
+    ("profile:G000598", "legislator:CA:ocd-person/8b2f37bc-65b7-40ed-af14-5d93cb765a5d"): {
+        "same": False,
+        "evidence": (
+            "Two people. The California State Assembly's own page for the district, "
+            "https://www.assembly.ca.gov/assemblymembers/50 (\"Assembly Member Garcia | "
+            "California State Assembly\"): \"Robert Garcia District: 50 Party: Democrat "
+            "Counties: san bernardino\", a sitting Assemblymember. The profile is the member "
+            "of Congress Robert Garcia, who sits for CA-42 on the term 2025-01-03 to "
+            "2027-01-03 (congress-legislators, bioguide G000598): one person does not hold "
+            "both seats at once."),
+        "read": "2026-11-17",
+    },
+}
+
+
 # Members who are on the November ballot for an office this site does not
 # cover, keyed on bioguide id: {bioguide: (what they are, source, checked)}.
 # Without it Byron Donalds, Florida's Republican nominee for governor, read

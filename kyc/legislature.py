@@ -75,6 +75,67 @@ def chamber_title(code, chamber):
     return LOWER_CHAMBER.get(code) or "House of Representatives"
 
 
+# A chamber that names itself otherwise than "<state> <chamber>" (rule 75),
+# by its own site's title: {(state, chamber): (name, the page, its title's
+# words, the day read)}. The legislature page's panel and the "Also on this
+# site" lines (kyc/identity.py, rule 105) read "New York Assembly" and
+# "California Assembly" of bodies that call themselves the New York State
+# Assembly and the California State Assembly. Only chambers whose own page
+# this project's reader opened are here; any other keeps the page's general
+# form until a person reads its own (nysenate.gov answered the reader a
+# challenge page, "Just a moment...", on 2026-11-15 and 2026-11-17, which
+# concludes nothing: rule 8). Each title was read again on 2026-11-17.
+CHAMBER_NAMES = {
+    ("CA", "lower"): ("California State Assembly", "https://www.assembly.ca.gov/",
+                      "Welcome to the California State Assembly | California State Assembly",
+                      "2026-11-17"),
+    ("CA", "upper"): ("California State Senate", "https://www.senate.ca.gov/",
+                      "Homepage | California State Senate", "2026-11-17"),
+    ("NY", "lower"): ("New York State Assembly", "https://nyassembly.gov/",
+                      "Assembly Home | New York State Assembly", "2026-11-17"),
+    ("WI", "lower"): ("Wisconsin State Assembly", "https://legis.wisconsin.gov/assembly",
+                      "Wisconsin State Assembly", "2026-11-17"),
+}
+
+
+def chamber_name(code, chamber):
+    """The chamber's own name where its own site gives one that is not the
+    state's name and the chamber's title (:data:`CHAMBER_NAMES`), else
+    None: the page then writes the general form."""
+    entry = CHAMBER_NAMES.get((code, chamber))
+    return entry[0] if entry else None
+
+
+def chamber_head(code, chamber):
+    """A chamber's names as its legislature page's payload carries them:
+    its ``title`` ("Assembly") and, only where its own site gives another
+    than the state's name and that title (:data:`CHAMBER_NAMES`, rule 75),
+    its ``name`` ("New York State Assembly"), which the page's panel and the
+    "Also on this site" lines read."""
+    name = chamber_name(code, chamber)
+    return {"title": chamber_title(code, chamber), **({"name": name} if name else {})}
+
+
+def chamber_name_problems():
+    """An entry that does not say its source, or whose name its own quoted
+    title does not carry, or that only repeats the general form."""
+    from .pages import short_name
+
+    out = []
+    for (code, chamber), entry in sorted(CHAMBER_NAMES.items()):
+        if len(entry) != 4 or not all(entry):
+            out.append(f"{code} {chamber}: needs the name, the page, its words and the day read")
+            continue
+        name, url, words, read = entry
+        if not url.startswith("https://") or name not in words or not re.fullmatch(
+                r"\d{4}-\d{2}-\d{2}", read):
+            out.append(f"{code} {chamber}: {name!r} is not in the words quoted from {url}, "
+                       "or the day is not a day")
+        elif name == f"{short_name(code)} {chamber_title(code, chamber)}":
+            out.append(f"{code} {chamber}: {name!r} is the general form; the entry says nothing")
+    return out
+
+
 def label_text(name):
     """What is written on a district: its number or short code ("12",
     "10A", "B"). A district known by a name ("10th Bristol", "Belknap 1") is
@@ -1003,7 +1064,7 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         for district_id in on_special:
             found[district_id]["special"] = True
         out_chambers[chamber] = {
-            "title": chamber_title(code, chamber),
+            **chamber_head(code, chamber),
             "seats": seats,
             "listed": count["listed"],
             # The same count as the state page's (stategov.chamber), and
@@ -1068,6 +1129,9 @@ def build(root=".", codes=None, dropped=None):
     cache = statelegs.load_cache(root)
     if not cache:
         raise LegislatureError(f"no {statelegs.CACHE_PATH}; run 'statelegs'")
+    named = chamber_name_problems()
+    if named:
+        raise LegislatureError("legislature.CHAMBER_NAMES: " + "; ".join(named))
     try:
         control = stategov.build(root)[0]["states"]
     except stategov.StateGovError as exc:
