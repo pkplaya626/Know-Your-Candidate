@@ -3760,6 +3760,32 @@ CERTIFIED_BALLOTS = {
                              ("Mark Cohen", "By Petition")],
         },
     },
+    # The Secretary of State's sample official ballot for the federal races:
+    # the Senate and all four districts on one sheet, each with a write-in
+    # line, the party as it prints it ("Democrat"). Read 2026-11-26 through
+    # its own text (kyc/pdfread.py), each name placed in its column by its
+    # position on the page. The Wikipedia page read that day put the 1st
+    # district's Libertarian, Johnny Baucom, in the 2nd district's November
+    # table too (rule 63's two ballots); this ballot prints him in the 1st
+    # alone and the independent Bennie Foster in the 2nd.
+    "MS": {
+        "source": "Mississippi Secretary of State, SAMPLE Official Election Ballot, State of "
+                  "Mississippi, Federal and Judicial Election, Tuesday, November 3, 2026 (9-9-26)",
+        "url": "https://www.sos.ms.gov/content/documents/Elections/2026/Sample%20Ballot%209-9-26.pdf",
+        "read": "2026-11-26", "complete": True,
+        "races": {
+            "S-MS-2026": [("Scott Colom", "Democrat"), ("Cindy Hyde-Smith", "Republican"),
+                          ("Ty Pinkins", "Independent")],
+            "H-MS-01-2026": [("Johnny Baucom", "Libertarian"), ("Cliff Johnson", "Democrat"),
+                             ("Trent Kelly", "Republican")],
+            "H-MS-02-2026": [("Ron Eller", "Republican"), ("Bennie G. Thompson", "Democrat"),
+                             ("Bennie Foster", "Independent")],
+            "H-MS-03-2026": [("Michael A. Chiaradio", "Democrat"), ("Michael Guest", "Republican"),
+                             ("Erik Kiehle", "Libertarian")],
+            "H-MS-04-2026": [("Mike Ezell", "Republican"), ("Jeffrey Hulum III", "Democrat"),
+                             ("Carl Boyanton", "Independent")],
+        },
+    },
 }
 
 # States whose federal general election goes to a runoff when no candidate wins
