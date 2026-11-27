@@ -1114,9 +1114,12 @@ def check_results_pages(cache):
                   for item in items]
     if names_left:
         issues.append(Issue("warn", "result-name-refused",
-                            f"{len(names_left)} names only an infobox gave after the count, with "
-                            "no filing and no state's list (rule 63): left off the page; a person "
-                            "should look at each", names_left))
+                            f"{len(names_left)} names the results read left off the page, with no "
+                            "filing and no state's list to hold them there (rule 63): only an "
+                            "infobox gave them after the count, or the results put one name on two "
+                            "November ballots of a state; each line says which, and a person should "
+                            "look at each (the state's list for the race in "
+                            "overrides.CERTIFIED_BALLOTS settles a name it prints)", names_left))
     rows_left = [f"{rid}: {item.get('name')}, in the place of {', '.join(item.get('for') or [])}: "
                  f"{item.get('why')}"
                  for rid, items in sorted((cache.get("refusedRows") or {}).items())

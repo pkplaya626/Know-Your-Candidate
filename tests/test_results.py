@@ -6103,5 +6103,133 @@ class TestTheNationalSummarysMark(TestTheInfoboxDeclaresTheWinner):
         self.assertEqual(results.national_rows("\n!{{ushr|OH|5|X}}\n|{{sortname|A|B}}\n|-"), {})
 
 
+LIB, IND = "Libertarian Party (United States)", "Independent politician"
+
+
+class TestOneNameOnTwoBallots(NoGap):
+    """One person is on one November ballot for Congress (rule 63). The
+    Mississippi page read on 2026-11-26 gave the 1st district's Libertarian,
+    Johnny Baucom, a row in the 2nd district's November table too, whose ballot
+    held the independent Bennie Foster, and the read had him lose both."""
+
+    TITLE = "2026 United States House of Representatives elections in Mississippi"
+    DATES = {("MS", "H"): {"primary": "2026-03-10", "runoff": "2026-04-07"}}
+    FIRST, SECOND = "H-MS-01-2026", "H-MS-02-2026"
+
+    def setUp(self):
+        super().setUp()
+        self.field = {"candidates": [row("H6MS01131", "KELLY, TRENT", "MS", "H", 1, "REP"),
+                                     row("H6MS01313", "JOHNSON, CLIFF", "MS", "H", 1, "DEM"),
+                                     row("H4MS02068", "THOMPSON, BENNIE G", "MS", "H", 2, "DEM"),
+                                     row("H2MS02203", "ELLER, RON", "MS", "H", 2, "REP")]}
+
+    def section(self, n, ordinal, rep, dem, november):
+        return "\n".join([
+            f"\n==District {n}==",
+            party_box("Republican primary results", (rep, REP, 50000, True)),
+            party_box("Democratic primary results", (dem, DEM, 40000, True)),
+            party_box(f"2026 Mississippi's {ordinal} congressional district election", *november), ""])
+
+    def first(self, third=("Johnny Baucom", LIB, 3390, False), marked=True):
+        return self.section(1, "1st", "Trent Kelly", "Cliff Johnson",
+                            [("Trent Kelly", REP, 160000 if marked else None, marked),
+                             ("Cliff Johnson", DEM, 80000 if marked else None, False)] +
+                            ([third] if third else []))
+
+    def second(self, third=("Johnny Baucom", LIB, 6004, False), marked=True):
+        return self.section(2, "2nd", "Ron Eller", "Bennie Thompson",
+                            [("Bennie Thompson", DEM, 169048 if marked else None, marked),
+                             ("Ron Eller", REP, 73941 if marked else None, False)] +
+                            ([third] if third else []))
+
+    def read(self, *sections, certified=None, logged=None, today=datetime.date(2026, 11, 26)):
+        page = "".join(sections)
+        return results.build(self.field, self.DATES, today=today,
+                             log=(logged.append if logged is not None else lambda *_: None),
+                             fetch=lambda t: page if t == self.TITLE else
+                             (_ for _ in ()).throw(results.PageMissing(t)), certified=certified)
+
+    def lists(self, races, complete=True):
+        return {"MS": {"source": "Mississippi Secretary of State", "url": "https://x", "fetched": "2026-11-26",
+                       "complete": complete, "races": {
+                           rid: [{"name": n, "party": p, "kind": "ballot"} for n, p in people]
+                           for rid, people in races.items()}}}
+
+    CALLED_FIRST = {"H6MS01131": "elected", "H6MS01313": "defeated"}
+    CALLED_SECOND = {"H4MS02068": "elected", "H2MS02203": "defeated"}
+
+    def test_a_name_on_two_districts_ballots_with_no_filing_is_refused_in_both(self):
+        logged = []
+        cache = self.read(self.first(), self.second(), logged=logged)
+        first, second = cache["races"][self.FIRST], cache["races"][self.SECOND]
+        self.assertEqual((first["unmatched"], second["unmatched"]), ({}, {}))
+        self.assertNotIn("Johnny Baucom", first.get("unmatchedParty") or {})
+        # Nobody else's result moves: the race is not held back for it.
+        self.assertEqual(first["status"], self.CALLED_FIRST)
+        self.assertEqual(second["status"], self.CALLED_SECOND)
+        refused = cache["refusedNames"]
+        self.assertEqual(sorted(refused), [self.FIRST, self.SECOND])
+        self.assertEqual(refused[self.SECOND][0]["name"], "Johnny Baucom")
+        self.assertIn("November ballot of " + self.FIRST, refused[self.SECOND][0]["why"])
+        self.assertNotIn("whose filing", refused[self.SECOND][0]["why"])
+        self.assertEqual(sum("[REFUSED]" in line and "Johnny Baucom" in line for line in logged), 2, logged)
+        from kyc import validate
+        issues = [i for i in validate.check_results_pages(cache) if i.code == "result-name-refused"]
+        self.assertEqual([i.level for i in issues], ["warn"])
+        self.assertEqual(len(issues[0].detail), 2)
+        self.assertIn("two", issues[0].message)
+
+    def test_a_name_on_one_ballot_stands(self):
+        cache = self.read(self.first(), self.second(third=("Bennie Foster", IND, 6004, False)))
+        self.assertEqual(cache["races"][self.FIRST]["unmatched"], {"Johnny Baucom": "defeated"})
+        self.assertEqual(cache["races"][self.SECOND]["unmatched"], {"Bennie Foster": "defeated"})
+        self.assertFalse(cache["refusedNames"])
+
+    def test_the_states_list_holds_a_name_where_it_prints_it(self):
+        # The list of each race: the 1st prints him, the 2nd does not, so the
+        # 2nd's whole list leaves him off it (rule 77) and names its own third.
+        printed = [("Trent Kelly", "Republican"), ("Cliff Johnson", "Democratic"),
+                   ("Johnny Baucom", "Libertarian")]
+        both = self.lists({self.FIRST: printed,
+                           self.SECOND: [("Bennie G. Thompson", "Democratic"), ("Ron Eller", "Republican"),
+                                         ("Bennie Foster", "Independent")]})
+        cache = self.read(self.first(), self.second(), certified=both)
+        self.assertEqual(cache["races"][self.FIRST]["unmatched"], {"Johnny Baucom": "defeated"})
+        second = cache["races"][self.SECOND]["unmatched"]
+        self.assertEqual(second.get("Bennie Foster"), "defeated")
+        self.assertNotIn(second.get("Johnny Baucom"), results.NOVEMBER)
+        self.assertFalse(cache["refusedNames"])
+        # The 1st's list alone: it holds him there, and the 2nd refuses him.
+        one = self.lists({self.FIRST: printed})
+        cache = self.read(self.first(), self.second(), certified=one)
+        self.assertEqual(cache["races"][self.FIRST]["unmatched"], {"Johnny Baucom": "defeated"})
+        self.assertEqual(cache["races"][self.SECOND]["unmatched"], {})
+        self.assertEqual(sorted(cache["refusedNames"]), [self.SECOND])
+
+    def test_a_filers_name_on_another_districts_ballot_is_refused_there_alone(self):
+        cache = self.read(self.first(third=None), self.second(third=("Cliff Johnson", LIB, 6004, False)))
+        self.assertEqual(cache["races"][self.FIRST]["status"], self.CALLED_FIRST)
+        self.assertEqual(cache["races"][self.SECOND]["unmatched"], {})
+        refused = cache["refusedNames"]
+        self.assertEqual(sorted(refused), [self.SECOND])
+        self.assertIn("whose filing is theirs", refused[self.SECOND][0]["why"])
+
+    def test_before_the_count_too(self):
+        # A ballot is one person's before it is counted as after.
+        cache = self.read(self.first(marked=False), self.second(marked=False),
+                          today=datetime.date(2026, 10, 20))
+        first, second = cache["races"][self.FIRST], cache["races"][self.SECOND]
+        self.assertNotIn("Johnny Baucom", first["unmatched"])
+        self.assertNotIn("Johnny Baucom", second["unmatched"])
+        self.assertEqual(sorted(cache["refusedNames"]), [self.FIRST, self.SECOND])
+
+    def test_two_races_page_spellings_are_never_folded_together(self):
+        # "Johnny Baucom" and "John Baucom" may be one person on one page; in
+        # two districts they are two names, and nothing is refused.
+        cache = self.read(self.first(), self.second(third=("John Baucom", LIB, 6004, False)))
+        self.assertFalse(cache["refusedNames"])
+        self.assertEqual(cache["races"][self.SECOND]["unmatched"], {"John Baucom": "defeated"})
+
+
 if __name__ == "__main__":
     unittest.main()

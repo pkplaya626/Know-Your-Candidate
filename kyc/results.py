@@ -4748,6 +4748,68 @@ def _one_person(a, b):
     return len(x) >= 2 and x[:-1] == y[:-1] and _near(x[-1], y[-1])
 
 
+def on_two_ballots(races, by_race, certified=None):
+    """``[(race_id, name, why)]``: each name the results put on two November
+    ballots of one state, to refuse in the race it is not theirs in (rule 63).
+
+    One person is on one ballot for Congress in an election. A page that
+    copied a row into another district's table put them on two: the Mississippi
+    page of 2026-11-26 gave the 1st district's Libertarian, Johnny Baucom, 6,004
+    votes in the 2nd district's table too, whose ballot held the independent
+    Bennie Foster, and the read had him lose both. Which of the two is right is
+    no reading's to say, so:
+
+    - a name no filing holds is refused in every such race where no state's
+      certified list prints it (a list is the state's word, rule 77);
+    - a filer's name, beside their own filing's race, is refused in the other
+      races, where no filing holds it; the filing's status stands.
+
+    Names are one name when their words are the same in any order (``_words``);
+    the looser folds one page's spellings take (``_one_person``) are never asked
+    across two races, which hold different people. Louisiana's seats read from
+    the qualified list or the office's results are the state's word and are
+    never asked (rule 64).
+    """
+    def listed(rid, name):
+        spec = (certified or {}).get(rid.split("-")[1]) or {}
+        return any(_words(entry.get("name")) == _words(name)
+                   for entry in (spec.get("races") or {}).get(rid, ()))
+
+    seen = {}       # (state, words) -> [(rid, page name or None, cid or None)]
+    for rid, race in sorted(races.items()):
+        if race.get("source") in ("qualified", OFFICE):
+            continue
+        state = rid.split("-")[1]
+        for name, status in (race.get("unmatched") or {}).items():
+            if status in NOVEMBER and len(_words(name)) >= 2:
+                seen.setdefault((state, _words(name)), []).append((rid, name, None))
+        names = race.get("names") or {}
+        rows = {row["candidate_id"]: row for row in by_race.get(rid, ())}
+        for cid, status in (race.get("status") or {}).items():
+            if status not in NOVEMBER:
+                continue
+            spelled = {names.get(cid)} | ({_row_name(rows[cid])} if cid in rows else set())
+            for name in filter(None, spelled):
+                if len(_words(name)) >= 2:
+                    seen.setdefault((state, _words(name)), []).append((rid, None, cid))
+    out = []
+    for (_state, _words_), places in sorted(seen.items()):
+        races_in = sorted({rid for rid, _n, _c in places})
+        if len(races_in) < 2:
+            continue
+        filed = sorted({rid for rid, _n, cid in places if cid})
+        for rid, name, _cid in places:
+            if name is None or rid in filed or listed(rid, name):
+                continue
+            others = [r for r in races_in if r != rid]
+            why = (f"the results also put them on the November ballot of {', '.join(others)}"
+                   + (", whose filing is theirs" if filed else "")
+                   + ", and one person is on one ballot; no filing and no state's list "
+                     "holds them here")
+            out.append((rid, name, why))
+    return out
+
+
 def certify_race(race, spec, rows, aliases=None, ranked_choice=False, no_primary=False):
     """Lay a state's certified list over a race's results (rule 77).
 
@@ -5487,6 +5549,14 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             for cid in races[rid].get("certifiedHeld") or []:
                 log(f"    [warn] {rid}: {cid} is on the page's November ballot and not "
                     f"matched on {state}'s certified list; left as the page has them")
+
+    # One name on two November ballots of one state is a page's copied row in
+    # one of them (rule 63): refused where it is not theirs, and said.
+    for rid, name, why in on_two_ballots(races, by_race, certified):
+        races[rid]["unmatched"].pop(name, None)
+        (races[rid].get("unmatchedParty") or {}).pop(name, None)
+        refused_names.setdefault(rid, []).append({"name": name, "why": why})
+        log(f"    [REFUSED] {rid}: {name!r}: {why}; not shown")
 
     routes = {}
     for rid, race in races.items():

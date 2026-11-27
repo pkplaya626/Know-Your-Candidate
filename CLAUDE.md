@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3608 tests, no dependencies
+python -m unittest discover tests             # 3614 tests, no dependencies
 npm install && npm test                       # 5242 real-DOM checks (needs jsdom)
 ```
 
@@ -1539,7 +1539,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the count a name only the infobox gives, with no filing and no list, adds
     nobody (`refusedNames`, `result-name-refused`): the night's vandal, with no
     mark anywhere, would have stood "Also on the November ballot". The race is
-    not held back for it. Its share reporting is its first number, whatever is
+    not held back for it. Nor is one person on two November ballots of a
+    state, at any time (`results.on_two_ballots`): the Mississippi page read
+    on 2026-11-26 gave the 1st district's Libertarian, Johnny Baucom, 6,004
+    votes in the 2nd district's table too, whose ballot held the independent
+    Bennie Foster, and the read had him lose both. A name no filing holds is
+    refused in every such race where no state's certified list prints it,
+    and a filer's name in a race not their filing's is refused there; a name
+    is one name only by the same words (`_words`), never a page's own looser
+    folds across two races, and the refusals are `refusedNames` too. Its
+    share reporting is its first number, whatever is
     around it ("15%<ref>", "under 15%"), and a field with none concludes nothing.
     Replayed offline over the pages of the two reads of that night, it made
     every call they had made (all 10 and all 3), with no other status changed,
