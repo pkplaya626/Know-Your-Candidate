@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3608 tests, no dependencies
+python -m unittest discover tests             # 3616 tests, no dependencies
 npm install && npm test                       # 5242 real-DOM checks (needs jsdom)
 ```
 
@@ -1917,7 +1917,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     posted or passes its gates waits as well, and the office's runoff stands
     (`_december_call_waits`): called against it, LA-5 went back to the list,
     its eight first-round losers "qualified" again; a page winner the
-    December counts do not lead still disagrees. A read that concludes
+    December counts do not lead still disagrees. Nor, once the office's
+    December count decides the seat, is a page that still marks only the
+    first round's runoff, of exactly the office's two, with or without an
+    unmarked December box an editor prepared, a disagreement: it marks no
+    December result (no mark is no call, whatever an unmarked table counts),
+    the office's result is shown as beside a silent page, and
+    the page is noted (`pageBehind`, `office-result-page-behind`, an info
+    line) - read against the office, a refresh on the night of December 12,
+    between the office's count and an editor's mark, sent LA-5 back to the
+    list the same way (its verifier); a runoff pair that is not the office's
+    two still disagrees. A read that concludes
     nothing for a seat the last read set the page's call aside for - the
     office unread or none made, a round's file older than the last read's,
     no qualified list, a December round held - keeps it set aside as that

@@ -4215,6 +4215,48 @@ def _december_call_waits(rid, page, entry, december, listed, names_of, meta, log
     return True
 
 
+def _first_round_verdict(rid, first_day, meta, prev_meta):
+    """The office's first-round verdict for a seat, ``{list name: status}``:
+    this read's record of the round where it holds one, else the last
+    read's (a read that wrote none - unread, no list - keeps it), else
+    None."""
+    for record in (meta.get("races") or {}, prev_meta.get("races") or {}):
+        found = ((record.get(rid) or {}).get(first_day) or {}).get("verdict")
+        if isinstance(found, dict) and found:
+            return found
+    return None
+
+
+def _page_behind_december(page, entry, first_verdict, second_day, rows, aliases, names_of):
+    """Whether a page that disagrees with the office's December result marks
+    no December result at all (rule 64): the office's entry was decided
+    in its December round, and the page's only call is the first round's
+    runoff, of exactly the two the office's first round sent to December -
+    the page as it stood before December 12, or with an unmarked December
+    box an editor prepared. Such a page lags; it does not contradict the
+    office, which is shown as it is beside a page that makes no call. Read
+    as a disagreement, a refresh on the night of the count, between the
+    office's posting and an editor's mark, put LA-5 back on the qualified
+    list, its eight first-round losers "qualified" again. A page that marks a
+    December winner, or whose runoff is not the office's two, still
+    disagrees."""
+    if not (second_day and second_day in ((entry.get("office") or {}).get("rounds") or ())):
+        return False
+    if not isinstance(first_verdict, dict) or \
+            sorted(s for s in first_verdict.values() if s == RUNOFF) != [RUNOFF, RUNOFF]:
+        return False
+    status = dict(first_verdict)
+    matched, ambiguous = match_names(list(status), rows, aliases)
+    if any(status.get(n) == RUNOFF for n in ambiguous):
+        return False
+    near = {"status": {cid: status[n] for n, cids in matched.items() for cid in cids},
+            "unmatched": {n: s for n, s in status.items()
+                          if n not in matched and n not in ambiguous}}
+    # The page's call is the first round's very result: its two in the
+    # runoff, nobody elected (a December mark is a call, and is asked as one).
+    return _same_result(page, near, names_of)
+
+
 def _page_beside_a_held_round(rid, page, held_round, listed, names_of, rows, aliases,
                               races, calls, meta, log):
     """A page that decides a seat whose first round a gate of the office's
@@ -4410,6 +4452,7 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         meta["held"] = dict(prev_meta.get("held") or {})
         meta["kept"], meta["disagree"] = [], {}
         meta.pop("pageHeld", None)         # each seat's is carried below, or not at all
+        meta.pop("pageBehind", None)       # each seat's is asked again below
         # So is its held line's clause about the page's call: the line goes
         # back to the seat's own reason, or goes where it had none, and the
         # clause is said again only where the page still makes the call. Kept
@@ -4425,6 +4468,7 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         meta = dict(prev_meta, carried=True, unread=unread, unreadOn=today.isoformat())
         meta["held"], meta["kept"], meta["disagree"] = {}, [], {}
         meta.pop("pageHeld", None)
+        meta.pop("pageBehind", None)
 
     # A file written before the one the last read relied on concludes
     # nothing for its round (rule 8): the three files are fetched one by one,
@@ -4618,7 +4662,19 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                 # nothing decided either - the hold is carried (rule 8).
                 _carry_silent_hold(rid, prev_meta, why, today, meta, log)
             continue
-        if page_decides and not _same_result(page, entry, names_of) and not (
+        if page_decides and not _same_result(page, entry, names_of) and _page_behind_december(
+                page, entry, _first_round_verdict(rid, first_day, meta, prev_meta), second_day,
+                by_race.get(rid, []), (aliases or {}).get(rid), names_of):
+            # The page has not yet caught up with December: it says nothing
+            # of the round the office decided, and the office's result is
+            # shown as beside a silent page, with a note (rule 64).
+            meta.setdefault("pageBehind", {})[rid] = {"page": page.get("page"),
+                                                      "pageSays": _says(page),
+                                                      "officeSays": _says(entry)}
+            log(f"    [note] {rid}: {page.get('page')!r} still says {_says(page)}, the first "
+                f"round's runoff; the Secretary of State's {second_day} results say "
+                f"{_says(entry)}, which is shown")
+        elif page_decides and not _same_result(page, entry, names_of) and not (
                 second_day and second_day < today.isoformat() and _december_call_waits(
                     rid, page, entry, december_round, listed.get(rid), names_of, meta, log)):
             meta["disagree"][rid] = {"page": page.get("page"), "pageSays": _says(page),

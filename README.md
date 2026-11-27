@@ -1131,7 +1131,12 @@ for the round's date. The election is found by its date, a seat by
   is a disagreement too, and a page's call of a seat the office holds for its
   close margin waits for the official results (`pageHeld`). After December
   12, a page's December winner waits for the office's December count, the
-  office's runoff standing meanwhile, unless the counts lead someone else. A
+  office's runoff standing meanwhile, unless the counts lead someone else.
+  Once the office's December count decides the seat, a page still marking
+  only the first round's runoff of the same two (an unmarked December box
+  beside it or not) marks no December result: the office's result is shown
+  and the page is noted (`pageBehind`, `office-result-page-behind`, an info
+  line); a runoff of two others still disagrees. A
   read that concludes nothing for such a seat - the office unread, a round's
   file older than the last read's, no qualified list, a December round held -
   keeps the page's call set aside as the last read set it aside, its
