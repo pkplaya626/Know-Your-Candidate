@@ -17263,15 +17263,39 @@ async function testFederalAudit() {
       lede.textContent);
   });
 
-  suite("federal/index.html — Varlan: senior by the courts' list, active by the directory", () => {
-    const moving = d.courts.filter((c) => c.listedSenior);
-    check("such a court exists in the committed data", moving.length > 0);
+  // FEDERAL-01 (rule 82): a judge the courts' list has on senior status,
+  // whom the FJC directory still lists as active, is counted senior on the
+  // court's row, and the row says by which source. The case is made here: the
+  // directory catches up (Judge Varlan's senior status, the case this first
+  // checked, was in it by 2026-11-26), and a check that waited for the
+  // committed data to hold one held that day's refresh. Every court the data
+  // holds so is asked too.
+  const listedHub = await buildPage("federal/index.html", { loaded: (w) => {
+    const row = w.kycFederal.courts.find((c) => c.kind === "district" && c.listed && c.active > 1 &&
+      !c.listedSenior);
+    if (!row) return;
+    row.active -= 1;
+    row.senior += 1;
+    row.listedSenior = 1;
+    w.__listedCourt = row.id;
+  } });
+  await settle(50);
+  suite("federal/index.html — senior by the courts' list, active by the directory", () => {
+    const { window: w, D: doc, errors: errs } = listedHub;
+    check("no page errors", errs.length === 0, errs.join(" | "));
+    const judgesOf = (c) => doc.querySelector('#courts tr a[href="../courts/' + c.id + '.html"]').closest("tr")
+      .querySelector('[data-label="Judges"]').textContent;
+    const moving = w.kycFederal.courts.filter((c) => c.listedSenior);
+    check("a district court made so", !!w.__listedCourt && moving.some((c) => c.id === w.__listedCourt));
     moving.forEach((c) => {
-      const row = D.querySelector('#courts a[href="../courts/' + c.id + '.html"]').closest("tr");
-      const judges = row.querySelector('[data-label="Judges"]').textContent;
-      check(c.id + ": counted senior, and the row says by which source",
-        /senior by the courts’ list of vacancies, not yet by the FJC directory/.test(judges), judges);
+      const judges = judgesOf(c);
+      check(c.id + ": counted senior, and the row says by which source", judges === c.active + " active, " +
+        c.senior + " senior (" + c.listedSenior + " of them senior by the courts’ list of vacancies, not " +
+        "yet by the FJC directory)", judges);
     });
+    const plain = w.kycFederal.courts.find((c) => c.kind === "district" && c.listed && !c.listedSenior);
+    check("a court with none says nothing of the courts' list", !!plain && !/courts’ list/.test(judgesOf(plain)),
+      plain && judgesOf(plain));
   });
 
   suite("federal/index.html — the executive: websites, succession, former officers", () => {
@@ -17355,13 +17379,32 @@ async function testFederalAudit() {
     }
   });
 
-  const tne = await buildPage("courts/tn-e.html");
+  // FEDERAL-01 on the court's own page: the judge is among the senior, and
+  // the row, the count and the dialog say which source says what. Made on
+  // the court's first active judge, as on the hub above (the directory
+  // caught up with Judge Varlan); any judge the data holds so is asked too.
+  const tne = await buildPage("courts/tn-e.html", { loaded: (w) => {
+    const judge = w.kycCourt["tn-e"].judges.find((j) => j.status !== "senior" && !j.listedSenior);
+    if (!judge) return;
+    judge.listedSenior = { since: "2026-10-05" };
+    const row = w.kycFederal.courts.find((c) => c.id === "tn-e");
+    row.active -= 1;
+    row.senior += 1;
+    row.listedSenior = (row.listedSenior || 0) + 1;
+    w.__listedJudge = judge.id;
+  } });
   await settle(50);
   suite("courts/tn-e.html — a judge the two sources disagree about (FEDERAL-01)", () => {
     const { window: w, D: doc, errors: errs } = tne;
     check("no page errors", errs.length === 0, errs.join(" | "));
     const moved = w.kycCourt["tn-e"].judges.filter((j) => j.listedSenior);
-    check("the committed data has one", moved.length === 1);
+    check("an active judge made so", !!w.__listedJudge && moved.some((j) => j.id === w.__listedJudge));
+    const court = w.kycFederal.courts.find((c) => c.id === "tn-e");
+    const counted = court.active + " active " + (court.active === 1 ? "judge" : "judges") + " and " +
+      court.senior + " on senior status (" + court.listedSenior + " of them on senior status by the " +
+      "courts’ list of vacancies, not yet by the FJC directory)";
+    check("the court's count says how many are senior by which source",
+      doc.getElementById("federalBody").textContent.indexOf(counted) !== -1, counted);
     moved.forEach((j) => {
       check("not among the active judges", !doc.querySelector('#active [data-official="' + j.id + '"]'));
       const row = doc.querySelector('#senior [data-official="' + j.id + '"]');
@@ -17377,7 +17420,20 @@ async function testFederalAudit() {
     });
   });
 
-  const lae = await buildPage("courts/la-e.html");
+  // An announced elevation is a nomination, never "Appointed to another
+  // court" (FEDERAL-V1). Made as an announced vacancy of the court's first
+  // active judge: Judge St. John's, the case this first checked, leaves the
+  // announced list once she is commissioned to the Fifth Circuit (confirmed
+  // 2026-11-18). Every announced row the data holds is asked too.
+  const lae = await buildPage("courts/la-e.html", { loaded: (w) => {
+    const mine = w.kycCourt["la-e"];
+    const judge = mine.judges.find((j) => j.status !== "senior" && !j.nominatedTo);
+    const ca5 = w.kycFederal.courts.find((c) => c.id === "ca5");
+    if (!judge || !ca5) return;
+    mine.future = (mine.future || []).concat([{ vacatedBy: { listedAs: judge.sortName, name: judge.name },
+      reason: "Elevated", announced: "2026-07-14", future: true, nominatedTo: { id: "ca5", name: ca5.name } }]);
+    w.__elevated = judge.name;
+  } });
   await settle(50);
   suite("courts/la-e.html — a sitting judge nominated to another court (FEDERAL-V1)", () => {
     const { window: w, D: doc, errors: errs } = lae;
@@ -17385,9 +17441,12 @@ async function testFederalAudit() {
     const later = w.kycCourt["la-e"].future || [];
     const rows = [...doc.querySelectorAll("#vacancies table")].pop();
     const why = rows ? [...rows.querySelectorAll('[data-label="Why"]')].map((c) => c.textContent) : [];
+    check("an announced elevation made so", !!w.__elevated && later.some((r) => r.vacatedBy.name === w.__elevated));
     check("an announced elevation is a nomination, never 'Appointed to another court'",
       later.length > 0 && why.length === later.length &&
-      !why.some((t) => /Appointed to another court/.test(t)) && why.some((t) => /^Nominated to/.test(t)),
+      !why.some((t) => /Appointed to another court/.test(t)) &&
+      later.every((r, i) => r.reason !== "Elevated" || why[i] === (r.nominatedTo
+        ? "Nominated to the " + r.nominatedTo.name.replace(/^U\.S\. /, "") : "Nominated to another court")),
       why.join(" | "));
   });
 
@@ -17438,7 +17497,18 @@ async function testFederalAudit() {
       !/jury service/.test(block.textContent) && /opinions, the docket/.test(block.textContent),
       block && block.textContent.slice(0, 200));
   });
-  const cod = await buildPage("courts/co.html");
+  // A judge nominated to another court, as the courts' announced list has
+  // it (FEDERAL-V1, rule 82): their own record says so, in the future tense.
+  // Made on the court's first active judge: Judge Domenico's nomination to
+  // the Tenth Circuit, the case this first checked, ends with the Senate's
+  // vote or his commission. Every judge the data holds so is asked too.
+  const cod = await buildPage("courts/co.html", { loaded: (w) => {
+    const judge = w.kycCourt.co.judges.find((j) => j.status !== "senior" && !j.listedSenior && !j.nominatedTo);
+    const ca10 = w.kycFederal.courts.find((c) => c.id === "ca10");
+    if (!judge || !ca10) return;
+    judge.nominatedTo = { id: "ca10", name: ca10.name, nominated: "2026-05-12", asOf: w.kycFederal.vacancies.asOf };
+    w.__nominatedJudge = judge.id;
+  } });
   await settle(50);
   suite("courts/co.html — one division, and a judge nominated to another court", () => {
     const { window: w, D: doc, errors: errs } = cod;
@@ -17447,15 +17517,15 @@ async function testFederalAudit() {
     check("an undivided court's list begins with a capital", items.length === 1 &&
       /^Court is held at /.test(items[0].textContent), items.map((i) => i.textContent.slice(0, 40)).join(" | "));
     const nominated = w.kycCourt.co.judges.filter((j) => j.nominatedTo);
-    check("the committed data has a judge nominated to the Tenth Circuit", nominated.length === 1 &&
-      nominated[0].nominatedTo.id === "ca10");
+    check("an active judge made so, nominated to the Tenth Circuit", !!w.__nominatedJudge &&
+      nominated.some((j) => j.id === w.__nominatedJudge && j.nominatedTo.id === "ca10"));
     nominated.forEach((j) => {
       w.KYC.official.open(j.id);
       const note = doc.getElementById("officialNominated");
-      check("their own record says so, dated in words", !!note &&
-        /Nominated to the Court of Appeals for the Tenth Circuit/.test(note.textContent) &&
+      check(j.name + ": their own record says so, dated in words", !!note &&
+        note.textContent.indexOf("Nominated to the " + j.nominatedTo.name.replace(/^U\.S\. /, "")) === 0 &&
         /pending in the Senate/.test(note.textContent) && !ISO.test(note.textContent) &&
-        !!note.querySelector('a[href$="ca10.html"]'), note && note.textContent);
+        !!note.querySelector('a[href$="' + j.nominatedTo.id + '.html"]'), note && note.textContent);
       w.KYC.official.close();
     });
     const empty = [...doc.querySelectorAll('#vacancies [data-label="Nominated"]')]
@@ -17465,6 +17535,7 @@ async function testFederalAudit() {
   suite("courts/tn-e.html — dates in words in the dialog", () => {
     const { window: w, D: doc } = tne;
     const moved = w.kycCourt["tn-e"].judges.filter((j) => j.listedSenior);
+    check("a judge to ask (made so above)", moved.length > 0);
     moved.forEach((j) => {
       w.KYC.official.open(j.id);
       const meta = doc.getElementById("officialModalMeta").textContent;
