@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3608 tests, no dependencies
+python -m unittest discover tests             # 3635 tests, no dependencies
 npm install && npm test                       # 5242 real-DOM checks (needs jsdom)
 ```
 
@@ -4949,11 +4949,25 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (`KYC.legislatureLagText`, one implementation for the state page, the
     legislature page, Your ballot and Find who represents you); each member
     of a seat on that ballot is marked as listed from before the new term
-    (`KYC.legislatureSeatLag`; "may have been on" where the record names no
-    district), never as who sits now; and no majority, trifecta, coalition
-    note or map colour is stated from it (`legislatureControlWithheld`; the
-    map's Legislatures and Trifectas views draw it "not stated" in the
-    vacant grey, with a legend key). Nothing names a winner: this site reads
+    (`KYC.legislatureSeatLag`, badged by `legislatureSeatLagBadge`; "may
+    have been on", and its new term begun "if it was", where the record
+    names no district: Montana's Senate told every seat its term had begun),
+    never as who sits now; and no majority, trifecta, coalition note or map
+    colour is stated from it (`legislatureControlWithheld`, and one wording,
+    `withheld()` in kyc-stategov.js, for the map's hover and badge, the
+    state page's paragraph, its glance box and the directory of
+    legislatures: the branch's review found the glance box saying
+    "Republican trifecta" and the directory "Republican majority in both
+    chambers." under rows that stated none; the map's Legislatures and
+    Trifectas views draw it "not stated" in the vacant grey, with a legend
+    key). A seat on that ballot in a special election for the rest of a term
+    has no new term, and the law does not say when its winner took office:
+    the chamber counts such seats apart (`specialSeats`, from
+    `legislature.special_numbers`, the clauses the map's district marks
+    read), its sentence calls the others regular, and the district says a
+    special election was on that ballot and names no day ("May be listed
+    from before the special election"); Hawaii's Senate read "13 of its 25
+    seats" beside district 19's special. Nothing names a winner: this site reads
     no state legislative result. `validate` warns of each chamber past its
     day with its roster behind (`legislature-roster-behind`, eleven on
     2026-11-25) and of every gap (`legislature-term-unknown`), never an
