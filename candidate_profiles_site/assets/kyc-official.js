@@ -299,6 +299,9 @@
       '      <span class="badge badge-neutral" id="officialModalKind"></span>',
       '      <h2 class="modal-name" id="officialModalName"></h2>',
       '      <p class="modal-meta" id="officialModalMeta"></p>',
+      // The person's other roles on this site, each linked to its card,
+      // and service in Congress with no card here (rule 105).
+      '      <div class="modal-also" id="officialModalAlso" hidden></div>',
       // Whose photograph the portrait is (rule 87).
       '      <p class="modal-credit" id="officialModalPhotoCredit" hidden></p>',
       "    </div>",
@@ -842,6 +845,9 @@
     var line = el("officialModalPhotoCredit");
     line.innerHTML = pic ? KYC.photoCreditHtml(pic.credit) : "";
     line.hidden = !line.innerHTML;
+    var also = el("officialModalAlso");
+    also.innerHTML = person ? KYC.alsoHtml(person) + KYC.congressBioHtml(person) : "";
+    also.hidden = !also.innerHTML;
   }
 
   function open(id, opts) {
@@ -883,6 +889,9 @@
   function applyRoute() {
     var route = KYC.router.read();
     if (route.view === "official") {
+      // Back from a profile its "Also on this site" line opened: the
+      // profile closes first, leaving the history as it stands (rule 105).
+      if (KYC.profile && KYC.profile.isOpen()) KYC.profile.close({ routed: true });
       open(route.id, { fromRoute: true });
     } else if (isOpen()) {
       routed = true;

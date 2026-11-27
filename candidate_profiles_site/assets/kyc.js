@@ -2847,8 +2847,14 @@
      *  sent them off the site - so that entry is replaced with the list in
      *  place and the page told to show it, since replaceState fires no
      *  event of its own. */
-    clearProfile: function () {
-      if (!/#\/(profile|official)\//.test(global.location.hash)) return;
+    /* *kind*: the dialog that is closing ("profile"), whose own address
+     * alone it clears. A profile closed because a link in it opened a
+     * governor's overlay or an official's dialog in its place (rule 105's
+     * "Also on this site") must leave the new address standing: cleared,
+     * the Back it took returned the reader to the profile. */
+    clearProfile: function (kind) {
+      var own = kind ? new RegExp("#\/" + kind + "\/") : /#\/(profile|official)\//;
+      if (!own.test(global.location.hash)) return;
       var state = history.state;
       if (state && state.kycProfile) {
         var depth = state.depth || 1;
@@ -3860,6 +3866,91 @@
     return (doc.body && doc.body.getAttribute("data-root")) || "";
   }
 
+  /* ---------------------------------------------------- also on this site */
+
+  /** Whether this page draws the card a role names itself, so its link
+   *  opens it in place (rule 105): a profile wherever the profile dialog is
+   *  loaded (it loads the person's state file, and says so when it cannot,
+   *  rule 94); a governor or a candidate for governor where the overlay is
+   *  loaded and this page's data/stategov holds their state; a federal
+   *  official on the federal page; a judge on their own court's page. */
+  function alsoInPlace(role) {
+    var KYCg = global.KYC || {};
+    if (role.kind === "profile") return !!KYCg.profile;
+    if (role.kind === "governor" || role.kind === "candidate") {
+      return !!(KYCg.governor && KYCg.stategov && KYCg.stategov.state &&
+                KYCg.stategov.state(role.state));
+    }
+    // A court's page carries its id on its container, as kyc-federal.js and
+    // the officials' dialog read it, never on the body: read off the body, a
+    // court's page counted as the federal page (it loads data/federal.js
+    // too), and its own judges never opened in place.
+    var box = doc.getElementById("federalContent");
+    var court = (box && box.getAttribute("data-court")) || "";
+    var hub = !!box && box.getAttribute("data-federal") === "hub";
+    if (role.kind === "official") return !!(KYCg.official && global.kycFederal && hub);
+    if (role.kind === "judge") {
+      return !!KYCg.official && (role.court === "scotus"
+        ? !!global.kycFederal && hub
+        : !!court && court === role.court);
+    }
+    return false;
+  }
+
+  /** The address a role's link opens: its view on this page where the page
+   *  draws it, else its card's own page from the site's root (an absolute
+   *  address, the Congress biography, as it is). */
+  function alsoHref(role) {
+    if (role.view && alsoInPlace(role)) return role.view;
+    var href = String(role.href || "");
+    return /^https?:/.test(href) ? href : siteRoot() + href;
+  }
+
+  /** "Also on this site:" and each of a person's other roles here, in that
+   *  role's own card's words, each linked to that card (rule 105). The
+   *  roles and their words are the pipeline's (kyc/identity.py), joined by
+   *  ids and corroborated records, never a name; the page only chooses the
+   *  tense, on the reader's own day: from the day after Election Day a role
+   *  that says so ("Was on the Nov 3, 2026 ballot for Governor of
+   *  Minnesota") reads its *after* words. "" where there are none. *opts*:
+   *  ``cls`` an extra class, ``tag`` the element ("p"). */
+  function alsoHtml(record, opts) {
+    opts = opts || {};
+    var roles = (record && record.also) || [];
+    if (!roles.length) return "";
+    var post = electionStatus(2026, opts.now).phase === "post-election";
+    var today = localDay(opts.now || new Date());
+    var parts = roles.map(function (role) {
+      // A governor's or an officer's role ends on its own card's clock: once
+      // the term the 2026 election chose has begun on the reader's day and
+      // the roster's holder was not on the ballot for it (`ends`, the
+      // pipeline's, as KYC.stategov.pastTermText decides it), its `ended`
+      // words (the review of PR #267: "Attorney General of Texas" stood on
+      // Ken Paxton's dialog in January beside the row saying otherwise).
+      var words = role.ends && role.ended && today >= role.ends ? role.ended
+        : post && role.after ? role.after : role.words;
+      var link = role.link ? " (" + role.link + ")" : "";
+      return '<a class="also-link" href="' + escapeAttr(alsoHref(role)) + '" data-also-kind="' +
+        escapeAttr(role.kind) + '">' + escapeHtml(words + link) + "</a>";
+    });
+    var tag = opts.tag || "p";
+    return "<" + tag + ' class="also-line' + (opts.cls ? " " + escapeAttr(opts.cls) : "") +
+      '"><span class="also-label">Also on this site:</span> ' + parts.join("; ") + "</" + tag + ">";
+  }
+
+  /** The Congress biography of an official or a governor whose service in
+   *  Congress has no card here (``congressBio``: the bioguide id
+   *  congress-legislators gives for the record's own Wikidata item), as a
+   *  link; "" where there is none. */
+  function congressBioHtml(record, opts) {
+    var id = record && record.congressBio;
+    if (!id) return "";
+    var tag = (opts && opts.tag) || "p";
+    return "<" + tag + ' class="also-line also-bio"><a class="also-link" href="' +
+      escapeAttr("https://bioguide.congress.gov/search/bio/" + encodeURIComponent(id)) +
+      '">Biography in the Biographical Directory of the U.S. Congress</a></' + tag + ">";
+  }
+
   function stateUrl(code) {
     return siteRoot() + "states/" + String(code).toLowerCase() + ".html";
   }
@@ -4856,6 +4947,9 @@
     senateBases: senateBases,
     seatUpYear: seatUpYear,
     stateUrl: stateUrl,
+    alsoHtml: alsoHtml,
+    alsoHref: alsoHref,
+    congressBioHtml: congressBioHtml,
     shareUrl: shareUrl,
     shareLink: shareLink,
     clearShareField: clearShareField,
