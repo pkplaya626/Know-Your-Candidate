@@ -27719,7 +27719,15 @@ async function testAlsoLines() {
   const role = (over) => Object.assign({ kind: "profile", id: "X000000", state: "MN",
     words: "Made-up role words", after: "Made-up past words",
     href: "states/mn.html#/profile/X000000", view: "#/profile/X000000", share: "p/X000000.html" }, over || {});
-  const wordsOf = (r, post) => (post && r.after ? r.after : r.words) + (r.link ? " (" + r.link + ")" : "");
+  // As KYC.alsoHtml says a role on the clock's day: a legislator's, a
+  // governor's or an officer's ends on its chamber's or term's day (`ends`,
+  // `ended`: rules 105 and 106), and South Carolina's House began its term on
+  // Nov. 9, before this suite's post-election clock.
+  const wordsOf = (r, post) => {
+    const day = (post ? POST : CAMPAIGN_NOW).slice(0, 10);
+    return (r.ends && r.ended && day >= r.ends ? r.ended : post && r.after ? r.after : r.words) +
+      (r.link ? " (" + r.link + ")" : "");
+  };
   const lineText = (box) => [...box.querySelectorAll(".also-line a.also-link")].map((a) => a.textContent);
   const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
   const people = [...everyone().values()];
@@ -28166,9 +28174,12 @@ async function testAlsoLines() {
 
   suite("also on this site — the share pages (rule 105)", () => {
     const share = (file) => { try { return fs.readFileSync(path.join(SITE, file), "utf8"); } catch (e) { return ""; } };
-    const said = (text, r) => text.indexOf(">" + (r.words + (r.link ? " (" + r.link + ")" : ""))
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "<") !== -1 ||
-      (r.after && text.indexOf(">" + r.after.replace(/&/g, "&amp;") + "<") !== -1);
+    // A share page is written on the build's day: a role whose day has come
+    // (`ends`) is said in its `ended` words there (rules 105 and 106).
+    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const said = (text, r) => text.indexOf(">" + esc(r.words + (r.link ? " (" + r.link + ")" : "")) + "<") !== -1 ||
+      (r.after && text.indexOf(">" + r.after.replace(/&/g, "&amp;") + "<") !== -1) ||
+      (r.ended && text.indexOf(">" + esc(r.ended + (r.link ? " (" + r.link + ")" : "")) + "<") !== -1);
     const wrong = joinedPeople.filter((p) => !p.formerMember || true).filter((p) => {
       const text = share("p/" + p.id + ".html");
       return text && (p.also.some((r) => !said(text, r)) || !/class="share-also"/.test(text));
