@@ -1043,6 +1043,133 @@ class TestAPageCallOfDecemberWaitsForTheOffice(NoGap):
         self.assertIn("H-LA-05-2026", cache["officeResults"]["disagree"])
 
 
+class TestAPageBehindDecemberLeavesTheOfficesResult(NoGap):
+    """Once the office's December count elects one of LA-5's two, a page that
+    still marks only November's runoff - both in "runoff", with or without an
+    unmarked December box an editor prepared - marks no December result. It
+    was a disagreement: LA-5 went back to the qualified list, its eight
+    first-round losers "qualified" again, on the night between the office's
+    count and an editor's mark. The office's result is shown, with a note; a
+    December winner the office does not elect, or a runoff that is not the
+    office's two, still disagrees."""
+
+    DECEMBER = {"11/03/2026": {1: LA1, 5: LA5}, "12/12/2026": {5: TWO}}
+    FIRST = [("Gabe Firment", "Republican", "39,126"), ("Patricia Moore", "Democratic", "40,786"),
+             ("Michael Echols", "Republican", "32,905"),
+             ("Stewart Cathey Jr.", "Republican", "28,168")]
+
+    def page(self, runoff=("Gabe Firment", "Patricia Moore"), december=None):
+        first = box([(n, p, v, n in runoff) for n, p, v in self.FIRST], total=140985)
+        text = f"\n==District 1==\nNothing yet.\n==District 5==\n{first}\n"
+        if december is not None:
+            text += box([(n, p, v, won) for n, p, v, won in december],
+                        title="Runoff results", total=0 if not any(
+                            v for _n, _p, v, _w in december) else 170000) + "\n"
+        return text
+
+    def decide(self, page, office=None, previous=None):
+        office = read(self.DECEMBER, today=DECEMBER_AFTER) if office is None else office
+        return self.build(office, page=page, today=DECEMBER_AFTER, previous=previous)
+
+    def assert_office(self, cache, behind=True):
+        race = cache["races"]["H-LA-05-2026"]
+        self.assertEqual(race["source"], "office")
+        self.assertEqual(race["status"]["H6LA05317"], "elected")
+        self.assertEqual(race["status"]["H6LA05341"], "defeated")
+        self.assertEqual(race["status"]["H6LA05101"], "defeated")
+        self.assertEqual(race["status"]["H6LA05103"], "defeated")
+        self.assertNotIn("qualified", race["status"].values())
+        office = cache["officeResults"]
+        self.assertFalse(office["disagree"])
+        codes = {i.code: i for i in validate.check_results_pages(cache)}
+        self.assertNotIn("office-result-disagrees", codes)
+        if behind:
+            item = office["pageBehind"]["H-LA-05-2026"]
+            self.assertEqual(item["pageSays"], "runoff H6LA05317, H6LA05341")
+            self.assertEqual(item["officeSays"], "elected H6LA05317")
+            self.assertEqual(codes["office-result-page-behind"].level, "info")
+        else:
+            self.assertNotIn("pageBehind", office)
+            self.assertNotIn("office-result-page-behind", codes)
+
+    def assert_disagrees(self, cache):
+        race = cache["races"]["H-LA-05-2026"]
+        self.assertEqual(race["source"], "qualified")
+        self.assertIn("H-LA-05-2026", cache["officeResults"]["disagree"])
+        self.assertNotIn("H-LA-05-2026", cache["officeResults"].get("pageBehind") or {})
+
+    def test_a_page_marking_only_novembers_runoff_leaves_the_offices_december_result(self):
+        page = self.page()
+        alone = self.build(None, page=page, today=DECEMBER_AFTER)
+        self.assertEqual(alone["races"]["H-LA-05-2026"]["status"]["H6LA05317"], "runoff")
+        self.assert_office(self.decide(page))
+
+    def test_an_unmarked_december_box_marks_no_december_result_either(self):
+        page = self.page(december=[("Gabe Firment", "Republican", "", False),
+                                   ("Patricia Moore", "Democratic", "", False)])
+        self.assert_office(self.decide(page))
+
+    def test_a_kept_december_result_beside_a_lagging_page_stands(self):
+        decided = self.decide(self.page())
+        for office in ({"unread": "HTTP 403"}, None):
+            with self.subTest(office=office):
+                later = self.build(office, page=self.page(), today=DECEMBER_AFTER,
+                                   previous=decided)
+                self.assertIn("H-LA-05-2026", later["officeResults"]["kept"])
+                self.assert_office(later)
+                # Once the page marks December's winner the note goes, on a
+                # read that concludes nothing as on one made.
+                caught_up = self.build(office, today=DECEMBER_AFTER, previous=later,
+                                       page=self.page(december=[
+                                           ("Gabe Firment", "Republican", "90,000", True),
+                                           ("Patricia Moore", "Democratic", "80,000", False)]))
+                self.assert_office(caught_up, behind=False)
+
+    def test_a_december_winner_the_office_elects_agrees(self):
+        page = self.page(december=[("Gabe Firment", "Republican", "90,000", True),
+                                   ("Patricia Moore", "Democratic", "80,000", False)])
+        self.assert_office(self.decide(page), behind=False)
+
+    def test_a_december_winner_the_office_does_not_elect_still_disagrees(self):
+        page = self.page(december=[("Patricia Moore", "Democratic", "90,000", True),
+                                   ("Gabe Firment", "Republican", "80,000", False)])
+        self.assert_disagrees(self.decide(page))
+
+    def test_only_an_entry_decided_in_december_is_one_a_page_can_lag(self):
+        # The helper asked directly, of a made-up entry: the same page and
+        # first-round verdict, the entry decided in the first round alone.
+        page = {"status": {"H6LA05317": "runoff", "H6LA05341": "runoff"}, "unmatched": {}}
+        verdict = {"Gabe Firment": "runoff", 'Patricia "Pat" Moore': "runoff",
+                   "Michael Echols": "defeated", "Stewart Cathey Jr.": "defeated"}
+        rows = [r for r in FIELD["candidates"] if r["district_number"] == 5]
+        entry = {"status": {"H6LA05317": "elected", "H6LA05341": "defeated"},
+                 "office": {"rounds": ["2026-11-03", "2026-12-12"]}}
+        self.assertTrue(results._page_behind_december(page, entry, verdict, "2026-12-12",
+                                                      rows, None, {}))
+        entry["office"]["rounds"] = ["2026-11-03"]
+        self.assertFalse(results._page_behind_december(page, entry, verdict, "2026-12-12",
+                                                       rows, None, {}))
+
+    def test_with_no_list_this_run_the_last_reads_first_round_tells_a_page_behind(self):
+        # A run with no qualified list writes no first-round record of its
+        # own, so the page's runoff is compared with the last read's
+        # first-round verdict (_first_round_verdict). Its review found no
+        # test asking it: limited to this read's record, LA-5 left the cache
+        # on such a run (2026-11-27).
+        decided = self.decide(self.page())
+        for office in (read(self.DECEMBER, today=DECEMBER_AFTER), {"unread": "HTTP 403"}):
+            with self.subTest(office="read" if "unread" not in office else "unread"):
+                later = self.build(office, page=self.page(), today=DECEMBER_AFTER,
+                                   previous=decided, lists=None)
+                self.assert_office(later)
+
+    def test_a_runoff_that_is_not_the_offices_two_still_disagrees(self):
+        page = self.page(runoff=("Gabe Firment", "Michael Echols"))
+        alone = self.build(None, page=page, today=DECEMBER_AFTER)
+        self.assertEqual(alone["races"]["H-LA-05-2026"]["status"]["H6LA05101"], "runoff")
+        self.assert_disagrees(self.decide(page))
+
+
 # -------------------------------------------------- the third review's follow-ups
 
 EARLY = datetime.date(2026, 11, 14)

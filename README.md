@@ -1131,7 +1131,12 @@ for the round's date. The election is found by its date, a seat by
   is a disagreement too, and a page's call of a seat the office holds for its
   close margin waits for the official results (`pageHeld`). After December
   12, a page's December winner waits for the office's December count, the
-  office's runoff standing meanwhile, unless the counts lead someone else. A
+  office's runoff standing meanwhile, unless the counts lead someone else.
+  Once the office's December count decides the seat, a page still marking
+  only the first round's runoff of the same two (an unmarked December box
+  beside it or not) marks no December result: the office's result is shown
+  and the page is noted (`pageBehind`, `office-result-page-behind`, an info
+  line); a runoff of two others still disagrees. A
   read that concludes nothing for such a seat - the office unread, a round's
   file older than the last read's, no qualified list, a December round held -
   keeps the page's call set aside as the last read set it aside, its
@@ -1176,7 +1181,9 @@ general-election candidates, its list is the ballot (rule 77):
   page draws from: an accepted declaration in the general election is
   printed, a rejected one never was). A list published only as a PDF is
   transcribed in `overrides.CERTIFIED_BALLOTS` with its document and the day
-  it was read (Iowa, Nebraska). Only an election office's list is a ballot: a
+  it was read (Iowa, Nebraska; Mississippi's Secretary of State's sample official
+  ballot for the federal races, which prints every district's candidates). Only an
+  election office's list is a ballot: a
   party's list of its convention nominees is not, since the state may still
   refuse them.
 - The name a profile shows comes from its source's authority: a name settled

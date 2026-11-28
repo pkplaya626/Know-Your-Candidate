@@ -284,6 +284,13 @@ class TestReaders(unittest.TestCase):
         self.assertIn(("Rick Stewart", "Libertarian"),
                       overrides.CERTIFIED_BALLOTS["IA"]["races"]["H-IA-02-2026"])
         self.assertIn("Mike Marvin", str(overrides.CERTIFIED_BALLOTS["NE"]["races"]["S-NE-2026"]))
+        # Mississippi's ballot prints Johnny Baucom in the 1st district alone, and
+        # the independent Bennie Foster in the 2nd: the whole ballot keeps the
+        # Wikipedia page's copied row off the 2nd (rule 77).
+        ms = overrides.CERTIFIED_BALLOTS["MS"]["races"]
+        self.assertIn(("Johnny Baucom", "Libertarian"), ms["H-MS-01-2026"])
+        self.assertNotIn("Baucom", str(ms["H-MS-02-2026"]))
+        self.assertIn(("Bennie Foster", "Independent"), ms["H-MS-02-2026"])
 
 
 # ----------------------------------------------------------------- overlay
