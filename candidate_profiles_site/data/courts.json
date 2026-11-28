@@ -318,6 +318,35 @@
    "seats": 7,
    "url": "https://www.jud.ct.gov/external/supapp/supjustices.htm"
   },
+  "DC": {
+   "chief": "Anna Blackburne-Rigsby",
+   "listed": 9,
+   "members": [
+    "Anna Blackburne-Rigsby",
+    "Corinne A. Beckwith",
+    "James A. Crowell IV",
+    "Joshua Deahl",
+    "Catharine F. Easterly",
+    "John P. Howard III",
+    "Roy W. McLeese III",
+    "Stuart G. Nash",
+    "Vijay Shanker"
+   ],
+   "read": "2026-11-27",
+   "seats": 9,
+   "titles": {
+    "Anna Blackburne-Rigsby": "Chief Judge",
+    "Catharine F. Easterly": "Associate Judge",
+    "Corinne A. Beckwith": "Associate Judge",
+    "James A. Crowell IV": "Associate Judge",
+    "John P. Howard III": "Associate Judge",
+    "Joshua Deahl": "Associate Judge",
+    "Roy W. McLeese III": "Associate Judge",
+    "Stuart G. Nash": "Associate Judge",
+    "Vijay Shanker": "Associate Judge"
+   },
+   "url": "https://www.dccourts.gov/court-of-appeals/court-of-appeals-judges"
+  },
   "DE": {
    "chief": "Collins J. Seitz, Jr.",
    "listed": 5,
@@ -518,6 +547,23 @@
    "read": "2026-11-26",
    "seats": 9,
    "url": "https://www.gasupreme.us/court-information/biographies/"
+  },
+  "GU": {
+   "chief": "Katherine A. Maraman",
+   "listed": 3,
+   "members": [
+    "Katherine A. Maraman",
+    "Robert J. Torres Jr.",
+    "F. Philip Carbullido"
+   ],
+   "read": "2026-11-27",
+   "seats": 3,
+   "titles": {
+    "F. Philip Carbullido": "Associate Justice",
+    "Katherine A. Maraman": "Chief Justice",
+    "Robert J. Torres Jr.": "Associate Justice"
+   },
+   "url": "https://guamcourts.gov/courts-council/supreme-court/justices"
   },
   "HI": {
    "chief": "Vladimir P. Devens",
@@ -1189,6 +1235,23 @@
    "read": "2026-11-26",
    "seats": 7,
    "url": "https://mncourts.gov/supremecourt/supreme-court-justices"
+  },
+  "MP": {
+   "chief": "Alexandro C. Castro",
+   "listed": 3,
+   "members": [
+    "John A. Manglona",
+    "Alexandro C. Castro",
+    "Roberto C. Naraja"
+   ],
+   "read": "2026-11-27",
+   "seats": 3,
+   "titles": {
+    "Alexandro C. Castro": "Chief Justice",
+    "John A. Manglona": "Associate Justice",
+    "Roberto C. Naraja": "Associate Justice"
+   },
+   "url": "https://www.nmijudiciary.gov/justices"
   },
   "MS": {
    "chief": "Michael K. Randolph",
@@ -1956,6 +2019,35 @@
    "seats": 7,
    "url": "https://www.pacourts.us/courts/supreme-court/supreme-court-justices"
   },
+  "PR": {
+   "chief": "Maite D. Oronoz Rodríguez",
+   "listed": 9,
+   "members": [
+    "Maite D. Oronoz Rodríguez",
+    "Rafael L. Martínez Torres",
+    "Mildred G. Pabón Charneco",
+    "Erick V. Kolthoff Caraballo",
+    "Roberto Feliberti Cintrón",
+    "Luis F. Estrella Martínez",
+    "Ángel Colón Pérez",
+    "Camille Rivera Pérez",
+    "Raúl Arnaldo Candelario López"
+   ],
+   "read": "2026-11-27",
+   "seats": 9,
+   "titles": {
+    "Camille Rivera Pérez": "Jueza Asociada",
+    "Erick V. Kolthoff Caraballo": "Juez Asociado",
+    "Luis F. Estrella Martínez": "Juez Asociado",
+    "Maite D. Oronoz Rodríguez": "Jueza Presidenta",
+    "Mildred G. Pabón Charneco": "Jueza Asociada",
+    "Rafael L. Martínez Torres": "Juez Asociado",
+    "Raúl Arnaldo Candelario López": "Juez Asociado",
+    "Roberto Feliberti Cintrón": "Juez Asociado",
+    "Ángel Colón Pérez": "Juez Asociado"
+   },
+   "url": "https://poderjudicial.pr/tribunal-supremo/composicion-del-tribunal-supremo/"
+  },
   "RI": {
    "chief": "Paul A. Suttell",
    "listed": 4,
@@ -2524,6 +2616,27 @@
    "seats": 7,
    "url": "https://www.vacourts.gov/courts/scv/home"
   },
+  "VI": {
+   "chief": "Rhys S. Hodge",
+   "listed": 5,
+   "members": [
+    "Rhys S. Hodge",
+    "Maria M. Cabret",
+    "Ive Arlington Swan",
+    "Harold W.L. Willocks",
+    "Denise M. Francois"
+   ],
+   "read": "2026-11-27",
+   "seats": 5,
+   "titles": {
+    "Denise M. Francois": "Associate Justice",
+    "Harold W.L. Willocks": "Associate Justice",
+    "Ive Arlington Swan": "Associate Justice",
+    "Maria M. Cabret": "Associate Justice",
+    "Rhys S. Hodge": "Chief Justice"
+   },
+   "url": "https://supreme.vicourts.org/about_us/justices"
+  },
   "VT": {
    "chief": "Paul L. Reiber",
    "listed": 5,
@@ -2827,5 +2940,5 @@
    "url": "https://www.wyocourts.gov/supreme-court/"
   }
  },
- "fetched": "2026-11-26T19:46:38+00:00"
+ "fetched": "2026-11-28T03:05:04+00:00"
 }

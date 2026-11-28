@@ -519,7 +519,9 @@ class TestCommitted(unittest.TestCase):
                              code)
         # STATEGOV-12: ten courts showed no one on 2026-10-17. Only a court
         # nobody can read - not by a script, a browser or by hand - is left.
-        self.assertEqual(sorted(courts.UNREADABLE), ["AL"])
+        # American Samoa's High Court (courts.OWN_COURTS) publishes no roster
+        # of its own: this site's reader found no website of the court's own.
+        self.assertEqual(sorted(courts.UNREADABLE), ["AL", "AS"])
 
     def test_a_court_a_browser_reads_has_a_read_in_the_cache(self):
         cache = courts.load_cache(ROOT)
@@ -551,6 +553,105 @@ class TestCommitted(unittest.TestCase):
         for code in STATES:
             court = payload["states"][code]["court"]
             self.assertTrue(court.get("members") or court.get("unreadable"), code)
+
+
+OWN_PAGES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "courts")
+
+
+class TestOwnCourts(unittest.TestCase):
+    """The District's and the territories' own highest courts
+    (``courts.OWN_COURTS``, rule 57): each read by its recipe from its own
+    page, saved as the page stood on 2026-11-15, its chief and each member's
+    title in the court's own words, its seats from its own law or the court's
+    own words. A page in a shape the recipe has not seen concludes nothing."""
+
+    def page(self, code):
+        with open(os.path.join(OWN_PAGES, f"own_{code.lower()}.html"), encoding="utf-8") as handle:
+            return handle.read()
+
+    def read(self, code, page=None, pages=None):
+        page = self.page(code) if page is None else page
+        recipe = courts.COURTS[code]
+        if recipe.get("browser"):
+            return courts.read_court(code, recipe, courts.seats_of(code), page=page, pages=pages)
+        saved = courts._get_bytes
+        courts._get_bytes = lambda url, headers=None, timeout=60: page.encode("utf-8")
+        try:
+            return courts.read_court(code, recipe, courts.seats_of(code), pages=pages)
+        finally:
+            courts._get_bytes = saved
+
+    def test_each_court_reads_its_members_its_chief_and_their_titles(self):
+        expected = {
+            # code: (chief, members read, the chief's title, the others')
+            "DC": ("Anna Blackburne-Rigsby", 9, "Chief Judge", {"Associate Judge"}),
+            "GU": ("Katherine A. Maraman", 3, "Chief Justice", {"Associate Justice"}),
+            "MP": ("Alexandro C. Castro", 3, "Chief Justice", {"Associate Justice"}),
+            "PR": ("Maite D. Oronoz Rodríguez", 9, "Jueza Presidenta", {"Juez Asociado", "Jueza Asociada"}),
+            "VI": ("Rhys S. Hodge", 5, "Chief Justice", {"Associate Justice"}),
+        }
+        # American Samoa's High Court publishes no roster of its own
+        # (courts.UNREADABLE): it has no recipe and is listed without members.
+        self.assertEqual(sorted(expected), sorted(c for c in courts.OWN_COURTS if c in courts.COURTS))
+        self.assertIn("AS", courts.UNREADABLE)
+        for code, (chief, listed, chief_title, others) in expected.items():
+            with self.subTest(code=code):
+                got = self.read(code)
+                self.assertEqual((got["chief"], got["listed"]), (chief, listed))
+                self.assertEqual(got["titles"][chief], chief_title)
+                self.assertEqual({t for n, t in got["titles"].items() if n != chief}, others)
+                self.assertLessEqual(got["listed"], courts.seats_of(code))
+
+    def test_the_districts_senior_judges_are_not_among_its_nine(self):
+        # "The court is assisted by a number of senior judges": their table
+        # follows the Associate Judges' and is not the court's nine.
+        got = self.read("DC")
+        self.assertEqual(got["listed"], 9)
+        self.assertIn("Senior Judges", self.page("DC"))
+
+    def test_a_title_the_recipe_has_not_seen_concludes_nothing(self):
+        # "Acting Chief Justice", "Designated Justice": read as known, a
+        # page in a shape nobody looked at would name a court's members.
+        page = self.page("GU").replace("<em>Chief Justice", "<em>Acting Chief Justice", 1)
+        self.assertNotEqual(page, self.page("GU"))
+        with self.assertRaises(courts.CourtsError):
+            self.read("GU", page=page)
+
+    def test_more_members_than_seats_concludes_nothing(self):
+        saved = courts.OWN_COURTS["GU"]["seats"]
+        try:
+            courts.OWN_COURTS["GU"]["seats"] = 2
+            with self.assertRaisesRegex(courts.CourtsError, "members read for 2 seats"):
+                self.read("GU")
+        finally:
+            courts.OWN_COURTS["GU"]["seats"] = saved
+
+    def test_no_photograph_is_read_for_them(self):
+        pages = {}
+        for code in courts.OWN_COURTS:
+            if code in courts.COURTS:
+                self.read(code, pages=pages)
+        self.assertEqual(pages, {})
+
+    def test_an_entry_says_whose_words_give_its_seats_and_none_is_a_compilation(self):
+        self.assertEqual(courts.own_court_problems(), [])
+        saved = dict(courts.OWN_COURTS["GU"])
+        try:
+            courts.OWN_COURTS["GU"]["seatsFrom"] = ("7 GCA § 3103(a)", "https://law.justia.com/guam/7-3103",
+                                                    "three (3) full-time Justices", "2026-11-15")
+            self.assertTrue(any("compiled copy" in p for p in courts.own_court_problems()))
+            courts.OWN_COURTS["GU"]["seatsFrom"] = ("7 GCA § 3103(a)", "https://col.guamcourts.gov/x.pdf",
+                                                    "", "2026-11-15")
+            self.assertTrue(any("whose words give them" in p for p in courts.own_court_problems()))
+            courts.OWN_COURTS["GU"]["seatsFrom"] = ("7 GCA § 3103(a)", "https://col.guamcourts.gov/x.pdf",
+                                                    "three (3) full-time Justices", "")
+            self.assertTrue(any("the day it was read" in p for p in courts.own_court_problems()))
+            del courts.OWN_COURTS["GU"]["name"]
+            self.assertTrue(any("its name" in p for p in courts.own_court_problems()))
+        finally:
+            courts.OWN_COURTS["GU"].clear()
+            courts.OWN_COURTS["GU"].update(saved)
+        self.assertEqual(courts.own_court_problems(), [])
 
 
 if __name__ == "__main__":
