@@ -65,8 +65,8 @@ null: the state's own links stay beside it.
   "postmarked by" one day count if they arrive by another links a quote
   that says "postmarked" (``arrive_sources``), on the general election's
   line as on a runoff's;
-- a December date the results reader also holds (``overrides.GENERAL_RUNOFFS``,
-  ``OPEN_PRIMARY_SEATS``) must be the same date here (rule 53).
+- a December date the results reader also holds (``kyc/election_law.py``'s runoffs,
+  ``overrides.OPEN_PRIMARY_SEATS``) must be the same date here (rule 53).
 
 ``for_page`` turns a record into the lines the page shows, in words, each
 with its links; the page decides only what the reader's own calendar day
@@ -950,9 +950,11 @@ def _runoff_date_problems(code, record, runoff, day):
 
 def override_runoffs():
     """The December dates the results reader holds: {code: date}."""
-    from .overrides import GENERAL_RUNOFFS, OPEN_PRIMARY_SEATS
+    from .election_law import ELECTION_LAWS, general_runoff
+    from .overrides import OPEN_PRIMARY_SEATS
 
-    out = {code: date for code, (date, _evidence) in GENERAL_RUNOFFS.items()}
+    out = {code: general_runoff(code, office)[0] for code, office in sorted(ELECTION_LAWS)
+           if general_runoff(code, office)}
     for (code, _office, _cycle), seat in OPEN_PRIMARY_SEATS.items():
         if seat.get("runoff"):
             out[code] = seat["runoff"]

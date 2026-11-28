@@ -3790,32 +3790,14 @@ CERTIFIED_BALLOTS = {
     },
 }
 
-# States whose federal general election goes to a runoff when no candidate wins
-# a majority, and when (state code: (date, evidence)). After Election Day the
-# results reader treats an unpartisan "Runoff results" table on these states'
-# pages as that runoff (results.resolve_race). Louisiana's House seats are an
-# open primary with its own December round (OPEN_PRIMARY_SEATS).
-GENERAL_RUNOFFS = {
-    "GA": ("2026-12-01", "O.C.G.A. 21-2-501(a): a runoff is held on the 28th day after a "
-                         "general election in which no candidate receives a majority; "
-                         "November 3 + 28 days = December 1, 2026"),
-    # The Delegates from Guam and the Virgin Islands are elected by a
-    # majority too (results night, 2026-11-04: read by plurality, a page
-    # marking a leader short of one would have been "elected" a fortnight
-    # before the runoff). The dates are data/voting_dates.json's.
-    "GU": ("2026-11-17", "48 U.S.C. 1712: \"The Delegate from Guam shall be elected at large "
-                         "and by a majority of the votes cast for the office of Delegate. If "
-                         "no candidate receives such majority, on the fourteenth day following "
-                         "such election a runoff election shall be held\"; November 3 + 14 "
-                         "days = November 17, 2026"),
-    "VI": ("2026-11-17", "48 U.S.C. 1712 elects the Delegate from the Virgin Islands by a "
-                         "majority, with a runoff between the top two on the fourteenth day "
-                         "after the election; the Elections System of the Virgin Islands' "
-                         "2026 Elections Calendar (amended June 10, 2026) lists November 17 "
-                         "as \"RUN-OFF ELECTION DAY (Revised Organic Act of 1954, Sec., 11 re: "
-                         "Gov.-Lt. Gov.; P.L. 92-271 re: Delegate to House of "
-                         "Representatives)\""),
-}
+# The states whose federal general election goes to a runoff when no
+# candidate wins a majority, and when ({state: (date, evidence)}): a view by
+# state, kept for one release, of the one table of who is elected, keyed on
+# the state and the office (kyc/election_law.py: Georgia's Senate and House
+# races, Guam's and the Virgin Islands' Delegates). Nothing in kyc/ decides by
+# it. Louisiana's House seats are an open primary with its own December round
+# (OPEN_PRIMARY_SEATS).
+from .election_law import GENERAL_RUNOFFS_BY_STATE as GENERAL_RUNOFFS  # noqa: E402
 
 # Seats whose November election is their only round: no primary, so the
 # results reader's gate (results.primary_settled) has no date to open them

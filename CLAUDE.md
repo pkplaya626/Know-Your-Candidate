@@ -229,7 +229,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3643 tests, no dependencies
+python -m unittest discover tests             # 3662 tests, no dependencies
 npm install && npm test                       # 5363 real-DOM checks (needs jsdom)
 ```
 
@@ -1493,7 +1493,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     day after.** `results.general_held` opens the November table on the day
     after Election Day; a single marked winner is `elected` and the rest of
     that ballot `defeated`, and no mark or two marks change nothing.
-    Georgia's general runoff (`overrides.GENERAL_RUNOFFS`) is a runoff table
+    One race is read by one function, `results.read_race`, from its section
+    of the page, the race's people as its caller knows them (`RacePeople`:
+    for Congress the FEC's filings, the roster's names and aliases, the
+    state's certified or qualified list; it answers `same`, `on_a_list`,
+    `vouched` and `untied`) and the law that elects the office (`RaceLaw`,
+    `race_law`), and returns everything stored for the race; `build` calls
+    it for every race, and nothing a race's reading depends on stays in its
+    loop. Who is elected is one table keyed on the state and the office,
+    never the state alone (`kyc/election_law.py`'s `ELECTION_LAWS`:
+    plurality where no entry says otherwise, a majority or a runoff with its
+    day, ranked choice, and the all-party primaries, each provision quoted):
+    keyed on "ME", the ranked-choice gate Maine's races for Congress are held
+    to would have held its governor, elected by plurality, for ever. Moved
+    without a change (2026-11-17): replayed from the same starting caches
+    over November's saved pages, eleven sets and clocks from the night of
+    November 3 to December 13, every cache and every log line was main's.
+    Georgia's general runoff (`election_law.general_runoff`) is a runoff table
     naming no party whose people were all on the November ballot - a June
     party runoff titled "Runoff results" holds a loser who never was. From
     the day after December 1 a runoff with no result read is in the past
@@ -1512,7 +1528,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     and once certified (2026-11-01), the reading called no race wrongly, but
     a table titled by its seat alone ("Florida's 1st congressional district,
     2024") was never read as the November one - 83 seats in eleven states;
-    a ranked-choice count (`RANKED_CHOICE`: Maine, Alaska) elects only
+    a ranked-choice count (`election_law.ranked_choice`: Maine's and
+    Alaska's for Congress) elects only
     beside a majority in a table that marks the winner, since first choices
     are a lead (Poliquin led Maine's 2nd in 2018 and lost); and a certified
     list's other candidates, whom the page's November table leaves out, lost
@@ -2308,7 +2325,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
 
 74. **A status word must describe the race it badges, and what that race
     decided.** California's and Washington's top two and Alaska's top
-    four advance whatever the party (`results.ALL_PARTY_PRIMARIES`), so
+    four advance whatever the party (`election_law.all_party_primary`), so
     no one there "won the primary" or was "renominated". A member running
     under a new district number is not leaving (`renumbered`, and the
     seat they hold says `holderMoved`); one who ran there and lost is.
