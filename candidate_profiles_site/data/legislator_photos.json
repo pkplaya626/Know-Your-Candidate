@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-26T19:36:04+00:00",
+ "fetched": "2026-11-28T17:50:30+00:00",
  "people": {
   "ocd-person/006c1bd9-54e9-49be-9d02-12dda1119149": {
    "bytes": 61635,
@@ -2156,7 +2156,7 @@
    "credit": "Vermont General Assembly",
    "district": "Franklin-8",
    "name": "Jack Brigham",
-   "read": "2026-11-14",
+   "read": "2026-11-28",
    "state": "VT",
    "withheld": "https://legislature.vermont.gov/images/profile.png is offered on 3 members' pages"
   },
@@ -3012,11 +3012,11 @@
    "height": 200,
    "image": "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2899.jpg",
    "key": "member page",
-   "lastModified": "2026-11-10",
-   "lastModifiedAt": "2026-11-10T16:31:07",
+   "lastModified": "2026-11-28",
+   "lastModifiedAt": "2026-11-28T17:50:21",
    "name": "Brent Jacobson",
    "page": "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2899",
-   "read": "2026-11-10",
+   "read": "2026-11-28",
    "sha": "047d80e855785803",
    "state": "WI",
    "width": 150
@@ -7208,11 +7208,11 @@
    "height": 200,
    "image": "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2852.jpg",
    "key": "member page",
-   "lastModified": "2026-11-10",
-   "lastModifiedAt": "2026-11-10T16:31:08",
+   "lastModified": "2026-11-28",
+   "lastModifiedAt": "2026-11-28T17:50:20",
    "name": "Dean Kaufert",
    "page": "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2852",
-   "read": "2026-11-10",
+   "read": "2026-11-28",
    "sha": "2be163c541fd6fbc",
    "state": "WI",
    "width": 150
@@ -12624,7 +12624,7 @@
    "credit": "Vermont General Assembly",
    "district": "Chittenden-18",
    "name": "Kevin Scully",
-   "read": "2026-11-14",
+   "read": "2026-11-28",
    "state": "VT",
    "withheld": "https://legislature.vermont.gov/images/profile.png is offered on 3 members' pages"
   },
@@ -15560,7 +15560,7 @@
    "credit": "Vermont General Assembly",
    "district": "Washington-Orange",
    "name": "David Soucy",
-   "read": "2026-11-14",
+   "read": "2026-11-28",
    "state": "VT",
    "withheld": "https://legislature.vermont.gov/images/profile.png is offered on 3 members' pages"
   },
