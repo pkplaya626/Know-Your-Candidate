@@ -32,7 +32,15 @@ class Issue:
 
     __slots__ = ("level", "code", "message", "detail")
 
+    LEVELS = ("error", "warn", "info")
+
     def __init__(self, level, code, message, detail=None):
+        # A level the report does not know is counted nowhere and printed
+        # nowhere: "warning" kept three checks' findings, the photographs'
+        # manifest's four and rule 106's two out of every build's report,
+        # with nothing failing. A wrong level is the build's error.
+        if level not in self.LEVELS:
+            raise ValueError(f"{code}: unknown issue level {level!r}; one of {self.LEVELS}")
         self.level = level
         self.code = code
         self.message = message
@@ -2512,7 +2520,7 @@ def check_statewide_candidates(data, snapshot=None):
     leads = statewide.member_leads(data, (snapshot or {}).get("legislators"),
                                    set(overrides.OTHER_OFFICE_NOMINEES))
     if leads:
-        return [Issue("warning", "statewide-member-unnoted",
+        return [Issue("warn", "statewide-member-unnoted",
                       f"{len(leads)} sitting member(s) of Congress share a name with a statewide "
                       "candidate in their state and have no OTHER_OFFICE_NOMINEES entry", leads)]
     return []
@@ -2542,7 +2550,7 @@ def check_terms_begun(root=".", today=None, payload=None):
     out = []
     found = terms_begin.lagging(payload, today)
     if found:
-        out.append(Issue("warning", "holder-past-inauguration",
+        out.append(Issue("warn", "holder-past-inauguration",
                          f"{len(found)} office(s) whose new term has begun, by its jurisdiction's "
                          f"own law, while the roster still names the holder who was not on the "
                          f"ballot for it (or no one): read the roster again, or the office's own "
@@ -2552,11 +2560,59 @@ def check_terms_begun(root=".", today=None, payload=None):
     # the provision (the review of PR #230): a warning, and no page words.
     gaps = terms_begin.unread(payload, today)
     if gaps:
-        out.append(Issue("warning", "term-day-unread",
+        out.append(Issue("warn", "term-day-unread",
                          f"{len(gaps)} office(s) on the 2026 ballot whose new term's first day no "
                          f"provision here gives, while the roster names a holder who was not on "
                          f"the ballot for it: read the jurisdiction's own law into "
                          f"kyc/terms_begin.py", gaps))
+    return out
+
+
+def check_state_terms(root=".", today=None):
+    """Both tables' checks on one build of the state government: the
+    offices' (``check_terms_begun``) and the legislative chambers'
+    (``check_legislative_terms``, rule 106)."""
+    import datetime
+    from . import stategov
+    today = today or datetime.datetime.now(datetime.timezone.utc).date()
+    try:
+        payload = stategov.build(root)[0]
+    except stategov.StateGovError as exc:
+        return [Issue("error", "terms-begin-unchecked",
+                      f"the state government could not be built to check its terms: {exc}")]
+    return (check_terms_begun(root, today, payload) +
+            check_legislative_terms(payload, today))
+
+
+def check_legislative_terms(payload, today, roster_read=None):
+    """A legislative chamber whose new term has begun by the build's day,
+    from the state's own law (kyc/legislative_terms.py), while the roster
+    this site reads (Open States) may still list members whose terms ended
+    then (``legislature-roster-behind``), and every chamber on the 2026
+    ballot whose day no provision here gives (``legislature-term-unknown``):
+    warnings, never errors (rule 8), since the page already says so on the
+    reader's day (rule 106)."""
+    from . import legislative_terms
+    if roster_read is None:
+        roster_read = (((payload or {}).get("sources") or {}).get("openstates")
+                       or ["", "", ""])[2]
+    out = []
+    behind = legislative_terms.lagging(payload, today, roster_read or "")
+    if behind:
+        out.append(Issue("warn", "legislature-roster-behind",
+                         f"{len(behind)} legislative chamber(s) whose new term has begun, by the "
+                         "state's own law, while the Open States roster may still list members "
+                         "whose terms ended then: the pages say so beside the chamber, mark the "
+                         "seats on that ballot and state no control",
+                         [words for _code, _which, words in behind]))
+    gaps = legislative_terms.unknown(payload)
+    if gaps:
+        out.append(Issue("warn", "legislature-term-unknown",
+                         f"{len(gaps)} legislative chamber(s) on the 2026 ballot whose new term's "
+                         "first day no provision here gives: read the state's own law into "
+                         "kyc/legislative_terms.py (until then no page can say when its roster "
+                         "falls behind)",
+                         [f"{code} {which}: {why}" for code, which, why in gaps]))
     return out
 
 

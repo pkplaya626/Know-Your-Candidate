@@ -1784,11 +1784,20 @@ class TestTheWholePersonBesideASeatInCongress(SettledEntries):
 
 
 class TestALegislatorsTermEnding(unittest.TestCase):
-    """A legislator's role has no end this site reads: a joined legislator
-    whose district is on the 2026 ballot while they ran for another office
-    is said (``identity-legislator-term-ending``)."""
+    """A legislator's role ends on the day its chamber's new term began, by
+    the state's own law (kyc/legislative_terms.py, rule 106), where the seat
+    was on the 2026 ballot and the roster is not recorded caught up; in a
+    chamber whose day is a gap, a joined legislator whose district is on
+    that ballot while they ran for another office is said
+    (``identity-legislator-term-unknown``). Made chambers: a December day, a
+    gap, a roster recorded caught up."""
 
-    def build(self, up):
+    DECEMBER = {"day": "2026-12-07", "from": "2026-12-07", "kind": "on", "counted": True,
+                "words": "the first Monday in December next following her or his election",
+                "cite": "Made Const. art. IV, s.2", "source": "https://law.example.gov/4-2",
+                "read": "2026-11-25"}
+
+    def build(self, up, term=None, behind=True, unknown=False):
         challenger = filer("FEC_H6TX00001", "Gina Example", state="TX", label="House • TX-37",
                            wikipedia="Gina Example")
         history = {"people": {challenger["id"]: {"wikipedia": "Gina Example", "offices": [
@@ -1796,29 +1805,73 @@ class TestALegislatorsTermEnding(unittest.TestCase):
              "open": True, "agree": "exact"}]}}}
         seat = {"id": "ocd-person/1", "name": "Gina Example", "chamber": "lower", "district": "49",
                 "districtId": "049", "state": "TX"}
-        legislatures = {"TX": {"chambers": {"lower": {"title": "House of Representatives",
-                                                      "districts": {"049": {"up": up}}}}}}
+        chamber = {"title": "House of Representatives", "districts": {"049": {"up": up}},
+                   "upSeats": 150, "seats": 150}
+        if term:
+            chamber.update(termBegins=term, rosterBehind=behind)
+        if unknown:
+            chamber["termUnknown"] = {"source": "https://law.example.gov/gap"}
+        legislatures = {"TX": {"chambers": {"lower": chamber},
+                               "sources": {"peopleDate": "2026-11-17"}}}
         links = identity.build([challenger], history=history,
                                legislators={"states": {"TX": [seat]}}, legislatures=legislatures)
         identity.attach(links)
         return links, challenger
 
-    def test_a_seat_on_the_ballot_beside_a_run_for_another_office_is_said(self):
-        links, challenger = self.build(True)
-        found = [p for p in identity.problems(links) if p[1] == "identity-legislator-term-ending"]
+    def test_a_seat_on_the_ballot_ends_on_the_chambers_day(self):
+        links, challenger = self.build(True, self.DECEMBER)
+        role = challenger["also"][0]
+        self.assertEqual(role["kind"], "legislator")
+        self.assertEqual(role["words"],
+                         "Member of the Texas House of Representatives, district 49")
+        self.assertEqual(role["ends"], "2026-12-07")
+        self.assertEqual(role["endsRead"], "2026-11-17")
+        self.assertEqual(role["ended"],
+                         "Was a member of the Texas House of Representatives, district 49, for "
+                         "the term that ended when the new term began on Dec. 7, 2026, counted "
+                         "from “the first Monday in December next following her or his "
+                         "election”; the seat was on the Nov. 3, 2026 ballot")
+        # Nothing names a winner, nor says they left the seat (rule 19).
+        self.assertNotIn("won", role["ended"])
+        self.assertNotIn("left", role["ended"])
+        # The day is the limit's end: no warning stands for it.
+        self.assertNotIn("identity-legislator-term-unknown", codes(links))
+        self.assertNotIn("identity-legislator-term-ending", codes(links))
+        # The share pages' words on each side of the day (the page's day:
+        # the results' read, or a later roster read).
+        before = identity.share_html(challenger, post="2026-12-06")
+        after = identity.share_html(challenger, post="2026-12-07")
+        self.assertIn(">Member of the Texas House of Representatives, district 49<", before)
+        self.assertIn(">Was a member of the Texas House of Representatives, district 49, for "
+                      "the term that ended", after)
+
+    def test_no_end_where_the_seat_was_not_up_or_the_roster_caught_up(self):
+        for up, behind in ((False, True), (None, True), (True, False)):
+            links, challenger = self.build(up, self.DECEMBER, behind=behind)
+            role = challenger["also"][0]
+            self.assertNotIn("ends", role, (up, behind))
+            self.assertNotIn("ended", role, (up, behind))
+            self.assertNotIn("identity-legislator-term-unknown", codes(links), (up, behind))
+
+    def test_a_gap_says_the_limit_and_gives_no_end(self):
+        links, challenger = self.build(True, unknown=True)
+        self.assertNotIn("ends", challenger["also"][0])
+        found = [p for p in identity.problems(links) if p[1] == "identity-legislator-term-unknown"]
         self.assertEqual(found[0][0], "warn")
         self.assertIn("1 joined state legislator card is in a district the legislature page marks "
                       "on the 2026 ballot", found[0][2])
+        self.assertIn("first day this site has not read", found[0][2])
         self.assertEqual(found[0][3], [
             "Gina Example (Member of the Texas House of Representatives, district 49; TX lower 49, "
             "ocd-person/1) and profile Gina Example (Candidate for the U.S. House in TX-37)"])
         # The line still names the seat: the limit is said, not hidden.
         self.assertEqual(roles(challenger), [("legislator", "ocd-person/1")])
+        self.assertNotIn("identity-legislator-term-ending", codes(links))
 
-    def test_a_seat_not_on_the_ballot_or_not_known_is_not(self):
+    def test_a_seat_not_on_the_ballot_or_not_known_is_not_said(self):
         for up in (False, None):
-            links, _challenger = self.build(up)
-            self.assertNotIn("identity-legislator-term-ending", codes(links), up)
+            links, _challenger = self.build(up, unknown=True)
+            self.assertNotIn("identity-legislator-term-unknown", codes(links), up)
 
 
 class TestMoreGuardsTheReaderUndid(unittest.TestCase):

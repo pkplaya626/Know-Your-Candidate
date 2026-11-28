@@ -436,6 +436,42 @@ def legislator_role(code, member, title, name=None):
             "href": href, "share": href}
 
 
+def legislator_term_end(role, payload, member):
+    """A legislator's role ends on the day its chamber's new term began, by
+    the state's own law (kyc/legislative_terms.py, the legislature page's
+    ``termBegins``), where the member's district was on the 2026 ballot
+    (``districts[d].up``) and no person has recorded the chamber's roster
+    caught up (``rosterBehind``, rule 106): the role carries that day
+    (``ends``, the first day the term had certainly begun), the roster's day
+    read (``endsRead``) and the words from then (``ended``): "Was a member of
+    the California State Assembly, district 32, for the term that ended
+    when the new term began on Dec. 7, 2026 ...". The words say the term
+    the roster's listing was for, and no more: this site reads no state
+    legislative result, so a member re-elected to the seat is not said to
+    have left it, nor anyone to have won it (rule 19). A district not on that
+    ballot, or one the record names no district for, a chamber whose day is
+    a gap and a roster recorded caught up give no end. *payload*: the
+    legislature page's payload for the member's state."""
+    from .terms_begin import began_words
+
+    chamber = ((payload or {}).get("chambers") or {}).get(member.get("chamber")) or {}
+    term = chamber.get("termBegins")
+    district = (chamber.get("districts") or {}).get(member.get("districtId")) or {}
+    if (not term or not term.get("from") or not chamber.get("rosterBehind")
+            or district.get("up") is not True):
+        return role
+    role["ends"] = term["from"]
+    read = (((payload or {}).get("sources") or {}).get("peopleDate") or "")[:10]
+    if read:
+        role["endsRead"] = read
+    held = role["words"]
+    if held.startswith("Member of "):
+        held = "a member of " + held[len("Member of "):]
+    role["ended"] = (f"Was {held}, for the term that ended when the new term "
+                     f"{began_words(term)}; the seat was on the Nov. 3, 2026 ballot")
+    return role
+
+
 def _named_officer(off):
     """An officer card that names its holder as the office's (rule 56): no
     dispute, no unconfirmed association listing, a name."""
@@ -477,6 +513,7 @@ class Links:
         self.history_cache = {}
         self.legislators = {}
         self.titles = {}
+        self.legislatures = {}    # the legislature pages' payload: each chamber's new term
 
     def settled(self, a, b):
         """Whether a person's evidenced entry settles the pair either way."""
@@ -790,8 +827,9 @@ def _legislator_node(links, code, member, chamber_titles):
         return links.nodes[key]
     title = chamber_titles.get((code, member.get("chamber"))) or "Legislature"
     name = (links.chamber_names or {}).get((code, member.get("chamber")))
-    return links.add(Node(key, "legislator", member.get("name"), code, member,
-                          legislator_role(code, member, title, name),
+    role = legislator_term_end(legislator_role(code, member, title, name),
+                               (links.legislatures or {}).get(code), member)
+    return links.add(Node(key, "legislator", member.get("name"), code, member, role,
                           photo=_photo(member, "image")))
 
 
@@ -1257,6 +1295,7 @@ def build(profiles, races=None, summary=None, stategov=None, federal=None, court
                 links.chamber_names[(code, chamber)] = info["name"]
     links.legislators = legislators or {}
     links.titles = titles
+    links.legislatures = legislatures or {}
     _apply_settled(links)
     _join_by_ids(links)
     _join_officers(links, officers)
@@ -1279,7 +1318,7 @@ def _withhold_behind_seats(links):
     """One pass over the person as a whole, after every join: in each
     component holding a member of Congress sitting now (``record.seated``),
     every governor's, officer's and legislator's card whose role carries no
-    end (``ends``, :func:`term_end`; a legislator's never does) or one later
+    end (``ends``, :func:`term_end`, :func:`legislator_term_end`) or one later
     than the day the member's term began is withheld - its joins undone, so
     it names nobody and nobody names it - and said, in
     ``identity-officer-roster-behind`` (a governor's or an officer's card)
@@ -1316,8 +1355,10 @@ def _withhold_behind_seats(links):
                 f"{person.kind} {person.name} ({person.record.get('id')}) and {node.name} "
                 f"({node.state} {rec.get('chamber')} {rec.get('district')}, {rec.get('id')}): "
                 "seated in Congress" + (f" since {day}" if day else "")
-                + f", but joined to the legislator card, whose seat carries no end this site "
-                f"reads (joined by {why})")
+                + ", but joined to the legislator card, whose seat "
+                + (f"this site reads ending only on {node.role['ends']}"
+                   if node.role.get("ends") else "carries no end this site reads")
+                + f" (joined by {why})")
         else:
             _say_officer_behind(links, node, person, why)
         links.withheld_pairs.update(frozenset((key, other)) for other in _group if other != key)
@@ -1331,19 +1372,17 @@ def _withhold_behind_seats(links):
 
 
 def _report_term_ending(links, legislatures):
-    """One line (``identity-legislator-term-ending``) for each joined
+    """One line (``identity-legislator-term-unknown``) for each joined
     legislator whose district the legislature page marks on the 2026
     ballot (``districts[d].up``, kyc/legislature.py ``seats_up``) while
     another of their cards shows a 2026 run for another office - a filing
-    for Congress or the election office's list for governor. The seat they
-    hold is one that election filled (or, in a district of more seats, may
-    be), and they leave it when the chamber's new term begins: California's
-    on the first Monday in December, Pennsylvania's House on December 1. A
-    legislator's role carries no end, because this site records no
-    legislature's day its new term begins; until a sourced day does, the
-    line names the seat for as long as the roster lists them, and this
-    warning is the limit said, for a person to check once each chamber's new
-    term has begun (rule 105)."""
+    for Congress or the election office's list for governor - in a chamber
+    whose new term's first day this site has not read (a gap in
+    kyc/legislative_terms.py: no ``termBegins``). Where the chamber has a
+    day, the role ends on it (:func:`legislator_term_end`, rule 106) and
+    nothing is said here; where it has none, the line names the seat for as
+    long as the roster lists them, and this warning is the limit said, for
+    a person to read the state's law into the table (rule 105)."""
     rows = []
     for group in links.components():
         runs = [n for n in group if (n.kind == "profile" and n.record.get("isCandidate"))
@@ -1351,13 +1390,13 @@ def _report_term_ending(links, legislatures):
         if not runs:
             continue
         for node in group:
-            if node.kind != "legislator":
+            if node.kind != "legislator" or node.role.get("ends"):
                 continue
             rec = node.record
             chamber = (((legislatures or {}).get(node.state) or {}).get("chambers") or {}).get(
                 rec.get("chamber")) or {}
             district = (chamber.get("districts") or {}).get(rec.get("districtId")) or {}
-            if district.get("up") is not True:
+            if district.get("up") is not True or chamber.get("termBegins"):
                 continue
             run = runs[0]
             rows.append(
@@ -1367,13 +1406,13 @@ def _report_term_ending(links, legislatures):
     if rows:
         n = len(rows)
         links.problems.append((
-            "warn", "identity-legislator-term-ending",
+            "warn", "identity-legislator-term-unknown",
             f"{n} joined state legislator card{'' if n == 1 else 's'} {'is' if n == 1 else 'are'} "
             "in a district the legislature page marks on the 2026 ballot while another of the "
-            "person's cards shows a 2026 run for another office: they may leave that seat when "
-            "the chamber's new term begins, a day this site does not record, so the line names the "
-            "seat for as long as the roster lists them; check each once its chamber's new term "
-            "has begun (rule 105)", sorted(rows)))
+            "person's cards shows a 2026 run for another office, in a chamber whose new term's "
+            "first day this site has not read (kyc/legislative_terms.py GAPS): the line names the "
+            "seat for as long as the roster lists them; read the state's law into the table "
+            "(rules 105 and 106)", sorted(rows)))
 
 
 def _look_alikes(links):

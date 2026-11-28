@@ -913,21 +913,21 @@ def problems(cache, root=".", shown=None, files=True):
         if entry.get("copy") and url not in shown.urls:
             orphans.append(url)
     if missing:
-        out.append(("warning", "photo-copies-missing",
+        out.append(("warn", "photo-copies-missing",
                     f"{sum(missing.values())} portraits over 300 KB or 1,200 px have no smaller "
                     f"copy yet ({', '.join(f'{k} {n}' for k, n in sorted(missing.items()))}); "
                     f"run 'photocopies'"))
     if unweighed:
-        out.append(("warning", "photo-copies-unweighed",
+        out.append(("warn", "photo-copies-unweighed",
                     f"{sum(unweighed.values())} portraits not yet weighed "
                     f"({', '.join(f'{k} {n}' for k, n in sorted(unweighed.items()))}); "
                     f"run 'photocopies'"))
     if orphans:
-        out.append(("warning", "photo-copy-orphan",
+        out.append(("warn", "photo-copy-orphan",
                     f"{len(orphans)} copies whose original no record shows any more (the "
                     f"'photocopies' command removes them): {', '.join(orphans[:3])}"))
     if unshown:
-        out.append(("warning", "photo-hosted-orphan",
+        out.append(("warn", "photo-hosted-orphan",
                     f"{len(unshown)} photographs hosted here that no record shows any more "
                     f"(the 'guidephotos' command removes them): {', '.join(unshown[:3])}"))
     return out
