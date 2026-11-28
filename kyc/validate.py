@@ -1311,13 +1311,53 @@ def check_results_pages(cache):
                             "until every gate passes; each line says which failed", held))
     disagree = [f"{rid}: {item.get('page')!r} says {item.get('pageSays')}; the Secretary of "
                 f"State's results say {item.get('officeSays')}"
-                for rid, item in sorted((office.get("disagree") or {}).items())]
+                + (f" (as the read of {item['keptFrom']} found: this read concluded nothing "
+                   "for the seat, and the page's call stays set aside"
+                   + ("; the page now agrees with the office's last result, and its call "
+                      "stays set aside until a read of those results concludes"
+                      if item.get("pageAgrees") else "") + ")"
+                   if item.get("keptFrom") else "")
+                for rid, item in sorted((office.get("disagree") or {}).items())
+                if not item.get("pageSilentOn")]
     if disagree:
         issues.append(Issue("warn", "office-result-disagrees",
                             f"{len(disagree)} Louisiana House seats where the results page and "
                             "the Secretary of State's own results name different people (rule "
                             "64): neither is shown, and the seat reads from the qualified list "
                             "until a person looks", disagree))
+    # A hold carried while the page makes no call (``pageSilentOn``): no call
+    # is set aside this run, so nothing is warned as a live disagreement, but
+    # a person is told the hold stands until a read decides the seat.
+    silent = [f"{rid}: {item.get('page')!r} said {item.get('pageSays')}, which the read of "
+              f"{item.get('keptFrom')} "
+              + (f"found the Secretary of State's results contradict ({item.get('officeSays')})"
+                 if kind == "disagree" else
+                 "held for the Secretary of State's official results"
+                 + (f" ({item['seatWhy']})" if item.get("seatWhy") else ""))
+              + f"; it makes no call of the seat since {item['pageSilentOn']}"
+              for kind in ("disagree", "pageHeld")
+              for rid, item in sorted((office.get(kind) or {}).items())
+              if item.get("pageSilentOn")]
+    if silent:
+        issues.append(Issue("info", "office-result-set-aside",
+                            f"{len(silent)} Louisiana House seats whose results page makes no "
+                            "call now, where a read of the Secretary of State's results set its "
+                            "last call aside (rule 64): the call stays set aside until a read of "
+                            "those results decides the seat", sorted(silent)))
+    # A page that still marks only the first round's runoff of the two the
+    # office's December round decided between (``pageBehind``): it marks no
+    # December result, so the office's result is shown; a person is told
+    # the page has not caught up.
+    behind = [f"{rid}: {item.get('page')!r} still says {item.get('pageSays')}, the first "
+              f"round's runoff; the Secretary of State's results say {item.get('officeSays')}"
+              for rid, item in sorted((office.get("pageBehind") or {}).items())]
+    if behind:
+        issues.append(Issue("info", "office-result-page-behind",
+                            f"{len(behind)} Louisiana House seats whose results page marks only "
+                            "the first round's runoff where the Secretary of State's December "
+                            "results decide the seat (rule 64): the page marks no December "
+                            "result, whatever an unmarked December table of its counts, and the "
+                            "office's result is shown", behind))
     if office.get("unread"):
         issues.append(Issue("warn", "office-results-unread",
                             f"Louisiana's Secretary of State's results could not be read on "
@@ -1729,8 +1769,10 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
         elif source == "curated":
             # A photograph a person chose (overrides.CANDIDATE_PHOTOS): its
             # page, words and day, and its size as read - a Commons file's
-            # standard sizes, another file's bytes and pixels, within the
-            # caps (an entry is a person's look, not a reason to send 5 MB).
+            # standard sizes, another file's bytes and pixels. One over the
+            # caps is shown smaller from the same file where a resizer
+            # serves it, else as it is, and says so either way (``heavy``,
+            # rule 87: the sweep of 2026-11-17's campaign photographs).
             from .portraits import wikimedia_file
             record = portraits.get(profile_key(p)) or {}
             missing = [f for f in ("page", "evidence", "read") if not record.get(f)]
@@ -1739,8 +1781,11 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
                     missing.append("sizes")
             elif not all(record.get(k) for k in ("bytes", "width", "height")):
                 missing.append("weight")
-            elif too_heavy(record):
-                missing.append("weight within the caps")
+            elif too_heavy(record) and not record.get("heavy"):
+                missing.append("note that it is over the caps")
+            elif record.get("original") and not (record.get("heavy")
+                                                 and record.get("originalWeight")):
+                missing.append("note of the heavy file it was made smaller from")
             if missing:
                 found.append(f"{p['name']} (curated): no {', '.join(missing)}")
         if source != "curated" and p.get("isCandidate") and not p.get("bioguide") \
@@ -2115,7 +2160,7 @@ def check_registrations(profiles, field):
     return issues
 
 
-def check_voting_links(cache):
+def check_voting_links(cache, today=None):
     """Every state and D.C. has its four official voting pages.
 
     The state page tells a reader where to check their registration, find
@@ -2171,7 +2216,10 @@ def check_voting_links(cache):
     # A link a person opened by hand (overrides.VOTING_LINKS_BY_HAND) is
     # listed apart, while its reading counts; one it no longer counts is
     # listed again here and below.
-    stale_by_hand = voting.by_hand_problems(cache)
+    # The reader's day decides whether a reading by hand still counts; a test
+    # gives its own, or a check written in October fails on the 31st day
+    # after its entries (every refresh from 2026-11-26 would have).
+    stale_by_hand = voting.by_hand_problems(cache, today)
     counted = {(code, kind) for code, kinds in voting.by_hand(cache).items() for kind in kinds
                if not any(p.startswith(f"{code} {kind}: opened by hand") for p in stale_by_hand)}
     unchecked = sorted(f"{code} {kind}: {link['url']} "
@@ -2352,6 +2400,9 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         issues += check_voting_dates(voting_dates)
     if statewide is not None:
         issues += check_statewide_candidates(statewide, snapshot)
+        from . import statewide_photos
+        issues += check_statewide_photo_choices(statewide,
+                                                statewide_photos.load_cache(root) or {})
     if measures is not None:
         issues += check_ballot_measures(measures)
     if local_measures is not None:
@@ -2401,6 +2452,43 @@ def check_ballot_measures(data):
         return [Issue("error", "ballot-measures", f"{len(found)} problems in the ballot measures "
                       "(kyc/ballot_measures.py)", found)]
     return []
+
+
+def check_statewide_photo_choices(data, photo_cache=None):
+    """Every ``overrides.STATEWIDE_PHOTOS`` entry (rule 91's fifth route) says
+    what file, page, words, tie and look it rests on, as a
+    ``CANDIDATE_PHOTOS`` entry must (``statewide_photos.curated_problems``),
+    and is not a photograph a person refused (``NOT_A_PORTRAIT``,
+    ``PORTRAIT_LICENCE_DOUBTS``): an error, as the profiles' is. One that
+    stands for nothing - a name no list prints, a candidate another route
+    pictures, an entry the cache (*photo_cache*, data/statewide_photos.json)
+    holds no record of - is a warning, as every stale override's is."""
+    from . import overrides, statewide_photos
+    from .photos import refused
+
+    bad = []
+    for k, entry in sorted(getattr(overrides, "STATEWIDE_PHOTOS", {}).items()):
+        problems = statewide_photos.curated_problems(entry)
+        if not problems:
+            upload = statewide_photos.upload_of(
+                entry["page"].split("/wiki/File:", 1)[-1]) if "/wiki/File:" in entry["page"] \
+                else None
+            why = refused(*[u for u in (entry["url"], upload) if u])
+            if why:
+                problems.append(why)
+        if problems:
+            bad.append(f"{k}: {'; '.join(problems)}")
+    issues = []
+    if bad:
+        issues.append(Issue("error", "statewide-photo-curated-unevidenced",
+                            f"{len(bad)} overrides.STATEWIDE_PHOTOS entries do not say what "
+                            "they rest on, or name a refused photograph", bad))
+    stale = statewide_photos.stale_curated(photo_cache, statewide_photos.lists_of(data))
+    if stale:
+        issues.append(Issue("warn", "stale-statewide-photo-override",
+                            f"{len(stale)} overrides.STATEWIDE_PHOTOS entries stand for no "
+                            "photograph shown", stale))
+    return issues
 
 
 def check_statewide_candidates(data, snapshot=None):

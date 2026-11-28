@@ -700,6 +700,9 @@
       '<p class="gov-links">' + (gov.website ? link(gov.website, "Governor's office") + " · " : "") +
       link(gov.profile, "NGA biography") + "</p>" +
       (contact && !opts.brief ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
+      // The governor's other roles on this site, and their earlier service
+      // in Congress where it has no card here (rule 105).
+      KYC.alsoHtml(gov, { cls: "gcard-also" }) + KYC.congressBioHtml(gov) +
       photo.credit + "</div></div></article>";
   }
 
@@ -753,6 +756,8 @@
         " for lieutenant governor</p>" : "") +
       (person.ballotName ? '<p class="faint">Printed on the ballot as “' +
         KYC.escapeHtml(person.ballotName) + "”</p>" : "") +
+      // Their other roles on this site, each linked to its card (rule 105).
+      KYC.alsoHtml(person, { cls: "gcard-also" }) + KYC.congressBioHtml(person) +
       photo.credit + "</div></div></article>";
   }
 
@@ -1184,7 +1189,10 @@
         (off.readByHand ? '<p class="faint gov-by-hand">' + link(off.readByHand.url, "The office's own page") +
           " names them, read by hand on " + KYC.escapeHtml(KYC.dayMonthYear(off.readByHand.read)) +
           ".</p>" : "") +
-        (contact.length ? '<p class="faint gov-contact">' + contact.join(" · ") + "</p>" : "");
+        (contact.length ? '<p class="faint gov-contact">' + contact.join(" · ") + "</p>" : "") +
+        // The holder's other roles on this site (rule 105): Peggy Flanagan's
+        // profile as Minnesota's Senate nominee.
+        KYC.alsoHtml(off, { cls: "gov-officer-also" });
     }
     var pictured = body.indexOf("gov-officer-photo") !== -1;
     // The office's label carries the ballot mark, above the holder (rule 79).
