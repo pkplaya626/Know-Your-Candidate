@@ -285,6 +285,19 @@ class TestElectionLaw(unittest.TestCase):
         self.assertEqual(kind("GU", "House"), {"generalRunoff": "2026-11-17"})
         self.assertEqual(kind("AK", "House"), {"primaryKind": "top-four"})
         self.assertEqual(kind("OH", "House"), {})
+        # Every real entry answers the Senate and the House alike, so a badge
+        # that ignored the chamber passed the lines above (the refactor's
+        # review, 2026-11-28): a made-up state whose two offices' laws differ.
+        made = {("ZZ", "S"): {"elect": election_law.MAJORITY_OR_RUNOFF, "runoff": "2026-12-01",
+                              "law": "Made Code 1: a runoff where no candidate has a majority"},
+                ("ZZ", "H"): {"primary": ("top-two", "Made Code 2: the two leaders go through")}}
+        election_law.ELECTION_LAWS.update(made)
+        try:
+            self.assertEqual(kind("ZZ", "Senate"), {"generalRunoff": "2026-12-01"})
+            self.assertEqual(kind("ZZ", "House"), {"primaryKind": "top-two"})
+        finally:
+            for key in made:
+                del election_law.ELECTION_LAWS[key]
 
 
 class TestRaceLaw(unittest.TestCase):

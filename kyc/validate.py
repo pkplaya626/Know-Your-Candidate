@@ -920,10 +920,17 @@ def check_duplicate_people(profiles):
     return issues
 
 
-# States whose primaries send more than one person per party to November.
-# California and Washington run top-two primaries; Alaska sends four through.
-# Everywhere else, two nominees from one party is a parsing error.
-MULTI_NOMINEE_STATES = frozenset({"CA", "WA", "AK"})
+# Whose primaries send more than one person per party to November: the
+# table of who is elected and how, keyed on (state, office)
+# (kyc/election_law.py, rule 74: California and Washington run top-two
+# primaries, Alaska sends four through). Everywhere else, two nominees
+# from one party is a parsing error. A copy of the states kept here could
+# drift from the table the reader follows (the refactor's review,
+# 2026-11-28).
+def _multi_nominee(race):
+    from .election_law import all_party_primary, office_of
+    state, office = office_of(race.get("id"))
+    return bool(all_party_primary(race.get("state") or state, office))
 
 # No primary decides who these are, so several can share a November ballot.
 # These are results.party_key values - the key space nominees are grouped in -
@@ -993,7 +1000,7 @@ def check_results(profiles, races):
                 # the FEC is one nominee, and is reported separately.
                 line = p.get("ballotParty") or party_key(p["party"])
                 nominees[line].setdefault(_fold(p["name"]), p)
-        if race["state"] not in MULTI_NOMINEE_STATES:
+        if not _multi_nominee(race):
             for party, found in sorted(nominees.items()):
                 if len(found) > 1 and party not in UNPRIMARIED_PARTIES:
                     crowded.append(f"{race['id']}: {len(found)} {party} nominees - " +

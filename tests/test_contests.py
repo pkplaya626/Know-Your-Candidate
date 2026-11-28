@@ -394,6 +394,28 @@ class TestValidation(unittest.TestCase):
         codes = [i.code for i in validate.check_results([a, b], [race])]
         self.assertNotIn("multiple-nominees", codes)
 
+    def test_two_nominees_of_one_party_are_allowed_where_the_offices_law_sends_two(self):
+        # The office's own law (kyc/election_law.py, keyed on the state and
+        # the office), never a copy of the states kept here: a made-up state
+        # whose House primary sends two through and whose Senate's does not.
+        from kyc import election_law
+        made = {("ZZ", "H"): {"primary": ("top-two", "Made Code 2: the two leaders go through")}}
+        election_law.ELECTION_LAWS.update(made)
+        try:
+            for rid, chamber, district, expected in (("H-ZZ-01-2026", "House", 1, False),
+                                                     ("S-ZZ-2026", "Senate", None, True)):
+                a = candidate("FEC_1", "Ann Able", "ZZ", chamber=chamber, district=district, fec="X1")
+                b = candidate("FEC_2", "Bo Baker", "ZZ", chamber=chamber, district=district, fec="X2")
+                for p in (a, b):
+                    p["raceStatus"], p["raceId"] = "nominee", rid
+                race = {"id": rid, "state": "ZZ", "settled": True,
+                        "incumbentIds": [], "candidateIds": ["FEC_1", "FEC_2"], "results": {}}
+                codes = [i.code for i in validate.check_results([a, b], [race])]
+                self.assertEqual("multiple-nominees" in codes, expected, rid)
+        finally:
+            for key in made:
+                del election_law.ELECTION_LAWS[key]
+
     def test_one_person_registered_twice_is_one_nominee(self):
         a = candidate("FEC_1", "Hillary Herzig", "NJ", district=6, fec="H1", party="Republican")
         b = candidate("FEC_2", "Hillary Herzig", "NJ", district=6, fec="H2", party="Republican")
