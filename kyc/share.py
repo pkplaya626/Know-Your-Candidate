@@ -1213,6 +1213,11 @@ def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
                     f"which marks the primary&#x27;s winner (read {_e(date_words(checked) or checked)}).</span></p>")
     if seat_up(person):
         body.append(f'<p class="share-next">{_e(seat_up(person))}</p>')
+    # Their other roles on this site, each linked to its share page (rule 105).
+    from .identity import share_html
+    also = share_html(person, post)
+    if also:
+        body.append(also)
     race = races_by_id.get(person.get("contestRaceId") or person.get("raceId") or "")
     if race:
         body.append(f'<p>{_e(_race_link_words(person, race, by_id, races_by_id, post))}: '

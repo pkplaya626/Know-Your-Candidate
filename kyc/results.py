@@ -4151,6 +4151,32 @@ def _against_ranking(page, ranking, names_of):
     return None
 
 
+# A held line's clause about a page's call that waits (``pageHeld``), and the
+# words a December wait says where the seat has no held line of its own.
+_PAGE_CALL = "; the page's call ("
+_NO_DECEMBER_YET = "the office has posted no December count for the seat yet"
+
+
+def _held_without_the_call(item, line):
+    """A seat's held line without its clause about the page's call: the
+    reason the ``pageHeld`` record keeps apart (``why``, None where the seat
+    was held for the page's call alone), else, for a record written before
+    it was kept, the line up to the clause."""
+    if "why" in item:
+        return item["why"]
+    base = str(line or "").split(_PAGE_CALL)[0]
+    return None if base in ("", _NO_DECEMBER_YET) else base
+
+
+def _kept_facts(facts, since):
+    """A round's record as the last read held it, said to be kept and from
+    which read (``keptFrom``: the day of the read that wrote it, through any
+    number of reads that kept it)."""
+    if not isinstance(facts, dict):
+        return facts
+    return dict(facts, keptFrom=facts.get("keptFrom") or since)
+
+
 def _december_call_waits(rid, page, entry, december, listed, names_of, meta, log):
     """Whether a page's call of a seat's December round, once it is held,
     waits for the office's (rule 64), and so is no disagreement: the office's
@@ -4180,12 +4206,55 @@ def _december_call_waits(rid, page, entry, december, listed, names_of, meta, log
     ranking = la_results.ranking(december, listed or []) if december else None
     if ranking and winner not in {n for n, v in ranking if v == ranking[0][1]}:
         return False
-    meta.setdefault("pageHeld", {})[rid] = {"page": page.get("page"), "pageSays": _says(page)}
-    said = meta["held"].get(rid) or "the office has posted no December count for the seat yet"
-    meta["held"][rid] = f"{said}; the page's call ({_says(page)}) waits for the office's"
+    meta.setdefault("pageHeld", {})[rid] = {"page": page.get("page"), "pageSays": _says(page),
+                                            "why": meta["held"].get(rid)}
+    said = meta["held"].get(rid) or _NO_DECEMBER_YET
+    meta["held"][rid] = f"{said}{_PAGE_CALL}{_says(page)}) waits for the office's"
     log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}; it waits for the "
         "Secretary of State's December count, and the runoff stands")
     return True
+
+
+def _first_round_verdict(rid, first_day, meta, prev_meta):
+    """The office's first-round verdict for a seat, ``{list name: status}``:
+    this read's record of the round where it holds one, else the last
+    read's (a read that wrote none - unread, no list - keeps it), else
+    None."""
+    for record in (meta.get("races") or {}, prev_meta.get("races") or {}):
+        found = ((record.get(rid) or {}).get(first_day) or {}).get("verdict")
+        if isinstance(found, dict) and found:
+            return found
+    return None
+
+
+def _page_behind_december(page, entry, first_verdict, second_day, rows, aliases, names_of):
+    """Whether a page that disagrees with the office's December result marks
+    no December result at all (rule 64): the office's entry was decided
+    in its December round, and the page's only call is the first round's
+    runoff, of exactly the two the office's first round sent to December -
+    the page as it stood before December 12, or with an unmarked December
+    box an editor prepared. Such a page lags; it does not contradict the
+    office, which is shown as it is beside a page that makes no call. Read
+    as a disagreement, a refresh on the night of the count, between the
+    office's posting and an editor's mark, put LA-5 back on the qualified
+    list, its eight first-round losers "qualified" again. A page that marks a
+    December winner, or whose runoff is not the office's two, still
+    disagrees."""
+    if not (second_day and second_day in ((entry.get("office") or {}).get("rounds") or ())):
+        return False
+    if not isinstance(first_verdict, dict) or \
+            sorted(s for s in first_verdict.values() if s == RUNOFF) != [RUNOFF, RUNOFF]:
+        return False
+    status = dict(first_verdict)
+    matched, ambiguous = match_names(list(status), rows, aliases)
+    if any(status.get(n) == RUNOFF for n in ambiguous):
+        return False
+    near = {"status": {cid: status[n] for n, cids in matched.items() for cid in cids},
+            "unmatched": {n: s for n, s in status.items()
+                          if n not in matched and n not in ambiguous}}
+    # The page's call is the first round's very result: its two in the
+    # runoff, nobody elected (a December mark is a call, and is asked as one).
+    return _same_result(page, near, names_of)
 
 
 def _page_beside_a_held_round(rid, page, held_round, listed, names_of, rows, aliases,
@@ -4206,9 +4275,10 @@ def _page_beside_a_held_round(rid, page, held_round, listed, names_of, rows, ali
             races.pop(rid, None)
             calls.pop(rid, None)
             meta.setdefault("pageHeld", {})[rid] = {"page": page.get("page"),
-                                                    "pageSays": _says(page)}
-            meta["held"][rid] = (f"{meta['held'].get(rid)}; the page's call "
-                                 f"({_says(page)}) waits for them too")
+                                                    "pageSays": _says(page),
+                                                    "why": meta["held"].get(rid)}
+            meta["held"][rid] = (f"{meta['held'].get(rid)}{_PAGE_CALL}"
+                                 f"{_says(page)}) waits for them too")
             log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}, which the "
                 "Secretary of State holds for its close margin: it waits for the official "
                 "results")
@@ -4224,6 +4294,112 @@ def _page_beside_a_held_round(rid, page, held_round, listed, names_of, rows, ali
     calls.pop(rid, None)
     log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}; the Secretary of State's "
         f"counts do not ({why}): neither is shown")
+
+
+def _keep_last_hold(rid, page, prev_meta, why, races, calls, meta, log):
+    """A page that decides a seat for which this read of the office's results
+    concludes nothing (rule 8: the office unread, a round's file older than
+    the last read's, no qualified list to check the names against, a December
+    round held, a first round a gate holds where the hold stood on December's
+    verdict), where the last read set the page's call aside - its counts
+    contradicting it (``disagree``), or its close margin holding it until the
+    official results (``pageHeld``). The call stays set aside, as that read
+    set it aside, and the record is kept with the day of the read it is kept
+    from (``keptFrom``), so validate names it again: one failed request made
+    the call the office's counts contradicted go live, credited to Wikipedia,
+    with no warning (the last verifier of PR #265). A read that itself
+    decides - the office's result, or its counts beside a held round - never
+    comes here; nor does a page that no longer decides the seat."""
+    for kind in ("disagree", "pageHeld"):
+        item = (prev_meta.get(kind) or {}).get(rid)
+        if item:
+            break
+    else:
+        return
+    since = item.get("keptFrom") or prev_meta.get("read")
+    kept = dict(item, page=page.get("page"), pageSays=_says(page), keptFrom=since)
+    kept.pop("pageSilentOn", None)      # the page makes the call again
+    races.pop(rid, None)
+    calls.pop(rid, None)
+    base = why or "no read of the office's results was made this run"
+    if kind == "pageHeld":
+        # The seat's own reason, apart from the page's call: this read's, or
+        # with no read made the last read's (its line, rebuilt without the
+        # clause before any seat is asked) - and beside it the reason the
+        # read that held the call found (the close margin), which a later
+        # read's own reason no longer said (the reader of the fix that keeps
+        # a hold).
+        line, seat = _held_line_beside(item, why or meta["held"].get(rid), since,
+                                       prev_meta.get("held") or {}, rid)
+        kept["why"], kept["seatWhy"] = line, seat
+        meta["held"][rid] = (f"{line or base}{_PAGE_CALL}{_says(page)}) waits for the office's "
+                             f"official results, as the read of {since} found")
+    else:
+        meta["held"].setdefault(rid, base)
+        if kept.get("pageSays") == kept.get("officeSays"):
+            kept["pageAgrees"] = True
+        else:
+            kept.pop("pageAgrees", None)
+    meta.setdefault(kind, {})[rid] = kept
+    log(f"    [warn] {rid}: {page.get('page')!r} says {_says(page)}; this read of the Secretary "
+        f"of State's results concludes nothing for the seat ({base}), and the read of {since} "
+        + ("found its counts say otherwise: neither is shown" if kind == "disagree" else
+           "held the page's call for the official results: it still waits"))
+
+
+def _seat_reason(item, prev_held, rid):
+    """The reason a ``pageHeld`` record's seat was held when the read that
+    held the page's call found it (the close margin), apart from the call:
+    kept as ``seatWhy`` once the hold is kept, else the record's own ``why``,
+    else, for a record written before either was kept, its held line up to
+    the clause."""
+    if "seatWhy" in item:
+        return item["seatWhy"]
+    return _held_without_the_call(item, prev_held.get(rid))
+
+
+def _held_line_beside(item, this, since, prev_held, rid):
+    """A kept ``pageHeld`` seat's held line without the page's call - this
+    read's reason, and beside it the seat's own as the read that held the
+    call found it - and that seat's reason: ``(line, seat)``."""
+    seat = _seat_reason(item, prev_held, rid)
+    if seat and this and seat not in this:
+        return f"{this}; as the read of {since} found, {seat}", seat
+    return this or seat, seat
+
+
+def _carry_silent_hold(rid, prev_meta, why, today, meta, log):
+    """A seat whose page makes no call this run, for which this read of the
+    office's results concludes nothing, where the last read set the page's
+    call aside (``disagree``, ``pageHeld``). Nothing is shown that the page
+    no longer says, but the hold is carried, from the read that found it
+    (``keptFrom``) and marked as made while the page is silent
+    (``pageSilentOn``): dropped, a page silent for one run (its fetch failed
+    with the office's) and calling again on a run whose office read
+    concluded nothing let the call the office's counts contradicted go live,
+    credited to Wikipedia, with no warning (the verifier of the fix that
+    keeps a hold). It clears only on a read that decides the seat."""
+    for kind in ("disagree", "pageHeld"):
+        item = (prev_meta.get(kind) or {}).get(rid)
+        if item:
+            break
+    else:
+        return
+    since = item.get("keptFrom") or prev_meta.get("read")
+    kept = dict(item, keptFrom=since, pageSilentOn=item.get("pageSilentOn") or today.isoformat())
+    kept.pop("pageAgrees", None)
+    if kind == "pageHeld":
+        line, seat = _held_line_beside(item, why or meta["held"].get(rid), since,
+                                       prev_meta.get("held") or {}, rid)
+        kept["why"], kept["seatWhy"] = line, seat
+        if line:
+            meta["held"][rid] = line
+        else:
+            meta["held"].pop(rid, None)
+    meta.setdefault(kind, {})[rid] = kept
+    log(f"    [note] {rid}: the page makes no call of the seat now; the read of {since} set its "
+        f"call ({item.get('pageSays')}) aside, and it stays set aside until a read of the "
+        "Secretary of State's results decides the seat")
 
 
 def apply_office_results(races, calls, office, listed, by_race, aliases, previous, today,
@@ -4250,8 +4426,12 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
     fixed = OPEN_PRIMARY_SEATS.get(("LA", "H", CYCLE))
     prev_races = (previous or {}).get("races") or {}
     prev_meta = (previous or {}).get("officeResults") or {}
+    # A seat the last read set aside - the page's call against the office's
+    # counts, or waiting for them - is asked again even with no list read:
+    # a read that concludes nothing must not let that call go live (rule 8).
     rids = sorted({rid for rid in listed if rid.startswith("H-LA-")}
-                  | {rid for rid, race in prev_races.items() if race.get("source") == OFFICE})
+                  | {rid for rid, race in prev_races.items() if race.get("source") == OFFICE}
+                  | set(prev_meta.get("disagree") or {}) | set(prev_meta.get("pageHeld") or {}))
     if not fixed or (not rids and not office):
         return None
     first_day, second_day = fixed["primary"], fixed.get("runoff")
@@ -4269,11 +4449,26 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
     if not tried and prev_meta:
         # Nothing read this run (no request made): the last read's record stands.
         meta = dict(prev_meta, carried=True)
-        meta.setdefault("held", {})
+        meta["held"] = dict(prev_meta.get("held") or {})
         meta["kept"], meta["disagree"] = [], {}
+        meta.pop("pageHeld", None)         # each seat's is carried below, or not at all
+        meta.pop("pageBehind", None)       # each seat's is asked again below
+        # So is its held line's clause about the page's call: the line goes
+        # back to the seat's own reason, or goes where it had none, and the
+        # clause is said again only where the page still makes the call. Kept
+        # whole, it said "the page's call (...) waits" of a page that had
+        # stopped making it (the reader of the fix that keeps a hold).
+        for rid, item in sorted((prev_meta.get("pageHeld") or {}).items()):
+            base = _held_without_the_call(item, meta["held"].get(rid))
+            if base:
+                meta["held"][rid] = base
+            else:
+                meta["held"].pop(rid, None)
     elif unread and prev_meta:
         meta = dict(prev_meta, carried=True, unread=unread, unreadOn=today.isoformat())
         meta["held"], meta["kept"], meta["disagree"] = {}, [], {}
+        meta.pop("pageHeld", None)
+        meta.pop("pageBehind", None)
 
     # A file written before the one the last read relied on concludes
     # nothing for its round (rule 8): the three files are fetched one by one,
@@ -4294,12 +4489,13 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                     "written": elections[day].get("written"),
                     "version": elections[day].get("version"), "on": today.isoformat()})
                 log(f"    [warn] the Secretary of State's {day} results conclude nothing: {why}")
-    # A December election the last read listed and this one does not is no
-    # sign it was never held: its record stays the baseline (rule 8).
-    if tried and not unread and second_day and second_day not in elections \
-            and second_day in prev_elections:
-        meta["elections"][second_day] = dict(prev_elections[second_day],
-                                             unlistedOn=today.isoformat())
+    # An election the last read listed and this one does not - December's, or
+    # the first round's once a later dates file drops it - is no sign it was
+    # never held: its record stays the baseline a later file is compared
+    # with (rule 8).
+    for day in (first_day, second_day):
+        if tried and not unread and day and day not in elections and day in prev_elections:
+            meta["elections"][day] = dict(prev_elections[day], unlistedOn=today.isoformat())
 
     def facts(race, verdict, why):
         return {"officeId": race["officeId"], "title": race["title"],
@@ -4314,6 +4510,8 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         entry, why = None, None
         held_round = None      # (race, verdict once official) of a first round a gate held
         december_round = None  # the December race a gate held, its first round a runoff
+        had_december = False   # the last read had the office's December verdict for the seat
+        first_verdict_held = False  # a gate holds a first round the last read had a verdict of
         if not tried:
             pass
         elif unread:
@@ -4321,8 +4519,11 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         elif rid not in listed:
             why = "the qualified list was not read this run, so no name can be checked against it"
         elif first_day not in elections:
-            why = f"the office lists no results for {first_day} yet" if first_day <= \
-                today.isoformat() else None
+            # Never "yet" of an election the last read had: it was held.
+            why = (None if first_day > today.isoformat() else
+                   f"the office lists no results for {first_day}, where its last read had them"
+                   if first_day in prev_elections else
+                   f"the office lists no results for {first_day} yet")
         elif first_day in stale:
             why = f"{first_day}: {stale[first_day]}"
         elif n not in (elections[first_day].get("races") or {}):
@@ -4331,12 +4532,26 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
             r1 = elections[first_day]["races"][n]
             official = bool(elections[first_day].get("official"))
             v1, why = la_results.judge(r1, listed[rid], official, CLOSE_MARGIN)
+            record = {first_day: facts(r1, v1, why)}
+            prev_first = ((prev_meta.get("races") or {}).get(rid) or {}).get(first_day)
             if v1 is None:
                 # What the counts would give once the office marks them
                 # official: a verdict only where the close margin alone held it.
                 held_round = (r1, None if official else
                               la_results.judge(r1, listed[rid], True, CLOSE_MARGIN)[0])
-            record = {first_day: facts(r1, v1, why)}
+                if isinstance(prev_first, dict) and prev_first.get("verdict"):
+                    # The last read's first round held a verdict, and this
+                    # read's file has gone back to partial counts (or a gate
+                    # holds it): the record the hold or the kept result stands
+                    # on stays the record, this read's counts beside it, and
+                    # a hold that stood on it stands (rule 8). Asked of the
+                    # partial counts, a page call the full count had
+                    # contradicted went live wherever they led it (the
+                    # verifier of the fix that keeps a hold).
+                    first_verdict_held = True
+                    record[first_day] = dict(
+                        _kept_facts(prev_first, prev_meta.get("read")),
+                        heldRead=dict(facts(r1, None, why), on=today.isoformat()))
             v2, written, decided_by = None, elections[first_day].get("written"), [first_day]
             later = elections.get(second_day) if second_day else None
             r2 = ((later or {}).get("races") or {}).get(n)
@@ -4347,9 +4562,11 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                 (prev.get("source") == OFFICE and prev.get("decidedIn"))
                 or (prev_december or {}).get("verdict"))
             if v1 and r2 is None and had_december and RUNOFF in v1.values():
-                # The last read had December's result; a dates file that lists
-                # no December election, or a December file with no race for
-                # the seat, is no sign the runoff was never held (rule 8).
+                # The last read had December's result - shown, or set aside
+                # beside a page that named someone else, its record kept; a
+                # dates file that lists no December election, or a December
+                # file with no race for the seat, is no sign the runoff was
+                # never held (rule 8).
                 why2 = (f"the office lists no results for {second_day}, where its last read "
                         "had them" if later is None else
                         f"the office's {second_day} results hold no race for district {n}, "
@@ -4358,7 +4575,7 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                 log(f"    [warn] {rid}: the Secretary of State's {second_day} results conclude "
                     f"nothing ({why2}); the last read stands")
                 if prev_december:
-                    record[second_day] = prev_december
+                    record[second_day] = _kept_facts(prev_december, prev_meta.get("read"))
                 v1, why = None, f"{second_day}: {why2}"
             elif v1 and r2 is not None:
                 if RUNOFF not in v1.values():
@@ -4370,9 +4587,9 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                                                 CLOSE_MARGIN, before=v1)
                 if second_day not in stale:
                     record[second_day] = facts(r2, v2, why2)
-                elif second_day in ((prev_meta.get("races") or {}).get(rid) or {}):
+                elif prev_december:
                     # An older file's counts are not kept as this read's.
-                    record[second_day] = prev_meta["races"][rid][second_day]
+                    record[second_day] = _kept_facts(prev_december, prev_meta.get("read"))
                 if v2:
                     official, written = bool(later.get("official")), later.get("written")
                     decided_by.append(second_day)
@@ -4382,10 +4599,22 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
                         f"conclude nothing ({why2}); the first round stands")
                     if RUNOFF in v1.values() and second_day not in stale:
                         december_round = r2
-                    prev = prev_races.get(rid) or {}
-                    if prev.get("source") == OFFICE and prev.get("decidedIn"):
-                        v1 = None          # keep the last read, which the December round decided
+                    if had_december:
+                        # Keep the last read, which the December round decided:
+                        # its result where it was shown, and where a page that
+                        # named someone else set it aside (``disagree``,
+                        # ``pageHeld``), that too. Its December record has the
+                        # verdict the hold stands on; a file gone back to
+                        # partial counts, or an older one, made a contradicted
+                        # call a runoff the page's call merely waited on.
+                        v1 = None
                         why = f"{second_day}: {why2}"
+                        if prev_december and second_day not in stale:
+                            # The record the kept result stands on stays the
+                            # record; this read's counts are kept beside it.
+                            record[second_day] = dict(
+                                _kept_facts(prev_december, prev_meta.get("read")),
+                                heldRead=dict(facts(r2, v2, why2), on=today.isoformat()))
             meta["races"][rid] = record
             if v1:
                 entry = _office_race(listed[rid], v1, v2, by_race.get(rid, []),
@@ -4402,8 +4631,6 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
             if prev and prev.get("source") == OFFICE:
                 entry = prev
                 meta["kept"].append(rid)
-                if rid not in meta["races"] and rid in (prev_meta.get("races") or {}):
-                    meta["races"][rid] = prev_meta["races"][rid]
                 log(f"    [warn] {rid}: kept the Secretary of State's result read on "
                     f"{(prev.get('office') or {}).get('read')}")
         page = races.get(rid)
@@ -4415,12 +4642,39 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
         page_decides = bool(page) and page.get("source") != OFFICE and any(
             ids or names for ids, names in _decided_people(page).values())
         if entry is None:
-            if held_round is not None and page_decides:
+            # A first round a gate holds says nothing of December: where the
+            # last read had December's verdict and set the page's call aside
+            # beside it, that hold stands. Asked of the first round's counts
+            # alone, a December winner they led went live over the December
+            # count that had contradicted the call.
+            # So does a first round gone back to partial counts where the
+            # last read's full count had a verdict.
+            set_aside = (had_december or first_verdict_held) and any(
+                rid in (prev_meta.get(kind) or {}) for kind in ("disagree", "pageHeld"))
+            if held_round is not None and page_decides and not set_aside:
                 _page_beside_a_held_round(rid, page, held_round, listed[rid], names_of,
                                           by_race.get(rid, []), (aliases or {}).get(rid),
                                           races, calls, meta, log)
+            elif page_decides:
+                _keep_last_hold(rid, page, prev_meta, why, races, calls, meta, log)
+            else:
+                # The page makes no call: nothing to set aside this run, and
+                # nothing decided either - the hold is carried (rule 8).
+                _carry_silent_hold(rid, prev_meta, why, today, meta, log)
             continue
-        if page_decides and not _same_result(page, entry, names_of) and not (
+        if page_decides and not _same_result(page, entry, names_of) and _page_behind_december(
+                page, entry, _first_round_verdict(rid, first_day, meta, prev_meta), second_day,
+                by_race.get(rid, []), (aliases or {}).get(rid), names_of):
+            # The page has not yet caught up with December: it says nothing
+            # of the round the office decided, and the office's result is
+            # shown as beside a silent page, with a note (rule 64).
+            meta.setdefault("pageBehind", {})[rid] = {"page": page.get("page"),
+                                                      "pageSays": _says(page),
+                                                      "officeSays": _says(entry)}
+            log(f"    [note] {rid}: {page.get('page')!r} still says {_says(page)}, the first "
+                f"round's runoff; the Secretary of State's {second_day} results say "
+                f"{_says(entry)}, which is shown")
+        elif page_decides and not _same_result(page, entry, names_of) and not (
                 second_day and second_day < today.isoformat() and _december_call_waits(
                     rid, page, entry, december_round, listed.get(rid), names_of, meta, log)):
             meta["disagree"][rid] = {"page": page.get("page"), "pageSays": _says(page),
@@ -4432,6 +4686,24 @@ def apply_office_results(races, calls, office, listed, by_race, aliases, previou
             continue
         races[rid] = entry
         calls[rid] = CALLED_OFFICE
+    # A round this read wrote no record of for a seat - no list to check its
+    # names against, a round's file older than the last read's, the first
+    # round dropped from the dates file or holding no race for the district,
+    # a December the read never reached behind a first round a gate held -
+    # keeps the last read's record (rule 8), said to be kept and from which
+    # read. Dropped, the next read no longer knew the office had counted
+    # December, and said of a seat whose page it had contradicted that "the
+    # office has posted no December count for the seat yet" (the reader of
+    # the fix that keeps a hold).
+    # (Where the office was unread or no read was made, the whole record is
+    # the last read's already, under its ``read`` day and ``carried``.)
+    if meta.get("races") is not prev_meta.get("races"):
+        since = prev_meta.get("read")
+        for rid, record in sorted((prev_meta.get("races") or {}).items()):
+            mine = meta["races"].setdefault(rid, {})
+            for day, found in sorted((record or {}).items()):
+                if day not in mine:
+                    mine[day] = _kept_facts(found, since)
     meta["kept"] = sorted(meta.get("kept") or [])
     return meta
 

@@ -177,6 +177,55 @@ class TestPhotos(unittest.TestCase):
         self.assertTrue(photos.curated_problems(
             dict(good, url="https://commons.wikimedia.org/wiki/Special:FilePath/A.jpg")))
 
+    def test_an_entry_names_one_commons_file(self):
+        # The statewide reader showed the file the page named while the
+        # record said the address's: an entry whose two name different
+        # files is refused (the photo sweep's review, 2026-11-17).
+        from kyc import photos
+        entry = {"url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Pat_Doe_official.jpg",
+                 "page": "https://commons.wikimedia.org/wiki/File:Pat_Doe_official.jpg",
+                 "words": "Pat Doe", "tie": "the article", "seen": "alone",
+                 "read": "2026-11-17"}
+        self.assertEqual(photos.curated_problems(entry), [])
+        # Percent escapes and underscores are the same name.
+        self.assertEqual(photos.curated_problems(dict(
+            entry, page="https://commons.wikimedia.org/wiki/File:Pat%20Doe_official.jpg")), [])
+        other = dict(entry, page="https://commons.wikimedia.org/wiki/File:Someone_else.jpg")
+        self.assertTrue(any("name different files" in p
+                            for p in photos.curated_problems(other)))
+
+    def test_an_entry_quotes_no_contact_details(self):
+        # The Wyoming Legislature's record and the Secretary of State's list
+        # both print Eric Barlow's home address, and the first entry quoted
+        # it, to be committed and published in the cache's evidence. An
+        # entry never quotes an address, an email or a phone number.
+        from kyc import photos
+        good = {"url": "https://example.gov/a.jpg", "page": "https://example.gov/a",
+                "words": "Senator Pat Doe, Senate District 23, 2023-Present",
+                "tie": "the office's own page", "seen": "alone, a fifth of the card",
+                "read": "2026-11-17", "by": "Example Legislature"}
+        self.assertEqual(photos.curated_problems(good), [])
+        for field, text, kind in (
+                ("words", 'Senator Pat Doe, "address":"1625 A Buffalo Cut Across Road"',
+                 "a street address"),
+                ("tie", "the list prints Pat Doe 12 Main St, Gillette", "a street address"),
+                ("words", "Email: pat.doe@senate.example.gov", "an email address"),
+                ("tie", "Phone (307) 555-0123", "a phone number"),
+                ("seen", "call 307-555-0123", "a phone number")):
+            problems = photos.curated_problems(dict(good, **{field: text}))
+            self.assertIn(f"{kind} in its {field}, which an entry never quotes", problems,
+                          (field, text))
+        # A district, a year, a pixel size and a band are not contact details.
+        self.assertEqual(photos.contact_details(
+            "Senate District 23; 1200 x 1803 px; brow at band 3.6; 2023-2027; "
+            "136 of 536 source px; FEC id H6TX19206"), [])
+        from kyc import overrides
+        for name in ("CANDIDATE_PHOTOS", "STATEWIDE_PHOTOS"):
+            for key, entry in getattr(overrides, name).items():
+                for field in ("words", "tie", "seen", "by"):
+                    self.assertEqual(photos.contact_details(entry.get(field)), [],
+                                     (name, key, field))
+
 
 class TestBuild(unittest.TestCase):
     """End-to-end over the real rosters in the repository."""

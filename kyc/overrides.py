@@ -182,6 +182,1217 @@ CANDIDATE_PHOTOS = {
                  "legislator": "ocd-person/88548c7a-b637-4821-b336-c99cfa475e22",
                  "name": "Pat Moore"},
     },
+    # The photo sweep of 2026-11-17 (the owner's request of 2026-11-15, "lets
+    # try and fill those photos and any other missing from non eliminated
+    # canidates"): everyone still in view whom every route left with the
+    # silhouette - the members-elect, the nominees and Louisiana's qualified
+    # candidates awaiting a result - was researched from the pages tied to
+    # them (the campaign site their committee filed, or one whose disclaimer
+    # names that committee exactly; their legislature's page; the article
+    # their ballot page links, and its Commons files). Each photograph here
+    # was found by one reader, re-opened and confirmed by a second who read
+    # the page and fetched the file again as this project (its bytes, pixel
+    # size and sha256 the same), measured on the 4:5 card, and looked at
+    # again on a contact sheet; "seen" is the second reader's look. A file
+    # over the caps is shown smaller from the same file where its host's
+    # resizer or Photon serves it, else as it is, and said
+    # (portraits.lighten_curated, rule 87).
+    # Jamie Ager
+    "FEC_H6NC11248": {
+        "url": "https://agerforcongress.com/nitropack_static/nDWggFDzPwYfEWVodLHJgkYjRco"
+               "wLtaf/assets/images/optimized/rev-7fa717c/agerforcongress.com/wp-content"
+               "/uploads/2025/07/jamie-pigs-768x512.webp",
+        "page": "https://agerforcongress.com/about",
+        "words": "on \"Meet Jamie Ager | Ager for Congress\", under the heading \"Meet "
+                 "Jamie Ager\", the file \"jamie-pigs\" (the srcset's 768px form of "
+                 "jamie-pigs.webp; no alt text), directly before \"I know firsthand the "
+                 "stress many small business owners and families face - navigating "
+                 "health insurance, making payroll, managing cash flow\"",
+        "by": "the campaign's website (agerforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "agerforcongress.com), 'Paid for by Ager for Congress' (the FEC "
+               "committee exactly), whose home page names him for NC-11 ('Jamie Ager "
+               "names bipartisan NC-11 transition committee', 'I'm Jamie Ager. In "
+               "Congress, I'm fighting for Appalachian values'); the file names only "
+               "his first name, so rule 38's reader could not take it unattended",
+        "seen": "Looked at the file, the 960px original and the card: one man, "
+                "crouching in a hay barn among pigs, cap with the Hickory Nut Gap farm "
+                "badge (the same badge he wears in the Commons delegation crop), red "
+                "jacket, smiling at the camera. No person anywhere in the frame; the "
+                "small pale shapes by the far windows are animals and hanging gear, not "
+                "people. The card's crop keeps his whole face, centred, near the top. "
+                "Measured: brow (under the cap's brim) at about y=98, chin at about "
+                "y=162 of the 768x512 file: about 64 px against a 51.2 px band, about "
+                "1.2 tenths (1.17 tenths on the 960px file: 75 px against 64 px). "
+                "Small, but over a tenth.",
+        "read": "2026-11-17",
+    },
+    # Jessica Killin
+    "FEC_H6CO05324": {
+        "url": "https://run.imgix.net/0cdc1c93-4d9e-4c61-b29f-a8691a56ce6f/18371d67-0344"
+               "-4012-bd58-9b91eb195a9c/18371d67-0344-4012-bd58-9b91eb195a9c.jpeg?ixlib="
+               "js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=3256%2C636%2C4018%2C"
+               "3903&auto=compress%2Cformat&fit=fillmax&w=640&q=75&s=124e36879db8a6d51a5"
+               "621a65c1672bd",
+        "page": "https://www.killinforcolorado.com/about",
+        "words": "the About page's opening photograph (alt text \"hero image\") under "
+                 "\"About Jessica Killin\", on \"About — Jessica Killin for Congress\": \"A "
+                 "proud fourth-generation Coloradan, Jessica is a ... Army veteran, and "
+                 "public servant running for Congress\" (the srcset's 640px form, signed "
+                 "by the site)",
+        "by": "the campaign's website (killinforcolorado.com)",
+        "tie": "the campaign site her committee filed with the FEC (campaignSite "
+               "killinforcolorado.com), 'Paid for by Killin for Colorado' (the FEC "
+               "committee exactly); the pages name her running for Congress in "
+               "Colorado ('Fighting for Colorado', 'Raised in Colorado Springs', 'the "
+               "places that make Southern Colorado special') though not the district "
+               "number; the file names no one, so rule 38's reader could not take it "
+               "unattended",
+        "seen": "Looked at the card and the whole file: one woman, alone, red jacket "
+                "over a white top, arms folded, smiling at the camera, Pikes Peak and "
+                "Colorado Springs behind and a stone wall below. Nobody else anywhere "
+                "in the frame. A posed professional portrait; the card keeps her whole "
+                "face, centred. Measured: card: brow at about band 2.05, chin at about "
+                "band 3.4, about 1.35 tenths (whole file: about 87 px brow to chin "
+                "against a 62.2 px band, 1.4 tenths)",
+        "read": "2026-11-17",
+    },
+    # Bob Brooks
+    "FEC_H6PA07188": {
+        "url": "https://www.brooksforcongress.com/wp-content/uploads/2026/07/1326-JR3B54"
+               "01-scaled.jpg",
+        "page": "https://www.brooksforcongress.com/",
+        "words": "the image's alt text \"Bob Brooks petting his bulldog\" (on the Meet Bob "
+                 "page the same file is \"Bob Brooks petting Aspen, the family bulldog\"), "
+                 "on \"Bob Brooks for Congress | Put the fire out in Washington\"",
+        "by": "the campaign's website (brooksforcongress.com)",
+        "tie": "route 1(b): no site is on his filing or ballot page; a web search led "
+               "to brooksforcongress.com (the IAFF's announcement of his run names "
+               "it), whose footer reads 'PAID FOR BY BOB BROOKS FOR CONGRESS', his "
+               "principal campaign committee exactly as the FEC registers it, and "
+               "which names this race ('Bob Brooks for Pennsylvania's 7th "
+               "Congressional District', 'Firefighter Bob Brooks Declares Victory in "
+               "PA-07 Congressional Race', Nov 3, 2026)",
+        "seen": "Looked at the whole file and the card: one bald, grey-bearded man, "
+                "crouching by a stone fireplace in a red 'Pennsylvania Professional "
+                "Firefighters Association' T-shirt (the union he presides over, as the "
+                "page says), petting a bulldog on a dog bed. Nobody else anywhere in "
+                "the frame; no screen, no picture of a person. His face is in "
+                "three-quarter view looking down-left at the dog, eyes, nose and mouth "
+                "plain. Wider than tall; the card keeps him whole-faced at its top "
+                "right. Measured: brow at about y=211, chin at about y=435 of the "
+                "2560x1707 file: about 224 px against a 170.7 px band, about 1.3 tenths "
+                "(card: brow near band 1.4, chin near band 2.6)",
+        "read": "2026-11-17",
+    },
+    # Scott Colom
+    "CAND_39": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Scott_Colom_2_%28cro"
+               "pped%29.png",
+        "page": "https://commons.wikimedia.org/wiki/File:Scott_Colom_2_(cropped).png",
+        "words": "\"Scott Colom is the 2026 Democratic nominee for U.S. Senate in "
+                 "Mississippi\" (the file's description), File:Scott Colom 2 "
+                 "(cropped).png, in Category:Scott Colom and the lead image of the "
+                 "article Scott Colom; CC BY 4.0, author \"The Contrarian\", dated "
+                 "2026-10-12, source named as the video \"Can a Democrat win in "
+                 "Mississippi? (w/ Scott Colom)\"",
+        "tie": "route (c): the article his ballot page links (Scott Colom, "
+               "wikipediaVia election-page; item Q115492489, whose Commons sitelink is "
+               "Category:Scott Colom) shows this file as its lead; his campaign site "
+               "scottcolom.com ('Paid for by Scott Colom for Senate') names him as the "
+               "district attorney running for the U.S. Senate in Mississippi",
+        "seen": "Looked at the card and whole file: one man, head and shoulders, bald, "
+                "short grey beard, blue jacket, open white shirt, a small "
+                "U.S./Mississippi flag pin, facing the camera mid-sentence; behind him "
+                "a bookshelf and framed photographs of people (pictures, not people in "
+                "the frame, which the standard allows); nobody else, no screen. A video "
+                "frame, a little soft, but a plain likeness. Measured: card: brow "
+                "(eyebrows) at about band 3.1, chin at about band 7.0: about 3.9 tenths "
+                "(the first reader said 4.3; either way far over a tenth)",
+        "read": "2026-11-17",
+    },
+    # Brian Poindexter
+    "FEC_H6OH07168": {
+        "url": "https://poindexterforcongress.com/wp-content/uploads/2025/12/bp-hardhat-"
+               "4-5-1024x819.jpg",
+        "page": "https://poindexterforcongress.com/",
+        "words": "on \"Brian Poindexter for Congress | Ready to Work for Working "
+                 "Families\", under \"Ready to work for working families in congress\" and "
+                 "directly before \"Why I'm Running for Congress: When times get tough, "
+                 "working people are always asked to do more with less\"; the file is "
+                 "\"bp-hardhat-4-5\" (his initials; the srcset's 1024px form; no alt text)",
+        "by": "the campaign's website (poindexterforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "poindexterforcongress.com), 'Paid for by Poindexter for Congress' (the "
+               "FEC committee exactly), which names this race: 'Ready to Work for "
+               "Working Families in ohio's 7th congressional district'; the same "
+               "photograph, same hard hat and sweatshirt, heads its share card beside "
+               "'BRIAN POINDEXTER Working class values for Ohio's 7th Congressional "
+               "District'; the file names only his initials, so rule 38's reader could "
+               "not take it unattended",
+        "seen": "Looked at the file and the card: one man, alone, in a sticker-covered "
+                "ironworker's hard hat and a navy 'West Side Warriors' hoodie, arms "
+                "folded, looking at the camera, an empty industrial lot blurred behind; "
+                "nobody else anywhere in the frame. The same face as the man at the "
+                "lectern in the Commons victory photograph of him and as the share card "
+                "bp-og.jpg, where this very photograph stands beside 'BRIAN POINDEXTER "
+                "Working class values for Ohio's 7th Congressional District'. The card "
+                "keeps his whole face. Measured: brow (under the hat's brim) at about "
+                "y=255, chin at about y=395 of the 1024x819 file: about 140 px against "
+                "an 81.9 px band, about 1.7 tenths (card: brow near band 3.0, chin near "
+                "band 4.8)",
+        "read": "2026-11-17",
+    },
+    # Bob Harvie
+    "FEC_H6PA01181": {
+        "url": "https://bobharvieforcongress.com/wp-content/uploads/2026/08/harvie_redsh"
+               "irt_squ.jpg",
+        "page": "https://bobharvieforcongress.com/",
+        "words": "the file \"harvie_redshirt_squ.jpg\" (alt text "
+                 "\"Copyright©gerrihernandez\", the photographer's credit), directly above "
+                 "\"About Bob\": \"Bob Harvie was elected to the Board of Bucks County "
+                 "Commissioners in November 2019\", on \"Home - Bob Harvie for Congress\"",
+        "by": "the campaign's website (bobharvieforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "bobharvieforcongress.com), 'Paid for by Bob Harvie For Congress ... PO "
+               "Box 67 Langhorne, PA 19047' (the FEC committee exactly), naming him as "
+               "the Bucks County commissioner running for Congress (PA-1 is Bucks "
+               "County); the file is square, so rule 38's shape test (taller than "
+               "wide, unless named a headshot) kept the pipeline from taking it",
+        "seen": "Looked at the whole file, the card and three enlarged crops of its "
+                "edges: one man, grey hair, red polo shirt, arms folded, smiling at the "
+                "camera on a tree-lined street, a U.S. flag and a porch blurred at the "
+                "left, a tree trunk at the right. The narrow gap between his right "
+                "elbow and the tree trunk holds a featureless dark-and-grey blur (no "
+                "skin tone, no head or limb above it: foliage above), and the left edge "
+                "a thin dark vertical by a porch column; neither is a person that can "
+                "be made out (the Jill Barry precedent of rule 38), so nobody else is "
+                "in the frame. The same man as the campaign's share card "
+                "bobharvie_OG.png, which names him 'Bob Harvie FOR CONGRESS'. Square; "
+                "the card keeps him whole. Measured: brow at about y=430, chin at about "
+                "y=790 of the 2180x2181 file: about 360 px against a 218.1 px band, "
+                "about 1.65 tenths (card: brow near band 1.5, chin near band 3.15)",
+        "read": "2026-11-17",
+    },
+    # Charlie Hatcher
+    "FEC_H6TN05405": {
+        "url": "https://charliehatcher.com/wp-content/uploads/2026/08/133-EXTRA_Portrait"
+               "-of-Charlie-CU-2-scaled.png",
+        "page": "https://charliehatcher.com/about/",
+        "words": "the file \"133-EXTRA_Portrait-of-Charlie-CU-2-scaled.png\", a background "
+                 "picture of the page \"About – Charlie Hatcher\" (no alt text), whose "
+                 "words open \"ABOUT CHARLIE ... Charlie Hatcher is a farmer, "
+                 "veterinarian, businessman, and public servant\"",
+        "by": "the campaign's website (charliehatcher.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "charliehatcher.com), 'Paid for by Charlie Hatcher for Congress' (the "
+               "FEC committee exactly), whose home page names this race: 'Now Doc "
+               "Hatcher's running for Congress TN CD 5'; the file names only his first "
+               "name, as a portrait, so rule 38's reader (which wants the surname, or "
+               "the first name with 'headshot', 'portrait' or 'profile' only on that "
+               "narrow, looked-at route) did not take it",
+        "seen": "Looked at the card and the whole file: a close-up of one man alone, "
+                "dark cap, grey work shirt, looking just past the camera, lit from the "
+                "left, barn slats and light behind. Nobody else anywhere in the frame. "
+                "The same lean face as the man on the home page's hero "
+                "hatcher-hero-img.jpeg, who wears a 'HATCHER FAMILY DAIRY' cap. The "
+                "card keeps his whole face (cap crown cut). Measured: card: brow at "
+                "about band 2.0, chin at about band 5.2: about 3.2 tenths (one band = "
+                "143.9 source px)",
+        "read": "2026-11-17",
+    },
+    # Don Ralph Leonard
+    "FEC_H6OH15112": {
+        "url": "https://images.squarespace-cdn.com/content/v1/687eb236d4e3d45f11da2aa6/b"
+               "53dd593-9c08-4fd4-8192-f41c2b4977cb/DSC02163.jpg?format=1000w",
+        "page": "https://donforohio.com/bio",
+        "words": "on \"Bio — Don Leonard for US Congress\", under \"Meet Don Leonard\", the "
+                 "photograph directly before \"My name is Don Leonard, and I am running "
+                 "to represent everyone in Ohio's 15th Congressional District\" (file "
+                 "DSC02163.jpg, no alt text; the srcset's 1000w form, on the site "
+                 "builder's CDN)",
+        "by": "the campaign's website (donforohio.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "donforohio.com, also the site the election page lists), 'paid for by "
+               "Don Leonard for Ohio' (the FEC committee exactly), which names this "
+               "race in the words beside the photograph; the file carries no name, so "
+               "rule 38's reader could not take it unattended",
+        "seen": "Looked at the card and the whole file: one man, alone, dark hair, "
+                "short beard, navy shirt, one hand in a pocket, looking at the camera "
+                "on a wooded path; nobody else anywhere in the frame. The same man as "
+                "in the page's 'fatherhood' collage, which the first-person text beside "
+                "it ('My daughter was born at OSU Hospital') makes his. Wider than "
+                "tall: the card keeps his whole face at its right edge (body and arm "
+                "cut there), the rest of the card foliage. Measured: card: brow at "
+                "about band 2.2, chin at about band 3.35: about 1.15 tenths (one band = "
+                "75 source px; about 87 px brow to chin)",
+        "read": "2026-11-17",
+    },
+    # Chris Gober
+    "FEC_H6TX10221": {
+        "url": "https://framerusercontent.com/images/qcPVXzbsxz7ZpcrGPh6h7i7N4.jpg?scale"
+               "-down-to=512&lossless=1&width=5472&height=3648",
+        "page": "https://chrisgober.com/",
+        "words": "on \"Chris Gober\" (\"Chris Gober Running for Congress to represent "
+                 "Texas's 10th District\"), the photograph directly before the section "
+                 "\"Meet Chris Gober\": \"Chris Gober is a seventh-generation Texan, proud "
+                 "Texas A&M Aggie, husband of 18 years, and father to two ...\" (its alt "
+                 "text is the site template's placeholder \"Photo-of-the-Designer\"; the "
+                 "srcset's 512px form)",
+        "by": "the campaign's website (chrisgober.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "chrisgober.com), 'Paid for by Chris Gober for Texas' (the FEC "
+               "committee exactly), which names this race ('Running for Congress to "
+               "represent Texas's 10th District', 'TX-10', 'Election Day Tuesday, "
+               "November 3, 2026'); the image carries no name of his, so rule 38's "
+               "reader could not take it unattended",
+        "seen": "Looked at the card and the whole file: one man, alone, dark maroon "
+                "shirt, hands in pockets, smiling at the camera before dark foliage and "
+                "yellow wildflowers; nobody else in the frame. DOUBT I CHECKED: the "
+                "site is a Framer template that still carries the template's own images "
+                "(a robot, a sci-fi astronaut, a 'Supra smart solar energy' phone "
+                "mock-up, a laptop) and both photographs of this man keep the "
+                "template's placeholder alts ('Photo-of-the-Designer', 'Phiotographer "
+                "looking at the camera'), so the man could have been the template's "
+                "stock model. He is not: the Federalist Society's bio page for Chris "
+                "Gober ('Gober is a 7th-generation Texan', 'General Counsel to the "
+                "Republican Party of Texas'; headshot alt 'Chris Gober') shows the same "
+                "man - long face, swept dark hair, the same broad smile - and the "
+                "campaign's own text beside the photograph calls him a "
+                "seventh-generation Texan too. That headshot was downloaded only to "
+                "compare faces (img/b01/fec-h6tx10221/11-64732a24c6fc.jpg), never to be "
+                "offered. The card keeps his whole face, centred. Measured: card: brow "
+                "at about band 1.55, chin at about band 2.95: about 1.4 tenths (one "
+                "band = 34.1 source px)",
+        "read": "2026-11-17",
+    },
+    # Paul Barringer
+    "FEC_H6NC13228": {
+        "url": "https://paulbarringer.com/wp-content/uploads/2026/01/Paul-Barringer2025-"
+               "12-23-6360-400x500.webp",
+        "page": "https://paulbarringer.com/",
+        "words": "the home page's first image, file name "
+                 "\"Paul-Barringer2025-12-23-6360.webp\" (srcset 400w form), above the "
+                 "heading \"Common sense. North Carolina values. Paul Barringer, Democrat "
+                 "for Congress.\"",
+        "by": "the campaign's website (paulbarringer.com)",
+        "tie": "the campaign site his committee filed with the FEC "
+               "(www.paulbarringer.com, which redirects to paulbarringer.com); the "
+               "page says he is \"running for Congress in NC's 13th Congressional "
+               "District\" and its disclaimer reads \"PAID FOR BY PAUL BARRINGER FOR "
+               "CONGRESS\", the FEC committee's exact name",
+        "seen": "Looked at the file and the card: one man, grey hair, smiling, olive "
+                "waxed jacket over a checked shirt, hands in pockets, in a winter field "
+                "before bare trees. Nobody else anywhere in the file; the card keeps "
+                "the whole file. Measured: On the card picture brow at about band 2.4, "
+                "chin at about band 3.7: about 1.3-1.4 tenths (about 68 px of the 500 "
+                "px file against a 50 px band).",
+        "read": "2026-11-17",
+    },
+    # Wes Climer
+    "FEC_H6SC05202": {
+        "url": "https://wesclimer.com/wp-content/uploads/2025/08/P1027884-scaled-e175639"
+               "2467361-768x925.jpg",
+        "page": "https://wesclimer.com/about/",
+        "words": "the About page's only portrait, in the section headed \"Meet wes "
+                 "climer\", beside \"Wes Climer is a husband, father of five, business "
+                 "owner and public servant ... now representing York County in the State "
+                 "Senate\" and \"Now he's running for Congress because the job isn't done\" "
+                 "(srcset 768w form)",
+        "by": "the campaign's website (wesclimer.com)",
+        "tie": "the campaign site his committee filed with the FEC "
+               "(www.wesclimer.com); its disclaimer reads \"Paid for by Climer for "
+               "Congress\", the FEC committee's exact name, and the About page says he "
+               "is running \"for the people of South Carolina's 5th Congressional "
+               "District\"; the same man stands at the right of the home page's family "
+               "photograph under \"About Wes Climer\"",
+        "seen": "Looked at both files and both cards: the same photograph pixel for "
+                "pixel to the eye - one man in a navy suit, white shirt and red tie "
+                "before a red brick wall, smiling; nobody else in the frame. The About "
+                "page read fresh still draws this address (renditions 249w, 768w, 850w, "
+                "1195w listed; 768w within the caps). Measured: On the card picture "
+                "brow at about band 2.0, chin at about band 3.8: about 1.8 tenths "
+                "(about 165 px against a 92.5 px band).",
+        "read": "2026-11-17",
+    },
+    # Kristina Knickerbocker
+    "FEC_H6OH10121": {
+        "url": "https://kristinaknickerbocker.com/wp-content/themes/blueprintinteractive"
+               "/images/meet_cutout.png",
+        "page": "https://kristinaknickerbocker.com/meet-kristina/",
+        "words": "the \"Meet Kristina\" page's hero image (alt text \"Meet Page Hero "
+                 "Image\", file \"meet_cutout.png\"), under the heading \"A Life Dedicated "
+                 "to Service\" and directly before \"U.S. Air Force Veteran, Oncology "
+                 "Nurse Practitioner, and mom of two - Kristina Knickerbocker's life has "
+                 "been dedicated to serving our country and our community\"; her white "
+                 "coat is embroidered \"Kristina Knickerbocker MS, APRN-CNP\"",
+        "by": "the campaign's website (kristinaknickerbocker.com)",
+        "tie": "the campaign site her committee filed with the FEC "
+               "(kristinaknickerbocker.com); its disclaimer reads \"Paid for By "
+               "Knickerbocker for Congress\", the FEC committee's exact name, and it "
+               "gives the campaign's Dayton, Ohio address (OH-10); the page is the "
+               "site's About page",
+        "seen": "Looked at the file and the card: a studio cut-out of one woman, long "
+                "fair hair, white coat embroidered 'Kristina Knickerbocker MS, "
+                "APRN-CNP' over a navy top, stethoscope round her neck, on a plain "
+                "light grey ground. Nobody else anywhere; the card keeps her whole "
+                "head. Measured: On the card picture brow at about band 2.0, chin at "
+                "about band 3.8: about 1.8 tenths (about 235 px against a 129.6 px "
+                "band).",
+        "read": "2026-11-17",
+    },
+    # Ryan Elijah
+    "FEC_H6FL07231": {
+        "url": "https://www.elijahforcongress.com/assets/img/hero-ryan-headshot.jpg",
+        "page": "https://www.elijahforcongress.com",
+        "words": "the home page's first image, alt text \"Ryan Elijah, candidate for "
+                 "Congress in Florida's 7th District\", file name "
+                 "\"hero-ryan-headshot.jpg\"",
+        "by": "the campaign's website (elijahforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC "
+               "(www.elijahforcongress.com); titled \"Ryan Elijah for Congress - "
+               "Florida's 7th Congressional District\", it says he \"is running for "
+               "Congress in Florida's 7th District\" and gives \"Election Day Tuesday, "
+               "November 3, 2026\"; its disclaimer reads \"Paid for by Ryan Elijah for "
+               "Congress\", the FEC committee's exact name",
+        "seen": "Looked at the whole file: one man in a navy suit, striped red and "
+                "white tie, flag pin and red pocket square, before two palm trunks, sky "
+                "and water. The pale shapes at the lower left are a white railing by "
+                "the water, not a person. Nobody else in the frame. Measured: On the "
+                "card picture brow at about band 4.5, chin at about band 6.4: about 1.9 "
+                "tenths (about 310 px of the file against a 166.8 px band).",
+        "read": "2026-11-17",
+    },
+    # Angela Gonzales-Torres
+    "FEC_H6CA34286": {
+        "url": "https://run.imgix.net/06be24b2-0f79-4e8b-946c-e788fb89576f/134d35b9-7cff"
+               "-4c3f-a6e3-153a3ab62b30/134d35b9-7cff-4c3f-a6e3-153a3ab62b30.jpg?ixlib=j"
+               "s-3.8.0&bri=4&con=0&sat=0&high=0&shad=0&usm=25&rect=482%2C0%2C2036%2C203"
+               "6&auto=compress%2Cformat&fit=fillmax&w=640&q=75&s=8101cd6eab2cc2f88d70dc"
+               "b773dc2841",
+        "page": "https://www.angela4congress.com/about",
+        "words": "the About page's hero image (alt text \"hero image\", the srcset's 640w "
+                 "form, signed by the site's image host), under the heading \"Rooted in "
+                 "LA. Ready for change.\" and directly before \"Angela Gonzales-Torres is "
+                 "a democratic socialist running to represent California's 34th "
+                 "Congressional District.\"",
+        "by": "the campaign's website (angela4congress.com)",
+        "tie": "the campaign site her committee filed with the FEC "
+               "(www.angela4congress.com), titled \"Angela Gonzales-Torres for "
+               "Congress\"; its About page names her race, California's 34th "
+               "Congressional District (CA-34); disclaimer \"Paid for by Angela for "
+               "CA-34\" (the FEC registers \"ANGELA FOR CA34\")",
+        "seen": "Looked at the card and whole file: one young woman with long dark "
+                "hair, hoop earring, navy crew-neck sweater, shot from below against "
+                "blue sky and a white building with barred windows. Nobody else in the "
+                "frame. Same woman as the Commons lead File:Angela Gonzales-Torres.jpg "
+                "(same hoops and blue sweater), which is a licence doubt and was "
+                "rightly not offered. Measured: On the card picture brow at about band "
+                "3.7, chin at about band 5.9: about 2.2 tenths.",
+        "read": "2026-11-17",
+    },
+    # Cyril Jefferson
+    "FEC_H6NC06164": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/6/61/US_Representative_Cy"
+               "ril_Jefferson.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:US_Representative_Cyril_Jefferso"
+                "n.jpg",
+        "words": "\"US Representative Cyril Jefferson\" (the file page's description), in "
+                 "Category:Cyril Jefferson; the lead image of the article Cyril "
+                 "Jefferson; author \"Ike Hayman, House Creative Services\", public domain "
+                 "(PD-USGov), dated November 9, 2026",
+        "tie": "route (c): the article NC-6's election page links for him (Cyril "
+               "Jefferson, item Q124332362, wikipediaVia election-page) shows this "
+               "file as its lead, and the file is in the person's own Commons category "
+               "(the item's Commons sitelink); his campaign site "
+               "(cyrilforcongress.com) names him as the NC-6 candidate",
+        "seen": "Looked at the file: a studio official portrait of one man, short "
+                "beard, dark suit, striped tie, a round lapel pin, before a U.S. flag "
+                "and dark blue backdrop. Nobody else. I also fetched his own category's "
+                "(Jefferson-cropped) crop of the NC Democratic delegation photograph "
+                "(Office of Rep. Deborah Ross, November 2026): the same man, wearing "
+                "the same lapel pin. Measured: On the card picture brow at about band "
+                "2.7, chin at about band 5.2: about 2.5 tenths.",
+        "read": "2026-11-17",
+    },
+    # Shawn Harris
+    "FEC_H4GA14057": {
+        "url": "https://www.shawnforgeorgia.com/html/assets/photos/Porch-alone-side.JPG."
+               "jpg",
+        "page": "https://www.shawnforgeorgia.com/",
+        "words": "alt text \"Shawn Harris seated on a porch in Georgia\", file name "
+                 "\"Porch-alone-side.JPG.jpg\", on the home page titled \"Shawn Harris for "
+                 "Georgia | Democrat for Georgia's 14th District\"",
+        "by": "the campaign's website (shawnforgeorgia.com)",
+        "tie": "the campaign site GA-14's election page lists for him "
+               "(electionPageSite https://www.shawnforgeorgia.com/, the work list's "
+               "campaignSite via election-page); the site names him \"Democrat for "
+               "Georgia's 14th District\" and \"Retired Brigadier General\", the GA-14 "
+               "Democratic nominee; its disclaimer reads \"PAID FOR BY SHAWN FOR "
+               "GEORGIA\" (the FEC registers SHAWN HARRIS FOR CONGRESS), so this rests "
+               "on the election page's link, not on 1(b)",
+        "seen": "Looked at the whole file and a 1:1 crop of the door: one man, bald, "
+                "glasses, checked shirt and jeans, seated on stone porch steps, hands "
+                "steepled; behind him a front door, sidelights, chairs, a porch swing "
+                "and a plant. The door's glass reflects only foliage and sky. Nobody "
+                "else anywhere. Wider than tall; the card keeps him whole-faced at its "
+                "centre and cuts the chairs. Measured: Brow at about y 415, chin at "
+                "about y 590 of the 1333 px file: about 175 px against a 133.3 px band, "
+                "about 1.3 tenths (on the card picture band 3.0 to 4.3).",
+        "read": "2026-11-17",
+    },
+    # John Cowan
+    "FEC_H0GA14048": {
+        "url": "https://cowanforcongress.com/images/Cowanscrubs.png",
+        "page": "https://cowanforcongress.com",
+        "words": "the home page's first image, alt text \"Dr. John Cowan\", file name "
+                 "\"Cowanscrubs.png\", followed by \"I'm Dr. John Cowan - As a doctor and a "
+                 "small business owner...\"; his white coat is embroidered \"John A. "
+                 "Cowan, Jr. MD Neurosurgery\"",
+        "by": "the campaign's website (cowanforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC "
+               "(cowanforcongress.com); its disclaimer reads \"Paid for by Friends of "
+               "John Cowan\", the FEC committee's exact name, and the same site's Meet "
+               "page (https://cowanforcongress.com/meet-dr-cowan.html) says \"Dr. Cowan "
+               "is running for Congress\" and has \"spent decades caring for patients "
+               "across Georgia's 11th District\"; the Meet page's own portrait "
+               "(cowan12.png, alt \"Dr. John Cowan\") shows the same man",
+        "seen": "Looked at the file and card: one man, dark hair, looking off to his "
+                "left, white coat embroidered 'John A. Cowan, Jr. MD Neurosurgery' over "
+                "teal scrubs, against a pale blurred background. Nobody else in the "
+                "frame; the card keeps his whole head. Measured: On the card picture "
+                "brow at about band 2.4, chin at about band 4.0: about 1.6 tenths.",
+        "read": "2026-11-17",
+    },
+    # Carlos de la Cruz Jr.
+    "FEC_H6TX35087": {
+        "url": "https://static.wixstatic.com/media/34bf2f_571e35cfe9664926bcf5582cad2621"
+               "e7~mv2.jpg/v1/crop/x_0,y_47,w_1191,h_1097/fill/w_554,h_510,al_c,q_80,usm"
+               "_0.66_1.00_0.01,enc_avif,quality_auto/photo%20sep%2025%202025%2C%208%202"
+               "1%2046%20am%20(10)_edite.jpg",
+        "page": "https://www.carlosforcongress.com",
+        "words": "the photograph in the home page's section headed \"Air Force Veteran & "
+                 "Political Outsider | CARLOS | DE LA CRUZ\", directly after \"Carlos "
+                 "served 20 years in the U.S. Air Force ... Carlos has spent his life "
+                 "delivering results\" (file \"photo sep 25 2025, 8 21 46 am "
+                 "(10)_edite.jpg\", the rendition the page draws, 554x510)",
+        "by": "the campaign's website (carlosforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC "
+               "(www.carlosforcongress.com), titled \"Carlos De La Cruz for Congress\", "
+               "\"Support a Texas CONSERVATIVE\", address Universal City, Texas; its "
+               "disclaimer reads \"PAID FOR BY CARLOS FOR CONGRESS\", the FEC "
+               "committee's exact name; the same man is at the centre of the site's "
+               "own banner beside \"CARLOS DE LA CRUZ FOR CONGRESS\" (the site does not "
+               "print the district number)",
+        "seen": "Looked at the card and whole file: one man, dark short hair, navy "
+                "blazer over an open white shirt, before a U.S. flag, trees and roofs. "
+                "Nobody else in the frame; slightly wider than tall, the card keeps him "
+                "whole. Measured: On the card picture brow at about band 2.0, chin at "
+                "about band 3.9: about 1.9 tenths.",
+        "read": "2026-11-17",
+    },
+    # Anthony Lawrence Kozycki
+    "FEC_H6GA07221": {
+        "url": "https://kozyckiforcongress.com/img/Tony_Kozycki_7115_Wide.jpg",
+        "page": "https://kozyckiforcongress.com",
+        "words": "alt text \"Tony Kozycki - International Diplomacy\", file name "
+                 "\"Tony_Kozycki_7115_Wide.jpg\", in the section \"Service in Defense of "
+                 "this Nation\" before \"Working with Allies, Strengthening Security\"",
+        "by": "the campaign's website (kozyckiforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC "
+               "(kozyckiforcongress.com), titled \"Tony Kozycki for Congress | "
+               "Georgia's 7th District\", which says \"Tony Kozycki is a Democrat "
+               "runni[ng]\" for that district; disclaimer \"Paid for by Kozycki for "
+               "Congress\", the FEC committee's exact name (the FEC files him as "
+               "KOZYCKI, ANTHONY LAWRENCE; the site uses Tony with the same surname)",
+        "seen": "Looked at the file and card: a studio portrait of one man in a green "
+                "flight jacket with squadron patches over a grey T-shirt, plain grey "
+                "backdrop. Nobody else. Measured: On the card picture brow at about "
+                "band 1.9, chin at about band 3.7: about 1.8 tenths.",
+        "read": "2026-11-17",
+    },
+    # Kimberly Hardy
+    "FEC_H6NC07196": {
+        "url": "https://images.squarespace-cdn.com/content/v1/685d6ecae0e5cc62fa1d93ac/1"
+               "627beeb-f441-49f8-a735-a35d0e692ba6/Transparent+Background.png?format=50"
+               "0w",
+        "page": "https://www.kimberlyhardyforcongress.com/",
+        "words": "alt text \"Dr. Kimberly Hardy\" (file \"Transparent+Background.png\", "
+                 "Squarespace's 500w form) on the home page titled \"Kimberly Hardy for "
+                 "US Congress\"",
+        "by": "the campaign's website (kimberlyhardyforcongress.com)",
+        "tie": "the campaign site her committee filed with the FEC "
+               "(kimberlyhardyforcongress.com, now www.); it says \"Kimberly Hardy is "
+               "running for Congress in North Carolina\", its About page \"...North "
+               "Carolina's 7th district in Congress\", and its disclaimer reads \"Paid "
+               "for by Kimberly Hardy for Congress\", the FEC committee's exact name "
+               "(the FEC files her as HARDY, KIMBERLY DR.)",
+        "seen": "Looked at the file and card: a studio portrait of one woman, long dark "
+                "hair, glasses, smiling, patterned keyhole-neck dress, plain light grey "
+                "ground. Nobody else. Measured: On the card picture brow at about band "
+                "1.8, chin at about band 4.3: about 2.5 tenths.",
+        "read": "2026-11-17",
+    },
+    # Jace Yarbrough
+    "FEC_H6TX32225": {
+        "url": "https://cdn.prod.website-files.com/693c3a90305739817374e10a/693c42031c56"
+               "573a565aaddf_5P7A0044%20(1)-p-800.jpg",
+        "page": "https://www.jaceforcongress.com/media-kit",
+        "words": "alt text \"Jace Yarbrough wearing blue suit.\" on the campaign's \"Media "
+                 "Kit - Jace Yarbrough for Congress\" page (the srcset's 800w form of "
+                 "5P7A0044)",
+        "by": "the campaign's website (jaceforcongress.com)",
+        "tie": "route 1(b): no site is filed in the work list; jaceyarbrough.com "
+               "redirects to www.jaceforcongress.com, whose disclaimer reads \"Paid for "
+               "by Jace Yarbrough for Congress PO BOX 1102, Rockwall TX 75087\", the "
+               "FEC committee's exact name (C00930297), and whose home page says he is "
+               "\"fighting for Texas' 32nd district\"",
+        "seen": "Looked at the whole file and 3x crops of both sides: one man, beard, "
+                "blue blazer, white shirt, flag pin, hands in pockets, on a gravel lane "
+                "between wooden fences and trees; the red shape far behind on the right "
+                "is a small structure, the lamps are on the gate posts. Nobody else. "
+                "Wider than tall; the card keeps him whole-faced at its centre. "
+                "Measured: Brow at about y 135, chin at about y 228 of the 578 px file: "
+                "about 93 px against a 57.8 px band, about 1.6 tenths.",
+        "read": "2026-11-17",
+    },
+    # Tom Sell
+    "FEC_H6TX19206": {
+        "url": "https://www.selltexastrue.com/tom-sell-cattle.jpg",
+        "page": "https://www.selltexastrue.com/",
+        "words": "file name \"tom-sell-cattle.jpg\" (alt text \"West Texas landscape "
+                 "background\"), the home page's first image, in the section \"Tom Sell "
+                 "for Texas\": \"West Texas is home - it's where my roots run deep\"; the "
+                 "page is titled \"Conservative Tom Sell - Standing Up For West Texas "
+                 "Values. Running for Congress\"",
+        "by": "the campaign's website (selltexastrue.com)",
+        "tie": "route 1(b): no site in the work list; a news page (KACU) led to "
+               "www.selltexastrue.com, whose disclaimer reads \"Paid for by "
+               "Conservative Tom Sell for Congress\", the FEC committee's exact name "
+               "(C00926345); it says he is \"Running for Congress\" in West Texas with "
+               "\"Election Day: November 3\", and its About page names his work for "
+               "\"Congressman Larry Combest (R-TX19)\"; the same man stands at the "
+               "centre of the site's family photograph \"Tom Sell and his family\"",
+        "seen": "Looked at the whole file: one man in a cream cowboy hat, waxed tan "
+                "jacket, green vest and blue shirt among red cattle in haze. No other "
+                "person anywhere. He is the man at the centre of the site's 'Tom Sell "
+                "and his family' photograph (same hat, jacket and vest). Wider than "
+                "tall; the card's crop (x 373-1227) keeps him whole-faced at its left. "
+                "Measured: Brow (under the brim) at about y 325, chin at about y 450 of "
+                "the 1067 px file: about 125 px against a 106.7 px band, about 1.2 "
+                "tenths. It stands ahead of his article's lead, File:Tom Sell "
+                "119th-120th Congress Veterans Day tribute (cropped).jpg (207x232), a "
+                "crop of a group photograph nobody had looked at.",
+        "read": "2026-11-17",
+    },
+    # Chuck Hubbard
+    "FEC_H4NC05294": {
+        "url": "https://hubbardforcongress.com/wp-content/uploads/2024/04/chuckatappstat"
+               "e-683x1024.webp",
+        "page": "https://hubbardforcongress.com/about",
+        "words": "the About page's photograph (file \"chuckatappstate-683x1024.webp\"), "
+                 "directly above the heading \"About Chuck Hubbard\" and \"Meet your "
+                 "candidate for Congress, Chuck Hubbard\", on the page titled \"Meet Chuck "
+                 "Hubbard - Chuck Hubbard for Congress\"",
+        "by": "the campaign's website (hubbardforcongress.com)",
+        "tie": "route 1(b): no site in the work list; a web search led to "
+               "hubbardforcongress.com, whose disclaimer reads \"Paid for by Chuck "
+               "Hubbard for Congress\", the FEC committee's exact name (C00841874); the "
+               "site says \"Chuck is running to represent our community in Congress\", "
+               "names \"The 5th District\" and Virginia Foxx (NC-5's incumbent) and "
+               "Wilkes County, North Carolina; it prints no year, and its files date "
+               "from April 2024 (his first run against Foxx, under the same "
+               "committee); the man is the same as in the NC Democratic delegation "
+               "crop in his own Commons category",
+        "seen": "Looked at the whole file and 2-3x crops of both lower corners: one "
+                "bald man in a light blue shirt before trees and the App State clock "
+                "tower; at the lower right only benches and steps, at the left a brick "
+                "building and shrubs. Nobody else. Same man (same shirt) as the site's "
+                "street hero image. Measured: Brow at about y 340, chin at about y 520 "
+                "of the 1024 px file: about 180 px against an 85.4 px band, about 2.1 "
+                "tenths.",
+        "read": "2026-11-17",
+    },
+    # Maura Keller
+    "FEC_H4GA03100": {
+        "url": "https://images.squarespace-cdn.com/content/v1/65babf991018d92de237b77e/3"
+               "7086b63-ea7e-4136-b2f7-12db3be71528/MK+Homepage+Gold+Border+Square+Heads"
+               "hot.jpg?format=500w",
+        "page": "https://maurakeller.com/",
+        "words": "the file name \"MK Homepage Gold Border Square Headshot.jpg\" (her "
+                 "initials and \"Headshot\"; no alt text), on the home page titled \"Maura "
+                 "Keller for Congress | US Army Veteran and VA Health Worker\" (the 500w "
+                 "rendition its srcset lists)",
+        "by": "the campaign's website (maurakeller.com)",
+        "tie": "the campaign site her committee filed with the FEC "
+               "(www.maurakeller.com, ending at maurakeller.com); the page is \"Paid "
+               "for by Maura Keller for Congress\" (the FEC committee exactly) and says "
+               "she is \"committed to serving the people of Georgia's 3rd Congressional "
+               "District\", running \"first in 2024 and again in 2026\". The file names "
+               "her initials, not her surname, so rule 38's reader could not take it "
+               "unattended: the same woman, in the same blue blazer, is the site's "
+               "file \"Maura Keller 2026 Web Background Homepage.jpg\", and wears a "
+               "\"MAURA KELLER US CONGRESS GA CD 3\" shirt in \"Maura Keller Web Square "
+               "09.jpg\" on the same page",
+        "seen": "Looked at the file and card: one woman, shoulder-length light brown "
+                "hair, smiling, grey-blue blazer over white top, blurred US flag left "
+                "and grey backdrop, thin gold border; nobody else in the frame, the "
+                "card keeps her whole face. Same woman as the site's own named files "
+                "'Maura Keller 2026 Web Background Homepage.jpg' (same blue blazer, "
+                "seated outdoors) and 'Maura Keller Web Square 09.jpg' (in a 'MAURA "
+                "KELLER US CONGRESS GA CD 3' shirt), which I looked at. Measured: On "
+                "the card brow at about band 2.6, chin at about band 5.2: about 2.6 "
+                "tenths (one band = 50 source px).",
+        "read": "2026-11-17",
+    },
+    # Chris Harden
+    "FEC_H6GA11116": {
+        "url": "https://static.wixstatic.com/media/17a715_318a9891ee8b44f38b32442ae7bb0b"
+               "8e~mv2.jpg/v1/fill/w_440,h_550,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,qua"
+               "lity_auto/Chris-Harden-Headshot.jpg",
+        "page": "https://www.electharden.com/",
+        "words": "the home page's first image, file name \"Chris-Harden-Headshot.jpg\", "
+                 "alt text \"Professional headshot of Chris Harden in dark suit and light "
+                 "blue tie sitting on stool against dark studio background\" (the page "
+                 "draws it at 147x184 through Wix's own resizer, "
+                 ".../v1/fill/w_147,h_184,...; this is the same file through the same "
+                 "resizer at 440x550, since 147px is too small for the card)",
+        "by": "the campaign's website (electharden.com)",
+        "tie": "the campaign site his committee filed with the FEC "
+               "(www.chrishardenforcongress.com) now leads to electharden.com, which "
+               "enrich read as still naming him; the page is titled \"Chris Harden for "
+               "Congress | Democratic Candidate for GA-11\", says \"Elect Chris Harden "
+               "for Congress in Georgia's 11th District\", and carries \"PAID FOR BY "
+               "CHRIS HARDEN FOR CONGRESS\" (the FEC committee exactly)",
+        "seen": "Looked at the file and card: one man alone, short brown hair, beard, "
+                "smiling, dark suit, white shirt, light blue tie, seated on a stool "
+                "with hands clasped, plain dark blue-grey studio backdrop; nobody else "
+                "in the frame; the card keeps the whole file. Measured: On the card "
+                "brow at about band 1.1, chin at about band 2.6: about 1.5 tenths (one "
+                "band = 55 source px).",
+        "read": "2026-11-17",
+    },
+    # Lauren B. Pena
+    "FEC_H6TX35038": {
+        "url": "https://files.manuscdn.com/user_upload_by_module/session_file/3105196634"
+               "50394445/BJQRmbhGNXZEirYx.jpg",
+        "page": "https://www.lauren4congress.com/",
+        "words": "the page's og:image (its own share picture, file name "
+                 "\"BJQRmbhGNXZEirYx.jpg\", no alt text), on the page titled \"Lauren B. "
+                 "Peña for Congress | Texas CD-37\", whose words read \"Lauren B. Peña — "
+                 "Republican nominee for Texas CD-37. Trafficking survivor, mother of "
+                 "six, conservative. General Election November 3, 2026.\" The page lists "
+                 "no other image and no other rendition; the page's twitter:image:alt "
+                 "for this very file is \"Lauren B. Peña — Republican candidate for U.S. "
+                 "Congress, Texas CD-37\", and its schema.org Person (\"Lauren B. Peña\", "
+                 "\"Congressional Candidate — Texas CD-37\") names it as her image",
+        "by": "the campaign's website (lauren4congress.com)",
+        "tie": "the campaign site her committee (LAUREN4TEXAS) filed with the FEC, "
+               "which names her and this race (\"Republican nominee for Texas CD-37\", "
+               "\"General Election November 3, 2026\"); the file names no surname, so "
+               "rule 38's reader could not take it unattended. The page's words carry "
+               "no \"Paid for by\" line",
+        "seen": "Looked at the file and card: one woman alone, long dark hair, "
+                "blue-grey eyes, red lipstick, smiling, royal blue jacket, before a US "
+                "flag; nobody else anywhere in the frame; the card keeps her whole "
+                "face. Measured: On the card brow at about band 2.9, chin at about band "
+                "6.9: about 4.0 tenths (one band = 131 source px).",
+        "read": "2026-11-17",
+    },
+    # Tessa Lynn Hodge
+    "FEC_H6CA23230": {
+        "url": "https://run.imgix.net/3d168e21-fedf-4224-a39e-27cd57192ee3/76d9d749-bb4a"
+               "-445f-a579-23e30c082a3f/76d9d749-bb4a-445f-a579-23e30c082a3f.png?ixlib=j"
+               "s-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C0%2C1000%2C667&au"
+               "to=compress%2Cformat&fit=fillmax&w=640&q=75&s=4e1bdbad5673669dac2ae99e4b"
+               "cd078e",
+        "page": "https://www.tessaforca.com/",
+        "words": "the home page's opening photograph (alt text \"hero image\", the 640w "
+                 "rendition its srcset lists, signed by the site), directly under the "
+                 "site's logo (alt \"Tessa for CA\") on the page titled \"Tessa Lynn Hodge "
+                 "for Congress\", whose words open \"Tessa is fighting to lower the cost "
+                 "of living\". No alt text or caption names her: the same woman is at the "
+                 "centre of the About page's photographs under the heading \"About Tessa "
+                 "Lynn Hodge\" and \"Tessa's Story\". A person should weigh that before "
+                 "showing it",
+        "by": "the campaign's website (tessaforca.com)",
+        "tie": "route 1(b): no campaign site is on file for her; a web search led to "
+               "tessaforca.com, whose disclaimer \"Paid for by Tessa Lynn Hodge for "
+               "Congress\" names her principal campaign committee exactly as the FEC "
+               "registers it (TESSA LYNN HODGE FOR CONGRESS, C00899138), and whose "
+               "About page names this race: \"Tessa Lynn Hodge for Congress, CA-23\", \"I "
+               "am Tessa Lynn Hodge, and I'm running for Congress to represent "
+               "California's 23rd Congressional District in the 2026 election\"",
+        "seen": "Looked at the file and card: one woman alone, long dark brown hair, "
+                "smiling, black cardigan over a dark floral top, tattooed forearms, "
+                "hands folded on a table with a tablet on a stand, before shelves of "
+                "pottery and a window with blinds; a hanging dreamcatcher-like ornament "
+                "and paper prints on the left, no person anywhere in the frame (whole "
+                "file checked, not only the card's crop). The card (x 149-491) keeps "
+                "her whole and alone. The same woman, in the same cardigan and floral "
+                "top, is at the centre of the About page's photograph under 'About "
+                "Tessa Lynn Hodge' (with others round a table; not offered) and alone "
+                "with a dog in another of the site's photographs. Measured: On the card "
+                "brow at about band 2.8, chin at about band 4.4: about 1.6 tenths (one "
+                "band = 42.7 source px); the face is small but over a tenth.",
+        "read": "2026-11-17",
+    },
+    # Pamela Delancy
+    "FEC_H6GA10183": {
+        "url": "https://content.campaignpartner.net/images/149430/Candidate.png",
+        "page": "https://votepamdelancy.com",
+        "words": "the page's og:image, file name \"Candidate.png\", on the page titled "
+                 "\"Pamela DeLancy for Congress District 10 | Georgia\" (\"Pamela DeLancy "
+                 "is running for Congress District 10 in Georgia\"); the same photograph "
+                 "is the home page's opening background picture, file name "
+                 "\"candidate_90388824d65a4c65accefc4557e331ba_PD_Campaign_Photo.png\" "
+                 "(her initials), at 3.3 MB; this is the lighter of the two the page "
+                 "lists",
+        "by": "the campaign's website (votepamdelancy.com)",
+        "tie": "the campaign site her committee filed with the FEC; \"Paid for by "
+               "Committee to Elect Pamela DeLancy for Congress\" (the FEC committee "
+               "exactly), naming this race: \"Pamela DeLancy, candidate for Congress, "
+               "Georgia District 10\". The files carry no surname, so rule 38's reader "
+               "could not take them unattended",
+        "seen": "Looked at the file and card: one woman alone, dark shoulder-length "
+                "curly hair, pearl earrings, smiling, navy blazer with a US flag pin, "
+                "white open-collared blouse, before two blurred US flags; nobody else "
+                "in the frame; the card keeps her whole face. The same woman stands "
+                "beside a man under the McDonough arch in the Meet Pam page's "
+                "photograph 'Barnes_and_Pam2.jpg' (not offered: two people), which ties "
+                "the face to 'Pam' on her own site. Measured: On the card brow at about "
+                "band 2.6, chin at about band 5.0: about 2.4 tenths (one band = 150 "
+                "source px).",
+        "read": "2026-11-17",
+    },
+    # Kevin Eugene Martin
+    "FEC_H6GA06181": {
+        "url": "https://kevinmartinforcongress.com/assets/kevin-hero.jpg",
+        "page": "https://kevinmartinforcongress.com/",
+        "words": "the image's alt text \"Kevin Martin, candidate for Congress in "
+                 "Georgia's 6th District\", file name \"kevin-hero.jpg\", under the heading "
+                 "\"We Work for You, So It's Time We Start Listening\"",
+        "by": "the campaign's website (kevinmartinforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC "
+               "(kevinmartinforcongress.org) now leads to kevinmartinforcongress.com, "
+               "which enrich read as still naming him; \"PAID FOR BY COMMITTEE TO ELECT "
+               "KEVIN E MARTIN\" (the FEC committee exactly), titled \"Kevin Martin for "
+               "Congress | Georgia's 6th District, 2026\"",
+        "seen": "Looked at the file and card: one man alone, receding brown hair, "
+                "smiling, navy suit, white shirt, gold tie, before a US flag and a "
+                "mottled grey studio backdrop; nobody else in the frame; the card keeps "
+                "the whole file. Measured: On the card brow at about band 3.0, chin at "
+                "about band 5.6: about 2.6 tenths (one band = 100 source px).",
+        "read": "2026-11-17",
+    },
+    # Blake Miguez
+    "FEC_H6LA05234": {
+        "url": "https://senate.la.gov/SenPics/Sen22.jpg",
+        "page": "https://senate.la.gov/smembers?ID=22",
+        "words": "the page's only portrait, directly before \"State Senator Blake Miguez "
+                 "Republican District 22\" (no alt text)",
+        "by": "Louisiana State Senate",
+        "tie": "route (d): the campaign site his committee filed with the FEC (\"Paid "
+               "for and authorized by Blake Miguez for Louisiana\", the FEC committee "
+               "exactly; \"Louisiana's 6th District\") says in its own words that he is "
+               "\"a small business owner in the oil and gas industry, and a State "
+               "Senator\" and \"Blake was elected to the Louisiana State Senate in "
+               "2023\"; the Louisiana Senate's page for district 22 names him beside "
+               "the photograph",
+        "seen": "Looked at the file and card: one man alone, dark hair greying at the "
+                "sides, beard, smiling, blue suit, white shirt, red tie and red pocket "
+                "square, legislative lapel pin, plain grey studio backdrop; nobody else "
+                "in the frame; the card keeps the whole file. Same face as his "
+                "campaign's own 'blake-miguez-hero.jpg' (alt 'Blake Miguez'), which I "
+                "looked at, so the seat file shows him and not his predecessor, "
+                "whatever the batch date (which, being a copy's, proves nothing by "
+                "itself, rule 100). Measured: On the card brow at about band 2.2, chin "
+                "at about band 5.2: about 3.0 tenths (one band = 32.5 source px).",
+        "read": "2026-11-17",
+        # Sen22.jpg shows whoever holds Senate District 22 (rule 100).
+        "seat": {"state": "LA", "chamber": "upper", "district": "22",
+                 "legislator": "ocd-person/8574f94d-93ed-49b0-a5f6-aa1832b5542a",
+                 "name": "Blake Miguez"},
+    },
+    # Michael Charles Echols
+    "FEC_H6LA05242": {
+        "url": "https://www.michaelechols.com/wp-content/uploads/2026/02/MECHOLS52-768x9"
+               "72.png",
+        "page": "https://www.michaelechols.com",
+        "words": "the image's alt text \"Michael Echols in a professional suit, candidate "
+                 "for Congress.\", file name \"MECHOLS52-809x1024.png\", the page's first "
+                 "image, followed by \"Michael Echols State Representative | Business "
+                 "Leader | Conservative Reformer\" (the 768w rendition its srcset lists, "
+                 "within the caps)",
+        "by": "the campaign's website (michaelechols.com)",
+        "tie": "the campaign site his committee filed with the FEC; \"Paid for by "
+               "Echols for Congress\" (the FEC committee exactly), titled \"Michael "
+               "Echols for Congress\", \"Michael Echols represents North Louisiana "
+               "(District 14) in the Louisiana House of Representatives\". The page's "
+               "words name no district of the U.S. House and no year; the site is the "
+               "one ECHOLS FOR CONGRESS (registered for 2026) filed",
+        "seen": "Looked at the file and card: one man alone, short dark hair, smiling "
+                "slightly, blue suit, white shirt, red tie, arms folded, plain light "
+                "grey backdrop; nobody else in the frame; the card keeps the whole "
+                "file. Measured: On the card brow at about band 1.7, chin at about band "
+                "3.9: about 2.2 tenths (one band = 96 source px).",
+        "read": "2026-11-17",
+    },
+    # Stephen Wagley
+    "FEC_H6LA06182": {
+        "url": "https://static.wixstatic.com/media/70755c_c916a22f8a07481d8a86cc21bf72c2"
+               "7d~mv2.jpg/v1/fill/w_323,h_484,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,qua"
+               "lity_auto/70755c_c916a22f8a07481d8a86cc21bf72c27d~mv2.jpg",
+        "page": "https://www.wagleyforcongress.com/",
+        "words": "the image's alt text \"Stephen-Wagley-Headshot-Tie.jpg\", after the "
+                 "heading \"Meet Stephen Wagley\" on the home page titled \"HOME | Stephen "
+                 "Wagley for Congress\"; the page declares it 323x484 and its static "
+                 "markup draws an 81x54 placeholder through Wix's own resizer "
+                 "(.../v1/fill/w_81,h_54,...): this is the same file through the same "
+                 "resizer at the declared 323x484",
+        "by": "the campaign's website (wagleyforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (stephenwagley.com) "
+               "now leads to wagleyforcongress.com, which enrich read as still naming "
+               "him: \"Official website for Stephen Wagley for Congress in Louisiana, "
+               "US\", \"Meet Stephen Wagley\". The page's words give no \"Paid for by\" "
+               "line, no district number and no year; WAGLEY FOR CONGRESS is the "
+               "committee the work list gives for LA-6",
+        "seen": "Looked at the file and card: one man alone, dark swept-back hair, full "
+                "beard, smiling, navy suit, light blue shirt, red and blue paisley tie, "
+                "a lapel pin, before blurred trees; nobody else in the frame; the card "
+                "keeps him whole. Measured: On the card brow at about band 3.1, chin at "
+                "about band 5.9: about 2.8 tenths (one band = 40.4 source px).",
+        "read": "2026-11-17",
+    },
+    # Conrad Roberts Cable
+    "FEC_H6LA04187": {
+        "url": "https://images.squarespace-cdn.com/content/v1/68a876e549ee746bc353d307/7"
+               "633d1e3-dad7-477f-8abf-e808f346560c/07292025-ConradCable-Portrait-007.jp"
+               "g?format=1000w",
+        "page": "https://www.conrad4congress2026.com/meet-conrad",
+        "words": "the image's alt text \"Louisiana 4th District congressional candidate "
+                 "Conrad Cable smiling outdoors in a straw hat, blue checkered shirt, "
+                 "and brown overalls, standing in a green rural landscape.\", file name "
+                 "\"07292025-ConradCable-Portrait-007.jpg\", the first image of the page "
+                 "titled \"Meet Conrad | Conrad 4 Congress\" (the 1000w rendition its "
+                 "srcset lists)",
+        "by": "the campaign's website (conrad4congress2026.com)",
+        "tie": "route 1(b): no campaign site is on file for him; a web search led to "
+               "conrad4congress2026.com, whose disclaimer \"Paid for by Committee to "
+               "Elect Conrad Cable\" names his principal campaign committee exactly as "
+               "the FEC registers it (COMMITTEE TO ELECT CONRAD CABLE, C00909762), and "
+               "which names this race: \"Conrad Cable for Congress 2026 | Louisiana's "
+               "4th District\", \"running for Congress in LA-04 in 2026\"",
+        "seen": "Looked at the whole file and the card: one man alone, beard, glasses, "
+                "straw hat, blue gingham shirt, brown work overalls, smiling, looking "
+                "to his right, before blurred greenery and a lawn; nobody else anywhere "
+                "in the frame. The frame is wider than tall, but the card (x 233-767) "
+                "keeps his whole head, hat and face well inside its edges. Measured: On "
+                "the card brow at about band 2.8, chin (under the beard) at about band "
+                "4.6, beard's end about 5.0: about 1.8-2.2 tenths (one band = 66.7 "
+                "source px).",
+        "read": "2026-11-17",
+    },
+    # Lauren Jewett
+    "FEC_H6LA01258": {
+        "url": "https://www.laurenjewett.com/_next/image?url=%2Fimages%2Fportraits%2F07_"
+               "Jewett_Headshots_2026.jpg&w=640&q=75&dpl=dpl_H3ozFSWCbechM5W34THw1ybmrQo"
+               "5",
+        "page": "https://www.laurenjewett.com/about",
+        "words": "the image's alt text \"Lauren Jewett\", file name "
+                 "\"07_Jewett_Headshots_2026.jpg\", on the page titled \"Meet Lauren Jewett "
+                 "| Congressional Candidate LA-01 | Lauren Jewett for Congress\" (the "
+                 "site's own 640px rendition through its image optimizer, as its srcset "
+                 "lists)",
+        "by": "the campaign's website (laurenjewett.com)",
+        "tie": "the campaign site her committee filed with the FEC; \"Paid for by the "
+               "Committee to Elect Lauren Jewett for Congress\" (the FEC committee "
+               "exactly); \"running for Congress in Louisiana's 1st Congressional "
+               "District\", \"November 3, 2026\"",
+        "seen": "Looked at the file and card: one woman alone, shoulder-length brown "
+                "hair, smiling, chin resting on her hand, black sleeveless top, elbows "
+                "on a white table, plain light grey-white backdrop; nobody else in the "
+                "frame; the card keeps her whole face. Note: the address carries the "
+                "site's Next.js deployment id (dpl=...), which may stop answering after "
+                "a redeploy. Measured: On the card brow at about band 3.0, chin at "
+                "about band 4.5: about 1.5 tenths (one band = 80 source px).",
+        "read": "2026-11-17",
+    },
+    # Matthew Gromlich
+    "FEC_H6LA04195": {
+        "url": "https://images.squarespace-cdn.com/content/v1/69df20822a2d50664859f4d7/a"
+               "e16ec47-1b70-4b45-997c-42bf157356ab/Profile+Pic+-+MGFC+-+March+2026+-+00"
+               "9.jpg?format=750w",
+        "page": "https://www.mattgromlichforcongress.com/",
+        "words": "alt text \"Matt Gromlich, running for congress in Louisiana's 4th "
+                 "district, wearing a black blazer with a small American flag pin, a "
+                 "white textured sweater, and dark pants. He is outdoors with a modern "
+                 "building and trees in the background.\"; file \"Profile Pic - MGFC - "
+                 "March 2026 - 009.jpg\", above the heading \"Matt Gromlich\" (the srcset's "
+                 "750w form)",
+        "by": "the campaign's website (mattgromlichforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "fightersforourfuture.com, safe, titled 'Matt Gromlich | Louisiana "
+               "Congressional District 4') shows only a banner 'OUR NEW WEBSITE IS "
+               "LIVE ... Click below to visit the updated official campaign site' "
+               "naming 'MattGromlichForCongress.com'; that site's disclaimer reads "
+               "'Paid for by the Committee to Elect Matt Gromlich' (the FEC committee "
+               "exactly) and its title names the race: 'Matt Gromlich | Candidate for "
+               "Congress, Louisiana's 4th District', 'running for Congress in LA-04 "
+               "against Mike Johnson', '(c)2026 Committee to Elect Matt Gromlich'. The "
+               "pipeline's reader passed the file over for the word 'flag' (his flag "
+               "pin) in its alt text",
+        "seen": "Looked at the file and card: one man, short brown hair and beard, "
+                "smiling, black blazer with a flag pin over a white ribbed sweater, "
+                "leaning on a low wall before a pale multi-storey building, palm trees "
+                "and a tree branch; every window and balcony empty, nobody else "
+                "anywhere in the frame. Tie read fresh: the filed site "
+                "fightersforourfuture.com (titled 'Matt Gromlich | Louisiana "
+                "Congressional District 4') shows only a banner sending readers to "
+                "MattGromlichForCongress.com; that site's disclaimer reads 'Paid for by "
+                "the Committee to Elect Matt Gromlich' (the FEC committee exactly), "
+                "title 'Matt Gromlich | Candidate for Congress, Louisiana's 4th "
+                "District', 'running for Congress in LA-04 against Mike Johnson', "
+                "'(c)2026 Committee to Elect Matt Gromlich'. Measured: face brow to "
+                "chin about 2.1 tenths of the card (brow at band 2.4, chin at band 4.4 "
+                "on the card picture; about 210 of the file's px against a 93.8px band)",
+        "read": "2026-11-17",
+    },
+    # John David Day
+    "FEC_H6LA03205": {
+        "url": "https://johndayforcongress.com/wp-content/uploads/2026/03/John-Day-for-C"
+               "ongress-ProfileImage-Hereo.png",
+        "page": "https://johndayforcongress.com/about-john-day-for-congress/",
+        "words": "alt text \"John Day for Congress\", file "
+                 "\"John-Day-for-Congress-ProfileImage-Hereo.png\", directly above the "
+                 "heading \"About John Day\" and \"Meet your candidate! Steady. Principled. "
+                 "Present. John Day was born in Shreveport, raised in Lake Charles\"; the "
+                 "home page draws the same file above \"I'm John Day, a Veteran running "
+                 "for Congress in the 3rd District of Louisiana.\"",
+        "by": "the campaign's website (johndayforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "johndayforcongress.com, safe): 'I'm John Day, a Veteran running for "
+               "Congress in the 3rd District of Louisiana', '(c) 2026 John Day for "
+               "Congress'. Its disclaimer reads 'Paid for by John Day for Congress', "
+               "not the registered 'COMMITEE TO ELECT JOHN DAY', but this is the site "
+               "the committee filed (route 1(a)), not one found another way",
+        "seen": "Looked at the file and card: a studio cut-out on a transparent "
+                "background (grey on the card) of one man in glasses, grey hair and "
+                "beard, blue suit, red tie, beaded necklace and flag pin; nobody else "
+                "in the frame. The filed site (campaignSite johndayforcongress.com) "
+                "names LA-3: 'Louisiana's 3rd Congressional District', '(c) 2026 John "
+                "Day for Congress'; its disclaimer 'Paid for by John Day for Congress' "
+                "is not letter for letter the registered COMMITEE TO ELECT JOHN DAY, "
+                "which route 1(a) does not need. Measured: face brow to chin about 2.6 "
+                "tenths of the card (brow at band 2.0, chin at band 4.6; about 260 of "
+                "the file's px against a 96.1px band)",
+        "read": "2026-11-17",
+    },
+    # Patrick Wayne Forbes
+    "FEC_H6LA06190": {
+        "url": "https://static.wixstatic.com/media/637d7a_8cc2a2562383408f9ba5064535a3f4"
+               "12~mv2.jpg/v1/fill/w_2048,h_1365,al_c,q_90,enc_auto/637d7a_8cc2a25623834"
+               "08f9ba5064535a3f412~mv2.jpg",
+        "page": "https://www.patforbes.com/",
+        "words": "the home page's Wix image record for it: name "
+                 "\"Pat_Forbes_WEB_Shoot-9.jpg\", alt \"Pat Forbes smiling in park with "
+                 "trees in background\", on \"Pat Forbes for U.S. Congress | Louisiana | "
+                 "Official Campaign Site\" beside \"Meet Pat Forbes, running for US "
+                 "Congress in Louisiana's 6th District\"",
+        "by": "the campaign's website (patforbes.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "patforbes.com, safe): 'Paid for by Committee to Elect Pat Forbes' (the "
+               "FEC committee exactly), 'Meet Pat Forbes, running for US Congress in "
+               "Louisiana's 6th District'. The site is Wix: its images are drawn by "
+               "script from records in the markup (wow-image data-image-info), which "
+               "is why rule 38's reader listed only the og:image banner",
+        "seen": "Looked at the file, the card and zooms of both edges: one man, grey "
+                "hair and beard, dark suit, blue tie, arms folded, under trees by "
+                "water; the blurred left edge (outside the card's crop) holds a lamp "
+                "post, a red shape like a parked car and a pale post, no person that "
+                "can be made out; the right edge is water and path. Tie read fresh: "
+                "'Paid for by Committee to Elect Pat Forbes' (the FEC committee "
+                "exactly), title 'Pat Forbes for U.S. Congress | Louisiana | Official "
+                "Campaign Site', 'Meet Pat Forbes, running for US Congress in "
+                "Louisiana's 6th District', 'Election Day: Tuesday, Nov. 3'. Measured: "
+                "face brow to chin about 2.7 tenths of the card (brow at band 2.6, chin "
+                "at band 5.3; one band = 136.5 source px)",
+        "read": "2026-11-17",
+    },
+    # Gordon Brian Heslop
+    "FEC_H6LA04229": {
+        "url": "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=1037,fit=c"
+               "rop/7nq3YslSVIcSZlff/gordon-3-30-1NNSewD4szHQgvdn.png",
+        "page": "https://heslopforcongress.com",
+        "words": "the home page's only photograph, file \"gordon-3-30-...png\" (no alt "
+                 "text), in the section under the headings \"Gordon Heslop\" / \"Republican "
+                 "Candidate 4th Congressional District of Louisiana\" and \"I'M AN ANTI "
+                 "TRUMP REPUBLICAN\" (the srcset's w=768 form; the file's full resolution "
+                 "is 221x301, which the host serves at that request)",
+        "by": "the campaign's website (heslopforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "heslopforcongress.com, safe): 'Gordon Heslop Republican Candidate 4th "
+               "Congressional District of Louisiana', 'Paid for by Heslop for "
+               "Congress' (not letter for letter the registered 'HESLOP FOR CONGRESS "
+               "COMMITTEE', but this is the filed site, route 1(a)); the file names "
+               "only his first name, so rule 38's reader could not take it unattended",
+        "seen": "Looked at the file and card: a plain head-and-shoulders photograph of "
+                "one older man, white hair, rimless glasses, dark jacket, light-blue "
+                "shirt, striped tie, against a cream wall; nobody else in the frame. "
+                "Small and a little soft but a clear likeness. Filed site (campaignSite "
+                "heslopforcongress.com): 'Republican Candidate 4th Congressional "
+                "District of Louisiana', 'towards the end of this year (2026)'; "
+                "disclaimer 'Paid for by Heslop for Congress', not letter for letter "
+                "HESLOP FOR CONGRESS COMMITTEE, which route 1(a) does not need. "
+                "Measured: face brow to chin about 3.5 tenths of the card (brow at band "
+                "3.5, chin at band 7.0; one band = 27.6 source px)",
+        "read": "2026-11-17",
+    },
+    # Lindsay Garcia
+    "FEC_H6LA05309": {
+        "url": "https://static.wixstatic.com/media/efbd32_e67486738c5642dcbde522b7c787cd"
+               "5c~mv2.jpg/v1/fill/w_453,h_556,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,qua"
+               "lity_auto/SV-0092.jpg",
+        "page": "https://www.rubiagarcia.com/meet-lindsay",
+        "words": "the Meet page's first photograph (file and alt text \"SV-0092.jpg\"), on "
+                 "\"Meet Rubia | Rubia Garcia For Congress | Louisiana 6th District\", "
+                 "directly above the heading \"Meet Rubia\" and \"Lindsay “Rubia” Garcia "
+                 "isn’t a career politician. She’s a daughter of Louisiana\"",
+        "by": "the campaign's website (rubiagarcia.com)",
+        "tie": "the campaign site her committee filed with the FEC (campaignSite "
+               "rubiagarcia.com, safe): 'Paid for and Authorized by Lindsay Rubia "
+               "Garcia For Congress' (the FEC committee exactly), 'Lindsay “Rubia” "
+               "Garcia for Congress in Louisiana’s 6th District', 'Tuesday, November "
+               "3rd, 2026'; the file names no one, so rule 38's reader could not take "
+               "it unattended",
+        "seen": "Looked at the file and card: a studio portrait of one woman, long wavy "
+                "brown and blonde hair over one shoulder, white blazer, navy shirt, "
+                "plain light-grey backdrop; nobody else in the frame. Measured: face "
+                "brow to chin about 1.7 tenths of the card (brow at band 2.4, chin at "
+                "band 4.1; one band = 55.6 source px)",
+        "read": "2026-11-17",
+    },
+    # Vincent Matrisciano
+    "FEC_H6NJ11336": {
+        "url": "https://vincentmatriscianoforcongress.com/wp-content/uploads/2026/05/260"
+               "420-Cuppek-018-scaled-e1779207272511-768x832.jpg",
+        "page": "https://vincentmatriscianoforcongress.com/about/",
+        "words": "the About page's first photograph (file 260420-Cuppek-018..., no alt "
+                 "text; the srcset's 768w form, and the page's og:image), under \"About "
+                 "Vincent\" / \"Who is Vincent Matrisciano?\" and \"Vincent brings a career "
+                 "of public service and real-world problem-solving to his campaign for "
+                 "New Jersey's 11th Congressional District\", on \"About - Vincent "
+                 "Matrisciano\"",
+        "by": "the campaign's website (vincentmatriscianoforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "vincentmatriscianoforcongress.com, safe): 'Paid for by the Vincent "
+               "Matrisciano for Congress Committee' (the FEC committee 'VINCENT "
+               "MATRISCIANO FOR CONGRESS'), 'Vincent MATRISCIANO FOR CONGRESS Write-in "
+               "candidate for NJ-11', '(c) 2026'; the file names no one (a "
+               "photographer's shoot number), so rule 38's reader could not take it "
+               "unattended. The home page's family photograph 'Meet your future "
+               "Congressman' shows the same man",
+        "seen": "Looked at the file, card and zooms of both edges: one bald man in "
+                "glasses, blue suit, striped tie, flag pin and pocket square, hands "
+                "clasped, in a bright lobby; shelves with ornaments and a plant behind, "
+                "sofas at right; nobody else in the frame. Measured: face brow to chin "
+                "about 1.3 tenths of the card (brow at band 1.9, chin at band 3.2; "
+                "about 105 of the file's px against an 83.2px band)",
+        "read": "2026-11-17",
+    },
+    # Michael Thurow
+    "FEC_H6WI06233": {
+        "url": "https://images.squarespace-cdn.com/content/v1/6949e25a449b6734bccf9382/e"
+               "2370e3b-a273-437e-8d01-64e4efe74564/ThurowforCongress_HeroPhoto.jpg?form"
+               "at=1000w",
+        "page": "https://www.thurowforcongress.com/about",
+        "words": "alt text \"A portrait of Mike Thurow, Independent candidate for "
+                 "Wisconsin's Sixth Congressional District.\", file "
+                 "\"ThurowforCongress_HeroPhoto.jpg\" (the srcset's 1000w form), the About "
+                 "page's opening photograph above \"Meet Mike Thurow\" / \"Mike Thurow grew "
+                 "up in Mequon, Wi\"",
+        "by": "the campaign's website (thurowforcongress.com)",
+        "tie": "the campaign site his committee filed with the FEC (campaignSite "
+               "thurowforcongress.com, safe): 'PAID FOR BY MIKE THUROW FOR CONGRESS' "
+               "(the FEC committee exactly), 'Mike Thurow is the Independent candidate "
+               "for Wisconsin's 6th Congressional District', '(c)2026 Mike Thurow for "
+               "Congress'",
+        "seen": "Looked at the file and card: one man, short dark hair, smiling, olive "
+                "jacket over a grey henley, before a snowy creek with bare trees and "
+                "orange leaves; nobody else anywhere in the frame. Wider than tall; the "
+                "card's centre crop keeps him whole-faced. Measured: face brow to chin "
+                "about 2.5 tenths of the card (brow at band 2.3, chin at band 4.8; "
+                "about 142 of the file's px against a 56.3px band)",
+        "read": "2026-11-17",
+    },
+    # Austin Magee
+    "FEC_H6LA05283": {
+        "url": "https://images.squarespace-cdn.com/content/v1/699c7b79fe93a070441bd9b0/f"
+               "b6a9c08-7817-446e-a48e-6f636730d574/IMG_6622.jpg?format=1000w",
+        "page": "https://www.austinmageeforcongress.com/",
+        "words": "the background photograph (file \"IMG_6622.jpg\", no alt text; the "
+                 "page's 1000w rendition) of the home page section whose headings read "
+                 "\"Austin Magee\" and \"Candidate for Louisiana’s Congressional District "
+                 "5\", under the banner \"I can't do any worse than the rest of 'em!\"",
+        "by": "the campaign's website (austinmageeforcongress.com)",
+        "tie": "route 1(b): a web search (Ballotpedia/BallotReady, leads only) named "
+               "austinmageeforcongress.com; the site's own disclaimer reads 'Paid for "
+               "by Austin Magee for Congress' (the FEC committee AUSTIN MAGEE FOR "
+               "CONGRESS exactly) and it names the race: 'Austin Magee's congressional "
+               "campaign for Louisiana's District 5', 'Candidate for Louisiana’s "
+               "Congressional District 5'; its yard-sign graphic reads 'Vote May 16 "
+               "Dist 5'. The about page's family photograph shows the same red-bearded "
+               "man",
+        "seen": "Looked at the file, card and a zoom of the woods behind: one man with "
+                "a long red beard, red plaid shirt over a white T-shirt, jeans, two "
+                "books on his knee, sitting against a large tree trunk in leafy woods; "
+                "nobody else in the frame. Wider than tall; the card's centre crop "
+                "keeps him whole-faced. Measured: face brow to chin about 1.6 tenths of "
+                "the card, the chin taken at the jaw line under the beard (brow at band "
+                "1.5, chin at band 3.2; about 90 of the file's px against a 56.2px "
+                "band); to the beard's end far more",
+        "read": "2026-11-17",
+    },
+    # Elizabeth Fitzgibbon
+    "FEC_H6WI06241": {
+        "url": "https://static.wixstatic.com/media/821665_f849b4f500f24015b5b657d7e07a1d"
+               "58~mv2.png/v1/fill/w_426,h_559,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,qua"
+               "lity_auto/bcfdfe36-8d58-49c1-8608-ac840758886a.png",
+        "page": "https://www.fitzgibbonforcongress.com/",
+        "words": "the home page's opening photograph (its only portrait; file and alt "
+                 "text a generated name, 'bcfdfe36-8d58-49c1-8608-ac840758886a.png'), in "
+                 "the hero of the page titled \"Elizabeth Fitzgibbon for Congress | "
+                 "Wisconsin Congressional District 6\", beside \"Elizabeth is a mother, "
+                 "advocate, and independent candidate for Wisconsin's 6th Congressional "
+                 "District\" (the page's 1x rendition, 426x559; its srcset's 2x is "
+                 "852x1118)",
+        "by": "the campaign's website (fitzgibbonforcongress.com)",
+        "tie": "her filed campaign site "
+               "(elizabethfitzgibbonforglenngrothmansseatincongress.org, no longer in "
+               "DNS) moved to fitzgibbonforcongress.com, which enrichment.json read as "
+               "still naming her; its footer 'Paid for by Friends for Fitzgibbon' "
+               "names her FEC principal committee (FRIENDS FOR FITZGIBBON, C00946673) "
+               "exactly, and the page names this race (Wisconsin's 6th Congressional "
+               "District, independent). The file names no one, so rule 38's reader "
+               "cannot take it unattended: like CAND_9 (Brad Lander), the page's "
+               "opening photograph beside the words naming her",
+        "seen": "Looked at the card, the 2x rendition (852x1118, 49,032 bytes) and a "
+                "full-resolution face crop of the 1632x2111 original: a retouched "
+                "studio headshot of one woman, background removed (transparent PNG, "
+                "grey on the page), dark blazer, white blouse, hoop earrings; "
+                "photographic skin texture, no sign of generation; nobody else, no arm, "
+                "shoulder or face anywhere in the frame. Not a namesake: the site is "
+                "her committee's and names WI-6 and her independent run, as the work "
+                "list does. The site's other person images are named "
+                "'Gemini_Generated_Image' (a woman with a child, AI-edited) and are "
+                "rightly not offered. The page lists only the 1x (426x559, the "
+                "lightest) and 2x (852x1118, also within the caps; sharper on a 2x "
+                "screen) renditions; the 1x offered passes over nothing lighter. "
+                "Measured: card picture 500px tall, 50px a band: brow at about 2.9 "
+                "tenths from the top, chin at about 5.3: about 2.3-2.4 tenths of the "
+                "card (first reader said 2.7); well over a tenth",
+        "read": "2026-11-17",
+    },
 }
 
 # There is no list of members to leave out. Whoever has left is decided by
@@ -258,6 +1469,164 @@ MEMBER_STATUS_BY_ID = {
     "F000110": ("Not running for re-election in 2026; running for the Louisiana State Senate.",
                 "https://www.thegreenpapers.com/G26/LA"),
 }
+
+# Two cards an evidenced entry settles (kyc/identity.py, rule 105):
+# keyed on both cards' keys exactly as the build's identity warnings name
+# them ("officer:MI:sos", "candidate:gov-MI-jocelyn-benson",
+# "profile:FEC_...", "legislator:GA:ocd-person/..."), each {"same": True
+# where they are one person, False where they are namesakes, "evidence":
+# the pages that tie or part them - the office's own page naming the person
+# beside the other role, never a news story - and "read": the day}. An id
+# and a second source join people without an entry; an entry is for a pair
+# no record ties (identity-look-alike, identity-legislator-look-alike) or
+# whose names an id cannot settle (identity-names-disagree). The build
+# warns on an entry naming a card it no longer makes, one the records now
+# join themselves, and a "two people" entry the records join
+# (stale-identity-join, identity-join-contradicted). "behind" beside "same":
+# True says the legislator card of the pair is no current role - the
+# legislature's own pages seat someone else while Open States still seats
+# them - in the legislature's words: the pair joins nothing and is said in
+# identity-legislator-roster-behind until the roster drops the card, when
+# the entry is stale. Each source below was opened by this project's reader
+# (its agents, kyc/agent.py's USER_AGENT) on the day given, a second read of
+# the research of 2026-11-15; no person has yet looked at these entries, and
+# one a person has read says so. A page that refused the reader concludes
+# nothing (rule 8) and is named as such. No telephone number or mailing
+# address is copied.
+IDENTITY_JOINS = {
+    ("officer:MI:sos", "candidate:gov-MI-jocelyn-benson"): {
+        "same": True,
+        "evidence": (
+            "The candidate card's own Wikidata item, Q13562375 (its record's item; enwiki "
+            "\"Jocelyn Benson\", the article Michigan's race article links for the list's "
+            "name: \"| nominee1 = '''[[Jocelyn Benson]]'''\"), holds P39 Q16147324, series "
+            "ordinal 43, start 2019-01-01, replaces Q7383055 (Ruth Johnson); Q16147324 is "
+            "labelled \"Michigan Department of State\", alias \"Michigan Secretary of "
+            "State\", \"elected office and department within the government of the State of "
+            "Michigan\". The article's infobox: \"office1 = 43rd [[Michigan Secretary of "
+            "State|Secretary of State of Michigan]]\", \"term_start1 = January 1, 2019\", "
+            "term_end1 blank, \"predecessor1 = [[Ruth Johnson]]\": rule 69's two sources, "
+            "which the build withheld only for the item's label. The campaign site the item "
+            "gives (P856), https://www.jocelynbenson.com/ : \"Secretary of State and "
+            "Democratic nominee for Governor Jocelyn Benson joined the rest of the Democratic "
+            "ticket\". The office's own page, "
+            "https://www.michigan.gov/sos/resources/the-secretary-of-state, answered this "
+            "reader 403 \"Access Denied\" and concludes nothing."),
+        "read": "2026-11-17",
+    },
+    ("officer:MT:sos", "profile:FEC_H6MT01160"): {
+        "same": True,
+        "evidence": (
+            "The profile's FEC id H6MT01160 has the principal campaign committee C00941583 "
+            "\"CHRISTI JACOBSEN FOR CONGRESS\" (OpenFEC /candidate/H6MT01160/committees/, first "
+            "filed 2026-03-03). The Montana Secretary of State's \"FEDERAL PRIMARY 2026 "
+            "Candidate List\", https://candidatefiling.mt.gov/candidatefiling/CandidateList."
+            "aspx?e=450002928 , prints for \"1ST CONGRESSIONAL UNITED STATES REPRESENTATIVE "
+            "... CHRISTI JACOBSEN\" the website \"CHRISTIJACOBSEN.COM\", filed \"3/3/2026 "
+            "11:23:45 AM REP\" (its post office box, the committee's too, is not copied). "
+            "That site, https://christijacobsen.com/about/ : \"Christi Jacobsen is running "
+            "for Congress ... She currently serves as Montana’s Secretary of State\", and "
+            "\"PAID FOR BY CHRISTI JACOBSEN FOR CONGRESS\", the committee's name. The "
+            "office's own site, https://sosmt.gov/, answered this reader 403 \"Just a "
+            "moment...\", a challenge page that concludes nothing."),
+        "read": "2026-11-17",
+    },
+    ("officer:SD:ag", "profile:FEC_H6SD01109"): {
+        "same": True,
+        "evidence": (
+            "The profile's FEC id H6SD01109 has the principal campaign committee C00909689 "
+            "\"MARTY JACKLEY FOR CONGRESS\", whose filed website is WWW.MARTYJACKLEY.COM "
+            "(data/campaigns.json; rule 32). https://martyjackley.com/about : \"2009–2019, "
+            "2023–PRESENT Attorney General of South Dakota Appointed in 2009, then reelected "
+            "three times.\", the photograph captioned \"Attorney General Marty Jackley\", "
+            "\"Paid for by Marty Jackley for Congress\". The office's own page, the officer "
+            "card's, https://atg.sd.gov/OurOffice/bio.aspx : \"Attorney General Marty J. "
+            "Jackley Marty was raised in Sturgis and graduated from the South Dakota School of "
+            "Mines ...\", \"In 2022 Marty was elected for a fourth term as the South Dakota "
+            "Attorney General.\" - the life the campaign's About page tells."),
+        "read": "2026-11-17",
+    },
+    ("profile:FEC_H6IL09293", "legislator:IL:ocd-person/0125b0ac-65ba-443e-b418-53cdf42b9f85"): {
+        "same": True,
+        "evidence": (
+            "The profile's FEC id H6IL09293 has the principal campaign committee C00910976 "
+            "\"MIKE SIMMONS FOR CONGRESS\", website WWW.MIKESIMMONS.ORG (OpenFEC "
+            "/candidate/H6IL09293/committees/). https://www.mikesimmons.org (\"Mike Simmons | "
+            "Illinois State Senator | District 7\"): \"state Senator for the 7th Senate "
+            "District of Illinois ... On February 6, 2021, Mike was sworn in to represent the "
+            "7th District\". The General Assembly's own page for the member the card links, "
+            "https://www.ilga.gov/Senate/Members/Details/3398 : \"Senate Member Mike Simmons "
+            "(D) - 104th General Assembly (2025-2026) Mike Simmons (D) Senator 2021 - Present "
+            "7th District\". The card's \"Mike Simmons-Gessesse\" is Open States' form; the "
+            "legislature writes \"Mike Simmons\"."),
+        "read": "2026-11-17",
+    },
+    ("profile:FEC_H6FL24087", "legislator:FL:ocd-person/a8a2eaa4-449b-441f-96bb-d8a3e8191479"): {
+        "same": True,
+        "behind": ("the Florida Senate's own page for District 34, "
+                   "https://www.flsenate.gov/Senators/S34, names \"2026-2028 Senator Ashley "
+                   "Viola Gantt ... District 34\", \"Elected to the Senate in 2026\"; its list "
+                   "of 2026-2028 senators holds no Jones"),
+        "evidence": (
+            "The Florida Senate's page for the last term, "
+            "https://www.flsenate.gov/Senators/2024-2026/S34 : \"2024-2026 Senator Shevrin D. "
+            "\"Shev\" Jones Party: Democrat District 34\". The profile's FEC id H6FL24087 has "
+            "the principal campaign committee C00952556 \"SHEVRIN FOR CONGRESS\", website "
+            "WWW.SHEVRINJONES.COM (OpenFEC). That site's https://shevrinjones.com/about/ was "
+            "read on 2026-11-15 (\"Florida State Senator Shevrin “Shev” Jones\", \"Today, Jones "
+            "proudly serves Florida’s 34th Senate District\", \"Paid for by Shevrin Jones for "
+            "Congress\"), and on 2026-11-17 answered 404 (\"404 — Shevrin Jones for State "
+            "Senate\"); its front page, https://shevrinjones.com/ , now titled \"Shevrin Jones "
+            "for State Senate\": \"Shevrin “Shev” Jones is an educator ... Elected to the "
+            "Florida House in 2012 and the Florida Senate in 2020, he is running to bring that "
+            "record to District 37\", \"paid for and approved by Shevrin Jones, Democrat, for "
+            "State Senate, District 37\" - the same person, on the site his FEC committee "
+            "filed. One person; the card's seat is now Senator Gantt's (\"behind\")."),
+        "read": "2026-11-17",
+    },
+    ("profile:FEC_S6FL00830", "legislator:FL:ocd-person/66c3a112-3008-4332-a6b0-8990a7d992d5"): {
+        "same": True,
+        "behind": ("the Florida House's \"Representatives for 2026 - 2028\", "
+                   "https://www.flhouse.gov/Sections/Representatives/representatives.aspx, "
+                   "lists \"Gibson, Audrey Democrat — District: 13 ... 11/04/26 - 11/07/28\" "
+                   "and no Nixon"),
+        "evidence": (
+            "The profile's FEC id S6FL00830 has the committee \"ANGIE FOR FLORIDA\", whose "
+            "filed website is ANGIENIXON.COM (data/campaigns.json; rule 32). "
+            "https://angienixon.com : \"Angie is a former Florida State Representative, union "
+            "organizer, and mother born and raised in Jacksonville\", \"Paid for by Angie for "
+            "Florida\". The profile's record of offices (Wikidata Q98690818) gives \"Member of "
+            "the Florida House of Representatives\", 2020 to 2026. One person; the card's "
+            "seat, District 13, is now Representative Gibson's (\"behind\")."),
+        "read": "2026-11-17",
+    },
+    ("profile:J000299", "legislator:LA:ocd-person/0e901294-3718-49df-9922-0ac4503acee2"): {
+        "same": False,
+        "evidence": (
+            "Two people. The Louisiana House's own page for the district, "
+            "https://house.louisiana.gov/H_Reps/members?ID=27 : \"State Representative Michael "
+            "T. Johnson Republican District 27\", \"Representing Parishes: Rapides\", \"Year "
+            "Elected: 2019\", \"Education: Pineville High School, 1977; B.A., Public "
+            "Administration, Louisiana College, 1981; J.D., Southern University Law Center, "
+            "1984\". The profile is the Speaker, Mike Johnson, who sits in Congress for LA-4 "
+            "on the term 2025-01-03 to 2027-01-03 (congress-legislators, bioguide J000299), "
+            "born 1972-01-30."),
+        "read": "2026-11-17",
+    },
+    ("profile:G000598", "legislator:CA:ocd-person/8b2f37bc-65b7-40ed-af14-5d93cb765a5d"): {
+        "same": False,
+        "evidence": (
+            "Two people. The California State Assembly's own page for the district, "
+            "https://www.assembly.ca.gov/assemblymembers/50 (\"Assembly Member Garcia | "
+            "California State Assembly\"): \"Robert Garcia District: 50 Party: Democrat "
+            "Counties: san bernardino\", a sitting Assemblymember. The profile is the member "
+            "of Congress Robert Garcia, who sits for CA-42 on the term 2025-01-03 to "
+            "2027-01-03 (congress-legislators, bioguide G000598): one person does not hold "
+            "both seats at once."),
+        "read": "2026-11-17",
+    },
+}
+
 
 # Members who are on the November ballot for an office this site does not
 # cover, keyed on bioguide id: {bioguide: (what they are, source, checked)}.
@@ -1707,6 +3076,377 @@ SEEN_ARTICLE_LEADS = {
          {"width": 675, "height": 780}),
 }
 
+# A photograph a person chose for a candidate on a statewide ballot
+# (kyc/statewide_photos.py, rule 91's fifth route: the owner's request of
+# 2026-11-15, "lets try and fill those photos and any other missing from non
+# eliminated canidates"), as CANDIDATE_PHOTOS is for a profile (rule 24).
+# Keyed on the cache's own key for the candidate, "ST|office|name" with the
+# name as the election office's list prints it (statewide_photos.key), never
+# a name typed another way. Each entry has the same fields as a
+# CANDIDATE_PHOTOS entry (photos.curated_problems): the file (url), the page
+# that names them beside it, its words, whose it is (by; a Commons file's
+# author and licence are read from its own page, never typed), why that page
+# is this candidate's (tie), what a person saw (the candidate alone, nobody
+# else in the frame, the face measured on the card), the day read, and for a
+# file a legislature keys by its seat, the seat and the member it was read
+# for (withheld once the roster seats someone else). ballotphotos reads
+# each into data/statewide_photos.json as route "curated" (--curated-only
+# reads these alone), weighed, and a Commons file credited from its file page
+# and held to the licence test (statewide_photos.licence_doubt); NOT_A_PORTRAIT
+# and PORTRAIT_LICENCE_DOUBTS withhold it as they do every route's. It stands
+# only where the other four routes leave the candidate with none - the
+# holder's office photograph, a member's by bioguide id, an official guide's
+# (one hosted here included) and the race's article - and an entry those
+# routes now picture, or for a name no list prints any more, is a warning
+# (validate: stale-statewide-photo-override).
+#
+# The first entries are the photo sweep of 2026-11-17: the candidates for
+# governor whom every route left with the silhouette, each photograph found
+# by one reader, re-opened and confirmed by a second who read the page and
+# fetched the file again as this project (its bytes, pixel size and sha256
+# the same) and measured it on the card, and looked at again on a contact
+# sheet.
+STATEWIDE_PHOTOS = {
+    # Fred Love
+    "AR|governor|State Senator Fred Love": {
+        "url": "https://arkleg.state.ar.us/Content/photos/2027/Senate/640_sm.jpg",
+        "page": "https://arkleg.state.ar.us/Legislators/Detail?member=F.+Love",
+        "words": "alt text \"Photo of Senator Love\", under the page's heading \"Senator "
+                 "Fredrick J. Love (D)\", followed by \"District: 15\"; "
+                 "page title \"Senator Fredrick J. Love (D) - Arkansas "
+                 "State Legislature\"",
+        "by": "Arkansas State Legislature (Arkansas General Assembly)",
+        "tie": "Route 1(d). The article the race's own article links for him "
+               "('Fredrick Love', recorded in statewide_photos.json articles for "
+               "AR|governor|State Senator Fred Love) says in its own words: \"Fredrick "
+               "J. Love is an American politician representing the 15th district in "
+               "the Arkansas Senate since 2023 ... He was the Democratic nominee in "
+               "the 2026 Arkansas gubernatorial election.\" The election office's list "
+               "(Pulaski County notice, p. 3) prints him as \"State Senator Fred "
+               "Love-DEM\". The Arkansas General Assembly's own member page for him "
+               "(one of the links Open States lists for this member, "
+               "ocd-person/b35d0a49..., district 15) names Senator Fredrick J. Love "
+               "(D), District 15, beside the photograph. The file is keyed by the "
+               "legislature's member number 640, not by seat (the same number as his "
+               "senate.arkansas.gov/senators/640 page), so it is not a seat file.",
+        "seen": "A studio head-and-shoulders portrait of one man alone, smiling, bald, "
+                "grey beard, grey plaid suit and striped tie, plain grey mottled "
+                "backdrop; nobody else in the frame. The same man as the Commons file "
+                "in his article (Rep Fredrick J Love.jpg). Not a logo or graphic. A "
+                "second reader looked again and measured: brow at about band 3.6, chin "
+                "at about band 6.3 on the card: about 2.6 tenths (about 133 of 536 "
+                "source px; one band = 53.6 px)",
+        "read": "2026-11-17",
+    },
+    # Greg Lopez
+    "CO|governor|Greg Lopez": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Greg_Lopez_118th_Con"
+               "gress_portrait.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Greg_Lopez_118th_Congress_portra"
+                "it.jpg",
+        "words": "file description \"A portrait of Rep. Greg Lopez (R-CO) for the 118th "
+                 "U.S. Congress.\"; file name \"Greg Lopez 118th Congress portrait.jpg\"; "
+                 "in Category:Greg Lopez and used in the article 'Greg Lopez'",
+        "tie": "Route 1(c). The 2026 Colorado gubernatorial election article links "
+               "'Greg Lopez' for him (statewide_photos.json articles for "
+               "CO|governor|Greg Lopez); that article's Wikidata item Q126910689 has "
+               "Commons category 'Category:Greg Lopez' (P373), which holds this file, "
+               "and the article itself uses it. The file page gives the author as the "
+               "Office of the Clerk, U.S. House of Representatives, a government "
+               "office, source https://clerk.house.gov/members/L000604, licence public "
+               "domain (PD US Congress). Not the article's lead (File:Greg Lopez in "
+               "2024.jpg, refused as public-domain-unsupported) and not in "
+               "NOT_A_PORTRAIT or PORTRAIT_LICENCE_DOUBTS.",
+        "seen": "The House's official studio portrait of one man alone: grey hair, "
+                "smiling, dark suit, white shirt, red tie, on the plain blue backdrop "
+                "of the Congress portraits; nobody else in the frame, no words or "
+                "graphics. A second reader looked again and measured: brow at about "
+                "band 4.0, chin at about band 7.8 on the card: about 3.8 tenths (one "
+                "band = 41 source px)",
+        "read": "2026-11-17",
+    },
+    # David Jolly
+    "FL|governor|David Jolly": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/1/1f/David_Jolly.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:David_Jolly.jpg",
+        "words": "file description \"Official portrait of David Jolly, the U.S. "
+                 "representative for Florida's 13th congressional district.\"; file name "
+                 "\"David Jolly.jpg\"; in Category:David Jolly",
+        "tie": "Route 1(c). The 2026 Florida gubernatorial election article links "
+               "'David Jolly' for him (statewide_photos.json articles for "
+               "FL|governor|David Jolly); that article's Wikidata item Q15963996 has "
+               "Commons category 'Category:David Jolly' (P373), which holds this file, "
+               "the item's own image (P18). The file page gives the author as the U.S. "
+               "House of Representatives, licence public domain (PD US Congress), "
+               "source https://bioguide.congress.gov/search/bio/J000296. It is not the "
+               "article's lead (File:David Jolly (3x4).jpg, refused as a licence doubt "
+               "for naming no author) and not in NOT_A_PORTRAIT or "
+               "PORTRAIT_LICENCE_DOUBTS. A person should know: the file page's source "
+               "line also names a 'Hi-res file' on orlandoweekly.com beside the "
+               "Biographical Directory's 'Low-res file with metadata' "
+               "(https://bioguide.congress.gov/photo/67f56dbbfddc8a66d43f6b02.jpg); I "
+               "fetched the Directory's file as this project and it is the same "
+               "official portrait (same pose, pin, tie and blue backdrop, the "
+               "Directory's a tighter crop), so the photograph is the House's work "
+               "whatever copy the uploader took the larger bytes from.",
+        "seen": "The House's official studio portrait of one man alone: dark hair "
+                "greying at the sides, smiling, pinstriped suit with the House member's "
+                "pin, white shirt, silver tie, plain blue backdrop; nobody else in the "
+                "frame, no words or graphics. A second reader looked again and "
+                "measured: brow at about band 4.0, chin at about band 6.2 on the card: "
+                "about 2.2 tenths (one band = 62.5 px of the 500px rendition); "
+                "comfortably over a tenth",
+        "read": "2026-11-17",
+    },
+    # Therese Maria Terlaje
+    "GU|governor|TERLAJE, Therese Maria": {
+        "url": "https://guamlegislature.gov/wp-content/uploads/2025/02/TMT-768x960.jpg",
+        "page": "https://guamlegislature.gov/about-tmt/",
+        "words": "alt text \"Senator Therese M. Terlaje\", under the page's heading \"About "
+                 "– Senator Therese M. Terlaje\", followed by \"5th Guam Legislative Term "
+                 "Legislative Years of Service 34th – 38th (2017 – present) Village "
+                 "Party Democrat\"; page title \"About – Senator Therese M. Terlaje » Guam "
+                 "Legislature\"",
+        "by": "Guam Legislature",
+        "tie": "Route 1(d). The article the race's own article links for her ('Therese "
+               "Terlaje', recorded in statewide_photos.json articles for "
+               "GU|governor|TERLAJE, Therese Maria) says in its own words: \"Terlaje "
+               "has served as a member of the Legislature of Guam since 2017 ... "
+               "having served in the 35th (2019–2021), 36th (2021–2023), 37th "
+               "(2023–2025), and 38th (2025-present) sessions of the legislature. "
+               "Terlaje is running for Governor of Guam.\" and links this very page "
+               "(https://guamlegislature.gov/about-tmt/). The Guam Legislature's own "
+               "page for her names \"Senator Therese M. Terlaje\" beside the photograph, "
+               "\"34th – 38th (2017 – present)\". The file is named for her initials "
+               "(TMT), not a seat. Offered in the 768w rendition the page's srcset "
+               "lists (64 KB, 768x960), within the caps.",
+        "seen": "A studio portrait of one woman alone: long dark wavy hair, smiling, "
+                "black wrap jacket with a pin, orange bead necklace, plain mottled "
+                "brown-grey backdrop; nobody else in the frame, no words or graphics. "
+                "The same woman as the Commons files of her (2018 and 2024). A second "
+                "reader looked again and measured: brow at about band 2.6, chin at "
+                "about band 4.4 on the card: about 1.8 tenths (one band = 96 source px)",
+        "read": "2026-11-17",
+    },
+    # Vicente A. Ada
+    "GU|governor|ADA, Vicente A.": {
+        "url": "https://guamlegislature.gov/wp-content/uploads/2025/02/VAA-768x960.jpg",
+        "page": "https://guamlegislature.gov/about-vaa/",
+        "words": "alt text \"Vice Speaker V. Anthony Ada\", under the page's heading "
+                 "\"About – Vice Speaker V. Anthony Ada\", followed by \"6th Guam "
+                 "Legislative Term Legislative Years of Service 30th – 33rd (2009 – "
+                 "2016) 36th (2021 – 2022) 38th (2025 – present)\"; page title \"About – "
+                 "Vice Speaker V. Anthony Ada » Guam Legislature\"",
+        "by": "Guam Legislature",
+        "tie": "Route 1(d). The article the race's own article links for him ('Vicente "
+               "Ada', recorded in statewide_photos.json articles for GU|governor|ADA, "
+               "Vicente A.) says in its own words: \"Vicente Anthony \\\"Tony\\\" Ada ... A "
+               "member of the Republican Party, he has served in the Guam Legislature "
+               "from 2009 to 2017, from 2021 to 2023 and since 2025.\" and links this "
+               "very page (https://guamlegislature.gov/about-vaa/). The Guam "
+               "Legislature's own page names \"Vice Speaker V. Anthony Ada\" beside the "
+               "photograph, \"38th (2025 – present)\", and its biography \"Vicente "
+               "Anthony Ada, or 'Tony' as he is known\". The file is named for his "
+               "initials (VAA), not a seat. Offered in the 768w rendition the page's "
+               "srcset lists (58 KB, 768x960), within the caps. (His article also "
+               "calls him governor-elect; the legislature page is the office he holds "
+               "now.)",
+        "seen": "A studio portrait of one man alone: short dark hair, smiling, dark "
+                "suit, white shirt, red tie, plain mottled grey-brown backdrop; nobody "
+                "else in the frame, no words or graphics. The same man as the Commons "
+                "crops of him (Joint Region Marianas, 2025 and 2026). A second reader "
+                "looked again and measured: brow at about band 2.8, chin at about band "
+                "5.0 on the card: about 2.2 tenths (one band = 96 source px)",
+        "read": "2026-11-17",
+    },
+    # Darren Bailey
+    "IL|governor|Darren Bailey": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d0/Darren_Bailey_at_a_2"
+               "022_Campaign_Event.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Darren_Bailey_at_a_2022_Campaign"
+                "_Event.jpg",
+        "words": "File:Darren Bailey at a 2022 Campaign Event.jpg, described \"Republican "
+                 "nominee for Illinois Governor Darren Bailey at a campaign event, "
+                 "2022.\"; in Category:Darren Bailey; the Wikidata item's image (P18)",
+        "tie": "the article 'Darren Bailey', which the race's own article (2026 "
+               "Illinois gubernatorial election) links for him (statewide_photos.json "
+               "articles); its item Q59781882 names this file as its image (P18) and "
+               "its Commons sitelink is Category:Darren Bailey, which holds the file. "
+               "Author Cobiblair is the uploader, own work, CC BY-SA 4.0: no licence "
+               "doubt (the two crops of it, uploaded by others, are doubts and not "
+               "offered)",
+        "seen": "him alone, smiling, glasses, checked shirt, before a brick wall and a "
+                "white railing; nobody else anywhere in the frame (a grey box and a "
+                "shrub at the right edge). The automatic route refused the article's "
+                "lead (a crop of this file) for the words 'Campaign Event' in its name; "
+                "the photograph itself is no scene A second reader looked again and "
+                "measured: My own count on the card: brow at about band 3.6 (source y "
+                "~165), chin at about band 6.5 (source y ~345): about 180 source px at "
+                "62.5 px a band, about 2.9 tenths of the card; the card keeps x 0-500, "
+                "y 0-625, only the lower shirt cut",
+        "read": "2026-11-17",
+    },
+    # Aaron D. Ford
+    "NV|governor|Ford, Aaron D.": {
+        "url": "https://ag.nv.gov/uploadedImages/agnvgov/Content/About/20210324_AGPic.jp"
+               "g",
+        "page": "https://ag.nv.gov/About/AG_Aaron_Ford/",
+        "words": "under the heading \"Nevada Attorney General Aaron Ford\", the image's "
+                 "alt text \"Attorney General Aaron Ford\", followed by \"Attorney General "
+                 "Aaron D. Ford, Nevada's 34th Attorney General, took office on January "
+                 "7, 2019\"",
+        "by": "Office of the Nevada Attorney General",
+        "tie": "route 1(d): the article his race's own article links for him (Aaron "
+               "Ford, via 2026 Nevada gubernatorial election; statewide_photos.json "
+               "articles) says \"A member of the Democratic Party, Ford has served "
+               "since 2019 as the 34th attorney general of Nevada\" (its infobox: \"34th "
+               "Attorney General of Nevada Incumbent Assumed office January 7, 2019\"); "
+               "this is that office's own page for its holder. This site's Nevada "
+               "attorney general card (statewide_officers.json ag/NV, confirmed "
+               "2026-11-16) already shows this very file from this page (39,455 bytes, "
+               "480x480)",
+        "seen": "a studio-lit office portrait, him alone, seated, smiling, dark suit "
+                "and blue tie, a window and wooden shutters behind; nobody else in the "
+                "frame A second reader looked again and measured: My own count on the "
+                "card: brow at about band 3.0 (source y ~135), chin at about band 5.3 "
+                "(source y ~245): about 110 source px at 48 px a band, about 2.3 tenths "
+                "of the card; the card keeps x 48-432, y 0-480: head and shoulders "
+                "whole",
+        "read": "2026-11-17",
+    },
+    # Helena Buonanno Foulkes
+    "RI|governor|HELENA BUONANNO FOULKES": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/0/0f/HelenaFoulkes_CROP.j"
+               "pg",
+        "page": "https://commons.wikimedia.org/wiki/File:HelenaFoulkes_CROP.jpg",
+        "words": "the file's description \"Helena Foulkes, EVP CVS Caremark & President "
+                 "CVS/Pharmacy\", its name \"HelenaFoulkes CROP.jpg\"; the lead image of "
+                 "the article 'Helena Foulkes' and the image (P18) of its item "
+                 "Q21067177, filed in Category:Helena Foulkes",
+        "tie": "route 1(c): the race's own article '2026 Rhode Island gubernatorial "
+               "election' links [[Helena Foulkes]] for the Rhode Island Department of "
+               "State's 'Helena Buonanno Foulkes' (statewide_photos.json articles); "
+               "that article leads with this file, which is in the person's own "
+               "Commons category. The automatic reader passed it over as 'file-name' "
+               "only because the surname is run together in 'HelenaFoulkes'; no "
+               "person's list refuses it. Licence: Flickr import from the Digitas "
+               "account (author Digitas Photos), CC BY 2.0, extracted from "
+               "File:HelenaFoulkes.jpg; not an own-work claim, and the helper's "
+               "licence test raised no doubt",
+        "seen": "a 2014 conference photograph: she alone, seated, speaking, headset "
+                "microphone at her cheek, blue jacket, white top, hands raised before "
+                "her chest; behind her only a red and teal geometric stage backdrop and "
+                "the edge of a clear acrylic chair. I also looked at the uncropped "
+                "original (File:HelenaFoulkes.jpg): nobody else anywhere in the frame. "
+                "Not a studio portrait, but a likeness of her alone, face unobscured A "
+                "second reader looked again and measured: on the 960x1225 rendition the "
+                "card keeps y 0-1200 (one band = 120 px): brow near y 185, chin near y "
+                "440, about 2.1 tenths; on the helper's 500px card brow near band 1.8, "
+                "chin near band 3.3, about 1.5-2 tenths: above a tenth",
+        "read": "2026-11-17",
+    },
+    # Jermaine Johnson
+    "SC|governor|Jermaine Johnson": {
+        "url": "https://www.scstatehouse.gov/images/members/0943181705.jpg",
+        "page": "https://www.scstatehouse.gov/member?code=0943181705",
+        "words": "under the heading \"Representative Jermaine L. Johnson, Sr.\" (directly "
+                 "above it), the image's alt text \"Representative Jermaine L. Johnson, "
+                 "Sr. photo\", the words after it \"Democrat - Richland District 52 - "
+                 "Kershaw & Richland Counties\"; the page's personal information \"Born "
+                 "July 4, 1985\"; the file is keyed by the member's own code 0943181705 "
+                 "(the page's ?code=), not by a seat",
+        "by": "South Carolina General Assembly",
+        "tie": "route 1(d): the article the race's own article '2026 South Carolina "
+               "gubernatorial election' links for the list's 'Jermaine Johnson' "
+               "('Jermaine Johnson (politician)', statewide_photos.json articles) says "
+               "\"A member of the Democratic Party, he is a member for South Carolina "
+               "House of Representatives, representing the 52nd district\" and its "
+               "infobox \"Member of the South Carolina House of Representatives "
+               "Incumbent ... 52nd district (2024–present)\", born \"July 4, 1985\"; the "
+               "South Carolina Legislature's own member page for District 52 names "
+               "\"Representative Jermaine L. Johnson, Sr.\" beside this image and gives "
+               "the same birth date, July 4, 1985 (a second tie beyond the name). This "
+               "site's own legislature roster (data/legislature/sc.js) already shows "
+               "this very file on his card, credited to the South Carolina General "
+               "Assembly. NOTE for the reviewer: the article says he did not run for "
+               "re-election to the House in 2026 and its infobox already names a "
+               "successor ('Succeeded by Malcolm Taylor'); the Legislature's page "
+               "still names him for District 52 today, 2026-11-17",
+        "seen": "an official studio portrait: he alone, head and shoulders, smiling, in "
+                "a navy suit, white shirt and floral tie, a round pin on the lapel, "
+                "before a plain grey backdrop; nobody else in the frame. The file is "
+                "small (125x175) and soft but plainly a face A second reader looked "
+                "again and measured: on the helper's card (one band = 15.6 source px) "
+                "brow near band 2.5, chin near band 6.4: about 3.9 tenths",
+        "read": "2026-11-17",
+    },
+    # Gina Hinojosa
+    "TX|governor|GINA HINOJOSA": {
+        "url": "https://house.texas.gov/images/members/3210.jpg?v=1",
+        "page": "https://house.texas.gov/members/49",
+        "words": "alt \"Representative Hinojosa, Gina\" on the member page headed \"Rep. "
+                 "Hinojosa, Gina - District 49\" (title \"Official Home Page of the Texas "
+                 "House of Representatives Website for Rep. Hinojosa, Gina.\"); file "
+                 "3210.jpg is her member id, the same id as the article's State House "
+                 "link house.texas.gov/members/3210",
+        "by": "Texas House of Representatives",
+        "tie": "Route 1(d). The article her race's own article links for her "
+               "(statewide_photos.json articles: 'Gina Hinojosa', from '2026 Texas "
+               "gubernatorial election', read 2026-11-03) says in its own words that "
+               "she holds the seat now: \"she has represented the 49th district in the "
+               "Texas House of Representatives since 2017\", infobox \"Member of the "
+               "Texas House of Representatives from the 49th district Incumbent "
+               "Assumed office January 10, 2017\", and links "
+               "\"house.texas.gov/members/3210\" as her State House website. The Texas "
+               "House's own member page for District 49 names her beside the "
+               "photograph; the file is keyed by her member id 3210, not by the seat.",
+        "seen": "An official studio head-and-shoulders portrait of Gina Hinojosa alone "
+                "on a grey backdrop: dark jacket, striped collar, smiling at the "
+                "camera. Nobody else in the frame, no words, no graphic. Small file "
+                "(125x175) but sharp enough for the card. A second reader looked again "
+                "and measured: On the card: brow (eyebrows) at about band 4.0, chin at "
+                "about band 6.7: about 2.7 tenths of the card's height (one band = 15.6 "
+                "source px; the face spans roughly 42 source px), well over the tenth "
+                "required. (The first reader wrote 3.7 to 7.4; my reading of the ruler "
+                "puts the brow and chin higher, but either way it passes.)",
+        "read": "2026-11-17",
+    },
+    # Eric Barlow
+    "WY|governor|Eric Barlow": {
+        "url": "https://wyoleg.gov/LegislatorSummary/Photos/68th-BarlowEric.jpg",
+        "page": "https://www.wyoleg.gov/Legislators/2025/S/1995",
+        "words": "The Wyoming Legislature's own record for this member page (legID 1995, "
+                 "read from https://api.wyoleg.gov/v1/Legislator/1995, the address the "
+                 "page's own script reads): \"name\":\"Senator Eric Barlow\", "
+                 "\"district\":\"Senate District 23\", \"senateYears\":\"Senate: 2023-Present\", "
+                 "\"legPhoto\":\"68th-BarlowEric.jpg\"; the page draws the file as <img "
+                 "src=\"https://wyoleg.gov/LegislatorSummary/Photos/\" + legPhoto "
+                 "alt=\"Photograph of \" + name>, i.e. alt \"Photograph of Senator Eric "
+                 "Barlow\". File name: 68th-BarlowEric.jpg.",
+        "by": "Wyoming Legislature",
+        "tie": "Route 1(d). The race's own article links 'Eric Barlow' "
+               "(statewide_photos.json articles: race page '2026 Wyoming gubernatorial "
+               "election', read 2026-11-03); that article says in its own words "
+               "\"Member of the Wyoming Senate from the 23rd district Incumbent\" (and "
+               "\"Governor-elect of Wyoming Assuming office January 4, 2027\"). The "
+               "Wyoming Legislature's member record legID 1995 names him \"Senator Eric "
+               "Barlow\", Senate District 23, \"Senate: 2023-Present\", with legPhoto "
+               "68th-BarlowEric.jpg; the Wyoming Secretary of State's 2026 general "
+               "election candidate list prints \"Republican Eric Barlow\" in its "
+               "GOVERNOR row. This site's own legislature page already shows this file on "
+               "his Senate District 23 card, credited to the Wyoming Legislature. The "
+               "file is keyed by name, not by seat.",
+        "seen": "A studio head-and-shoulders portrait of one man alone (grey beard, "
+                "dark suit, red paisley tie) on a mottled grey backdrop; nobody else in "
+                "the frame or at its edges, no text over him. The card keeps him "
+                "whole-faced; the circle crop too. A second reader looked again and "
+                "measured: face brow to chin: brow at about band 2.7, chin (beard line "
+                "under the lip/jaw) at about band 5.5 of the card: about 2.8 tenths of "
+                "the card (one band = 26.8 source px)",
+        "read": "2026-11-17",
+    },
+}
+
 # Campaign-site photographs taken by the narrow first-name route (the
 # owner's decision of 2026-11-01, rule 38): the candidate's own campaign site,
 # an image whose file name or alt text carries their first name and a
@@ -2020,6 +3760,34 @@ CERTIFIED_BALLOTS = {
                              ("Mark Cohen", "By Petition")],
         },
     },
+    # The Secretary of State's sample official ballot for the federal races:
+    # the Senate and all four districts on one sheet, each with a write-in
+    # line, the party as it prints it ("Democrat"). Read 2026-11-26 through
+    # its own text (kyc/pdfread.py), each name placed in its column by its
+    # position on the page. The Wikipedia page read that day put the 1st
+    # district's Libertarian, Johnny Baucom, in the 2nd district's November
+    # table too, and the refresh of 2026-11-26 had him lose both; this
+    # ballot prints him in the 1st alone and the independent Bennie Foster
+    # in the 2nd, and as the whole ballot it keeps a copied row off the 2nd
+    # (rule 77).
+    "MS": {
+        "source": "Mississippi Secretary of State, SAMPLE Official Election Ballot, State of "
+                  "Mississippi, Federal and Judicial Election, Tuesday, November 3, 2026 (9-9-26)",
+        "url": "https://www.sos.ms.gov/content/documents/Elections/2026/Sample%20Ballot%209-9-26.pdf",
+        "read": "2026-11-26", "complete": True,
+        "races": {
+            "S-MS-2026": [("Scott Colom", "Democrat"), ("Cindy Hyde-Smith", "Republican"),
+                          ("Ty Pinkins", "Independent")],
+            "H-MS-01-2026": [("Johnny Baucom", "Libertarian"), ("Cliff Johnson", "Democrat"),
+                             ("Trent Kelly", "Republican")],
+            "H-MS-02-2026": [("Ron Eller", "Republican"), ("Bennie G. Thompson", "Democrat"),
+                             ("Bennie Foster", "Independent")],
+            "H-MS-03-2026": [("Michael A. Chiaradio", "Democrat"), ("Michael Guest", "Republican"),
+                             ("Erik Kiehle", "Libertarian")],
+            "H-MS-04-2026": [("Mike Ezell", "Republican"), ("Jeffrey Hulum III", "Democrat"),
+                             ("Carl Boyanton", "Independent")],
+        },
+    },
 }
 
 # States whose federal general election goes to a runoff when no candidate wins
@@ -2225,6 +3993,20 @@ COURT_ROSTERS = {
            "2026, Chief Judge Rowan D. Wilson conducted a statewide public hearing'. "
            "Cloudflare answers a headless Chrome 'Just a moment...'."),
 }
+
+# Legislative chambers whose Open States roster a person has seen list the
+# members of the term the November 3, 2026 election chose (rule 106). Keyed
+# (state, "upper" or "lower"); each is {"rosterRead": the Open States read
+# (data/state_legislators.json's "fetched" day) the person looked at, on or
+# after the term's first certain day in kyc/legislative_terms.py; "seen":
+# what they saw, quoted - a seat on that ballot listing the member the
+# chamber's own roster names for the new term; "source": the chamber's own
+# roster they compared it with; "day": the day they looked}. Until a
+# chamber is here, every page that shows it says, once its new term has
+# begun on the reader's day, that the roster may still list members whose
+# terms ended then (kyc/legislative_terms.roster_behind): nothing in the
+# roster's own records dates a member's term.
+LEGISLATURE_ROSTERS_CURRENT = {}
 
 # Statewide officers the office's own page names, read by hand in a person's
 # browser (rule 57's way), where kyc/officers.py's own read concludes

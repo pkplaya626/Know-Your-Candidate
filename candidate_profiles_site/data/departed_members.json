@@ -1,6 +1,6 @@
 {
  "congress": 119,
- "fetched": "2026-11-14T14:14:32+00:00",
+ "fetched": "2026-11-26T17:46:23+00:00",
  "members": [
   {
    "aliases": [
@@ -13,7 +13,8 @@
    "party": "Republican",
    "senateClass": 3,
    "state": "OH",
-   "termStart": "2023-01-03"
+   "termStart": "2023-01-03",
+   "wikidata": "Q28935729"
   },
   {
    "bioguide": "R000595",
@@ -23,7 +24,8 @@
    "party": "Republican",
    "senateClass": 3,
    "state": "FL",
-   "termStart": "2023-01-03"
+   "termStart": "2023-01-03",
+   "wikidata": "Q324546"
   },
   {
    "aliases": [
@@ -36,7 +38,8 @@
    "name": "Michael Waltz",
    "party": "Republican",
    "state": "FL",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q55386653"
   },
   {
    "bioguide": "T000489",
@@ -46,7 +49,8 @@
    "name": "Sylvester Turner",
    "party": "Democrat",
    "state": "TX",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q16751186"
   },
   {
    "aliases": [
@@ -59,7 +63,8 @@
    "name": "Raúl M. Grijalva",
    "party": "Democrat",
    "state": "AZ",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q946606"
   },
   {
    "aliases": [
@@ -72,7 +77,8 @@
    "name": "Gerald E. Connolly",
    "party": "Democrat",
    "state": "VA",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q1514859"
   },
   {
    "aliases": [
@@ -85,7 +91,8 @@
    "name": "Mark E. Green",
    "party": "Republican",
    "state": "TN",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q16224587"
   },
   {
    "bioguide": "S001207",
@@ -95,7 +102,8 @@
    "name": "Mikie Sherrill",
    "party": "Democrat",
    "state": "NJ",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q47087146"
   },
   {
    "bioguide": "G000596",
@@ -105,7 +113,8 @@
    "name": "Marjorie Taylor Greene",
    "party": "Republican",
    "state": "GA",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q98380406"
   },
   {
    "bioguide": "L000578",
@@ -115,7 +124,8 @@
    "name": "Doug LaMalfa",
    "party": "Republican",
    "state": "CA",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q1703840"
   },
   {
    "bioguide": "M001190",
@@ -125,7 +135,8 @@
    "party": "Republican",
    "senateClass": 2,
    "state": "OK",
-   "termStart": "2023-01-03"
+   "termStart": "2023-01-03",
+   "wikidata": "Q3448772"
   },
   {
    "bioguide": "G000594",
@@ -135,7 +146,8 @@
    "name": "Tony Gonzales",
    "party": "Republican",
    "state": "TX",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q104648170"
   },
   {
    "bioguide": "S001193",
@@ -145,7 +157,8 @@
    "name": "Eric Swalwell",
    "party": "Democrat",
    "state": "CA",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q3466996"
   },
   {
    "bioguide": "C001127",
@@ -155,7 +168,8 @@
    "name": "Sheila Cherfilus-McCormick",
    "party": "Democrat",
    "state": "FL",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q109560948"
   },
   {
    "bioguide": "S001157",
@@ -165,7 +179,8 @@
    "name": "David Scott",
    "party": "Democrat",
    "state": "GA",
-   "termStart": "2025-01-03"
+   "termStart": "2025-01-03",
+   "wikidata": "Q132071"
   },
   {
    "bioguide": "G000359",
@@ -175,9 +190,10 @@
    "party": "Republican",
    "senateClass": 2,
    "state": "SC",
-   "termStart": "2021-01-03"
+   "termStart": "2021-01-03",
+   "wikidata": "Q22212"
   }
  ],
- "membershipRead": "2026-11-14",
+ "membershipRead": "2026-11-26",
  "source": "https://unitedstates.github.io/congress-legislators/legislators-historical.json"
 }

@@ -333,9 +333,37 @@ def _build(args):
         issues.append(validate.Issue(level, code, message, detail))
     for level, code, message, detail in members_mod.problems(profiles, member_sources):
         issues.append(validate.Issue(level, code, message, detail))
-    issues.extend(validate.check_terms_begun(args.root))
+    issues.extend(validate.check_state_terms(args.root))
     departed_rows, departed_problems = _departed(args.root, snapshot, profiles)
     for level, code, message, detail in departed_problems + money_problems:
+        issues.append(validate.Issue(level, code, message, detail))
+    # The summary, the state governments, the federal payload and the
+    # legislatures before anything is written: who appears here in more than
+    # one role is joined across all of them, by ids, and written onto each
+    # card's record (kyc/identity.py, rule 105).
+    summary = summary_mod.build(profiles, races=race_list,
+                                committees=legislators.load_committees(args.root),
+                                results=outcomes, snapshot=snapshot, root=args.root,
+                                incoming=True)
+    summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
+                                          voting_dates_mod.load(args.root))
+    summary["departed"] = departed_rows
+    from . import seat_history as seat_history_mod
+    summary["lastElectionSources"] = seat_history_mod.page_sources()
+    from . import stategov, federal_build, legislature as legislature_mod
+    try:
+        state_gov, gov_problems = stategov.build(args.root)
+        fed_payload, fed_courts, fed_search, fed_problems = federal_build.build(args.root)
+        dropped = {}
+        legislatures = legislature_mod.build(args.root, dropped=dropped)
+    except (stategov.StateGovError, federal_build.FederalBuildError,
+            legislature_mod.LegislatureError) as exc:
+        print(f"[error] {exc}", file=sys.stderr)
+        return 2
+    links = _identity(args.root, profiles, race_list, summary, state_gov, fed_payload,
+                      fed_courts, departed_rows, legislatures)
+    from . import identity as identity_mod
+    for level, code, message, detail in identity_mod.problems(links):
         issues.append(validate.Issue(level, code, message, detail))
     # What the judges' Wikipedia and portrait join withheld (kyc/judge_links.py):
     # said by every build, not only by the refresh that found it.
@@ -423,15 +451,6 @@ def _build(args):
             print("\n[check] validation only, nothing written.")
         return 1 if errors else 0
 
-    summary = summary_mod.build(profiles, races=race_list,
-                                committees=legislators.load_committees(args.root),
-                                results=outcomes, snapshot=snapshot, root=args.root,
-                                incoming=True)
-    summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
-                                          voting_dates_mod.load(args.root))
-    summary["departed"] = departed_rows
-    from . import seat_history as seat_history_mod
-    summary["lastElectionSources"] = seat_history_mod.page_sources()
     people_files = emit.write_people(profiles, stats, args.root, races=race_list, summary=summary)
     print(f"\n[ok] wrote {people_files[0][0]} and {len(people_files) - 1} people file(s) under "
           f"{emit.PEOPLE_DIR} ({sum(size for _, size in people_files) / 1024:.0f} KB)")
@@ -458,14 +477,8 @@ def _build(args):
         print(f"[ok] wrote {odds_path} ({odds_size / 1024:.0f} KB)")
 
     # Each state's legislature: districts and members, rewritten per state
-    # only when its content changed.
-    from . import legislature as legislature_mod
-    dropped = {}
-    try:
-        legislatures = legislature_mod.build(args.root, dropped=dropped)
-    except legislature_mod.LegislatureError as exc:
-        print(f"[error] {exc}", file=sys.stderr)
-        return 2
+    # only when its content changed (built above, with each member's other
+    # roles here: rule 105).
     written_legs = emit.write_legislature(legislatures, args.root)
     leg_stats = legislature_mod.stats(legislatures)
     print(f"[ok] state legislatures: {leg_stats['states']} states, {leg_stats['districts']:,} "
@@ -517,13 +530,8 @@ def _build(args):
           f"{local_stats['towns']:,} town and township governments placed; "
           f"{len(written_local)} file(s) rewritten")
 
-    # Who runs each state: governors and party control, checked against NCSL.
-    from . import stategov
-    try:
-        state_gov, gov_problems = stategov.build(args.root)
-    except stategov.StateGovError as exc:
-        print(f"[error] {exc}", file=sys.stderr)
-        return 2
+    # Who runs each state: governors and party control, checked against NCSL
+    # (built above, with each card's other roles here: rule 105).
     for problem in gov_problems:
         print(f"  [warn] {problem}")
     gov_file = os.path.join(args.root, emit.STATEGOV_FILE)
@@ -545,6 +553,12 @@ def _build(args):
     print(f"[ok] terms begin: {len(terms_mod.up_offices()) - len(term_gaps)} offices on the 2026 "
           f"ballot dated from their jurisdiction's own law; {len(term_gaps)} with no day: " +
           ", ".join(f"{c} {k}" for c, k, _why in term_gaps))
+    from . import legislative_terms as legterms_mod
+    leg_terms = legterms_mod.stats()
+    print(f"[ok] legislative terms begin: {leg_terms['on'] + leg_terms['by']} chambers on the "
+          f"2026 ballot dated from their state's own law ({leg_terms['on']} on a day, "
+          f"{leg_terms['by']} by a day); {leg_terms['gaps']} with no day: " +
+          ", ".join(f"{c} {w}" for c, w, _why in legterms_mod.unknown(None)))
     listed = statewide_mod.stats(statewide_mod.load(args.root))
     print(f"[ok] statewide candidates: {listed['candidates']} on the ballot and "
           f"{listed['writeIns']} write-ins for {listed['offices']} offices; "
@@ -589,13 +603,8 @@ def _build(args):
 
     # The federal executive and courts (kyc/federal_build.py): one file for
     # the hub, one per court, each rewritten only when what it says changed.
-    # What is wrong with either cache is validate's to report.
-    from . import federal_build
-    try:
-        fed_payload, fed_courts, fed_search, fed_problems = federal_build.build(args.root)
-    except federal_build.FederalBuildError as exc:
-        print(f"[error] {exc}", file=sys.stderr)
-        return 2
+    # What is wrong with either cache is validate's to report (built above,
+    # with each card's other roles here: rule 105).
     # What the pages leave out and why (an office in the line of succession
     # nobody can be named for): said here as well as by validate.
     for problem in fed_problems:
@@ -645,7 +654,8 @@ def _build(args):
         print(f"[ok] wrote {s_path} ({s_size / 1024:.0f} KB)")
 
     # The sitemap and the share pages (rule 96) are written with the rest.
-    written = emit.write_state_pages(profiles, args.root, summary=summary, races=race_list)
+    written = emit.write_state_pages(profiles, args.root, summary=summary, races=race_list,
+                                     federal=(fed_payload, fed_courts))
     maps = [w for w in written
             if os.path.normpath(emit.DISTRICT_PAGES_DIR) in os.path.normpath(w)]
     states = [w for w in written if os.path.normpath(emit.STATES_DIR) in os.path.normpath(w)]
@@ -830,6 +840,29 @@ def _departed(root, snapshot, profiles):
     from . import departed as departed_mod
 
     return departed_mod.for_page(departed_mod.load_cache(root), snapshot, profiles)
+
+
+def _identity(root, profiles, race_list, summary, state_gov, fed, courts, departed_rows,
+              legislatures):
+    """Who appears here in more than one role (kyc/identity.py, rule 105):
+    joined by ids and corroborated records, and written onto every record a
+    card is drawn from - the profiles, the departed rows, the state
+    governments, the federal payload and its courts' files, and the
+    legislatures - before any of them is written or checked."""
+    from . import departed as departed_mod, history as history_mod, identity
+    from . import judge_links as judge_links_mod, statelegs
+
+    history = history_mod.load_cache(root)
+    links = identity.build(profiles, race_list, summary, stategov=state_gov, federal=fed,
+                           courts=courts, history=history,
+                           judge_links=judge_links_mod.load_cache(root),
+                           departed=departed_rows, departed_cache=departed_mod.load_cache(root),
+                           legislators=statelegs.load_cache(root), legislatures=legislatures)
+    identity.attach(links)
+    identity.attach_courts(links, courts)
+    identity.attach_legislatures(links, legislatures)
+    identity.congress_bios(links, history=history)
+    return links
 
 
 def _age_date(stats):
@@ -1731,6 +1764,26 @@ def _verify(args):
     summary["lastElectionSources"] = seat_history_mod.page_sources()
 
     problems = []
+    # The state governments, the federal payload and the legislatures, as
+    # the build makes them: each card's record with the person's other roles
+    # here (kyc/identity.py, rule 105), joined before any is compared.
+    from . import stategov, federal_build
+    from . import legislature as legislature_mod
+    gov_built = fed = legislatures = None
+    try:
+        gov_built = stategov.build(args.root)[0]
+    except stategov.StateGovError as exc:
+        problems.append(str(exc))
+    try:
+        fed = federal_build.build(args.root)
+    except federal_build.FederalBuildError as exc:
+        problems.append(str(exc))
+    try:
+        legislatures = legislature_mod.build(args.root)
+    except legislature_mod.LegislatureError as exc:
+        problems.append(f"state legislatures unavailable: {exc}")
+    _identity(args.root, profiles, race_list, summary, gov_built, fed[0] if fed else None,
+              fed[1] if fed else {}, summary["departed"], legislatures)
     from . import cycle as cycle_mod
     record = raw.get("record")
     if record is None:
@@ -1776,7 +1829,8 @@ def _verify(args):
     else:
         print(f"  ok  {emit.VOTES_DIR}: both chambers match {rollcalls.CACHE_PATH}")
 
-    stale_pages = emit.check_state_pages(profiles, args.root, summary=summary, races=race_list)
+    stale_pages = emit.check_state_pages(profiles, args.root, summary=summary, races=race_list,
+                                         federal=fed[:2] if fed else None)
     if stale_pages:
         problems.append(f"{len(stale_pages)} state page(s) are {stale_pages[0][1]}: "
                         + ", ".join(rel for rel, _ in stale_pages[:5])
@@ -1793,14 +1847,8 @@ def _verify(args):
     else:
         print(f"  ok  {emit.ODDS_FILE} matches odds.json ({odds_expected[:16]}...)")
 
-    from . import legislature as legislature_mod
-    legislatures = None
-    try:
-        legislatures = legislature_mod.build(args.root)
+    if legislatures is not None:
         stale_legs = emit.check_legislature(legislatures, args.root)
-    except legislature_mod.LegislatureError as exc:
-        problems.append(f"state legislatures unavailable: {exc}")
-    else:
         if stale_legs:
             problems.append(f"{len(stale_legs)} legislature file(s) are {stale_legs[0][1]}: "
                             + ", ".join(os.path.basename(p) for p, _ in stale_legs[:5]))
@@ -1837,14 +1885,7 @@ def _verify(args):
             print(f"  ok  {emit.SEARCH_FILE} matches the county maps, the committee rosters and "
                   f"the tribal directory ({search_committed[:16]}...)")
 
-    from . import stategov
-    gov_built = None
-    try:
-        gov_built = stategov.build(args.root)[0]
-        gov_expected = emit.stategov_signature(gov_built)
-    except stategov.StateGovError as exc:
-        gov_expected = None
-        problems.append(str(exc))
+    gov_expected = emit.stategov_signature(gov_built) if gov_built is not None else None
     gov_committed = emit.read_signature(path=os.path.join(args.root, emit.STATEGOV_FILE))
     if gov_expected is None:
         pass
@@ -1888,12 +1929,6 @@ def _verify(args):
         if not stale:
             print(f"  ok  {emit.LOCAL_MEASURES_DIR} matches {local_measures_mod.CACHE_PATH}")
 
-    from . import federal_build
-    try:
-        fed = federal_build.build(args.root)
-    except federal_build.FederalBuildError as exc:
-        fed = None
-        problems.append(str(exc))
     if fed is not None:
         stale_fed = emit.check_federal(*fed[:3], root=args.root)
         if stale_fed:
@@ -2304,7 +2339,15 @@ def _ballotphotos(args):
             return 2
         with open(os.path.join(args.root, "congress_snapshot.json"), encoding="utf-8") as handle:
             snapshot = _json.load(handle)
-        if args.articles_only:
+        from . import statelegs
+        legislators = statelegs.load_cache(args.root) or None
+        if args.curated_only:
+            # Only the photographs a person chose (overrides.STATEWIDE_PHOTOS),
+            # where no other route pictures the candidate: nothing else is
+            # read, changed or dropped.
+            cache, problems = statewide_photos.with_curated(
+                previous or {}, statewide_photos.lists_of(lists), legislators=legislators)
+        elif args.articles_only:
             # Only the candidates' own articles, as the races' articles link
             # them (rule 33), whatever route pictures them: no photograph is
             # read, changed or dropped.
@@ -2318,7 +2361,7 @@ def _ballotphotos(args):
         else:
             cache, problems = statewide_photos.fetch(lists, snapshot, previous,
                                                      wikipedia=not args.no_wikipedia,
-                                                     budget=budget)
+                                                     budget=budget, legislators=legislators)
         recorded = (cache.get("articles") or {}).values()
         print(f"  candidates' own articles: {sum('article' in r for r in recorded)} linked, "
               f"{sum(r.get('none') == 'not-linked' for r in recorded)} not linked, "
@@ -3126,6 +3169,9 @@ def build_parser():
     photos_cmd.add_argument("--articles-only", action="store_true",
                             help="read only the article each race's Wikipedia article links for "
                                  "a candidate for governor; change no photograph")
+    photos_cmd.add_argument("--curated-only", action="store_true",
+                            help="read only the photographs a person chose "
+                                 "(overrides.STATEWIDE_PHOTOS); change no other photograph")
     photos_cmd.add_argument("--max-minutes", type=float, default=None,
                             help="begin no race's article after this many minutes, then save "
                                  "and stop, keeping the last read of every race not reached "

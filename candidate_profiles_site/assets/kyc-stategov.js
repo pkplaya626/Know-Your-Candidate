@@ -700,6 +700,9 @@
       '<p class="gov-links">' + (gov.website ? link(gov.website, "Governor's office") + " · " : "") +
       link(gov.profile, "NGA biography") + "</p>" +
       (contact && !opts.brief ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
+      // The governor's other roles on this site, and their earlier service
+      // in Congress where it has no card here (rule 105).
+      KYC.alsoHtml(gov, { cls: "gcard-also" }) + KYC.congressBioHtml(gov) +
       photo.credit + "</div></div></article>";
   }
 
@@ -753,6 +756,8 @@
         " for lieutenant governor</p>" : "") +
       (person.ballotName ? '<p class="faint">Printed on the ballot as “' +
         KYC.escapeHtml(person.ballotName) + "”</p>" : "") +
+      // Their other roles on this site, each linked to its card (rule 105).
+      KYC.alsoHtml(person, { cls: "gcard-also" }) + KYC.congressBioHtml(person) +
       photo.credit + "</div></div></article>";
   }
 
@@ -907,7 +912,40 @@
     } else if (mode !== "governor" && any(function (s) { return s.legislature === "disputed"; })) {
       rows.push([FILL.disputed, "Sources disagree"]);
     }
+    if ((mode === "legislature" || mode === "trifecta") && any(function (s) { return lagging(s); })) {
+      rows.push([FILL.vacant, "Not stated: a chamber's new term has begun and the roster may be behind it"]);
+    }
     return rows;
+  }
+
+  /** Whether any chamber of a state's legislature has begun its new term
+   *  on the reader's day while the roster may be behind it (rule 106). */
+  function lagging(s, now) {
+    return !!(s && (KYC.legislatureTermBegun(s.upper, now) || KYC.legislatureTermBegun(s.lower, now)));
+  }
+
+  /** What a view says in place of a party's control once a chamber's new
+   *  term has begun and the roster may be behind it (rule 106), in one
+   *  wording for every view (rule 12): the map's hover and badge, the state
+   *  page's paragraph, its glance box and the directory of legislatures.
+   *  *mode*: "legislature" or "trifecta"; *short*: a badge's label. The
+   *  branch's review found the glance box still saying "Republican
+   *  trifecta" and the directory "Republican majority in both chambers"
+   *  under rows that said no majority was stated (2026-11-27). */
+  function withheld(mode, short) {
+    if (short) return "Not stated: a new term has begun";
+    return (mode === "legislature" ? "which party holds the legislature"
+      : "whether one party holds the governorship and the legislature") +
+      " is not stated here: the roster may still list members whose terms ended when a chamber's " +
+      "new term began";
+  }
+
+  function upperFirst(text) {
+    return text.replace(/^./, function (c) { return c.toUpperCase(); });
+  }
+
+  function rosterRead() {
+    return (gd().sources.openstates || [])[2] || "";
   }
 
   function partyName(letter) {
@@ -987,6 +1025,7 @@
     if (!s.legislature) {
       return { fill: FILL.none, text: name + ": its legislature is not covered here" };
     }
+    if (lagging(s)) return { fill: FILL.vacant, text: name + ": " + withheld(mode) };
     if (mode === "legislature") {
       var key = s.legislature === "coalition" ? "split" : s.legislature;
       return { fill: FILL[key] || FILL.split, text: name + " legislature: " + control(s.legislature) };
@@ -1023,6 +1062,7 @@
         KYC.escapeHtml(partyName(off.party)) + "</span>";
     }
     if (!s.legislature) return '<span class="faint">Legislature not covered</span>';
+    if (lagging(s)) return withheld(mode, true);
     if (mode === "trifecta") {
       return KYC.escapeHtml(s.trifecta === "R" || s.trifecta === "D" ? PARTY[s.trifecta] + " trifecta"
         : s.trifecta === "nonpartisan" ? "Nonpartisan legislature"
@@ -1046,7 +1086,9 @@
 
   function chamberRow(c, code, mark) {
     var unlisted = c.seats - c.listed;
+    var withheld = KYC.legislatureControlWithheld(c);
     var holds = code === "NE" ? "Elected without party labels"
+      : withheld ? withheld
       : c.majority ? PARTY[c.majority] + " majority of the seats"
       : "No party holds a majority of the seats";
     return '<li class="gov-chamber">' +
@@ -1056,9 +1098,10 @@
       // One square per seat, as on the legislature page (KYC.seatStrip).
       (KYC.seatStrip ? KYC.seatStrip(c) : "") +
       '<span class="gov-chamber-holds">' + KYC.escapeHtml(holds) +
-      (c.ncsl ? ' <span class="badge badge-warn">NCSL: ' +
+      (c.ncsl && !withheld ? ' <span class="badge badge-warn">NCSL: ' +
         KYC.escapeHtml(c.ncsl === "none" ? "no majority" : PARTY[c.ncsl] + " majority") + "</span>" : "") +
-      "</span>" + (mark ? '<span class="gov-chamber-ballot">' + mark + "</span>" : "") + "</li>";
+      "</span>" + (mark ? '<span class="gov-chamber-ballot">' + mark + "</span>" : "") +
+      KYC.legislatureLagNote(c, rosterRead()) + "</li>";
   }
 
   function source(key) {
@@ -1184,7 +1227,10 @@
         (off.readByHand ? '<p class="faint gov-by-hand">' + link(off.readByHand.url, "The office's own page") +
           " names them, read by hand on " + KYC.escapeHtml(KYC.dayMonthYear(off.readByHand.read)) +
           ".</p>" : "") +
-        (contact.length ? '<p class="faint gov-contact">' + contact.join(" · ") + "</p>" : "");
+        (contact.length ? '<p class="faint gov-contact">' + contact.join(" · ") + "</p>" : "") +
+        // The holder's other roles on this site (rule 105): Peggy Flanagan's
+        // profile as Minnesota's Senate nominee.
+        KYC.alsoHtml(off, { cls: "gov-officer-also" });
     }
     var pictured = body.indexOf("gov-officer-photo") !== -1;
     // The office's label carries the ballot mark, above the holder (rule 79).
@@ -1370,11 +1416,15 @@
         chamberRow(s.upper, code, chamberMark(code, "upper")) +
         (s.lower ? chamberRow(s.lower, code, chamberMark(code, "lower")) : "") + "</ul>" +
         (KYC.seatKey ? KYC.seatKey([s.upper, s.lower]) : "");
-      if (s.note) {
+      // A coalition note is about the legislature its roster lists, and a
+      // count is not stated from a roster known to be behind a new term
+      // (rule 106).
+      if (s.note && !lagging(s)) {
         html += '<p class="gov-note">' + KYC.escapeHtml(s.note) + " " +
           link(s.noteSource, "Legislature's roster") + "</p>";
       }
-      html += '<p class="gov-trifecta">' + KYC.escapeHtml(trifectaText(s.trifecta)) + ".</p>";
+      html += '<p class="gov-trifecta">' + KYC.escapeHtml(lagging(s) ? upperFirst(withheld("trifecta"))
+        : trifectaText(s.trifecta)) + ".</p>";
     }
     html += courtBlock(s.court, code) + courtBlock(s.criminalCourt, code) + federalCourtsBlock(s.federalCourts, code);
     if (opts && opts.links && s.upper) {
@@ -1580,9 +1630,8 @@
         return chamberRow(c, code, "");
       }).join("") + "</ul>" +
         (s.legislature && code !== "NE"
-          ? '<p class="faint">' + KYC.escapeHtml(control(s.legislature).replace(/^./, function (c) {
-              return c.toUpperCase();
-            })) + ".</p>" : "");
+          ? '<p class="faint">' + KYC.escapeHtml(upperFirst(lagging(s) ? withheld("legislature")
+            : control(s.legislature))) + ".</p>" : "");
     });
     // One key for every strip in the list, above it.
     var list = global.document.querySelector("#legislatureDirectory .directory-list");
@@ -1682,8 +1731,11 @@
     var leg = '<div class="glance-box"><p class="glance-kind">Legislature</p>' + (s.upper
       ? '<ul class="glance-list">' + glanceChamber(s.upper, code, "upper") +
         (s.lower ? glanceChamber(s.lower, code, "lower") : "") + "</ul>" +
-        '<p class="glance-control">' + KYC.escapeHtml(trifectaText(s.trifecta).split(":")[0]) + "</p>" +
-        (s.legislature === "coalition" && s.note ? '<p class="faint">' + KYC.escapeHtml(s.note) + "</p>" : "")
+        // Neither the trifecta nor a coalition note is stated from a roster
+        // that may be behind a new term (rule 106).
+        (lagging(s) ? '<p class="glance-control">' + KYC.escapeHtml(withheld("trifecta", true)) + "</p>"
+          : '<p class="glance-control">' + KYC.escapeHtml(trifectaText(s.trifecta).split(":")[0]) + "</p>" +
+            (s.legislature === "coalition" && s.note ? '<p class="faint">' + KYC.escapeHtml(s.note) + "</p>" : ""))
       : '<p class="faint">' + (s.territory ? "The territory’s legislature is not covered here."
         : "Not covered here.") + "</p>") + "</div>";
     var courts = s.court || s.criminalCourt

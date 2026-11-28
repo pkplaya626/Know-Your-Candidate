@@ -617,7 +617,13 @@
     // A run for another seat is the seat's badge, its result in it
     // (contestSeat).
     var elsewhere = !item.isCandidate && item.contestLabel;
-    return [
+    // The person's other roles on this site, each linked to its card (rule
+    // 105), by the one helper and outside the row's button, as a card's is:
+    // a link cannot sit inside one. The Senate panel's row for Amy
+    // Klobuchar said nothing of Minnesota's list for governor, which the
+    // governor's-race panel beside it did.
+    var also = KYC.alsoHtml(item, { cls: "row-also" });
+    var row = [
       '<button type="button" class="person-row" data-id="',
       KYC.escapeAttr(item.id), '">',
       KYC.portraitThumb(item, "38px"),
@@ -631,6 +637,7 @@
       KYC.icon("chevron"),
       "</button>",
     ].join("");
+    return also ? '<div class="person-cell">' + row + also + "</div>" : row;
   }
 
   /** The 2026 Senate view of a state with no Senate race: said, with when
@@ -1294,7 +1301,12 @@
       }
       // A governor's overlay (kyc-governor.js) over the map as it stands:
       // read as a list route, it reset the mode and rewrote the address.
-      if (route.view === "official") return;
+      // A profile opened from its "Also on this site" line closes on Back to
+      // it, leaving the history as it is (rule 105).
+      if (route.view === "official") {
+        if (KYC.profile.isOpen()) KYC.profile.close({ routed: true });
+        return;
+      }
       if (KYC.profile.isOpen()) KYC.profile.close();
       var wanted = route.params.mode || "senate";
       var shape = route.params.layout === "tiles" ? "tiles" : "map";

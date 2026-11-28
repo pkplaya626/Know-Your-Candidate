@@ -2260,6 +2260,170 @@
     return date.getFullYear() + "-" + two(date.getMonth() + 1) + "-" + two(date.getDate());
   }
 
+  /* ------------------------------------------------ a legislature's new term */
+
+  /* The day the term of the members elected on Nov. 3, 2026 began, from the
+   * state's own law (kyc/legislative_terms.py), and the roster this site
+   * reads, Open States, which seats members-elect only when it next updates
+   * (rule 106: Florida's members "take office upon election", and on
+   * Nov. 15 the roster still held two senators' predecessors). One
+   * implementation for the state page, the map, the legislature page, Your
+   * ballot and "Find who represents you" (rule 12). *c*: a chamber's record
+   * (stategov.legislative_term's fields: termBegins, rosterBehind, upSeats,
+   * seats). The page decides on the reader's own day (rule 84). */
+  function legislatureTermBegun(c, now) {
+    var t = c && c.termBegins;
+    if (!t || !c.rosterBehind || localDay(now || new Date()) < t.from) return null;
+    return t;
+  }
+
+  /** "took office on Dec. 1, 2026", counted where the law gives a rule. */
+  function tookOfficeWords(t) {
+    return "took office " + (t.kind === "by" ? "no later than " : "on ") + dateWords(t.day) +
+      (t.counted ? ", counted from “" + t.words + "”" : "");
+  }
+
+  /** The sentence beside a chamber's counts and members once its new term
+   *  has begun and the roster may be behind it; "" otherwise. *read*: the
+   *  roster's day read. It names no one elected: this site reads no state
+   *  legislative result. */
+  function legislatureLagText(c, read, now) {
+    var t = legislatureTermBegun(c, now);
+    if (!t) return "";
+    var seats = c.upSeats === c.seats ? "all " + c.seats + " of its seats were"
+      : c.upSeats + " of its " + c.seats + " seats were";
+    // A seat on that ballot in a special election for the rest of a term
+    // has no new term, and this law does not say when its winner took
+    // office: Hawaii's Senate read "13 of its 25 seats" beside a district
+    // whose special election was on that ballot (the branch's review,
+    // 2026-11-27), so the regular seats say what they are, and the specials
+    // are counted apart, in words that give them no day.
+    var n = c.specialSeats || 0;
+    var regular = n ? (c.upSeats === 1 ? " for a regular term" : " for regular terms") : "";
+    var special = n ? " " + (n === 1 ? "One more seat was" : n + " more seats were") + " on it in a " +
+      "special election for the rest of a term, and the roster may still list the member from " +
+      "before " + (n === 1 ? "that election" : "each") + " too." : "";
+    return "Members elected on Nov. 3, 2026" + (n ? " to regular terms" : "") + " " + tookOfficeWords(t) +
+      " (" + t.cite + "). " +
+      "The roster this site reads (Open States, read " + dateWords(read) + ") may still list " +
+      "members whose terms ended then: " + seats + " on that ballot" + regular + "." + special +
+      " This site reads no state legislative result, so it names no one elected.";
+  }
+
+  /** For a chamber on the ballot whose new term's day this site has not
+   *  read (a gap in kyc/legislative_terms.py), from the day after the
+   *  election: that it cannot say whether the roster is behind, never that
+   *  it is or is not (rule 19). "" otherwise. */
+  function legislatureTermUnknownText(c, read, now) {
+    if (!c || !c.termUnknown || c.termBegins ||
+        electionStatus(2026, now || new Date()).phase !== "post-election") return "";
+    return "This site has not read the day the term of the members elected on Nov. 3, 2026 begins " +
+      "in this chamber, so it cannot say whether the roster it reads (Open States, read " +
+      dateWords(read) + ") still lists members whose terms have ended.";
+  }
+
+  /** The same sentence as a paragraph, the law cited and linked; or, for a
+   *  chamber whose day is not read, that sentence, linking the provision a
+   *  person should read where there is one. */
+  function legislatureLagNote(c, read, now) {
+    var text = legislatureLagText(c, read, now);
+    if (!text) {
+      var unknown = legislatureTermUnknownText(c, read, now);
+      var src = unknown && c.termUnknown.source;
+      return unknown ? '<p class="leg-term-lag leg-term-unknown">' + escapeHtml(unknown) +
+        (src ? ' <a href="' + escapeAttr(src) + '" target="_blank" rel="noopener noreferrer">' +
+          "The state’s law</a>" : "") + "</p>" : "";
+    }
+    var t = c.termBegins;
+    var cite = "(" + t.cite + ")";
+    var at = text.indexOf(cite);
+    return '<p class="leg-term-lag">' + escapeHtml(text.slice(0, at)) + '(<a href="' +
+      escapeAttr(t.source) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(t.cite) +
+      "</a>)" + escapeHtml(text.slice(at + cite.length)) + "</p>";
+  }
+
+  /** In place of a majority: why none is stated (rule 54 from a roster
+   *  known to be behind is no count of who governs). */
+  function legislatureControlWithheld(c, now) {
+    var t = legislatureTermBegun(c, now);
+    return t ? "Which party holds a majority is not stated here: the roster may still list members " +
+      "whose terms ended when the new term began " + (t.kind === "by" ? "no later than " : "on ") +
+      dateWords(t.day) + "." : "";
+  }
+
+  /** A district's record: from its id in the chamber *c*, with how many
+   *  members the roster lists there (`members`); or the record itself; or
+   *  its bare `up`, as some callers hold it. */
+  function seatRecord(c, district) {
+    if (typeof district === "string") {
+      var d = ((c && c.districts) || {})[district] || {};
+      return { up: d.up, special: d.special,
+               members: (((c && c.members) || {})[district] || []).length };
+    }
+    return district && typeof district === "object" ? district : { up: district };
+  }
+
+  /** One district's members, marked as the roster's listing from before
+   *  the new term, never as who sits now; "" where the seat was not on the
+   *  ballot or the term has not begun. *district*: the legislature file's
+   *  record of it (`up`: true, false, or undefined where the state's record
+   *  names no district; `special`: an election for the rest of a term was
+   *  on that ballot there), or its `up` alone. A seat that may not have
+   *  been on the ballot (Montana's Senate, whose record names no district)
+   *  says its new term began only if it was; a special seat says no day,
+   *  since this law does not say when its winner took office. */
+  function legislatureSeatLag(c, district, read, now) {
+    var kind = seatLagKind(c, district, now);
+    if (!kind) return "";
+    var d = seatRecord(c, district);
+    var t = legislatureTermBegun(c, now);
+    var roster = "Open States’ roster, read " + dateWords(read);
+    var began = (t.kind === "by" ? "no later than " : "on ") + dateWords(t.day);
+    // A district of several members, where its id says how many the roster
+    // lists: one of its seats was up (West Virginia's Senate), or a special
+    // election filled one of them, or all of them were up (North Dakota's
+    // House, two a district: its verification found the special's words
+    // over both of a district's members, 2026-11-27).
+    var several = d.members > 1, oneOf = several && c.districtSeats === "one-of-several";
+    var all = several && !oneOf;
+    if (kind === "up") {
+      return (all ? "This district’s seats were" : oneOf ? "One of this district’s seats was" : "This seat was") +
+        " on the Nov. 3, 2026 ballot, and " + (all ? "their" : "its") + " new term began " + began + ": " +
+        roster + ", may still list the " + (all ? "members whose terms" : "member whose term") + " ended then.";
+    }
+    if (kind === "special") {
+      return (several ? "One of this district’s seats was" : "This seat was") + " on the Nov. 3, 2026 " +
+        "ballot in a special election for the rest of its term: " + roster + ", may still list the " +
+        "member from before that election.";
+    }
+    return (several ? "This district’s seats may have been" : "This seat may have been") + " on the " +
+      "Nov. 3, 2026 ballot; if " + (several ? "they were, their" : "it was, its") + " new term began " +
+      began + ", and " + roster + ", may still list the " +
+      (several ? "members whose terms" : "member whose term") + " ended then.";
+  }
+
+  /** Which of the seat's sentences is said, on the reader's day: "up" (on
+   *  that ballot for a regular term), "special" (for the rest of a term
+   *  only), "maybe" (the record names no district), or "". */
+  function seatLagKind(c, district, now) {
+    var d = seatRecord(c, district);
+    if (!legislatureTermBegun(c, now)) return "";
+    return d.up ? "up" : d.special ? "special" : d.up === false ? "" : "maybe";
+  }
+
+  /** The badge beside a district's members in a list, in its sentence's own
+   *  measure: "Listed from before the new term" only where the seat was on
+   *  that ballot for a regular term; "" where no sentence is said. */
+  function legislatureSeatLagBadge(c, district, now) {
+    var kind = seatLagKind(c, district, now);
+    var several = seatRecord(c, district).members > 1;
+    return kind === "up" ? (several && c.districtSeats === "one-of-several"
+        ? "One may be listed from before the new term" : "Listed from before the new term")
+      : kind === "special" ? (several ? "One may be listed from before the special election"
+        : "May be listed from before the special election")
+      : kind === "maybe" ? "May be listed from before the new term" : "";
+  }
+
   /* --------------------------------------------------------- report a problem */
 
   /* The public repository, where a reader reports an error: an issue form
@@ -2847,8 +3011,14 @@
      *  sent them off the site - so that entry is replaced with the list in
      *  place and the page told to show it, since replaceState fires no
      *  event of its own. */
-    clearProfile: function () {
-      if (!/#\/(profile|official)\//.test(global.location.hash)) return;
+    /* *kind*: the dialog that is closing ("profile"), whose own address
+     * alone it clears. A profile closed because a link in it opened a
+     * governor's overlay or an official's dialog in its place (rule 105's
+     * "Also on this site") must leave the new address standing: cleared,
+     * the Back it took returned the reader to the profile. */
+    clearProfile: function (kind) {
+      var own = kind ? new RegExp("#\/" + kind + "\/") : /#\/(profile|official)\//;
+      if (!own.test(global.location.hash)) return;
       var state = history.state;
       if (state && state.kycProfile) {
         var depth = state.depth || 1;
@@ -3860,6 +4030,91 @@
     return (doc.body && doc.body.getAttribute("data-root")) || "";
   }
 
+  /* ---------------------------------------------------- also on this site */
+
+  /** Whether this page draws the card a role names itself, so its link
+   *  opens it in place (rule 105): a profile wherever the profile dialog is
+   *  loaded (it loads the person's state file, and says so when it cannot,
+   *  rule 94); a governor or a candidate for governor where the overlay is
+   *  loaded and this page's data/stategov holds their state; a federal
+   *  official on the federal page; a judge on their own court's page. */
+  function alsoInPlace(role) {
+    var KYCg = global.KYC || {};
+    if (role.kind === "profile") return !!KYCg.profile;
+    if (role.kind === "governor" || role.kind === "candidate") {
+      return !!(KYCg.governor && KYCg.stategov && KYCg.stategov.state &&
+                KYCg.stategov.state(role.state));
+    }
+    // A court's page carries its id on its container, as kyc-federal.js and
+    // the officials' dialog read it, never on the body: read off the body, a
+    // court's page counted as the federal page (it loads data/federal.js
+    // too), and its own judges never opened in place.
+    var box = doc.getElementById("federalContent");
+    var court = (box && box.getAttribute("data-court")) || "";
+    var hub = !!box && box.getAttribute("data-federal") === "hub";
+    if (role.kind === "official") return !!(KYCg.official && global.kycFederal && hub);
+    if (role.kind === "judge") {
+      return !!KYCg.official && (role.court === "scotus"
+        ? !!global.kycFederal && hub
+        : !!court && court === role.court);
+    }
+    return false;
+  }
+
+  /** The address a role's link opens: its view on this page where the page
+   *  draws it, else its card's own page from the site's root (an absolute
+   *  address, the Congress biography, as it is). */
+  function alsoHref(role) {
+    if (role.view && alsoInPlace(role)) return role.view;
+    var href = String(role.href || "");
+    return /^https?:/.test(href) ? href : siteRoot() + href;
+  }
+
+  /** "Also on this site:" and each of a person's other roles here, in that
+   *  role's own card's words, each linked to that card (rule 105). The
+   *  roles and their words are the pipeline's (kyc/identity.py), joined by
+   *  ids and corroborated records, never a name; the page only chooses the
+   *  tense, on the reader's own day: from the day after Election Day a role
+   *  that says so ("Was on the Nov 3, 2026 ballot for Governor of
+   *  Minnesota") reads its *after* words. "" where there are none. *opts*:
+   *  ``cls`` an extra class, ``tag`` the element ("p"). */
+  function alsoHtml(record, opts) {
+    opts = opts || {};
+    var roles = (record && record.also) || [];
+    if (!roles.length) return "";
+    var post = electionStatus(2026, opts.now).phase === "post-election";
+    var today = localDay(opts.now || new Date());
+    var parts = roles.map(function (role) {
+      // A governor's or an officer's role ends on its own card's clock: once
+      // the term the 2026 election chose has begun on the reader's day and
+      // the roster's holder was not on the ballot for it (`ends`, the
+      // pipeline's, as KYC.stategov.pastTermText decides it), its `ended`
+      // words (the review of PR #267: "Attorney General of Texas" stood on
+      // Ken Paxton's dialog in January beside the row saying otherwise).
+      var words = role.ends && role.ended && today >= role.ends ? role.ended
+        : post && role.after ? role.after : role.words;
+      var link = role.link ? " (" + role.link + ")" : "";
+      return '<a class="also-link" href="' + escapeAttr(alsoHref(role)) + '" data-also-kind="' +
+        escapeAttr(role.kind) + '">' + escapeHtml(words + link) + "</a>";
+    });
+    var tag = opts.tag || "p";
+    return "<" + tag + ' class="also-line' + (opts.cls ? " " + escapeAttr(opts.cls) : "") +
+      '"><span class="also-label">Also on this site:</span> ' + parts.join("; ") + "</" + tag + ">";
+  }
+
+  /** The Congress biography of an official or a governor whose service in
+   *  Congress has no card here (``congressBio``: the bioguide id
+   *  congress-legislators gives for the record's own Wikidata item), as a
+   *  link; "" where there is none. */
+  function congressBioHtml(record, opts) {
+    var id = record && record.congressBio;
+    if (!id) return "";
+    var tag = (opts && opts.tag) || "p";
+    return "<" + tag + ' class="also-line also-bio"><a class="also-link" href="' +
+      escapeAttr("https://bioguide.congress.gov/search/bio/" + encodeURIComponent(id)) +
+      '">Biography in the Biographical Directory of the U.S. Congress</a></' + tag + ">";
+  }
+
   function stateUrl(code) {
     return siteRoot() + "states/" + String(code).toLowerCase() + ".html";
   }
@@ -4776,6 +5031,13 @@
     resultsSourceHtml: resultsSourceHtml,
     dateWords: dateWords,
     localDay: localDay,
+    legislatureTermBegun: legislatureTermBegun,
+    legislatureLagText: legislatureLagText,
+    legislatureTermUnknownText: legislatureTermUnknownText,
+    legislatureLagNote: legislatureLagNote,
+    legislatureControlWithheld: legislatureControlWithheld,
+    legislatureSeatLag: legislatureSeatLag,
+    legislatureSeatLagBadge: legislatureSeatLagBadge,
     REPO_URL: REPO_URL,
     reportUrl: reportUrl,
     offBallot: offBallot,
@@ -4856,6 +5118,9 @@
     senateBases: senateBases,
     seatUpYear: seatUpYear,
     stateUrl: stateUrl,
+    alsoHtml: alsoHtml,
+    alsoHref: alsoHref,
+    congressBioHtml: congressBioHtml,
     shareUrl: shareUrl,
     shareLink: shareLink,
     clearShareField: clearShareField,

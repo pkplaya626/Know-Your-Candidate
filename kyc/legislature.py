@@ -75,6 +75,67 @@ def chamber_title(code, chamber):
     return LOWER_CHAMBER.get(code) or "House of Representatives"
 
 
+# A chamber that names itself otherwise than "<state> <chamber>" (rule 75),
+# by its own site's title: {(state, chamber): (name, the page, its title's
+# words, the day read)}. The legislature page's panel and the "Also on this
+# site" lines (kyc/identity.py, rule 105) read "New York Assembly" and
+# "California Assembly" of bodies that call themselves the New York State
+# Assembly and the California State Assembly. Only chambers whose own page
+# this project's reader opened are here; any other keeps the page's general
+# form until a person reads its own (nysenate.gov answered the reader a
+# challenge page, "Just a moment...", on 2026-11-15 and 2026-11-17, which
+# concludes nothing: rule 8). Each title was read again on 2026-11-17.
+CHAMBER_NAMES = {
+    ("CA", "lower"): ("California State Assembly", "https://www.assembly.ca.gov/",
+                      "Welcome to the California State Assembly | California State Assembly",
+                      "2026-11-17"),
+    ("CA", "upper"): ("California State Senate", "https://www.senate.ca.gov/",
+                      "Homepage | California State Senate", "2026-11-17"),
+    ("NY", "lower"): ("New York State Assembly", "https://nyassembly.gov/",
+                      "Assembly Home | New York State Assembly", "2026-11-17"),
+    ("WI", "lower"): ("Wisconsin State Assembly", "https://legis.wisconsin.gov/assembly",
+                      "Wisconsin State Assembly", "2026-11-17"),
+}
+
+
+def chamber_name(code, chamber):
+    """The chamber's own name where its own site gives one that is not the
+    state's name and the chamber's title (:data:`CHAMBER_NAMES`), else
+    None: the page then writes the general form."""
+    entry = CHAMBER_NAMES.get((code, chamber))
+    return entry[0] if entry else None
+
+
+def chamber_head(code, chamber):
+    """A chamber's names as its legislature page's payload carries them:
+    its ``title`` ("Assembly") and, only where its own site gives another
+    than the state's name and that title (:data:`CHAMBER_NAMES`, rule 75),
+    its ``name`` ("New York State Assembly"), which the page's panel and the
+    "Also on this site" lines read."""
+    name = chamber_name(code, chamber)
+    return {"title": chamber_title(code, chamber), **({"name": name} if name else {})}
+
+
+def chamber_name_problems():
+    """An entry that does not say its source, or whose name its own quoted
+    title does not carry, or that only repeats the general form."""
+    from .pages import short_name
+
+    out = []
+    for (code, chamber), entry in sorted(CHAMBER_NAMES.items()):
+        if len(entry) != 4 or not all(entry):
+            out.append(f"{code} {chamber}: needs the name, the page, its words and the day read")
+            continue
+        name, url, words, read = entry
+        if not url.startswith("https://") or name not in words or not re.fullmatch(
+                r"\d{4}-\d{2}-\d{2}", read):
+            out.append(f"{code} {chamber}: {name!r} is not in the words quoted from {url}, "
+                       "or the day is not a day")
+        elif name == f"{short_name(code)} {chamber_title(code, chamber)}":
+            out.append(f"{code} {chamber}: {name!r} is the general form; the entry says nothing")
+    return out
+
+
 def label_text(name):
     """What is written on a district: its number or short code ("12",
     "10A", "B"). A district known by a name ("10th Bristol", "Belknap 1") is
@@ -1003,7 +1064,7 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         for district_id in on_special:
             found[district_id]["special"] = True
         out_chambers[chamber] = {
-            "title": chamber_title(code, chamber),
+            **chamber_head(code, chamber),
             "seats": seats,
             "listed": count["listed"],
             # The same count as the state page's (stategov.chamber), and
@@ -1027,6 +1088,11 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         years = term_years(code, chamber)
         if years:
             out_chambers[chamber]["termYears"] = years
+        # The day the new term began and whether the roster may be behind it
+        # (rule 106), in the state page's record (stategov.legislative_term).
+        for key in ("upSeats", "specialSeats", "termBegins", "rosterBehind", "termUnknown"):
+            if key in ((control or {}).get(chamber) or {}):
+                out_chambers[chamber][key] = control[chamber][key]
 
     placed = {r["id"] for c in out_chambers.values() for listed in c["members"].values()
               for r in listed}
@@ -1068,6 +1134,9 @@ def build(root=".", codes=None, dropped=None):
     cache = statelegs.load_cache(root)
     if not cache:
         raise LegislatureError(f"no {statelegs.CACHE_PATH}; run 'statelegs'")
+    named = chamber_name_problems()
+    if named:
+        raise LegislatureError("legislature.CHAMBER_NAMES: " + "; ".join(named))
     try:
         control = stategov.build(root)[0]["states"]
     except stategov.StateGovError as exc:
@@ -1278,14 +1347,31 @@ def specials(code, chamber, districts):
     years. A clause that speaks of a special but names no district on this
     map is an error, never an unmarked district: a mark missing over a
     seat on the ballot looks entirely normal."""
-    entry = (ballot2026.STATES.get(code) or {}).get(chamber)
-    if not entry or not districts:
+    if not districts:
         return []
-    basis = entry[3]
-    clauses = re.split(r"[(;]", basis)[1:]
     by_name = {statelegs.norm(d["name"]): i for i, d in districts.items()}
     out = []
-    for clause in clauses:
+    for number in special_numbers(code, chamber):
+        found = by_name.get(statelegs.norm(number))
+        if found is None:
+            raise LegislatureError(f"{code} {chamber}: the 2026 record's special election in "
+                                   f"district {number} is not a district on the map")
+        if found not in out:
+            out.append(found)
+    return out
+
+
+def special_numbers(code, chamber):
+    """The district numbers the state's own record (``ballot2026``) names
+    for an election to the rest of a term on the Nov 3, 2026 ballot, in the
+    record's order, once each: what :func:`specials` places on the map and
+    the chamber's count of its special seats (``stategov.legislative_term``'s
+    ``specialSeats``, rule 106) read alike (rule 12)."""
+    entry = (ballot2026.STATES.get(code) or {}).get(chamber)
+    if not entry:
+        return []
+    out = []
+    for clause in re.split(r"[(;]", entry[3])[1:]:
         if not _SPECIAL_WORDS.search(clause):
             continue
         text = re.sub(r"\b\d+-year\b|\b\d+ years?\b|\b(?:19|20)\d\d\b", " ", clause)
@@ -1293,13 +1379,7 @@ def specials(code, chamber, districts):
         if not numbers:
             raise LegislatureError(f"{code} {chamber}: the 2026 record names a special election "
                                    f"but no district: {clause.strip()!r}")
-        for number in numbers:
-            found = by_name.get(statelegs.norm(number))
-            if found is None:
-                raise LegislatureError(f"{code} {chamber}: the 2026 record's special election in "
-                                       f"district {number} is not a district on the map")
-            if found not in out:
-                out.append(found)
+        out.extend(n for n in numbers if n not in out)
     return out
 
 

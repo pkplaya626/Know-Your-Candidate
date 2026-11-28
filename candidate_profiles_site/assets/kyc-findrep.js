@@ -712,8 +712,13 @@
         var members = (c.members || {})[id] || [];
         var href = page + "#/?" + (chamber === "lower" ? "chamber=lower&" : "") + "d=" +
           encodeURIComponent(id);
+        // Listed from before the new term where its seat was on the ballot
+        // and the term has begun, never as who sits now (rule 106).
+        var lag = members.length ? KYC.legislatureSeatLag(c, id,
+          (leg.sources || {}).peopleDate || "") : "";
         return '<a href="' + KYC.escapeAttr(href) + '">' + KYC.escapeHtml(districtName(c, id)) +
-          "</a>: " + (members.length ? members.map(memberWords).join(", ") : "nobody listed");
+          "</a>: " + (members.length ? members.map(memberWords).join(", ") : "nobody listed") +
+          (lag ? '<div class="findrep-note">' + KYC.escapeHtml(lag) + "</div>" : "");
       });
       var unplaced = (leg.unplaced || []).filter(function (m) { return m.chamber === chamber; });
       if (unplaced.length) {
@@ -1264,6 +1269,7 @@
     landIn: landIn,
     houseRace: houseRace,
     senateRaces: senateRaces,
+    legislatureRows: legislatureRows,
     districtName: districtName,
     nameOf: nameOf,
     placeWords: placeWords,

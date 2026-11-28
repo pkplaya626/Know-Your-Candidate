@@ -121,6 +121,9 @@
       // The office's ballot mark and the holder line (rule 79), and a
       // candidate's status badge.
       '      <p class="modal-meta" id="governorModalStatus" hidden></p>',
+      // The person's other roles on this site, each linked to its card,
+      // and service in Congress with no card here (rule 105).
+      '      <div class="modal-also" id="governorModalAlso" hidden></div>',
       // A slot the credit helper hides once it is empty (rule 87).
       '      <p class="modal-credit" id="governorModalPhotoCredit" data-credit-slot hidden></p>',
       "    </div>",
@@ -683,6 +686,9 @@
     else if (!found) renderMissing(id);
     else if (found.kind === "governor") renderGovernor(found.code, found.person);
     else renderCandidate(found.code, found.person, found.parts);
+    var also = el("governorModalAlso");
+    also.innerHTML = found ? KYC.alsoHtml(found.person) + KYC.congressBioHtml(found.person) : "";
+    also.hidden = !also.innerHTML;
   }
 
   /* ------------------------------------------------------------------ open */
@@ -698,6 +704,7 @@
     el("governorModalPrinted").hidden = true;
     el("governorModalMeta").textContent = "";
     el("governorModalStatus").hidden = true;
+    el("governorModalAlso").hidden = true;
     el("governorModalBody").innerHTML = '<div class="modal-column">' + (failed
       ? panel("info", "The governors’ data did not load", '<p class="note-box">This record cannot be ' +
         "shown, because the file of the states’ governors and their races did not load. Reloading the " +
@@ -766,6 +773,9 @@
   function applyRoute() {
     var route = KYC.router.read();
     if (route.view === "official" && owns(route.id)) {
+      // Back from a profile its "Also on this site" line opened: the
+      // profile closes first, leaving the history as it stands (rule 105).
+      if (KYC.profile && KYC.profile.isOpen()) KYC.profile.close({ routed: true });
       open(route.id, { fromRoute: true });
     } else if (isOpen()) {
       routed = true;

@@ -604,10 +604,17 @@ def holder_line(code, key, holder, terms, listed, after=False):
 def build(root="."):
     """``(payload, problems)``: what ``data/stategov.js`` holds, and every
     disagreement between the sources."""
-    from . import ballot2026, courts, executives, officers, statelegs, statewide, terms_begin
+    from . import (ballot2026, courts, executives, legislative_terms, officers, statelegs,
+                   statewide, terms_begin)
     unfit = terms_begin.problems()
     if unfit:
         raise StateGovError("kyc/terms_begin.py: " + "; ".join(unfit))
+    # The legislative chambers' days, and a person's word that a roster has
+    # caught up with one (rule 106): a table or an entry that breaks its own
+    # rules stops the build.
+    unfit = legislative_terms.problems() + legislative_terms.current_problems()
+    if unfit:
+        raise StateGovError("kyc/legislative_terms.py: " + "; ".join(unfit))
     exec_cache, leg_cache, ncsl, officer_cache = (
         executives.load_cache(root), statelegs.load_cache(root), load_ncsl(root),
         officers.load_cache(root))
@@ -650,6 +657,9 @@ def build(root="."):
     except cycle.CycleError:
         record = False
     candidates_heavy = 0
+    # The photographs a person chose that another route stands ahead of
+    # (statewide_photos.attach): their entries stand for nothing.
+    shadowed = []
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
                                  (ncsl, NCSL_CACHE, "executives"),
@@ -735,7 +745,8 @@ def build(root="."):
                     else None)
                 candidates_heavy += statewide_photos.attach(
                     code, key, item["candidates"]["candidates"], listed, holder, status,
-                    photo_cache, guide_cache, copies_manifest)
+                    photo_cache, guide_cache, copies_manifest, legislators=leg_cache,
+                    shadowed=shadowed)
         return record
 
     states = {}
@@ -763,7 +774,8 @@ def build(root="."):
                        as_of, sitting, record)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
-                                      entry["governor"]["partyKey"], problems))
+                                      entry["governor"]["partyKey"], problems,
+                                      leg_cache.get("fetched", "")[:10]))
             theirs = (ncsl["states"].get(code) or {}).get("governor", "")
             if theirs and theirs != entry["governor"]["partyKey"]:
                 problems.append(f"{code}: the NGA lists a {entry['governor']['party']} governor; "
@@ -796,6 +808,11 @@ def build(root="."):
                         "size: their source offers them only above the caps")
     problems.extend(statewide_photos.withheld(photo_cache))
     problems.extend(statewide_photos.stale_looks(photo_cache))
+    # validate names the entries the cache or the lists leave standing for
+    # nothing (stale-statewide-photo-override); the build, those a route
+    # applied here stands ahead of.
+    problems.extend(f"overrides.STATEWIDE_PHOTOS {line} stands ahead of it; remove the entry"
+                    for line in sorted(shadowed))
     problems.extend(court_photo_problems(court_cache))
     problems.extend(stale_name_forms(states))
     payload = {
@@ -841,13 +858,51 @@ def filled_where_vacant(code, which, ours, theirs):
     return []
 
 
-def _legislature(code, records, theirs, governor_key, problems):
+def legislative_term(code, which, roster_read):
+    """What the page needs to say, on the reader's day, that a chamber's new
+    term has begun while the roster may still list members whose terms ended
+    then (rule 106): its seats on the 2026 ballot (``upSeats``), the day the
+    term of the members elected on November 3 began (``termBegins``, from
+    kyc/legislative_terms.py) and whether the roster, read on *roster_read*,
+    may be behind it (``rosterBehind``: until a person records it caught
+    up); for a gap, ``termUnknown`` (the provision to read, where the gap
+    names one). ``{}`` for a chamber not on that ballot."""
+    from . import ballot2026, legislative_terms
+    from .legislature import special_numbers
+    entry = (ballot2026.STATES.get(code) or {}).get(which)
+    if not entry or not entry[2]:
+        return {}
+    out = {"upSeats": entry[2]}
+    # Seats on that ballot for the rest of a term, beside the regular ones:
+    # Hawaii's Senate had 13 regular seats and a special in district 19 (the
+    # review of the branch, 2026-11-27), and "13 of its 25 seats" left the
+    # special out while its district said a special election was there.
+    specials = len(special_numbers(code, which))
+    if specials:
+        out["specialSeats"] = specials
+    term = legislative_terms.for_page(code, which)
+    if term:
+        out["termBegins"] = term
+        out["rosterBehind"] = legislative_terms.roster_behind(code, which, term, roster_read)
+    else:
+        # A gap: the page says, after the election, that this site has not
+        # read the day, so it cannot say whether the roster is behind (rule
+        # 19), linking the provision a person should read where there is one.
+        gap = legislative_terms.gap_for(code, which)
+        if gap:
+            out["termUnknown"] = {"source": gap["source"]} if gap["source"] else {}
+    return out
+
+
+def _legislature(code, records, theirs, governor_key, problems, roster_read=""):
     upper_seats, lower_seats = SEATS[code]
     out = {"upper": dict(chamber(records, "upper", upper_seats),
-                         title="Legislature" if code == "NE" else "Senate")}
+                         title="Legislature" if code == "NE" else "Senate",
+                         **legislative_term(code, "upper", roster_read))}
     if lower_seats:
         out["lower"] = dict(chamber(records, "lower", lower_seats),
-                            title=LOWER_CHAMBER.get(code, "House of Representatives"))
+                            title=LOWER_CHAMBER.get(code, "House of Representatives"),
+                            **legislative_term(code, "lower", roster_read))
     if code == "NE":
         out["legislature"] = "nonpartisan"
         out["trifecta"] = "nonpartisan"

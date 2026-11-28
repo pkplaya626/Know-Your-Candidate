@@ -139,6 +139,9 @@
       // (rule 87: kyc/legphotos.py).
       (p.image && p.imageCredit ? '<p class="leg-credit">' +
         KYC.photoCreditHtml(KYC.copyCredit(p.imageCredit, p.image, p.photoCopy)) + "</p>" : "") +
+      // Their other roles on this site, each linked to its card (rule 105):
+      // a member running for Congress or governor.
+      KYC.alsoHtml(p, { cls: "leg-also" }) +
       "</div></article>";
   }
 
@@ -171,10 +174,25 @@
 
   function districtBallot(id) { return KYC.ballot.seatBallot(current(), id); }
 
+  /** Whether either chamber's new term has begun while the roster may be
+   *  behind it (rule 106). */
+  function lagging() {
+    return !!(KYC.legislatureTermBegun(state.chambers.upper) ||
+              KYC.legislatureTermBegun(state.chambers.lower));
+  }
+
+  /** One district's members, marked as listed from before the new term
+   *  where its seat was on the ballot and the term has begun (rule 106). */
+  function seatLag(id) {
+    var c = current();
+    var words = KYC.legislatureSeatLag(c, id, state.sources.peopleDate);
+    return words ? '<p class="leg-seat-lag">' + KYC.escapeHtml(words) + "</p>" : "";
+  }
+
   function showDistrict(id) {
     var people = current().members[id] || [];
     el("legPanelTitle").textContent = current().title + " district " + districtName(id);
-    el("legPanelBody").innerHTML = (people.length
+    el("legPanelBody").innerHTML = (people.length ? seatLag(id) : "") + (people.length
       ? people.map(personCard).join("")
       : '<p class="faint">Open States lists nobody for this seat. It may be vacant, or the record ' +
         "may be behind a special election.</p>") + districtBallot(id);
@@ -192,11 +210,15 @@
   /** Who runs the chamber, in the state page's words. */
   function holds(c) {
     var n = c.count;
+    // A majority is not stated from a roster known to be behind the new
+    // term (rule 106).
+    var withheld = KYC.legislatureControlWithheld(c);
     var text = code === "NE" ? "Elected without party labels"
+      : withheld ? withheld
       : n.majority ? PARTY[n.majority] + " majority of the seats"
       : "No party holds a majority of the seats";
     return '<p class="leg-holds">' + KYC.escapeHtml(text) +
-      (n.ncsl ? ' <span class="badge badge-warn">NCSL: ' +
+      (n.ncsl && !withheld ? ' <span class="badge badge-warn">NCSL: ' +
         KYC.escapeHtml(n.ncsl === "none" ? "no majority" : PARTY[n.ncsl] + " majority") + "</span>" : "") +
       "</p>";
   }
@@ -205,7 +227,9 @@
     var c = current();
     var missing = c.seats - c.listed;
     var unplaced = state.unplaced.filter(function (p) { return p.chamber === chamber; });
-    el("legPanelTitle").textContent = state.name + " " + c.title;
+    // The chamber's own name where its own site gives one ("New York State
+    // Assembly", legislature.CHAMBER_NAMES; rule 75), else the general form.
+    el("legPanelTitle").textContent = c.name || state.name + " " + c.title;
     // A member the map cannot draw (New Hampshire's floterial seats) still
     // holds a seat and counts in the chamber's parties, as the state page
     // counts them; a non-voting tribal representative holds none of its
@@ -214,9 +238,10 @@
       "<p>" + KYC.escapeHtml(c.seats + " seats" + (c.parties.length ? ": " + partyCounts(c) : "")) +
         (missing > 0 ? KYC.escapeHtml("; " + missing + " with nobody listed") : "") + ".</p>" +
       holds(c) +
+      KYC.legislatureLagNote(c, state.sources.peopleDate) +
       // The coalition note, where the majority of seats does not run the
-      // chamber (rule 54, STATEGOV-05).
-      (state.note ? '<p class="gov-note">' + KYC.escapeHtml(state.note) + " " +
+      // chamber (rule 54, STATEGOV-05), and not over a new term's roster.
+      (state.note && !lagging() ? '<p class="gov-note">' + KYC.escapeHtml(state.note) + " " +
         link(state.noteSource, "Legislature's roster") + "</p>" : "") +
       (missing > 0 ? '<p class="faint">Open States lists nobody for ' + missing +
         (missing === 1 ? " seat" : " seats") + ". They may be vacant, or the record may be behind a special election.</p>" : "") +
@@ -243,12 +268,14 @@
     });
     el("legRoster").innerHTML = ids.map(function (id) {
       var people = c.members[id] || [];
+      var lag = KYC.legislatureSeatLagBadge(c, id);
       return '<button type="button" class="leg-row" data-region="' + KYC.escapeAttr(id) + '">' +
         '<span class="leg-row-district">' + KYC.escapeHtml(c.districts[id].name) + "</span>" +
         '<span class="leg-row-people">' + (people.length ? people.map(function (p) {
           return '<span class="' + ({ D: "party-d", R: "party-r", I: "party-i" }[p.partyKey] || "") + '">' +
             KYC.escapeHtml(p.name) + "</span>";
-        }).join(", ") : '<span class="faint">Nobody listed</span>') + "</span></button>";
+        }).join(", ") + (lag ? ' <span class="badge leg-row-lag">' + KYC.escapeHtml(lag) + "</span>" : "")
+          : '<span class="faint">Nobody listed</span>') + "</span></button>";
     }).join("");
   }
 
@@ -257,7 +284,7 @@
   function draw() {
     var c = current();
     map = KYC.regionmap.create(el("legMap"), {
-      title: state.name + " " + c.title + " districts",
+      title: (c.name || state.name + " " + c.title) + " districts",
       viewBox: state.viewBox,
       regions: c.districts,
       insets: c.insets,
