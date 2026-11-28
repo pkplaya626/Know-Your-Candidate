@@ -73,7 +73,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_lookup_maps.py` | Rebuild `lookup_maps/`: every ZIP code area's share of each district and county, and the finer boundaries a location is placed on, for "Find who represents you" (network) |
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
-| `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
+| `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article, and last a person's evidenced choice, `overrides.STATEWIDE_PHOTOS`); `--curated-only` reads the choices alone and changes no other photograph; `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
 | `npm install && npm test` | Render every page in jsdom and drive the UI (5242 checks) |
@@ -1489,7 +1489,7 @@ URL, and `validate` fails a `photoSet` that names another file.
 | Field | What it holds |
 |---|---|
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
-| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile), `campaign-site` (the campaign's own site, its About page or the page as a browser draws it), `wikidata-fec` (the Wikidata item carrying the person's own FEC candidate id), `state-legislature` (the legislature's own page for a nominee who sits in it), `election-guide` (the election office's own guide, the file hosted here: the first entry is then `photos/<hash>.jpg` or `.png`, from the site's root) or `curated` (a photograph a person chose and looked at, `overrides.CANDIDATE_PHOTOS`, keyed on the profile's id: a government office's or the campaign's own file, an office's photograph its page draws only inline, hosted here unmodified (`photos/<hash>.png`, Brent Taylor's), or a Commons file in the person's own category, with the page naming them, why it is theirs and what was seen; a file a legislature keys by seat stands only while its member holds the seat) |
+| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile), `campaign-site` (the campaign's own site, its About page or the page as a browser draws it), `wikidata-fec` (the Wikidata item carrying the person's own FEC candidate id), `state-legislature` (the legislature's own page for a nominee who sits in it), `election-guide` (the election office's own guide, the file hosted here: the first entry is then `photos/<hash>.jpg` or `.png`, from the site's root) or `curated` (a photograph a person chose and looked at, `overrides.CANDIDATE_PHOTOS`, keyed on the profile's id: a government office's or the campaign's own file, an office's photograph its page draws only inline, hosted here unmodified (`photos/<hash>.png`, Brent Taylor's), or a Commons file in the person's own category, with the page naming them, why it is theirs and what was seen; a file a legislature keys by seat stands only while its member holds the seat; one over the caps is shown smaller from the same file through its host's resizer or Photon, its `original` kept, else as it is, and said either way, `heavy`: the sweep of 2026-11-17 added 43, twelve of them so) |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
 | `photoCopy` | `{src, of, ofBytes}`: the smaller copy this site made of the first entry, `of` being that entry's address and `ofBytes` its weight, `src` the copy under `photos/` from the site's root, stamped with its hash. Only for a credited portrait over 300 KB or 1,200px, and only for the person the copy was made for; the page loads it in the first entry's place and falls back to the original (rule 101) |
 | `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?, year?, caucus?, converted?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one), with the year the page dates the file to where it gives a single four-digit one plainly (`year`, printed "Photo (1981): ..."; never guessed, and never an upload date, an estimate or a span); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the page the image was on); a state legislature's (`by: "New Mexico Legislature"`, `page` the member's page), or the member's own party caucus's (`by: "Michigan Senate Democrats"`, `caucus: true`, `page` their page on its site); an election office's guide's, by where it was found (`by: "from the Washington Secretary of State's voters' guide"`, `page` the candidate's page in it), with `converted` where this site decoded the file (Oregon's JPEG 2000, as PNG). Absent for the silhouette |
@@ -2086,15 +2086,18 @@ sitting now is among one person's cards, every governor's, officer's and
 legislator's card of theirs whose role carries no end, or one after the day
 their term began, is withheld and said in the same two lines, with the joins
 that made it, however the join came (an entry, an item, another card). A
-legislator's role has no end at all: this site records no legislature's day
-its new term begins, so the line names the seat for as long as the roster
-lists them, and a joined legislator whose district the legislature page
-marks on the 2026 ballot while another of their cards shows a 2026 run for
-another office (they may leave that seat when the chamber's new term begins:
-California's on the first Monday in December) is a warning
-(`identity-legislator-term-ending`), for a person to check each once its
-chamber's new term has begun. The role ends only when a sourced day of each
-legislature's term exists. A role opens in place
+legislator's role ends on the day its chamber's new term began, by the
+state's own law (rule 106, `kyc/legislative_terms.py`), where the member's
+district was on the 2026 ballot and no person has recorded the chamber's
+roster caught up: from that day on the reader's calendar the line reads "Was
+a member of the California State Assembly, district 32, for the term that
+ended when the new term began on Dec. 7, 2026 ...; the seat was on the Nov.
+3, 2026 ballot" (`identity.legislator_term_end`: `ends`, `endsRead`,
+`ended`), naming no winner. In a chamber whose day is a gap the line names
+the seat for as long as the roster lists them, and a joined legislator whose
+district is on that ballot while another of their cards shows a 2026 run for
+another office is a warning (`identity-legislator-term-unknown`), for a
+person to read the state's law into the table. A role opens in place
 on the page that draws its card: a federal official or a justice on the
 federal page, a judge on their court's page, known by the page's
 `#federalContent` container (`data-federal`, `data-court`). A legislator's role names the chamber by its own name where
@@ -2682,6 +2685,7 @@ audit 2026-10-17):
 | One square per seat | The same count: Republicans from the left and Democrats from the right, as the counts beside them read, nobody listed as an outline, a tick above and below at half the seats (none for Nebraska's nonpartisan chamber). Also on every state page and the directory, with one key each (`KYC.seatStrip`, `KYC.seatKey`) | rules 51, 73 |
 | Seats on the Nov 3 ballot, and which districts | `ballot2026`'s record, read into districts only where its list or rule names exactly as many seats as it says are up; the term only where that record states one, said "as the state's record says", or, where that record's source is a list that names no term, as the provision `ballot2026.TERMS` cites says (`termSource`, linked: "Members serve 2-year terms, as S.D. Const. art. III, s. 6 says."). A district the record names for a special election for the rest of a term (Kansas Senate 24 and 25, Nebraska 41, New Mexico Senate 33, Colorado Senate 17, 21, 29 and 31, ...) is marked `special` and its panel says first that it is on the ballot; a special naming no district on the map fails the build. The record is quoted only where it says more than "all" or "none" | `seats_up`, `specials`, `term_years` |
 | Floterial district | New Hampshire's floterial members are named with their district under "Not on the map", where RSA 662:5 makes the district floterial (`NH_FLOTERIAL`, 39 districts, each the union of base districts); any other unplaced district is "unmatched" | `unplaced_why` |
+| The new term, once begun (`termBegins`, `rosterBehind`, `termUnknown`, `upSeats`, `specialSeats` on each chamber, in `stategov.js` and `data/legislature/<st>.js`) | The day the term of the members elected on Nov. 3, 2026 began, from the state's own constitution or code on its official host, quoted, counted and dated (`kyc/legislative_terms.py`: 57 chambers, 55 on a day and 2 by a day; 31 gaps, each with why and the address a person should read; from the day after the election a gap's chamber says only that this site has not read its day and so cannot say whether the roster is behind, `termUnknown`). From that day on the reader's calendar, the chamber's summary, its row on the state page, Your ballot's chamber card and Find who represents you say that its members took office then and that the Open States roster, read on its day, may still list members whose terms ended then; each member of a seat on that ballot is marked as listed from before the new term, never as who sits now, and a seat on it in a special election for the rest of a term is counted apart and named with no day, since the law does not say when its winner took office; no majority, trifecta, coalition note or map colour is stated from it, in the glance box and the directory of legislatures as in the chamber's rows, and the map draws it as "not stated". Until a person records the chamber's roster caught up (`overrides.LEGISLATURE_ROSTERS_CURRENT`: the roster read they looked at, what they saw, the chamber's own roster and the day). No winner is named | rule 106, `stategov.legislative_term`, `KYC.legislatureLagText` |
 
 ## Governors and party control
 
@@ -3057,6 +3061,33 @@ the day, its bytes and size):
    Wikimedia does not answer for keeps the last record of the same file
    (never another width of it); a file new to the candidate is taken at
    whichever width answers.
+5. a photograph a person chose, where every route above leaves the
+   candidate none (the owner's request of 2026-11-15, and the photo sweep
+   of 2026-11-17): an evidenced `overrides.STATEWIDE_PHOTOS` entry keyed on
+   the cache's own key for the candidate (`ST|office|<the list's name>`),
+   with the same fields and checks as a profile's `CANDIDATE_PHOTOS` entry
+   (the file, the page naming them beside it, its words, whose it is, why
+   that page is theirs, what a person saw and measured on the card, the day;
+   a file a legislature keys by its seat stands only while its member holds
+   the seat). `ballotphotos` reads it as route `curated` (`--curated-only`
+   reads these alone), weighed and shaped as every route's photograph is,
+   a Commons file credited from its own page and held to the licence test;
+   `NOT_A_PORTRAIT` and `PORTRAIT_LICENCE_DOUBTS` withhold it. The guide's
+   hosted photograph and the holder's office photograph stand ahead of it,
+   and the build names an entry they do; `validate` fails an entry without
+   its fields or a refused file (`statewide-photo-curated-unevidenced`) and
+   warns of one that stands for nothing - a name no list prints, a
+   candidate another route pictures, an entry the cache has not read
+   (`stale-statewide-photo-override`). Its first eleven entries picture
+   candidates for governor every route had left with the silhouette: four
+   state legislators' and an attorney general's official photographs from
+   their offices' own pages, the Guam Legislature's two, and four Commons
+   files (two House portraits, Darren Bailey's own upload, Helena Foulkes's
+   lead, refused by the reader only for its run-together file name).
+   An entry, statewide or a profile's, names one Commons file (its address
+   and its description page the same file) and quotes no email address,
+   street address or phone number in its words, tie, seen or credit
+   (`photos.contact_details`).
 
 A photograph its source offers only above 300 KB or 1,200px is shown all the
 same (rule 87): smaller from its host's resizer or Photon where the same

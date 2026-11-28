@@ -24856,6 +24856,325 @@ async function testLazyStateData() {
  * words (rule 91), and after Election Day the race is in the past tense
  * beside the state's results, naming no winner. Every check asks the data
  * for whichever case is true. */
+async function testLegislativeTerms() {
+  /* The day each legislative chamber's new term begins (kyc/legislative_terms.py,
+   * from the state's own law) and the roster this site reads, Open States,
+   * which seats members-elect only when it next updates (rule 106: Florida's
+   * members "take office upon election", and on Nov. 15 the roster still held
+   * two senators' predecessors). Made-up chambers, on each clock: one whose
+   * term begins the day after the election, one on the first Monday of
+   * December, one in January, a gap, and a roster a person recorded caught
+   * up - never the day's data. */
+  const term = (day, from, extra) => Object.assign({ day, from, kind: "on", counted: true,
+    words: "the day next after their election", cite: "Made Const. art. II, s.3",
+    source: "https://law.example.gov/legislature", read: "2026-11-25" }, extra || {});
+  const NOV = term("2026-11-04", "2026-11-04");
+  const DEC = term("2026-12-07", "2026-12-07", { words: "the first Monday in December",
+    cite: "Made Const. art. II, s.4" });
+  const JAN = term("2027-01-11", "2027-01-11", { words: "the second Monday in January",
+    cite: "Made Stat. 1.01", kind: "by" });
+  const READ = "2026-11-17";
+  const pick = (D, window, id) => {
+    const shape = D.querySelector(`#legMap .district-statewide [data-region="${id}"]`);
+    shape.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  };
+  const CLOCKS = [["the campaign's clock", CAMPAIGN_NOW, false, false, false],
+    ["November 5", "2026-11-05T12:00:00", true, false, false],
+    ["December 8", "2026-12-08T12:00:00", true, true, false],
+    ["January 12", "2027-01-12T12:00:00", true, true, true]];
+  const made = (c, t, up, behind) => Object.assign(c, { termBegins: t, rosterBehind: behind, upSeats: up });
+  for (const [clock, now, nov, dec, jan] of CLOCKS) {
+    // The state page and the map's words (kyc-stategov.js).
+    const p = await buildPage("states/fl.html", { now });
+    await settle(30);
+    const W = p.window, K = W.KYC, D = p.D;
+    const s = W.kycStateGov.states.FL;
+    W.kycStateGov.sources.openstates = ["Open States", "https://openstates.org/", READ];
+    made(s.upper, NOV, 20, true);
+    made(s.lower, DEC, s.lower.seats, true);
+    const box = (html) => { const d = D.createElement("div"); d.innerHTML = html; return d; };
+    const rows = () => [...box(K.stategov.render("FL")).querySelectorAll(".gov-chamber")];
+    suite(`legislative terms on the state page, ${clock}`, () => {
+      const [upper, lower] = rows();
+      const un = upper.querySelector(".leg-term-lag"), ln = lower.querySelector(".leg-term-lag");
+      check(nov ? "the Senate's row says its members took office, when, and that the roster may be behind"
+        : "before the Senate's day, its row says nothing of a new term",
+        nov ? !!un && un.textContent.indexOf("Members elected on Nov. 3, 2026 took office on Nov. 4, 2026, " +
+          "counted from “the day next after their election” (Made Const. art. II, s.3).") === 0 &&
+          /The roster this site reads \(Open States, read Nov\. 17, 2026\) may still list members whose terms ended then: 20 of its 40 seats were on that ballot\./.test(un.textContent) &&
+          /names no one elected\.$/.test(un.textContent) &&
+          !!un.querySelector('a[href="https://law.example.gov/legislature"]')
+          : !un, upper.textContent);
+      check(dec ? "the House's row: the first Monday of December, all its seats on that ballot"
+        : "before the House's day, nothing of it",
+        dec ? !!ln && /took office on Dec\. 7, 2026, counted from “the first Monday in December”/.test(ln.textContent) &&
+          new RegExp("all " + s.lower.seats + " of its seats were on that ballot").test(ln.textContent)
+          : !ln, lower.textContent);
+      const uh = upper.querySelector(".gov-chamber-holds").textContent;
+      check(nov ? "no majority is stated from a roster behind the new term, and why"
+        : "before it, the majority is stated as the seats give it",
+        nov ? /^Which party holds a majority is not stated here: the roster may still list members whose terms ended when the new term began on Nov\. 4, 2026/.test(uh)
+          : /majority of the seats|Elected without party labels/.test(uh), uh);
+      const tri = box(K.stategov.render("FL")).querySelector(".gov-trifecta").textContent;
+      check(nov ? "nor whether one party holds the governorship and the legislature"
+        : "before it, the trifecta line stands", nov
+        ? /^Whether one party holds the governorship and the legislature is not stated here: the roster may still list members whose terms ended when a chamber's new term began\.$/.test(tri)
+        : !/not stated/.test(tri), tri);
+      // The glance box above the section, and a coalition note: the branch's
+      // review found it saying "Republican trifecta" under a section that
+      // stated none (2026-11-27).
+      const keep = [s.legislature, s.note];
+      s.legislature = "coalition";
+      s.note = "Made coalition note.";
+      const glance = box(K.stategov.glance("FL"));
+      const gc = (glance.querySelector(".glance-control") || {}).textContent;
+      check(nov ? "the glance box states no trifecta and no coalition note"
+        : "before it, the glance box states the trifecta and the coalition note",
+        nov ? gc === "Not stated: a new term has begun" && glance.textContent.indexOf("Made coalition note.") === -1
+          : !/Not stated/.test(gc) && glance.textContent.indexOf("Made coalition note.") !== -1, gc);
+      [s.legislature, s.note] = keep;
+      const look = K.stategov.look("FL", "legislature");
+      check(nov ? "the map's legislature view draws it as not stated, in the vacant grey, and says why"
+        : "before it, the map draws the party's control",
+        nov ? look.fill === "var(--vacant-fill)" && /is not stated here/.test(look.text) &&
+          K.stategov.legend("legislature").some((r) => /new term has begun/.test(r[1])) &&
+          /^Not stated/.test(K.stategov.badge("FL", "trifecta"))
+          : look.fill !== "var(--vacant-fill)" && !/not stated/.test(look.text), look.text);
+      // A person recorded the Senate's roster caught up: nothing is said of it.
+      s.upper.rosterBehind = false;
+      const caught = rows()[0];
+      check("a roster recorded caught up says nothing and states the majority",
+        !caught.querySelector(".leg-term-lag") && !/not stated/.test(caught.textContent), caught.textContent);
+      // A gap: no day read. After the election the row says this site
+      // cannot tell whether the roster is behind (rule 19), and still
+      // states the majority, since nothing shows it is behind.
+      s.upper.rosterBehind = true;
+      delete s.upper.termBegins;
+      s.upper.termUnknown = { source: "https://law.example.gov/gap" };
+      const gapRow = rows()[0], gapNote = gapRow.querySelector(".leg-term-lag");
+      check(nov ? "a chamber with no day read says, after the election, that this site cannot say whether its roster is behind"
+        : "before the election, a chamber with no day read says nothing of a new term",
+        nov ? !!gapNote && gapNote.textContent.indexOf("This site has not read the day the term of the members " +
+          "elected on Nov. 3, 2026 begins in this chamber, so it cannot say whether the roster it reads " +
+          "(Open States, read Nov. 17, 2026) still lists members whose terms have ended.") === 0 &&
+          !!gapNote.querySelector('a[href="https://law.example.gov/gap"]') &&
+          !/not stated/.test(gapRow.querySelector(".gov-chamber-holds").textContent)
+          : !gapNote, gapRow.textContent);
+      delete s.upper.termUnknown;
+      check("a chamber not on that ballot says nothing of a new term", !rows()[0].querySelector(".leg-term-lag"));
+      // A January chamber (a "by" day): only from the day after it.
+      made(s.lower, JAN, 99, true);
+      const jl = rows()[1].querySelector(".leg-term-lag");
+      check(jan ? "a January term, \"no later than\" its day, from the day after it"
+        : "a January term says nothing before its day",
+        jan ? !!jl && /took office no later than Jan\. 11, 2027, counted from “the second Monday in January”/.test(jl.textContent) &&
+          /99 of its 120 seats were on that ballot/.test(jl.textContent)
+          : !jl, jl && jl.textContent);
+      // An "Also on this site" legislator role (kyc/identity.py
+      // legislator_term_end): its ended words from the chamber's day on the
+      // reader's own, its own words before it; never a winner's.
+      const legRole = { kind: "legislator", id: "ocd-person/1", state: "FL",
+        words: "Member of the Made House of Representatives, district 4",
+        ends: DEC.from, endsRead: READ, href: "legislature/fl.html#/?d=4",
+        share: "legislature/fl.html#/?d=4",
+        ended: "Was a member of the Made House of Representatives, district 4, for the term " +
+          "that ended when the new term began on Dec. 7, 2026; the seat was on the Nov. 3, 2026 ballot" };
+      const also = box(K.alsoHtml({ also: [legRole] })).textContent;
+      check(dec ? "a legislator's Also line reads its ended words from the chamber's day"
+        : "before the chamber's day, a legislator's Also line reads the seat's own words",
+        dec ? also.indexOf("Was a member of the Made House of Representatives, district 4, for the term that ended") !== -1
+          : also.indexOf("Member of the Made House of Representatives, district 4") !== -1 &&
+            also.indexOf("Was a member") === -1, also);
+    });
+
+    // The directory of legislatures: each state's chambers and its control,
+    // in the state page's words (the branch's review found Florida's cell
+    // ending "Republican majority in both chambers." under rows that stated
+    // no majority).
+    const dir = await buildPage("legislature/index.html", { now, loaded: (w) => {
+      const fl = w.kycStateGov.states.FL;
+      made(fl.upper, NOV, 20, true);
+      made(fl.lower, DEC, fl.lower.seats, true);
+      fl.legislature = "R";
+    } });
+    await settle(30);
+    suite(`legislative terms in the directory of legislatures, ${clock}`, () => {
+      check("no page errors", dir.errors.length === 0, dir.errors.join(" | "));
+      const cell = dir.D.querySelector('[data-facts="FL"]');
+      const text = cell ? cell.textContent : "";
+      check(nov ? "Florida's cell states no party's control, and says why"
+        : "before its day, Florida's cell states the party's control",
+        nov ? text.indexOf("Which party holds the legislature is not stated here: the roster may still list " +
+          "members whose terms ended when a chamber's new term began.") !== -1 && !/majority in both chambers/.test(text)
+          : /Republican majority in both chambers\./.test(text) && !/not stated/.test(text), text.slice(0, 400));
+    });
+
+    // The legislature page: the counts, the district panel and the rows.
+    const lp = await buildPage("legislature/fl.html", { now });
+    await settle(30);
+    const LW = lp.window, LD = lp.D, LK = LW.KYC;
+    const leg = LW.kycLegislature.FL;
+    leg.sources.peopleDate = READ;
+    made(leg.chambers.upper, NOV, 20, true);
+    made(leg.chambers.lower, DEC, leg.chambers.lower.seats, true);
+    const ids = Object.keys(leg.chambers.upper.districts);
+    const upId = ids.find((i) => leg.chambers.upper.districts[i].up === true &&
+      (leg.chambers.upper.members[i] || []).length);
+    const offId = ids.find((i) => leg.chambers.upper.districts[i].up === false &&
+      (leg.chambers.upper.members[i] || []).length);
+    LD.querySelector('.segmented [data-chamber="lower"]').click();
+    LD.querySelector('.segmented [data-chamber="upper"]').click();
+    suite(`legislative terms on the legislature page, ${clock}`, () => {
+      check("no page errors", lp.errors.length === 0, lp.errors.join(" | "));
+      const body = LD.getElementById("legPanelBody");
+      const note = body.querySelector(".leg-term-lag");
+      check(nov ? "the chamber's summary says it beside the counts, and states no majority"
+        : "before its day, the summary says nothing of a new term and states the majority",
+        nov ? !!note && note.textContent === LK.legislatureLagText(leg.chambers.upper, READ) &&
+          /^Which party holds a majority is not stated here/.test(body.querySelector(".leg-holds").textContent)
+          : !note && !/not stated/.test(body.querySelector(".leg-holds").textContent), body.textContent.slice(0, 300));
+      const row = (id) => LD.querySelector(`#legRoster .leg-row[data-region="${id}"]`);
+      check(nov ? "a seat on that ballot is marked listed from before the new term, one not on it is not"
+        : "before its day, no seat is marked",
+        !!upId && !!offId && (nov ? !!row(upId).querySelector(".leg-row-lag") && !row(offId).querySelector(".leg-row-lag")
+          : !row(upId).querySelector(".leg-row-lag")), upId + " / " + offId);
+      pick(LD, LW, upId);
+      const mark = LD.querySelector("#legPanelBody .leg-seat-lag");
+      check(nov ? "its panel marks its member as the roster's listing, never as who sits now"
+        : "before its day, the panel marks nothing",
+        nov ? !!mark && /^This seat was on the Nov\. 3, 2026 ballot, and its new term began on Nov\. 4, 2026: Open States’ roster, read Nov\. 17, 2026, may still list the member whose term ended then\.$/.test(mark.textContent)
+          : !mark, mark && mark.textContent);
+      pick(LD, LW, offId);
+      check("a seat not on that ballot is never marked", !LD.querySelector("#legPanelBody .leg-seat-lag"));
+      // "Find who represents you": the same words under the member.
+      const fr = LK.findRep.legislatureRows("FL", leg, { upper: [upId], lower: [] });
+      const frText = fr.join("");
+      check(nov ? "Find who represents you marks the member the same way" : "and says nothing before it",
+        nov ? frText.indexOf(LK.escapeHtml(LK.legislatureSeatLag(leg.chambers.upper, true, READ))) !== -1
+          : !/may still list the member/.test(frText), frText.slice(0, 300));
+      // A gap: the summary says this site cannot tell, and marks no seat.
+      const gapC = leg.chambers.upper, kept = gapC.termBegins;
+      delete gapC.termBegins;
+      gapC.termUnknown = {};
+      LD.querySelector('.segmented [data-chamber="lower"]').click();
+      LD.querySelector('.segmented [data-chamber="upper"]').click();
+      const gapNote = LD.querySelector("#legPanelBody .leg-term-lag");
+      check(nov ? "a chamber with no day read: its summary says this site cannot say whether the roster is behind, states the majority and marks no seat"
+        : "before the election, a chamber with no day read says nothing",
+        nov ? !!gapNote && /^This site has not read the day/.test(gapNote.textContent) &&
+          !gapNote.querySelector("a") &&
+          !/not stated/.test(LD.querySelector("#legPanelBody .leg-holds").textContent) &&
+          !row(upId).querySelector(".leg-row-lag")
+          : !gapNote, gapNote && gapNote.textContent);
+      delete gapC.termUnknown;
+      gapC.termBegins = kept;
+      // A seat on that ballot in a special election for the rest of a term,
+      // and a seat the record names no district for: the branch's review
+      // found Hawaii's Senate counting 13 of its 25 seats beside a special
+      // district left unmarked, and Montana's Senate telling every seat its
+      // new term had begun (2026-11-27).
+      const up = leg.chambers.upper, sp = up.districts[offId];
+      sp.special = true;
+      up.specialSeats = 1;
+      LD.querySelector('.segmented [data-chamber="lower"]').click();
+      LD.querySelector('.segmented [data-chamber="upper"]').click();
+      const spText = LK.legislatureLagText(up, READ);
+      check(nov ? "the summary counts a special seat apart, and gives it no day"
+        : "before its day, nothing of it",
+        nov ? spText.indexOf("Members elected on Nov. 3, 2026 to regular terms took office on Nov. 4, 2026") === 0 &&
+          spText.indexOf("20 of its 40 seats were on that ballot for regular terms. One more seat was on it " +
+            "in a special election for the rest of a term, and the roster may still list the member from " +
+            "before that election too.") !== -1
+          : spText === "", spText);
+      const spBadge = row(offId).querySelector(".leg-row-lag");
+      check(nov ? "the special seat's row: maybe listed from before the special election"
+        : "before its day, the special seat's row is unmarked",
+        nov ? !!spBadge && spBadge.textContent === "May be listed from before the special election" : !spBadge,
+        row(offId).textContent);
+      check(nov ? "a regular seat's row still reads listed from before the new term" : "nor a regular seat's",
+        nov ? (row(upId).querySelector(".leg-row-lag") || {}).textContent === "Listed from before the new term"
+          : !row(upId).querySelector(".leg-row-lag"));
+      pick(LD, LW, offId);
+      const spMark = LD.querySelector("#legPanelBody .leg-seat-lag");
+      check(nov ? "its panel says the special election was on that ballot, and names no new term"
+        : "before its day, its panel marks nothing",
+        nov ? !!spMark && spMark.textContent === "This seat was on the Nov. 3, 2026 ballot in a special election " +
+          "for the rest of its term: Open States’ roster, read Nov. 17, 2026, may still list the member from " +
+          "before that election."
+          : !spMark, spMark && spMark.textContent);
+      delete sp.special;
+      delete up.specialSeats;
+      const maybe = up.districts[upId], wasUp = maybe.up;
+      delete maybe.up;
+      const maybeWords = LK.legislatureSeatLag(up, maybe, READ);
+      check(nov ? "a seat that may have been on that ballot says its new term began only if it was"
+        : "before its day, nothing of it",
+        nov ? maybeWords === "This seat may have been on the Nov. 3, 2026 ballot; if it was, its new term began " +
+          "on Nov. 4, 2026, and Open States’ roster, read Nov. 17, 2026, may still list the member whose term " +
+          "ended then." && LK.legislatureSeatLagBadge(up, maybe) === "May be listed from before the new term"
+          : maybeWords === "" && LK.legislatureSeatLagBadge(up, maybe) === "", maybeWords);
+      maybe.up = wasUp;
+      // A district of two members: all its seats up (North Dakota's House),
+      // one of them up (West Virginia's Senate), or a special election for
+      // one of them - its verification found the special's words over both
+      // of a North Dakota district's members (2026-11-27).
+      const second = (id) => up.members[id].push(Object.assign({}, up.members[id][0], { name: "Made Second" }));
+      second(upId);
+      const two = LK.legislatureSeatLag(up, upId, READ), twoBadge = LK.legislatureSeatLagBadge(up, upId);
+      check(nov ? "a district of two members whose seats were up: their seats, the members"
+        : "before its day, nothing of it",
+        nov ? two === "This district’s seats were on the Nov. 3, 2026 ballot, and their new term began on " +
+          "Nov. 4, 2026: Open States’ roster, read Nov. 17, 2026, may still list the members whose terms ended " +
+          "then." && twoBadge === "Listed from before the new term" : two === "" && twoBadge === "", two);
+      const keptSeats = up.districtSeats;
+      up.districtSeats = "one-of-several";
+      const oneOf = LK.legislatureSeatLag(up, upId, READ);
+      check(nov ? "one of a district's seats up: one of its seats, the member" : "before its day, nothing of one",
+        nov ? oneOf === "One of this district’s seats was on the Nov. 3, 2026 ballot, and its new term began on " +
+          "Nov. 4, 2026: Open States’ roster, read Nov. 17, 2026, may still list the member whose term ended then." &&
+          LK.legislatureSeatLagBadge(up, upId) === "One may be listed from before the new term" : oneOf === "", oneOf);
+      up.districtSeats = keptSeats;
+      up.members[upId].pop();
+      sp.special = true;
+      second(offId);
+      const spTwo = LK.legislatureSeatLag(up, offId, READ);
+      check(nov ? "a special election in a district of two members: one of its seats"
+        : "before its day, nothing of a special",
+        nov ? spTwo === "One of this district’s seats was on the Nov. 3, 2026 ballot in a special election for " +
+          "the rest of its term: Open States’ roster, read Nov. 17, 2026, may still list the member from before " +
+          "that election." && LK.legislatureSeatLagBadge(up, offId) === "One may be listed from before the special " +
+          "election" : spTwo === "", spTwo);
+      up.members[offId].pop();
+      delete sp.special;
+    });
+
+    // Your ballot: the reader's chamber card says when the term began.
+    const bp = await buildPage("ballot.html", { now });
+    await settle(30);
+    const BK = bp.window.KYC;
+    const bleg = JSON.parse(JSON.stringify(leg));
+    const cards = BK.ballot.legislatureCards("FL", { leg: bleg, upper: [upId], lower: [] });
+    suite(`legislative terms on Your ballot, ${clock}`, () => {
+      const html = cards.map((c) => typeof c === "string" ? c : (c.html || c.body || JSON.stringify(c))).join("");
+      check(nov ? "the chamber's card says its members took office and the roster may be behind"
+        : "before its day, the card says nothing of a new term",
+        nov ? html.indexOf("Members elected on Nov. 3, 2026 took office on Nov. 4, 2026") !== -1 &&
+          html.indexOf("may still list members whose terms ended then") !== -1
+          : html.indexOf("may still list members") === -1, html.slice(0, 400));
+      const gleg = JSON.parse(JSON.stringify(leg));
+      delete gleg.chambers.upper.termBegins;
+      gleg.chambers.upper.termUnknown = { source: "https://law.example.gov/gap" };
+      const ghtml = BK.ballot.legislatureCards("FL", { leg: gleg, upper: [upId], lower: [] })
+        .map((c) => typeof c === "string" ? c : (c.html || c.body || JSON.stringify(c))).join("");
+      check(nov ? "a chamber with no day read: the card says this site cannot say whether the roster is behind"
+        : "before the election, a chamber with no day read: nothing",
+        nov ? ghtml.indexOf("This site has not read the day the term of the members elected on Nov. 3, 2026 begins") !== -1 &&
+          ghtml.indexOf("took office on Nov. 4, 2026") === -1
+          : ghtml.indexOf("This site has not read the day") === -1, ghtml.slice(0, 400));
+    });
+  }
+}
+
 async function testTermsBegun() {
   /* The day the term the 2026 election chose begins (kyc/terms_begin.py,
    * from each state's own law), and a roster that has not caught up with
@@ -27400,7 +27719,15 @@ async function testAlsoLines() {
   const role = (over) => Object.assign({ kind: "profile", id: "X000000", state: "MN",
     words: "Made-up role words", after: "Made-up past words",
     href: "states/mn.html#/profile/X000000", view: "#/profile/X000000", share: "p/X000000.html" }, over || {});
-  const wordsOf = (r, post) => (post && r.after ? r.after : r.words) + (r.link ? " (" + r.link + ")" : "");
+  // As KYC.alsoHtml says a role on the clock's day: a legislator's, a
+  // governor's or an officer's ends on its chamber's or term's day (`ends`,
+  // `ended`: rules 105 and 106), and South Carolina's House began its term on
+  // Nov. 9, before this suite's post-election clock.
+  const wordsOf = (r, post) => {
+    const day = (post ? POST : CAMPAIGN_NOW).slice(0, 10);
+    return (r.ends && r.ended && day >= r.ends ? r.ended : post && r.after ? r.after : r.words) +
+      (r.link ? " (" + r.link + ")" : "");
+  };
   const lineText = (box) => [...box.querySelectorAll(".also-line a.also-link")].map((a) => a.textContent);
   const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
   const people = [...everyone().values()];
@@ -27847,9 +28174,12 @@ async function testAlsoLines() {
 
   suite("also on this site — the share pages (rule 105)", () => {
     const share = (file) => { try { return fs.readFileSync(path.join(SITE, file), "utf8"); } catch (e) { return ""; } };
-    const said = (text, r) => text.indexOf(">" + (r.words + (r.link ? " (" + r.link + ")" : ""))
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "<") !== -1 ||
-      (r.after && text.indexOf(">" + r.after.replace(/&/g, "&amp;") + "<") !== -1);
+    // A share page is written on the build's day: a role whose day has come
+    // (`ends`) is said in its `ended` words there (rules 105 and 106).
+    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const said = (text, r) => text.indexOf(">" + esc(r.words + (r.link ? " (" + r.link + ")" : "")) + "<") !== -1 ||
+      (r.after && text.indexOf(">" + r.after.replace(/&/g, "&amp;") + "<") !== -1) ||
+      (r.ended && text.indexOf(">" + esc(r.ended + (r.link ? " (" + r.link + ")" : "")) + "<") !== -1);
     const wrong = joinedPeople.filter((p) => !p.formerMember || true).filter((p) => {
       const text = share("p/" + p.id + ".html");
       return text && (p.also.some((r) => !said(text, r)) || !/class="share-also"/.test(text));
@@ -27922,6 +28252,7 @@ async function testAlsoLines() {
   if (!only || only === "states" || only === "statephone" || only === "governors") await testPhoneGovernorRace();
   if (!only || only === "states" || only === "governors") await testGovernorCards();
   if (!only || only === "states" || only === "governors" || only === "terms") await testTermsBegun();
+  if (!only || only === "states" || only === "terms" || only === "legterms") await testLegislativeTerms();
   if (!only || only === "states" || only === "governors") await testGovernorOverlays();
   if (!only || only === "states" || only === "governors" || only === "photos") await testGovernorPhotoCredits();
   if (!only || only === "states") await testElectionNight();

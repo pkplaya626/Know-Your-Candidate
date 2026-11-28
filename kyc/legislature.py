@@ -1088,6 +1088,11 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         years = term_years(code, chamber)
         if years:
             out_chambers[chamber]["termYears"] = years
+        # The day the new term began and whether the roster may be behind it
+        # (rule 106), in the state page's record (stategov.legislative_term).
+        for key in ("upSeats", "specialSeats", "termBegins", "rosterBehind", "termUnknown"):
+            if key in ((control or {}).get(chamber) or {}):
+                out_chambers[chamber][key] = control[chamber][key]
 
     placed = {r["id"] for c in out_chambers.values() for listed in c["members"].values()
               for r in listed}
@@ -1342,14 +1347,31 @@ def specials(code, chamber, districts):
     years. A clause that speaks of a special but names no district on this
     map is an error, never an unmarked district: a mark missing over a
     seat on the ballot looks entirely normal."""
-    entry = (ballot2026.STATES.get(code) or {}).get(chamber)
-    if not entry or not districts:
+    if not districts:
         return []
-    basis = entry[3]
-    clauses = re.split(r"[(;]", basis)[1:]
     by_name = {statelegs.norm(d["name"]): i for i, d in districts.items()}
     out = []
-    for clause in clauses:
+    for number in special_numbers(code, chamber):
+        found = by_name.get(statelegs.norm(number))
+        if found is None:
+            raise LegislatureError(f"{code} {chamber}: the 2026 record's special election in "
+                                   f"district {number} is not a district on the map")
+        if found not in out:
+            out.append(found)
+    return out
+
+
+def special_numbers(code, chamber):
+    """The district numbers the state's own record (``ballot2026``) names
+    for an election to the rest of a term on the Nov 3, 2026 ballot, in the
+    record's order, once each: what :func:`specials` places on the map and
+    the chamber's count of its special seats (``stategov.legislative_term``'s
+    ``specialSeats``, rule 106) read alike (rule 12)."""
+    entry = (ballot2026.STATES.get(code) or {}).get(chamber)
+    if not entry:
+        return []
+    out = []
+    for clause in re.split(r"[(;]", entry[3])[1:]:
         if not _SPECIAL_WORDS.search(clause):
             continue
         text = re.sub(r"\b\d+-year\b|\b\d+ years?\b|\b(?:19|20)\d\d\b", " ", clause)
@@ -1357,13 +1379,7 @@ def specials(code, chamber, districts):
         if not numbers:
             raise LegislatureError(f"{code} {chamber}: the 2026 record names a special election "
                                    f"but no district: {clause.strip()!r}")
-        for number in numbers:
-            found = by_name.get(statelegs.norm(number))
-            if found is None:
-                raise LegislatureError(f"{code} {chamber}: the 2026 record's special election in "
-                                       f"district {number} is not a district on the map")
-            if found not in out:
-                out.append(found)
+        out.extend(n for n in numbers if n not in out)
     return out
 
 

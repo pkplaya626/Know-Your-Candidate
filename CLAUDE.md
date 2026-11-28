@@ -229,8 +229,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3616 tests, no dependencies
-npm install && npm test                       # 5242 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3643 tests, no dependencies
+npm install && npm test                       # 5363 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -462,7 +462,40 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     profile's, what a person saw (the person alone) and the day; it stands
     ahead of the automatic routes as the portrait cache's `curated` route:
     Ken Paxton, left a silhouette when the background-people sweep refused
-    his Commons photograph, shows his office's portrait this way. A ballot link
+    his Commons photograph, shows his office's portrait this way. The
+    photo sweep of 2026-11-17 (the owner's request of 2026-11-15, "lets try
+    and fill those photos and any other missing from non eliminated
+    canidates") added 43 such entries for members-elect, nominees and
+    Louisiana's qualified candidates: 42 every route had left a silhouette,
+    and Tom Sell, whose article's lead was a crop of a group tribute nobody
+    had looked at (his campaign's photograph of him alone stands ahead of
+    it, as a curated entry does): each file found by one reader on a page tied to the person (the campaign site
+    their committee filed, or one whose disclaimer names that committee
+    exactly; their legislature's page; the article their ballot page links
+    and its Commons files), re-opened and confirmed by a second who fetched
+    it again as this project (the same bytes, pixel size and sha256) and
+    measured the face on the card, and looked at again on a contact sheet.
+    A chosen file over the caps is shown smaller from the same file through
+    its host's resizer or Photon, weighed and the same shape, the entry's
+    file kept as its `original`, else as it is, and said either way
+    (`heavy`, `portraits.lighten_curated`, rule 87; twelve were, Charlie
+    Hatcher's a 4.4 MB PNG). A frame wider than tall is asked first for the
+    width that leaves the 4:5 card's crop 500 pixels of height
+    (`photos.card_tall_forms`, never over 1,200 wide; at 500 wide a 3:2
+    file left the card 266x333 pixels, soft on a phone), else at 500, and a
+    Wix rendition is drawn smaller by Wix's own service, its `/v1/fill/`
+    width and height in proportion, before Photon (`photos.host_resized`:
+    Patrick Forbes's). A chosen file is weighed as a page is
+    served it (`portraits.weigh_as_shown`): Wix sent Elizabeth Fitzgibbon's
+    24 KB AVIF as a 379 KB PNG to a request that accepted nothing in
+    particular. An entry names one file: a Commons address and a
+    description page naming two are refused (the statewide reader showed
+    the page's while its record said the address's), and so is an entry
+    whose words, tie, seen or credit quote an email address, a street
+    address or a phone number (`photos.contact_details`): the first
+    Wyoming entry quoted the home address the legislature's record and the
+    Secretary of State's list both print, to be committed and published in
+    the cache's evidence (rule 64 keeps no contact details either). A ballot link
     withheld as leading elsewhere is withheld before any portrait is taken
     from it (`enrich.withhold_links`).
     `title_is_about` rejects a resolved title that does not contain the
@@ -3438,7 +3471,32 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     pamphlet (JPEG 2000 inside PDFs) - picture a candidate none of those
     routes reaches, kept here as copies by the owner's decision of
     2026-10-25 (`kyc/guide_photos.py`, rules 24 and 101), joined on the
-    list's own words for that office. A heavy photograph is shown and said, as rule 87 says. A Commons
+    list's own words for that office. A fifth route stands behind all of
+    them (the owner's request of 2026-11-15, as rule 24's curated route is
+    for profiles): a photograph a person chose, by an evidenced
+    `overrides.STATEWIDE_PHOTOS` entry keyed on the cache's own key for the
+    candidate (`ST|office|<the list's name>`, `statewide_photos.key`), with
+    the fields and checks of a `CANDIDATE_PHOTOS` entry - the file, the page
+    naming them beside it, its words, whose it is, why that page is theirs,
+    what a person saw and measured, the day, and a seat-keyed file's seat,
+    withheld once the roster seats someone else
+    (`statewide_photos.curated_problems`). `ballotphotos` reads it as route
+    `curated` (`--curated-only` alone), weighed and shaped as every route's,
+    a Commons file credited from its own page and held to the licence test
+    but not the file-name test (a person looked at the picture, not its
+    name); `NOT_A_PORTRAIT` and `PORTRAIT_LICENCE_DOUBTS` withhold it, and so
+    does an entry that no longer names the cached file. It is shown only
+    where every route leaves the candidate none, the guide's hosted
+    photograph and the holder's office photograph included
+    (`statewide_photos.attach`, which names an entry they stand ahead of to
+    the build); `validate` fails an entry without its fields or naming a
+    refused file (`statewide-photo-curated-unevidenced`) and warns of one
+    that stands for nothing: a name no list prints, a candidate another
+    route pictures, an entry the cache has not read
+    (`stale-statewide-photo-override`). The sweep of 2026-11-17 gave it its
+    first eleven, candidates for governor every route had left a
+    silhouette, found, confirmed and looked at as rule 24's 43 were, held
+    to its one Commons file and its words free of contact details. A heavy photograph is shown and said, as rule 87 says. A Commons
     file is held to rule 82's one licence test, at the read and again at
     every build (`statewide_photos.licence_doubt`): one whose page names no
     author, public domain on an uploader's word alone ("PD-author", or no
@@ -4804,23 +4862,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     joins kept - and said in `identity-officer-roster-behind` (a
     governor's or an officer's) or `identity-legislator-roster-behind` (a
     legislator's), with the joins that made it, never also a look-alike. A
-    legislator's role has no end at all: this site records no legislature's
-    day its new term begins. Mike McGuire's California Senate seat (its
-    district on the 2026 ballot; he won CA-1) would read "Member of the
-    California State Senate, district 2" after December 7, when California's
-    new term begins, and Jasmeet Bains, who lost her race for CA-22,
-    "Member of the California State Assembly" for as long as Open States
-    lists her - the legislature page's own lag, copied onto profiles,
-    governor cards and share pages.
-    Until a sourced table of each legislature's term-start day gives the
-    role an end (its own branch, which serves the legislature pages' lag
-    too), the limit is said: each joined legislator whose district the
-    legislature page marks on the 2026 ballot (`districts[d].up`) while
-    another of their cards shows a 2026 run for another office, a filing
-    for Congress or the list for governor, is a warning
-    (`identity-legislator-term-ending`, with the chamber and district), for
-    a person to check once that chamber's new term has begun. A district
-    of more seats than one up (West Virginia's Senate) may not be theirs.
+    legislator's role had no end at all, since this site recorded no
+    legislature's day its new term begins: Mike McGuire's California Senate
+    seat (its district on the 2026 ballot; he won CA-1) would have read
+    "Member of the California State Senate, district 2" after December 7,
+    when California's new term begins, and Jasmeet Bains, who lost her race
+    for CA-22, "Member of the California State Assembly" for as long as
+    Open States lists her - the legislature page's own lag, copied onto
+    profiles, governor cards and share pages. Rule 106's table now gives it
+    one (`identity.legislator_term_end`): where the member's district was on
+    the 2026 ballot (`districts[d].up`), the chamber has a day
+    (`termBegins`) and no person has recorded its roster caught up
+    (`rosterBehind`), the role carries `ends` (the term's first certain
+    day), `endsRead` (the roster's read) and `ended`, "Was a member of the
+    California State Senate, district 2, for the term that ended when the
+    new term began on Dec. 7, 2026 ...; the seat was on the Nov. 3, 2026
+    ballot", read on the reader's day as a governor's is: it says the term
+    the roster's listing was for, never that a re-elected member left or
+    who won. Where the chamber's day is a gap the limit is said: each joined
+    legislator whose district is on that ballot while another of their
+    cards shows a 2026 run for another office, a filing for Congress or the
+    list for governor, is a warning (`identity-legislator-term-unknown`,
+    with the chamber and district; it replaced
+    `identity-legislator-term-ending`, which named every chamber's), for a
+    person to read the state's law into the table. A district of more seats
+    than one up (West Virginia's Senate) may not be theirs.
     Janet Mills's governor role keeps its gap: Maine's day is a
     `terms_begin` GAP (maine.gov answered this project's reader CloudFront's
     "Request blocked"), so her profile's "Governor of Maine" carries no end
@@ -4832,6 +4898,99 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     and the map (main's too): the overlay's own route handler, and theirs,
     close an open profile first (`KYC.profile.close({ routed: true })`),
     leaving the history as it stands and the overlay's scroll lock held.
+
+106. **A legislature's new term begins on its state's day, and a roster
+    that has not caught up is said to be behind, never shown as who sits.**
+    The legislators this site shows - the legislature pages, the state
+    pages' chamber counts and control (rule 54), Your ballot's seats, Find
+    who represents you, the search - are Open States' (`statelegs`), which
+    seats members-elect only when it next updates, often weeks late, and
+    nothing on the site knew when any chamber's new term began. On
+    2026-11-15 the Florida Senate listed "Senator Ashley Viola Gantt" in
+    District 34 and the Florida House's 2026-2028 list held Audrey Gibson in
+    District 13, while this site, its roster read 2026-11-17, still showed
+    Shevrin Jones and Angie Nixon there as sitting: Florida's members "take
+    office upon election" (Fla. Const. art. III, s.15(d)). Alabama's,
+    Delaware's and Nevada's begin the day after the election, South
+    Carolina's House the Monday after it, Idaho's, North Dakota's and
+    Pennsylvania's on December 1, California's on the first Monday in
+    December (art. IV, s.2(a)(3)), Alaska's on the third Tuesday in January
+    (AS 24.05.080, the law the constitution's "unless otherwise provided by
+    law" leaves room for), most in January. `kyc/legislative_terms.py` is
+    `kyc/terms_begin.py`'s table for every chamber `ballot2026` puts on the
+    ballot, in its shape: the provision quoted from the state's own
+    publication (never Cornell, Justia or a compilation, rules 48 and 50),
+    read as this project (rule 103) on its day, the rule counted on the
+    calendar and counted again by `check` (`("election", 0)`, the election
+    day itself, begun for certain only from the next day as a noon term is;
+    `("election", 1)`, the day after), "on" or "by" (Colorado's term begins
+    with a session that meets "no later than the second Wednesday of
+    January"); a hold-over clause gives no day; a staggered chamber's record
+    is of the seats on that ballot. The build fails on an entry without its
+    words, address or day, words that are not a quote's, a day the rule does
+    not count, a compiled host, and a chamber on the ballot with neither a
+    day nor a gap (`stategov.build`). Read 2026-11-25, and every quote found
+    again on its page by a second read that day (the PDFs through their own
+    text): 57 chambers dated (55 on a day, 2 by a day) and 31 gaps, each
+    with why and the address a person should read - refusals and pages
+    drawn by script (Georgia's Cloudflare challenge, Indiana's, Maine's,
+    New Hampshire's, Oklahoma's Sucuri check, Tennessee's, West Virginia's
+    timeout, Arkansas's missing official copy) and provisions that name no
+    day (Arizona, Illinois, Missouri, Nebraska, South Dakota, Vermont,
+    Wisconsin, Wyoming). California's leginfo answered one read and a
+    Cloudflare challenge the next. A gap is no day, and no claim either way:
+    from the day after the election its chamber says only that this site
+    has not read the day, so it cannot say whether the roster still lists
+    members whose terms have ended (`termUnknown`,
+    `KYC.legislatureTermUnknownText`, linked to the provision to read where
+    the gap names one), and its majority stands, since nothing shows the
+    roster behind. Nothing in Open States' records dates a member's
+    term (its people carry no dates), so a later read is no proof of a
+    caught-up one: a chamber's roster is behind (`rosterBehind`) until a
+    person records that the roster read on or after the term's day lists
+    the new term's members (`overrides.LEGISLATURE_ROSTERS_CURRENT`, with
+    what they saw, the chamber's own roster and the day; `current_problems`
+    refuses one without them or of an earlier read). From the term's first
+    certain day on the reader's calendar (rule 84), every page that shows
+    the chamber says, beside its counts and members, that members elected on
+    Nov. 3, 2026 took office then, citing the law, and that the roster this
+    site reads (Open States, read on its day) may still list members whose
+    terms ended then, and how many of its seats were on that ballot
+    (`KYC.legislatureLagText`, one implementation for the state page, the
+    legislature page, Your ballot and Find who represents you); each member
+    of a seat on that ballot is marked as listed from before the new term
+    (`KYC.legislatureSeatLag`, badged by `legislatureSeatLagBadge`; "may
+    have been on", and its new term begun "if it was", where the record
+    names no district: Montana's Senate told every seat its term had begun),
+    never as who sits now; and no majority, trifecta, coalition note or map
+    colour is stated from it (`legislatureControlWithheld`, and one wording,
+    `withheld()` in kyc-stategov.js, for the map's hover and badge, the
+    state page's paragraph, its glance box and the directory of
+    legislatures: the branch's review found the glance box saying
+    "Republican trifecta" and the directory "Republican majority in both
+    chambers." under rows that stated none; the map's Legislatures and
+    Trifectas views draw it "not stated" in the vacant grey, with a legend
+    key). A seat on that ballot in a special election for the rest of a term
+    has no new term, and the law does not say when its winner took office:
+    the chamber counts such seats apart (`specialSeats`, from
+    `legislature.special_numbers`, the clauses the map's district marks
+    read), its sentence calls the others regular, and the district says a
+    special election was on that ballot and names no day ("May be listed
+    from before the special election"); Hawaii's Senate read "13 of its 25
+    seats" beside district 19's special. Nothing names a winner: this site reads
+    no state legislative result. `validate` warns of each chamber past its
+    day with its roster behind (`legislature-roster-behind`, eleven on
+    2026-11-25) and of every gap (`legislature-term-unknown`), never an
+    error (rule 8). The overlap cards' "Also on this site" lines (rule 105)
+    take the same day: a legislator's role whose seat was on that ballot
+    ends on it (`identity.legislator_term_end`, its words in the past tense
+    from then on the reader's day, naming no winner), and a joined
+    legislator in a chamber whose day is a gap is
+    `identity-legislator-term-unknown`. Tests make the chambers they
+    test - a term the day after the election, one in December, a "by" day
+    in January, a gap, a roster behind and one recorded caught up - on four
+    clocks (`testLegislativeTerms`), and each check was undone in turn and
+    failed.
 
 ## District maps
 
