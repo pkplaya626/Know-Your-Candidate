@@ -683,6 +683,11 @@ def build(root="."):
     unfit = courts.curated_errors()
     if unfit:
         raise StateGovError("overrides.COURT_ROSTERS: " + "; ".join(unfit))
+    # The District's and the territories' own highest courts: each with its
+    # name, its words and whose words give its seats, or the build stops.
+    unfit = courts.own_court_problems()
+    if unfit:
+        raise StateGovError("courts.OWN_COURTS: " + "; ".join(unfit))
     problems.extend(courts.curated_stale())
     problems.extend(courts.stale(court_cache))
     # An officer confirmed from the office's page read by hand is held to
@@ -738,7 +743,8 @@ def build(root="."):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
         if code not in STATES:
             # A territory: the page calls it one, and says its legislature
-            # and courts are not covered rather than leaving them out silently.
+            # and its other courts are not covered rather than leaving them
+            # out silently; its own highest court is courts.own_court's.
             entry["territory"] = True
         entry.update(officers.for_state(code, officer_cache, disputes))
         problems.extend(office_links(code, entry))
@@ -773,7 +779,15 @@ def build(root="."):
     # law elects an office of the four, its attorney general, and the Board
     # of Elections lists the candidates (ballot2026.DISTRICT). No roster read
     # here names its holder, so the record holds the office and its list.
-    district = {code: {"district": True, "ballot2026": ballot_record(code, {})}
+    # Its own highest court, the District of Columbia Court of Appeals, is
+    # read as a state's is (courts.OWN_COURTS, rule 57).
+    # The federal courts for it are listed after it, as a state's are: the
+    # U.S. Court of Appeals for the D.C. Circuit is another court.
+    from .federal_courts import federal_for_state
+    district = {code: {"district": True, "ballot2026": ballot_record(code, {}),
+                       **courts.for_state(code, court_cache),
+                       **({"federalCourts": federal_for_state(code)}
+                          if federal_for_state(code) else {})}
                 for code in sorted(ballot2026.DISTRICT)}
     problems.extend(unpictured(states))
     if candidates_heavy:

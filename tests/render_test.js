@@ -11150,9 +11150,16 @@ async function testStateGov() {
     const text = section.textContent;
     check("a territory is never called 'the state'",
       /The territory has no lieutenant governor/.test(text) && !/The state has/.test(text), text.slice(0, 300));
+    // Its courts are "not covered" only where its record holds no court
+    // of its own (rule 57: its Tribunal Supremo is read now); whichever the
+    // record holds, the note says which.
+    const prCourt = pr.window.kycStateGov.states.PR.court;
     check("it says its legislature, attorney general and courts are not covered, not just 'not covered'",
-      /Puerto Rico's legislature, attorney general and courts are not covered here/.test(text) &&
-      !/Seats: not covered/.test(text));
+      (prCourt
+        ? /Puerto Rico's legislature, attorney general and courts other than its highest court are not covered here/.test(text) &&
+          /and its highest court, below\./.test(text)
+        : /Puerto Rico's legislature, attorney general and courts are not covered here/.test(text)) &&
+      !/Seats: not covered/.test(text), section.querySelector(".gov-note").textContent);
   });
 
   // The Northern Mariana Islands elect their attorney general (N.M.I. Const.
@@ -11179,7 +11186,9 @@ async function testStateGov() {
       row.textContent);
     const note = section.querySelector(".gov-note").textContent;
     check("the territory's note says only the holder is not covered, in the place's own words (rule 75)",
-      /^The Northern Mariana Islands' legislature and courts, and the holder of its office of attorney general, are not covered here/.test(note) &&
+      (mp.window.kycStateGov.states.MP.court
+        ? /^The Northern Mariana Islands' legislature, its courts other than its highest court, and the holder of its office of attorney general, are not covered here/.test(note)
+        : /^The Northern Mariana Islands' legislature and courts, and the holder of its office of attorney general, are not covered here/.test(note)) &&
       /for the attorney general, the candidates on the election office's list/.test(note) &&
       !/legislature, attorney general and courts/.test(note), note);
     const offices = KYC.stategov.ballotOffices("MP");
@@ -11210,7 +11219,9 @@ async function testStateGov() {
         !c.party), row.textContent);
     const note = section.querySelector(".gov-note").textContent;
     check("the territory's note says only the holder is not covered, in the place's own words (rule 75)",
-      /^Guam's legislature and courts, and the holder of its office of attorney general, are not covered here/.test(note) &&
+      (gu.window.kycStateGov.states.GU.court
+        ? /^Guam's legislature, its courts other than its highest court, and the holder of its office of attorney general, are not covered here/.test(note)
+        : /^Guam's legislature and courts, and the holder of its office of attorney general, are not covered here/.test(note)) &&
       !/legislature, attorney general and courts/.test(note), note);
     const offices = KYC.stategov.ballotOffices("GU");
     check("the ballot line counts it with the governor's ticket", /attorney general/.test(offices || ""), offices);
@@ -11687,7 +11698,9 @@ async function testStateGov() {
       /District of Columbia Board of Elections’ sample ballot/.test(row.textContent), row.textContent);
     const notes = [...section.querySelectorAll(".gov-note")].map((p) => p.textContent).join(" ");
     check("the note says only the holder is not covered, in the District's own words (rule 75)",
-      /^The District of Columbia’s mayor, council and courts, and the holder of its office of attorney general, are not covered here/.test(notes) &&
+      (KYC.stategov.district("DC").court
+        ? /^The District of Columbia’s mayor and council, its courts other than its highest court, and the holder of its office of attorney general, are not covered here/.test(notes)
+        : /^The District of Columbia’s mayor, council and courts, and the holder of its office of attorney general, are not covered here/.test(notes)) &&
       !/state|territor/i.test(notes), notes);
     check("the mayor sentence stays", /The District of Columbia has an elected mayor and a council of 13/.test(section.textContent));
     check("the ballot line names the office", KYC.stategov.ballotOffices("DC") === "the attorney general" &&
@@ -14746,6 +14759,313 @@ async function testPlaceSentences() {
  *    "Tribal governments listed in" it, "each with its leader": rule 19;
  *  - "Guam delegate" and "Puerto Rico resident commissioner" found nobody,
  *    while "delegate" alone listed all six: rule 97. */
+/* The District of Columbia's and the five territories' own highest courts
+ * (rule 57, courts.OWN_COURTS): each on its own page under its own name,
+ * with the titles the court's own roster gives its members, in the place's
+ * own words (rule 75), and in the search's answers both ways - a court
+ * read, and a court this site names no members of (rule 19). The owner
+ * asked why the Virgin Islands' judges were missing: the federal count was
+ * right, and the page named no court of the territory's own. Asked of the
+ * record, and of records made here: which court a refresh reads, keeps or
+ * cannot read is the week's, never typed into a check. */
+async function testOwnCourts() {
+  const AFTER = "2026-11-05T12:00:00";
+  const clocks = [["the campaign's clock", undefined], ["after Election Day", AFTER]];
+  const record = (window, code) => {
+    const d = window.kycStateGov || {};
+    return (d.states || {})[code] || (d.district || {})[code] || null;
+  };
+  const places = (window) => {
+    const meta = window.KYC.meta().states;
+    return Object.keys(meta).filter((c) => meta[c].territory || c === "DC");
+  };
+  // *code*'s block with its court replaced by *court* (none: removed), and
+  // the record put back.
+  const drawWith = (page, code, court) => {
+    const rec = record(page.window, code);
+    const saved = rec.court;
+    if (court) rec.court = court; else delete rec.court;
+    try {
+      const box = page.D.createElement("div");
+      box.innerHTML = page.window.KYC.stategov.render(code, { here: true });
+      return box;
+    } finally {
+      if (saved) rec.court = saved; else delete rec.court;
+    }
+  };
+  const flat = (el) => el.textContent.replace(/\s+/g, " ");
+
+  for (const [clock, now] of clocks) {
+    const opts = now ? { now } : {};
+    const first = await buildPage("states/dc.html", opts);
+    const codes = places(first.window);
+    const pages = { DC: first };
+    for (const code of codes) {
+      if (!pages[code]) pages[code] = await buildPage("states/" + code.toLowerCase() + ".html", opts);
+    }
+    const withCourt = codes.filter((c) => (record(pages[c].window, c) || {}).court);
+    const read = withCourt.filter((c) => (record(pages[c].window, c).court.members || []).length);
+    const unread = withCourt.filter((c) => record(pages[c].window, c).court.unreadable);
+
+    suite(`the District's and the territories' own highest courts — on their pages (${clock})`, () => {
+      check("the record holds a court for the District or a territory, by its own whole name",
+        withCourt.length > 0 && withCourt.every((c) => {
+          const court = record(pages[c].window, c).court;
+          return court.own && court.name && court.name !== "Supreme Court" && court.short;
+        }), withCourt.join(" ") || "none");
+      const wrong = [];
+      withCourt.forEach((c) => {
+        const { window, D } = pages[c];
+        const KYC = window.KYC;
+        const court = record(window, c).court;
+        const section = D.getElementById("state-government");
+        const say = (what) => wrong.push(c + ": " + what);
+        if (!section) { say("no government section"); return; }
+        const head = section.querySelector("#highest-court");
+        if (!head || head.textContent !== court.name) say("no block headed by the court's own name");
+        const lead = section.querySelector(".gov-court-own");
+        const whose = KYC.possessive(KYC.placeStart(c), "’") + " own highest court";
+        if (!lead || lead.textContent.indexOf(whose) !== 0) say("its lead is not '" + whose + "': " + (lead || {}).textContent);
+        // Rule 75: never "the state's" of the District or a territory.
+        const block = [];
+        for (let el = head; el && !/gov-sources/.test(el.className || ""); el = el.nextElementSibling) {
+          if (el !== head && /panel-subhead/.test(el.className || "")) break;
+          block.push(el.textContent);
+        }
+        if (/\b[Ss]tate(?:’s|'s)?\b/.test(block.join(" "))) say("its block says 'state': " + block.join(" ").slice(0, 160));
+        if ((court.members || []).length) {
+          const rows = [...section.querySelectorAll(".gov-court-member")];
+          const names = rows.map((li) => li.querySelector(".gov-court-name").textContent);
+          if (rows.length !== court.members.length) say(rows.length + " rows for " + court.members.length + " members");
+          // Each member under the title the court's own roster gives them.
+          court.members.forEach((m) => {
+            const title = (court.titles || {})[m];
+            const row = names.find((n) => n.indexOf(m) === 0);
+            if (!row) say("no row for " + m);
+            else if (title && row !== m + " " + title) say(m + " is '" + row + "', not under '" + title + "'");
+          });
+          if (court.chief && names[0].indexOf(court.chief) !== 0) say("the chief is not first: " + names[0]);
+          if (rows.some((li) => li.querySelector('[class^="party-"]') || li.querySelector("img"))) say("a party or a photograph");
+          const line = flat(section.querySelector(".gov-court + p.faint"));
+          const short = (court.seats || 0) - court.members.length;
+          if (court.seats && line.indexOf(court.members.length + " of " + court.seats + " seats") !== 0) say("seat line: " + line);
+          if (short > 0 && !/with nobody listed by the court/.test(line)) say("does not say nobody is listed: " + line);
+          if (/vacan/i.test(line)) say("calls a seat vacant: " + line);
+          if (!section.querySelector('a[href="' + court.url + '"]')) say("no link to the court's own roster");
+          const sources = flat(section.querySelector(".gov-sources"));
+          if (court.read && sources.indexOf(court.name + ": the court's own roster (" + KYC.dateWords(court.read) + ")") === -1) {
+            say("the sources do not name the court and its day: " + sources);
+          }
+        } else {
+          if (!/so its members are not listed here\./.test(flat(section))) say("an unread court does not say why");
+          if (section.querySelector(".gov-court-member")) say("an unread court lists someone");
+        }
+        if (court.seats) {
+          const seats = section.querySelector(".gov-court-seats");
+          if (!seats || seats.textContent.indexOf("“" + court.seatsFrom.quote + "”") === -1 ||
+              !seats.querySelector('a[href="' + court.seatsFrom.url + '"]')) say("its seats are not quoted from their source");
+        } else if (section.querySelector(".gov-court-seats")) {
+          say("a count of seats no source gives");
+        }
+        // What is not covered is said of the courts other than this one.
+        const note = flat(section.querySelector(".gov-note"));
+        if (!/courts other than its highest court/.test(note) || !/its highest court, below\.$/.test(note) ||
+            /(?:and|council and) courts(?:,| are)/.test(note)) say("the note: " + note);
+      });
+      check("each is headed by its own name, in the place's own words, its members under the court's own " +
+        "titles, its seats quoted from their source, and the note says which courts are not covered",
+        wrong.length === 0, wrong.join(" || "));
+      check("a court read lists its members; one unread says why and names no one",
+        read.length + unread.length === withCourt.length, `read ${read.join(" ")}; unread ${unread.join(" ")}`);
+      // The federal courts on the same page are other courts, under their own heading.
+      const mixed = withCourt.filter((c) => {
+        const rec = record(pages[c].window, c);
+        const section = pages[c].D.getElementById("state-government");
+        const heads = [...section.querySelectorAll(".panel-subhead")].map((p) => p.textContent);
+        const fedAt = heads.indexOf("Federal courts");
+        const lead = (section.querySelector(".gov-court-own") || {}).textContent || "";
+        return (rec.federalCourts || []).length
+          ? fedAt === -1 || fedAt < heads.indexOf(rec.court.name) || !/not one of the federal courts listed below\.$/.test(lead)
+          : fedAt !== -1 || /federal/.test(lead);
+      });
+      check("its federal courts are listed after it under their own heading, and it is said not to be one of them",
+        mixed.length === 0, mixed.join(" "));
+    });
+
+    // Made here, on whichever of them the record reads: every shape a refresh can leave.
+    const code = read[0] || withCourt[0];
+    suite(`the District's and the territories' own highest courts — every shape of the record (${clock})`, () => {
+      if (!code) { check("no such court in the record (nothing to make)", false); return; }
+      const page = pages[code];
+      const KYC = page.window.KYC;
+      const court = record(page.window, code).court;
+      const base = { name: court.name, short: court.short, word: court.word, chiefTitle: court.chiefTitle, own: true,
+        seats: 3, seatsFrom: { by: "Example Code § 1", url: "https://example.gov/code/1", quote: "three justices", read: "2026-11-15" },
+        url: "https://example.gov/roster", read: "2026-11-15" };
+      // Titles in the court's own words, not this site's.
+      const spanish = drawWith(page, code, Object.assign({}, base, { members: ["Ana Ejemplo", "Luis Muestra"],
+        chief: "Ana Ejemplo", chiefTitle: "Chief Justice",
+        titles: { "Ana Ejemplo": "Jueza Presidenta", "Luis Muestra": "Juez Asociado" } }));
+      const names = [...spanish.querySelectorAll(".gov-court-name")].map((el) => el.textContent);
+      check("a member is shown under the title the court gives them, never this site's translation (rule 75)",
+        names.join("|") === "Ana Ejemplo Jueza Presidenta|Luis Muestra Juez Asociado" &&
+        !/Chief Justice|Associate Justice/.test(names.join(" ")), names.join("|"));
+      const line = flat(spanish.querySelector(".gov-court + p.faint"));
+      check("fewer names than seats is 'nobody listed by the court', never 'vacant' (rule 19)",
+        /^2 of 3 seats; 1 with nobody listed by the court\./.test(line) && !/vacan/i.test(flat(spanish)), line);
+      const noChief = drawWith(page, code, Object.assign({}, base, { members: ["Pat Example"], chief: "",
+        chiefTitle: "Chief Judge", word: "judges", titles: { "Pat Example": "Associate Judge" } }));
+      check("a roster that names no chief says so, in the court's own word for its chief",
+        /; the court lists no chief judge\./.test(flat(noChief)) &&
+        !/Chief Judge/.test([...noChief.querySelectorAll(".gov-court-name")].map((el) => el.textContent).join(" ")),
+        flat(noChief.querySelector(".gov-court + p.faint")));
+      const uncounted = drawWith(page, code, Object.assign({}, base, { members: ["Pat Example"], chief: "",
+        seats: 0, seatsFrom: undefined }));
+      check("a court no source gives a count of seats says how many the court lists, and no count",
+        /^1 listed by the court/.test(flat(uncounted.querySelector(".gov-court + p.faint"))) &&
+        !uncounted.querySelector(".gov-court-seats") && !/ of \d+ seats/.test(flat(uncounted)),
+        flat(uncounted.querySelector(".gov-court + p.faint")));
+      const why = "This site's automated check could not read the court's site";
+      const unreadable = drawWith(page, code, { name: court.name, short: court.short, word: court.word,
+        chiefTitle: court.chiefTitle, own: true, unreadable: why, url: "https://example.gov/roster" });
+      check("a court whose site could not be read says so of this site's check, names no one, and links the court's page",
+        flat(unreadable).indexOf(why + ", so its members are not listed here.") !== -1 &&
+        !unreadable.querySelector(".gov-court-member") &&
+        !!unreadable.querySelector('a[href="https://example.gov/roster"]') &&
+        /its highest court, below\.$/.test(flat(unreadable.querySelector(".gov-note"))), flat(unreadable).slice(0, 300));
+      const byHand = drawWith(page, code, Object.assign({}, base, { members: ["Pat Example"], chief: "Pat Example",
+        readOn: "2026-11-16", read: undefined }));
+      check("a roster read by hand says so, and on which day",
+        flat(byHand).indexOf("read by hand on " + KYC.dayMonthYear("2026-11-16") + ": the court's site refuses automated reading") !== -1,
+        flat(byHand.querySelector(".gov-court + p.faint")));
+      // No court in the record: the old words, and no block.
+      const none = drawWith(page, code, null);
+      const note = flat(none.querySelector(".gov-note"));
+      check("with no court in the record the page says its courts are not covered, and draws none",
+        !none.querySelector("#highest-court") && !none.querySelector(".gov-court") &&
+        /courts(?:,| are| and)/.test(note) && /not covered here/.test(note) && !/highest court/.test(note), note);
+    });
+
+    // The map's panel says what the page says (rule 12).
+    const mapCode = read.find((c) => c !== "DC");
+    if (mapCode) {
+      const mapped = await buildPage("map.html", Object.assign({ hash: "#/?state=" + mapCode + "&mode=governor" }, opts));
+      suite(`the District's and the territories' own highest courts — the map's panel (${clock})`, () => {
+        const mine = pages[mapCode].D.querySelector("#state-government .gov-court");
+        const theirs = mapped.D.querySelector("#delegation .gov-court");
+        check("it lists the court's members as the place's page does",
+          !!mine && !!theirs && mine.innerHTML === theirs.innerHTML, mapCode + ": " + (theirs ? flat(theirs) : "no court in the panel"));
+      });
+    }
+
+    // ---- the search's answers, both ways
+    const { window, D } = await buildPage("index.html", opts);
+    await settle(50);
+    const KYC = window.KYC;
+    loadAnswers(window);
+    const box = () => D.getElementById("searchAnswers");
+    const text = () => (box().hidden ? "" : flat(box()));
+    const hrefs = () => (box().hidden ? [] : [...box().querySelectorAll("a")].map((a) => a.getAttribute("href")));
+    const firstHref = () => (box().hidden ? "" : (box().querySelector(".answer-row a, a") || { getAttribute() { return ""; } }).getAttribute("href"));
+    const ask = async (q) => { typeInto(window, D, ""); typeInto(window, D, q); await settle(200); };
+    const reload = () => window.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
+    const all = places(window).filter((c) => (record(window, c) || {}).court);
+    const said = {};
+    const queriesOf = (c) => {
+      const court = record(window, c).court;
+      const place = KYC.matchName(c);
+      return [place + " " + court.short, court.name, place + " highest court", place + " " + court.short + " chief " +
+        (court.word === "judges" ? "judge" : "justice")];
+    };
+    for (const c of all) {
+      for (const q of queriesOf(c)) {
+        await ask(q);
+        said[c + "|" + q] = [text(), hrefs(), firstHref()];
+      }
+    }
+    // The federal courts there, asked by their own names: never the place's own court.
+    const federal = {};
+    for (const ct of (window.kycFederal.courts || []).filter((x) => x.kind !== "supreme" &&
+        (x.states || []).some((s) => all.indexOf(s) !== -1) && (x.kind !== "appeals" || /District of Columbia/.test(x.name)))) {
+      await ask(ct.name);
+      federal[ct.id] = [text(), hrefs()];
+    }
+    await ask("DC Circuit");
+    const dcCircuit = [text(), hrefs()];
+    // Made here: the same places with no court in the record, and with one unread.
+    const gone = {};
+    const madeUnread = {};
+    const why = "This site's automated check could not read the court's site";
+    const saved = {};
+    all.forEach((c) => { saved[c] = record(window, c).court; });
+    for (const c of all) {
+      // By what a reader calls any such court: with no record, the site
+      // does not know the court's own name ("Tribunal Supremo").
+      const q = queriesOf(c)[2];
+      delete record(window, c).court;
+      await ask(q);
+      gone[c] = [text(), hrefs()];
+      record(window, c).court = { name: saved[c].name, short: saved[c].short, word: saved[c].word,
+        chiefTitle: saved[c].chiefTitle, own: true, unreadable: why, url: "" };
+      await ask(queriesOf(c)[3]);
+      madeUnread[c] = [text(), hrefs()];
+      record(window, c).court = saved[c];
+    }
+    reload();
+    suite(`search answers — the District's and a territory's own highest court (${clock})`, () => {
+      check("the record holds one to ask of", all.length > 0, all.join(" "));
+      const wrong = [];
+      all.forEach((c) => {
+        const court = record(window, c).court;
+        const page = "states/" + c.toLowerCase() + ".html#highest-court";
+        const members = court.members || [];
+        queriesOf(c).forEach((q, i) => {
+          const [t, links, top] = said[c + "|" + q];
+          const say = (what) => wrong.push(`'${q}': ${what}: ${t.slice(0, 200)}`);
+          if (t.indexOf(KYC.possessive(KYC.placeStart(c), "’") + " highest court, the " + court.name) === -1) say("does not name the court");
+          if (top !== page) say("its first link is " + top + ", not the page's block");
+          if (/\bstate(?:’s)? (?:page|highest)|[Tt]he state\b/.test(t)) say("calls it a state");
+          if (t.indexOf("own court, not a federal court.") === -1) say("does not say it is not a federal court");
+          if (/lower court this site does not cover/.test(t) && i < 2) say("calls the court's own name another court's");
+          if (court.unreadable) {
+            if (t.indexOf(court.unreadable + ", so its members are not listed here.") === -1) say("does not say why it is unread");
+          } else if (i === 3) {
+            const title = (court.titles || {})[court.chief] || court.chiefTitle;
+            if (court.chief ? t.indexOf(title + ": " + court.chief + ", as the court’s roster names its chief.") === -1
+              : t.indexOf("lists no " + court.chiefTitle.toLowerCase()) === -1) say("the chief");
+          } else if (t.indexOf(members.length + (members.length === 1 ? " member" : " members") + " listed by the court") === -1) {
+            say("does not count the court's members");
+          }
+          if (/names no members/.test(t)) say("says it names no members of a court it holds");
+          void links;
+        });
+      });
+      check("named from the record, linked at its block on the place's page, in the place's own words, " +
+        "and never called a federal court or a state's", wrong.length === 0, wrong.slice(0, 4).join(" || "));
+      const confused = Object.keys(federal).filter((id) => {
+        const [t, links] = federal[id];
+        return links.indexOf("courts/" + id + ".html") === -1 || links.some((h) => /#highest-court$/.test(h)) ||
+          /highest court, the /.test(t);
+      });
+      check("a federal court there, asked for by its own name, is its own page and never the place's own court",
+        Object.keys(federal).length > 0 && confused.length === 0,
+        confused.map((id) => id + ": " + federal[id][0].slice(0, 120) + " " + federal[id][1].join(" ")).join(" || "));
+      check("'DC Circuit' is the federal court of appeals, never the District of Columbia Court of Appeals",
+        dcCircuit[1].indexOf("courts/cadc.html") !== -1 && !dcCircuit[1].some((h) => /states\/dc\.html/.test(h)) &&
+        !/District of Columbia Court of Appeals/.test(dcCircuit[0].replace(/U\.S\. Court of Appeals for the District of Columbia Circuit/g, "")),
+        dcCircuit[0].slice(0, 200));
+      const notGone = all.filter((c) => gone[c][0].indexOf("this site names no members of its highest court.") === -1 ||
+        gone[c][1].some((h) => /#highest-court$/.test(h)));
+      check("made here: with no court in the record, each is told this site names no members of its highest court (rule 19)",
+        notGone.length === 0, notGone.map((c) => c + ": " + gone[c][0].slice(0, 140)).join(" || "));
+      const notUnread = all.filter((c) => madeUnread[c][0].indexOf(why + ", so its members are not listed here.") === -1 ||
+        /as the court’s roster names its chief|lists no chief/.test(madeUnread[c][0]));
+      check("made here: a court this site could not read says so, and nothing of who is chief (rules 19, 57)",
+        notUnread.length === 0, notUnread.map((c) => c + ": " + madeUnread[c][0].slice(0, 160)).join(" || "));
+    });
+  }
+}
+
 async function testTerritoryFollowups() {
   const { window, D } = await buildPage("index.html");
   await settle(50);
@@ -14955,11 +15275,13 @@ async function testTerritoryFollowups() {
   // ---- F3: no other answer calls such a place a state
   const gov = () => window.kycStateGov.states;
   const placeSaid = {};
+  const placeLinks = {};
   for (const code of notStates.concat([aState])) {
     const name = KYC.stateName(code);
     for (const what of ["circuit court", "federal courts", "counties", "tribes", "mayor"]) {
       await ask(name + " " + what);
       placeSaid[code + "|" + what] = text();
+      placeLinks[code + "|" + what] = hrefs();
     }
   }
   // Made here: a territory whose page holds a highest court. One with a
@@ -14975,6 +15297,22 @@ async function testTerritoryFollowups() {
     await ask(KYC.stateName(courtTerritory) + " federal courts");
   }
   const withCourt = courtTerritory ? text() : "";
+  reload("stategov.js");
+  // And the other way, made here: a place whose record holds its own
+  // highest court (the District's and the territories' are read now, rule
+  // 57), with that court taken out of the record - a refresh that read
+  // none - is told this site names no members of it.
+  const ownRecord = (c) => {
+    const d = window.kycStateGov || {};
+    return (d.states || {})[c] || (d.district || {})[c] || {};
+  };
+  const courtRead = notStates.find((c) => (ownRecord(c).court || {}).name &&
+    (window.kycFederal.courts || []).some((ct) => ct.kind !== "appeals" && (ct.states || []).indexOf(c) !== -1));
+  if (courtRead) {
+    delete ownRecord(courtRead).court;
+    await ask(KYC.stateName(courtRead) + " federal courts");
+  }
+  const withoutCourt = courtRead ? text() : "";
   reload("stategov.js");
   const tribes = window.kycSearch.tribes || {};
   const noTribes = Object.keys(meta).filter((c) => !tribes[c]);
@@ -15005,9 +15343,11 @@ async function testTerritoryFollowups() {
     // What the note says of the place's own highest court is what its page holds.
     check("a place's own highest court is 'on its page' only where its page holds one (rule 19)",
       notStates.concat([aState]).filter((c) => said(c, "federal courts")).every((c) => {
-        const holds = !!((gov()[c] || {}).court || {}).name;
+        // A state's or a territory's in its entry, the District's in the
+        // District's own record; one the record names is named.
+        const holds = !!(ownRecord(c).court || {}).name;
         const t = said(c, "federal courts");
-        return holds ? /own highest court is on its (?:state )?page\./.test(t)
+        return holds ? /own highest court(?:, the [^,]+,)? is on its (?:state )?page\./.test(t)
           : t.indexOf("This site names no members of " + KYC.possessive(KYC.placeWords(c), "’") + " own highest court.") !== -1 &&
             !/own highest court is on/.test(t);
       }), notStates.map((c) => c + ": " + said(c, "federal courts").slice(0, 170)).join(" || "));
@@ -15016,6 +15356,15 @@ async function testTerritoryFollowups() {
     check("made here: a territory whose page holds a court is told 'on its page', never 'its state page'",
       !!courtTerritory && withCourt.indexOf(KYC.possessive(KYC.placeStart(courtTerritory), "’") + " own highest court is on its page.") !== -1 &&
         !/its state page/.test(withCourt), (courtTerritory || "no territory with a federal court") + ": " + withCourt.slice(0, 220));
+    check("made here: a place whose court the record holds, with it taken out, is told this site names no members of it",
+      !courtRead || (withoutCourt.indexOf("This site names no members of " + KYC.possessive(KYC.placeWords(courtRead), "’") +
+        " own highest court.") !== -1 && !/own highest court(?:, the [^,]+,)? is on/.test(withoutCourt)),
+      (courtRead || "no such place holds a court") + ": " + withoutCourt.slice(0, 220));
+    const named = notStates.filter((c) => (ownRecord(c).court || {}).own && said(c, "federal courts"));
+    check("a place's own court the record holds is named, and linked at its block on the place's page",
+      named.every((c) => said(c, "federal courts").indexOf("own highest court, the " + ownRecord(c).court.name + ", is on its page.") !== -1 &&
+        (placeLinks[c + "|federal courts"] || []).indexOf("states/" + c.toLowerCase() + ".html#highest-court") !== -1),
+      named.map((c) => c + ": " + said(c, "federal courts").slice(0, 160)).join(" || ") || "none in the record");
     check("'<place> counties' says this site has no county page for it",
       notStates.every((c) => said(c, "counties").indexOf("This site has no county page for " + KYC.placeWords(c) +
         ": its county pages cover the 50 states.") !== -1), notStates.map((c) => said(c, "counties")).join(" | "));
@@ -27298,6 +27647,7 @@ async function testTheJanuaryWords() {
   if (!only || only === "index.html" || only === "search") await testSearchAnswers();
   if (!only || only === "index.html" || only === "search" || only === "codewords") await testCodeWords();
   if (!only || only === "index.html" || only === "search" || only === "followups") await testTerritoryFollowups();
+  if (!only || only === "states" || only === "search" || only === "owncourts") await testOwnCourts();
   if (!only || only === "index.html" || only === "states" || only === "followups" || only === "heldseat") await testLongBadgesWrap();
   if (!only || only === "search" || only === "states" || only === "places") await testPlaceSentences();
   if (!only || only === "federal" || only === "search") await testJudgeSearch();

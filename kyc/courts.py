@@ -26,6 +26,15 @@ hand from its own page, with the day and the page's words, in
 ``overrides.COURT_ROSTERS``, and the page says so. A court nobody can read
 is listed without its members and the page says why. Nothing comes from
 Wikipedia or Ballotpedia.
+
+The District of Columbia and the five territories have a highest court of
+their own too (``OWN_COURTS``): read the same way, by a recipe in
+``COURTS``, from the court's own host, and shown under the court's own name
+with the titles the court gives its members ("Chief Judge", "Jueza
+Presidenta"). They are not among ``HIGH_COURTS``, whose table and maps
+speak of the fifty states (rule 49): each one's seats are its own law's or
+the court's own words, quoted with their address. No photograph is read
+for them.
 """
 
 import datetime
@@ -373,6 +382,142 @@ COURTS = {
                 r"[A-Za-zÀ-ÖØ-öø-ÿ.'’ -]*(?:, *(?:Jr|Sr)\.?)?)$",
         "every": r"(?m)^(?:Chief +)?Justice +(?!\(Vacant\)$)[^\n]*$",
     },
+    # The District of Columbia's and the territories' own highest courts
+    # (OWN_COURTS), each checked against the court's page on 2026-11-15. A
+    # recipe here says which titles it knows ("titles"): a member under any
+    # other ("Acting Chief Justice", "Designated Justice", "Jueza
+    # Presidenta Interina") is a page the recipe has not seen, and the read
+    # is refused rather than guessed at. No photograph is read ("photos").
+    "DC": {
+        # www.dccourts.gov answers a plain request 403 and a headless Chrome
+        # the page. The Chief Judge's and the Associate Judges' tables, each
+        # under its own heading; the Senior Judges' table after them is not
+        # the court's nine ("The court is assisted by a number of senior
+        # judges"). A name is "Blackburne-Rigsby, Judge Anna" or "Crowell
+        # IV, James A.".
+        "url": "https://www.dccourts.gov/court-of-appeals/court-of-appeals-judges",
+        "browser": True,
+        "parts": [
+            {"section": [r"<h4>\s*Chief Judge\s*</h4>", r"<h4>\s*Associate Judges\s*</h4>"],
+             "title": "Chief Judge"},
+            {"section": [r"<h4>\s*Associate Judges\s*</h4>", r"<h4>\s*Senior Judges\s*</h4>"],
+             "title": "Associate Judge"},
+        ],
+        "item": r"<td[^>]*\bviews-field-title\b[^>]*>\s*(?:<a[^>]*>)?(?P<name>[^<]+)",
+        "titles": r"Chief Judge|Associate Judge",
+        "photos": False,
+    },
+    "GU": {
+        # guamcourts.gov; the judiciary's old guamcourts.org refuses the
+        # connection. "Current Justices", then "Previous Justices".
+        "url": "https://guamcourts.gov/courts-council/supreme-court/justices",
+        "section": [r"<h2>\s*Current Justices\s*</h2>", r"<h2>\s*Previous Justices\s*</h2>"],
+        "item": r"<h4>\s*<a[^>]*>(?P<name>[^<]+)</a>\s*</h4>\s*<p>\s*<em>(?P<title>[^<]+)</em>",
+        "titles": r"Chief Justice|Associate Justice",
+        "photos": False,
+    },
+    "MP": {
+        # A Wix page, drawn on the server: each justice is a heading in
+        # capitals, a paragraph, then the title as a heading in capitals.
+        "url": "https://www.nmijudiciary.gov/justices",
+        "item": r"<h6[^>]*>\s*(?:<span[^>]*>)?(?P<name>[^<]+?)(?:</span>)?\s*</h6>(?:(?!<h6).)*?"
+                r"<h6[^>]*>\s*(?:<span[^>]*>)?(?P<title>[^<]*JUSTICE)(?:</span>)?\s*</h6>",
+        "titles": r"Chief Justice|Associate Justice",
+        "photos": False,
+    },
+    "PR": {
+        # "Composición del Tribunal Supremo": a heading "Hon. <name>" and
+        # under it the title, in the court's own words. Whoever presides is
+        # the "Juez Presidente" or "Jueza Presidenta" ("chief").
+        "url": "https://poderjudicial.pr/tribunal-supremo/composicion-del-tribunal-supremo/",
+        "item": r"<h[34]>\s*(?P<name>Hon\.[^<]+)</h[34]>(?:(?!<h[34]>).)*?<h5>(?P<title>[^<]+)</h5>",
+        "titles": r"Jueza? President[ea]|Jueza? Asociad[oa]",
+        "chief": r"Jueza? President[ea]",
+        "photos": False,
+    },
+    "VI": {
+        # The page's own cards; its navigation names the justices too, in
+        # the same words.
+        "url": "https://supreme.vicourts.org/about_us/justices",
+        "item": r'<a class="imageButton"[^>]*\btitle="(?P<name>(?P<title>[A-Za-z ]*?Justice)\s+[^"]+)"',
+        "titles": r"Chief Justice|Associate Justice",
+        "photos": False,
+    },
+}
+
+# The District of Columbia's and the five territories' own highest courts,
+# which no table of the fifty states holds (government_maps.HIGH_COURTS and
+# the guide's maps are of the states, rule 49). Each by the name its own law
+# or its own site gives it (rule 75), with the words it uses for its members
+# and its chief, and its seats as its own law or the court's own words give
+# them, quoted with their address and the day read (rules 48 and 50: the
+# law's own publication, never a compiled copy). ``seats`` 0: no law read
+# here fixes a number.
+#   "short": the court's name without its place, as a reader types it.
+#   "seatsFrom": (whose words, their address, the words, the day read).
+OWN_COURTS = {
+    "DC": {
+        "name": "District of Columbia Court of Appeals", "short": "Court of Appeals",
+        "word": "judges", "chiefTitle": "Chief Judge", "seats": 9,
+        "seatsFrom": ("D.C. Code § 11-702",
+                      "https://code.dccouncil.gov/us/dc/council/code/sections/11-702",
+                      "The court shall consist of a chief judge and eight associate judges.",
+                      "2026-11-15"),
+    },
+    "GU": {
+        "name": "Supreme Court of Guam", "short": "Supreme Court",
+        "word": "justices", "chiefTitle": "Chief Justice", "seats": 3,
+        # The Compiler of Laws' own file of 7 GCA ch. 3.
+        "seatsFrom": ("7 GCA § 3103(a)",
+                      "https://col.guamcourts.gov/sites/default/files/7gc003.pdf",
+                      "The Supreme Court shall consist of three (3) full-time Justices",
+                      "2026-11-15"),
+    },
+    "MP": {
+        "name": "Supreme Court of the Commonwealth of the Northern Mariana Islands",
+        "short": "Supreme Court",
+        "word": "justices", "chiefTitle": "Chief Justice", "seats": 3,
+        # The Commonwealth Law Revision Commission's text. "At least two":
+        # the court's roster lists three, and a fourth name would be refused
+        # until a person reads the law that added a seat.
+        "seatsFrom": ("N.M.I. Const. art. IV, § 3",
+                      "https://cnmilaw.gov/constitution",
+                      "The supreme court shall consist of a chief justice and at least two "
+                      "associate justices. The Legislature may increase the number of justices "
+                      "when necessary.",
+                      "2026-11-15"),
+    },
+    "PR": {
+        "name": "Tribunal Supremo de Puerto Rico", "short": "Tribunal Supremo",
+        # The words of the court's own English pages, where this site needs
+        # an English word (a count of "justices", "no Chief Justice listed");
+        # each member's title is shown as the court's roster writes it.
+        "word": "justices", "chiefTitle": "Chief Justice", "seats": 9,
+        "seatsFrom": ("the court’s own English page",
+                      "https://poderjudicial.pr/eng/supreme-court/",
+                      "Currently, under the Judiciary Act of 2003, as amended, the Supreme Court "
+                      "comprises one (1) Chief Justice and eight (8) Associate Justices.",
+                      "2026-11-15"),
+        "note": "The court’s English pages call it the Supreme Court.",
+    },
+    "VI": {
+        "name": "Supreme Court of the Virgin Islands", "short": "Supreme Court",
+        "word": "justices", "chiefTitle": "Chief Justice", "seats": 5,
+        # The judiciary's own history of itself. The Supreme Court's "About
+        # Us" page still read "The court presently consists of a chief
+        # justice and two associate justices" over a roster of five
+        # (2026-11-15): the older sentence.
+        "seatsFrom": ("the Judiciary of the Virgin Islands’ history of itself, of Act No. 7888 "
+                      "of 2016",
+                      "https://www.vicourts.org/about_us/overview_of_judiciary_of_the_virgin_islands/"
+                      "history_of_the_v__i__judiciary",
+                      "also authorized the expansion of the appellate bench from 3 to 5 justices",
+                      "2026-11-15"),
+    },
+    "AS": {
+        "name": "High Court of American Samoa", "short": "High Court",
+        "word": "justices", "chiefTitle": "Chief Justice", "seats": 0,
+    },
 }
 
 # The browser reader: a Node script (no dependencies) that drives a headless
@@ -395,6 +540,18 @@ UNREADABLE = {
     "AL": ("https://judicial.alabama.gov/appellate/supremecourt",
            "The court's site could not be reached by this site's automated reader, nor from "
            "a person's own browser on October 26, 2026"),
+    # No page: on 2026-11-15 no website of the High Court's own was found.
+    # The territory government's site (americansamoa.gov) lists no page for
+    # its courts among its departments and offices; asbar.org, which
+    # publishes the court's rules and a list of past justices of 2012, is the
+    # American Samoa Bar Association's, not the court's; no name tried
+    # (highcourt.as, judiciary.as, courts.as) has an address at dns.google.
+    # A claim about this site's search, never that the court publishes none
+    # (rule 19), and nobody is named from the Bar's pages, the Pacific
+    # Judicial Council's or an encyclopedia (rule 50).
+    "AS": ("",
+           "This site found no roster published by the court itself: its reader found no "
+           "website of the court's own when it looked on November 15, 2026"),
 }
 
 # A roster grows stale without a sound: a court kept at its last good read
@@ -588,7 +745,9 @@ def clean_name(raw):
     if "," in name and re.fullmatch(r"[^,]+,\s*[^,]+", name) and not re.search(
             r",\s*(?:jr|sr|ii|iii|iv)\.?$", name, re.I):
         last, first = (p.strip() for p in name.split(",", 1))
-        name = f"{first} {last}"                 # "Rabner, Stuart" -> "Stuart Rabner"
+        # "Rabner, Stuart" -> "Stuart Rabner"; the D.C. Court of Appeals'
+        # "Blackburne-Rigsby, Judge Anna" -> "Anna Blackburne-Rigsby".
+        name = f"{_LEAD.sub('', first).strip()} {last}"
     letters = [ch for ch in name if ch.isalpha()]
     # Capitals, or nearly ("SHERYL GORDON McCLOUD"): ordinary case, with
     # the person's own form where title case would get it wrong.
@@ -609,6 +768,48 @@ def _json_path(data, path):
 
 def extract(page, recipe):
     """``[(name, chief)]`` from a court's page by its recipe."""
+    return [(name, chief) for name, chief, _ in extract_titled(page, recipe)]
+
+
+def _title_words(raw):
+    """A member's title as the court writes it, in one line; capitals put
+    into ordinary case ("CHIEF JUSTICE" -> "Chief Justice")."""
+    title = _text(raw)
+    letters = [ch for ch in title if ch.isalpha()]
+    if letters and all(ch.isupper() for ch in letters):
+        title = title.title()
+    return title
+
+
+def extract_titled(page, recipe):
+    """``[(name, chief, title)]`` from a court's page by its recipe: each
+    member, whether the court calls them its chief, and the title it gives
+    them, in its own words ("" where the recipe reads none).
+
+    A recipe in ``parts`` reads each part's own slice of the page under the
+    part's own title (the D.C. Court of Appeals lists its Chief Judge and
+    its Associate Judges in a table each); a part whose slice has no end is
+    refused, or the table after it would be read into it. A recipe that
+    says which ``titles`` it knows refuses any other: an acting chief, a
+    designated justice or a clerk is a page the recipe has not seen, never
+    a member under a title this site chose for them (rule 57)."""
+    if recipe.get("parts"):
+        out, seen = [], set()
+        for part in recipe["parts"]:
+            start, end = part["section"]
+            found = re.search(start, page)
+            stop = found and re.search(end, page[found.end():])
+            if not found or not stop:
+                raise CourtsError("the page no longer has the section its recipe reads "
+                                  f"for its {part['title']}")
+            piece = page[found.end():found.end() + stop.start()]
+            rest = {k: v for k, v in recipe.items() if k not in ("parts", "section")}
+            for name, _, _ in extract_titled(piece, dict(rest, titles=None)):
+                if name.lower() in seen:
+                    raise CourtsError(f"{name} is listed under two titles")
+                seen.add(name.lower())
+                out.append((name, _is_chief(recipe, part["title"], ""), part["title"]))
+        return _known_titles(recipe, out)
     if recipe.get("format") == "json":
         data = json.loads(page)
         if recipe.get("script"):
@@ -626,13 +827,13 @@ def extract(page, recipe):
             if recipe.get("initials"):
                 # "Stephen K Bushong" -> "Stephen K. Bushong"
                 name = re.sub(r"\b([A-Z])\b(?!\.)", r"\1.", name)
-            out.append((name, chief))
-        return out
+            out.append((name, chief, title))
+        return _known_titles(recipe, out)
     if recipe.get("script"):
         match = re.search(recipe["script"], page, re.S)
         if not match:
             raise CourtsError("the page no longer carries the data its recipe reads")
-        return extract(match.group(1), dict(recipe, format="json", script=None))
+        return extract_titled(match.group(1), dict(recipe, format="json", script=None))
     if recipe.get("section"):
         start, end = recipe["section"]
         found = re.search(start, page)
@@ -662,9 +863,28 @@ def extract(page, recipe):
         # Whitespace normalised first: the lookbehinds in CHIEF need one
         # plain space, so "Associate<br>\n Chief Justice" or a non-breaking
         # space would otherwise read an associate chief as the chief.
-        chief = bool(re.search(CHIEF, _text(f"{title} {raw}"), re.I))
-        out.append((name, chief))
-    return out
+        out.append((name, _is_chief(recipe, title, raw), _title_words(title)))
+    return _known_titles(recipe, out)
+
+
+def _is_chief(recipe, title, raw):
+    """Whether *title* (beside the member's line, *raw*) is the chief's: the
+    recipe's own word for it where the court's is not English (Puerto
+    Rico's "Jueza Presidenta"), the whole title and nothing more; else
+    ``CHIEF``."""
+    if recipe.get("chief"):
+        return bool(re.fullmatch(recipe["chief"], _text(title), re.I))
+    return bool(re.search(CHIEF, _text(f"{title} {raw}"), re.I))
+
+
+def _known_titles(recipe, members):
+    """*members*, or a refusal where the recipe says which titles it knows
+    and the page gives a member any other."""
+    if recipe.get("titles"):
+        for name, _, title in members:
+            if not re.fullmatch(recipe["titles"], title, re.I):
+                raise CourtsError(f"a title the recipe does not know: {title!r}, of {name}")
+    return members
 
 
 def read_court(code, recipe, seats, page=None, pages=None):
@@ -694,21 +914,33 @@ def read_court(code, recipe, seats, page=None, pages=None):
             recipe = {k: v for k, v in recipe.items() if k != "format"}
         else:
             page = data.decode("utf-8", errors="replace")
-    if pages is not None and recipe.get("format") != "pdf":
+    if recipe.get("format") != "pdf" and agent.walled(page):
+        # A bot wall's or a challenge's page answers 200 in the roster's
+        # place and says nothing of the court (rules 8 and 103).
+        raise CourtsError(f"{code}: {recipe['url']} answered with a bot wall's or a challenge's "
+                          "page, or nothing; not read")
+    if pages is not None and recipe.get("format") != "pdf" and recipe.get("photos", True):
         pages[code] = page
-    members = extract(page, recipe)
+    try:
+        members = extract_titled(page, recipe)
+    except CourtsError as exc:
+        raise CourtsError(str(exc) if str(exc).startswith(f"{code}:") else f"{code}: {exc}") from exc
     if not members:
         raise CourtsError(f"{code}: no members read from {recipe['url']}")
     if len(members) > seats:
         raise CourtsError(f"{code}: {len(members)} members read for {seats} seats")
-    chiefs = [n for n, chief in members if chief]
+    chiefs = [n for n, chief, _ in members if chief]
     if len(chiefs) > 1:
         raise CourtsError(f"{code}: more than one chief read: {', '.join(chiefs)}")
-    out = {"members": [n for n, _ in members], "chief": chiefs[0] if chiefs else "",
+    out = {"members": [n for n, _, _ in members], "chief": chiefs[0] if chiefs else "",
            "listed": len(members), "seats": seats, "url": recipe.get("link", recipe["url"]),
            # The day it was read: a court that later keeps this read
            # (rule 8) carries the day, and stale() says when it is old.
            "read": datetime.date.today().isoformat()}
+    if recipe.get("titles"):
+        # Each member's title in the court's own words (rule 75), for a
+        # court whose recipe says which it knows.
+        out["titles"] = {name: title for name, _, title in members}
     if recipe.get("dated"):
         # The date the court's own document says it was revised: a roster
         # file can be months old, and the page says so.
@@ -719,11 +951,21 @@ def read_court(code, recipe, seats, page=None, pages=None):
     return out
 
 
+def seats_of(code):
+    """How many seats the court under *code* has: a state's from the guide's
+    table (``HIGH_COURTS``; its criminal court's under the state's code, as
+    ``fetch`` always read it), the District's or a territory's from
+    ``OWN_COURTS``. 0: no count is known here."""
+    from .government_maps import HIGH_COURTS
+    if code in OWN_COURTS:
+        return OWN_COURTS[code]["seats"]
+    return HIGH_COURTS.get(code[:2], ("", 0))[1]
+
+
 def fetch(codes=None, pause=1.0, root=".", pages=None):
     """``(courts, problems)`` for every court with a recipe. The courts a
     browser must read are read first, together, by the browser reader.
     *pages*, when given, collects each roster's HTML (``read_court``)."""
-    from .government_maps import HIGH_COURTS
     courts, problems = {}, []
     codes = sorted(codes or COURTS)
     drawn, browser_problems = read_with_browser(
@@ -731,7 +973,7 @@ def fetch(codes=None, pause=1.0, root=".", pages=None):
     problems.extend(browser_problems)
     for code in codes:
         recipe = COURTS[code]
-        seats = recipe.get("seats", HIGH_COURTS.get(code[:2], ("", 0))[1])
+        seats = recipe.get("seats", seats_of(code))
         try:
             courts[code] = read_court(code, recipe, seats, drawn.get(code), pages)
         except CourtsError as exc:
@@ -751,6 +993,8 @@ def for_state(code, cache):
     as the page shows it: the court from HIGH_COURTS, and its members from
     the cache, or why they could not be read."""
     from .government_maps import HIGH_COURTS, METHOD_PHRASE
+    if code in OWN_COURTS:
+        return own_court(code, cache)
     if code not in HIGH_COURTS:
         return {}
     name, seats, term, method, note = HIGH_COURTS[code]
@@ -799,6 +1043,75 @@ def for_state(code, cache):
 CRIMINAL_SEATS = {"TX-CCA": 9, "OK-CCA": 5}
 
 
+def own_court(code, cache):
+    """``{"court": {...}}`` for the District of Columbia or a territory
+    (``OWN_COURTS``), as its page shows it: the court by its own name, its
+    members and each one's title as the court's own roster gives them, or
+    why they are not listed; the seats with whose words give them. ``own``
+    marks it as the place's own court by its whole name, for the page's
+    words ("Guam's highest court", never "the state's": rule 75). No
+    photograph, and no word of how its members are chosen: neither was read
+    for these courts."""
+    about = OWN_COURTS[code]
+    court = {"name": about["name"], "short": about["short"], "word": about["word"],
+             "chiefTitle": about["chiefTitle"], "own": True}
+    read = (cache or {}).get("courts", {}).get(code)
+    if read:
+        court.update(members=list(read["members"]), chief=read["chief"], url=read["url"])
+        if read.get("titles"):
+            court["titles"] = {n: t for n, t in read["titles"].items() if n in read["members"]}
+        if read.get("read"):
+            court["read"] = read["read"]
+    elif code in curated():
+        roster = curated()[code]
+        court.update(members=list(roster["members"]), chief=roster["chief"], url=roster["url"],
+                     readOn=roster["read"])
+    elif code in UNREADABLE:
+        court.update(unreadable=UNREADABLE[code][1], url=UNREADABLE[code][0])
+    else:
+        return {}
+    if about["seats"]:
+        court["seats"] = about["seats"]
+        by, url, quote, day = about["seatsFrom"]
+        court["seatsFrom"] = {"by": by, "url": url, "quote": quote, "read": day}
+    if about.get("note"):
+        court["note"] = about["note"]
+    return {"court": court}
+
+
+def own_court_problems():
+    """Every entry of ``OWN_COURTS`` that does not say what the page needs,
+    or whose seats rest on no source: an error for the build
+    (``stategov.build``). The seats' words are the law's own publication's
+    or the court's own (rules 48 and 50): a compiled copy's host
+    (``government_text.COMPILED_LAW``) is refused."""
+    import urllib.parse
+    from .government_text import COMPILED_LAW
+    problems = []
+    for code, about in sorted(OWN_COURTS.items()):
+        if not all(about.get(k) for k in ("name", "short", "word", "chiefTitle")):
+            problems.append(f"{code}: a court needs its name, its short name and its words")
+        if code not in COURTS and code not in UNREADABLE and code not in curated():
+            problems.append(f"{code}: the court has no recipe, no roster read by hand and no "
+                            "reason it is unread")
+        if not about["seats"]:
+            if about.get("seatsFrom"):
+                problems.append(f"{code}: a source for seats it does not count")
+            continue
+        by, url, quote, day = about.get("seatsFrom") or ("", "", "", "")
+        host = (urllib.parse.urlsplit(url).hostname or "").lower()
+        if not (by and quote and url.startswith("https://")):
+            problems.append(f"{code}: its seats need whose words give them, their address "
+                            "and the words")
+        if any(host == bad or host.endswith("." + bad) for bad in COMPILED_LAW):
+            problems.append(f"{code}: its seats cite a compiled copy of the law ({host})")
+        try:
+            datetime.date.fromisoformat(day)
+        except (TypeError, ValueError):
+            problems.append(f"{code}: its seats' source needs the day it was read")
+    return problems
+
+
 def curated():
     """``{code: {"url", "read", "members", "chief", "evidence"}}``: the
     rosters a person read from a court's own page, where the court's site
@@ -818,11 +1131,16 @@ def curated_errors():
     from .government_maps import HIGH_COURTS
     problems = []
     for code, roster in sorted(curated().items()):
-        seats = HIGH_COURTS.get(code, ("", 0))[1]
+        # A state's seats, or the District's or a territory's own court's;
+        # one with no count known (American Samoa's, seats 0) is held to
+        # the rest.
+        seats = HIGH_COURTS.get(code, ("", 0))[1] or OWN_COURTS.get(code, {}).get("seats", 0)
+        counted = code in HIGH_COURTS or bool(seats)
         members = list(roster["members"])
         if code in COURTS or code in UNREADABLE:
             problems.append(f"{code}: a curated roster for a court the pipeline reads or calls unreadable")
-        if not members or len(members) > seats or len(set(members)) != len(members):
+        if (not members or (counted and len(members) > seats) or len(set(members)) != len(members)
+                or (code not in HIGH_COURTS and code not in OWN_COURTS)):
             problems.append(f"{code}: the curated roster lists {len(members)} for {seats} seats")
         if roster["chief"] and roster["chief"] not in members:
             problems.append(f"{code}: the curated chief {roster['chief']} is not among its members")

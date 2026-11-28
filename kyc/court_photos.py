@@ -531,7 +531,12 @@ def counts(cache):
     this run; one kept from an earlier read (rule 8) is among *shown* too."""
     out = {"members": 0, "shown": 0, "smaller": 0, "heavy": 0, "none": 0, "unknown": 0,
            "shape": 0}
+    from .courts import OWN_COURTS
     for code, read in ((cache or {}).get("courts") or {}).items():
+        if code in OWN_COURTS:
+            # No photograph is read for the District's or a territory's own
+            # court: its members are not among those "with none that passes".
+            continue
         out["members"] += len(read.get("members") or ())
         shown = for_page(code, read)
         out["shown"] += len(shown)

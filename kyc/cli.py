@@ -2106,7 +2106,8 @@ def _localgov(args):
 
 def _courts(args):
     """Every state's court of last resort and who sits on it, read from each
-    court's own roster (kyc/courts.py)."""
+    court's own roster (kyc/courts.py); and the District of Columbia's and
+    the territories' own highest courts (courts.OWN_COURTS)."""
     from . import courts
     from .government_maps import STATES
     if args.check:
@@ -2146,12 +2147,16 @@ def _courts(args):
         print(f"  [error] {problem}", file=sys.stderr)
     problems.extend(courts.curated_stale())
     problems.extend(courts.stale({"courts": read}))
-    missing = [c for c in STATES if c not in read and c not in courts.UNREADABLE and c not in curated]
+    missing = [c for c in list(STATES) + sorted(courts.OWN_COURTS)
+               if c not in read and c not in courts.UNREADABLE and c not in curated]
     for problem in problems:
         print(f"  [warn] {problem}")
     print(f"  {len(read)} courts read; {len(curated)} read by hand from the court's own page "
           f"({', '.join(sorted(curated))}); {len(courts.UNREADABLE)} cannot be read at all"
           + (f"; no recipe or no result for {', '.join(missing)}" if missing else ""))
+    own = sorted(c for c in courts.OWN_COURTS if c in read)
+    print(f"  of those, the District's and the territories' own courts: {', '.join(own) or 'none'} "
+          "(no photograph is read for them)")
     from . import court_photos
     seen = court_photos.counts({"courts": read})
     print(f"  photographs: {seen['shown']} of {seen['members']} justices from their court's own "
