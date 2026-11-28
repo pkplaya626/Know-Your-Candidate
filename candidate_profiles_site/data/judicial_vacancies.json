@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-26",
+ "asOf": "2026-11-28",
  "current": [
   {
    "code": "01 - MA",
@@ -351,7 +351,7 @@
  "emergenciesUnmatched": [
   "10 - CO: Domenico,Daniel D. (3000-01-01)"
  ],
- "fetched": "2026-11-26T19:58:22+00:00",
+ "fetched": "2026-11-28T18:21:25+00:00",
  "future": [
   {
    "announced": "2026-07-15",
@@ -534,7 +534,7 @@
    }
   }
  ],
- "read": "2026-11-26",
+ "read": "2026-11-28",
  "sources": {
   "current": "https://www.uscourts.gov/data-news/judicial-vacancies/current-judicial-vacancies",
   "emergencies": "https://www.uscourts.gov/data-news/judicial-vacancies/judicial-emergencies",
